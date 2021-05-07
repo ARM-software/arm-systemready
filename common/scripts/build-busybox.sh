@@ -45,7 +45,7 @@
 # LINUX_PATH - Path to Linux tree containing DT compiler and include files
 # LINUX_OUT_DIR - output directory name
 # LINUX_CONFIG_DEFAULT - the default linux build output
-set -x
+
 TOP_DIR=`pwd`
 BUSYBOX_ARCH=arm64
 BUSYBOX_PATH=busybox

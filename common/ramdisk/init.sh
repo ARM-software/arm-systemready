@@ -38,7 +38,30 @@ echo "init.sh"
 
 mdev -s
 
-/bin/fwts
+#mount result partition
+mount -t auto -v /dev/vda1 /mnt/
+
+mkdir -p /mnt/acs_results/fwts
+
+#Check for the existense of fwts test configuration file in the package. EBBR Execution
+if [ -f  /bin/ir_bbr_fwts_tests.ini ]; then
+ test_list=`cat /bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
+ echo "Test Executed are $test_list"
+ /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/Result.log
+else
+ #SBBR Execution
+ /bin/fwts  -f -r /mnt/acs_results/fwts/Result.log
+fi
+
+if [ -f  /lib/modules/bsa_acs.ko ]; then
+ insmod /lib/modules/bsa_acs.ko
+ mkdir -p /mnt/acs_results/linux
+ /bin/bsa > /mnt/acs_results/linux/BsaResults.log
+else
+ echo "Warning : BSA Kernel Driver is not found"
+fi
+
+umount /mnt/
 
 exec sh
 

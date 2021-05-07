@@ -54,10 +54,10 @@ init_dir()
  cp -r $TOP_DIR/../../common/config                       $TOP_DIR/build-scripts 
 }
 
-#create_scripts_link
-#init_dir
+create_scripts_link
+init_dir
 
 source ./build-scripts/build-all.sh  ES
-#source ./build-scripts/make_image.sh ES
+source ./build-scripts/make_image.sh ES
 
 

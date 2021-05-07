@@ -28,12 +28,28 @@
 
 echo -off
 
-for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%j:\EFI\BOOT\bsa\bsa.nsh then
-        FS%j:\EFI\BOOT\bsa\bsa.nsh
+for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%i:\EFI\BOOT\bbr\SctStartup.nsh then
+        FS%i:\EFI\BOOT\bbr\SctStartup.nsh
+        for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+            if  exist FS%k:\acs_results\sct_results\ then
+                cp -r FS%i:\EFI\BOOT\bbr\SCT\Overall FS%k:\acs_results\sct_results\
+                cp -r FS%i:\EFI\BOOT\bbr\SCT\Log FS%k:\acs_results\sct_results\
+            endif
+        endfor
+        goto Donebbr
     endif
 endfor
 
+:Donebbr
+for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%j:\EFI\BOOT\bsa\bsa.nsh then
+        FS%j:\EFI\BOOT\bsa\bsa.nsh
+        goto Donebsa
+    endif
+endfor
+
+:Donebsa
 for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%l:\Image then
         FS%l:
