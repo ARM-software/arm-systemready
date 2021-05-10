@@ -85,7 +85,7 @@ get_grub_src()
 }
 get_fwts_src()
 {
-    git clone --depth 1 --single-branch --branch V20.11.00 https://git.launchpad.net/fwts
+    git clone --depth 1 --single-branch --branch V21.03.00 https://git.launchpad.net/fwts
     pushd $TOP_DIR/fwts
     git submodule update --init
     popd
