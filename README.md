@@ -8,5 +8,5 @@ Note:  Currently ES and IR bands are supported in this repository
 For SystemReady SR, please refer to the Arm Enterprise ACS repository
 
 Please navigate to the ES or IR band, specific scripts and images, through the directories below:
-ES
-IR
+[ES] (https://github.com/ARM-software/arm-systemready/tree/master/ES)
+[IR] (https://github.com/ARM-software/arm-systemready/tree/master/IR)
