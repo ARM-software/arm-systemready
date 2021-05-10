@@ -38,8 +38,28 @@ echo "init.sh"
 
 mdev -s
 
+#give linux time to finish initlazing disks
+sleep 5
+
 #mount result partition
-mount -t auto -v /dev/vda1 /mnt/
+cat /proc/partitions | grep "sd" | while read line
+do
+   # do something with $line here
+   MAJOR=`echo $line | awk '{print $1}'`
+   MINOR=`echo $line | awk '{print $2}'`
+   DEVICE=`echo $line | awk '{print $4}'`
+   echo "$MAJOR $MINOR $DEVICE"
+   mknod /dev/$DEVICE b $MAJOR $MINOR
+   mount /dev/$DEVICE /mnt
+   if [ -d /mnt/acs_results ]; then
+        #Partition is mounted. Break from loop
+        break;
+        #Note: umount must be done from the calling function
+   fi
+   #acs_results is not found, so move to next
+   umount /mnt
+done
+
 
 mkdir -p /mnt/acs_results/fwts
 
