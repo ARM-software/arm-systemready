@@ -42,7 +42,7 @@ mdev -s
 sleep 5
 
 #mount result partition
-cat /proc/partitions | while read line
+cat /proc/partitions | tail -n +3 | while read line
 do
    # do something with $line here
    MAJOR=`echo $line | awk '{print $1}'`
