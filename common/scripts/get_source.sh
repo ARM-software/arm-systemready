@@ -111,7 +111,7 @@ get_linux-acs_src()
 
 get_bbr_acs_src()
 {
-  git clone "https://ap-gerrit-1.ap01.arm.com/avk/syscomp_bbr" bbr-acs
+  git clone ssh://$USER@ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bbr  bbr-acs
 }
 
 sudo apt install git curl mtools gdisk gcc\
