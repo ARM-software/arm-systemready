@@ -42,8 +42,8 @@ create_scripts_link()
  ln -s $TOP_DIR/../../common/scripts/framework.sh               $TOP_DIR/build-scripts/framework.sh
  ln -s $TOP_DIR/../../common/scripts/parse_params.sh            $TOP_DIR/build-scripts/parse_params.sh
  ln -s $TOP_DIR/../../common/scripts/make_image.sh              $TOP_DIR/build-scripts/make_image.sh
- ln -s $TOP_DIR/bbr-acs/common/build-scripts/build-sct.sh       $TOP_DIR/build-scripts/build-sct.sh
- ln -s $TOP_DIR/bbr-acs/common/build-scripts/build-fwts.sh      $TOP_DIR/build-scripts/build-fwts.sh
+ ln -s $TOP_DIR/bbr-acs/common/scripts/build-sct.sh             $TOP_DIR/build-scripts/build-sct.sh
+ ln -s $TOP_DIR/bbr-acs/common/scripts/build-fwts.sh            $TOP_DIR/build-scripts/build-fwts.sh
 }
 
 init_dir()
@@ -57,7 +57,7 @@ init_dir()
 create_scripts_link
 init_dir
 
-source ./build-scripts/build-all.sh  ES
+source ./build-scripts/build-all.sh  ES F
 source ./build-scripts/make_image.sh ES
 
 

@@ -5,7 +5,7 @@
    DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
    ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
 +  BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
-+  BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_dt/BsaPalLib.inf
++  BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi_dt/BsaPalLib.inf
 +  FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
  
  [LibraryClasses.ARM,LibraryClasses.AARCH64]
