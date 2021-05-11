@@ -42,7 +42,7 @@ mdev -s
 sleep 5
 
 #mount result partition
-cat /proc/partitions | grep "sd" | while read line
+cat /proc/partitions | while read line
 do
    # do something with $line here
    MAJOR=`echo $line | awk '{print $1}'`
@@ -55,9 +55,10 @@ do
         #Partition is mounted. Break from loop
         break;
         #Note: umount must be done from the calling function
+   else
+        #acs_results is not found, so move to next
+        umount /mnt
    fi
-   #acs_results is not found, so move to next
-   umount /mnt
 done
 
 
@@ -78,7 +79,7 @@ if [ -f  /lib/modules/bsa_acs.ko ]; then
  mkdir -p /mnt/acs_results/linux
  /bin/bsa > /mnt/acs_results/linux/BsaResults.log
 else
- echo "Warning : BSA Kernel Driver is not found"
+ echo "Error : BSA Kernel Driver is not found. Linux BSA Tests cannot be run."
 fi
 
 umount /mnt/

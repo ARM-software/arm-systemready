@@ -106,7 +106,7 @@ create_diskimage ()
     (echo n; echo 1; echo $part_start; echo +$((fatpart_size-1));\
     echo 0700; echo w; echo y) | gdisk $image_name
     (echo n; echo 2; echo $((part_start+fatpart_size)); echo +$((fatpart2_size-1));\
-    echo 8300; echo w; echo y) | gdisk $image_name
+    echo 0700; echo w; echo y) | gdisk $image_name
 }
 
 prepare_disk_image ()
