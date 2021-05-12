@@ -61,6 +61,9 @@ do
    fi
 done
 
+#linux debug dump
+mkdir -p /mnt/acs_results/linux_dump
+lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
 
 mkdir -p /mnt/acs_results/fwts
 

@@ -28,14 +28,47 @@
 
 echo -off
 
+for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%m:\acs_results then
+        FS%m:
+        cd FS%m:\acs_results
+        if not exist uefi_dump then
+            mkdir uefi_dump
+        endif
+        cd uefi_dump
+
+        pci > pci.log
+        drivers > drivers.log
+        devices > devices.log
+        dmpstore > dmpstore.log
+        dh -d -v > dh.log
+        memmap > memmap.log
+
+        for %n in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+                if exist FS%n:\EFI\BOOT\bsa\ir_bsa.flag then
+                    #IR Specific ->DT
+                else
+                    smbiosview > smbiosview.log
+                    acpiview -l  > acpiview_l.log
+                    acpiview -r 2 > acpiview_r.log
+                    acpiview > acpiview.log
+                    acpiview -d -s acpiview_d
+                    goto Donedump
+                endif
+                goto Donedump
+        endfor
+    endif
+endfor
+:Donedump
+
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\EFI\BOOT\bbr\SctStartup.nsh then
         FS%i:\EFI\BOOT\bbr\SctStartup.nsh
         for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             if  exist FS%k:\acs_results\sct_results\ then
                 cp -r FS%i:\EFI\BOOT\bbr\SCT\Overall FS%k:\acs_results\sct_results\
-		cp -r FS%i:\EFI\BOOT\bbr\SCT\Dependency\EfiCompliantBBTest FS%k:\acs_results\sct_results\
-		cp -r FS%i:\EFI\BOOT\bbr\SCT\Sequence FS%k:\acs_results\sct_results\
+                cp -r FS%i:\EFI\BOOT\bbr\SCT\Dependency\EfiCompliantBBTest FS%k:\acs_results\sct_results\
+                cp -r FS%i:\EFI\BOOT\bbr\SCT\Sequence FS%k:\acs_results\sct_results\
             endif
         endfor
         goto Donebbr
