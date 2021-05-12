@@ -55,6 +55,7 @@ GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gn
 CROSS_COMPILE=$TOP_DIR/$GCC
 UEFI_LIBC_PATH=edk2-libc
 PATCH_DIR=$TOP_DIR/../patches
+COMMON_PATCH_DIR=$TOP_DIR/../../common/patches
 
 do_build()
 {
@@ -63,6 +64,11 @@ do_build()
     PATH="$PATH:$CROSS_COMPILE_DIR"
 
     git checkout ShellPkg/ShellPkg.dsc # Remove if any patches applied
+    git checkout ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c # Remove if any patches applied
+    if ! patch -R -p0 -s -f --dry-run < $COMMON_PATCH_DIR/edk2_gicv3.patch; then
+         echo "Applying EDK2 GICv3 Patch ..."
+         patch  -p0  < $COMMON_PATCH_DIR/edk2_gicv3.patch
+    fi
 
     if [ "$BUILD_PLAT" = "ES" ]; then
        if ! patch -R -p0 -s -f --dry-run < $PATCH_DIR/es_bsa.patch; then
