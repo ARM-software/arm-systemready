@@ -41,7 +41,7 @@ for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         drivers > drivers.log
         devices > devices.log
         dmpstore > dmpstore.log
-        dh -d -v > dh.log
+        dh -d > dh.log
         memmap > memmap.log
 
         for %n in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
