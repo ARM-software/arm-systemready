@@ -28,41 +28,47 @@
 
 echo -off
 
-for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%p:\EFI\BOOT\debug\debug_dump.nsh then
-        FS%p:\EFI\BOOT\debug\debug_dump.nsh
-        goto DoneDebug
+for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F
+  if exist FS%i:\EFI\BOOT\debug then
+    FS%i:
+    cd FS%i:\EFI\BOOT\debug
+    echo Press any key to stop the EFI Debug dump
+    stallforkey.efi 5
+    if %lasterror% == 0 then
+      goto Done
     endif
+  endif
 endfor
-:DoneDebug
 
-for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%i:\EFI\BOOT\bbr\SctStartup.nsh then
-        FS%i:\EFI\BOOT\bbr\SctStartup.nsh
-        for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-            if  exist FS%k:\acs_results\sct_results\ then
-                cp -r FS%i:\EFI\BOOT\bbr\SCT\Overall FS%k:\acs_results\sct_results\
-                cp -r FS%i:\EFI\BOOT\bbr\SCT\Dependency\EfiCompliantBBTest FS%k:\acs_results\sct_results\
-                cp -r FS%i:\EFI\BOOT\bbr\SCT\Sequence FS%k:\acs_results\sct_results\
-            endif
+for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%m:\acs_results then
+        FS%m:
+        cd FS%m:\acs_results
+        if not exist uefi_dump then
+            mkdir uefi_dump
+        endif
+        cd uefi_dump
+        echo "Starting UEFI Debug dump"
+        pci > pci.log
+        drivers > drivers.log
+        devices > devices.log
+        dmpstore > dmpstore.log
+        dh -d > dh.log
+        memmap > memmap.log
+
+        for %n in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+                if exist FS%n:\EFI\BOOT\bsa\ir_bsa.flag then
+                    #IR Specific ->DT
+                else
+                    smbiosview > smbiosview.log
+                    acpiview -l  > acpiview_l.log
+                    acpiview -r 2 > acpiview_r.log
+                    acpiview > acpiview.log
+                    acpiview -d -s acpiview_d
+                    goto Done
+                endif
+                goto Done
         endfor
-        goto Donebbr
     endif
 endfor
-
-:Donebbr
-for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%j:\EFI\BOOT\bsa\bsa.nsh then
-        FS%j:\EFI\BOOT\bsa\bsa.nsh
-        goto Donebsa
-    endif
-endfor
-
-:Donebsa
-for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%l:\Image then
-        FS%l:
-        Image initrd=\ramdisk-busybox.img systemd.log_target=null plymouth.ignore-serial-consoles debug crashkernel=512M,high log_buf_len=1M efi=debug acpi=on crashkernel=256M earlycon uefi_debug
-    endif
-endfor
-echo "Image not found"
+:Done

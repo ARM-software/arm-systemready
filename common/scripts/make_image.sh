@@ -41,6 +41,7 @@ GRUB_FS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
 EFI_CONFIG_FILE=${TOP_DIR}/build-scripts/config/startup.nsh
 BSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bsa.nsh
 BBR_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bbr.nsh
+DEBUG_CONFIG_FILE=${TOP_DIR}/build-scripts/config/debug_dump.nsh
 BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
 GRUB_PATH=grub
@@ -55,6 +56,7 @@ create_cfgfiles ()
     mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
     mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh
     mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
+    mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/debug_dump.nsh
     #mcopy -i  $fatpart_name -o ${BBR_CONFIG_FILE}    ::/EFI/BOOT/bbr/bbr.nsh
 
 }
@@ -71,6 +73,7 @@ create_fatpart ()
     mmd -i $fatpart_name ::/grub
     mmd -i $fatpart_name ::/EFI/BOOT/bsa
     mmd -i $fatpart_name ::/EFI/BOOT/bbr
+    mmd -i $fatpart_name ::/EFI/BOOT/debug
 
     mcopy -i $fatpart_name bootaa64.efi ::/EFI/BOOT
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
@@ -78,6 +81,7 @@ create_fatpart ()
     mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
     mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
     mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
+    mcopy -s -i $fatpart_name SCT/SCT/StallForKey.efi ::/EFI/BOOT/debug
     if [ "$BUILD_PLAT" = "IR" ]; then
       echo " IR BSA flag file copied"
       mcopy -i $fatpart_name ${TOP_DIR}/build-scripts/ir_bsa.flag ::/EFI/BOOT/bsa
