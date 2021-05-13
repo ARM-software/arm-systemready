@@ -44,7 +44,8 @@ sleep 5
 RESULT_DEVICE="";
 
 #mount result partition
-cat /proc/partitions | tail -n +3 | while read line
+cat /proc/partitions | tail -n +3 > partition_table.lst
+while read -r line
 do
    # do something with $line here
    MAJOR=`echo $line | awk '{print $1}'`
@@ -55,14 +56,17 @@ do
    mount /dev/$DEVICE /mnt
    if [ -d /mnt/acs_results ]; then
         #Partition is mounted. Break from loop
-        RESULT_DEVICE=/dev/$DEVICE
+        RESULT_DEVICE="/dev/$DEVICE"
+        echo "Setting RESULT_DEVICE to $RESULT_DEVICE"
         break;
         #Note: umount must be done from the calling function
    else
         #acs_results is not found, so move to next
         umount /mnt
    fi
-done
+done < partition_table.lst
+
+rm partition_table.lst
 
 #linux debug dump
 mkdir -p /mnt/acs_results/linux_dump
@@ -96,6 +100,8 @@ umount /mnt/
 if [ ! -z "$RESULT_DEVICE" ]; then
  echo "Mounting $RESULT_DEVICE"
  mount $RESULT_DEVICE
+else
+ echo "Warning: The acs_results partition device is NULL. Cannot re-mount : $RESULT_DEVICE"
 fi
 
 exec sh
