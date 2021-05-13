@@ -71,11 +71,14 @@ mkdir -p /mnt/acs_results/fwts
 if [ -f  /bin/ir_bbr_fwts_tests.ini ]; then
  test_list=`cat /bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
  echo "Test Executed are $test_list"
- /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/Result.log
+ /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
 else
  #SBBR Execution
- /bin/fwts  -f -r /mnt/acs_results/fwts/Result.log
+ /bin/fwts  -f -r /mnt/acs_results/fwts/FWTSResults.log
 fi
+
+sleep 5
+echo "Running Linux BSA tests"
 
 if [ -f  /lib/modules/bsa_acs.ko ]; then
  insmod /lib/modules/bsa_acs.ko
