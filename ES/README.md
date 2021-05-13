@@ -58,6 +58,10 @@ This image comprises of two FAT file system partitions recognized by UEFI: <br /
   Contains bootable applications and test suites. (Approximate size: 400 MB)
 
 
+## Verification
+
+Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". When that is selected, Linux output will go only to the graphical console (HDMI monitor). In order to force serial console output, you need to change the "Console Preference" to "Serial".
+
 ### Verification of the ES Image on Qemu
 Command to boot with qemu :
     sudo qemu-system-aarch64 -nographic -cpu cortex-a53 -M virt -m 1024 -bios (**path to QEMU_EFI**)/qemu-efi/QEMU_EFI.fd -drive if=virtio,format=raw,file=(**path to image**)/es_acs_live_image.img

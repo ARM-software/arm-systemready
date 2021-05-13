@@ -56,6 +56,9 @@ This image comprises of two FAT file system partitions recognized by UEFI: <br /
 - 'boot' <br />
   Contains bootable applications and test suites. (Approximate size: 400 MB)
 
+## Verification
+
+Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". When that is selected, Linux output will go only to the graphical console (HDMI monitor). In order to force serial console output, you need to change the "Console Preference" to "Serial".
 
 ### Verification of the IR Image on Qemu
 Command to boot with qemu :

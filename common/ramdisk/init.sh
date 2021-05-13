@@ -41,6 +41,8 @@ mdev -s
 #give linux time to finish initlazing disks
 sleep 5
 
+RESULT_DEVICE="";
+
 #mount result partition
 cat /proc/partitions | tail -n +3 | while read line
 do
@@ -53,6 +55,7 @@ do
    mount /dev/$DEVICE /mnt
    if [ -d /mnt/acs_results ]; then
         #Partition is mounted. Break from loop
+        RESULT_DEVICE=/dev/$DEVICE
         break;
         #Note: umount must be done from the calling function
    else
@@ -89,6 +92,11 @@ else
 fi
 
 umount /mnt/
+
+if [ ! -z "$RESULT_DEVICE" ]; then
+ echo "Mounting $RESULT_DEVICE"
+ mount $RESULT_DEVICE
+fi
 
 exec sh
 

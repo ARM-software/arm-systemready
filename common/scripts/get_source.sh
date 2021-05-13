@@ -120,6 +120,7 @@ sudo apt install git curl mtools gdisk gcc\
 
 get_uefi_src
 get_bsa_src
+get_bbr_acs_src
 get_sct_src
 get_grub_src
 get_busybox_src
@@ -127,4 +128,3 @@ get_linux_src
 get_cross_compiler
 get_fwts_src
 get_linux-acs_src
-get_bbr_acs_src
