@@ -95,14 +95,7 @@ else
  echo "Error : BSA Kernel Driver is not found. Linux BSA Tests cannot be run."
 fi
 
-umount /mnt/
-
-if [ ! -z "$RESULT_DEVICE" ]; then
- echo "Mounting $RESULT_DEVICE"
- mount $RESULT_DEVICE
-else
- echo "Warning: The acs_results partition device is NULL. Cannot re-mount : $RESULT_DEVICE"
-fi
+sync /mnt
 
 exec sh
 
