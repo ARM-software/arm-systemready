@@ -81,7 +81,7 @@ if [ -f  /bin/ir_bbr_fwts_tests.ini ]; then
  /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
 else
  #SBBR Execution
- /bin/fwts  -f -r /mnt/acs_results/fwts/FWTSResults.log
+ /bin/fwts  -r stdout -q --sbbr > /mnt/acs_results/fwts/FWTSResults.log
 fi
 
 sleep 5
@@ -90,19 +90,13 @@ echo "Running Linux BSA tests"
 if [ -f  /lib/modules/bsa_acs.ko ]; then
  insmod /lib/modules/bsa_acs.ko
  mkdir -p /mnt/acs_results/linux
- /bin/bsa > /mnt/acs_results/linux/BsaResults.log
+ /bin/bsa > /mnt/acs_results/linux/BsaResultsApp.log
 else
  echo "Error : BSA Kernel Driver is not found. Linux BSA Tests cannot be run."
 fi
+dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
 
-umount /mnt/
-
-if [ ! -z "$RESULT_DEVICE" ]; then
- echo "Mounting $RESULT_DEVICE"
- mount $RESULT_DEVICE
-else
- echo "Warning: The acs_results partition device is NULL. Cannot re-mount : $RESULT_DEVICE"
-fi
+sync /mnt
 
 exec sh
 

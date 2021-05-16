@@ -1,21 +1,26 @@
-SystemReady ES  <WIP>
+# SystemReady ES ACS 
 
 
-<Introduction to SystemReady ES>
+## Introduction to SystemReady ES
+SystemReady ES - Embedded Server, is a band of system certification in the Arm SystemReady program that ensures interoperability with standard operating systems and hypervisors.
 
-This section contains the build scripts and the live-images for the SystemReady ES Band
+SystemReady ES-certified platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. Compliant systems must conform to the:
+* [Base System Architecture (BSA) specification](https://developer.arm.com/documentation/den0094/latest)
+* SBBR recipe of the [Base Boot Requirements (BBR) specification](https://developer.arm.com/documentation/den0044/latest)
+The SystemReady ES certification and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
+This section contains the build scripts and the live-images for the SystemReady ES Band.
 
 ## Release details
  - Code Quality: REL v1.0 BETA-1
- - **The latest pre-built release of ACS is available for download here: [v20.10_REL3.0](https://github.com/ARM-software/arm-systemready-acs/tree/release/ES/prebuilt_images/v21.05_REL1.0_BETA-1)**
+ - **The latest pre-built release of ACS is available for download here: [v21.05_REL1.0_BETA-1](https://github.com/ARM-software/arm-systemready-acs/tree/release/ES/prebuilt_images/v21.05_REL1.0_BETA-1)**
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
 
 
-##Steps to  build SystemReady ES ACS live image
+## Steps to  build SystemReady ES ACS live image
 
 ## GitHub branch
 - To pick up the release version of the code, checkout the release branch with the appropriate tag.
@@ -101,12 +106,7 @@ The live image boots to UEFI Shell. The different test applications can be run i
 
 
 ## Security Implication
-Arm Enterprise ACS test suite may run at higher privilege level. An attacker may utilize these tests as a means to elevate privilege which can potentially reveal the platform security assets. To prevent the leakage of secure information, it is strongly recommended that the ACS test suite is run only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
-
-
-## License
-
-Arm Enterprise ACS is distributed under Apache v2.0 License.
+Arm SystemReady ES ACS test suite may run at higher privilege level. An attacker may utilize these tests as a means to elevate privilege which can potentially reveal the platform security assets. To prevent the leakage of secure information, it is strongly recommended that the ACS test suite is run only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
 
 
 ## Feedback, contributions, and support
@@ -114,5 +114,5 @@ Arm Enterprise ACS is distributed under Apache v2.0 License.
  - For feedback, use the GitHub Issue Tracker that is associated with this repository.
  - For support, please send an email to "support-systemready-acs@arm.com" with details.
  - Arm licensees can contact Arm directly through their partner managers.
- - Arm welcomes code contributions through GitHub pull requests. For details, see "docs/Contributions.txt".
+ - Arm welcomes code contributions through GitHub pull requests.
 
