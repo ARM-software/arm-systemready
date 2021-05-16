@@ -68,6 +68,13 @@ done < partition_table.lst
 
 rm partition_table.lst
 
+if [ ! -z "$RESULT_DEVICE" ]; then
+ echo "Mounted the results partition on device $RESULT_DEVICE"
+else
+ echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
+fi
+
+
 #linux debug dump
 mkdir -p /mnt/acs_results/linux_dump
 lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
