@@ -69,8 +69,7 @@ Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". Wh
 
 ### Verification of the IR Image on Qemu
 Command to boot with qemu :
-    sudo qemu-system-aarch64 -nographic -cpu cortex-a53 -M virt -m 1024 -bios (**path to QEMU_EFI**)/qemu-efi/QEMU_EFI.fd -drive if=virtio,format=raw,file=(**path to image**)/ir_acs_live_image.img
-
+   qemu-system-aarch64 -bios <**Path to QEMU u-boot firmware**>/nor_flash.bin -cpu cortex-a57 -drive file=<**Path to IR live image**>/ir_acs_live_image.img,if=virtio,format=raw -m 2048 -machine virt,secure -monitor null -no-acpi -nodefaults -nographic -rtc base=utc,clock=host -serial stdio -smp 2 -accel tcg,thread=multi -d unimp,guest_errors
    Note: qemu for aarch64 must be installed  before running above command  by `sudo apt-get install qemu-utils qemu-efi qemu-system-arm`
 
 ### Verification of the IR Image on Fixed Virtual Platform (FVP) environment
