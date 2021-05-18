@@ -91,19 +91,22 @@ else
  /bin/fwts  -r stdout -q --sbbr > /mnt/acs_results/fwts/FWTSResults.log
 fi
 
-sleep 5
-echo "Running Linux BSA tests"
+sleep 2
 
-if [ -f  /lib/modules/bsa_acs.ko ]; then
- insmod /lib/modules/bsa_acs.ko
- mkdir -p /mnt/acs_results/linux
- /bin/bsa > /mnt/acs_results/linux/BsaResultsApp.log
-else
- echo "Error : BSA Kernel Driver is not found. Linux BSA Tests cannot be run."
+if [ ! -f  /bin/ir_bbr_fwts_tests.ini ]; then
+ #Run Linux BSA tests for ES only
+ sleep 3
+ echo "Running Linux BSA tests"
+ if [ -f  /lib/modules/bsa_acs.ko ]; then
+  insmod /lib/modules/bsa_acs.ko
+  mkdir -p /mnt/acs_results/linux
+  /bin/bsa > /mnt/acs_results/linux/BsaResultsApp.log
+ else
+  echo "Error : BSA Kernel Driver is not found. Linux BSA Tests cannot be run."
+ fi
+ dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
 fi
-dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
 
 sync /mnt
 
 exec sh
-
