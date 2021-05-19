@@ -56,7 +56,7 @@ get_bsa_src()
 {
     pushd $TOP_DIR/edk2
     git clone https://github.com/tianocore/edk2-libc
-    git clone ssh://$USER@ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bsa ShellPkg/Application/bsa-acs
+    git clone --depth 1 --branch v21.05_REL1.0_BETA-0 ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bsa ShellPkg/Application/bsa-acs
     popd
     pushd  $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
     git pull
@@ -101,7 +101,7 @@ get_sct_src()
 
 get_linux-acs_src()
 {
-  git clone ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_linux_acs linux-acs
+  git clone --depth 1 --branch v21.05_REL1.0_BETA-0  ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_linux_acs linux-acs
   pushd $TOP_DIR/linux-5.10
   echo "Applying Linux ACS Patch..."
   git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-SBSA-ACS-Linux-5.10.patch
@@ -111,7 +111,7 @@ get_linux-acs_src()
 
 get_bbr_acs_src()
 {
-  git clone ssh://$USER@ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bbr  bbr-acs
+  git clone  --depth 1 --branch v21.05_REL1.0_BETA-0 ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bbr  bbr-acs
 }
 
 sudo apt install git curl mtools gdisk gcc\
