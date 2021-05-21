@@ -1,0 +1,22 @@
+--- ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c	2021-05-12 12:32:48.128743341 +0530
++++ ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe_bsa.c	2021-05-12 12:32:25.700745650 +0530
+@@ -11,6 +11,7 @@
+ #include "ArmGicDxe.h"
+ 
+ #define ARM_GIC_DEFAULT_PRIORITY  0x80
++#define ARM_GIC_MAX_NUM_INTERRUPT 16384
+ 
+ extern EFI_HARDWARE_INTERRUPT_PROTOCOL gHardwareInterruptV3Protocol;
+ extern EFI_HARDWARE_INTERRUPT2_PROTOCOL gHardwareInterrupt2V3Protocol;
+@@ -383,8 +384,9 @@
+ 
+   mGicDistributorBase    = PcdGet64 (PcdGicDistributorBase);
+   mGicRedistributorsBase = PcdGet64 (PcdGicRedistributorsBase);
+-  mGicNumInterrupts      = ArmGicGetMaxNumInterrupts (mGicDistributorBase);
+-
++///  mGicNumInterrupts      = ArmGicGetMaxNumInterrupts (mGicDistributorBase);
++  mGicNumInterrupts      = ARM_GIC_MAX_NUM_INTERRUPT;
++  
+   // We will be driving this GIC in native v3 mode, i.e., with Affinity
+   // Routing enabled. So ensure that the ARE bit is set.
+   if (!FeaturePcdGet (PcdArmGicV3WithV2Legacy)) {
