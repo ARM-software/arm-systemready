@@ -1,0 +1,57 @@
+dir /dev 755 0 0
+nod /dev/console 644 0 0 c 5 1
+nod /dev/loop0 644 0 0 b 7 0
+dir /bin 755 1000 1000
+file /bin/busybox ./busybox 755 0 0
+slink /linuxrc /bin/busybox 777 0 0
+slink /bin/sh /bin/busybox 777 0 0
+dir /proc 755 0 0
+dir /sys 755 0 0
+dir /mnt 755 0 0
+dir /usr 755 0 0
+dir /sbin 755 0 0
+dir /usr/bin 755 0 0
+dir /usr/sbin 755 0 0
+file /init ./init.sh 777 0 0
+dir /lib 777 0 0
+dir /lib/modules 777 0 0
+
+file /bin/fwts                          ./fwts_output/bin/fwts                                    755 0 0
+file /bin/bsa                           ./linux-bsa/bsa                                           755 0 0
+file /lib/modules/bsa_acs.ko            ./linux-bsa/bsa_acs.ko                                    755 0 0
+file /lib/libbsd.so.0                   ./fwts_build_dep/libbsd.so.0                              755 0 0
+file /lib/libfdt.so.1                   ./fwts_build_dep/libfdt.so.1                              755 0 0
+file /lib/libgio-2.0.so.0               ./fwts_build_dep/libgio-2.0.so.0                          755 0 0
+file /lib/libglib-2.0.so.0              ./fwts_build_dep/libglib-2.0.so.0                         755 0 0
+file /lib/libgobject-2.0.so.0           ./fwts_build_dep/libgobject-2.0.so.0                      755 0 0
+file /lib/libgmodule-2.0.so.0           ./fwts_build_dep/libgmodule-2.0.so.0                      755 0 0
+file /lib/libz.so.1                     ./fwts_build_dep/libz.so.1                                755 0 0
+file /lib/libselinux.so.1               ./fwts_build_dep/libselinux.so.1                          755 0 0
+file /lib/libmount.so.1                 ./fwts_build_dep/libmount.so.1                            755 0 0
+file /lib/libpcre.so.3                  ./fwts_build_dep/libpcre.so.3                             755 0 0
+file /lib/libffi.so.6                   ./fwts_build_dep/libffi.so.6                              755 0 0
+file /lib/libblkid.so.1                 ./fwts_build_dep/libblkid.so.1                            755 0 0
+file /lib/libuuid.so.1                  ./fwts_build_dep/libuuid.so.1                             755 0 0
+
+file /lib/libc-2.25.so                  ./fwts_build_dep/cross_libs/libc-2.25.so                  755 0 0
+file /lib/libc.so.6                     ./fwts_build_dep/cross_libs/libc.so.6                     755 0 0
+file /lib/ld-2.25.so                    ./fwts_build_dep/cross_libs/ld-2.25.so                    755 0 0
+file /lib/ld-linux-aarch64.so.1         ./fwts_build_dep/cross_libs/ld-linux-aarch64.so.1         755 0 0
+file /lib/libpthread-2.25.so            ./fwts_build_dep/cross_libs/libpthread-2.25.so            755 0 0
+file /lib/libpthread.so.0               ./fwts_build_dep/cross_libs/libpthread.so.0               755 0 0
+file /lib/libresolv.so.2                ./fwts_build_dep/cross_libs/libresolv.so.2                755 0 0
+file /lib/libresolv-2.25.so             ./fwts_build_dep/cross_libs/libresolv-2.25.so             755 0 0
+file /lib/librt.so.1                    ./fwts_build_dep/cross_libs/librt.so.1                    755 0 0
+file /lib/librt-2.25.so                 ./fwts_build_dep/cross_libs/librt-2.25.so                 755 0 0
+file /lib/libdl.so.2                    ./fwts_build_dep/cross_libs/libdl.so.2                    755 0 0
+file /lib/libdl-2.25.so                 ./fwts_build_dep/cross_libs/libdl-2.25.so                 755 0 0
+file /lib/libm.so.6                     ./fwts_build_dep/cross_libs/libm.so.6                     755 0 0
+file /lib/libm-2.25.so                  ./fwts_build_dep/cross_libs/libm-2.25.so                  755 0 0
+
+file /lib/libfwtsiasl.so.1.0.0          ./fwts_output/lib/fwts/libfwtsiasl.so.1.0.0               755 0 0
+file /lib/libfwtsiasl.so.1              ./fwts_output/lib/fwts/libfwtsiasl.so.1                   755 0 0
+file /lib/libfwtsacpica.so.1.0.0        ./fwts_output/lib/fwts/libfwtsacpica.so.1.0.0             755 0 0
+file /lib/libfwtsacpica.so.1            ./fwts_output/lib/fwts/libfwtsacpica.so.1                 755 0 0
+file /lib/libfwts.so.1                  ./fwts_output/lib/fwts/libfwts.so.1                       755 0 0
+file /lib/libfwts.so.1.0.0              ./fwts_output/lib/fwts/libfwts.so.1.0.0                   755 0 0
+
