@@ -1,0 +1,14 @@
+v21.05_0.8_BETA-0
+**SystemReady IR** 
+* BSA: BSA Tests for IR based on BSA specifications v1.0
+* BSA: Modules: PE, Memory map, GIC, Timer, SMMU, Watchdog, Peripheral, PCIe, Power and wakeup
+  For the complete list of tests refer to the bsa-acs repository
+* BBR: SCT with EBBR.seq sequence file based on BBR specifications v1.0
+* BBR: FWTS customised to run for EBBR based on BBR specifications v1.0
+* Build scripts to build the bootable image ir_acs_live_image.img
+* Automation in the image to execute SCT, UEFI Dumps, BSA, Booting Linux, FWTS
+
+**SystemReady ES**
+* README.md with introduction and reference links for SystemReady ES
+
+Note: SystemReady ES ACS bootable image is WIP

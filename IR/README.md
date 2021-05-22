@@ -13,7 +13,7 @@ This section contains the build scripts and the live-images for the SystemReady 
 
 ## Release details
  - Code Quality: v0.8 BETA-0
- - **The latest pre-built release of ACS is available for download here: [v21.05_0.8_BETA-0](https://github.com/ARM-software/arm-systemready-acs/tree/release/IR/prebuilt_images/v21.05_0.8_BETA-0)**
+ - **The latest pre-built release of IR ACS is available for download here: [v21.05_0.8_BETA-0](prebuilt_images/v21.05_0.8_BETA-0)**
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.

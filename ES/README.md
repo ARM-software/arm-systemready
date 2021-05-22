@@ -9,7 +9,9 @@ SystemReady ES-certified platforms implement a minimum set of hardware and firmw
 * SBBR recipe of the [Base Boot Requirements (BBR) specification](https://developer.arm.com/documentation/den0044/latest)
 * The SystemReady ES certification and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
-## ACS for SystemReady ES Certification
+**Note: SystemReady ES ACS image is WIP. Please refer to the below sections for more details**
+
+## Provisonary ACS for SystemReady ES Certification
 Use the latest version of the pre-built ACS image in the [Arm Enterprise ACS](https://github.com/ARM-software/arm-enterprise-acs) repository for SystemReady ES Certifications.
 Details of the latest version of image can be found in the [Release details section in the README](https://github.com/ARM-software/arm-enterprise-acs/blob/master/README.md#release-details)
 

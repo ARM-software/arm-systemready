@@ -14,12 +14,12 @@ The Arm SystemReady program is a natural extension of the Arm ServerReady progra
 For more informaton, please visit: [Arm SystemReady](https://developer.arm.com/architectures/system-architectures/arm-systemready)
 
 This repository contains the infrastructure to build the Architecture Compliance Suite and the bootable prebuilt images to be used for the certifications of various bands of SystemReady.
-Note:  Currently SystemReady ES and IR bands are supported in this repository
+Note:  Currently SystemReady IR band is supported in this repository
 
 For SystemReady SR, please refer to the [Arm Enterprise ACS repository](https://github.com/ARM-software/arm-enterprise-acs)
 
 ## System Ready bands:
-Please navigate to the ES or IR band for further details on specific scripts and prebuilt images, through the directories below:
+Please navigate to the ES or IR band for further details, through the directories below:
 * [ES](./ES)
 * [IR](./IR)
 
