@@ -39,7 +39,7 @@ Before starting the ACS build, ensure that the following requirements are met:
  - User should have **sudo** privilege to install tools required for build
 
 ### Steps to build SystemReady IR ACS live image
-1. Clone the [Arm-SystemReady](https://github.com/ARM-software/arm-systemready-acs) repo.
+1. Clone the [Arm-SystemReady](https://github.com/ARM-software/arm-systemready) repo.
 
 2. Navigate to the IR/scripts directory <br />
  `cd arm-systemready/IR/scripts`
