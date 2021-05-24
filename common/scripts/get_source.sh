@@ -116,7 +116,8 @@ get_bbr_acs_src()
 
 sudo apt install git curl mtools gdisk gcc\
  openssl automake autotools-dev libtool bison flex\
- bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint
+ bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
+ make gcc g++ python
 
 get_uefi_src
 get_bsa_src
