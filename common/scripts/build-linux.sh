@@ -95,10 +95,10 @@ do_package ()
     # Copy binary to output folder
     pushd $TOP_DIR
 
-    mkdir -p ${OUTDIR}/${!outpath}
+    mkdir -p ${OUTDIR}
 
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/arch/$LINUX_ARCH/boot/$LINUX_IMAGE_TYPE \
-    ${OUTDIR}/${!outpath}/$LINUX_IMAGE_TYPE
+    ${OUTDIR}/$LINUX_IMAGE_TYPE
 
 }
 
