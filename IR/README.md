@@ -37,8 +37,8 @@ Before starting the ACS build, ensure that the following requirements are met:
  - Ubuntu 18.04 LTS with at least 64GB of free disk space.
  - Must use Bash shell.
  - User should have **sudo** privilege to install tools required for build
- - Need to install `git` before  build using `sudo apt install git`
- - `git config --global user.name "Your Name"` and `git config --global user.email "Your Email"` must be configured before build.
+ - Need to install `git` using `sudo apt install git`
+ - `git config --global user.name "Your Name"` and `git config --global user.email "Your Email"` must be configured.
 
 ### Steps to build SystemReady IR ACS live image
 1. Clone the [Arm-SystemReady](https://github.com/ARM-software/arm-systemready) repo.
