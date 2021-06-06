@@ -60,8 +60,6 @@ COMMON_PATCH_DIR=$TOP_DIR/../../common/patches
 do_build()
 {
     pushd $TOP_DIR/$UEFI_PATH
-    CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
-    PATH="$PATH:$CROSS_COMPILE_DIR"
 
     git checkout ShellPkg/ShellPkg.dsc # Remove if any patches applied
     git checkout ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c # Remove if any patches applied
@@ -95,7 +93,15 @@ do_build()
     source ./edksetup.sh
     make -C BaseTools/Source/C
     export EDK2_TOOLCHAIN=$UEFI_TOOLCHAIN
-    export ${UEFI_TOOLCHAIN}_AARCH64_PREFIX=$CROSS_COMPILE
+    arch=$(uname -m)
+    if [[ $arch = "aarch64" ]]
+    then
+	echo "arm64 native compile"
+    else
+        CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
+        PATH="$PATH:$CROSS_COMPILE_DIR"
+        export ${UEFI_TOOLCHAIN}_AARCH64_PREFIX=$CROSS_COMPILE
+    fi
     local vars=
     export PACKAGES_PATH=$TOP_DIR/$UEFI_PATH:$TOP_DIR/$UEFI_PATH/$UEFI_LIBC_PATH
     export PYTHON_COMMAND=/usr/bin/python3
@@ -106,8 +112,6 @@ do_build()
 do_clean()
 {
     pushd $TOP_DIR/$UEFI_PATH
-    CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
-    PATH="$PATH:$CROSS_COMPILE_DIR"
     source ./edksetup.sh
     make -C BaseTools/Source/C clean
     rm -rf Build/Shell/DEBUG_GCC49

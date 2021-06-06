@@ -49,10 +49,17 @@ GRUB_PLAT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub_prefix.cfg
 
 do_build ()
 {
-    if [ -d $TOP_DIR/$GRUB_PATH ]; then
-        pushd $TOP_DIR/$GRUB_PATH
+    arch=$(uname -m)
+    if [[ $arch = "aarch64" ]]
+    then
+        CROSS_COMPILE_DIR=''
+    else
         CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
         PATH="$PATH:$CROSS_COMPILE_DIR"
+    fi
+
+    if [ -d $TOP_DIR/$GRUB_PATH ]; then
+        pushd $TOP_DIR/$GRUB_PATH
         echo $CROSS_COMPILE_DIR
         echo $CROSS_COMPILE
         mkdir -p $TOP_DIR/$GRUB_PATH/output
@@ -66,10 +73,10 @@ do_build ()
         fi
 
         ./autogen.sh
-        ./configure STRIP=$CROSS_COMPILE_DIR/aarch64-linux-gnu-strip \
+        ./configure STRIP=aarch64-linux-gnu-strip \
         --target=aarch64-linux-gnu --with-platform=efi \
         --prefix=$TOP_DIR/$GRUB_PATH/output/ \
-        TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
+        TARGET_CC=aarch64-linux-gnu-gcc --disable-werror
 
         make -j8 install
         output/bin/grub-mkimage -v -c ${GRUB_PLAT_CONFIG_FILE} \
