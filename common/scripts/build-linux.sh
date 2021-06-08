@@ -73,6 +73,7 @@ do_build ()
     sed -i 's/# CONFIG_EFI_TEST is not set/CONFIG_EFI_TEST=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_DMI_SYSFS is not set/CONFIG_DMI_SYSFS=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_CGROUP_FREEZER is not set/CONFIG_CGROUP_FREEZER=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_COMMON_CLK_ZYNQMP is not set/CONFIG_COMMON_CLK_ZYNQMP=y/g' $LINUX_OUT_DIR/.config
 
     make ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC O=$LINUX_OUT_DIR -j$PARALLELISM
     popd
