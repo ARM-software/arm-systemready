@@ -30,8 +30,6 @@
 
 
 TOP_DIR=`pwd`
-GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-export CROSS_COMPILE=$TOP_DIR/$GCC
 export KERNEL_SRC=$TOP_DIR/linux-5.10/out
 LINUX_PATH=$TOP_DIR/linux-5.10
 BSA_PATH=$TOP_DIR/edk2/ShellPkg/Application/bsa-acs
@@ -40,6 +38,16 @@ build_bsa_kernel_driver()
 {
  pushd $TOP_DIR/linux-acs/bsa-acs-drv/files
  ./setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
+    cmd=$(uname -m)
+    echo $cmd
+    if [[ $cmd = "aarch64" ]]
+    then
+	echo "arm64 native build"
+        export CROSS_COMPILE=''
+    else
+        GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+        export CROSS_COMPILE=$TOP_DIR/$GCC
+    fi
  ./linux_bsa_acs.sh
  popd
 }

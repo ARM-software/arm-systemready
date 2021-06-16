@@ -51,8 +51,6 @@ BUSYBOX_ARCH=arm64
 BUSYBOX_PATH=busybox
 BUSYBOX_OUT_DIR=output
 BUSYBOX_RAMDISK_PATH=ramdisk
-GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-CROSS_COMPILE=$TOP_DIR/$GCC
 BUSYBOX_RAMDISK_BUSYBOX_PATH=$BUSYBOX_PATH/$BUSYBOX_OUT_DIR/_install/bin
 
 do_build()
@@ -63,8 +61,18 @@ do_build()
     mkdir -p $BUSYBOX_OUT_DIR
     make O=$BUSYBOX_OUT_DIR defconfig
     sed -i 's/# CONFIG_STATIC is not set/CONFIG_STATIC=y/g' $BUSYBOX_OUT_DIR/.config
-    make O=$BUSYBOX_OUT_DIR -j $PARALLELISM  ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC
-    make O=$BUSYBOX_OUT_DIR ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC install
+    arch=$(uname -m)
+    if [[ $arch = "aarch64" ]]
+    then
+        echo "arm64 native compile"
+        make O=$BUSYBOX_OUT_DIR -j $PARALLELISM  ARCH=arm64
+        make O=$BUSYBOX_OUT_DIR ARCH=arm64 install
+    else
+        GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+        CROSS_COMPILE=$TOP_DIR/$GCC
+        make O=$BUSYBOX_OUT_DIR -j $PARALLELISM  ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC
+        make O=$BUSYBOX_OUT_DIR ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC install
+    fi
     popd
 
 }
