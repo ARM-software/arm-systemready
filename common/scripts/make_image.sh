@@ -38,6 +38,7 @@ TOP_DIR=`pwd`
 PLATDIR=${TOP_DIR}/output
 OUTDIR=${PLATDIR}
 GRUB_FS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
+GRUB_FS_CONFIG_FILE_SIG=${TOP_DIR}/build-scripts/config/grub.cfg.sig
 EFI_CONFIG_FILE=${TOP_DIR}/build-scripts/config/startup.nsh
 BSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bsa.nsh
 BBR_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bbr.nsh
@@ -54,6 +55,7 @@ create_cfgfiles ()
     local fatpart_name="$1"
 
     mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
+    mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE_SIG} ::/grub.cfg.sig
     mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh
     mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
     mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/debug_dump.nsh

@@ -45,7 +45,9 @@ TOP_DIR=`pwd`
 GRUB_PATH=grub
 GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 CROSS_COMPILE=$TOP_DIR/$GCC
-GRUB_PLAT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub_prefix.cfg
+KEYS_DIR=$TOP_DIR/bbsr-acs-keys
+GRUB_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
+GRUB_INITIAL_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub-initial.cfg
 
 do_build ()
 {
@@ -72,11 +74,13 @@ do_build ()
         TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
 
         make -j8 install
-        output/bin/grub-mkimage -v -c ${GRUB_PLAT_CONFIG_FILE} \
-        -o output/grubaa64.efi -O arm64-efi -p "" \
-        part_gpt part_msdos ntfs ntfscomp hfsplus fat ext2 normal chain \
+        output/bin/grub-mkstandalone -v \
+        -o output/grubaa64.efi -O arm64-efi --pubkey $KEYS_DIR/TestDB1.pubgpg --disable-shim-lock \
+        --modules "pgp gcry_sha512 gcry_rsa part_gpt part_msdos ntfs ntfscomp hfsplus fat ext2 normal chain \
         boot configfile linux help part_msdos terminal terminfo configfile \
-        lsefi search normal gettext loadenv read search_fs_file search_fs_uuid search_label
+        lsefi search normal gettext loadenv read search_fs_file search_fs_uuid search_label" \
+        "boot/grub/grub.cfg=$GRUB_INITIAL_CONFIG_FILE"
+
         popd
     fi
 
@@ -90,10 +94,22 @@ do_clean ()
         git clean -fdX
         popd
     fi
+
+    # delete the gpg generated sig file
+    rm -f $GRUB_CONFIG_FILE.sig
+:
 }
 do_package ()
 {
-    :
+    pushd $TOP_DIR/$GRUB_PATH
+
+    # sign grub with db key
+    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt output/grubaa64.efi --output output/grubaa64.efi
+
+    # sign grub.cfg with gpg key
+    gpg --default-key "TestDB1" --detach-sign $GRUB_CONFIG_FILE
+
+    popd
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
