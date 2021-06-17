@@ -78,6 +78,7 @@ create_fatpart ()
 
     mcopy -i $fatpart_name bootaa64.efi ::/EFI/BOOT
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
+    mcopy -i $fatpart_name Shell.efi.sig ::/EFI/BOOT
     mcopy -i $fatpart_name $OUTDIR/Image ::/
     mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
     mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
@@ -144,6 +145,7 @@ prepare_disk_image ()
     rm -f $PLATDIR/$IMG_BB
     cp grubaa64.efi bootaa64.efi
     cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi Shell.efi
+    cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi.sig Shell.efi.sig
     cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi Bsa.efi
     cp -Tr $TOP_DIR/$SCT_PATH/ SCT
     grep -q -F 'mtools_skip_check=1' ~/.mtoolsrc || echo "mtools_skip_check=1" >> ~/.mtoolsrc

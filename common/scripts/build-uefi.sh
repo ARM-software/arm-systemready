@@ -94,6 +94,8 @@ do_package ()
     pushd $TOP_DIR
     # sign Shell.efi with db key
     sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi --output $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi
+    # sign Shell.efi with gpg key as well for grub
+    gpg --default-key "TestDB1" --detach-sign $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi
     popd
 }
 
