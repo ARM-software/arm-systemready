@@ -82,7 +82,9 @@ create_fatpart ()
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
     mcopy -i $fatpart_name Shell.efi.sig ::/EFI/BOOT
     mcopy -i $fatpart_name $OUTDIR/Image ::/
+    mcopy -i $fatpart_name $OUTDIR/Image.sig ::/
     mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
+    mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img.sig  ::/
     mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
     mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
     mcopy -i $fatpart_name ${TOP_DIR}/bbsr-acs-keys/*.der ::/EFI/BOOT/bbr/bbsr-acs-keys
