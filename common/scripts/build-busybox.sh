@@ -109,6 +109,8 @@ do_package ()
     pushd $TOP_DIR
     mkdir -p ${OUTDIR}
     cp $BUSYBOX_RAMDISK_PATH/ramdisk.img  ${PLATDIR}/ramdisk-busybox.img
+    # sign binary with gpg key for grub secure boot
+    gpg --default-key "TestDB1" --detach-sign ${PLATDIR}/ramdisk-busybox.img
     popd
 }
 
