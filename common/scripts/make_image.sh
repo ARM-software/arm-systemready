@@ -49,6 +49,7 @@ GRUB_PATH=grub
 UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64/
 BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
 SCT_PATH=edk2-test/uefi-sct/AARCH64_SCT
+UEFI_APPS_PATH=${TOP_DIR}/edk2/Build/MdeModule/DEBUG_GCC5/AARCH64
 
 create_cfgfiles ()
 {
@@ -81,6 +82,7 @@ create_fatpart ()
       mmd -i $fatpart_name ::/EFI/BOOT/bbr/security-extension-acs-keys
     fi
     mmd -i $fatpart_name ::/EFI/BOOT/debug
+    mmd -i $fatpart_name ::/EFI/BOOT/app
 
     mcopy -i $fatpart_name bootaa64.efi ::/EFI/BOOT
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
@@ -100,6 +102,8 @@ create_fatpart ()
       mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img.sig  ::/
       mcopy -i $fatpart_name ${TOP_DIR}/security-extension-acs-keys/*.der ::/EFI/BOOT/bbr/security-extension-acs-keys
     fi
+    mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/EFI/BOOT/app
+
     echo "FAT partition image created"
 }
 

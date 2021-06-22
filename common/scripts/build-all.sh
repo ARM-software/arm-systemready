@@ -36,6 +36,7 @@ then
   source ./build-scripts/build-bsaefi.sh $@
 fi
 source ./build-scripts/build-sct.sh $@
+source ./build-scripts/build-uefi-apps.sh $@
 source ./build-scripts/build-linux.sh
 if [[ $1 != SE ]]
 then

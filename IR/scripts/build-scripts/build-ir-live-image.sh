@@ -44,6 +44,7 @@ create_scripts_link()
  ln -s $TOP_DIR/../../common/scripts/make_image.sh              $TOP_DIR/build-scripts/make_image.sh
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-sct.sh             $TOP_DIR/build-scripts/build-sct.sh
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-fwts.sh            $TOP_DIR/build-scripts/build-fwts.sh
+ ln -s $TOP_DIR/bbr-acs/common/scripts/build-uefi-apps.sh       $TOP_DIR/build-scripts/build-uefi-apps.sh
 }
 
 init_dir()
