@@ -31,10 +31,16 @@
 
 source ./build-scripts/build-bbsr-acs-keys.sh
 source ./build-scripts/build-uefi.sh
-source ./build-scripts/build-bsaefi.sh $@
+if [[ $1 != BBSR ]]
+then
+  source ./build-scripts/build-bsaefi.sh $@
+fi
 source ./build-scripts/build-sct.sh $@
 source ./build-scripts/build-linux.sh
-source ./build-scripts/build-linux-bsa.sh
+if [[ $1 != BBSR ]]
+then
+  source ./build-scripts/build-linux-bsa.sh
+fi
 source ./build-scripts/build-grub.sh
 source ./build-scripts/build-fwts.sh $@
 source ./build-scripts/build-busybox.sh
