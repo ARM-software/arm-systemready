@@ -66,6 +66,10 @@ if [ -f  /bin/ir_bbr_fwts_tests.ini ]; then
  test_list=`cat /bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
  echo "Test Executed are $test_list"
  /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
+elif [ -f  /bin/bbsr_fwts_tests.ini ]; then
+ test_list=`cat /bin/bbsr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
+ echo "Test Executed are $test_list"
+ /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
 else
  #SBBR Execution
  /bin/fwts  -r stdout -q --sbbr > /mnt/acs_results/fwts/FWTSResults.log
@@ -73,7 +77,7 @@ fi
 
 sleep 2
 
-if [ ! -f  /bin/ir_bbr_fwts_tests.ini ]; then
+if [ ! -f  /bin/ir_bbr_fwts_tests.ini ] && [ ! -f /bin/bbsr_fwts_tests.ini ]; then
  #Run Linux BSA tests for ES only
  sleep 3
  echo "Running Linux BSA tests"
