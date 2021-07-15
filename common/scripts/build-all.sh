@@ -29,16 +29,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-source ./build-scripts/build-bbsr-acs-keys.sh
+source ./build-scripts/build-SE-acs-keys.sh
 source ./build-scripts/build-uefi.sh
-if [[ $1 != BBSR ]]
+if [[ $1 != SE ]]
 then
   source ./build-scripts/build-bsaefi.sh $@
 fi
 source ./build-scripts/build-sct.sh $@
 source ./build-scripts/build-uefi-apps.sh $@
 source ./build-scripts/build-linux.sh
-if [[ $1 != BBSR ]]
+if [[ $1 != SE ]]
 then
   source ./build-scripts/build-linux-bsa.sh
 fi

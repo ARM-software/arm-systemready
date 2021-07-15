@@ -59,7 +59,7 @@ create_cfgfiles ()
     mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
     mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE_SIG} ::/grub.cfg.sig
     mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh
-    if [ "$BUILD_PLAT" != "BBSR" ]; then
+    if [ "$BUILD_PLAT" != "SE" ]; then
       mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
     fi
     mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/debug_dump.nsh
@@ -79,8 +79,8 @@ create_fatpart ()
     mmd -i $fatpart_name ::/grub
     mmd -i $fatpart_name ::/EFI/BOOT/bsa
     mmd -i $fatpart_name ::/EFI/BOOT/bbr
-    if [ "$BUILD_PLAT" = "BBSR" ]; then
-      mmd -i $fatpart_name ::/EFI/BOOT/bbr/bbsr-acs-keys
+    if [ "$BUILD_PLAT" = "SE" ]; then
+      mmd -i $fatpart_name ::/EFI/BOOT/bbr/SE-acs-keys
     fi
     mmd -i $fatpart_name ::/EFI/BOOT/debug
     mmd -i $fatpart_name ::/EFI/BOOT/app
@@ -89,7 +89,7 @@ create_fatpart ()
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
     mcopy -i $fatpart_name $OUTDIR/Image ::/
     mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
-    if [ "$BUILD_PLAT" != "BBSR" ]; then
+    if [ "$BUILD_PLAT" != "SE" ]; then
       mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
     fi
     mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
@@ -100,11 +100,11 @@ create_fatpart ()
 
     mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/EFI/BOOT/app
 
-    if [ "$BUILD_PLAT" = "BBSR" ]; then
+    if [ "$BUILD_PLAT" = "SE" ]; then
       mcopy -i $fatpart_name Shell.efi.sig ::/EFI/BOOT
       mcopy -i $fatpart_name $OUTDIR/Image.sig ::/
       mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img.sig  ::/
-      mcopy -i $fatpart_name ${TOP_DIR}/bbsr-acs-keys/*.der ::/EFI/BOOT/bbr/bbsr-acs-keys
+      mcopy -i $fatpart_name ${TOP_DIR}/SE-acs-keys/*.der ::/EFI/BOOT/bbr/SE-acs-keys
     fi
     echo "FAT partition image created"
 }
@@ -147,9 +147,9 @@ prepare_disk_image ()
     elif [ "$BUILD_PLAT" = "IR" ]; then
        IMG_BB=ir_acs_live_image.img
        echo -e "\e[1;32m Build IR Live Image at $PLATDIR/$IMG_BB \e[0m"
-    elif [ "$BUILD_PLAT" = "BBSR" ]; then
-       IMG_BB=bbsr_acs_live_image.img
-       echo -e "\e[1;32m Build BBSR Live Image at $PLATDIR/$IMG_BB \e[0m"
+    elif [ "$BUILD_PLAT" = "SE" ]; then
+       IMG_BB=se_acs_live_image.img
+       echo -e "\e[1;32m Build SE Live Image at $PLATDIR/$IMG_BB \e[0m"
     else
        echo "Specify platform ES or IR"
        exit_fun
@@ -167,7 +167,7 @@ prepare_disk_image ()
     cp grubaa64.efi bootaa64.efi
     cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi Shell.efi
     cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi.sig Shell.efi.sig
-    if [ "$BUILD_PLAT" != "BBSR" ]; then
+    if [ "$BUILD_PLAT" != "SE" ]; then
        cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi Bsa.efi
     fi
     cp -Tr $TOP_DIR/$SCT_PATH/ SCT
@@ -218,7 +218,7 @@ BUILD_PLAT=$1
 
 if [ -z "$BUILD_PLAT" ]
 then
-   echo "Specify platform ES, IR, or BBSR"
+   echo "Specify platform ES, IR, or SE"
    exit_fun
 fi
 #prepare the disk image
