@@ -81,7 +81,7 @@ get_fwts_src()
 }
 get_sct_src()
 {
-    git clone --single-branch --branch bbsr-acs-beta0 https://github.com/stuyoder/edk2-test.git  edk2-test
+    git clone --single-branch --branch security-extension-acs-beta0 https://github.com/stuyoder/edk2-test.git  edk2-test
     pushd $TOP_DIR/edk2-test
     popd
 }
@@ -93,7 +93,7 @@ get_efitools_src()
 
 get_bbr_acs_src()
 {
-  git clone  --single-branch --branch bbsr-acs-beta0 https://github.com/stuyoder/bbr-acs.git bbr-acs
+  git clone  --single-branch --branch security-extension-acs-beta0 https://github.com/stuyoder/bbr-acs.git bbr-acs
 }
 
 sudo apt install git curl mtools gdisk gcc\
