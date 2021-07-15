@@ -54,7 +54,7 @@ UEFI_BUILD_MODE=RELEASE
 GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 PATCH_DIR=$TOP_DIR/../patches
 CROSS_COMPILE=$TOP_DIR/$GCC
-KEYS_DIR=$TOP_DIR/bbsr-acs-keys
+KEYS_DIR=$TOP_DIR/security-extension-acs-keys
 UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64
 
 do_build()
