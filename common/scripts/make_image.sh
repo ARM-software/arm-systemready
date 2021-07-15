@@ -75,6 +75,7 @@ create_fatpart ()
     mmd -i $fatpart_name ::/grub
     mmd -i $fatpart_name ::/EFI/BOOT/bsa
     mmd -i $fatpart_name ::/EFI/BOOT/bbr
+    mmd -i $fatpart_name ::/EFI/BOOT/bbr/bbsr-acs-keys
     mmd -i $fatpart_name ::/EFI/BOOT/debug
     mmd -i $fatpart_name ::/EFI/BOOT/app
 
@@ -84,6 +85,7 @@ create_fatpart ()
     mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
     mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
     mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
+    mcopy -i $fatpart_name ${TOP_DIR}/bbsr-acs-keys/*.der ::/EFI/BOOT/bbr/bbsr-acs-keys
     if [ "$BUILD_PLAT" = "IR" ]; then
       echo " IR BSA flag file copied"
       mcopy -i $fatpart_name ${TOP_DIR}/build-scripts/ir_bsa.flag ::/EFI/BOOT/bsa
