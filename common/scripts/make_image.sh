@@ -80,7 +80,7 @@ create_fatpart ()
     mmd -i $fatpart_name ::/EFI/BOOT/bsa
     mmd -i $fatpart_name ::/EFI/BOOT/bbr
     if [ "$BUILD_PLAT" = "SE" ]; then
-      mmd -i $fatpart_name ::/EFI/BOOT/bbr/SE-acs-keys
+      mmd -i $fatpart_name ::/EFI/BOOT/bbr/security-extension-acs-keys
     fi
     mmd -i $fatpart_name ::/EFI/BOOT/debug
     mmd -i $fatpart_name ::/EFI/BOOT/app
@@ -104,7 +104,7 @@ create_fatpart ()
       mcopy -i $fatpart_name Shell.efi.sig ::/EFI/BOOT
       mcopy -i $fatpart_name $OUTDIR/Image.sig ::/
       mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img.sig  ::/
-      mcopy -i $fatpart_name ${TOP_DIR}/SE-acs-keys/*.der ::/EFI/BOOT/bbr/SE-acs-keys
+      mcopy -i $fatpart_name ${TOP_DIR}/security-extension-acs-keys/*.der ::/EFI/BOOT/bbr/security-extension-acs-keys
     fi
     echo "FAT partition image created"
 }

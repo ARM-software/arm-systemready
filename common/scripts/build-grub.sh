@@ -48,7 +48,7 @@ TOP_DIR=`pwd`
 GRUB_PATH=grub
 GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 CROSS_COMPILE=$TOP_DIR/$GCC
-KEYS_DIR=$TOP_DIR/bbsr-acs-keys
+KEYS_DIR=$TOP_DIR/security-extension-acs-keys
 GRUB_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
 GRUB_INITIAL_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub-initial.cfg
 

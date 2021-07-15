@@ -61,7 +61,7 @@ LINUX_ARCH=arm64
 LINUX_IMAGE_TYPE=Image
 GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 CROSS_COMPILE=$TOP_DIR/$GCC
-KEYS_DIR=$TOP_DIR/bbsr-acs-keys
+KEYS_DIR=$TOP_DIR/security-extension-acs-keys
 
 do_build ()
 {
