@@ -29,6 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
+source ./build-scripts/build-bbsr-acs-keys.sh
 source ./build-scripts/build-uefi.sh
 source ./build-scripts/build-bsaefi.sh $@
 source ./build-scripts/build-sct.sh $@
