@@ -29,7 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-source ./build-scripts/build-SE-acs-keys.sh
+source ./build-scripts/build-security-extension-acs-keys.sh
 source ./build-scripts/build-uefi.sh
 if [[ $1 != SE ]]
 then
