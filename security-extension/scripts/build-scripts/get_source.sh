@@ -99,7 +99,8 @@ get_bbr_acs_src()
 sudo apt install git curl mtools gdisk gcc\
  openssl automake autotools-dev libtool bison flex\
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint\
- sbsigntool uuid-runtime
+ sbsigntool uuid-runtime monkeysphere make g++ gnu-efi\
+ libfile-slurp-perl help2man
 
 get_uefi_src
 get_bbr_acs_src
