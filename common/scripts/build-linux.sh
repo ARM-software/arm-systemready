@@ -99,16 +99,16 @@ do_package ()
     # Copy binary to output folder
     pushd $TOP_DIR
 
-    mkdir -p ${OUTDIR}/${!outpath}
+    mkdir -p ${OUTDIR}/
 
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/arch/$LINUX_ARCH/boot/$LINUX_IMAGE_TYPE \
-    ${OUTDIR}/${!outpath}/$LINUX_IMAGE_TYPE
+    ${OUTDIR}/$LINUX_IMAGE_TYPE
 
     # sign image with db key
-    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt ${OUTDIR}/${!outpath}/$LINUX_IMAGE_TYPE --output ${OUTDIR}/${!outpath}/$LINUX_IMAGE_TYPE
+    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt ${OUTDIR}/$LINUX_IMAGE_TYPE --output ${OUTDIR}/$LINUX_IMAGE_TYPE
 
     # sign binary with gpg key for grub secure boot
-    gpg --default-key "TestDB1" --detach-sign ${OUTDIR}/${!outpath}/$LINUX_IMAGE_TYPE
+    gpg --default-key "TestDB1" --detach-sign ${OUTDIR}/$LINUX_IMAGE_TYPE
 
 }
 
