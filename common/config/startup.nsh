@@ -70,12 +70,6 @@ endfor
 :DoneApp
 
 for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%p:\EFI\BOOT\bbr\security-extension-acs-keys then
-        goto Done
-    endif
-endfor
-
-for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%p:\EFI\BOOT\debug\debug_dump.nsh then
         FS%p:\EFI\BOOT\debug\debug_dump.nsh
         goto DoneDebug
@@ -98,5 +92,3 @@ for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     endif
 endfor
 echo "Image not found"
-
-:Done
