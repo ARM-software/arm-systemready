@@ -50,9 +50,7 @@ create_scripts_link()
 init_dir()
 {
  rm -rf $TOP_DIR/ramdisk
- rm -rf $TOP_DIR/build-scripts/config
  cp -r $TOP_DIR/../../common/ramdisk                      $TOP_DIR 
- cp -r $TOP_DIR/../../common/config                       $TOP_DIR/build-scripts 
 }
 
 create_scripts_link
