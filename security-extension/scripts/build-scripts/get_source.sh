@@ -81,9 +81,35 @@ get_fwts_src()
 }
 get_sct_src()
 {
-    git clone --single-branch --branch security-extension-acs-beta0 https://github.com/stuyoder/edk2-test.git  edk2-test
+
+    git clone --single-branch https://github.com/tianocore/edk2-test
     pushd $TOP_DIR/edk2-test
+    git checkout 421a6997ef362c6286c4ef87d21d5367a9d1fb58
+    echo "Applying security-extension ACS patch..."
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0001-uefi-sct-SctPkg-Secure-Boot-add-variable-size-test.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0002-uefi-sct-SctPkg-add-test-infrastructure-for-Secure-B.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0003-uefi-sct-SctPkg-add-dependency-infrastructure-for-Se.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0004-uefi-sct-SctPkg-sign-the-.efi-images.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0005-uefi-sct-SctPkg-add-variable-attributes-Secure-Boot-.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0006-uefi-sct-SctPkg-support-.auth-files-in-creating-the-.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0007-uefi-sct-SctPkg-add-initial-Secure-Boot-variable-upd.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0008-uefi-sct-SctPkg-TCG2-Protocol-add-header-with-TCG2-p.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0009-uefi-sct-SctPkg-TCG2-Protocol-add-GetCapability-Test.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0010-uefi-sct-SctPkg-TCG2-Protocol-add-GetActivePcrBanks-.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0011-uefi-sct-SctPkg-TCG2-Protocol-add-HashLogExtendEvent.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0012-uefi-sct-SctPkg-TCG2-Protocol-add-GetEventLog-test.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0013-uefi-sct-SctPkg-TCG2-Protocol-add-SubmitCommand-test.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0014-uefi-sct-SctPkg-Secure-Boot-verify-update-of-db-vari.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0015-uefi-sct-SctPkg-SecureBoot-verify-update-of-db-signe.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0016-uefi-sct-SctPkg-Secure-Boot-verify-update-of-dbx-var.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0017-uefi-sct-SctPkg-Secure-Boot-verify-db-update-by-2nd-.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0018-uefi-sct-SctPkg-Secure-Boot-move-SB-variable-cleanup.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0019-uefi-sct-SctPkg-Secure-Boot-add-image-loading-test.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0020-security-extension-updates-to-image-generation.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0021-security-extension-add-assertions-2-5-for-image-load.patch
+    git apply -p1 < $TOP_DIR/bbr-acs/bbsr/patches/0022-security-extension-add-checkpoint2-to-image-loading.patch
     popd
+
 }
 
 get_efitools_src()
