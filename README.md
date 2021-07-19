@@ -23,6 +23,11 @@ Please navigate to the ES or IR band for further details, through the directorie
 * [ES](./ES)
 * [IR](./IR)
 
+## System Ready Security Extension:
+The SystemReady security extension provides a way to certify that secure boot and secure firmware update are implemented as prescribed by the Arm [Base Boot Security Specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). The security extension can be followed with the SystemReady SR, ES, and IR bands.
+Please navigate to the security extension link below for further details on specific scripts and prebuilt images:
+* [security-extension](./security-extension)
+
 ## License
 
 Arm SystemReady ACS is distributed under Apache v2.0 License.
