@@ -93,6 +93,12 @@ Linux will boot and automatically run a subset of FWTS:
 
 Expected Result: All tests pass.
 
+If the system uses ACPI for resource discovery, run the "tpm2" FWTS test to verify the TPM2 ACPI table. See example below:
+    # fwts tpm2
+    Running 1 tests, results appended to results.log
+    Test: TPM2 Trusted Platform Module 2 test.
+      Validate TPM2 table.                                    1 passed
+
 ### 5. Secure firmware update test
 
 The BBSR requires support for update capsules compliant with the UEFI specification for systems that perform in-band (e.g. OS-initiated) firmware updates.  The Security Extension ACS firmware update test is a manual test run from the UEFI Shell that requires a valid update capsule for the system's firmware.
