@@ -15,9 +15,12 @@ This section contains the build scripts and the live-images for the SystemReady 
 ## Release details
  - Code Quality: v1.0 BETA-0
  - **The latest pre-built release of the Security Extension ACS is available for download here: [v21.07_REL1.0_BETA-0](https://github.com/stuyoder/arm-systemready/tree/security-extension-acs-beta0/security-extension/prebuilt_images/v21.07_REL1.0_BETA-0)**
- - The Security Extension tests are written for version 1.1 of the BBR specification.
+ - The Security Extension tests are written for version 1.1 of the BBSR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
+ - Limitations
+     - This release is limited to the security extension ACS tests only.  It is not suported to use this release for SystemReady ES and IR band testing.  See the SystemReady ACS page for links to the latest SystemReady IR and ES tests.
+     - This release covers the TCG2 protocol tests for systems that implement TPM 2.0 (R230_BBSR).  Test coverage for the additional measured boot requirements specified in BBSR (R170 - R210) will be covered in a future release.
 
 
 ## Steps to build SystemReady Security Extension ACS live image
