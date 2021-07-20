@@ -52,7 +52,7 @@ For example, to enroll the Secure Boot keys on QEMU with EDK2 based firmware per
      - Select Enroll PK -> Enroll PK Using File
      - Select the ACS disk which has the "BOOT" label
      - The secure boot keys are located at the following path on the disk:
-         - EFI -> BOOT -> bbr -> bbsr-acs-keys
+         - EFI -> BOOT -> bbr -> security-extension-acs-keys
      - Select the following file for PK: `TestPK1.der`
      - Repeat the above steps to enroll the keys (TestKEK1.der, TestDB1.der, TestDBX1.der)  for KEK, db, dbx selecting the following options:
          - KEK Options
@@ -99,13 +99,13 @@ The BBSR requires support for update capsules compliant with the UEFI specificat
 
 The steps utilize the CapsuleApp.efi program that is located on the ACS image at the following path: EFI\BOOT\app\CapsuleApp.efi
 
- - Preparation
+ - #### A. Preparation
      - Copy the vendor provided update capsule image onto a storage device
      - Create an update capsule that has been tampered with. Using the xxd command, modify the last byte of a **copy** of the vendor provided update capsule image.
      - Copy the tampered-with update capsule onto the storage device
      - Enable the storage device containg the capsule images on the system under test
 
- - Reset the system.  The boot flow will skip running SCT since it previously was run and will stop at the UEFI Shell prompt:
+ - #### B. Reset the system.  The boot flow will skip running SCT since it previously was run and will stop at the UEFI Shell prompt:
 
 <pre>
     Shell> echo -off
@@ -122,9 +122,9 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
     FS1:\acs_results\app_output\>
 </pre>
 
- - Dump the firmware's EFI System Resource Table (ESRT) using the command: `CapsuleApp -E`
+ - #### C. Dump the firmware's EFI System Resource Table (ESRT) using the command: `CapsuleApp -E`
      - Expected Result: the ESRT dump shows a table entry for all updatable system firmware components
- - See example below:
+     - See example below:
 <pre>
     FS0:\EFI\BOOT\app\CapsuleApp.efi -E
 
@@ -145,11 +145,11 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
       LastAttemptStatus        - 0x0 (Success)
 </pre>
 
- - Dump the FMP information advertised by the firmware using the command: `CapsuleApp -P`
+ - #### D. Dump the FMP information advertised by the firmware using the command: `CapsuleApp -P`
      - Expected Result:
          - The ImageTypeId fields match the FwClass advertised by the ESRT
          - The AUTHENTICATION_REQUIRED attribute is set indicating that image authentication is required
- - See example below:
+     - See example below:
 <pre>
     FS0:\EFI\BOOT\app\CapsuleApp.efi -P
 
@@ -192,9 +192,9 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
 
 </pre>
 
- - Dump the update capsule header using the command: `CapsuleApp -D [capsule-image]`
+ - #### E. Dump the update capsule header using the command: `CapsuleApp -D [capsule-image]`
      - Expected Result: The dump shows a valid CapsuleHeader, FmpHeader, and FmpPayload
- - See example below:
+     - See example below:
 <pre>
     FS0:\EFI\BOOT\app\CapsuleApp.efi -D DeveloperBox.Cap
 
@@ -218,9 +218,9 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
       UpdateHardwareInstance - 0x0
 </pre>
 
- - Test an firmware update using the CapsuleApp with the tampered capsule: `CapsuleApp  [tampered-capsule-image]`
+ - #### F. Test an firmware update using the CapsuleApp with the tampered capsule: `CapsuleApp  [tampered-capsule-image]`
      - Expected Result: The firmware update must not be processed.
- - See example below:
+     - See example below:
 <pre>
     FS1:> FS0:\EFI\BOOT\app\CapsuleApp.efi FS2:\DeveloperBox.tampered.cap
     CapsuleApp: creating capsule descriptors at 0xFF7BC898
@@ -229,9 +229,9 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
     FS1:> 
 </pre>
 
- - Test an firmware update using the CapsuleApp with the vendor provided capsule: `CapsuleApp  [capsule-image]`
+ - #### G. Test an firmware update using the CapsuleApp with the vendor provided capsule: `CapsuleApp  [capsule-image]`
      - Expected Result: The firmware update is processed successfully.
- - See example below:
+     - See example below:
 <pre>
     FS1:> FS0:\EFI\BOOT\app\CapsuleApp.efi FS2:\DeveloperBox.cap
     CapsuleApp: creating capsule descriptors at 0xFF7BC018
