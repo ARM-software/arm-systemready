@@ -67,7 +67,7 @@ For example, to enroll the Secure Boot keys on QEMU with EDK2 based firmware per
 
 ### 3. Run SCT
 
-The Security Option SCT is a subset of the SCT focused on security interfaces-- authenticated variables, Secure Boot variables, Secure Boot image loading, secure firmware update using update capsules, and TCG2 protocol test for systems with TPMs.
+The Security Extension SCT is a subset of the SCT focused on security interfaces-- authenticated variables, Secure Boot variables, Secure Boot image loading, secure firmware update using update capsules, and TCG2 protocol test for systems with TPMs.
 
 After resetting the system with the ACS Secure Boot keys enrolled grub will automatically start the Security Option SCT
 
@@ -75,6 +75,8 @@ After resetting the system with the ACS Secure Boot keys enrolled grub will auto
 
 After the tests complete, the system returns to the UEFI Shell and the following test output is available in the acs_results partition of the ACS disk:
  - \acs_results\sct_results\Overall\Summary.log
+
+Expected Result: All tests pass.
 
 Reset the system at the UEFI Shell using the **reset** command:
 `FS1:\acs_results\app_output\> reset`
@@ -89,16 +91,19 @@ Linux will boot and automatically run a subset of FWTS:
 
  - ![FWTS](./images/fwts.png)
 
+Expected Result: All tests pass.
+
 ### 5. Secure firmware update test
 
-This is a manual test in the UEFI Shell that requires a valid update capsule for the system's firmware.
+The BBSR requires support for update capsules compliant with the UEFI specification for systems that perform in-band (e.g. OS-initiated) firmware updates.  The Security Extension ACS firmware update test is a manual test run from the UEFI Shell that requires a valid update capsule for the system's firmware.
 
 The steps utilize the CapsuleApp.efi program that is located on the ACS image at the following path: EFI\BOOT\app\CapsuleApp.efi
 
  - Preparation
-     - Using the xxd command, modify the last byte of a **copy** of the update capsule image.  This simulates a capsule that has been tampered with.
-     - Copy the valid update capsule image and the tampered with copy onto a storage device
-     - Enable the storage device containg the images on the system under test
+     - Copy the vendor provided update capsule image onto a storage device
+     - Create an update capsule that has been tampered with. Using the xxd command, modify the last byte of a **copy** of the vendor provided update capsule image.
+     - Copy the tampered-with update capsule onto the storage device
+     - Enable the storage device containg the capsule images on the system under test
 
  - Reset the system.  The boot flow will skip running SCT since it previously was run and will stop at the UEFI Shell prompt:
 
@@ -117,7 +122,8 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
     FS1:\acs_results\app_output\>
 </pre>
 
- - Dump the firmware's ESRT using the command: `CapsuleApp -E`
+ - Dump the firmware's EFI System Resource Table (ESRT) using the command: `CapsuleApp -E`
+     - Expected Result: the ESRT dump shows a table entry for all updatable system firmware components
  - See example below:
 <pre>
     FS0:\EFI\BOOT\app\CapsuleApp.efi -E
@@ -140,6 +146,9 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
 </pre>
 
  - Dump the FMP information advertised by the firmware using the command: `CapsuleApp -P`
+     - Expected Result:
+         - The ImageTypeId fields match the FwClass advertised by the ESRT
+         - The AUTHENTICATION_REQUIRED attribute is set indicating that image authentication is required
  - See example below:
 <pre>
     FS0:\EFI\BOOT\app\CapsuleApp.efi -P
@@ -184,6 +193,7 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
 </pre>
 
  - Dump the update capsule header using the command: `CapsuleApp -D [capsule-image]`
+     - Expected Result: The dump shows a valid CapsuleHeader, FmpHeader, and FmpPayload
  - See example below:
 <pre>
     FS0:\EFI\BOOT\app\CapsuleApp.efi -D DeveloperBox.Cap
@@ -206,6 +216,29 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
       UpdateImageSize        - 0x2DBFDD
       UpdateVendorCodeSize   - 0x0
       UpdateHardwareInstance - 0x0
+</pre>
+
+ - Test an firmware update using the CapsuleApp with the tampered capsule: `CapsuleApp  [tampered-capsule-image]`
+     - Expected Result: The firmware update must not be processed.
+ - See example below:
+<pre>
+    FS1:> FS0:\EFI\BOOT\app\CapsuleApp.efi FS2:\DeveloperBox.tampered.cap
+    CapsuleApp: creating capsule descriptors at 0xFF7BC898
+    CapsuleApp: capsule data starts          at 0xF491F018 with size 0x2DC035
+    CapsuleApp: block/size                   0xF491F018/0x2DC035
+    FS1:> 
+</pre>
+
+ - Test an firmware update using the CapsuleApp with the vendor provided capsule: `CapsuleApp  [capsule-image]`
+     - Expected Result: The firmware update is processed successfully.
+ - See example below:
+<pre>
+    FS1:> FS0:\EFI\BOOT\app\CapsuleApp.efi FS2:\DeveloperBox.cap
+    CapsuleApp: creating capsule descriptors at 0xFF7BC018
+    CapsuleApp: capsule data starts          at 0xF491F018 with size 0x2DC035
+    CapsuleApp: block/size                   0xF491F018/0x2DC035
+    Updating firmware - please wait....................................
+    FS1:> 
 </pre>
 
 
