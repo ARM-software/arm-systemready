@@ -103,7 +103,7 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
      - Copy the vendor provided update capsule image onto a storage device
      - Create an update capsule that has been tampered with. Using the xxd command, modify the last byte of a **copy** of the vendor provided update capsule image.
      - Copy the tampered-with update capsule onto the storage device
-     - Enable the storage device containg the capsule images on the system under test
+     - Enable the storage device containing the capsule images on the system under test
 
  - #### B. Reset the system.  The boot flow will skip running SCT since it previously was run and will stop at the UEFI Shell prompt:
 
@@ -123,7 +123,7 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
 </pre>
 
  - #### C. Dump the firmware's EFI System Resource Table (ESRT) using the command: `CapsuleApp -E`
-     - Expected Result: the ESRT dump shows a table entry for all updatable system firmware components
+     - Expected Result: the ESRT dump shows a table entry for all updateable system firmware components
      - See example below:
 <pre>
     FS0:\EFI\BOOT\app\CapsuleApp.efi -E
