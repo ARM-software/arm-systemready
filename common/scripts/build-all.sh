@@ -35,6 +35,10 @@ if [[ $1 != SE ]]
 then
   source ./build-scripts/build-bsaefi.sh $@
 fi
+if [[ $1 == SE ]]
+then
+  source ./build-scripts/build-efitools.sh
+fi
 source ./build-scripts/build-sct.sh $@
 source ./build-scripts/build-uefi-apps.sh $@
 source ./build-scripts/build-linux.sh
