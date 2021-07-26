@@ -64,10 +64,10 @@ get_bsa_src()
     if [ -z $ARM_BSA_TAG ]; then
         #No TAG is provided. Download the latest code
         echo "Downloading Arm BSA source code."
-        git clone --depth 1 ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bsa ShellPkg/Application/bsa-acs
+        git clone --depth 1 https://github.com/ARM-software/bsa-acs.git ShellPkg/Application/bsa-acs
     else
         echo "Downloading Arm BSA source code. TAG : $ARM_BSA_TAG"
-        git clone --depth 1 --branch $ARM_BSA_TAG ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bsa ShellPkg/Application/bsa-acs
+        git clone --depth 1 --branch $ARM_BSA_TAG https://github.com/ARM-software/bsa-acs.git ShellPkg/Application/bsa-acs
     fi
     popd
     pushd  $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
@@ -120,10 +120,10 @@ get_linux-acs_src()
 {
   if [ -z $ARM_LINUX_ACS_TAG ]; then
       echo "Downloading Arm Linux ACS source code."
-      git clone --depth 1 ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_linux_acs linux-acs
+      git clone --depth 1 https://gitlab.arm.com/linux-arm/linux-acs linux-acs
   else
       echo "Downloading Arm Linux ACS source code. TAG : ${ARM_LINUX_ACS_TAG}"
-      git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_linux_acs linux-acs
+      git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs linux-acs
   fi
   pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
   echo "Applying Linux ACS Patch..."
@@ -137,10 +137,10 @@ get_bbr_acs_src()
    if [ -z $ARM_BBR_TAG ]; then
        #No TAG is provided. Download the latest code
        echo "Downloading Arm BBR source code."
-       git clone  --depth 1 ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bbr  bbr-acs
+       git clone  --depth 1 https://github.com/ARM-software/bbr-acs.git bbr-acs
    else
        echo "Downloading Arm BBR source code. TAG: $ARM_BBR_TAG"
-       git clone  --depth 1 --branch $ARM_BBR_TAG ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bbr  bbr-acs
+       git clone  --depth 1 --branch $ARM_BBR_TAG https://github.com/ARM-software/bbr-acs.git bbr-acs
    fi
 }
 
