@@ -29,24 +29,29 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 TOP_DIR=`pwd`
+. $TOP_DIR/../../common/config/common_config.cfg
+#The shell variables use in this file are defined in common_config.cfg
 
 get_linux_src()
 {
-    git clone --depth 1 --branch v5.10 https://github.com/torvalds/linux.git linux-5.10
+    echo "Downloading Linux source code. Version : $LINUX_KERNEL_VERSION"
+    git clone --depth 1 --branch v$LINUX_KERNEL_VERSION https://github.com/torvalds/linux.git linux-${LINUX_KERNEL_VERSION}
 }
 
 get_busybox_src()
 {
+    echo "Downloading Busybox source code. TAG : $BUSYBOX_SRC_VERSION"
     git clone https://git.busybox.net/busybox/
     pushd $TOP_DIR/busybox
-    git checkout 1_31_stable
+    git checkout $BUSYBOX_SRC_VERSION
     popd
 }
 
 get_uefi_src()
 {
+    echo "Downloading EDK2 source code. TAG : $EDK2_SRC_VERSION"
     git clone --depth 1 --single-branch \
-    --branch edk2-stable202102 https://github.com/tianocore/edk2.git
+    --branch $EDK2_SRC_VERSION https://github.com/tianocore/edk2.git
     pushd $TOP_DIR/edk2
     git submodule update --init
     popd
@@ -56,7 +61,14 @@ get_bsa_src()
 {
     pushd $TOP_DIR/edk2
     git clone https://github.com/tianocore/edk2-libc
-    git clone --depth 1 --branch v21.05_0.5_ALPHA  https://github.com/ARM-software/bsa-acs.git  ShellPkg/Application/bsa-acs
+    if [ -z $ARM_BSA_TAG ]; then
+        #No TAG is provided. Download the latest code
+        echo "Downloading Arm BSA source code."
+        git clone --depth 1 ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bsa ShellPkg/Application/bsa-acs
+    else
+        echo "Downloading Arm BSA source code. TAG : $ARM_BSA_TAG"
+        git clone --depth 1 --branch $ARM_BSA_TAG ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bsa ShellPkg/Application/bsa-acs
+    fi
     popd
     pushd  $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
     git pull
@@ -65,19 +77,21 @@ get_bsa_src()
 
 get_cross_compiler()
 {
+    echo "Downloading TOOLS source code. Version : ${LINARO_TOOLS_VERSION}"
     LINARO=https://releases.linaro.org/components/toolchain/binaries
-    VERSION=7.5-2019.12
-    GCC=aarch64-linux-gnu/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz
+    VERSION=$LINARO_TOOLS_MAJOR_VERSION
+    GCC=aarch64-linux-gnu/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu.tar.xz
     mkdir -p tools
     pushd $TOP_DIR/tools
     wget $LINARO/$VERSION/$GCC
-    tar -xf gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz
-    rm gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz
+    tar -xf gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu.tar.xz
+    rm gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu.tar.xz
     popd
 }
 
 get_grub_src()
 {
+    echo "Downloading grub source code."
     git clone https://git.savannah.gnu.org/git/grub.git
     pushd $TOP_DIR/grub
     git submodule update --init
@@ -85,33 +99,49 @@ get_grub_src()
 }
 get_fwts_src()
 {
-    git clone --depth 1 --single-branch --branch V21.03.00 https://git.launchpad.net/fwts
+    echo "Downloading FWTS source code. TAG : ${FWTS_SRC_TAG}"
+    git clone --single-branch https://git.launchpad.net/fwts
     pushd $TOP_DIR/fwts
+    git checkout $FWTS_SRC_TAG
     git submodule update --init
     popd
 }
 get_sct_src()
 {
+    echo "Downloading SCT (edk2-test) source code. TAG : ${SCT_SRC_TAG}"
     git clone --single-branch https://github.com/tianocore/edk2-test
     pushd $TOP_DIR/edk2-test
-    git checkout 421a6997ef362c6286c4ef87d21d5367a9d1fb58
+    git checkout $SCT_SRC_TAG
     popd
 }
 
 
 get_linux-acs_src()
 {
-  git clone --depth 1 --branch v21.05_0.5_ALPHA https://gitlab.arm.com/linux-arm/linux-acs linux-acs
-  pushd $TOP_DIR/linux-5.10
+  if [ -z $ARM_LINUX_ACS_TAG ]; then
+      echo "Downloading Arm Linux ACS source code."
+      git clone --depth 1 ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_linux_acs linux-acs
+  else
+      echo "Downloading Arm Linux ACS source code. TAG : ${ARM_LINUX_ACS_TAG}"
+      git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_linux_acs linux-acs
+  fi
+  pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
   echo "Applying Linux ACS Patch..."
-  git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-SBSA-ACS-Linux-5.10.patch
+  git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-ACS-Linux-${LINUX_KERNEL_VERSION}.patch
   popd
 
 }
 
 get_bbr_acs_src()
 {
-  git clone  --depth 1 --branch v21.05_0.8_BETA-0 https://github.com/ARM-software/bbr-acs.git  bbr-acs
+   if [ -z $ARM_BBR_TAG ]; then
+       #No TAG is provided. Download the latest code
+       echo "Downloading Arm BBR source code."
+       git clone  --depth 1 ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bbr  bbr-acs
+   else
+       echo "Downloading Arm BBR source code. TAG: $ARM_BBR_TAG"
+       git clone  --depth 1 --branch $ARM_BBR_TAG ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bbr  bbr-acs
+   fi
 }
 
 sudo apt install git curl mtools gdisk gcc\

@@ -32,6 +32,7 @@
 # Generate the disk image for busybox boot
 #------------------------------------------
 
+
 #variables for image generation
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 TOP_DIR=`pwd`
@@ -48,6 +49,7 @@ GRUB_PATH=grub
 UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64/
 BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
 SCT_PATH=edk2-test/uefi-sct/AARCH64_SCT
+UEFI_APPS_PATH=${TOP_DIR}/edk2/Build/MdeModule/DEBUG_GCC5/AARCH64
 
 create_cfgfiles ()
 {
@@ -74,6 +76,7 @@ create_fatpart ()
     mmd -i $fatpart_name ::/EFI/BOOT/bsa
     mmd -i $fatpart_name ::/EFI/BOOT/bbr
     mmd -i $fatpart_name ::/EFI/BOOT/debug
+    mmd -i $fatpart_name ::/EFI/BOOT/app
 
     mcopy -i $fatpart_name bootaa64.efi ::/EFI/BOOT
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
@@ -85,6 +88,8 @@ create_fatpart ()
       echo " IR BSA flag file copied"
       mcopy -i $fatpart_name ${TOP_DIR}/build-scripts/ir_bsa.flag ::/EFI/BOOT/bsa
     fi
+    mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/EFI/BOOT/app
+
     echo "FAT partition image created"
 }
 
@@ -174,7 +179,13 @@ prepare_disk_image ()
     rm -f BOOT
     rm -f RESULT
 
-    echo "Completed preparation of disk image for busybox boot"
+    echo "Compressing the image : $PLATDIR/$IMG_BB"
+    xz -z $PLATDIR/$IMG_BB
+
+    if [ -f $PLATDIR/$IMG_BB.xz ]; then
+        echo "Completed preparation of disk image for busybox boot"
+        echo "Image path : $PLATDIR/$IMG_BB.xz"
+    fi
     echo "----------------------------------------------------"
 }
 exit_fun() {

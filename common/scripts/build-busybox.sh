@@ -46,11 +46,16 @@
 # LINUX_OUT_DIR - output directory name
 # LINUX_CONFIG_DEFAULT - the default linux build output
 
+
 TOP_DIR=`pwd`
+. $TOP_DIR/../../common/config/common_config.cfg
+
 BUSYBOX_ARCH=arm64
 BUSYBOX_PATH=busybox
 BUSYBOX_OUT_DIR=output
 BUSYBOX_RAMDISK_PATH=ramdisk
+GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+CROSS_COMPILE=$TOP_DIR/$GCC
 BUSYBOX_RAMDISK_BUSYBOX_PATH=$BUSYBOX_PATH/$BUSYBOX_OUT_DIR/_install/bin
 
 do_build()
@@ -68,7 +73,7 @@ do_build()
         make O=$BUSYBOX_OUT_DIR -j $PARALLELISM  ARCH=arm64
         make O=$BUSYBOX_OUT_DIR ARCH=arm64 install
     else
-        GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+        GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
         CROSS_COMPILE=$TOP_DIR/$GCC
         make O=$BUSYBOX_OUT_DIR -j $PARALLELISM  ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC
         make O=$BUSYBOX_OUT_DIR ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC install

@@ -47,11 +47,14 @@
 #     - defines - extra platform defines during the build
 #     - binary - what to call the final output binary
 
+
 TOP_DIR=`pwd`
+. $TOP_DIR/../../common/config/common_config.cfg
+
 UEFI_PATH=edk2
 UEFI_TOOLCHAIN=GCC49
 UEFI_BUILD_MODE=RELEASE
-GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 CROSS_COMPILE=$TOP_DIR/$GCC
 UEFI_LIBC_PATH=edk2-libc
 PATCH_DIR=$TOP_DIR/../patches
@@ -112,6 +115,8 @@ do_build()
 do_clean()
 {
     pushd $TOP_DIR/$UEFI_PATH
+    CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
+    PATH="$PATH:$CROSS_COMPILE_DIR"
     source ./edksetup.sh
     make -C BaseTools/Source/C clean
     rm -rf Build/Shell/DEBUG_GCC49
