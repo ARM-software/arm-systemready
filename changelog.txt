@@ -6,18 +6,18 @@ v21.07_0.9_BETA
 **SystemReady ES**
 * BSA: BSA Tests for ES based on BSA specifications v1.0
 * BSA: Initial ITS tests for systems presenting firmware which is SBBR complaint
-Support to build ES ACS live image : build scripts and build instructions in documentation
-SystemReady ES README.md updates
+* Support to build ES ACS live image : build scripts and build instructions in documentation
+* SystemReady ES README.md updates
 
 **Common**
-Added a common configuration file to set external and internal software versions for build
-Upgrading ACS image to v5.11 kernel
-BBR: Refinement of UEFI-SCT Sequence files for IR and ES and verification
-BBR: Support for CapsuleApp.efi in build and automation for ES and IR
-BBR: Migrate to the version V21.06.00 + of FWTS
-BBR: Migrate to 2821093 tag of SCT
-General improvements in scripts
-Bug Fixes
+* Added a common configuration file to set external and internal software versions for build
+* Upgrading ACS image to v5.11 kernel
+* BBR: Refinement of UEFI-SCT Sequence files for IR and ES and verification
+* BBR: Support for CapsuleApp.efi in build and automation for ES and IR
+* BBR: Migrate to the version V21.06.00 + of FWTS
+* BBR: Migrate to 2821093 tag of SCT
+* General improvements in scripts
+* Bug Fixes
 
 
 
