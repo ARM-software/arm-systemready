@@ -41,9 +41,12 @@
 # BUSYBOX_BUILD_ENABLED - Building Busybox
 #
 
+
 TOP_DIR=`pwd`
+. $TOP_DIR/../../common/config/common_config.cfg
+
 GRUB_PATH=grub
-GCC=tools/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 CROSS_COMPILE=$TOP_DIR/$GCC
 GRUB_PLAT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub_prefix.cfg
 
@@ -73,10 +76,10 @@ do_build ()
         fi
 
         ./autogen.sh
-        ./configure STRIP=aarch64-linux-gnu-strip \
+        ./configure STRIP=$CROSS_COMPILE_DIR/aarch64-linux-gnu-strip \
         --target=aarch64-linux-gnu --with-platform=efi \
         --prefix=$TOP_DIR/$GRUB_PATH/output/ \
-        TARGET_CC=aarch64-linux-gnu-gcc --disable-werror
+        TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
 
         make -j8 install
         output/bin/grub-mkimage -v -c ${GRUB_PLAT_CONFIG_FILE} \

@@ -58,7 +58,7 @@ init_dir()
 create_scripts_link
 init_dir
 
-source ./build-scripts/build-all.sh  IR F
-source ./build-scripts/make_image.sh IR
+source ./build-scripts/build-all.sh  ES F
+source ./build-scripts/make_image.sh ES
 
 
