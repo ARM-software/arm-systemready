@@ -14,7 +14,7 @@ This section contains the build scripts and the live-images for the SystemReady 
 
 ## Release details
  - Code Quality: v1.0 BETA-0
- - **The latest pre-built release of the Security Extension ACS is available for download here: [v21.07_REL1.0_BETA-0](https://github.com/stuyoder/arm-systemready/tree/security-extension-acs-beta0/security-extension/prebuilt_images/v21.07_REL1.0_BETA-0)**
+ - **The latest pre-built release of the Security Extension ACS is available for download here: [v21.07_REL1.0_BETA-0](https://github.com/ARM-software/arm-systemready/tree/security-extension-acs-beta0/security-extension/prebuilt_images/v21.07_REL1.0_BETA-0)**
  - The Security Extension tests are written for version 1.1 of the BBSR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
@@ -32,7 +32,7 @@ This section contains the build scripts and the live-images for the SystemReady 
 
 ### Prebuilt images
 - Prebuilt images for each release are available in the prebuilt_images folder of the release branch. You can either choose to use these images or build your own image by following the steps below.
-- To access the prebuilt_images, click this link : [prebuilt_images](https://github.com/stuyoder/arm-systemready/tree/security-extension-acs-beta0/security-extension/prebuilt_images/v21.07_REL1.0_BETA-0)
+- To access the prebuilt_images, click this link : [prebuilt_images](https://github.com/ARM-software/arm-systemready/tree/security-extension-acs-beta0/security-extension/prebuilt_images/v21.07_REL1.0_BETA-0)
 - If you choose to use the prebuilt image, skip the build steps and jump to the test suite execution section below.
 
 ### Prerequisites
@@ -42,8 +42,8 @@ Before starting the ACS build, ensure that the following requirements are met:
  - User should have **sudo** privilege to install tools required for build
 
 ### Steps to build SystemReady Security Extension ACS live image
-1. Clone the security-extension-acs-beta0 branch of  [Arm-SystemReady](https://github.com/stuyoder/arm-systemready) repo. <br />
- `git -b security-extension-acs-beta0 https://github.com/stuyoder/arm-systemready`
+1. Clone the security-extension-acs-beta0 branch of  [Arm-SystemReady](https://github.com/ARM-software/arm-systemready) repo. <br />
+ `git clone -b security-extension-acs-beta0 https://github.com/ARM-software/arm-systemready`
 
 2. Navigate to the security-extension/scripts directory <br />
  `cd arm-systemready/security-extension/scripts`

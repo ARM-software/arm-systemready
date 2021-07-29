@@ -119,7 +119,7 @@ get_efitools_src()
 
 get_bbr_acs_src()
 {
-  git clone  --single-branch --branch security-extension-acs-beta0 https://github.com/stuyoder/bbr-acs.git bbr-acs
+  git clone  --single-branch --branch security-extension-acs-beta0 https://github.com/ARM-software/bbr-acs.git bbr-acs
 }
 
 sudo apt install git curl mtools gdisk gcc\
