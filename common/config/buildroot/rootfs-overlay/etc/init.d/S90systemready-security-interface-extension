@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# securityfs does not get automounted
+/bin/mount -t securityfs securityfs /sys/kernel/security
+
+# mount result partition
+RESULT_DEVICE="";
+mount LABEL=RESULT /mnt
+RESULT_DEVICE=`blkid |grep "LABEL=\"RESULT\"" |cut -f1 -d:`
+
+if [ ! -z "$RESULT_DEVICE" ]; then
+ echo "Mounted the results partition on device $RESULT_DEVICE"
+else
+ echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
+fi
+
+# linux debug dump
+mkdir -p /mnt/acs_results/linux_dump
+lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
+
+# run fwts
+mkdir -p /mnt/acs_results/fwts
+
+if [ -f  /bin/bbsr_fwts_tests.ini ]; then
+ test_list=`cat /bin/bbsr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
+ echo "Test Executed are $test_list"
+ fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
+fi
+
+# run tpm2 tests
+mkdir -p /mnt/acs_results/tmp2
+if [ -f /sys/kernel/security/tpm0/binary_bios_measurements ]; then
+ echo "TPM2: dumping PCRs and event log"
+ cp /sys/kernel/security/tpm0/binary_bios_measurements /tmp
+ tpm2_eventlog /tmp/binary_bios_measurements > /mnt/acs_results/tmp2/eventlog.log
+ tpm2_pcrread > /mnt/acs_results/tmp2/pcr.log
+ rm /tmp/binary_bios_measurements
+else
+ echo "TPM event log not found at /sys/kernel/security/tpm0/binary_bios_measurements"
+fi

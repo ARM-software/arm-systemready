@@ -28,24 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
 source ./build-scripts/build-security-extension-acs-keys.sh
 source ./build-scripts/build-uefi.sh
-if [[ $1 != SE ]]
-then
-  source ./build-scripts/build-bsaefi.sh $@
-fi
-if [[ $1 == SE ]]
-then
-  source ./build-scripts/build-efitools.sh
-fi
+source ./build-scripts/build-efitools.sh
 source ./build-scripts/build-sct.sh $@
 source ./build-scripts/build-uefi-apps.sh $@
-source ./build-scripts/build-linux.sh
-if [[ $1 != SE ]]
-then
-  source ./build-scripts/build-linux-bsa.sh
-fi
 source ./build-scripts/build-grub.sh
-source ./build-scripts/build-fwts.sh $@
-source ./build-scripts/build-busybox.sh
+source ./build-scripts/build-buildroot.sh

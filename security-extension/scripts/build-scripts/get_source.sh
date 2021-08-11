@@ -32,6 +32,7 @@ TOP_DIR=`pwd`
 . $TOP_DIR/../../common/config/common_config.cfg
 #The shell variables use in this file are defined in common_config.cfg
 
+
 get_linux_src()
 {
     echo "Downloading Linux source code. Version : $LINUX_KERNEL_VERSION"
@@ -135,6 +136,29 @@ get_efitools_src()
   git clone --branch v1.9.2 https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
 }
 
+get_buildroot_src()
+{
+  git clone --single-branch git://git.buildroot.net/buildroot
+  pushd $TOP_DIR/buildroot
+  git checkout $BUILDROOT_SRC_TAG
+  echo "Updating buildroot..."
+  # uprev tpm2-tools to 5.1.1
+  patch -p1 < $TOP_DIR/../../common/config/buildroot/tpm2-tools-5.1.1.patch
+  # copy in a customized kernel config
+  mkdir -p ./board/arm/system-ready
+  cp $TOP_DIR/../../common/config/buildroot/kernel.config ./board/arm/system-ready
+  # copy in a customized busybox config
+  cp $TOP_DIR/../../common/config/buildroot/busybox.config ./package/busybox/busybox.config
+  # copy in a systemready specific defconfig
+  cp $TOP_DIR/../../common/config/buildroot/arm_systemready_defconfig ./configs
+  # copy in the rootfs overlay
+  cp -a $TOP_DIR/../../common/config/buildroot/rootfs-overlay .
+  # copy in the fwts ini file
+  mkdir -p rootfs-overlay/bin
+  cp $TOP_DIR/bbr-acs/bbsr/config/bbsr_fwts_tests.ini rootfs-overlay/bin
+  popd
+}
+
 get_bbr_acs_src()
 {
    git clone  --single-branch --branch security-extension-acs-beta1 https://eu-gerrit-1.euhpc.arm.com/a/attk/syscomp_bbr.git bbr-acs
@@ -151,8 +175,6 @@ get_uefi_src
 get_bbr_acs_src
 get_sct_src
 get_grub_src
-get_busybox_src
-get_linux_src
 get_cross_compiler
-get_fwts_src
 get_efitools_src
+get_buildroot_src
