@@ -87,7 +87,7 @@ do_build ()
         output/bin/grub-mkstandalone -v \
         -o output/grubaa64.efi -O arm64-efi --pubkey $KEYS_DIR/TestDB1.pubgpg --disable-shim-lock \
         --modules "pgp gcry_sha512 gcry_rsa part_gpt part_msdos ntfs ntfscomp hfsplus fat ext2 normal chain \
-        boot configfile linux help part_msdos terminal terminfo configfile \
+        boot configfile linux help part_msdos terminal terminfo configfile tpm \
         lsefi search normal gettext loadenv read search_fs_file search_fs_uuid search_label" \
         "boot/grub/grub.cfg=$GRUB_INITIAL_CONFIG_FILE"
 
