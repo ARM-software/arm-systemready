@@ -62,7 +62,7 @@ do_build()
 
 do_clean ()
 {
-    echo "FIXME: NOT Cleaning buildroot..."
+    echo "Cleaning buildroot..."
     pushd $TOP_DIR/$BUILDROOT_PATH
     make clean
     popd
@@ -86,7 +86,7 @@ do_package ()
     cp $BUILDROOT_PATH/output/images/Image $OUTDIR
     # Sign the kernel
     sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $OUTDIR/Image --output $OUTDIR/Image
-    gpg --yes --default-key "TestDB1" --detach-sign output/Image
+    gpg --yes --default-key "TestDB1" --detach-sign $OUTDIR/Image
     popd
 }
 
