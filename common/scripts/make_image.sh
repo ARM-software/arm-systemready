@@ -105,6 +105,7 @@ create_fatpart ()
       mcopy -i $fatpart_name $OUTDIR/Image.sig ::/
       mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img.sig  ::/
       mcopy -i $fatpart_name ${TOP_DIR}/security-extension-acs-keys/*.der ::/EFI/BOOT/bbr/security-extension-acs-keys
+      mcopy -i $fatpart_name ${TOP_DIR}/security-extension-acs-keys/*.auth ::/EFI/BOOT/bbr/security-extension-acs-keys
     fi
 
     echo "FAT partition image created"
