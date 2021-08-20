@@ -20,20 +20,38 @@ The BBSR ACS consists of automated and manual tests.  Automated testcases includ
 
 The following are pre-requisites needed prior to running the ACS:
 
-1. The ACS image must be available on the system on a bootable storage device.
+1. The security extension ACS image must be available on the system on a bootable storage device.
 
-2. For Secure Boot the system firmware must be in "Setup Mode" where the Secure Boot keys are cleared prior to starting the ACS.  The mechanism to enroll Secure Boot keys is platform specific and the procedure to do this must be available.
+2. For Secure Boot the system firmware must be in "Setup Mode" where the Secure Boot keys are cleared prior to starting the ACS.  The mechanism to enroll Secure Boot keys is platform specific and the procedure to enroll the keys must be available.
 
 3. For the update capsule test, if the system supports in-band system firmware updates from the OS, an update capsule must be available on a storage device on the system.
 
 ### 2. Enroll the Secure Boot Keys
 
-The ACS provides a set of keys for the UEFI Secure Boot keys PK, KEK, db, ad dbx.  Before starting the test suite these test keys must be enrolled using whatever procedure is applicable for the platform under test.
+The ACS provides a set of keys for the UEFI Secure Boot keys PK, KEK, db, and dbx.  Before starting the test suite these test keys must be enrolled using and applicable platform-specific procedure for the firmware of the platform under test.
 
 The test keys are available on the "boot" partition of the ACS image at the following path:<br />
 `EFI\BOOT\bbr\security-extension-acs-keys.`
 
-#### <ul>Example</ul>
+The test keys are available in DER format (suitable for enrolling in EDK2) and as signed UEFI variable signature list blobs (suitable for u-boot).
+
+DER formatted test keys:
+<pre>
+TestDB1.der
+TestDBX1.der
+TestKEK1.der
+TestPK1.der
+</pre>
+
+Signed signature list formatted test keys:
+<pre>
+TestDB1.auth
+TestDBX1.auth
+TestKEK1.auth
+TestPK1.auth
+</pre>
+
+#### <ul>Example - EDK2</ul>
 
 For example, to enroll the Secure Boot keys on QEMU with EDK2 based firmware perform the following steps:
 
@@ -49,10 +67,10 @@ For example, to enroll the Secure Boot keys on QEMU with EDK2 based firmware per
 
  - To enroll PK:
      - Select "PK Options"
-     - Select Enroll PK -> Enroll PK Using File
+     - Select "Enroll PK" -> "Enroll PK Using File"
      - Select the ACS disk which has the "BOOT" label
      - The secure boot keys are located at the following path on the disk:
-         - EFI -> BOOT -> bbr -> security-extension-acs-keys
+         - EFI \ BOOT \ bbr \ security-extension-acs-keys
      - Select the following file for PK: `TestPK1.der`
      - Repeat the above steps to enroll the keys (TestKEK1.der, TestDB1.der, TestDBX1.der)  for KEK, db, dbx selecting the following options:
          - KEK Options
@@ -61,13 +79,18 @@ For example, to enroll the Secure Boot keys on QEMU with EDK2 based firmware per
 
   - After completing the above steps secure boot will be enabled
 
-      - ![EDK2 main menu](./images/edk2_main_menu.png)
+      - ![EDK2 main menu](./images/edk2_secure_boot_enabled.png)
 
   - Reset the system
 
-### 3. Run SCT
+#### <ul>U-boot</ul>
 
-The Security Extension SCT is a subset of the SCT focused on security interfaces-- authenticated variables, Secure Boot variables, Secure Boot image loading, secure firmware update using update capsules, and TCG2 protocol test for systems with TPMs.
+For information on enrolling keys with U-boot firmware see the following link:
+https://github.com/u-boot/u-boot/blob/master/doc/develop/uefi/uefi.rst
+
+### <a name="run-sct"></a> 3. Run SCT
+
+The Security Extension SCT is a subset of the SCT focused on security interfaces-- authenticated variables, Secure Boot variables, Secure Boot image loading, and TCG2 protocol test for systems with TPMs.
 
 After resetting the system with the ACS Secure Boot keys enrolled grub will automatically start the Security Option SCT
 
@@ -76,28 +99,73 @@ After resetting the system with the ACS Secure Boot keys enrolled grub will auto
 After the tests complete, the system returns to the UEFI Shell and the following test output is available in the acs_results partition of the ACS disk:
  - \acs_results\sct_results\Overall\Summary.log
 
-Expected Result: All tests pass.
+The expected result is that all tests pass.
 
-Reset the system at the UEFI Shell using the **reset** command:
+Note: If a TPM is present in the system and is supported by the firmware, the TCG2 protocol tests in SCT will run and will be included in the Summary.log.  If the TCG2 protocol is not present, these tests will be skipped.
+
+### <a name="run-fwts"></a> 4. Run FWTS
+
+Reset the system at the UEFI Shell using the **reset** command:<br>
 `FS1:\acs_results\app_output\> reset`
 
-### 4. Run FWTS
-
-After the system is reset when the boot process reaches the Grub menu, select the "Linux BusyBox" option to boot Linux
+After the system is reset, when the boot process reaches the Grub menu, select the "Linux BusyBox" option to boot Linux
 
  - ![Linux-BusyBox](./images/linux-busybox.png)
 
-Linux will boot and automatically run a subset of FWTS:
+Linux will boot and automatically run a subset of FWTS and dump the TPM event log and PCRs.
 
- - ![FWTS](./images/fwts.png)
+If no TPM is present the tpm2 test and dumping of PCRs and event log is skipped:
+<pre>
+Test Executed are uefirtauthvar tpm2
+Running 2 tests, results appended to /mnt/acs_results/fwts/FWTSResults.log
+Test: Authenticated variable tests.
+  Create authenticated variable test.                     1 passed
+  Authenticated variable test with the same authentica..  1 passed
+  Authenticated variable test with another valid authe..  1 passed
+  Append authenticated variable test.                     1 passed
+  Update authenticated variable test.                     1 passed
+  Authenticated variable test with old authenticated v..  1 passed
+  Delete authenticated variable test.                     1 passed
+  Authenticated variable test with invalid modified data  1 passed
+  Authenticated variable test with invalid modified ti..  1 passed
+  Authenticated variable test with different guid.        1 passed
+  Set and delete authenticated variable created by dif..  2 passed
+Test: TPM2 Trusted Platform Module 2 test.
+ Test skipped.
+TPM event log not found at /sys/kernel/security/tpm0/binary_bios_measurements
+</pre>
 
-Expected Result: All tests pass.
+If a TPM is present, the tpm2 test is run and PCRs and event log is dumped to the results partition:
+<pre>
+Test Executed are uefirtauthvar tpm2
+Running 2 tests, results appended to /mnt/acs_results/fwts/FWTSResults.log
+Test: Authenticated variable tests.
+  Create authenticated variable test.                     1 passed
+  Authenticated variable test with the same authentica..  1 passed
+  Authenticated variable test with another valid authe..  1 passed
+  Append authenticated variable test.                     1 passed
+  Update authenticated variable test.                     1 passed
+  Authenticated variable test with old authenticated v..  1 passed
+  Delete authenticated variable test.                     1 passed
+  Authenticated variable test with invalid modified data  1 passed
+  Authenticated variable test with invalid modified ti..  1 passed
+  Authenticated variable test with different guid.        1 passed
+  Set and delete authenticated variable created by dif..  2 passed
+Test: TPM2 Trusted Platform Module 2 test.
+  Validate TPM2 table.                                    1 passed
+TPM2: dumping PCRs and event log
+  Event log: /mnt/acs_results/tmp2/eventlog.log
+  PCRs: /mnt/acs_results/tmp2/pcr.log
+</pre>
 
-If the system uses ACPI for resource discovery, run the "tpm2" FWTS test to verify the TPM2 ACPI table. See example below:
-    # fwts tpm2
-    Running 1 tests, results appended to results.log
-    Test: TPM2 Trusted Platform Module 2 test.
-      Validate TPM2 table.                                    1 passed
+The expected result is that all tests pass.
+
+Logs are available in the results partition of the ACS storage device:
+ - FWTS results:  /acs_results/fwts/FWTSResults.log
+ - Event log: /mnt/acs_results/tmp2/eventlog.log
+ - PCRs: /mnt/acs_results/tmp2/pcr.log
+
+The event log and PCR log are evaluated as part of the measured boot test phase, see [6. TPM Measured Boot](#measured-boot)
 
 ### 5. Secure firmware update test
 
@@ -106,12 +174,12 @@ The BBSR requires support for update capsules compliant with the UEFI specificat
 The steps utilize the CapsuleApp.efi program that is located on the ACS image at the following path: EFI\BOOT\app\CapsuleApp.efi
 
  - #### A. Preparation
-     - Copy the vendor provided update capsule image onto a storage device
-     - Create an update capsule that has been tampered with. Using the xxd command, modify the last byte of a **copy** of the vendor provided update capsule image.
-     - Copy the tampered-with update capsule onto the storage device
-     - Enable the storage device containing the capsule images on the system under test
+     - Copy the vendor provided update capsule image onto a storage device.
+     - Prepare a version of the vendor provided update capsule that has been "tampered" with, for use in a negative test. Using a copy of the vendor provided update capsule, use the xxd command to modify the last byte of the image.
+     - Copy the tampered-with update capsule onto the storage device.
+     - Enable the storage device containing the capsule images on the system under test.
 
- - #### B. Reset the system.  The boot flow will skip running SCT since it previously was run and will stop at the UEFI Shell prompt:
+ - #### B. Reset the system.  Because SCT was run previously (see [Step 3](#run-sct)), the boot flow will skip running SCT and will stop at the UEFI Shell prompt:
 
 <pre>
     Shell> echo -off
@@ -224,7 +292,7 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
       UpdateHardwareInstance - 0x0
 </pre>
 
- - #### F. Test an firmware update using the CapsuleApp with the tampered capsule: `CapsuleApp  [tampered-capsule-image]`
+ - #### F. Test an firmware update using the CapsuleApp with the "tampered" capsule image: `CapsuleApp  [tampered-capsule-image]`
      - Expected Result: The firmware update must not be processed.
      - See example below:
 <pre>
@@ -245,6 +313,112 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
     CapsuleApp: block/size                   0xF491F018/0x2DC035
     Updating firmware - please wait....................................
     FS1:> 
+</pre>
+
+### <a name="measured-boot"></a> 6. TPM Measured Boot
+
+Measured boot enables detection of tampering of firmware, configuration data, and software components by measuring (i.e. computing a hash) of each component during boot and securely extending the hash into a PCR in a TPM device.  The PCR values can be used at a later point in time to enforce security policies.
+
+The BBSR specification describes the requirements for TPM-based measured boot, primarily by reference to the TCG PC Client Platform Firmware Profile Specification.
+
+Verifying compliance of measured boot is a manual procecdure that involves examining the TPM event log and PCR register dumps produced during the FWTS test phase.  See [4. Run FWTS](#run-fwts)
+
+The two logs are available in the results partition of the ACS storage device:
+ - Event log: /mnt/acs_results/tmp2/eventlog.log
+ - PCRs: /mnt/acs_results/tmp2/pcr.log
+
+The steps below explain how to verify key requirements defined in the TCG Firmware Profile specification.
+
+#### Step 1 - Verify the cumulative SHA256 measurements from the event log matches the TPM PCRs 0-7
+
+The events logged in the TPM event log must match the actual measurements in the TPM PCRs.  It is trivial to do a visual comparison by looking at the SHA256 measurements in the pcr.log file and the computed values at the end of eventlog.log.
+
+See the example below where the PCR values and event log values match.
+
+Example:
+SHA256 values for PCRs 0-7 from pcr.log
+<pre>
+sha256:
+  0 : 0x4A17B720C5E37DCD65533EB47CDE5B5E1E93E9A5953B42E913F2C83D88576685
+  1 : 0x8EFBC5102BEB859074EC99DB20009BD213726B57777DA560B7BC7AA567C22425
+  2 : 0x3D458CFE55CC03EA1F443F1562BEEC8DF51C75E14A9FCF9A7234A13F198E7969
+  3 : 0x3D458CFE55CC03EA1F443F1562BEEC8DF51C75E14A9FCF9A7234A13F198E7969
+  4 : 0xFE3C30CA8D4CACCAAAE635D60DC3132D1B5C93E0F2BB092BF0D83287D76B1210
+  5 : 0x768A45048228ECE6EF442FA88AF60DFB19D8ABCB1869E1DBDBEAEA1244353037
+  6 : 0x3D458CFE55CC03EA1F443F1562BEEC8DF51C75E14A9FCF9A7234A13F198E7969
+  7 : 0x7D852DB48CA55F36243903877E416D4AF77AA8755010C064884799E70F51664D
+</pre>
+
+SHA256 values for PCRs 0-7 from eventlog.log
+<pre>
+pcrs:
+  sha256:
+    0  : 0x4a17b720c5e37dcd65533eb47cde5b5e1e93e9a5953b42e913f2c83d88576685
+    1  : 0x8efbc5102beb859074ec99db20009bd213726b57777da560b7bc7aa567c22425
+    2  : 0x3d458cfe55cc03ea1f443f1562beec8df51c75e14a9fcf9a7234a13f198e7969
+    3  : 0x3d458cfe55cc03ea1f443f1562beec8df51c75e14a9fcf9a7234a13f198e7969
+    4  : 0xfe3c30ca8d4caccaaae635d60dc3132d1b5c93e0f2bb092bf0d83287d76b1210
+    5  : 0x768a45048228ece6ef442fa88af60dfb19d8abcb1869e1dbdbeaea1244353037
+    6  : 0x3d458cfe55cc03ea1f443f1562beec8df51c75e14a9fcf9a7234a13f198e7969
+    7  : 0x7d852db48ca55f36243903877e416d4af77aa8755010c064884799e70f51664d
+</pre>
+
+#### Step 2 - Verify the EV_NO_ACTION event for Specification ID version
+
+The first event in the event log must be the Specification ID version.  This is an EV_NO_ACTION event and is not extended into a PCR.
+
+See example:
+<pre>
+- EventNum: 0
+  PCRIndex: 0
+  EventType: EV_NO_ACTION
+  Digest: "0000000000000000000000000000000000000000"
+  EventSize: 45
+  SpecID:
+  - Signature: Spec ID Event03
+    platformClass: 0
+    specVersionMinor: 0
+    specVersionMajor: 2
+    specErrata: 0
+    uintnSize: 2
+    numberOfAlgorithms: 4
+</pre>
+
+#### Step 3 - Verify EV_POST_CODE events for measurements of firmware to PCR[0]
+
+All mutable, Secure world firmware components must be measured into PCR[0] using the EV_POST_CODE event type.  The suggested event data values are provided in BBSR.
+
+#### Step 4 - Verify EV_POST_CODE events for measurements of signed data PCR[0]
+
+All signed critical data must be measured into PCR[0] using the EV_POST_CODE event type, with platform-specific event data.
+
+#### Step 5 - Verify Secure Boot policy measurements
+
+The contents of the SecureBoot, PK, KEK, db, and dbx variables must be measured into PCR[7] using the EV_EFI_VARIABLE_DRIVER_CONFIG event type.
+
+See example below for the measurement of the SecureBoot variable:
+
+<pre>
+- EventNum: 3
+  PCRIndex: 7
+  EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+  DigestCount: 4
+  Digests:
+  - AlgorithmId: sha1
+    Digest: "d4fdd1f14d4041494deb8fc990c45343d2277d08"
+  - AlgorithmId: sha256
+    Digest: "ccfc4bb32888a345bc8aeadaba552b627d99348c767681ab3141f5b01e40a40e"
+  - AlgorithmId: sha384
+    Digest: "2cded0c6f453d4c6f59c5e14ec61abc6b018314540a2367cba326a52aa2b315ccc08ce68a816ce09c6ef2ac7e514ae1f"
+  - AlgorithmId: sha512
+    Digest: "94a377e9002be6e1d8399bf7674d9eb4e931df34f48709fddd5e1493bfb96c19ee695387109a5a5b42f4871cbee8e32a9f3282636e99a8890762ee45bd7b34b7"
+  EventSize: 53
+  Event:
+    VariableName: 61dfe48b-ca93-d211-aa0d-00e098032b8c
+    UnicodeNameLength: 10
+    VariableDataLength: 1
+    UnicodeName: SecureBoot
+    VariableData: "01"
 </pre>
 
 
