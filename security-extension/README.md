@@ -14,7 +14,7 @@ This section contains the build scripts and the live-images for the SystemReady 
 
 ## Release details
  - Code Quality: v1.0 BETA-1
- - **The latest pre-built release of the Security Extension ACS is available for download here: [v21.08_SE_REL1.0_BETA-1](https://github.com/ARM-software/arm-systemready/tree/security-extension-acs-beta1/security-extension/prebuilt_images/v21.08_SE_REL1.0_BETA-1)**
+ - **The latest pre-built release of the Security Extension ACS is available for download here: [v21.08_SE_REL1.0_BETA-1](./prebuilt_images/v21.08_SE_REL1.0_BETA-1)**
  - The Security Extension tests are written for version 1.1 of the BBSR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
@@ -33,7 +33,7 @@ This section contains the build scripts and the live-images for the SystemReady 
 
 ### Pre-built images
 - Pre-built images for each release are available in the prebuilt_images folder of the release branch. You can either choose to use these images or build your own image by following the steps below.
-- To access the prebuilt_images, click this link : [prebuilt_images](https://github.com/ARM-software/arm-systemready/tree/security-extension-acs-beta1/security-extension/prebuilt_images/v21.08_SE_REL1.0_BETA-1)
+- To access the prebuilt_images, click this link : [prebuilt_images](./prebuilt_images/v21.08_SE_REL1.0_BETA-1)
 - If you choose to use the pre-built image, skip the build steps and jump to the test suite execution section below.
 
 ### Prerequisites
