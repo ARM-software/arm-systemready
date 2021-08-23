@@ -41,6 +41,7 @@ Before starting the ACS build, ensure that the following requirements are met:
  - Ubuntu 18.04 LTS with at least 64GB of free disk space.
  - Must use Bash shell.
  - User should have **sudo** privilege to install tools required for build
+ - git must be installed in order to clone the ACS repo
 
 ### Steps to build SystemReady Security Extension ACS live image
 1. Clone the security-extension-acs-beta1 branch of  [Arm-SystemReady](https://github.com/ARM-software/arm-systemready) repo. <br />
