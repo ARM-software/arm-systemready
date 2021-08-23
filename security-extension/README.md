@@ -18,8 +18,10 @@ This section contains the build scripts and the live-images for the SystemReady 
  - The Security Extension tests are written for version 1.1 of the BBSR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
+ - New Features
+     - New features in this release include tests for the UEFI Image Information Execution table and TPM-based measured boot.
  - Limitations
-     - This release is limited to the security extension ACS tests only.  It is not suported to use this release for SystemReady ES and IR band testing.  See the SystemReady ACS page for links to the latest SystemReady IR and ES tests.
+     - This release is limited to the security extension ACS tests only.  It is not supported to use this release for SystemReady ES and IR band testing.  See the SystemReady ACS page for links to the latest SystemReady IR and ES tests.
 
 
 ## Steps to build SystemReady Security Extension ACS live image
@@ -29,10 +31,10 @@ This section contains the build scripts and the live-images for the SystemReady 
 
 ## ACS build steps
 
-### Prebuilt images
-- Prebuilt images for each release are available in the prebuilt_images folder of the release branch. You can either choose to use these images or build your own image by following the steps below.
+### Pre-built images
+- Pre-built images for each release are available in the prebuilt_images folder of the release branch. You can either choose to use these images or build your own image by following the steps below.
 - To access the prebuilt_images, click this link : [prebuilt_images](https://github.com/ARM-software/arm-systemready/tree/security-extension-acs-beta1/security-extension/prebuilt_images/v21.08_SE_REL1.0_BETA-1)
-- If you choose to use the prebuilt image, skip the build steps and jump to the test suite execution section below.
+- If you choose to use the pre-built image, skip the build steps and jump to the test suite execution section below.
 
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
