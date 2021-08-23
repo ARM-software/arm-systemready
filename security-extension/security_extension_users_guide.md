@@ -321,7 +321,7 @@ Measured boot enables detection of tampering of firmware, configuration data, an
 
 The BBSR specification describes the requirements for TPM-based measured boot, primarily by reference to the TCG PC Client Platform Firmware Profile Specification.
 
-Verifying compliance of measured boot is a manual procecdure that involves examining the TPM event log and PCR register dumps produced during the FWTS test phase.  See [4. Run FWTS](#run-fwts)
+Verifying compliance of measured boot is a manual procedure that involves examining the TPM event log and PCR register dumps produced during the FWTS test phase.  See [4. Run FWTS](#run-fwts)
 
 The two logs are available in the results partition of the ACS storage device:
  - Event log: /mnt/acs_results/tmp2/eventlog.log
