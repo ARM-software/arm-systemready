@@ -51,7 +51,7 @@ TestKEK1.auth
 TestPK1.auth
 </pre>
 
-#### <ul>Example - EDK2</ul>
+#### <ul>Enrolling Keys in EDK2 - Example</ul>
 
 For example, to enroll the Secure Boot keys on QEMU with EDK2 based firmware perform the following steps:
 
@@ -83,7 +83,7 @@ For example, to enroll the Secure Boot keys on QEMU with EDK2 based firmware per
 
   - Reset the system
 
-#### <ul>U-boot</ul>
+#### <ul>Enrolling Keys in U-boot</ul>
 
 For information on enrolling keys with U-boot firmware see the following link:
 https://github.com/u-boot/u-boot/blob/master/doc/develop/uefi/uefi.rst
@@ -105,7 +105,7 @@ Note: If a TPM is present in the system and is supported by the firmware, the TC
 
 ### <a name="run-fwts"></a> 4. Run FWTS
 
-Reset the system at the UEFI Shell using the **reset** command:<br>
+After completing the SCT tests, reset the system at the UEFI Shell using the **reset** command:<br>
 `FS1:\acs_results\app_output\> reset`
 
 After the system is reset, when the boot process reaches the Grub menu, select the "Linux BusyBox" option to boot Linux
@@ -175,7 +175,7 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
 
  - #### A. Preparation
      - Copy the vendor provided update capsule image onto a storage device.
-     - Prepare a version of the vendor provided update capsule that has been "tampered" with, for use in a negative test. Using a copy of the vendor provided update capsule, use the xxd command to modify the last byte of the image.
+     - Prepare a version of the vendor provided update capsule that has been "tampered" with, for use in a negative test. Using a copy of the vendor provided update capsule, use the xxd command and a text editor to modify the last byte of the image.
      - Copy the tampered-with update capsule onto the storage device.
      - Enable the storage device containing the capsule images on the system under test.
 
@@ -317,7 +317,7 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
 
 ### <a name="measured-boot"></a> 6. TPM Measured Boot
 
-Measured boot enables detection of tampering of firmware, configuration data, and software components by measuring (i.e. computing a hash) of each component during boot and securely extending the hash into a PCR in a TPM device.  The PCR values can be used at a later point in time to enforce security policies.
+Measured boot enables detection of tampering of firmware, configuration data, and software components by measuring (i.e. computing a hash) of security relevant firmware components and data during boot and securely extending the hash into a PCR in a TPM device.  The PCR values can be used at a later point in time to enforce security policies.
 
 The BBSR specification describes the requirements for TPM-based measured boot, primarily by reference to the TCG PC Client Platform Firmware Profile Specification.
 
@@ -327,11 +327,11 @@ The two logs are available in the results partition of the ACS storage device:
  - Event log: /mnt/acs_results/tmp2/eventlog.log
  - PCRs: /mnt/acs_results/tmp2/pcr.log
 
-The steps below explain how to verify key requirements defined in the TCG Firmware Profile specification.
+The steps below explain how to verify some key requirements defined in the TCG Firmware Profile specification.  The measurements for a given system are highly platform-specific, and the TCG Firmware Profile specification will dictate the specific requirements.
 
 #### Step 1 - Verify the cumulative SHA256 measurements from the event log matches the TPM PCRs 0-7
 
-The events logged in the TPM event log must match the actual measurements in the TPM PCRs.  It is trivial to do a visual comparison by looking at the SHA256 measurements in the pcr.log file and the computed values at the end of eventlog.log.
+The events logged in the TPM event log must match the actual measurements extended in the TPM PCRs.  It is trivial to do a visual comparison by looking at the SHA256 measurements in the pcr.log file and the computed values at the end of eventlog.log.
 
 See the example below where the PCR values and event log values match.
 
@@ -420,6 +420,26 @@ See example below for the measurement of the SecureBoot variable:
     UnicodeName: SecureBoot
     VariableData: "01"
 </pre>
+
+#### Step 6 - UEFI BootOrder and Boot#### variables
+
+If the UEFI BootOrder and Boot#### variables are used by the firmware, they must be measured into PCR[1] with event types EV_EFI_VARIABLE_BOOT or EV_EFI_VARIABLE_BOOT2.
+
+#### Step 7 - Verify boot attempt measurements
+
+Platform firmware must record each boot attempt into PCR[4] using the event type EV_ACTION with the action string “Calling EFI Application from Boot Option”.
+
+#### Step 8 - Verify PCR[1] measurements
+
+Measurements of security relevant configuration data go into PCR[1].
+
+This should include configuration data such as the security lifecycle state of a system.
+
+Security relevant SMBIOS structures must be measured into PCR[1] using event type EV_EFI_HANDOFF_TABLES.  This should include structures that identify the platform hardware (manufacturer, model number, version, etc).
+
+#### Step 9 - Verify EV_SEPARATOR measurements
+
+The EV_SEPARATOR event delineates the point in platform boot where the platform firmware relinquishes control of making measurements into the TPM. There must be an EV_SEPARATOR measurement for each PCR[0] through PCR[7].
 
 
 ## License
