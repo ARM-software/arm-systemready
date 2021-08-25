@@ -10,7 +10,7 @@ The Security Extension ACS tests the following security related interfaces:
 * Secure firmware update using update capsules
 * For systems with TPMs, TPM measured boot and the TCG2 protocol
 
-This section contains the build scripts and the live-images for the SystemReady Security Extension.
+This section describes the steps to build the ACS or obtain the pre-built live image.
 
 ## Release details
  - Code Quality: v1.0 BETA-1
@@ -27,7 +27,7 @@ This section contains the build scripts and the live-images for the SystemReady 
 ## Steps to build SystemReady Security Extension ACS live image
 
 ## GitHub branch
-- To pick up the release version of the code, checkout the branch security-extension-acs-beta1 with the appropriate tag.
+- To pick up the release version of the code, checkout the branch "security-extension-acs".  The release tag is: v21.08_SE_REL1.0_BETA-1
 
 ## ACS build steps
 
@@ -44,8 +44,8 @@ Before starting the ACS build, ensure that the following requirements are met:
  - git must be installed in order to clone the ACS repo
 
 ### Steps to build SystemReady Security Extension ACS live image
-1. Clone the security-extension-acs-beta1 branch of  [Arm-SystemReady](https://github.com/ARM-software/arm-systemready) repo. <br />
- `git clone -b security-extension-acs-beta1 https://github.com/ARM-software/arm-systemready`
+1. Clone the security-extension-acs branch of  [Arm-SystemReady](https://github.com/ARM-software/arm-systemready) repo. <br />
+ `git clone -b security-extension-acs https://github.com/ARM-software/arm-systemready`
 
 2. Navigate to the security-extension/scripts directory <br />
  `cd arm-systemready/security-extension/scripts`
@@ -71,7 +71,7 @@ The test suite consists of both automated and manual tests.  See the [Security E
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS) TAG: V21.03.00](http://kernel.ubuntu.com/git/hwe/fwts.git)
+- [Firmware Test Suite (FWTS) TAG: V21.02.00](http://kernel.ubuntu.com/git/hwe/fwts.git)
 
 - [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 421a6997ef362c6286c4ef87d21d5367a9d1fb58
 
