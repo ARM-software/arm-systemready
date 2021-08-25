@@ -165,7 +165,7 @@ get_buildroot_src()
 
 get_bbr_acs_src()
 {
-   git clone  --single-branch --branch security-extension-acs-beta1 https://eu-gerrit-1.euhpc.arm.com/a/attk/syscomp_bbr.git bbr-acs
+   git clone  --single-branch --branch security-extension-acs https://github.com/ARM-software/bbr-acs.git bbr-acs
 }
 
 sudo apt install git curl mtools gdisk gcc\
