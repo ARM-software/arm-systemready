@@ -86,8 +86,9 @@ endfor
 
 :Donebsa
 for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%l:\Image then
+    if exist FS%l:\Image and exist FS%l:\ramdisk-busybox.img then
         FS%l:
+        cd FS%l:\
         Image initrd=\ramdisk-busybox.img systemd.log_target=null plymouth.ignore-serial-consoles debug crashkernel=512M,high log_buf_len=1M efi=debug acpi=on crashkernel=256M earlycon uefi_debug
     endif
 endfor
