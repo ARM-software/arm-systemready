@@ -28,12 +28,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
 TOP_DIR=`pwd`
 . $TOP_DIR/../../common/config/common_config.cfg
 
-GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-export CROSS_COMPILE=$TOP_DIR/$GCC
 export KERNEL_SRC=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}/out
 LINUX_PATH=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}
 BSA_PATH=$TOP_DIR/edk2/ShellPkg/Application/bsa-acs
@@ -41,17 +38,17 @@ BSA_PATH=$TOP_DIR/edk2/ShellPkg/Application/bsa-acs
 build_bsa_kernel_driver()
 {
  pushd $TOP_DIR/linux-acs/bsa-acs-drv/files
- ./setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
-    cmd=$(uname -m)
-    echo $cmd
-    if [[ $cmd = "aarch64" ]]
+    arch=$(uname -m)
+    echo $arch
+    if [[ $arch = "aarch64" ]]
     then
-	echo "arm64 native build"
+        echo "arm64 native build"
         export CROSS_COMPILE=''
     else
         GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
         export CROSS_COMPILE=$TOP_DIR/$GCC
     fi
+ ./setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
  ./linux_bsa_acs.sh
  popd
 }

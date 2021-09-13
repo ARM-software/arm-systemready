@@ -23,6 +23,13 @@ Navigate to the ES or IR band for further details on specific scripts and prebui
 * [ES](./ES)
 * [IR](./IR)
 
+## Limitations
+
+Validating the compliance of certain PCIe rules defined in the BSA specification require the PCIe end-point generate specific stimulus during the runtime of the test. Examples of such stimulus are  P2P, PASID, ATC, etc. The tests that requires these stimuli are grouped together in the exerciser module. The exerciser layer is an abstraction layer that enables the integration of hardware capable of generating such stimuli to the test framework.
+The details of the hardware or Verification IP which enable these exerciser tests platform specific and are beyond the scope of this document.
+
+The Live image does not allow customizations, hence, the exerciser module is not included in the Live image. To enable exerciser tests for greater coverage of PCIe rules, please refer to [BSA](https://github.com/ARM-software/bsa-acs) Or contact your Arm representative for details.
+
 ## License
 
 Arm SystemReady ACS is distributed under Apache v2.0 License.

@@ -1,3 +1,20 @@
+v21.09_1.0
+**SystemReady IR**
+* BSA: Increased peripheral rules coverage
+* SystemReady IR README.md updates (Reference platform)
+
+**SystemReady ES**
+* BSA: Increased ITS tests coverage for systems presenting firmware which is SBBR complaint
+* SystemReady ES README.md updates
+
+**Common**
+* Upgrading ACS image to v5.13 kernel
+* BBR: Refinement of UEFI-SCT Sequence files for IR  verification
+* BBR: Migrate to the version V21.08.00 of FWTS
+* BBR: Migrate to edk2-test-stable202108 tag of SCT
+* General improvements in scripts
+* Bug Fixes
+
 v21.07_0.9_BETA
 **SystemReady IR**
 * BSA: Increased PCIe rules coverage
@@ -20,9 +37,8 @@ v21.07_0.9_BETA
 * Bug Fixes
 
 
-
 v21.05_0.8_BETA-0
-**SystemReady IR** 
+**SystemReady IR**
 * BSA: BSA Tests for IR based on BSA specifications v1.0
 * BSA: Modules: PE, Memory map, GIC, Timer, SMMU, Watchdog, Peripheral, PCIe, Power and wakeup
   For the complete list of tests refer to the bsa-acs repository

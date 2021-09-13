@@ -69,7 +69,7 @@ do_build()
     arch=$(uname -m)
     if [[ $arch = "aarch64" ]]
     then
-	echo "arm64 native build"
+        echo "arm64 native build"
     else
         CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
         PATH="$PATH:$CROSS_COMPILE_DIR"
