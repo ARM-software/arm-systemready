@@ -54,8 +54,7 @@ BUSYBOX_ARCH=arm64
 BUSYBOX_PATH=busybox
 BUSYBOX_OUT_DIR=output
 BUSYBOX_RAMDISK_PATH=ramdisk
-GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-CROSS_COMPILE=$TOP_DIR/$GCC
+
 BUSYBOX_RAMDISK_BUSYBOX_PATH=$BUSYBOX_PATH/$BUSYBOX_OUT_DIR/_install/bin
 
 do_build()

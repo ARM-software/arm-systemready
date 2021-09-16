@@ -68,7 +68,7 @@ if [ -f  /bin/ir_bbr_fwts_tests.ini ]; then
  /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
 else
  #SBBR Execution
- /bin/fwts  -r stdout -q --sbbr > /mnt/acs_results/fwts/FWTSResults.log
+ /bin/fwts  -r stdout -q --sbbr esrt uefibootpath > /mnt/acs_results/fwts/FWTSResults.log
 fi
 
 sleep 2

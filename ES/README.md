@@ -12,8 +12,8 @@ SystemReady ES-certified platforms implement a minimum set of hardware and firmw
 This section contains the build scripts and the live-images for the SystemReady ES Band.
 
 ## Release details
- - Code Quality: v0.9 BETA
- - **The latest pre-built release of ACS is available for download here: [v21.07_0.9_BETA](prebuilt_images/v21.07_0.9_BETA)**
+ - Code Quality: v1.0
+ - **The latest pre-built release of ACS is available for download here: [v21.09_1.0](prebuilt_images/v21.09_1.0)**
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
@@ -31,12 +31,12 @@ This section contains the build scripts and the live-images for the SystemReady 
 ### Prebuilt images
 - Prebuilt images for each release are available in the prebuilt_images folder. You can either choose to use these images or build your own image by following the build steps.
 - To access the prebuilt_images, click : [prebuilt_images](prebuilt_images/)
-- If you choose to use the prebuilt image, skip the build steps, and jump to the "Verification" section below.
+- If you choose to use the prebuilt image, skip the build steps, and navigate to the "Verification" section below.
 
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
  - Ubuntu 18.04 or 20.04 LTS with at least 32GB of free disk space.
- - Must use Bash shell.
+ - Use bash shell.
  - You must have **sudo** privilege to install tools required for build.
  - Install `git` using `sudo apt install git`
  - `git config --global user.name "Your Name"` and `git config --global user.email "Your Email"` must be configured.
@@ -56,7 +56,7 @@ Before starting the ACS build, ensure that the following requirements are met:
 
 5. If all the above steps are successful, then the  bootable image will be available at **/path-to-arm-systemready/ES/scripts/output/es_acs_live_image.img.xz**
 
-Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before they are used.<br />
+Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before it is used.<br />
 
 ## Build output
 This image comprises of two FAT file system partitions recognized by UEFI: <br />
@@ -70,11 +70,24 @@ This image comprises of two FAT file system partitions recognized by UEFI: <br /
 
 Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". When that is selected, Linux output will go only to the graphical console (HDMI monitor). To force serial console output, you may change the "Console Preference" to "Serial".
 
-### Verification of the ES Image on Neoverse N2 reference design (RD-N2)
+### Verification of the ES image on the Arm Neoverse N2 reference design (RD-N2)
 
-#### Install RD-N2 platform FVP
+#### Prerequisites
+- If the system supports LPIs (Interrupt ID > 8192) then Firmware should support installation of handler for LPI interrupts.
+    - If you are using edk2, change the ArmGic driver in the ArmPkg to support installation of handler for LPIs.
+    - Add the following in \<path to RDN2 software stack\>/uefi/edk2/ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c
+>        - After [#define ARM_GIC_DEFAULT_PRIORITY  0x80]
+>          +#define ARM_GIC_MAX_NUM_INTERRUPT 16384
+>        - Change this in GicV3DxeInitialize function.
+>          -mGicNumInterrupts      = ArmGicGetMaxNumInterrupts (mGicDistributorBase);
+>          +mGicNumInterrupts      = ARM_GIC_MAX_NUM_INTERRUPT;
 
-Follow the steps mentioned in [RD-N2 platform software user guide](https://gitlab.arm.com/arm-reference-solutions/arm-reference-solutions-docs/-/tree/master/docs/infra/rdn2) to build and install the RD-N2 platform FVP
+#### Follow the steps mentioned in [RD-N2 platform software user guide](https://gitlab.arm.com/arm-reference-solutions/arm-reference-solutions-docs/-/tree/master/docs/infra/rdn2) to obtain RD-N2 FVP.
+
+### For software stack build instructions follow Busybox Boot link under Supported Features by RD-N2 platform software stack section in the same guide.
+
+Note: RD-N2 should be built with the GIC Changes mentioned in Prerequisites.<br />
+Note: sudo permission will be required by building software stack.
 
 
 #### Verifying the ACS-ES pre-built image
@@ -91,7 +104,7 @@ cd /path to RD-N2_FVP platform software/model-scripts/rdinfra/platforms/rdn2
 This will start the ACS live image automation and run the test suites in sequence.
 
 Known Limitations:<br />
-On FVP models, during the execution of the UEFI-SCT suite, the following behavior is observed:
+On FVP models, with versions previous to 11.15.23, during the execution of the UEFI-SCT suite, the following behavior is observed:
 
 1. Execution of “UEFIRuntimeServices” tests may cause the test execution on FVP to stall and become non-responsive.
 The message displayed prior to this stall would be either “System may reset after 1 second…” or a print associated with “SetTime” tests.
@@ -100,7 +113,7 @@ The FVP execution must be terminated and restarted by running the run_model.sh s
 The execution will continue from the test that is next in sequence of the test prior to FVP stall.
 
 2. It may appear that the test execution has stalled with the message “Waiting for few seconds for signal …” displayed on the console.
-This is expected behavior and the forward progress of tests will continue after a 20 minute delay.
+This is expected behavior and the forward progress of tests will continue after a 20-minute delay.
 
 
 ### Automation
@@ -114,13 +127,13 @@ The live image boots to UEFI Shell. The different test applications can be run i
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: 08378441d14c0c28b51f9843906582a81a9c1659
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: V21.08.00 
 
-- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v21.07_0.9_BETA
+- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v21.09_1.0
 
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: : v21.07_0.9_BETA
+- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: : v21.09_1.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 61dddf12db3d17cf19134089db45fbefb29ed004
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: edk2-test-stable202108
 
 
 
