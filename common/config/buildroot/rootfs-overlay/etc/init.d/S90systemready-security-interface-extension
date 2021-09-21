@@ -28,14 +28,14 @@ if [ -f  /bin/bbsr_fwts_tests.ini ]; then
 fi
 
 # run tpm2 tests
-mkdir -p /mnt/acs_results/tmp2
+mkdir -p /mnt/acs_results/tpm2
 if [ -f /sys/kernel/security/tpm0/binary_bios_measurements ]; then
  echo "TPM2: dumping PCRs and event log"
  cp /sys/kernel/security/tpm0/binary_bios_measurements /tmp
- tpm2_eventlog /tmp/binary_bios_measurements > /mnt/acs_results/tmp2/eventlog.log
- echo "  Event log: /mnt/acs_results/tmp2/eventlog.log"
- tpm2_pcrread > /mnt/acs_results/tmp2/pcr.log
- echo "  PCRs: /mnt/acs_results/tmp2/pcr.log"
+ tpm2_eventlog /tmp/binary_bios_measurements > /mnt/acs_results/tpm2/eventlog.log
+ echo "  Event log: /mnt/acs_results/tpm2/eventlog.log"
+ tpm2_pcrread > /mnt/acs_results/tpm2/pcr.log
+ echo "  PCRs: /mnt/acs_results/tpm2/pcr.log"
  rm /tmp/binary_bios_measurements
 else
  echo "TPM event log not found at /sys/kernel/security/tpm0/binary_bios_measurements"
