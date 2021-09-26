@@ -31,6 +31,7 @@ This section contains the build scripts and the live-images for the SystemReady 
 ### Prebuilt images
 - Prebuilt images for each release are available in the prebuilt_images folder. You can either choose to use these images or build your own image by following the build steps.
 - To access the prebuilt_images, click : [prebuilt_images](prebuilt_images/)
+- The prebuilt images are archived after compression to the .xz format. On Linux, use the xz utility to uncompress the image `xz -d es_acs_live_image.img.xz`. On Windows, use the 7zip or a similar utility.
 - If you choose to use the prebuilt image, skip the build steps, and navigate to the "Verification" section below.
 
 ### Prerequisites
