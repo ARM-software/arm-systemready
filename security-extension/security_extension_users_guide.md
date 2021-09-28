@@ -10,7 +10,7 @@ The BBSR specifies requirements for the following security interfaces:
  - UEFI capsule updates
  - TPM 2.0 and measured boot
 
-The BBSR ACS is built on the SystemReady ACS (https://github.com/ARM-software/arm-systemready), and thus follows the same model for building and running test cases.
+The BBSR ACS uses the same framework as the SystemReady ACS (https://github.com/ARM-software/arm-systemready), and thus follows the same model for building and running test cases.
 
 The BBSR ACS consists of automated and manual tests.  Automated testcases include firmware based tests using the SCT (edk2-test) framework and OS-based tests using FWTS.
 
@@ -24,7 +24,7 @@ The following are pre-requisites needed prior to running the ACS:
 
 2. For Secure Boot the system firmware must be in "Setup Mode" where the Secure Boot keys are cleared prior to starting the ACS.  The mechanism to enroll Secure Boot keys is platform specific and the procedure to enroll the keys must be available.
 
-3. For the update capsule test, if the system supports in-band system firmware updates from the OS, an update capsule must be available on a storage device on the system.
+3. For the update capsule test, if the system supports in-band system firmware updates, an update capsule must be available on a storage device on the system.
 
 ### 2. Enroll the Secure Boot Keys
 
@@ -92,7 +92,7 @@ https://github.com/u-boot/u-boot/blob/master/doc/develop/uefi/uefi.rst
 
 The Security Extension SCT is a subset of the SCT focused on security interfaces-- authenticated variables, Secure Boot variables, Secure Boot image loading, and TCG2 protocol test for systems with TPMs.
 
-After resetting the system with the ACS Secure Boot keys enrolled grub will automatically start the Security Option SCT
+After resetting the system with the ACS Secure Boot keys enrolled, grub will automatically start the Security Extension SCT
 
  - ![GRUB](./images/grub.png)
 
@@ -135,7 +135,7 @@ Test: TPM2 Trusted Platform Module 2 test.
 TPM event log not found at /sys/kernel/security/tpm0/binary_bios_measurements
 </pre>
 
-If a TPM is present, the tpm2 test is run and PCRs and event log is dumped to the results partition:
+If a TPM is present, the tpm2 test is run and PCRs and event log are dumped to the results partition:
 <pre>
 Test Executed are uefirtauthvar tpm2
 Running 2 tests, results appended to /mnt/acs_results/fwts/FWTSResults.log
@@ -158,7 +158,7 @@ TPM2: dumping PCRs and event log
   PCRs: /mnt/acs_results/tmp2/pcr.log
 </pre>
 
-The expected result is that all tests pass.
+The expected result is that all tests pass.  The tpm2 test is only applicable to ACPI-based systems.
 
 Logs are available in the results partition of the ACS storage device:
  - FWTS results:  /acs_results/fwts/FWTSResults.log
@@ -169,17 +169,24 @@ The event log and PCR log are evaluated as part of the measured boot test phase,
 
 ### 5. Secure firmware update test
 
-The BBSR requires support for update capsules compliant with the UEFI specification for systems that perform in-band (e.g. OS-initiated) firmware updates.  The Security Extension ACS firmware update test is a manual test run from the UEFI Shell that requires a valid update capsule for the system's firmware.
+The BBSR requires support for update capsules compliant with the UEFI specification for systems that perform in-band firmware updates.  The Security Extension ACS firmware update test is a manual test run from the firmware that requires a valid update capsule for the system's firmware.
 
-The steps utilize the CapsuleApp.efi program that is located on the ACS image at the following path: EFI\BOOT\app\CapsuleApp.efi
+The UEFI specification defines two methods of performing updates with capsules:
+1) UpdateCapsule() runtime function (see section 8.5.3)
+2) Capsule on disk (see section 8.5.5)
 
- - #### A. Preparation
+Either method is acceptable for performing the capsule update test.  The vendor of the system under test must provide the update procedure to use.
+
+Some of the steps below utilize the CapsuleApp.efi program that is located on the ACS image at the following path: EFI\BOOT\app\CapsuleApp.efi
+
+ - #### <a name="fwup-prep"></a> A. Preparation
      - Copy the vendor provided update capsule image onto a storage device.
      - Prepare a version of the vendor provided update capsule that has been "tampered" with, for use in a negative test. Using a copy of the vendor provided update capsule, use the xxd command and a text editor to modify the last byte of the image.
      - Copy the tampered-with update capsule onto the storage device.
      - Enable the storage device containing the capsule images on the system under test.
 
- - #### B. Reset the system.  Because SCT was run previously (see [Step 3](#run-sct)), the boot flow will skip running SCT and will stop at the UEFI Shell prompt:
+ - #### B. Reset the system.
+     - Because SCT was run previously (see [Step 3](#run-sct)), the boot flow will skip running SCT and will stop at the UEFI Shell prompt:
 
 <pre>
     Shell> echo -off
@@ -219,7 +226,7 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
       LastAttemptStatus        - 0x0 (Success)
 </pre>
 
- - #### D. Dump the FMP information advertised by the firmware using the command: `CapsuleApp -P`
+ - #### <a name="dumpfmp"></a> D. Dump the FMP information advertised by the firmware using the command: `CapsuleApp -P`
      - Expected Result:
          - The ImageTypeId fields match the FwClass advertised by the ESRT
          - The AUTHENTICATION_REQUIRED attribute is set indicating that image authentication is required
@@ -292,9 +299,14 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
       UpdateHardwareInstance - 0x0
 </pre>
 
- - #### F. Test an firmware update using the CapsuleApp with the "tampered" capsule image: `CapsuleApp  [tampered-capsule-image]`
-     - Expected Result: The firmware update must not be processed.
-     - See example below:
+ - #### F. Test an firmware update using the CapsuleApp with the "tampered" capsule image
+
+     - This is a negative test that verifies whether the firmware update process will correct validate and reject a capsule that has been tampered with. The expected result is that the firmware update must not be processed.
+
+     - To perform this test, follow the vendor provided procedure to perform the update using a capsule that has been tampered with (see the [Preparation](#fwup-prep) step above).
+
+     - Below is an example using the CapsuleApp:
+
 <pre>
     FS1:> FS0:\EFI\BOOT\app\CapsuleApp.efi FS2:\DeveloperBox.tampered.cap
     CapsuleApp: creating capsule descriptors at 0xFF7BC898
@@ -303,9 +315,16 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
     FS1:> 
 </pre>
 
- - #### G. Test an firmware update using the CapsuleApp with the vendor provided capsule: `CapsuleApp  [capsule-image]`
-     - Expected Result: The firmware update is processed successfully.
-     - See example below:
+ - #### G. Test an firmware update using the CapsuleApp with the vendor provided capsule
+
+     - To perform this test follow the vendor provided procedure to perform the update using the valid vendor provided update capsule.  The expected result is that the capsule is processed successfully and the firmware is updated.
+
+     - Reset the system
+
+     - Repeat the test step to [dump the FMP](#dumpfmp) to verify that the FMP advertises the new firmware version.
+
+     - Below is an example of performing an update using the CapsuleApp:
+
 <pre>
     FS1:> FS0:\EFI\BOOT\app\CapsuleApp.efi FS2:\DeveloperBox.cap
     CapsuleApp: creating capsule descriptors at 0xFF7BC018
@@ -314,6 +333,7 @@ The steps utilize the CapsuleApp.efi program that is located on the ACS image at
     Updating firmware - please wait....................................
     FS1:> 
 </pre>
+
 
 ### <a name="measured-boot"></a> 6. TPM Measured Boot
 
