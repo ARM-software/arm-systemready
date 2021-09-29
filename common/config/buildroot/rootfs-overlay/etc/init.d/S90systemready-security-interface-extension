@@ -5,6 +5,9 @@ then
     # securityfs does not get automounted
     /bin/mount -t securityfs securityfs /sys/kernel/security
 
+    # give linux time to finish initializing disks
+    sleep 5
+
     # mount result partition
     RESULT_DEVICE="";
     mount LABEL=RESULT /mnt
