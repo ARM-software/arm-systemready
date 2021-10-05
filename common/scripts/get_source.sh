@@ -32,6 +32,8 @@ TOP_DIR=`pwd`
 . $TOP_DIR/../../common/config/common_config.cfg
 #The shell variables use in this file are defined in common_config.cfg
 
+export GIT_SSL_NO_VERIFY=1
+
 get_linux_src()
 {
     echo "Downloading Linux source code. Version : $LINUX_KERNEL_VERSION"
