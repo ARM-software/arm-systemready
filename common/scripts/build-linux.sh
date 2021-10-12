@@ -61,7 +61,6 @@ LINUX_ARCH=arm64
 LINUX_IMAGE_TYPE=Image
 GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 CROSS_COMPILE=$TOP_DIR/$GCC
-KEYS_DIR=$TOP_DIR/security-extension-acs-keys
 
 do_build ()
 {
@@ -123,13 +122,6 @@ do_package ()
 
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/arch/$LINUX_ARCH/boot/$LINUX_IMAGE_TYPE \
     ${OUTDIR}/$LINUX_IMAGE_TYPE
-
-    # sign image with db key
-    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt ${OUTDIR}/$LINUX_IMAGE_TYPE --output ${OUTDIR}/$LINUX_IMAGE_TYPE
-
-    # sign binary with gpg key for grub secure boot
-    gpg --default-key "TestDB1" --detach-sign ${OUTDIR}/$LINUX_IMAGE_TYPE
-
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )

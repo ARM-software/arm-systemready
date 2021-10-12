@@ -42,7 +42,7 @@ create_scripts_link()
  ln -s $TOP_DIR/../../common/scripts/make_image.sh              $TOP_DIR/build-scripts/make_image.sh
  ln -s $TOP_DIR/../../common/scripts/build-buildroot.sh         $TOP_DIR/build-scripts/build-buildroot.sh
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-sct.sh             $TOP_DIR/build-scripts/build-sct.sh
- ln -s $TOP_DIR/bbr-acs/common/scripts/build-security-extension-acs-keys.sh   $TOP_DIR/build-scripts/build-security-extension-acs-keys.sh
+ ln -s $TOP_DIR/bbr-acs/common/scripts/build-sie-keys.sh        $TOP_DIR/build-scripts/build-sie-keys.sh
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-uefi-apps.sh       $TOP_DIR/build-scripts/build-uefi-apps.sh
 }
 
@@ -55,7 +55,7 @@ init_dir()
 create_scripts_link
 init_dir
 
-source ./build-scripts/build-all.sh  SE F
-source ./build-scripts/make_image.sh SE
+source ./build-scripts/build-all.sh  SIE F
+source ./build-scripts/make_image.sh SIE
 
 

@@ -70,7 +70,7 @@ endfor
 :DoneApp
 
 for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%p:\EFI\BOOT\bbr\security-extension-acs-keys then
+    if exist FS%p:\EFI\BOOT\bbr\security-interface-extension-keys then
         goto Done
     endif
 endfor

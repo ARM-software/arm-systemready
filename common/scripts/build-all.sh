@@ -29,7 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 source ./build-scripts/build-efitools.sh
-source ./build-scripts/build-security-extension-acs-keys.sh
+source ./build-scripts/build-sie-keys.sh
 source ./build-scripts/build-uefi.sh
 source ./build-scripts/build-sct.sh $@
 source ./build-scripts/build-uefi-apps.sh $@

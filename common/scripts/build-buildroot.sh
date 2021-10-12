@@ -49,7 +49,7 @@ TOP_DIR=`pwd`
 . $TOP_DIR/../../common/config/common_config.cfg
 
 BUILDROOT_PATH=buildroot
-KEYS_DIR=$TOP_DIR/security-extension-acs-keys
+KEYS_DIR=$TOP_DIR/security-interface-extension-keys
 
 do_build()
 {

@@ -94,7 +94,7 @@ get_sct_src()
     git clone --single-branch https://github.com/tianocore/edk2-test
     pushd $TOP_DIR/edk2-test
     git checkout 421a6997ef362c6286c4ef87d21d5367a9d1fb58
-    echo "Applying security-extension ACS patch..."
+    echo "Applying security interface extension ACS patch..."
     cp -r $TOP_DIR/bbr-acs/bbsr/sct-tests/BBSRVariableSizeTest uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices
     cp -r $TOP_DIR/bbr-acs/bbsr/sct-tests/SecureBoot uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices
     cp -r $TOP_DIR/bbr-acs/bbsr/sct-tests/TCG2Protocol uefi-sct/SctPkg/TestCase/UEFI/EFI/Protocol
@@ -133,7 +133,7 @@ get_buildroot_src()
 
 get_bbr_acs_src()
 {
-   git clone  --single-branch --branch security-extension-acs https://github.com/ARM-software/bbr-acs.git bbr-acs
+   git clone  --single-branch --branch security-interface-extension-acs https://github.com/ARM-software/bbr-acs.git bbr-acs
 }
 
 sudo apt install git curl mtools gdisk gcc\
