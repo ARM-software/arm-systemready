@@ -23,10 +23,10 @@ Navigate to the ES or IR band for further details on specific scripts and prebui
 * [ES](./ES)
 * [IR](./IR)
 
-## System Ready Security Extension:
-The SystemReady security extension provides a way to certify that secure boot and secure firmware update are implemented as prescribed by the Arm [Base Boot Security Specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). The security extension can be followed with the SystemReady SR, ES, and IR bands.
-Please navigate to the security extension link below for further details on specific scripts and prebuilt images:
-* [security-extension](./security-extension)
+## System Ready Security Interface Extension:
+The SystemReady Security Interface Extension provides a way to certify that secure boot and secure firmware update are implemented as prescribed by the Arm [Base Boot Security Specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). The Security Interface Extension can be followed with the SystemReady SR, ES, and IR bands.
+Please navigate to the Security Interface Extension link below for further details on specific scripts and prebuilt images:
+* [security-interface-extension](./security-interface-extension)
 
 ## License
 

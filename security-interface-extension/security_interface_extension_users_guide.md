@@ -1,8 +1,8 @@
-# SystemReady Security Extension User's Guide
+# SystemReady Security Interface Extension User's Guide
 
-## Introduction to the SystemReady Security Extension
+## Introduction to the SystemReady Security Interface Extension
 
-The Base Boot Security Requirements (BBSR) ACS is a compliance suite that tests for compliance with the requirements specified in the Base Boot Security Requirements 1.1 specification (https://developer.arm.com/documentation/den0107/latest/).  Passing the tests in this compliance suite is required for being granted the SystemReady Security Extension certification.
+The Security Interface Extension ACS is a compliance suite that tests for compliance with the requirements specified in the Base Boot Security Requirements 1.1 specification (https://developer.arm.com/documentation/den0107/latest/).  Passing the tests in this compliance suite is required for being granted the SystemReady Security Interface Extension certification.
 
 The BBSR specifies requirements for the following security interfaces:
  - UEFI authenticated variables
@@ -14,13 +14,13 @@ The BBSR ACS uses the same framework as the SystemReady ACS (https://github.com/
 
 The BBSR ACS consists of automated and manual tests.  Automated testcases include firmware based tests using the SCT (edk2-test) framework and OS-based tests using FWTS.
 
-## Running the Security Extension ACS
+## Running the Security Interface Extension ACS
 
 ### 1. Pre-requisites
 
 The following are pre-requisites needed prior to running the ACS:
 
-1. The security extension ACS image must be available on the system on a bootable storage device.
+1. The Security Interface Extension ACS image must be available on the system on a bootable storage device.
 
 2. For Secure Boot the system firmware must be in "Setup Mode" where the Secure Boot keys are cleared prior to starting the ACS.  The mechanism to enroll Secure Boot keys is platform specific and the procedure to enroll the keys must be available.
 
@@ -31,7 +31,7 @@ The following are pre-requisites needed prior to running the ACS:
 The ACS provides a set of keys for the UEFI Secure Boot keys PK, KEK, db, and dbx.  Before starting the test suite these test keys must be enrolled using and applicable platform-specific procedure for the firmware of the platform under test.
 
 The test keys are available on the "boot" partition of the ACS image at the following path:<br />
-`EFI\BOOT\bbr\security-extension-acs-keys.`
+`EFI\BOOT\bbr\security-interface-extension-keys`
 
 The test keys are available in DER format (suitable for enrolling in EDK2) and as signed UEFI variable signature list blobs (suitable for u-boot).
 
@@ -70,7 +70,7 @@ For example, to enroll the Secure Boot keys on QEMU with EDK2 based firmware per
      - Select "Enroll PK" -> "Enroll PK Using File"
      - Select the ACS disk which has the "BOOT" label
      - The secure boot keys are located at the following path on the disk:
-         - EFI \ BOOT \ bbr \ security-extension-acs-keys
+         - EFI \ BOOT \ bbr \ security-interface-extension-keys
      - Select the following file for PK: `TestPK1.der`
      - Repeat the above steps to enroll the keys (TestKEK1.der, TestDB1.der, TestDBX1.der)  for KEK, db, dbx selecting the following options:
          - KEK Options
@@ -90,9 +90,9 @@ https://github.com/u-boot/u-boot/blob/master/doc/develop/uefi/uefi.rst
 
 ### <a name="run-sct"></a> 3. Run SCT
 
-The Security Extension SCT is a subset of the SCT focused on security interfaces-- authenticated variables, Secure Boot variables, Secure Boot image loading, and TCG2 protocol test for systems with TPMs.
+The Security Interface Extension SCT is a subset of the SCT focused on security interfaces-- authenticated variables, Secure Boot variables, Secure Boot image loading, and TCG2 protocol test for systems with TPMs.
 
-After resetting the system with the ACS Secure Boot keys enrolled, grub will automatically start the Security Extension SCT
+After resetting the system with the ACS Secure Boot keys enrolled, grub will automatically start the Security Interface Extension SCT
 
  - ![GRUB](./images/grub.png)
 
@@ -169,7 +169,7 @@ The event log and PCR log are evaluated as part of the measured boot test phase,
 
 ### 5. Secure firmware update test
 
-The BBSR requires support for update capsules compliant with the UEFI specification for systems that perform in-band firmware updates.  The Security Extension ACS firmware update test is a manual test run from the firmware that requires a valid update capsule for the system's firmware.
+The BBSR requires support for update capsules compliant with the UEFI specification for systems that perform in-band firmware updates.  The Security Interface Extension ACS firmware update test is a manual test run from the firmware that requires a valid update capsule for the system's firmware.
 
 The UEFI specification defines two methods of performing updates with capsules:
 1) UpdateCapsule() runtime function (see section 8.5.3)
