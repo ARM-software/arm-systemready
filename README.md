@@ -23,6 +23,11 @@ Navigate to the ES or IR band for further details on specific scripts and prebui
 * [ES](./ES)
 * [IR](./IR)
 
+## SystemReady Security Interface Extension:
+The SystemReady Security Interface Extension certifies that firmware meets the requirements specified by the Arm [Base Boot Security Requirements specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). The Security Interface Extension is optionally applicable to SystemReady SR, ES and IR bands, but not the LS band.
+Further details on Security Interface Extension, including pre-built images, are here:
+* [Security Interface Extension](https://github.com/ARM-software/arm-systemready/tree/security-interface-extension-acs/security-interface-extension)
+
 ## Limitations
 
 Validating the compliance of certain PCIe rules defined in the BSA specification require the PCIe end-point generate specific stimulus during the runtime of the test. Examples of such stimulus are  P2P, PASID, ATC, etc. The tests that requires these stimuli are grouped together in the exerciser module. The exerciser layer is an abstraction layer that enables the integration of hardware capable of generating such stimuli to the test framework.
