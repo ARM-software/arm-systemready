@@ -56,8 +56,8 @@ Before starting the ACS build, ensure that the following requirements are met:
 4. To start the build of the Security Interface Extension ACS live image, execute the below step <br />
  `./build-scripts/build-security-extension-live-image.sh`
 
-5. If all of above steps are successful, the bootable image will be available at: <br />
- `/[path-to-arm-systemready]/security-interface-extension/scripts/output/sie_acs_live_image.img`
+5. If all of above steps are successful, the compressed, bootable image will be available at: <br />
+ `/[path-to-arm-systemready]/security-interface-extension/scripts/output/sie_acs_live_image.img.xz`
 
 ## Build output
 This image comprises of two FAT file system partitions recognized by UEFI: <br />
