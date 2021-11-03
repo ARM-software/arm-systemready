@@ -69,6 +69,11 @@ do_build ()
     echo "Building using defconfig..."
     cp arch/arm64/configs/defconfig $LINUX_OUT_DIR/.config
     arch=$(uname -m)
+
+    if ! patch -R -p1 -s -f --dry-run < $COMMON_PATCH_DIR/0001-Linux-${LINUX_KERNEL_VERSION}.patch; then
+         echo "Applying Linux Kernel ESRT print values of ESRT Patch ..."
+         patch  -p1  < $COMMON_PATCH_DIR/0001-Linux-${LINUX_KERNEL_VERSION}.patch
+    fi
     if [[ $arch = "aarch64" ]]
     then
         echo "arm64"

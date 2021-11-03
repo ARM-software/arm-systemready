@@ -1,0 +1,32 @@
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -214,9 +214,16 @@ static struct attribute *esrt_attrs[] = {
+ static inline int esrt_table_exists(void)
+ {
+ 	if (!efi_enabled(EFI_CONFIG_TABLES))
+-		return 0;
++	{
++		pr_info("Check esrt table exist, issue of efi enabled");
++			return 0;
++	}
++	
+ 	if (efi.esrt == EFI_INVALID_TABLE_ADDR)
++	{
++		pr_info("Check esrt table exist, efi invalid table addr");
+ 		return 0;
++	}
+ 	return 1;
+ }
+ 
+@@ -344,6 +351,8 @@ static int __init register_entries(void)
+ 
+ 	if (!esrt_table_exists())
+ 		return 0;
++	pr_info("ESRT value of fw_resource_count=%d\n",esrt->fw_resource_count);
++	pr_info("ESRT value of fw_resource_count_max=%d\n",esrt->fw_resource_count_max);
+ 
+ 	for (i = 0; i < le32_to_cpu(esrt->fw_resource_count); i++) {
+ 		void *esre = NULL;
+-- 
+2.25.1
+
