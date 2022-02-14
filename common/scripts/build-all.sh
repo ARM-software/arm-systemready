@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -28,13 +28,35 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+if [ "$#" -ne 2 ]; then
+    echo "Usage $0 <ES|IR|SR> F"
+    echo "The second (mandatory) parameter F stands for full package."
+    exit 1
+fi
+
+BAND=$1
+PACKAGE=$2
+
+
 
 source ./build-scripts/build-uefi.sh
-source ./build-scripts/build-bsaefi.sh $@
+
+if [ $BAND == "SR" ]; then
+    source ./build-scripts/build-sbsaefi.sh
+else
+   source ./build-scripts/build-bsaefi.sh $@
+fi
 source ./build-scripts/build-sct.sh $@
 source ./build-scripts/build-uefi-apps.sh $@
-source ./build-scripts/build-linux.sh
-source ./build-scripts/build-linux-bsa.sh
-source ./build-scripts/build-grub.sh
+source ./build-scripts/build-linux.sh $BAND
+
+if [ $BAND == "SR" ]; then
+    source ./build-scripts/build-linux-sbsa.sh
+else
+    source ./build-scripts/build-linux-bsa.sh
+fi
+
+source ./build-scripts/build-grub.sh $@
 source ./build-scripts/build-fwts.sh $@
-source ./build-scripts/build-busybox.sh
+source ./build-scripts/build-busybox.sh $@
+

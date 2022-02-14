@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -55,7 +55,13 @@
 # LINUX_IMAGE_TYPE - Image or zImage (Image is the default if not specified)
 
 TOP_DIR=`pwd`
-. $TOP_DIR/../../common/config/common_config.cfg
+BAND=$1
+
+if [ $BAND == "SR" ]; then
+    . $TOP_DIR/../../common/config/sr_common_config.cfg
+else
+    . $TOP_DIR/../../common/config/common_config.cfg
+fi
 
 LINUX_ARCH=arm64
 LINUX_IMAGE_TYPE=Image
@@ -117,6 +123,15 @@ do_package ()
 
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/arch/$LINUX_ARCH/boot/$LINUX_IMAGE_TYPE \
     ${OUTDIR}/$LINUX_IMAGE_TYPE
+
+    #Copy drivers for packaging into Ramdisk
+    if [ $BAND == "SR" ]; then
+        mkdir -p $TOP_DIR/ramdisk/drivers
+        cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/nvme/host/nvme.ko $TOP_DIR/ramdisk/drivers
+        cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/nvme/host/nvme-core.ko $TOP_DIR/ramdisk/drivers
+        cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci-renesas.ko $TOP_DIR/ramdisk/drivers
+        cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci.ko $TOP_DIR/ramdisk/drivers
+    fi
 
 }
 

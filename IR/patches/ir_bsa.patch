@@ -1,6 +1,18 @@
---- ShellPkg/ShellPkg.dsc	2021-01-13 14:46:03.875244238 +0530
-+++ ShellPkg/ShellPkg_bsa.dsc	2021-01-13 14:44:19.407220595 +0530
-@@ -59,6 +59,9 @@
+From 4099a09e9dcc759c3703d759c6b7840a33386b1a Mon Sep 17 00:00:00 2001
+From: Amrathesh <amrathesh@arm.com>
+Date: Wed, 22 Dec 2021 17:01:59 +0530
+Subject: [PATCH] EDK2 IR BSA Patch
+
+Signed-off-by: Amrathesh <amrathesh@arm.com>
+---
+ ShellPkg/ShellPkg.dsc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ShellPkg/ShellPkg.dsc b/ShellPkg/ShellPkg.dsc
+index a8b6de3..e717591 100644
+--- a/ShellPkg/ShellPkg.dsc
++++ b/ShellPkg/ShellPkg.dsc
+@@ -60,6 +60,9 @@
    DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
    DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
    ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
@@ -10,12 +22,14 @@
  
  [LibraryClasses.ARM,LibraryClasses.AARCH64]
    #
-@@ -97,7 +99,7 @@
+@@ -98,6 +101,7 @@
    ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
    ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf
    ShellPkg/Library/UefiShellNetwork2CommandsLib/UefiShellNetwork2CommandsLib.inf
--
 +  ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf
+ 
    ShellPkg/Application/Shell/Shell.inf {
      <PcdsFixedAtBuild>
-       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
+-- 
+2.17.1
+

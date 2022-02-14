@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 TOP_DIR=`pwd`
-. $TOP_DIR/../../common/config/common_config.cfg
+
+#Get the band run from automatically
+pushd ..
+BAND_PATH=`pwd`
+BAND=`basename $BAND_PATH`
+popd
+
+echo "Getting the sources for $BAND "
+
+if [ $BAND == "SR" ]; then
+    . $TOP_DIR/../../common/config/sr_common_config.cfg
+else
+    . $TOP_DIR/../../common/config/common_config.cfg
+fi
+
 #The shell variables use in this file are defined in common_config.cfg
 
 export GIT_SSL_NO_VERIFY=1
@@ -76,6 +90,25 @@ get_bsa_src()
     git pull
     popd
 }
+
+get_sbsa_src()
+{
+    pushd $TOP_DIR/edk2
+    git clone https://github.com/tianocore/edk2-libc
+    if [ -z $ARM_SBSA_TAG ]; then
+        #No TAG is provided. Download the latest code
+        echo "Downloading Arm SBSA source code."
+        git clone --depth 1 https://github.com/ARM-software/sbsa-acs.git ShellPkg/Application/sbsa-acs
+    else
+        echo "Downloading Arm SBSA source code. TAG : $ARM_SBSA_TAG"
+        git clone --depth 1 --branch $ARM_SBSA_TAG https://github.com/ARM-software/sbsa-acs.git ShellPkg/Application/sbsa-acs
+    fi
+    popd
+    pushd  $TOP_DIR/edk2/ShellPkg/Application/sbsa-acs
+    git pull
+    popd
+}
+
 
 get_cross_compiler()
 {
@@ -128,8 +161,11 @@ get_linux-acs_src()
       git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs linux-acs
   fi
   pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
-  echo "Applying Linux ACS Patch..."
+
+  #The same patch is applicable BSA and SBSA
+  echo "Applying Linux ACS xBSA Patch..."
   git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-ACS-Linux-${LINUX_KERNEL_VERSION}.patch
+
   popd
 
 }
@@ -152,7 +188,12 @@ sudo apt install git curl mtools gdisk gcc\
  make gcc g++ python
 
 get_uefi_src
-get_bsa_src
+
+if [ $BAND == "SR" ]; then
+    get_sbsa_src
+else
+    get_bsa_src
+fi
 get_bbr_acs_src
 get_sct_src
 get_grub_src

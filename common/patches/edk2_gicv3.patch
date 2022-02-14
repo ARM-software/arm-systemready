@@ -1,5 +1,17 @@
---- ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c	2021-05-12 12:32:48.128743341 +0530
-+++ ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe_bsa.c	2021-05-12 12:32:25.700745650 +0530
+From 7109d1e6cba13fa2d6dda70104244aea8fb5ebe3 Mon Sep 17 00:00:00 2001
+From: Amrathesh <amrathesh@arm.com>
+Date: Wed, 5 Jan 2022 15:17:11 +0530
+Subject: [PATCH] EDK2 GICv3 Patch
+
+Signed-off-by: Amrathesh <amrathesh@arm.com>
+---
+ ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c b/ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c
+index 16bccbf..79e6e4e 100644
+--- a/ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c
++++ b/ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c
 @@ -11,6 +11,7 @@
  #include "ArmGicDxe.h"
  
@@ -8,15 +20,15 @@
  
  extern EFI_HARDWARE_INTERRUPT_PROTOCOL gHardwareInterruptV3Protocol;
  extern EFI_HARDWARE_INTERRUPT2_PROTOCOL gHardwareInterrupt2V3Protocol;
-@@ -383,8 +384,9 @@
+@@ -383,7 +384,7 @@ GicV3DxeInitialize (
  
    mGicDistributorBase    = PcdGet64 (PcdGicDistributorBase);
    mGicRedistributorsBase = PcdGet64 (PcdGicRedistributorsBase);
 -  mGicNumInterrupts      = ArmGicGetMaxNumInterrupts (mGicDistributorBase);
--
-+///  mGicNumInterrupts      = ArmGicGetMaxNumInterrupts (mGicDistributorBase);
 +  mGicNumInterrupts      = ARM_GIC_MAX_NUM_INTERRUPT;
-+  
+ 
    // We will be driving this GIC in native v3 mode, i.e., with Affinity
    // Routing enabled. So ensure that the ARE bit is set.
-   if (!FeaturePcdGet (PcdArmGicV3WithV2Legacy)) {
+-- 
+2.17.1
+

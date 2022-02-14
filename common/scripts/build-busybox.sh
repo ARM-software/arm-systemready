@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2015-2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2015-2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -48,7 +48,13 @@
 
 
 TOP_DIR=`pwd`
-. $TOP_DIR/../../common/config/common_config.cfg
+BAND=$1
+
+if [ $BAND == "SR" ]; then
+    . $TOP_DIR/../../common/config/sr_common_config.cfg
+else
+    . $TOP_DIR/../../common/config/common_config.cfg
+fi
 
 BUSYBOX_ARCH=arm64
 BUSYBOX_PATH=busybox
@@ -100,6 +106,16 @@ do_package ()
     # create the ramdisk
     pushd $TOP_DIR/$BUSYBOX_RAMDISK_PATH
     pwd
+    if [ $BAND == "SR" ]; then
+        bsa_count=`grep -w bsa files.txt | wc -l`
+        if [ $bsa_count -gt 0 ]; then
+           sed -i 's/bsa/sbsa/g' files.txt
+           echo "file /lib/modules/nvme.ko               ./drivers/nvme.ko                                         755 0 0"  >> files.txt
+           echo "file /lib/modules/nvme-core.ko          ./drivers/nvme-core.ko                                    755 0 0"  >> files.txt
+           echo "file /lib/modules/xhci-pci.ko           ./drivers/xhci-pci.ko                                     755 0 0"  >> files.txt
+           echo "file /lib/modules/xhci-pci-renesas.ko   ./drivers/xhci-pci-renesas.ko                             755 0 0"  >> files.txt
+        fi
+    fi
     cp $TOP_DIR/$BUSYBOX_RAMDISK_BUSYBOX_PATH/busybox .
     $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/$LINUX_CONFIG_DEFAULT/usr/gen_init_cpio files.txt \
     > ramdisk.img

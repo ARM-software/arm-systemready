@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -74,6 +74,9 @@ create_fatpart ()
     mmd -i $fatpart_name ::/EFI/BOOT
     mmd -i $fatpart_name ::/grub
     mmd -i $fatpart_name ::/EFI/BOOT/bsa
+    if [ "$BUILD_PLAT" = "SR" ]; then
+        mmd -i $fatpart_name ::/EFI/BOOT/bsa/sbsa
+    fi
     mmd -i $fatpart_name ::/EFI/BOOT/bbr
     mmd -i $fatpart_name ::/EFI/BOOT/debug
     mmd -i $fatpart_name ::/EFI/BOOT/app
@@ -82,7 +85,13 @@ create_fatpart ()
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
     mcopy -i $fatpart_name $OUTDIR/Image ::/
     mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
-    mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
+
+    if [ "$BUILD_PLAT" = "SR" ]; then
+        mcopy -i $fatpart_name Sbsa.efi ::/EFI/BOOT/bsa/sbsa
+    else
+        mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
+    fi
+
     mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
     if [ "$BUILD_PLAT" = "IR" ]; then
       echo " IR BSA flag file copied"
@@ -131,8 +140,11 @@ prepare_disk_image ()
     elif [ "$BUILD_PLAT" = "IR" ]; then
        IMG_BB=ir_acs_live_image.img
        echo -e "\e[1;32m Build IR Live Image at $PLATDIR/$IMG_BB \e[0m"
+    elif [ "$BUILD_PLAT" = "SR" ]; then
+       IMG_BB=sr_acs_live_image.img
+       echo -e "\e[1;32m Build SR Live Image at $PLATDIR/$IMG_BB \e[0m"
     else
-       echo "Specify platform ES or IR"
+       echo "Specify platform ES, IR or SR"
        exit_fun
     fi
 
@@ -147,7 +159,13 @@ prepare_disk_image ()
     rm -f $PLATDIR/$IMG_BB
     cp grubaa64.efi bootaa64.efi
     cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi Shell.efi
-    cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi Bsa.efi
+
+    if [ "$BUILD_PLAT" = "SR" ]; then
+        cp $TOP_DIR/$BSA_EFI_PATH/Sbsa.efi Sbsa.efi
+    else
+        cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi Bsa.efi
+    fi
+
     cp -Tr $TOP_DIR/$SCT_PATH/ SCT
     grep -q -F 'mtools_skip_check=1' ~/.mtoolsrc || echo "mtools_skip_check=1" >> ~/.mtoolsrc
 
@@ -196,7 +214,7 @@ BUILD_PLAT=$1
 
 if [ -z "$BUILD_PLAT" ]
 then
-   echo "Specify platform ES or IR"
+   echo "Specify platform ES, IR or SR"
    exit_fun
 fi
 #prepare the disk image
