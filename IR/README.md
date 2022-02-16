@@ -34,6 +34,8 @@ This section of the repository contains the build scripts and the live-images fo
 - The prebuilt images are archived after compression to the .xz format. On Linux, use the xz utility to uncompress the image `xz -d es_acs_live_image.img.xz`. On Windows, use the 7zip or a similar utility.
 - If you choose to use the prebuilt image, skip the build steps, and navigate to the "Verification" section below.
 
+Note: The latest pre-built image contains Linux kernel version 5.13. To build a image with a different Linux kernel version, update the `LINUX_KERNEL_VERSION` in the configuration file `<path to arm-systemready>/common/config/common_config.cfg` before the build (after step 3 below). To see the list of kernel versions for which Linux BSA patches are available, see the [folder](https://gitlab.arm.com/linux-arm/linux-acs/-/tree/master/kernel/src)
+
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
  - Ubuntu 18.04 or 20.04 LTS with at least 32GB of free disk space.
@@ -138,5 +140,5 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2021, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited and Contributors. All rights reserved.*
 

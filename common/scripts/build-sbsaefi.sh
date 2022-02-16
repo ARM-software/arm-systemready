@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -47,9 +47,9 @@
 #     - defines - extra platform defines during the build
 #     - binary - what to call the final output binary
 
-
 TOP_DIR=`pwd`
-. $TOP_DIR/../../common/config/common_config.cfg
+# Note: should include common_config.cfg once IR and ES versions are aligned.
+. $TOP_DIR/../../common/config/sr_common_config.cfg
 
 UEFI_PATH=edk2
 UEFI_TOOLCHAIN=GCC49
@@ -66,40 +66,20 @@ do_build()
 
     git checkout ShellPkg/ShellPkg.dsc # Remove if any patches applied
     git checkout ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c # Remove if any patches applied
-    if git apply --check $COMMON_PATCH_DIR/edk2_gicv3.patch; then
-         echo "Applying EDK2 GICv3 Patch ..."
-         git apply $COMMON_PATCH_DIR/edk2_gicv3.patch
+    if git apply --check $COMMON_PATCH_DIR/edk2_gicv3.patch ; then
+        echo "Applying EDK2 GICv3 Patch ..."
+        git apply $COMMON_PATCH_DIR/edk2_gicv3.patch
     else
-         echo "Error while applying EDK2 GICv3 Patch"
-         exit_fun
+        echo "Error while applying EDK2 GICv3 Patch"
+        exit_fun
     fi
 
-    if [ "$BUILD_PLAT" = "ES" ]; then
-       if git apply --check $PATCH_DIR/es_bsa.patch; then
-         echo "Applying ES BSA Patch ..."
-         git apply $PATCH_DIR/es_bsa.patch
-       else
-         echo "Error while applying ES BSA Patch"
-         exit_fun
-       fi
-    elif [ "$BUILD_PLAT" = "IR" ]; then
-       if git apply --check $PATCH_DIR/ir_bsa.patch; then
-          echo "Applying IR BSA Patch ..."
-          git apply $PATCH_DIR/ir_bsa.patch
-          touch $TOP_DIR/build-scripts/ir_bsa.flag
-
-          if grep "gEfiHiiConfigRoutingProtocolGuid" MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
-          then
-            sed -i '/gEfiHiiConfigRoutingProtocolGuid/{N;d;}' MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
-            echo "gEfiHiiConfigRoutingProtocolGuid is removed"
-          fi
-       else
-          echo "Error while applying IR BSA Patch"
-          exit_fun
-       fi
+    if git apply --check $PATCH_DIR/sr_sbsa.patch ; then
+        echo "Applying SR SBSA Patch ..."
+        git apply $PATCH_DIR/sr_sbsa.patch
     else
-       echo "Specify platform ES or IR"
-       exit_fun
+        echo  "Error while applying SR SBSA Patch"
+        exit_fun
     fi
 
     source ./edksetup.sh
@@ -116,8 +96,7 @@ do_build()
     fi
 
     export PACKAGES_PATH=$TOP_DIR/$UEFI_PATH:$TOP_DIR/$UEFI_PATH/$UEFI_LIBC_PATH
-    export PYTHON_COMMAND=/usr/bin/python3
-    source ShellPkg/Application/bsa-acs/tools/scripts/acsbuild.sh
+    source ShellPkg/Application/sbsa-acs/tools/scripts/avsbuild.sh
     popd
 }
 
@@ -134,9 +113,8 @@ do_clean()
 
 do_package ()
 {
-    echo "Packaging BSA... $VARIANT";
-    # Copy binaries to output folder
-    pushd $TOP_DIR
+#packaging is taken care in make_image.sh
+  : 
 }
 
 exit_fun() {
@@ -144,14 +122,6 @@ exit_fun() {
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-
-BUILD_PLAT=$1
-
-if [ -z "$BUILD_PLAT" ]
-then
-   echo "Specify platform ES or IR"
-   exit_fun
-fi
 
 source $DIR/framework.sh $@
 
