@@ -1,3 +1,18 @@
+v22.02_SR_1.0
+**SystemReady SR**
+* Code and scripts to build the SystemReady SR ACS Image
+* SystemReady SR ACS README.md with steps to build and verify the image
+* The SR ACS image now houses Linux kernel v5.15 Image
+* Improvements in SR ACS Image test automation
+* BSA: Enhancements and Issues fixed
+
+**Common**
+* BBR: Migrate to the version V22.01.00 + of FWTS
+* BBR: Migrate to commit d919c4a of edk2-test (UEFI-SCT)
+* General improvements in scripts
+* Enhancements and bug Fixes
+
+
 v21.09_1.0
 **SystemReady IR**
 * BSA: Increased peripheral rules coverage
