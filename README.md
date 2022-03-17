@@ -6,12 +6,12 @@ Systems that are designed to just work for the end user with the ability to inst
 For the Arm ecosystem, this requirement first surfaced in the server segment. The Arm ServerReady compliance certification program provides this 'just works' solution for servers, allowing you to deploy Arm servers with confidence. The program is based on industry standards and is accompanied by a compliance test suite, and a process for certification.
 
 The Arm SystemReady program is a natural extension of the Arm ServerReady program. Different market segments may target different sets of operating systems and hypervisors with different hardware and firmware requirements. We use the term band to identify these differences, with a shorthand notation for each band. The bands are:
-* [SystemReady SR](https://developer.arm.com/architectures/system-architectures/arm-systemready/sr)
-* [SystemReady LS](https://developer.arm.com/architectures/system-architectures/arm-systemready/ls)
-* [SystemReady ES](https://developer.arm.com/architectures/system-architectures/arm-systemready/es)
-* [SystemReady IR](https://developer.arm.com/architectures/system-architectures/arm-systemready/ir)
+* [SystemReady SR](https://www.arm.com/architecture/systems/systemready-certification-program/sr)
+* [SystemReady LS](https://www.arm.com/architecture/systems/systemready-certification-program/ls)
+* [SystemReady ES](https://www.arm.com/architecture/systems/systemready-certification-program/es)
+* [SystemReady IR](https://www.arm.com/architecture/systems/systemready-certification-program/ir)
 
-For more information, visit: [Arm SystemReady](https://developer.arm.com/architectures/system-architectures/arm-systemready)
+For more information on the Arm SystemReady Certification Program, visit: [Arm SystemReady](https://www.arm.com/architecture/systems/systemready-certification-program)
 
 This repository contains the infrastructure to build the Architecture Compliance Suite (ACS) and the bootable prebuilt images to be used for the certifications of various bands of SystemReady.<br />
 Note:  Currently SystemReady ES, IR and SR  bands are supported in this repository
