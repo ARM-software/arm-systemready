@@ -126,8 +126,8 @@ get_cross_compiler()
 
 get_grub_src()
 {
-    echo "Downloading grub source code."
-    git clone https://git.savannah.gnu.org/git/grub.git
+    echo "Downloading grub source code,Version: ${GRUB_SRC_TAG}"
+    git clone -b $GRUB_SRC_TAG https://github.com/rhboot/grub2.git grub
     pushd $TOP_DIR/grub
     git submodule update --init
     popd
