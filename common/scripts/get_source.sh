@@ -174,13 +174,15 @@ get_linux-acs_src()
       echo "Downloading Arm Linux ACS source code. TAG : ${ARM_LINUX_ACS_TAG}"
       git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs linux-acs
   fi
-  pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
+  if [[ $arch = "aarch64" ]]; then
+    pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
 
-  #The same patch is applicable BSA and SBSA
-  echo "Applying Linux ACS xBSA Patch..."
-  git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-ACS-Linux-${LINUX_KERNEL_VERSION}.patch
+    #The same patch is applicable BSA and SBSA
+    echo "Applying Linux ACS xBSA Patch..."
+    git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-ACS-Linux-${LINUX_KERNEL_VERSION}.patch
 
-  popd
+    popd
+  fi
 
 }
 
