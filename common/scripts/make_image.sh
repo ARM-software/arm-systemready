@@ -39,6 +39,7 @@ TOP_DIR=`pwd`
 PLATDIR=${TOP_DIR}/output
 OUTDIR=${PLATDIR}
 GRUB_FS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
+GRUB_ARM_FS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub-arm.cfg
 EFI_CONFIG_FILE=${TOP_DIR}/build-scripts/config/startup.nsh
 BSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bsa.nsh
 BBR_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bbr.nsh
@@ -47,15 +48,23 @@ BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
 GRUB_PATH=grub
 UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64/
+UEFI_ARM_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/ARM/
 BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
+BSA_EFI_ARM_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
 SCT_PATH=edk2-test/uefi-sct/AARCH64_SCT
+SCT_ARM_PATH=edk2-test/uefi-sct/ARM_SCT
 UEFI_APPS_PATH=${TOP_DIR}/edk2/Build/MdeModule/DEBUG_GCC5/AARCH64
+UEFI_APPS_ARM_PATH=${TOP_DIR}/edk2/Build/MdeModule/DEBUG_GCC5/AARCH64
 
 create_cfgfiles ()
 {
     local fatpart_name="$1"
 
-    mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
+    if [ -f bootarm.efi ]; then
+        mcopy -i  $fatpart_name -o ${GRUB_ARM_FS_CONFIG_FILE} ::/grub.cfg
+    else
+        mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
+    fi
     mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh
     mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
     mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/debug_dump.nsh
@@ -81,23 +90,48 @@ create_fatpart ()
     mmd -i $fatpart_name ::/EFI/BOOT/debug
     mmd -i $fatpart_name ::/EFI/BOOT/app
 
-    mcopy -i $fatpart_name bootaa64.efi ::/EFI/BOOT
-    mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
-    mcopy -i $fatpart_name $OUTDIR/Image ::/
+    if [ -f bootarm.efi ]; then
+        mcopy -i $fatpart_name bootarm.efi ::/EFI/BOOT
+    fi
+    if [ -f bootaa64.efi ]; then
+        mcopy -i $fatpart_name bootaa64.efi ::/EFI/BOOT
+    fi
+    if [ -f Shell.efi ]; then
+        mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
+    fi
+    if [ -f $OUTDIR/Image ]; then
+        mcopy -i $fatpart_name $OUTDIR/Image ::/
+    fi
+    if [ -f $OUTDIR/zImage ]; then
+        mcopy -i $fatpart_name $OUTDIR/zImage ::/
+    fi
     mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
 
     if [ "$BUILD_PLAT" = "SR" ]; then
-        mcopy -i $fatpart_name Sbsa.efi ::/EFI/BOOT/bsa/sbsa
+        if [ -f Sbsa.efi ]; then
+            mcopy -i $fatpart_name Sbsa.efi ::/EFI/BOOT/bsa/sbsa
+        fi
     else
-        mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
+        if [ -f Bsa.efi ]; then
+            mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
+        fi
     fi
 
-    mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
+    if [ -d SCT ]; then
+        mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
+    fi
     if [ "$BUILD_PLAT" = "IR" ]; then
       echo " IR BSA flag file copied"
-      mcopy -i $fatpart_name ${TOP_DIR}/build-scripts/ir_bsa.flag ::/EFI/BOOT/bsa
+      if [ -f ${TOP_DIR}/build-scripts/ir_bsa.flag ]; then
+        mcopy -i $fatpart_name ${TOP_DIR}/build-scripts/ir_bsa.flag ::/EFI/BOOT/bsa
+      fi
     fi
-    mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/EFI/BOOT/app
+    if [ -f ${UEFI_APPS_PATH}/CapsuleApp.efi ]; then
+        mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/EFI/BOOT/app
+    fi
+    if [ -f ${UEFI_APPS_ARM_PATH}/CapsuleApp.efi ]; then
+        mcopy -i $fatpart_name ${UEFI_APPS_ARM_PATH}/CapsuleApp.efi ::/EFI/BOOT/app
+    fi
 
     echo "FAT partition image created"
 }
@@ -157,16 +191,42 @@ prepare_disk_image ()
     local FAT2_SIZE=$((FAT2_SIZE_MB*SEC_PER_MB))
 
     rm -f $PLATDIR/$IMG_BB
-    cp grubaa64.efi bootaa64.efi
-    cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi Shell.efi
+    if [ -f grubaa64.efi ]; then
+        cp grubaa64.efi bootaa64.efi
+    fi
+    if [ -f grubarm.efi ]; then
+        cp grubarm.efi bootarm.efi
+    fi
+    if [ -f $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi ]; then
+        echo "ARM64 copy ARM64 shell"
+        cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi Shell.efi
+    fi
+    if [ -f $TOP_DIR/$UEFI_ARM_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi ]; then
+        echo "copy ARM shell"
+        cp $TOP_DIR/$UEFI_ARM_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi Shell.efi
+    fi
 
     if [ "$BUILD_PLAT" = "SR" ]; then
         cp $TOP_DIR/$BSA_EFI_PATH/Sbsa.efi Sbsa.efi
     else
-        cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi Bsa.efi
+        if [ -f $TOP_DIR/$BSA_EFI_PATH/Bsa.efi ]; then
+            echo "ARM64 copy ARM64 bsa"
+            cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi Bsa.efi
+        fi
+        if [ -f $TOP_DIR/$BSA_EFI_ARM_PATH/Bsa.efi ]; then
+            echo "copy ARM bsa"
+            cp $TOP_DIR/$BSA_EFI_ARM_PATH/Bsa.efi Bsa.efi
+        fi
     fi
 
-    cp -Tr $TOP_DIR/$SCT_PATH/ SCT
+    if [ -d $TOP_DIR/$SCT_PATH/ ]; then
+        echo "copy ARM64 sct"
+        cp -Tr $TOP_DIR/$SCT_PATH/ SCT
+    fi
+    if [ -d $TOP_DIR/$SCT_ARM_PATH/ ]; then
+        echo "copy ARM sct"
+        cp -Tr $TOP_DIR/$SCT_ARM_PATH/ SCT
+    fi
     grep -q -F 'mtools_skip_check=1' ~/.mtoolsrc || echo "mtools_skip_check=1" >> ~/.mtoolsrc
 
     #Package images for Busybox
