@@ -1,0 +1,26 @@
+From a376d159e356db9cb19f8fe74c370bc74075ee08 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
+Date: Wed, 24 Nov 2021 11:25:21 +0100
+Subject: [PATCH] GRUB: correct detection of DDR RAM address
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
+---
+ grub-core/kern/efi/mm.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/grub-core/kern/efi/mm.c b/grub-core/kern/efi/mm.c
+index 9838fb2f5..e0796ccda 100644
+--- a/grub-core/kern/efi/mm.c
++++ b/grub-core/kern/efi/mm.c
+@@ -681,6 +681,8 @@ grub_efi_get_ram_base(grub_addr_t *base_addr)
+   for (desc = memory_map, *base_addr = GRUB_EFI_MAX_USABLE_ADDRESS;
+        (grub_addr_t) desc < ((grub_addr_t) memory_map + memory_map_size);
+        desc = NEXT_MEMORY_DESCRIPTOR (desc, desc_size))
++	  if(desc->type != 7 /*EFI_CONVENTIONAL_MEMORY*/)
++			continue;
+     if (desc->attribute & GRUB_EFI_MEMORY_WB)
+       *base_addr = grub_min (*base_addr, desc->physical_start);
+ 
+-- 
+2.25.1
+

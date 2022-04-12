@@ -130,6 +130,11 @@ get_grub_src()
     git clone https://git.savannah.gnu.org/git/grub.git
     pushd $TOP_DIR/grub
     git submodule update --init
+    if [[ $arch = "arm" ]]; then
+        if patch -R -p0 -s -f --dry-run < $TOP_DIR/../../common/patches/0001-GRUB-correct-detection-of-DDR-RAM-address.patch; then
+            patch  -R -p0  < $TOP_DIR/../../common/patches/0001-GRUB-correct-detection-of-DDR-RAM-address.patch
+        fi
+    fi
     popd
 }
 get_fwts_src()
