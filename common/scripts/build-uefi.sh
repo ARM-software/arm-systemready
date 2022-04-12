@@ -51,12 +51,13 @@
 TOP_DIR=`pwd`
 . $TOP_DIR/../../common/config/common_config.cfg
 
+# toolchain
+. $TOP_DIR/../../common/scripts/common_cross_toolchain.sh
+
 UEFI_PATH=edk2
 UEFI_TOOLCHAIN=GCC5
 UEFI_BUILD_MODE=RELEASE
-GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 PATCH_DIR=$TOP_DIR/../patches
-CROSS_COMPILE=$TOP_DIR/$GCC
 
 do_build()
 {
@@ -70,16 +71,32 @@ do_build()
     if [[ $arch = "aarch64" ]]
     then
         echo "arm64 native build"
+        ARCH_TARGET_FOR_UEFI=AARCH64
     else
-        CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
-        PATH="$PATH:$CROSS_COMPILE_DIR"
-        export ${UEFI_TOOLCHAIN}_AARCH64_PREFIX=$CROSS_COMPILE
+        if [[ ! ${ARCH+x} ]]; then
+            # use ARCH=arm64
+            CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
+            PATH="$PATH:$CROSS_COMPILE_DIR"
+            export ${UEFI_TOOLCHAIN}_AARCH64_PREFIX=$CROSS_COMPILE
+            ARCH_TARGET_FOR_UEFI=AARCH64
+        else
+            case $ARCH in
+            arm)
+                export ${UEFI_TOOLCHAIN}_ARM_PREFIX=$CROSS_COMPILE
+                ARCH_TARGET_FOR_UEFI=ARM
+                ;;
+            *)
+                export ${UEFI_TOOLCHAIN}_AARCH64_PREFIX=$CROSS_COMPILE
+                ARCH_TARGET_FOR_UEFI=AARCH64
+                ;;
+            esac
+        fi
     fi
     local vars=
     export PACKAGES_PATH=$TOP_DIR/$UEFI_PATH
     export PYTHON_COMMAND=/usr/bin/python3
     git checkout  ShellPkg/ShellPkg.dsc #build shell with default file
-    build -a AARCH64 -t GCC5 -p ShellPkg/ShellPkg.dsc -b $UEFI_BUILD_MODE
+    build -a $ARCH_TARGET_FOR_UEFI -t GCC5 -p ShellPkg/ShellPkg.dsc -b $UEFI_BUILD_MODE
     popd
 }
 

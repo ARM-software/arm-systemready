@@ -49,10 +49,10 @@ if [ $BAND == "SR" ]; then
 else
     . $TOP_DIR/../../common/config/common_config.cfg
 fi
+# toolchain
+. $TOP_DIR/../../common/scripts/common_cross_toolchain.sh
 
 GRUB_PATH=grub
-GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-CROSS_COMPILE=$TOP_DIR/$GCC
 GRUB_PLAT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub_prefix.cfg
 
 do_build ()
@@ -81,17 +81,32 @@ do_build ()
         fi
 
         ./autogen.sh
-        ./configure STRIP=$CROSS_COMPILE_DIR/aarch64-linux-gnu-strip \
-        --target=aarch64-linux-gnu --with-platform=efi \
-        --prefix=$TOP_DIR/$GRUB_PATH/output/ \
-        TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
+        if [[ $ARCH = "arm" ]]; then
+            # ARCH=arm
+            ./configure STRIP=$CROSS_COMPILE_DIR/arm-linux-gnueabihf-strip \
+            --target=arm-linux-gnueabihf --with-platform=efi \
+            --prefix=$TOP_DIR/$GRUB_PATH/output/ \
+            TARGET_CC=$CROSS_COMPILE_DIR/arm-linux-gnueabihf-gcc --disable-werror
 
-        make -j8 install
-        output/bin/grub-mkimage -v -c ${GRUB_PLAT_CONFIG_FILE} \
-        -o output/grubaa64.efi -O arm64-efi -p "" \
-        part_gpt part_msdos ntfs ntfscomp hfsplus fat ext2 normal chain \
-        boot configfile linux help part_msdos terminal terminfo configfile \
-        lsefi search normal gettext loadenv read search_fs_file search_fs_uuid search_label
+            make -j8 install
+            output/bin/grub-mkimage -v -c ${GRUB_PLAT_CONFIG_FILE} \
+            -o output/grubarm.efi -O arm-efi -p "" \
+            part_gpt part_msdos ntfs ntfscomp hfsplus fat ext2 normal chain \
+            boot configfile linux help part_msdos terminal terminfo configfile \
+            lsefi search normal gettext loadenv read search_fs_file search_fs_uuid search_label
+        else
+            ./configure STRIP=$CROSS_COMPILE_DIR/aarch64-linux-gnu-strip \
+            --target=aarch64-linux-gnu --with-platform=efi \
+            --prefix=$TOP_DIR/$GRUB_PATH/output/ \
+            TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
+
+            make -j8 install
+            output/bin/grub-mkimage -v -c ${GRUB_PLAT_CONFIG_FILE} \
+            -o output/grubaa64.efi -O arm64-efi -p "" \
+            part_gpt part_msdos ntfs ntfscomp hfsplus fat ext2 normal chain \
+            boot configfile linux help part_msdos terminal terminfo configfile \
+            lsefi search normal gettext loadenv read search_fs_file search_fs_uuid search_label
+        fi
         popd
     fi
 

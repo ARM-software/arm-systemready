@@ -66,6 +66,24 @@ fi
 LINUX_ARCH=arm64
 LINUX_IMAGE_TYPE=Image
 
+# toolchain
+. $TOP_DIR/../../common/scripts/common_cross_toolchain.sh
+
+if [[ ! ${ARCH+x} ]]; then
+    # use AARCH64
+    LINUX_ARCH=arm64
+else
+    case $ARCH in
+    arm)
+        LINUX_ARCH=arm
+        LINUX_IMAGE_TYPE=zImage
+        ;;
+    *)
+        LINUX_ARCH=arm64
+        ;;
+    esac
+fi
+
 do_build ()
 {
     export ARCH=$LINUX_ARCH
@@ -73,7 +91,22 @@ do_build ()
     pushd $LINUX_PATH
     mkdir -p $LINUX_OUT_DIR
     echo "Building using defconfig..."
-    cp arch/arm64/configs/defconfig $LINUX_OUT_DIR/.config
+    if [[ $LINUX_ARCH = "arm64" ]]
+    then
+        cp arch/arm64/configs/defconfig $LINUX_OUT_DIR/.config
+    else
+        cp arch/arm/configs/multi_v7_defconfig $LINUX_OUT_DIR/.config
+        echo "" >> $LINUX_OUT_DIR/.config
+        echo "CONFIG_EFI=y" >> $LINUX_OUT_DIR/.config
+        echo "CONFIG_EFI_STUB=y" >> $LINUX_OUT_DIR/.config
+        echo "CONFIG_EFI_VARS=y" >> $LINUX_OUT_DIR/.config
+        echo "CONFIG_EFI_VARS_PSTORE=m" >> $LINUX_OUT_DIR/.config
+        echo "CONFIG_EFI_CAPSULE_LOADER=m" >> $LINUX_OUT_DIR/.config
+        echo "CONFIG_EFIVAR_FS=y" >> $LINUX_OUT_DIR/.config
+        echo "CONFIG_EFI_PARTITION=y" >> $LINUX_OUT_DIR/.config
+        echo "# CONFIG_FB_EFI is not set" >> $LINUX_OUT_DIR/.config
+    fi
+
     arch=$(uname -m)
     if [[ $arch = "aarch64" ]]
     then
@@ -81,9 +114,7 @@ do_build ()
         make ARCH=arm64 O=$LINUX_OUT_DIR olddefconfig
     else
         echo "x86 cross compile"
-        GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-        CROSS_COMPILE=$TOP_DIR/$GCC
-        make ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC O=$LINUX_OUT_DIR olddefconfig
+        make ARCH=$LINUX_ARCH CROSS_COMPILE=$CROSS_COMPILE O=$LINUX_OUT_DIR olddefconfig
     fi
     #Configurations needed for FWTS
     sed -i 's/# CONFIG_EFI_TEST is not set/CONFIG_EFI_TEST=y/g' $LINUX_OUT_DIR/.config
@@ -97,7 +128,7 @@ do_build ()
         echo "arm64 machine"
         make ARCH=arm64 O=$LINUX_OUT_DIR -j$PARALLELISM
     else
-        make ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC O=$LINUX_OUT_DIR -j$PARALLELISM
+        make ARCH=$LINUX_ARCH CROSS_COMPILE=$CROSS_COMPILE O=$LINUX_OUT_DIR -j$PARALLELISM
     fi
     popd
 }
@@ -132,7 +163,10 @@ do_package ()
         cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci-renesas.ko $TOP_DIR/ramdisk/drivers
         cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci.ko $TOP_DIR/ramdisk/drivers
     fi
-
+    if [[ $ARCH = "arm" ]]; then
+        # hack
+        cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/arch/$LINUX_ARCH/boot/dts/stm32mp157c-dk2.dtb ${OUTDIR}/
+    fi
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )

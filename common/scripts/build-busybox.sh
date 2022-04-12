@@ -55,8 +55,23 @@ if [ $BAND == "SR" ]; then
 else
     . $TOP_DIR/../../common/config/common_config.cfg
 fi
+# toolchain
+. $TOP_DIR/../../common/scripts/common_cross_toolchain.sh
 
 BUSYBOX_ARCH=arm64
+if [[ ! ${ARCH+x} ]]; then
+    # use AARCH64
+    BUSYBOX_ARCH=arm64
+else
+    case $ARCH in
+    arm)
+        BUSYBOX_ARCH=arm
+        ;;
+    *)
+        BUSYBOX_ARCH=arm64
+        ;;
+    esac
+fi
 BUSYBOX_PATH=busybox
 BUSYBOX_OUT_DIR=output
 BUSYBOX_RAMDISK_PATH=ramdisk
@@ -78,10 +93,13 @@ do_build()
         make O=$BUSYBOX_OUT_DIR -j $PARALLELISM  ARCH=arm64
         make O=$BUSYBOX_OUT_DIR ARCH=arm64 install
     else
-        GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-        CROSS_COMPILE=$TOP_DIR/$GCC
-        make O=$BUSYBOX_OUT_DIR -j $PARALLELISM  ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC
-        make O=$BUSYBOX_OUT_DIR ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC install
+        if [[ ! ${ARCH+x} ]]; then
+            # use ARCH=arm64
+            CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
+            PATH="$PATH:$CROSS_COMPILE_DIR"
+        fi
+        make O=$BUSYBOX_OUT_DIR -j $PARALLELISM  ARCH=$ARCH CROSS_COMPILE=$TOP_DIR/$GCC
+        make O=$BUSYBOX_OUT_DIR ARCH=$ARCH CROSS_COMPILE=$TOP_DIR/$GCC install
     fi
     popd
 
@@ -117,8 +135,13 @@ do_package ()
         fi
     fi
     cp $TOP_DIR/$BUSYBOX_RAMDISK_BUSYBOX_PATH/busybox .
-    $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/$LINUX_CONFIG_DEFAULT/usr/gen_init_cpio files.txt \
-    > ramdisk.img
+    if [[ $ARCH = "arm" ]]; then
+        $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/$LINUX_CONFIG_DEFAULT/usr/gen_init_cpio files-arm.txt \
+        > ramdisk.img
+    else
+        $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/$LINUX_CONFIG_DEFAULT/usr/gen_init_cpio files.txt \
+        > ramdisk.img
+    fi
     popd
     # Copy binary to output folder
     pushd $TOP_DIR
