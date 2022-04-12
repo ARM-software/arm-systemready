@@ -115,12 +115,21 @@ get_cross_compiler()
     echo "Downloading TOOLS source code. Version : ${LINARO_TOOLS_VERSION}"
     LINARO=https://releases.linaro.org/components/toolchain/binaries
     VERSION=$LINARO_TOOLS_MAJOR_VERSION
+    # aarch64 compiler
     GCC=aarch64-linux-gnu/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu.tar.xz
     mkdir -p tools
     pushd $TOP_DIR/tools
     wget $LINARO/$VERSION/$GCC
     tar -xf gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu.tar.xz
     rm gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu.tar.xz
+
+    # get arm compiler (32bits)
+    GCC=arm-linux-gnueabihf/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_arm-linux-gnueabihf.tar.xz
+    mkdir -p tools
+    pushd $TOP_DIR/tools
+    wget $LINARO/$VERSION/$GCC
+    tar -xf gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_arm-linux-gnueabihf.tar.xz
+    rm gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_arm-linux-gnueabihf.tar.xz
     popd
 }
 
