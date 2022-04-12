@@ -41,22 +41,29 @@ PACKAGE=$2
 
 source ./build-scripts/build-uefi.sh
 
-if [ $BAND == "SR" ]; then
-    source ./build-scripts/build-sbsaefi.sh
+if [[ $ARCH = "arm" ]]; then
+    # support for ARM32 bits
+    source ./build-scripts/build-sct.sh $@
+    source ./build-scripts/build-linux.sh $BAND
+    source ./build-scripts/build-grub.sh $@
+    source ./build-scripts/build-busybox.sh $@
 else
-   source ./build-scripts/build-bsaefi.sh $@
+    if [ $BAND == "SR" ]; then
+        source ./build-scripts/build-sbsaefi.sh
+    else
+       source ./build-scripts/build-bsaefi.sh $@
+    fi
+    source ./build-scripts/build-sct.sh $@
+    source ./build-scripts/build-uefi-apps.sh $@
+    source ./build-scripts/build-linux.sh $BAND
+
+    if [ $BAND == "SR" ]; then
+        source ./build-scripts/build-linux-sbsa.sh
+    else
+        source ./build-scripts/build-linux-bsa.sh
+    fi
+
+    source ./build-scripts/build-grub.sh $@
+    source ./build-scripts/build-fwts.sh $@
+    source ./build-scripts/build-busybox.sh $@
 fi
-source ./build-scripts/build-sct.sh $@
-source ./build-scripts/build-uefi-apps.sh $@
-source ./build-scripts/build-linux.sh $BAND
-
-if [ $BAND == "SR" ]; then
-    source ./build-scripts/build-linux-sbsa.sh
-else
-    source ./build-scripts/build-linux-bsa.sh
-fi
-
-source ./build-scripts/build-grub.sh $@
-source ./build-scripts/build-fwts.sh $@
-source ./build-scripts/build-busybox.sh $@
-
