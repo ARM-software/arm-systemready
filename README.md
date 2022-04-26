@@ -23,6 +23,7 @@ Navigate to the ES, IR, or SR band for further details on specific scripts and p
 * [ES](./ES)
 * [IR](./IR)
 * [SR](./SR)
+* [LS](./LS)
 
 ## SystemReady Security Interface Extension:
 The SystemReady Security Interface Extension certifies that firmware meets the requirements specified by the Arm [Base Boot Security Requirements specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). The Security Interface Extension is optionally applicable to SystemReady SR, ES and IR bands, but not the LS band.
