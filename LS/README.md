@@ -6,7 +6,7 @@ SystemReady LS is tailored to meet the needs of many hyperscalers on systems bas
 
 SystemReady LS-certified platforms implement a minimum set of hardware and standard firmware interfaces. Allowing for highly customizable firmware that targets the hyperscaler’s Linux environment.
 
-* [Server Base System Architecture (SBSA) specification](https://developer.arm.com/documentation/den0029/d/?lang=en)
+* [Server Base System Architecture (SBSA) specification](https://developer.arm.com/documentation/den0029/latest)
 * LBBR recipe of the [Base Boot Requirements (BBR) specification](https://developer.arm.com/documentation/den0044/latest)
 * The SystemReady LS certification and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
