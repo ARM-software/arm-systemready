@@ -1,0 +1,17 @@
+dir /dev 755 0 0
+nod /dev/console 644 0 0 c 5 1
+nod /dev/loop0 644 0 0 b 7 0
+dir /bin 755 1000 1000
+file /bin/busybox ./busybox 755 0 0
+slink /linuxrc /bin/busybox 777 0 0
+slink /bin/sh /bin/busybox 777 0 0
+dir /proc 755 0 0
+dir /sys 755 0 0
+dir /mnt 755 0 0
+dir /usr 755 0 0
+dir /sbin 755 0 0
+dir /usr/bin 755 0 0
+dir /usr/sbin 755 0 0
+file /init ./init.sh 777 0 0
+dir /lib 777 0 0
+dir /lib/modules 777 0 0
