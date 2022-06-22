@@ -1,0 +1,35 @@
+From 6c950c8fe7835e55a342c4a6dc7f117aab2e92bc Mon Sep 17 00:00:00 2001
+From: Etienne Carriere <etienne.carriere@linaro.org>
+Date: Mon, 2 May 2022 09:17:52 +0200
+Subject: [PATCH] Subject: [PATCH] GRUB: correct detection of DDR RAM address
+
+Consider only conventional memory (EFI_CONVENTIONAL_MEMORY == 7) when
+computing main RAM memory map.
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@foss.st.com>
+Signed-off-by: Etienne Carriere <etienne.carriere@linaro.org>
+---
+ grub-core/kern/efi/mm.c | 0 -+
+ 1 file changed, 2 insertions(+)
+
+Signed-off-by: Etienne Carriere <etienne.carriere@linaro.org>
+---
+ grub-core/kern/efi/mm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grub-core/kern/efi/mm.c b/grub-core/kern/efi/mm.c
+index d8e411454..97023c17b 100644
+--- a/grub-core/kern/efi/mm.c
++++ b/grub-core/kern/efi/mm.c
+@@ -681,7 +681,7 @@ grub_efi_get_ram_base(grub_addr_t *base_addr)
+   for (desc = memory_map, *base_addr = GRUB_EFI_MAX_USABLE_ADDRESS;
+        (grub_addr_t) desc < ((grub_addr_t) memory_map + memory_map_size);
+        desc = NEXT_MEMORY_DESCRIPTOR (desc, desc_size))
+-    if (desc->attribute & GRUB_EFI_MEMORY_WB)
++    if ((desc->type == 7) && (desc->attribute & GRUB_EFI_MEMORY_WB))
+       *base_addr = grub_min (*base_addr, desc->physical_start);
+ 
+   grub_free(memory_map);
+-- 
+2.17.1
+
