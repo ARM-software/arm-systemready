@@ -30,6 +30,13 @@
 
 TOP_DIR=`pwd`
 
+#Optional argument 'arm' shall be set when targeting a 32bit Arm device
+if [ "$1" == "arm" ]; then
+    TARGET_ARCH="arm"
+else
+    TARGET_ARCH="aarch64"
+fi
+
 #Get the band run from automatically
 pushd ..
 BAND_PATH=`pwd`
@@ -115,12 +122,18 @@ get_cross_compiler()
     echo "Downloading TOOLS source code. Version : ${LINARO_TOOLS_VERSION}"
     LINARO=https://releases.linaro.org/components/toolchain/binaries
     VERSION=$LINARO_TOOLS_MAJOR_VERSION
-    GCC=aarch64-linux-gnu/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu.tar.xz
+    if [ $TARGET_ARCH == "arm" ]; then
+	TAG=arm-linux-gnueabihf
+    else
+	TAG=aarch64-linux-gnu
+    fi
+
+    GCC=${TAG}/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
     mkdir -p tools
     pushd $TOP_DIR/tools
     wget $LINARO/$VERSION/$GCC
-    tar -xf gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu.tar.xz
-    rm gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu.tar.xz
+    tar -xf gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
+    rm gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
     popd
 }
 
@@ -160,13 +173,14 @@ get_linux-acs_src()
       echo "Downloading Arm Linux ACS source code. TAG : ${ARM_LINUX_ACS_TAG}"
       git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs linux-acs
   fi
-  pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
 
-  #The same patch is applicable BSA and SBSA
-  echo "Applying Linux ACS xBSA Patch..."
-  git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-ACS-Linux-${LINUX_KERNEL_VERSION}.patch
-
-  popd
+  if [ $TARGET_ARCH != "arm" ]; then
+    pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
+    #The same patch is applicable BSA and SBSA
+    echo "Applying Linux ACS xBSA Patch..."
+    git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-ACS-Linux-${LINUX_KERNEL_VERSION}.patch
+    popd
+  fi
 
 }
 
@@ -187,6 +201,10 @@ sudo apt install git curl mtools gdisk gcc\
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
  make gcc g++ python
 
+if [ $TARGET_ARCH == "arm" ]; then
+    sudo apt-get install libmpc-dev
+fi
+
 get_uefi_src
 
 if [ $BAND == "SR" ]; then
@@ -194,6 +212,7 @@ if [ $BAND == "SR" ]; then
 else
     get_bsa_src
 fi
+
 get_bbr_acs_src
 get_sct_src
 get_grub_src
