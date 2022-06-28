@@ -1,4 +1,6 @@
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+#!/usr/bin/env bash
+
+# Copyright (c) 2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -25,39 +27,18 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+set -x
+TOP_DIR=`pwd`
+pushd $TOP_DIR/meta-woden
+kas build kas/woden.yml
+if [ $? -eq 0 ]; then
+    if [ -f $TOP_DIR/meta-woden/build/tmp/deploy/images/generic-arm64/woden-image-generic-arm64.wic ]; then
+      cd $TOP_DIR/meta-woden/build/tmp/deploy/images/generic-arm64
+      rm ir-acs-live-image-generic-arm64.wic.xz 2> /dev/null
+      cp woden-image-generic-arm64.wic ir-acs-live-image-generic-arm64.wic
+      xz -z ir-acs-live-image-generic-arm64.wic
+      echo "The built image is at $TOP_DIR/meta-woden/build/tmp/deploy/images/generic-arm64/ir-acs-live-image-generic-arm64.wic.xz"
+    fi
+fi
+popd
 
-echo -off
-for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%i:\acs_results then
-        FS%i:
-        cd FS%i:\acs_results
-        if not exist uefi then
-            mkdir uefi
-        endif
-        cd uefi
-        for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-            if exist FS%j:\EFI\BOOT\bsa\Bsa.efi then
-                #BSA_VERSION_PRINT_PLACEHOLDER
-                if exist FS%j:\EFI\BOOT\bsa\ir_bsa.flag then
-                    #Executing for BSA IR. Execute only OS tests
-                    FS%j:\EFI\BOOT\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaResults.log
-                    goto Done
-                endif
-                FS%j:\EFI\BOOT\bsa\Bsa.efi -skip 900 -f BsaResults.log
-                goto Done
-            endif
-            if exist FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi then
-                if exist FS%i:\acs_results\uefi\SbsaResults.log then
-		    echo "SBSA ACS is already run"
-		    goto Done
-		endif
-	        FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi -skip 800 -f SbsaResults.log
-                reset
-		goto Done
-            endif
-        endfor
-        echo "Bsa.efi not found"
-    endif
-endfor
-echo "BsaResults not found"
-:Done

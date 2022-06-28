@@ -1,0 +1,7 @@
+bootloader --ptable gpt --timeout=10 --append="rootfstype=ext4"
+
+part /boot --source bootimg-efi --sourceparams="loader=${EFI_PROVIDER}" --label boot --active --align 1024 --use-uuid --size 100M
+
+part / --source rootfs --fstype=ext4 --label root --align 1024 --use-uuid
+
+part /results --fstype=vfat --label results --align 1024 --use-uuid --size 50M

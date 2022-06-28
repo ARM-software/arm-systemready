@@ -1,5 +1,7 @@
 # SystemReady IR ACS
 
+**_Note_**: Refer to [Yocto README](Yocto/README.md) for the details on the SystemReady IR ACS v2.0.0 **Beta-0** version and instructions to build using Yocto.
+
 ## Introduction to SystemReady IR
 SystemReady IoT Ready (IR) is a band of system certification in the Arm SystemReady program. This certification is for devices in the IoT edge sector that are built around SoCs based on the Arm A-profile architecture. It ensures interoperability with embedded Linux and other embedded operating systems.
 

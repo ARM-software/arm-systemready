@@ -1,0 +1,30 @@
+From ea08aac51e70143261345a631110ecbf493a6f6f Mon Sep 17 00:00:00 2001
+From: Amrathesh <amrathesh@arm.com>
+Date: Tue, 10 May 2022 14:04:15 +0530
+Subject: [PATCH] EDK2 IR BSA HII Patch
+
+- edk2-tag: edk2-stable202202
+
+Signed-off-by: Amrathesh <amrathesh@arm.com>
+---
+ MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
+index f0a8b9fe62..e41e0de3e0 100644
+--- a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
++++ b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
+@@ -90,8 +90,8 @@ UefiHiiServicesLibConstructor (
+   //
+   // Retrieve the pointer to the UEFI HII Config Routing Protocol
+   //
+-  Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **)&gHiiConfigRouting);
+-  ASSERT_EFI_ERROR (Status);
++  //Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **)&gHiiConfigRouting);
++  //ASSERT_EFI_ERROR (Status);
+ 
+   //
+   // Retrieve the pointer to the optional UEFI HII Font Protocol
+-- 
+2.17.1
+

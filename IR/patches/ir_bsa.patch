@@ -1,7 +1,9 @@
-From 4099a09e9dcc759c3703d759c6b7840a33386b1a Mon Sep 17 00:00:00 2001
+From 348ba393179b9231fc7914fb1770e7e904263cc6 Mon Sep 17 00:00:00 2001
 From: Amrathesh <amrathesh@arm.com>
-Date: Wed, 22 Dec 2021 17:01:59 +0530
+Date: Tue, 10 May 2022 13:59:19 +0530
 Subject: [PATCH] EDK2 IR BSA Patch
+
+- edk2-tag: edk2-stable202202
 
 Signed-off-by: Amrathesh <amrathesh@arm.com>
 ---
@@ -9,10 +11,10 @@ Signed-off-by: Amrathesh <amrathesh@arm.com>
  1 file changed, 4 insertions(+)
 
 diff --git a/ShellPkg/ShellPkg.dsc b/ShellPkg/ShellPkg.dsc
-index a8b6de3..e717591 100644
+index 38fde3dc71..677625e067 100644
 --- a/ShellPkg/ShellPkg.dsc
 +++ b/ShellPkg/ShellPkg.dsc
-@@ -60,6 +60,9 @@
+@@ -63,6 +63,9 @@
    DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
    DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
    ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
@@ -22,7 +24,7 @@ index a8b6de3..e717591 100644
  
  [LibraryClasses.ARM,LibraryClasses.AARCH64]
    #
-@@ -98,6 +101,7 @@
+@@ -101,6 +104,7 @@
    ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
    ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf
    ShellPkg/Library/UefiShellNetwork2CommandsLib/UefiShellNetwork2CommandsLib.inf
