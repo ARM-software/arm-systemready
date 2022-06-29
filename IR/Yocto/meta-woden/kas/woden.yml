@@ -1,0 +1,35 @@
+header:
+  version: 11
+
+repos:
+  meta-woden:
+
+  poky:
+    url: https://git.yoctoproject.org/git/poky
+    refspec: kirkstone-4.0
+    layers:
+      meta:
+
+  meta-arm:
+    url: https://git.yoctoproject.org/git/meta-arm
+    refspec: kirkstone
+    layers:
+      meta-arm:
+      meta-arm-bsp:
+      meta-arm-toolchain:
+
+  meta-openembedded:
+    url: https://git.openembedded.org/meta-openembedded
+    refspec: kirkstone
+    layers:
+      meta-oe:
+
+local_conf_header:
+  threads: |
+    BB_NUMBER_THREADS = "16"
+    PARALLEL_MAKE = "-j16"
+
+distro: woden
+machine: generic-arm64
+target:
+  - woden-image
