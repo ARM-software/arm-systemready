@@ -1,3 +1,13 @@
+v22.06_IR_2.0.0_BETA-0
+**SystemReady IR**
+* Scripts and recipes for Yocto IR ACS build with python integrated
+* Yocto version Kirkstone with new Linux kernel (Kernel Version: 5.15.38 )
+* Automated run of Linux BSA
+* BSA: Enhancements and Issues fixed
+* BBR: FWTS Tests to verify the ESRT table on FWTS to the extent for minimal criteria of FWUPD
+* BBR: Upgraded BBR test suites (SCT and FWTS). See common_config.cfg file for details
+
+
 v22.02_SR_1.0
 **SystemReady SR**
 * Code and scripts to build the SystemReady SR ACS Image
