@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -65,14 +65,6 @@ do_build()
     pushd $TOP_DIR/$UEFI_PATH
 
     git checkout ShellPkg/ShellPkg.dsc # Remove if any patches applied
-    git checkout ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c # Remove if any patches applied
-    if git apply --check $COMMON_PATCH_DIR/edk2_gicv3.patch ; then
-        echo "Applying EDK2 GICv3 Patch ..."
-        git apply $COMMON_PATCH_DIR/edk2_gicv3.patch
-    else
-        echo "Error while applying EDK2 GICv3 Patch"
-        exit_fun
-    fi
 
     if git apply --check $PATCH_DIR/sr_sbsa.patch ; then
         echo "Applying SR SBSA Patch ..."
