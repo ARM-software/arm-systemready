@@ -65,14 +65,6 @@ do_build()
     pushd $TOP_DIR/$UEFI_PATH
 
     git checkout ShellPkg/ShellPkg.dsc # Remove if any patches applied
-    git checkout ArmPkg/Drivers/ArmGic/GicV3/ArmGicV3Dxe.c # Remove if any patches applied
-    if git apply --check $COMMON_PATCH_DIR/edk2_gicv3.patch; then
-         echo "Applying EDK2 GICv3 Patch ..."
-         git apply $COMMON_PATCH_DIR/edk2_gicv3.patch
-    else
-         echo "Error while applying EDK2 GICv3 Patch"
-         exit_fun
-    fi
 
     if [ "$BUILD_PLAT" = "ES" ]; then
        if git apply --check $PATCH_DIR/es_bsa.patch; then
