@@ -57,8 +57,13 @@ create_cfgfiles ()
 
     mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
     mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh
-    mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
-    mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/debug_dump.nsh
+    if [ "$BUILD_PLAT" == "SIE" ]; then
+        GRUB_FS_CONFIG_FILE_SIG=${TOP_DIR}/build-scripts/config/grub.cfg.sig
+        mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE_SIG} ::/grub.cfg.sig
+    else
+        mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
+        mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/debug_dump.nsh
+    fi
     #mcopy -i  $fatpart_name -o ${BBR_CONFIG_FILE}    ::/EFI/BOOT/bbr/bbr.nsh
 
 }
@@ -78,6 +83,9 @@ create_fatpart ()
         mmd -i $fatpart_name ::/EFI/BOOT/bsa/sbsa
     fi
     mmd -i $fatpart_name ::/EFI/BOOT/bbr
+    if [ "$BUILD_PLAT" = "SIE" ]; then
+      mmd -i $fatpart_name ::/EFI/BOOT/bbr/security-interface-extension-keys
+    fi
     mmd -i $fatpart_name ::/EFI/BOOT/debug
     mmd -i $fatpart_name ::/EFI/BOOT/app
 
@@ -89,7 +97,9 @@ create_fatpart ()
     if [ "$BUILD_PLAT" = "SR" ]; then
         mcopy -i $fatpart_name Sbsa.efi ::/EFI/BOOT/bsa/sbsa
     else
-        mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
+        if [ "$BUILD_PLAT" != "SIE" ]; then
+            mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
+        fi
     fi
 
     mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
@@ -98,6 +108,14 @@ create_fatpart ()
       mcopy -i $fatpart_name ${TOP_DIR}/build-scripts/ir_bsa.flag ::/EFI/BOOT/bsa
     fi
     mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/EFI/BOOT/app
+
+    if [ "$BUILD_PLAT" = "SIE" ]; then
+      mcopy -i $fatpart_name Shell.efi.sig ::/EFI/BOOT
+      mcopy -i $fatpart_name $OUTDIR/Image.sig ::/
+      mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img.sig  ::/
+      mcopy -i $fatpart_name ${TOP_DIR}/security-interface-extension-keys/*.der ::/EFI/BOOT/bbr/security-interface-extension-keys
+      mcopy -i $fatpart_name ${TOP_DIR}/security-interface-extension-keys/*.auth ::/EFI/BOOT/bbr/security-interface-extension-keys
+    fi
 
     echo "FAT partition image created"
 }
@@ -143,8 +161,11 @@ prepare_disk_image ()
     elif [ "$BUILD_PLAT" = "SR" ]; then
        IMG_BB=sr_acs_live_image.img
        echo -e "\e[1;32m Build SR Live Image at $PLATDIR/$IMG_BB \e[0m"
+    elif [ "$BUILD_PLAT" = "SIE" ]; then
+       IMG_BB=sie_acs_live_image.img
+       echo -e "\e[1;32m Build SIE Live Image at $PLATDIR/$IMG_BB \e[0m"
     else
-       echo "Specify platform ES, IR or SR"
+       echo "Specify platform ES, IR, SR or SIE"
        exit_fun
     fi
 
@@ -162,6 +183,8 @@ prepare_disk_image ()
 
     if [ "$BUILD_PLAT" = "SR" ]; then
         cp $TOP_DIR/$BSA_EFI_PATH/Sbsa.efi Sbsa.efi
+    elif [ "$BUILD_PLAT" = "SIE" ]; then
+        cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi.sig Shell.efi.sig
     else
         cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi Bsa.efi
     fi
@@ -214,7 +237,7 @@ BUILD_PLAT=$1
 
 if [ -z "$BUILD_PLAT" ]
 then
-   echo "Specify platform ES, IR or SR"
+   echo "Specify platform ES, IR, SR or SIE"
    exit_fun
 fi
 #prepare the disk image
