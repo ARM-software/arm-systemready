@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -49,6 +49,7 @@
 
 
 TOP_DIR=`pwd`
+BAND=$1
 . $TOP_DIR/../../common/config/common_config.cfg
 
 UEFI_PATH=edk2
@@ -58,7 +59,7 @@ GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch6
 PATCH_DIR=$TOP_DIR/../patches
 CROSS_COMPILE=$TOP_DIR/$GCC
 
-if [ $1 == "SIE" ]; then
+if [ $BAND == "SIE" ]; then
     KEYS_DIR=$TOP_DIR/security-interface-extension-keys
     UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64
 fi
@@ -106,7 +107,7 @@ do_package ()
 {
     echo "Packaging uefi... $VARIANT";
     
-    if [ $1 == "SIE" ]; then
+    if [ $BAND == "SIE" ]; then
         echo "Signing Shell Application... "
         pushd $TOP_DIR
         # sign Shell.efi with db key

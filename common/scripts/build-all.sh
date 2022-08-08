@@ -43,7 +43,8 @@ if [ $1 == "SIE" ]; then
     source ./build-scripts/build-uefi-apps.sh $@
     source ./build-scripts/build-grub.sh $@
     source ./build-scripts/build-buildroot.sh
-    exit 0
+    # return to the parent script
+    return
 fi
 
 # Build IR|ES|SR ACS

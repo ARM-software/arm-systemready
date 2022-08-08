@@ -2,7 +2,7 @@
 
 ## Introduction to the SystemReady Security Interface Extension
 
-The SystemReady Security Interface Extension provides a way to certify that Secure Boot and secure firmware update are implemented as prescribed by the Arm [Base Boot Security Specification](https://developer.arm.com/documentation/den0107/latest) (BBSR).  The Security Interface Extension is an extension to the bands of the SystemReady program and a pre-requisite for a Security Interface Extension certification in one of the IR, ES, or LS bands.
+The SystemReady Security Interface Extension provides a way to certify that Secure Boot and secure firmware update are implemented as prescribed by the Arm [Base Boot Security Specification](https://developer.arm.com/documentation/den0107/latest) (BBSR).  The Security Interface Extension is an extension to the bands of the SystemReady program and a pre-requisite for a Security Interface Extension certification in one of the IR, ES, or SR bands.
 
 The Security Interface Extension ACS tests the following security related interfaces:
 * Authenticated variables
@@ -27,12 +27,12 @@ This section describes the steps to build the ACS or obtain the pre-built live i
 ## Steps to build SystemReady Security Inteface Extension ACS live image
 
 ## GitHub branch
-- To pick up the release version of the code, checkout the branch "security-interface-extension-acs".  The release tag is: v21.10_SIE_REL1.0
+- To pick up the release version of the code, checkout the release tag v21.10_SIE_REL1.0
 
 ## ACS build steps
 
 ### Pre-built images
-- Pre-built images for each release are available in the prebuilt_images folder of the release branch. You can either choose to use these images or build your own image by following the steps below.
+- Pre-built images for each release are available in the prebuilt_images folder. You can either choose to use these images or build your own image by following the steps below.
 - To access the prebuilt_images, click this link : [prebuilt_images](./prebuilt_images/v21.10_SIE_REL1.0)
 - If you choose to use the pre-built image, skip the build steps and jump to the test suite execution section below.
 
@@ -40,12 +40,12 @@ This section describes the steps to build the ACS or obtain the pre-built live i
 Before starting the ACS build, ensure that the following requirements are met:
  - Ubuntu 18.04 LTS with at least 64GB of free disk space.
  - Must use Bash shell.
- - User should have **sudo** privilege to install tools required for build
- - git must be installed in order to clone the ACS repo
+ - User should have **sudo** privilege to install tools required for build.
+ - git must be installed in order to clone the ACS repo.
 
 ### Steps to build SystemReady Security Interface Extension ACS live image
-1. Clone the security-interface-extension-acs branch of  [Arm-SystemReady](https://github.com/ARM-software/arm-systemready) repo. <br />
- `git clone -b security-interface-extension-acs https://github.com/ARM-software/arm-systemready`
+1. Clone the arm-systemready repository <br />
+ `git clone https://github.com/ARM-software/arm-systemready`
 
 2. Navigate to the security-interface-extension/scripts directory <br />
  `cd arm-systemready/security-interface-extension/scripts`
@@ -91,4 +91,4 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2021, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2022, Arm Limited and Contributors. All rights reserved.*
