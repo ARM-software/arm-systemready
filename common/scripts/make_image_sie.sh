@@ -40,14 +40,11 @@ PLATDIR=${TOP_DIR}/output
 OUTDIR=${PLATDIR}
 GRUB_FS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
 EFI_CONFIG_FILE=${TOP_DIR}/build-scripts/config/startup.nsh
-BSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bsa.nsh
-BBR_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bbr.nsh
-DEBUG_CONFIG_FILE=${TOP_DIR}/build-scripts/config/debug_dump.nsh
+GRUB_FS_CONFIG_FILE_SIG=${TOP_DIR}/build-scripts/config/grub.cfg.sig
 BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
 GRUB_PATH=grub
 UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64/
-BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
 SCT_PATH=edk2-test/uefi-sct/AARCH64_SCT
 UEFI_APPS_PATH=${TOP_DIR}/edk2/Build/MdeModule/DEBUG_GCC5/AARCH64
 
@@ -56,11 +53,8 @@ create_cfgfiles ()
     local fatpart_name="$1"
 
     mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
-    mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh
-    mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
-    mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/debug_dump.nsh
-    #mcopy -i  $fatpart_name -o ${BBR_CONFIG_FILE}    ::/EFI/BOOT/bbr/bbr.nsh
-
+    mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh   
+    mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE_SIG} ::/grub.cfg.sig
 }
 
 create_fatpart ()
@@ -73,11 +67,8 @@ create_fatpart ()
     mmd -i $fatpart_name ::/EFI
     mmd -i $fatpart_name ::/EFI/BOOT
     mmd -i $fatpart_name ::/grub
-    mmd -i $fatpart_name ::/EFI/BOOT/bsa
-    if [ "$BUILD_PLAT" = "SR" ]; then
-        mmd -i $fatpart_name ::/EFI/BOOT/bsa/sbsa
-    fi
     mmd -i $fatpart_name ::/EFI/BOOT/bbr
+    mmd -i $fatpart_name ::/EFI/BOOT/bbr/security-interface-extension-keys
     mmd -i $fatpart_name ::/EFI/BOOT/debug
     mmd -i $fatpart_name ::/EFI/BOOT/app
 
@@ -86,18 +77,14 @@ create_fatpart ()
     mcopy -i $fatpart_name $OUTDIR/Image ::/
     mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
 
-    if [ "$BUILD_PLAT" = "SR" ]; then
-        mcopy -i $fatpart_name Sbsa.efi ::/EFI/BOOT/bsa/sbsa
-    else
-        mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
-    fi
-
     mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
-    if [ "$BUILD_PLAT" = "IR" ]; then
-      echo " IR BSA flag file copied"
-      mcopy -i $fatpart_name ${TOP_DIR}/build-scripts/ir_bsa.flag ::/EFI/BOOT/bsa
-    fi
     mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/EFI/BOOT/app
+
+    mcopy -i $fatpart_name Shell.efi.sig ::/EFI/BOOT
+    mcopy -i $fatpart_name $OUTDIR/Image.sig ::/
+    mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img.sig  ::/
+    mcopy -i $fatpart_name ${TOP_DIR}/security-interface-extension-keys/*.der ::/EFI/BOOT/bbr/security-interface-extension-keys
+    mcopy -i $fatpart_name ${TOP_DIR}/security-interface-extension-keys/*.auth ::/EFI/BOOT/bbr/security-interface-extension-keys
 
     echo "FAT partition image created"
 }
@@ -134,19 +121,9 @@ prepare_disk_image ()
     echo "Preparing disk image for busybox boot"
     echo "-------------------------------------"
 
-    if [ "$BUILD_PLAT" = "ES" ]; then
-       IMG_BB=es_acs_live_image.img
-       echo -e "\e[1;32m Build ES Live Image at $PLATDIR/$IMG_BB \e[0m"
-    elif [ "$BUILD_PLAT" = "IR" ]; then
-       IMG_BB=ir_acs_live_image.img
-       echo -e "\e[1;32m Build IR Live Image at $PLATDIR/$IMG_BB \e[0m"
-    elif [ "$BUILD_PLAT" = "SR" ]; then
-       IMG_BB=sr_acs_live_image.img
-       echo -e "\e[1;32m Build SR Live Image at $PLATDIR/$IMG_BB \e[0m"
-    else
-       echo "Specify platform ES, IR or SR"
-       exit_fun
-    fi
+    
+    IMG_BB=sie_acs_live_image.img
+    echo -e "\e[1;32m Build SIE Live Image at $PLATDIR/$IMG_BB \e[0m"
 
     pushd $TOP_DIR/$GRUB_PATH/output
 
@@ -159,12 +136,7 @@ prepare_disk_image ()
     rm -f $PLATDIR/$IMG_BB
     cp grubaa64.efi bootaa64.efi
     cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi Shell.efi
-
-    if [ "$BUILD_PLAT" = "SR" ]; then
-        cp $TOP_DIR/$BSA_EFI_PATH/Sbsa.efi Sbsa.efi
-    else
-        cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi Bsa.efi
-    fi
+    cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi.sig Shell.efi.sig
 
     cp -Tr $TOP_DIR/$SCT_PATH/ SCT
     grep -q -F 'mtools_skip_check=1' ~/.mtoolsrc || echo "mtools_skip_check=1" >> ~/.mtoolsrc
@@ -214,7 +186,7 @@ BUILD_PLAT=$1
 
 if [ -z "$BUILD_PLAT" ]
 then
-   echo "Specify platform ES, IR or SR"
+   echo "Specify platform SIE"
    exit_fun
 fi
 #prepare the disk image

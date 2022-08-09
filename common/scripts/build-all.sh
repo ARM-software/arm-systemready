@@ -41,7 +41,7 @@ if [ $1 == "SIE" ]; then
     source ./build-scripts/build-uefi.sh $@
     source ./build-scripts/build-sct.sh $@
     source ./build-scripts/build-uefi-apps.sh $@
-    source ./build-scripts/build-grub.sh $@
+    source ./build-scripts/build-grub-sie.sh $@
     source ./build-scripts/build-buildroot.sh
     # return to the parent script
     return

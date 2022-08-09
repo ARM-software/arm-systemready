@@ -34,11 +34,11 @@ create_scripts_link()
 {
  ln -s $TOP_DIR/../../common/scripts/build-all.sh               $TOP_DIR/build-scripts/build-all.sh
  ln -s $TOP_DIR/../../common/scripts/build-uefi.sh              $TOP_DIR/build-scripts/build-uefi.sh
- ln -s $TOP_DIR/../../common/scripts/build-grub.sh              $TOP_DIR/build-scripts/build-grub.sh
+ ln -s $TOP_DIR/../../common/scripts/build-grub-sie.sh              $TOP_DIR/build-scripts/build-grub-sie.sh
  ln -s $TOP_DIR/../../common/scripts/build-efitools.sh          $TOP_DIR/build-scripts/build-efitools.sh
  ln -s $TOP_DIR/../../common/scripts/framework.sh               $TOP_DIR/build-scripts/framework.sh
  ln -s $TOP_DIR/../../common/scripts/parse_params.sh            $TOP_DIR/build-scripts/parse_params.sh
- ln -s $TOP_DIR/../../common/scripts/make_image.sh              $TOP_DIR/build-scripts/make_image.sh
+ ln -s $TOP_DIR/../../common/scripts/make_image_sie.sh              $TOP_DIR/build-scripts/make_image_sie.sh
  ln -s $TOP_DIR/../../common/scripts/build-buildroot.sh         $TOP_DIR/build-scripts/build-buildroot.sh
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-sct.sh             $TOP_DIR/build-scripts/build-sct.sh
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-sie-keys.sh        $TOP_DIR/build-scripts/build-sie-keys.sh
@@ -55,6 +55,6 @@ create_scripts_link
 init_dir
 
 source ./build-scripts/build-all.sh  SIE F
-source ./build-scripts/make_image.sh SIE
+source ./build-scripts/make_image_sie.sh SIE
 
 
