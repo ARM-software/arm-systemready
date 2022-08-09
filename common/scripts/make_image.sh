@@ -219,3 +219,4 @@ then
 fi
 #prepare the disk image
 prepare_disk_image
+

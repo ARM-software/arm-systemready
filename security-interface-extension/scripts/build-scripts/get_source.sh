@@ -109,7 +109,7 @@ get_buildroot_src()
 
 get_bbr_acs_src()
 {
-   git clone --depth 1 https://github.com/amrathesh/bbr-acs.git bbr-acs
+   git clone --depth 1 https://github.com/ARM-software/bbr-acs.git bbr-acs
 }
 
 sudo apt install git curl mtools gdisk gcc\
