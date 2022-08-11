@@ -47,8 +47,8 @@ Before starting the ACS build, ensure that the following requirements are met:
 1. Clone the arm-systemready repository <br />
  `git clone https://github.com/ARM-software/arm-systemready`
 
-2. Navigate to the security-interface-extension/scripts directory <br />
- `cd arm-systemready/security-interface-extension/scripts`
+2. Navigate to the SIE/scripts directory <br />
+ `cd arm-systemready/SIE/scripts`
 
 3. Run get_source.sh to download all related sources and tools for the build. Provide the sudo permission when prompted <br />
  `./build-scripts/get_source.sh` <br />
@@ -57,7 +57,7 @@ Before starting the ACS build, ensure that the following requirements are met:
  `./build-scripts/build-security-extension-live-image.sh`
 
 5. If all of above steps are successful, the compressed, bootable image will be available at: <br />
- `/[path-to-arm-systemready]/security-interface-extension/scripts/output/sie_acs_live_image.img.xz`
+ `/[path-to-arm-systemready]/SIE/scripts/output/sie_acs_live_image.img.xz`
 
 ## Build output
 This image comprises of two FAT file system partitions recognized by UEFI: <br />
