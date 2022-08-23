@@ -67,7 +67,7 @@ This image comprises of two FAT file system partitions recognized by UEFI: <br /
   Contains bootable applications and test suites. (Approximate size: 400 MB)
 
 ## Running the Security Interface Extension ACS
-The test suite consists of both automated and manual tests.  See the [Security Interface Extension ACS Users Guide](./security_interface_extension_users_guide.md) for addition information.
+The test suite consists of both automated and manual tests.  See the [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for addition information.
 
 ## Baselines for Open Source Software in this release:
 
