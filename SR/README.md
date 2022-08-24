@@ -59,6 +59,7 @@ Before starting the ACS build, ensure that the following requirements are met:
 5. If all the above steps are successful, then the  bootable image will be available at **/path-to-arm-systemready/SR/scripts/output/sr_acs_live_image.img.xz**
 
 Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before it is used.<br />
+Note: For the build instructions of the Security Interface Extension ACS, refer to the [SIE README](./../SIE//README.md) for further details.<br />
 
 ## Build output
 This image comprises two FAT file system partitions recognized by UEFI: <br />
