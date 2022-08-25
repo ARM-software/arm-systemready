@@ -49,6 +49,7 @@
 
 
 TOP_DIR=`pwd`
+BAND=$1
 . $TOP_DIR/../../common/config/common_config.cfg
 
 UEFI_PATH=edk2
@@ -57,6 +58,11 @@ UEFI_BUILD_MODE=RELEASE
 GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 PATCH_DIR=$TOP_DIR/../patches
 CROSS_COMPILE=$TOP_DIR/$GCC
+
+if [ $BAND == "SIE" ]; then
+    KEYS_DIR=$TOP_DIR/security-interface-extension-keys
+    UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64
+fi
 
 do_build()
 {
@@ -100,8 +106,16 @@ do_clean()
 do_package ()
 {
     echo "Packaging uefi... $VARIANT";
-    # Copy binaries to output folder
-    pushd $TOP_DIR
+    
+    if [ $BAND == "SIE" ]; then
+        echo "Signing Shell Application... "
+        pushd $TOP_DIR
+        # sign Shell.efi with db key
+        sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi --output $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi
+        # sign Shell.efi with gpg key as well for grub
+        gpg --default-key "TestDB1" --detach-sign $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi
+        popd
+    fi
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )

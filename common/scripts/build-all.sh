@@ -29,15 +29,27 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 if [ "$#" -ne 2 ]; then
-    echo "Usage $0 <ES|IR|SR> F"
+    echo "Usage $0 <ES|IR|SR|SIE> F"
     echo "The second (mandatory) parameter F stands for full package."
     exit 1
 fi
 
+# Build SIE ACS standalone image
+if [ $1 == "SIE" ]; then
+    source ./build-scripts/build-efitools.sh
+    source ./build-scripts/build-sie-keys.sh
+    source ./build-scripts/build-uefi.sh $@
+    source ./build-scripts/build-sct.sh $@
+    source ./build-scripts/build-uefi-apps.sh $@
+    source ./build-scripts/build-grub-sie.sh $@
+    source ./build-scripts/build-buildroot.sh
+    # return to the parent script
+    return
+fi
+
+# Build IR|ES|SR ACS
 BAND=$1
 PACKAGE=$2
-
-
 
 source ./build-scripts/build-uefi.sh
 
@@ -59,4 +71,3 @@ fi
 source ./build-scripts/build-grub.sh $@
 source ./build-scripts/build-fwts.sh $@
 source ./build-scripts/build-busybox.sh $@
-
