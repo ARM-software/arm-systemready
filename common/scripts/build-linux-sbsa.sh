@@ -41,7 +41,7 @@ build_sbsa_kernel_driver()
     echo $arch
     if [[ $arch = "aarch64" ]]
     then
-        echo "arm64 native build"
+        echo "aarch64 native build"
         export CROSS_COMPILE=''
     else
         GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
