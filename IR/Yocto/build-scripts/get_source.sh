@@ -71,11 +71,16 @@ copy_recipes()
     #woden.conf will be changed
     #sed -i 's/PREFERRED_VERSION_linux-yocto ?= \"[0-9]\.[0-9][0-9]\%\"/PREFERRED_VERSION_linux-yocto ?= \"'${YOCTO_LINUX_KERNEL_VERSION}'\%\"/' $TOP_DIR/meta-woden/poky/meta-poky/conf/distro/poky.conf
 
+    #Adding build option to grub that is required for SecureBoot
+    sed -i 's/\/grub\-core\//\/grub\-core\/\ --disable-shim-lock/g' $TOP_DIR/meta-woden/poky/meta/recipes-bsp/grub/grub-efi_2.06.bb
+
     #Remove the existing recipe
     rm $TOP_DIR/meta-woden/poky/meta/recipes-kernel/linux/linux-yocto_5.15.bb 
 
     #copy linux_yocto.bbappend with empty defconfig
     cp $TOP_DIR/config/linux-yocto_%.bbappend $TOP_DIR/meta-woden/meta-arm/meta-arm/recipes-kernel/linux/linux-yocto_%.bbappend
+
+    cp $TOP_DIR/meta-woden/recipes-acs/edk2-firmware/files/allow_capsule_on_disk.patch $TOP_DIR/meta-woden/meta-arm/meta-arm/recipes-bsp/uefi/files
 
     # check whether common_config.cfg specifies tag for related source(s) and update
     # recipes accordingly

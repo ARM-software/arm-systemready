@@ -11,8 +11,8 @@ SystemReady IR-certified platforms implement a minimum set of hardware and firmw
 This section of the repository contains the build scripts and the live-images for the SystemReady IR Band.
 
 ## Release details
- - Code Quality: IR ACS v2.0.0 Beta-0
- - The latest pre-built release of IR ACS is available for download here: [v22.06_2.0.0_BETA-0](../prebuilt_images/v22.06_2.0.0_BETA-0)
+ - Code Quality: IR ACS v2.0.0 Beta-1
+ - The latest pre-built release of IR ACS is available for download here: [v22.10_2.0.0_BETA-1](prebuilt_images/v22.10_2.0.0_BETA-1)
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
@@ -116,15 +116,17 @@ The live image boots to UEFI Shell. The different test applications can be run i
 2. [UEFI Shell application](https://github.com/ARM-software/bsa-acs/blob/main/README.md) for BSA compliance.
 3. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
 
+For the verification steps of SIE ACS on QEMU with TPM support, refer to the [SIE ACS Verification](SIE_ACS_Verification.md).
+
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v22.05.00
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v22.07.00
 
-- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v22.06_IR_2.0.0_BETA-0
+- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v22.06_IR_2.0.0_BETA-1
 
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v22.06_IR_2.0.0_BETA-0
+- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v22.06_IR_2.0.0_BETA-1
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: dedfd87f76a9b48bfc03511c19beba285c4f5a81
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 4a25c3b3c79f63bd9f98b4fffcb21b5c66dd14bb
 
 
 
