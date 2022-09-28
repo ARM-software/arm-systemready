@@ -1,3 +1,14 @@
+v22.10_IR_2.0.0_BETA-1
+**SystemReady IR**
+* SIE-ACS test cases integrated into IR ACS image with new grub options
+* IR Require Devicetree Schema Conformance run through dt-validate (Schema version kernel 5.19)
+* General updates in READMEs and a new README for SIE ACS verification instructions on QEMU
+* BBR: Upgraded BBR test suites SCT and FWTS v22.07.00. See common_config.cfg file for details
+* BBR: dt_base suite added in FWTS coverage for EBBR
+* BBR: UEFI-SCT, Enabled HII Test/HII Database Protocol in EBBR.seq file
+* Enhancements to Yocto scripts and general improvements
+
+
 v22.06_IR_2.0.0_BETA-0
 **SystemReady IR**
 * Scripts and recipes for Yocto IR ACS build with python integrated
