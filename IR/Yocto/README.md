@@ -12,7 +12,7 @@ This section of the repository contains the build scripts and the live-images fo
 
 ## Release details
  - Code Quality: IR ACS v2.0.0 Beta-1
- - The latest pre-built release of IR ACS is available for download here: [v22.10_2.0.0_BETA-1](prebuilt_images/v22.10_2.0.0_BETA-1)
+ - The latest pre-built release of IR ACS is available for download here: [v22.10_2.0.0_BETA-1](https://github.com/ARM-software/arm-systemready/tree/main/IR/prebuilt_images/v22.10_2.0.0_BETA-1)
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
