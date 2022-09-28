@@ -9,6 +9,8 @@ S = "${WORKDIR}"
 SRC_URI = " file://bsa.nsh \
             file://debug_dump.nsh \
             file://startup.nsh \
+            file://sie_startup.nsh \
+            file://sie_SctStartup.nsh \
             "
 
 # no configure step
@@ -25,10 +27,13 @@ do_deploy() {
    cp bsa.nsh ${DEPLOYDIR}/
    cp debug_dump.nsh ${DEPLOYDIR}/
    cp startup.nsh ${DEPLOYDIR}/
+   cp sie_startup.nsh ${DEPLOYDIR}/
+   cp sie_SctStartup.nsh ${DEPLOYDIR}/
 
    # create and copy necessary flags to deploy directory
    touch ir_bsa.flag yocto_image.flag
    cp ir_bsa.flag yocto_image.flag ${DEPLOYDIR}/
+
 }
 
 addtask deploy after do_install

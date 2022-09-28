@@ -30,6 +30,9 @@
 
 echo "init.sh"
 
+echo "Mounting efivarfs ..."
+mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+
 sleep 5
 
 echo "Attempting to mount the results partition ..."
@@ -68,6 +71,18 @@ fi
 
 sleep 3
 
+SECURE_BOOT="";
+SECURE_BOOT=`cat /proc/cmdline | awk '{ print $NF}'`
+
+if [ $SECURE_BOOT = "secureboot" ]; then
+   echo "Call SIE ACS in Linux"
+   /usr/bin/secure_init.sh
+   echo "SIE ACS run is completed\n"
+   echo "Please press <Enter> to continue ..."
+   echo -e -n "\n"
+   exit 0
+fi
+
 #linux debug dump
 mkdir -p /mnt/acs_results/linux_dump
 lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
@@ -76,7 +91,7 @@ mkdir -p /mnt/acs_results/fwts
 echo "Executing FWTS for EBBR"
 test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
 echo "Test Executed are $test_list"
-echo $'SystemReady IR ACS v2.0.0 Beta 0\nFWTS v22.05.00' > /mnt/acs_results/fwts/FWTSResults.log
+echo $'SystemReady IR ACS v2.0.0 Beta-1\nFWTS v22.07.00' > /mnt/acs_results/fwts/FWTSResults.log
 /usr/bin/fwts --ebbr `echo $test_list` -r /mnt/acs_results/fwts/FWTSResults.log
 echo -e -n "\n"
 
@@ -85,14 +100,40 @@ mkdir -p /mnt/acs_results/linux_acs/bsa_acs_app
 echo "Loading BSA ACS Linux Driver"
 insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
 echo "Executing BSA ACS Application "
-echo $'SystemReady IR ACS v2.0.0 Beta 0\nBSA v1.0.1' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+echo $'SystemReady IR ACS v2.0.0 Beta-1\nBSA v1.0.2' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
 bsa >> /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
 
 #flush the contents to disk
 sync /mnt
+
 sleep 3
 
-echo "ACS run is completed\n"
+echo "copying fdt "
+
+mkdir -p /home/root/fdt
+
+cp /sys/firmware/fdt /home/root/fdt
+
+mkdir -p /mnt/acs_results/linux_tools
+
+if [ -f /results/acs_results/linux_tools/dt-validate.log ]
+then
+    mv /results/acs_results/linux_tools/dt-validate.log /results/acs_results/linux_tools/dt-validate.log.old
+fi
+
+echo "Running dt-validate tool "
+
+dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt.dtb 2>> /mnt/acs_results/linux_tools/dt-validate.log
+
+if [ ! -s /mnt/acs_results/linux_tools/dt-validate.log ]
+then
+    echo $'The FDT is compliant according to schema ' >> /mnt/acs_results/linux_tools/dt-validate.log
+fi
+
+sed -i '1s/^/DeviceTree bindings of Linux kernel version: 5.19.10 \ndtschema version: 2022.9 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
+
+echo "ACS run is completed"
 echo "Please press <Enter> to continue ..."
 echo -e -n "\n"
 exit 0
