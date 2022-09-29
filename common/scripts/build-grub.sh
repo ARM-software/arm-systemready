@@ -55,7 +55,7 @@ GRUB_PLAT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub_prefix.cfg
 
 do_build ()
 {
-    if [ $arch == "aarch64" ]; then
+    if [[ $arch = "aarch64" ]]; then
         CROSS_COMPILE_DIR=''
     else
         GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
@@ -80,7 +80,7 @@ do_build ()
 
         ./autogen.sh
 
-        if [ $arch == "aarch64" ]; then
+        if [[ $arch = "aarch64" ]]; then
             ./configure \
             --target=aarch64-linux-gnu --with-platform=efi \
             --prefix=$TOP_DIR/$GRUB_PATH/output/ \
