@@ -196,10 +196,18 @@ get_bbr_acs_src()
     fi
 }
 
+source /etc/lsb-release
+
 sudo apt install git curl mtools gdisk gcc\
  openssl automake autotools-dev libtool bison flex\
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
- make gcc g++ python
+ make gcc g++ build-essential wget gettext dosfstools
+
+if [ $DISTRIB_CODENAME == "focal" ]; then
+	sudo apt install python-is-python3
+else
+	sudo apt install python
+fi
 
 if [ $TARGET_ARCH == "arm" ]; then
     sudo apt-get install libmpc-dev
