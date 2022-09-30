@@ -30,6 +30,8 @@ The SystemReady Security Interface Extension certifies that firmware meets the r
 Further details on Security Interface Extension, including pre-built images, are here:
 * [SIE](./SIE)
 
+Note: For the IR band, SIE ACS is integrated to the IR ACS prebuilt image. For more details, refer the [IR README](./IR/Yocto/README.md).
+
 ## Limitations
 
 ### BSA

@@ -7,7 +7,7 @@ index 94cae289..21eec3b7 100644
  #include "StandardTest.h"
  #include <Library/EntsLib.h>
 +
-+#define ACS_VERSION "SystemReady IR ACS v2.0.0 Beta-0\nBBR ACS 1.0.1 (EBBR)"
++#define ACS_VERSION "SystemReady IR ACS v2.0.0 Beta-1\nBBR ACS 1.0.2 (EBBR)"
 +
  
  static EFI_TIME Epoch = { .Year = 1970, .Month = 1, .Day = 1 };

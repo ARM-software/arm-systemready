@@ -7,3 +7,4 @@ FILESEXTRAPATHS:prepend := "${TOPDIR}/../meta-arm/meta-arm/recipes-bsp/uefi/file
 require recipes-bsp/uefi/edk2-firmware.inc
 
 SRC_URI:remove = "file://unaligned.patch"
+SRC_URI:append = " file://allow_capsule_on_disk.patch "

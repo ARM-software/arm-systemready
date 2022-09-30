@@ -10,7 +10,12 @@ IMAGE_INSTALL = "packagegroup-core-boot \
                  fwts \
                  bsa-acs-drv \
                  bsa-acs-app \
-                 ${CORE_IMAGE_EXTRA_INSTALL}"
+                 mokutil \
+                 tpm2-tools \
+                 tpm2-abrmd \
+                 rng-tools \
+                 ${CORE_IMAGE_EXTRA_INSTALL} \
+"
 
 EXTRA_IMAGEDEPENDS += "bsa-acs \
                        shell-app \
@@ -24,39 +29,115 @@ IMAGE_EFI_BOOT_FILES += "Bsa.efi;EFI/BOOT/bsa/Bsa.efi \
                          yocto_image.flag \
                          debug_dump.nsh;EFI/BOOT/debug/debug_dump.nsh \
                          startup.nsh;EFI/BOOT/startup.nsh \
+                         sie_startup.nsh;EFI/BOOT/sie_startup.nsh \
+                         sie_SctStartup.nsh;EFI/BOOT/bbr/sie_SctStartup.nsh \
                          CapsuleApp.efi;EFI/BOOT/app/CapsuleApp.efi \
                          Shell.efi;EFI/BOOT/Shell.efi \
 "
 
+do_sign_images() {
+    rm -rf DO_SIGN
+    mkdir DO_SIGN
+    wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/ DO_SIGN/
+
+    KEYS_DIR="DO_SIGN/security-interface-extension-keys"
+    echo "KEYS_DIR = $KEYS_DIR"
+
+    #Sign the executables
+    TEST_DB1_KEY=$KEYS_DIR/TestDB1.key
+    TEST_DB1_CRT=$KEYS_DIR/TestDB1.crt
+
+    #For sbsign
+    export PATH="${PATH}:/usr/bin"
+
+    sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/bsa/Bsa.efi --output DO_SIGN/EFI/BOOT/bsa/Bsa.efi
+    sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/Shell.efi --output DO_SIGN/EFI/BOOT/Shell.efi
+    sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/bootaa64.efi --output DO_SIGN/EFI/BOOT/bootaa64.efi
+    sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/app/CapsuleApp.efi --output DO_SIGN/EFI/BOOT/app/CapsuleApp.efi
+    sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/Image --output DO_SIGN/Image
+
+    #TO DO: Should the file system be signed?
+
+    echo "Signing images complete."
+    wic cp DO_SIGN/EFI ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
+    wic cp DO_SIGN/Image ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
+
+    echo "Copy back complete"
+}
+
+
 do_dir_deploy() {
+
     # copying bbr directory to /boot partition
     wic cp ${DEPLOY_DIR_IMAGE}/bbr ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/
+    wic cp ${DEPLOY_DIR_IMAGE}/security-interface-extension-keys ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
+ 
+    do_sign_images;
+
+    wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/security-interface-extension-keys/*.crt
+    wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/security-interface-extension-keys/*.esl
+    wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/security-interface-extension-keys/*.key
 
     # create and copy empty acs_results directory to /results partition
     mkdir -p acs_results
     wic cp acs_results ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:3/
 
     #add bsa/bbr bootloder entry and set it has default boot
+
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/grub.cfg grub.cfg
-    echo "menuentry 'bbr/bsa' {chainloader /EFI/BOOT/Shell.efi}"  >> grub.cfg
+
+    LINUX_BOOT_CMD_TEMP=`grep -Po 'Image\s+[a-zA-Z]+=.*' < grub.cfg`
+    LINUX_BOOT_CMD=`echo $LINUX_BOOT_CMD_TEMP | head -1`
+
+    if grep  -Eq "menuentry.*bbr/bsa"  grub.cfg
+    then
+        echo "grub entry for bbr and bsa already present"
+    else
+        echo "menuentry 'bbr/bsa' {chainloader /EFI/BOOT/Shell.efi}"  >> grub.cfg
+    fi
+
     sed -i 's\default=boot\default=bbr/bsa\g' grub.cfg
     sed -i 's\boot\Linux Boot\g' grub.cfg
+
+    if grep  -Eq "SCT for Security Interface Extension"  grub.cfg
+    then
+        echo "grub entry for SCT for Security Interface Extension already present"
+    else
+        echo "menuentry 'SCT for Security Interface Extension (optional)' {chainloader /EFI/BOOT/Shell.efi -nostartup sie_startup.nsh}" >> grub.cfg
+    fi
+
+    if grep  -Eq "Linux Boot for Security Interface Extension"  grub.cfg
+    then
+        echo "grub entry for Linux Boot for Security Interface Extension already present"
+    else
+        awk '/menuentry '\''Linux Boot'\''/, /ext4/' grub.cfg | sed 's/Linux Boot/Linux Boot for Security Interface Extension (optional)/' | sed 's/ext4/ext4 secureboot/' >> grub.cfg
+        echo "}" >> grub.cfg
+    fi
+
     wic cp grub.cfg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/grub.cfg
 
     # update startup.nsh linux command with command from grub.cfg
     # since PARTUUID method is reliable
-    LINUX_BOOT_CMD=`grep -Po 'Image\s+[a-zA-Z]+=.*' < grub.cfg`
+    echo "LINUX_BOOT_CMD= $LINUX_BOOT_CMD"
+
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/startup.nsh startup.nsh
-    sed -i -E 's/Image\s+[a-zA-Z]+=.*/'"${LINUX_BOOT_CMD}"'/g' startup.nsh
+    wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/sie_startup.nsh sie_startup.nsh
+
+    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD}"'/g' startup.nsh
+    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD}"'/g' sie_startup.nsh
+
     wic cp startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/startup.nsh
+    wic cp sie_startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/sie_startup.nsh
 
     # remove additional startup.nsh from /boot partition
-    wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/startup.nsh
+    # wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/startup.nsh
 }
 
 IMAGE_FEATURES += "empty-root-password"
 IMAGE_INSTALL:append = "systemd-init-install \
                         pciutils \
+                        python3-dtschema \
+                        process-schema \
 "
 
 addtask dir_deploy before do_populate_lic_deploy after do_image_complete
