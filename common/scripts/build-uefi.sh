@@ -49,15 +49,19 @@
 
 
 TOP_DIR=`pwd`
+arch=$(uname -m)
 BAND=$1
 . $TOP_DIR/../../common/config/common_config.cfg
 
 UEFI_PATH=edk2
 UEFI_TOOLCHAIN=GCC5
 UEFI_BUILD_MODE=RELEASE
-GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 PATCH_DIR=$TOP_DIR/../patches
-CROSS_COMPILE=$TOP_DIR/$GCC
+
+ if [[ $arch != "aarch64" ]]; then
+    GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+    CROSS_COMPILE=$TOP_DIR/$GCC
+fi
 
 if [ $BAND == "SIE" ]; then
     KEYS_DIR=$TOP_DIR/security-interface-extension-keys
@@ -67,14 +71,15 @@ fi
 do_build()
 {
     pushd $TOP_DIR/$UEFI_PATH
-    CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
-    PATH="$PATH:$CROSS_COMPILE_DIR"
+    if [[ $arch != "aarch64" ]]; then
+        CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
+        PATH="$PATH:$CROSS_COMPILE_DIR"
+    fi
     source ./edksetup.sh
     make -C BaseTools
     export EDK2_TOOLCHAIN=$UEFI_TOOLCHAIN
-    arch=$(uname -m)
-    if [[ $arch = "aarch64" ]]
-    then
+
+    if [[ $arch = "aarch64" ]]; then
         echo "arm64 native build"
     else
         CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
@@ -85,15 +90,17 @@ do_build()
     export PACKAGES_PATH=$TOP_DIR/$UEFI_PATH
     export PYTHON_COMMAND=/usr/bin/python3
     git checkout  ShellPkg/ShellPkg.dsc #build shell with default file
-    build -a AARCH64 -t GCC5 -p ShellPkg/ShellPkg.dsc -b $UEFI_BUILD_MODE
+    build -a AARCH64 -t GCC5 -p ShellPkg/ShellPkg.dsc -b $UEFI_BUILD_MODE -n $PARALLELISM
     popd
 }
 
 do_clean()
 {
     pushd $TOP_DIR/$UEFI_PATH
-    CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
-    PATH="$PATH:$CROSS_COMPILE_DIR"
+    if [[ $arch != "aarch64" ]]; then
+        CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
+        PATH="$PATH:$CROSS_COMPILE_DIR"
+    fi
     source ./edksetup.sh
     make -C BaseTools clean
     if patch -R -p0 -s -f --dry-run < $PATCH_DIR/bsa.patch; then

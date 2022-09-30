@@ -119,22 +119,28 @@ get_sbsa_src()
 
 get_cross_compiler()
 {
-    echo "Downloading TOOLS source code. Version : ${LINARO_TOOLS_VERSION}"
-    LINARO=https://releases.linaro.org/components/toolchain/binaries
-    VERSION=$LINARO_TOOLS_MAJOR_VERSION
-    if [ $TARGET_ARCH == "arm" ]; then
-	TAG=arm-linux-gnueabihf
+    if [ $(uname -m) == "aarch64" ]; then
+        echo "=================================================================="
+        echo "aarch64 native build"
+        echo "WARNING: no cross compiler needed, GCC version recommended: ${LINARO_TOOLS_MAJOR_VERSION}"
+        echo "=================================================================="
     else
-	TAG=aarch64-linux-gnu
+        echo "Downloading TOOLS Linaro cross compiler. Version : ${LINARO_TOOLS_VERSION}"
+        LINARO=https://releases.linaro.org/components/toolchain/binaries
+        VERSION=$LINARO_TOOLS_MAJOR_VERSION
+        if [ $TARGET_ARCH == "arm" ]; then
+            TAG=arm-linux-gnueabihf
+        else
+            TAG=aarch64-linux-gnu
+        fi
+        GCC=${TAG}/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
+        mkdir -p tools
+        pushd $TOP_DIR/tools
+        wget $LINARO/$VERSION/$GCC
+        tar -xf gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
+        rm gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
+        popd
     fi
-
-    GCC=${TAG}/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
-    mkdir -p tools
-    pushd $TOP_DIR/tools
-    wget $LINARO/$VERSION/$GCC
-    tar -xf gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
-    rm gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
-    popd
 }
 
 get_grub_src()

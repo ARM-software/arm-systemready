@@ -41,8 +41,8 @@
 # BUSYBOX_BUILD_ENABLED - Building Busybox
 #
 
-
 TOP_DIR=`pwd`
+arch=$(uname -m)
 BAND=$1
 if [ $BAND == "SR" ]; then
     . $TOP_DIR/../../common/config/sr_common_config.cfg
@@ -51,17 +51,15 @@ else
 fi
 
 GRUB_PATH=grub
-GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
-CROSS_COMPILE=$TOP_DIR/$GCC
 GRUB_PLAT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub_prefix.cfg
 
 do_build ()
 {
-    arch=$(uname -m)
-    if [[ $arch = "aarch64" ]]
-    then
+    if [[ $arch = "aarch64" ]]; then
         CROSS_COMPILE_DIR=''
     else
+        GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+        CROSS_COMPILE=$TOP_DIR/$GCC
         CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
         PATH="$PATH:$CROSS_COMPILE_DIR"
     fi
@@ -81,12 +79,20 @@ do_build ()
         fi
 
         ./autogen.sh
-        ./configure STRIP=$CROSS_COMPILE_DIR/aarch64-linux-gnu-strip \
-        --target=aarch64-linux-gnu --with-platform=efi \
-        --prefix=$TOP_DIR/$GRUB_PATH/output/ \
-        TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
 
-        make -j8 install
+        if [[ $arch = "aarch64" ]]; then
+            ./configure \
+            --target=aarch64-linux-gnu --with-platform=efi \
+            --prefix=$TOP_DIR/$GRUB_PATH/output/ \
+            --disable-werror
+        else
+            ./configure STRIP=$CROSS_COMPILE_DIR/aarch64-linux-gnu-strip \
+            --target=aarch64-linux-gnu --with-platform=efi \
+            --prefix=$TOP_DIR/$GRUB_PATH/output/ \
+            TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
+        fi
+
+        make -j $PARALLELISM install
         output/bin/grub-mkimage -v -c ${GRUB_PLAT_CONFIG_FILE} \
         -o output/grubaa64.efi -O arm64-efi -p "" \
         part_gpt part_msdos ntfs ntfscomp hfsplus fat ext2 normal chain \
