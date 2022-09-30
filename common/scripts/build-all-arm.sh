@@ -33,10 +33,5 @@ source ./build-scripts/build-sct-arm.sh
 source ./build-scripts/build-linux-arm.sh
 source ./build-scripts/build-grub-arm.sh
 source ./build-scripts/build-uefi-apps-arm.sh
-
-echo "[build-all-arm.sh] Skip FWTS"
-# Skip fwts: build issue "G_STATIC_ASSERT(sizeof (unsigned long long) == sizeof (guint64))"
-# due to conflict between pkg-config and cross-compilation toolchain.
-#source ./build-scripts/build-fwts-arm.sh
-
+source ./build-scripts/build-fwts-arm.sh
 source ./build-scripts/build-busybox-arm.sh

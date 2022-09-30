@@ -15,3 +15,13 @@ dir /usr/sbin 755 0 0
 file /init ./init.sh 777 0 0
 dir /lib 777 0 0
 dir /lib/modules 777 0 0
+
+file /bin/fwts                          ./fwts_output/bin/fwts                                    755 0 0
+
+file /lib/libc.so.6                     ./fwts_build_dep-arm/cross_libs/libc.so.6                 755 0 0
+file /lib/ld-linux-armhf.so.3           ./fwts_build_dep-arm/cross_libs/ld-linux-armhf.so.3       755 0 0
+file /lib/libpthread.so.0               ./fwts_build_dep-arm/cross_libs/libpthread.so.0           755 0 0
+file /lib/libm.so.6                     ./fwts_build_dep-arm/cross_libs/libm.so.6                 755 0 0
+
+file /lib/libfwts.so.1                  ./fwts_output/lib/fwts/libfwts.so.1                       755 0 0
+file /lib/libfwts.so.1.0.0              ./fwts_output/lib/fwts/libfwts.so.1.0.0                   755 0 0
