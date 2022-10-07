@@ -192,20 +192,28 @@ get_linux-acs_src()
 
 get_bbr_acs_src()
 {
-   if [ -z $ARM_BBR_TAG ]; then
-       #No TAG is provided. Download the latest code
-       echo "Downloading Arm BBR source code."
-       git clone  --depth 1 https://github.com/ARM-software/bbr-acs.git bbr-acs
-   else
-       echo "Downloading Arm BBR source code. TAG: $ARM_BBR_TAG"
-       git clone  --depth 1 --branch $ARM_BBR_TAG https://github.com/ARM-software/bbr-acs.git bbr-acs
-   fi
+    echo "Downloading Arm BBR source code."
+    git clone https://github.com/ARM-software/bbr-acs.git bbr-acs
+
+    if [ -n "$ARM_BBR_TAG" ]; then
+        # TAG provided.
+        echo "Checking out Arm BBR TAG: $ARM_BBR_TAG"
+        git -C bbr-acs checkout $ARM_BBR_TAG
+    fi
 }
+
+source /etc/lsb-release
 
 sudo apt install git curl mtools gdisk gcc\
  openssl automake autotools-dev libtool bison flex\
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
- make gcc g++ python
+ make gcc g++ build-essential wget gettext dosfstools
+
+if [ $DISTRIB_CODENAME == "focal" ]; then
+	sudo apt install python-is-python3
+else
+	sudo apt install python
+fi
 
 if [ $TARGET_ARCH == "arm" ]; then
     sudo apt-get install libmpc-dev
