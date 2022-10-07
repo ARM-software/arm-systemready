@@ -59,6 +59,8 @@ CROSS_COMPILE=$TOP_DIR/$GCC
 UEFI_LIBC_PATH=edk2-libc
 PATCH_DIR=$TOP_DIR/../patches
 COMMON_PATCH_DIR=$TOP_DIR/../../common/patches
+OUTDIR=${TOP_DIR}/output
+BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
 
 do_build()
 {
@@ -70,6 +72,15 @@ do_build()
        if git apply --check $PATCH_DIR/es_bsa.patch; then
          echo "Applying ES BSA Patch ..."
          git apply $PATCH_DIR/es_bsa.patch
+       else
+         echo "Error while applying ES BSA Patch"
+         exit_fun
+       fi
+    elif [ "$BUILD_PLAT" = "SR" ]; then
+       if git apply --check $PATCH_DIR/es_bsa.patch; then
+         echo "Applying ES BSA Patch ..."
+         git apply $PATCH_DIR/es_bsa.patch
+         touch $TOP_DIR/build-scripts/sr_bsa.flag
        else
          echo "Error while applying ES BSA Patch"
          exit_fun
@@ -128,7 +139,8 @@ do_package ()
 {
     echo "Packaging BSA... $VARIANT";
     # Copy binaries to output folder
-    pushd $TOP_DIR
+    mkdir -p $OUTDIR
+    cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi $OUTDIR/Bsa.efi
 }
 
 exit_fun() {

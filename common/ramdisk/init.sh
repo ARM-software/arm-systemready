@@ -41,7 +41,7 @@ echo "init.sh"
 sleep 5
 mdev -s
 
-if [ -f  /lib/modules/sbsa_acs.ko ]; then
+if [ -f /bin/sr_bsa.flag ]; then
   #Case of SR
   echo "Starting drivers for SR"
   insmod /lib/modules/xhci-pci-renesas.ko
@@ -117,13 +117,20 @@ if [ ! -f  /bin/ir_bbr_fwts_tests.ini ]; then
   insmod /lib/modules/bsa_acs.ko
   /bin/bsa > /mnt/acs_results/linux/BsaResultsApp.log
   dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
- elif [ -f /lib/modules/sbsa_acs.ko ]; then
-  #Case of SR
-  insmod /lib/modules/sbsa_acs.ko
-  /bin/sbsa > /mnt/acs_results/linux/SbsaResultsApp.log
-  dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
  else
-  echo "Error : BSA or SBSA Kernel Driver is not found. Linux BSA or SBSA  Tests cannot be run."
+  echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run."
+ fi
+
+ if [ -f /bin/sr_bsa.flag ]; then
+  echo "Running Linux SBSA tests"
+  if [ -f  /lib/modules/sbsa_acs.ko ]; then
+   #Case of SR
+   insmod /lib/modules/sbsa_acs.ko
+   /bin/sbsa > /mnt/acs_results/linux/SbsaResultsApp.log
+   dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
+  else
+   echo "Error: SBSA kernel Driver is not found. Linux SBSA tests cannot be run."
+  fi
  fi
 fi
 

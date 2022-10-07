@@ -220,11 +220,10 @@ if [ $TARGET_ARCH == "arm" ]; then
 fi
 
 get_uefi_src
+get_bsa_src
 
 if [ $BAND == "SR" ]; then
     get_sbsa_src
-else
-    get_bsa_src
 fi
 
 get_bbr_acs_src

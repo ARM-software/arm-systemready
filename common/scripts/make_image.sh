@@ -41,13 +41,13 @@ OUTDIR=${PLATDIR}
 GRUB_FS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
 EFI_CONFIG_FILE=${TOP_DIR}/build-scripts/config/startup.nsh
 BSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bsa.nsh
+SBSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/sbsa.nsh
 BBR_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bbr.nsh
 DEBUG_CONFIG_FILE=${TOP_DIR}/build-scripts/config/debug_dump.nsh
 BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
 GRUB_PATH=grub
 UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64/
-BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
 SCT_PATH=edk2-test/uefi-sct/AARCH64_SCT
 UEFI_APPS_PATH=${TOP_DIR}/edk2/Build/MdeModule/DEBUG_GCC5/AARCH64
 
@@ -57,7 +57,11 @@ create_cfgfiles ()
 
     mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
     mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh
-    mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
+    if [ "$BUILD_PLAT" = "SR" ]; then
+        mcopy -i  $fatpart_name -o ${SBSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/sbsa.nsh
+    else
+        mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
+    fi
     mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/debug_dump.nsh
     #mcopy -i  $fatpart_name -o ${BBR_CONFIG_FILE}    ::/EFI/BOOT/bbr/bbr.nsh
 
@@ -85,11 +89,12 @@ create_fatpart ()
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
     mcopy -i $fatpart_name $OUTDIR/Image ::/
     mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
+    mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
 
     if [ "$BUILD_PLAT" = "SR" ]; then
         mcopy -i $fatpart_name Sbsa.efi ::/EFI/BOOT/bsa/sbsa
-    else
-        mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
+        echo " SR BSA flag file copied"
+        mcopy -i $fatpart_name ${TOP_DIR}/build-scripts/sr_bsa.flag ::/EFI/BOOT/bsa
     fi
 
     mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
@@ -160,10 +165,9 @@ prepare_disk_image ()
     cp grubaa64.efi bootaa64.efi
     cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi Shell.efi
 
+    cp $OUTDIR/Bsa.efi Bsa.efi
     if [ "$BUILD_PLAT" = "SR" ]; then
-        cp $TOP_DIR/$BSA_EFI_PATH/Sbsa.efi Sbsa.efi
-    else
-        cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi Bsa.efi
+        cp $OUTDIR/Sbsa.efi Sbsa.efi
     fi
 
     cp -Tr $TOP_DIR/$SCT_PATH/ SCT

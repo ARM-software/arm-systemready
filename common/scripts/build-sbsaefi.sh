@@ -59,6 +59,8 @@ CROSS_COMPILE=$TOP_DIR/$GCC
 UEFI_LIBC_PATH=edk2-libc
 PATCH_DIR=$TOP_DIR/../patches
 COMMON_PATCH_DIR=$TOP_DIR/../../common/patches
+OUTDIR=${TOP_DIR}/output
+SBSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
 
 do_build()
 {
@@ -105,8 +107,9 @@ do_clean()
 
 do_package ()
 {
-#packaging is taken care in make_image.sh
-  : 
+   echo "Packaging SBSA...";
+    # Copy binaries to output folder
+   cp $TOP_DIR/$SBSA_EFI_PATH/Sbsa.efi $OUTDIR/Sbsa.efi
 }
 
 exit_fun() {

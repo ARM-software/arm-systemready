@@ -38,26 +38,21 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             if exist FS%j:\EFI\BOOT\bsa\Bsa.efi then
                 #BSA_VERSION_PRINT_PLACEHOLDER
+                if exist FS%i:\acs_results\uefi\BsaResults.log then
+                    echo "BSA ACS is already run"
+                    goto Done
+                endif
                 if exist FS%j:\EFI\BOOT\bsa\ir_bsa.flag then
                     #Executing for BSA IR. Execute only OS tests
                     FS%j:\EFI\BOOT\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaResults.log
-                    goto Done
+                    reset
                 endif
                 FS%j:\EFI\BOOT\bsa\Bsa.efi -skip 900 -f BsaResults.log
-                goto Done
-            endif
-            if exist FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi then
-                if exist FS%i:\acs_results\uefi\SbsaResults.log then
-		    echo "SBSA ACS is already run"
-		    goto Done
-		endif
-	        FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi -skip 800 -f SbsaResults.log
                 reset
-		goto Done
             endif
         endfor
         echo "Bsa.efi not found"
     endif
 endfor
-echo "BsaResults not found"
+echo "acs_results not found"
 :Done
