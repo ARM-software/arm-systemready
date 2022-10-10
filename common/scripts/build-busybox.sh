@@ -107,14 +107,16 @@ do_package ()
     pushd $TOP_DIR/$BUSYBOX_RAMDISK_PATH
     pwd
     if [ $BAND == "SR" ]; then
-        bsa_count=`grep -w bsa files.txt | wc -l`
-        if [ $bsa_count -gt 0 ]; then
-           sed -i 's/bsa/sbsa/g' files.txt
+        touch $TOP_DIR/$BUSYBOX_RAMDISK_PATH/sr_bsa.flag
+    fi
+    if [ $BAND == "SR" ]; then
+           echo "file /bin/sr_bsa.flag                   ./sr_bsa.flag                                         755 0 0"  >> files.txt
+           echo "file /bin/sbsa                          ./linux-sbsa/sbsa                                         755 0 0"  >> files.txt
+           echo "file /lib/modules/sbsa_acs.ko           ./linux-sbsa/sbsa_acs.ko                                  755 0 0"  >> files.txt
            echo "file /lib/modules/nvme.ko               ./drivers/nvme.ko                                         755 0 0"  >> files.txt
            echo "file /lib/modules/nvme-core.ko          ./drivers/nvme-core.ko                                    755 0 0"  >> files.txt
            echo "file /lib/modules/xhci-pci.ko           ./drivers/xhci-pci.ko                                     755 0 0"  >> files.txt
            echo "file /lib/modules/xhci-pci-renesas.ko   ./drivers/xhci-pci-renesas.ko                             755 0 0"  >> files.txt
-        fi
     fi
     cp $TOP_DIR/$BUSYBOX_RAMDISK_BUSYBOX_PATH/busybox .
     $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/$LINUX_CONFIG_DEFAULT/usr/gen_init_cpio files.txt \

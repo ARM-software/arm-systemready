@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,45 +26,37 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if [ "$#" -ne 2 ]; then
-    echo "Usage $0 <ES|IR|SR|SIE> F"
-    echo "The second (mandatory) parameter F stands for full package."
-    exit 1
-fi
-
-# Build SIE ACS standalone image
-if [ $1 == "SIE" ]; then
-    source ./build-scripts/build-efitools.sh
-    source ./build-scripts/build-sie-keys.sh
-    source ./build-scripts/build-uefi.sh $@
-    source ./build-scripts/build-sct.sh $@
-    source ./build-scripts/build-uefi-apps.sh $@
-    source ./build-scripts/build-grub-sie.sh $@
-    source ./build-scripts/build-buildroot.sh
-    # return to the parent script
-    return
-fi
-
-# Build IR|ES|SR ACS
-BAND=$1
-PACKAGE=$2
-
-source ./build-scripts/build-uefi.sh
-source ./build-scripts/build-bsaefi.sh $@
-
-if [ $BAND == "SR" ]; then
-    source ./build-scripts/build-sbsaefi.sh
-fi
-
-source ./build-scripts/build-sct.sh $@
-source ./build-scripts/build-uefi-apps.sh $@
-source ./build-scripts/build-linux.sh $BAND
-source ./build-scripts/build-linux-bsa.sh
-
-if [ $BAND == "SR" ]; then
-    source ./build-scripts/build-linux-sbsa.sh
-fi
-
-source ./build-scripts/build-grub.sh $@
-source ./build-scripts/build-fwts.sh $@
-source ./build-scripts/build-busybox.sh $@
+echo -off
+for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%i:\acs_results then
+        FS%i:
+        cd FS%i:\acs_results
+        if not exist uefi then
+            mkdir uefi
+        endif
+        cd uefi
+        for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+            #BSA_VERSION_PRINT_PLACEHOLDER
+            if exist FS%j:\EFI\BOOT\bsa\Bsa.efi then
+                if exist FS%i:\acs_results\uefi\BsaResults.log then
+                    echo "BSA ACS is already run"
+                    goto SbsaRun
+                endif
+                FS%j:\EFI\BOOT\bsa\Bsa.efi -sbsa -skip 900 -f BsaResults.log
+            endif
+:SbsaRun
+            if exist FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi then
+                if exist FS%i:\acs_results\uefi\SbsaResults.log then
+                    echo "SBSA ACS is already run"
+                    goto Done
+                endif
+                FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi -skip 800 -f SbsaResults.log
+                reset
+            endif
+            echo "Sbsa.efi not present"
+        endfor
+        echo "Bsa.efi not present"
+    endif
+endfor
+echo "acs_results not found"
+:Done
