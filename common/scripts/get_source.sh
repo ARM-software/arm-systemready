@@ -184,7 +184,7 @@ get_linux-acs_src()
     pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
     #The same patch is applicable BSA and SBSA
     echo "Applying Linux ACS xBSA Patch..."
-    git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-ACS-Linux-${LINUX_KERNEL_VERSION}.patch
+    git apply $TOP_DIR/linux-acs/kernel/src/0001-BSA-ACS-Linux-${LINUX_KERNEL_VERSION}.patch
     popd
   fi
 
