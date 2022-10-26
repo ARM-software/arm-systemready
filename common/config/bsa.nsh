@@ -35,6 +35,9 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             mkdir uefi
         endif
         cd uefi
+        if not exist temp then
+            mkdir temp
+        endif
         for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             if exist FS%j:\EFI\BOOT\bsa\Bsa.efi then
                 #BSA_VERSION_PRINT_PLACEHOLDER
@@ -47,7 +50,16 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                     FS%j:\EFI\BOOT\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaResults.log
                     reset
                 endif
-                FS%j:\EFI\BOOT\bsa\Bsa.efi -skip 900 -f BsaResults.log
+                FS%j:\EFI\BOOT\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
+                if exist FS%i:\acs_results\uefi\BsaTempResults.log then
+                    echo " SystemReady ES ACS v1.1.0" > BsaResults.log
+                    stall 200000
+                    type BsaTempResults.log >> BsaResults.log
+                    cp BsaTempResults.log temp/
+                    rm BsaTempResults.log
+                else
+                    echo "There may be issues in writing of BSA logs . Please save the console output"
+                endif
                 reset
             endif
         endfor

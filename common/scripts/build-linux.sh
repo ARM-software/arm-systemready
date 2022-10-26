@@ -125,13 +125,11 @@ do_package ()
     ${OUTDIR}/$LINUX_IMAGE_TYPE
 
     #Copy drivers for packaging into Ramdisk
-    if [ $BAND == "SR" ]; then
-        mkdir -p $TOP_DIR/ramdisk/drivers
-        cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/nvme/host/nvme.ko $TOP_DIR/ramdisk/drivers
-        cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/nvme/host/nvme-core.ko $TOP_DIR/ramdisk/drivers
-        cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci-renesas.ko $TOP_DIR/ramdisk/drivers
-        cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci.ko $TOP_DIR/ramdisk/drivers
-    fi
+    mkdir -p $TOP_DIR/ramdisk/drivers
+    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/nvme/host/nvme.ko $TOP_DIR/ramdisk/drivers
+    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/nvme/host/nvme-core.ko $TOP_DIR/ramdisk/drivers
+    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci-renesas.ko $TOP_DIR/ramdisk/drivers
+    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci.ko $TOP_DIR/ramdisk/drivers
 
 }
 

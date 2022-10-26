@@ -13,8 +13,8 @@ The Security Interface Extension ACS tests the following security related interf
 This section describes the steps to build the ACS or obtain the pre-built live image.
 
 ## Release details
- - Code Quality: v1.0
- - **The latest pre-built release of the Security Interface Extension ACS is available for download here: [v21.10_SIE_REL1.0](./prebuilt_images/v21.10_SIE_REL1.0)**
+ - Code Quality: v1.1.0
+ - **The latest pre-built release of the Security Interface Extension ACS is available for download here: [v22.10_SIE_REL1.1.0](./prebuilt_images/v22.10_SIE_REL1.1.0)**
  - The Security Interface Extension tests are written for version 1.1 of the BBSR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
@@ -27,13 +27,13 @@ This section describes the steps to build the ACS or obtain the pre-built live i
 ## Steps to build SystemReady Security Inteface Extension ACS live image
 
 ## GitHub branch
-- To pick up the release version of the code, checkout the release tag v21.10_SIE_REL1.0
+- To pick up the release version of the code, checkout the release tag v22.10_SIE_REL1.1.0
 
 ## ACS build steps
 
 ### Pre-built images
 - Pre-built images for each release are available in the prebuilt_images folder. You can either choose to use these images or build your own image by following the steps below.
-- To access the prebuilt_images, click this link : [prebuilt_images](./prebuilt_images/v21.10_SIE_REL1.0)
+- To access the prebuilt_images, click this link : [prebuilt_images](./prebuilt_images/v22.10_SIE_REL1.1.0)
 - If you choose to use the pre-built image, skip the build steps and jump to the test suite execution section below.
 
 ### Prerequisites

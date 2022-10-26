@@ -156,7 +156,7 @@ prepare_disk_image ()
     pushd $TOP_DIR/$GRUB_PATH/output
 
     local FAT_SIZE_MB=512
-    local FAT2_SIZE_MB=50
+    local FAT2_SIZE_MB=128
     local PART_START=$((1*SEC_PER_MB))
     local FAT_SIZE=$((FAT_SIZE_MB*SEC_PER_MB))
     local FAT2_SIZE=$((FAT2_SIZE_MB*SEC_PER_MB))

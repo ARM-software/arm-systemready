@@ -113,11 +113,12 @@ do_package ()
            echo "file /bin/sr_bsa.flag                   ./sr_bsa.flag                                         755 0 0"  >> files.txt
            echo "file /bin/sbsa                          ./linux-sbsa/sbsa                                         755 0 0"  >> files.txt
            echo "file /lib/modules/sbsa_acs.ko           ./linux-sbsa/sbsa_acs.ko                                  755 0 0"  >> files.txt
-           echo "file /lib/modules/nvme.ko               ./drivers/nvme.ko                                         755 0 0"  >> files.txt
-           echo "file /lib/modules/nvme-core.ko          ./drivers/nvme-core.ko                                    755 0 0"  >> files.txt
-           echo "file /lib/modules/xhci-pci.ko           ./drivers/xhci-pci.ko                                     755 0 0"  >> files.txt
-           echo "file /lib/modules/xhci-pci-renesas.ko   ./drivers/xhci-pci-renesas.ko                             755 0 0"  >> files.txt
     fi
+    echo "file /lib/modules/nvme.ko               ./drivers/nvme.ko                                         755 0 0"  >> files.txt
+    echo "file /lib/modules/nvme-core.ko          ./drivers/nvme-core.ko                                    755 0 0"  >> files.txt
+    echo "file /lib/modules/xhci-pci.ko           ./drivers/xhci-pci.ko                                     755 0 0"  >> files.txt
+    echo "file /lib/modules/xhci-pci-renesas.ko   ./drivers/xhci-pci-renesas.ko                             755 0 0"  >> files.txt
+
     cp $TOP_DIR/$BUSYBOX_RAMDISK_BUSYBOX_PATH/busybox .
     $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/$LINUX_CONFIG_DEFAULT/usr/gen_init_cpio files.txt \
     > ramdisk.img

@@ -35,6 +35,9 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             mkdir uefi
         endif
         cd uefi
+        if not exist temp then
+            mkdir temp
+        endif
         for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             #BSA_VERSION_PRINT_PLACEHOLDER
             if exist FS%j:\EFI\BOOT\bsa\Bsa.efi then
@@ -42,7 +45,16 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                     echo "BSA ACS is already run"
                     goto SbsaRun
                 endif
-                FS%j:\EFI\BOOT\bsa\Bsa.efi -sbsa -skip 900 -f BsaResults.log
+                FS%j:\EFI\BOOT\bsa\Bsa.efi -sbsa -skip 900 -f BsaTempResults.log
+                if exist FS%i:\acs_results\uefi\BsaTempResults.log then
+                    echo " SystemReady SR ACS v1.1.0" > BsaResults.log
+                    stall 200000
+                    type BsaTempResults.log >> BsaResults.log
+                    cp BsaTempResults.log temp/
+                    rm BsaTempResults.log
+                else
+                    echo "There may be issues in writing of BSA logs. Please save the console output"
+                endif
             endif
 :SbsaRun
             if exist FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi then
@@ -50,7 +62,16 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                     echo "SBSA ACS is already run"
                     goto Done
                 endif
-                FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi -skip 800 -f SbsaResults.log
+                FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi -skip 800 -f SbsaTempResults.log
+                if exist FS%i:\acs_results\uefi\SbsaTempResults.log then
+                    echo " SystemReady SR ACS v1.1.0" > SbsaResults.log
+                    stall 200000
+                    type SbsaTempResults.log >> SbsaResults.log
+                    cp SbsaTempResults.log temp/
+                    rm SbsaTempResults.log
+                else
+                    echo "There may be issues in writing of SBSA logs. Please save the console output"
+                endif
                 reset
             endif
             echo "Sbsa.efi not present"
