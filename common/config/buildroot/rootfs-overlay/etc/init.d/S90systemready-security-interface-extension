@@ -46,4 +46,7 @@ then
      echo "TPM event log not found at /sys/kernel/security/tpm0/binary_bios_measurements"
     fi
 
+    # sync changes to storage
+    sync
+
 fi

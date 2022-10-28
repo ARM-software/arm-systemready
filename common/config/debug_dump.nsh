@@ -37,6 +37,7 @@ for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         endif
         cd uefi_dump
         echo "Starting UEFI Debug dump"
+        connect -r
         pci > pci.log
         drivers > drivers.log
         devices > devices.log
@@ -44,6 +45,11 @@ for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         dh -d > dh.log
         memmap > memmap.log
         bcfg boot dump > bcfg.log
+        map -r > map.log
+        devtree > devtree.log
+        ver > uefi_version.log
+        ifconfig -l > ifconfig.log
+        dmem > dmem.log
 
         for %n in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 if exist FS%n:\EFI\BOOT\bsa\ir_bsa.flag then

@@ -5,7 +5,7 @@
 SystemReady SR is a band of system certification in the Arm SystemReady program that ensures interoperability of Arm based servers with standard operating systems and hypervisors.
 
 SystemReady SR-certified platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. Compliant systems must conform to the:
-* [Server Base System Architecture (SBSA) specification](https://developer.arm.com/documentation/den0029/d/?lang=en)
+* [Server Base System Architecture (SBSA) specification](https://developer.arm.com/documentation/den0029/e/?lang=en)
 * SBBR recipe of the [Base Boot Requirements (BBR) specification](https://developer.arm.com/documentation/den0044/latest)
 * The SystemReady SR certification and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
@@ -15,8 +15,8 @@ This section contains the build scripts and the live-images for the SystemReady 
 
 ## Release details
  - Code quality: v1.0
- - **The latest pre-built release of ACS is available for download here: [v22.02_1.0](prebuilt_images/v22.02_1.0)**
- - The SBSA tests are written for version 6.0 of the SBSA specification.
+ - **The latest pre-built release of ACS is available for download here: [v22.10_1.1.0](prebuilt_images/v22.10_1.1.0)**
+ - The SBSA tests are written for version 6.1 of the SBSA specification.
  - The BBR tests are written for the SBBR section in version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
@@ -64,9 +64,9 @@ Note: For the build instructions of the Security Interface Extension ACS, refer 
 ## Build output
 This image comprises two FAT file system partitions recognized by UEFI: <br />
 - 'acs-results' <br />
-  stores logs of the automated execution of ACS. (Approximate size: 120MB) <br/>
+  stores logs of the automated execution of ACS. (Approximate size: 128MB) <br/>
 - 'boot' <br />
-  contains bootable applications and test suites. (Approximate size: 400MB)
+  contains bootable applications and test suites. (Approximate size: 500MB)
 
 
 ## Verification
@@ -124,20 +124,25 @@ This is expected behavior and the progress of tests will continue after a 20-min
 The test suite execution can be automated or manual. Automated execution is the default execution method when no key is pressed during boot. <br />
 The live image boots to UEFI Shell. The different test applications can run in the following order:
 
-1. [SCT tests](https://github.com/ARM-software/bbr-acs/blob/master/README.md) for BBR compliance.
+1. [SCT tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
 2. [UEFI Shell application](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for SBSA compliance.
-3. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/master/README.md) for BBR compliance.
-4. [OS tests](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for Linux SBSA compliance.
+                           (https://github.com/ARM-software/bsa-acs/blob/main/README.md)    for BSA compliance.
+3. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
+4. [OS tests](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for Linux SBSA compliance.<br />
+Note: To skip FWTS and OS tests for debugging, append "noacs" to the Linux command by editing the "Linux Boot" option in the grub menu during image boot.<br />
+To start an extended run of UEFI-SCT append "-nostartup startup.nsh sct_extd" to the shell.efi command by editing the "bbr/bsa" option in the grub menu during image boot.<br />
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: 1228f0412a6c76b437cfa3078d5dc1fb5ca102c6
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v22.09.00
 
-- [Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs) TAG: v22.02_SR_REL1.0
+- [Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs) TAG: v22.10_REL6.1.0
 
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v22.02_SR_REL1.0
+- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v22.10_REL1.0.2
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 01d9d24efdedb30ff6b0e1f1c47c6c3b0c5a7093
+- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v22.10_REL1.1.0
+
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: f628bec2193da1f9402ef749fbca50f61c812d6f
 
 
 

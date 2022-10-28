@@ -41,14 +41,11 @@ echo "init.sh"
 sleep 5
 mdev -s
 
-if [ -f /bin/sr_bsa.flag ]; then
-  #Case of SR
-  echo "Starting drivers for SR"
-  insmod /lib/modules/xhci-pci-renesas.ko
-  insmod /lib/modules/xhci-pci.ko
-  insmod /lib/modules/nvme-core.ko
-  insmod /lib/modules/nvme.ko
-fi
+echo "Starting disk drivers"
+insmod /lib/modules/xhci-pci-renesas.ko
+insmod /lib/modules/xhci-pci.ko
+insmod /lib/modules/nvme-core.ko
+insmod /lib/modules/nvme.ko
 
 sleep 5
 
@@ -87,51 +84,74 @@ else
  echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
 fi
 
+#Skip running of ACS Tests if the grub option is added
+ADDITIONAL_CMD_OPTION="";
+ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
-#linux debug dump
-mkdir -p /mnt/acs_results/linux_dump
-lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
+if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
+ #linux debug dump
+ mkdir -p /mnt/acs_results/linux_dump
+ lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
+ lsusb > /mnt/acs_results/linux_dump/lsusb.log
+ uname -a > /mnt/acs_results/linux_dump/uname.log
+ cat /proc/interrupts > /mnt/acs_results/linux_dump/interrupts.log
+ cat /proc/cpuinfo > /mnt/acs_results/linux_dump/cpuinfo.log
+ cat /proc/meminfo > /mnt/acs_results/linux_dump/meminfo.log
+ cat /proc/iomem > /mnt/acs_results/linux_dump/iomem.log
+ ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
+ cp -r /sys/firmware /mnt/acs_results/linux_dump/
 
-mkdir -p /mnt/acs_results/fwts
+ mkdir -p /mnt/acs_results/fwts
 
-#Check for the existense of fwts test configuration file in the package. EBBR Execution
-if [ -f  /bin/ir_bbr_fwts_tests.ini ]; then
- test_list=`cat /bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
- echo "Test Executed are $test_list"
- /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
-else
- #SBBR Execution
- echo "Executing FWTS for SBBR"
- /bin/fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/fwts/FWTSResults.log
-fi
-
-sleep 2
-
-if [ ! -f  /bin/ir_bbr_fwts_tests.ini ]; then
- #Run Linux BSA tests for ES and SR only
- mkdir -p /mnt/acs_results/linux
- sleep 3
- echo "Running Linux BSA tests"
- if [ -f  /lib/modules/bsa_acs.ko ]; then
-  #Case of ES
-  insmod /lib/modules/bsa_acs.ko
-  /bin/bsa > /mnt/acs_results/linux/BsaResultsApp.log
-  dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
+ #Check for the existense of fwts test configuration file in the package. EBBR Execution
+ if [ -f  /bin/ir_bbr_fwts_tests.ini ]; then
+  test_list=`cat /bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
+  echo "Test Executed are $test_list"
+  /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
  else
-  echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run."
+  #SBBR Execution
+  echo "Executing FWTS for SBBR"
+  /bin/fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/fwts/FWTSResults.log
  fi
 
- if [ -f /bin/sr_bsa.flag ]; then
-  echo "Running Linux SBSA tests"
-  if [ -f  /lib/modules/sbsa_acs.ko ]; then
-   #Case of SR
-   insmod /lib/modules/sbsa_acs.ko
-   /bin/sbsa > /mnt/acs_results/linux/SbsaResultsApp.log
-   dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
+ sleep 2
+
+ if [ ! -f  /bin/ir_bbr_fwts_tests.ini ]; then
+  #Run Linux BSA tests for ES and SR only
+  mkdir -p /mnt/acs_results/linux
+  sleep 3
+  echo "Running Linux BSA tests"
+  if [ -f  /lib/modules/bsa_acs.ko ]; then
+   #Case of ES
+   insmod /lib/modules/bsa_acs.ko
+   if [ -f /bin/sr_bsa.flag ]; then
+    echo $'SystemReady SR ACS v1.1.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+   else
+    echo $'SystemReady ES ACS v1.1.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+   fi
+   /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
+   dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
   else
-   echo "Error: SBSA kernel Driver is not found. Linux SBSA tests cannot be run."
+   echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run."
+  fi
+
+  if [ -f /bin/sr_bsa.flag ]; then
+   echo "Running Linux SBSA tests"
+   if [ -f  /lib/modules/sbsa_acs.ko ]; then
+    #Case of SR
+    insmod /lib/modules/sbsa_acs.ko
+    echo $'SystemReady SR ACS v1.1.0\n' > /mnt/acs_results/linux/SbsaResultsApp.log
+    /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
+    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
+   else
+    echo "Error: SBSA kernel Driver is not found. Linux SBSA tests cannot be run."
+   fi
   fi
  fi
+else
+ echo ""
+ echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
+ echo ""
 fi
 
 sync /mnt
