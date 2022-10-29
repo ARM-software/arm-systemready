@@ -1,3 +1,22 @@
+v22.10_SR_ES_SIE_REL1.1.0
+**SystemReady SR ES SIE**
+* Upgraded the Linux kernel version to 6.0
+* Added a "noacs" developer option to optionally skip ACS run after linux boot
+* Increased the partition size of acs_results to 128 GB
+* ACS version print updates
+* Added additional debug dumps in UEFI and Linux shells during automated run
+* BBR: Support for optional extended run, extd_run, for UEFI-SCT for EBBR and SBBR
+* BBR: Upgraded edk2, UEFI-SCT and FWTS version to v22.09.00. Please see the ES and SR README for details
+* BSA: Command line parameter to log mmio prints
+* BSA: RCiEP and iEP rules test moved to SBSA
+* SBSA: SBSA ACS updated to SBSA 6.1 specification
+* SBSA: SBSA ACS coverage will be covered by BSA and SBSA binaries
+* SBSA: BSA ACS will provide coverage for common rules of BSA and SBSA checklist.
+* SBSA: SBSA ACS will provide coverage for SBSA-specific rules
+* SBSA: Updated RCiEP and iEP rules test to run at Level 6.
+* General enhancements and bug fixes
+
+
 v22.10_IR_2.0.0_BETA-1
 **SystemReady IR**
 * SIE-ACS test cases integrated into IR ACS image with new grub options
