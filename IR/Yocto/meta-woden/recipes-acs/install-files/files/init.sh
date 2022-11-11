@@ -86,6 +86,16 @@ fi
 #linux debug dump
 mkdir -p /mnt/acs_results/linux_dump
 lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
+lsusb > /mnt/acs_results/linux_dump/lsusb.log
+uname -a > /mnt/acs_results/linux_dump/uname.log
+cat /proc/interrupts > /mnt/acs_results/linux_dump/interrupts.log
+cat /proc/cpuinfo > /mnt/acs_results/linux_dump/cpuinfo.log
+cat /proc/meminfo > /mnt/acs_results/linux_dump/meminfo.log
+cat /proc/iomem > /mnt/acs_results/linux_dump/iomem.log
+ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
+cp -r /sys/firmware /mnt/acs_results/linux_dump/
+dmidecode > /mnt/acs_results/linux_dump/dmidecode.log
+efibootmgr > /mnt/acs_results/linux_dump/efibootmgr.log
 
 mkdir -p /mnt/acs_results/fwts
 echo "Executing FWTS for EBBR"
