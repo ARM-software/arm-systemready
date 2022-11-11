@@ -138,6 +138,8 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         pciutils \
                         python3-dtschema \
                         process-schema \
+                        dmidecode \
+                        efibootmgr \
 "
 
 addtask dir_deploy before do_populate_lic_deploy after do_image_complete
