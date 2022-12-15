@@ -75,12 +75,12 @@ SECURE_BOOT="";
 SECURE_BOOT=`cat /proc/cmdline | awk '{ print $NF}'`
 
 if [ $SECURE_BOOT = "secureboot" ]; then
-   echo "Call SIE ACS in Linux"
-   /usr/bin/secure_init.sh
-   echo "SIE ACS run is completed\n"
-   echo "Please press <Enter> to continue ..."
-   echo -e -n "\n"
-   exit 0
+ echo "Call SIE ACS in Linux"
+ /usr/bin/secure_init.sh
+ echo "SIE ACS run is completed\n"
+ echo "Please press <Enter> to continue ..."
+ echo -e -n "\n"
+ exit 0
 fi
 
 #linux debug dump
@@ -110,7 +110,7 @@ mkdir -p /mnt/acs_results/linux_acs/bsa_acs_app
 echo "Loading BSA ACS Linux Driver"
 insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
 echo "Executing BSA ACS Application "
-echo $'SystemReady IR ACS v2.0.0 Beta-1\nBSA v1.0.2' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+echo $'SystemReady IR ACS v2.0.0 Beta-1\nBSA v1.0.1' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
 bsa >> /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
 dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
 
@@ -119,32 +119,27 @@ sync /mnt
 
 sleep 3
 
-echo "copying fdt "
-
 mkdir -p /home/root/fdt
-
-cp /sys/firmware/fdt /home/root/fdt
-
 mkdir -p /mnt/acs_results/linux_tools
 
-if [ -f /results/acs_results/linux_tools/dt-validate.log ]
-then
-    mv /results/acs_results/linux_tools/dt-validate.log /results/acs_results/linux_tools/dt-validate.log.old
+if [ -f /sys/firmware/fdt ]; then
+ echo "copying fdt "
+ cp /sys/firmware/fdt /home/root/fdt
+
+ if [ -f /results/acs_results/linux_tools/dt-validate.log ]; then
+  mv /results/acs_results/linux_tools/dt-validate.log /results/acs_results/linux_tools/dt-validate.log.old
+ fi
+
+ echo "Running dt-validate tool "
+ dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results/linux_tools/dt-validate.log
+
+ sed -i '1s/^/DeviceTree bindings of Linux kernel version: 5.19.10 \ndtschema version: 2022.9 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
+
+else
+ echo  $'Error: The FDT devicetree file ,fdt , does not exist at /sys/firmware/fdt. Cannot run dt-schema tool ' | tee /mnt/acs_results/linux_tools/dt-validate.log
 fi
-
-echo "Running dt-validate tool "
-
-dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt.dtb 2>> /mnt/acs_results/linux_tools/dt-validate.log
-
-if [ ! -s /mnt/acs_results/linux_tools/dt-validate.log ]
-then
-    echo $'The FDT is compliant according to schema ' >> /mnt/acs_results/linux_tools/dt-validate.log
-fi
-
-sed -i '1s/^/DeviceTree bindings of Linux kernel version: 5.19.10 \ndtschema version: 2022.9 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
 
 echo "ACS run is completed"
 echo "Please press <Enter> to continue ..."
 echo -e -n "\n"
 exit 0
-
