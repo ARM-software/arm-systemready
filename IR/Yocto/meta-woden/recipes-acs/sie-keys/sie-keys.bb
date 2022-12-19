@@ -43,6 +43,12 @@ do_compile() {
     cert-to-efi-sig-list $NAME.crt $NAME.esl
     sign-efi-sig-list -c $NAME.crt -k $NAME.key PK $NAME.esl $NAME.auth
 
+    # generate NULLPK.auth to facilitate deletion of PK during development
+    NAME=NullPK
+    FUTURE_DATE=`date --rfc-3339=date -d "+5 year"`
+    cat /dev/null > $NAME.esl
+    sign-efi-sig-list -t $FUTURE_DATE -c TestPK1.crt -k TestPK1.key PK $NAME.esl $NAME.auth
+
     # generate TestKEK1: DER and signed siglist
     NAME=TestKEK1
     openssl req -x509 -sha256 -newkey rsa:2048 -subj /CN=TEST_KEK/  -keyout $NAME.key -out $NAME.crt -nodes -days 4000
