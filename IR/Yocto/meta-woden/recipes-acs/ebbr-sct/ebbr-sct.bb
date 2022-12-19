@@ -33,7 +33,7 @@ do_configure() {
     cd ${S}/edk2-test
     # patch edk2-test
     echo "Applying SCT patch ..."
-    patch  -p1  < ${S}/bbr-acs/common/patches/edk2-test-bbr.patch
+    git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/common/patches/edk2-test-bbr.patch
 
     # Copy sbbr-test cases from bbr-acs to uefi-sct
     cp -r ${SBBR_TEST_DIR}/SbbrBootServices uefi-sct/SctPkg/TestCase/UEFI/EFI/BootServices/
@@ -50,8 +50,7 @@ do_configure() {
     cp -r ${S}/bbr-acs/bbsr/sct-tests/TCG2Protocol uefi-sct/SctPkg/TestCase/UEFI/EFI/Protocol
     cp -r ${S}/bbr-acs/bbsr/sct-tests/TCG2.h uefi-sct/SctPkg/UEFI/Protocol
 
-    patch  -p1  < ${S}/bbr-acs/bbsr/patches/0001-SIE-Patch-for-UEFI-SCT-Build.patch
-
+    git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/bbsr/patches/0001-SIE-Patch-for-UEFI-SCT-Build.patch
 
 }
 
@@ -125,6 +124,11 @@ do_signimage() {
 }
 
 do_compile() {
+    #For openssl
+    echo "S is ${S}"
+    export PATH="${S}/../../../generic_arm64-oe-linux/sie-keys/1.0-r0/efitools:/usr/bin:${PATH}"
+    echo "New Path: $PATH";
+
     cd ${S}/edk2-test
     # create softlink to SctPkg
     ln -sf ${S}/edk2-test/uefi-sct/SctPkg SctPkg
