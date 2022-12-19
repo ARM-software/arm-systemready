@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -52,6 +52,12 @@ do_build()
     openssl x509 -outform der -in $NAME.crt -out $NAME.der
     cert-to-efi-sig-list $NAME.crt $NAME.esl
     sign-efi-sig-list -c $NAME.crt -k $NAME.key PK $NAME.esl $NAME.auth
+
+    # generate NULLPK.auth to facilitate deletion of PK during development
+    NAME=NullPK
+    FUTURE_DATE=`date --rfc-3339=date -d "+5 year"`
+    cat /dev/null > $NAME.esl
+    sign-efi-sig-list -t $FUTURE_DATE -c TestPK1.crt -k TestPK1.key PK $NAME.esl $NAME.auth
 
     # generate TestKEK1: DER and signed siglist
     NAME=TestKEK1
