@@ -134,7 +134,9 @@ if [ -f /sys/firmware/fdt ]; then
  dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results/linux_tools/dt-validate.log
 
  sed -i '1s/^/DeviceTree bindings of Linux kernel version: 5.19.10 \ndtschema version: 2022.9 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
-
+ if [ ! -s /mnt/acs_results/linux_tools/dt-validate.log ]; then
+    echo $'The FDT is compliant according to schema ' >> /mnt/acs_results/linux_tools/dt-validate.log
+ fi
 else
  echo  $'Error: The FDT devicetree file ,fdt , does not exist at /sys/firmware/fdt. Cannot run dt-schema tool ' | tee /mnt/acs_results/linux_tools/dt-validate.log
 fi
