@@ -48,7 +48,7 @@ export GIT_SSL_NO_VERIFY=1
 sudo apt install git curl mtools gdisk gcc liblz4-tool zstd \
  openssl automake autotools-dev libtool bison flex \
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
- make gcc g++ python
+ make gcc g++ python gnu-efi libfile-slurp-perl help2man 
 
 sudo pip3 install kas
 
