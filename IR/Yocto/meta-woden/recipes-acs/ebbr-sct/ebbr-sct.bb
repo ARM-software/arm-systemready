@@ -12,6 +12,7 @@ SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=ht
             git://github.com/tianocore/edk2-test;destsuffix=edk2-test;protocol=https;nobranch=1;name=edk2-test \
             gitsm://github.com/tianocore/edk2.git;destsuffix=edk2-test/edk2;protocol=https;nobranch=1;name=edk2 \
             file://sctversion.patch;patch=1;patchdir=edk2-test \
+            file://BBR_SCT.dsc  \
 "
 
 S = "${WORKDIR}"
@@ -39,7 +40,9 @@ do_configure() {
     cp -r ${SBBR_TEST_DIR}/SbbrBootServices uefi-sct/SctPkg/TestCase/UEFI/EFI/BootServices/
     cp -r ${SBBR_TEST_DIR}/SbbrEfiSpecVerLvl ${SBBR_TEST_DIR}/SbbrRequiredUefiProtocols ${SBBR_TEST_DIR}/SbbrSmbios ${SBBR_TEST_DIR}/SbbrSysEnvConfig uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
     cp -r ${SBBR_TEST_DIR}/SBBRRuntimeServices uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices/
-    cp ${SBBR_TEST_DIR}/BBR_SCT.dsc uefi-sct/SctPkg/UEFI/
+    # This code shall be updated to the commented code when SIE ACS is integrated to SR and ES images
+    #cp ${SBBR_TEST_DIR}/BBR_SCT.dsc uefi-sct/SctPkg/UEFI/
+    cp ${S}/BBR_SCT.dsc uefi-sct/SctPkg/UEFI/
     cp ${SBBR_TEST_DIR}/build_bbr.sh uefi-sct/SctPkg/
     cp ${S}/bbr-acs/ebbr/config/EfiCompliant_EBBR.ini uefi-sct/SctPkg/UEFI/
 
