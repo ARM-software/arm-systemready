@@ -42,7 +42,7 @@ if [ $1 == "SIE" ]; then
     source ./build-scripts/build-sct.sh $@
     source ./build-scripts/build-uefi-apps.sh $@
     source ./build-scripts/build-grub-sie.sh $@
-    source ./build-scripts/build-buildroot.sh
+    source ./build-scripts/build-buildroot-sie.sh
     # return to the parent script
     return
 fi
@@ -55,18 +55,23 @@ source ./build-scripts/build-uefi.sh
 source ./build-scripts/build-bsaefi.sh $@
 
 if [ $BAND == "SR" ]; then
-    source ./build-scripts/build-sbsaefi.sh
+    source ./build-scripts/build-sbsaefi.sh $@
 fi
 
 source ./build-scripts/build-sct.sh $@
 source ./build-scripts/build-uefi-apps.sh $@
-source ./build-scripts/build-linux.sh $BAND
-source ./build-scripts/build-linux-bsa.sh
+source ./build-scripts/build-linux.sh $@
+source ./build-scripts/build-linux-bsa.sh $@
+source ./build-scripts/build-grub.sh $@
 
 if [ $BAND == "SR" ]; then
-    source ./build-scripts/build-linux-sbsa.sh
+    source ./build-scripts/build-sbsa-buildroot.sh $@
+    source ./build-scripts/build-linux-sbsa.sh $@
 fi
 
-source ./build-scripts/build-grub.sh $@
-source ./build-scripts/build-fwts.sh $@
-source ./build-scripts/build-busybox.sh $@
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    source ./build-scripts/build-buildroot.sh $@
+else
+    source ./build-scripts/build-fwts.sh $@
+    source ./build-scripts/build-busybox.sh $@
+fi

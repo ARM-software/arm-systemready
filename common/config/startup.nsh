@@ -1,4 +1,4 @@
-# Copyright (c) 2021-22, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -78,6 +78,11 @@ endfor
 
 :Donebsa
 for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%l:\Image and exist FS%l:\ramdisk-buildroot.img then
+        FS%l:
+        cd FS%l:\
+        Image initrd=\ramdisk-buildroot.img systemd.log_target=null plymouth.ignore-serial-consoles debug crashkernel=512M,high log_buf_len=1M efi=debug acpi=on crashkernel=256M earlycon uefi_debug
+    endif
     if exist FS%l:\Image and exist FS%l:\ramdisk-busybox.img then
         FS%l:
         cd FS%l:\

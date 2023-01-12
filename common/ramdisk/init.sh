@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -32,6 +32,11 @@
 /bin/busybox mount -t proc proc /proc
 /bin/busybox mount -t sysfs sysfs /sys
 echo "init.sh"
+
+#Create a link of S10init.sh to init.sh
+if [ ! -f /init.sh ]; then
+ ln -s  /etc/init.d/S10init.sh /init.sh
+fi
 
 #Create all the symlinks to /bin/busybox
 /bin/busybox --install -s
@@ -107,11 +112,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  if [ -f  /bin/ir_bbr_fwts_tests.ini ]; then
   test_list=`cat /bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
   echo "Test Executed are $test_list"
-  /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
+  fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
  else
   #SBBR Execution
   echo "Executing FWTS for SBBR"
-  /bin/fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/fwts/FWTSResults.log
+  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/fwts/FWTSResults.log
  fi
 
  sleep 2
