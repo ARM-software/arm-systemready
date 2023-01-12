@@ -122,9 +122,6 @@ do_package ()
     # sign grub with db key
     sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt output/grubaa64.efi --output output/grubaa64.efi
 
-    # sign grub.cfg with gpg key
-    gpg --default-key "TestDB1" --detach-sign $GRUB_CONFIG_FILE
-
     popd
 }
 

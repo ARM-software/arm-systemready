@@ -45,6 +45,8 @@ create_scripts_link()
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-sct.sh             $TOP_DIR/build-scripts/build-sct.sh
 
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-uefi-apps.sh       $TOP_DIR/build-scripts/build-uefi-apps.sh
+ ln -s $TOP_DIR/../../common/scripts/build-efitools.sh          $TOP_DIR/build-scripts/build-efitools.sh
+ ln -s $TOP_DIR/../../common/scripts/build-sie-keys.sh          $TOP_DIR/build-scripts/build-sie-keys.sh
 }
 
 init_dir()

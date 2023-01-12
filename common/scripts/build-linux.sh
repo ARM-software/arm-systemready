@@ -64,6 +64,7 @@ fi
 
 LINUX_ARCH=arm64
 LINUX_IMAGE_TYPE=Image
+KEYS_DIR=$TOP_DIR/security-interface-extension-keys
 
 do_build ()
 {
@@ -89,6 +90,17 @@ do_build ()
     sed -i 's/# CONFIG_CGROUP_FREEZER is not set/CONFIG_CGROUP_FREEZER=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_COMMON_CLK_ZYNQMP is not set/CONFIG_COMMON_CLK_ZYNQMP=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER is not set/CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER=y/g' $LINUX_OUT_DIR/.config
+    #Configurations for SecureBoot and TCG for SIE ACS
+    sed -i 's/# CONFIG_TCG_TPM is not set/CONFIG_TCG_TPM=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_TIS is not set/CONFIG_TCG_TIS=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_TIS_SPI is not set/CONFIG_TCG_TIS_SPI=y/g' $LINUX_OUT_DIR/.config
+    echo "CONFIG_TCG_TIS_SPI_CR50=y" >> $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_TIS_SYNQUACER is not set/CONFIG_TCG_TIS_SYNQUACER=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_TIS_I2C_CR50 is not set/CONFIG_TCG_TIS_I2C_CR50=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_CRB is not set/CONFIG_TCG_CRB=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_FTPM_TEE is not set/CONFIG_TCG_FTPM_TEE=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TEE is not set/CONFIG_TEE=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_OPTEE is not set/CONFIG_OPTEE=y/g' $LINUX_OUT_DIR/.config
 
     if [[ $arch = "aarch64" ]]
     then
@@ -119,6 +131,9 @@ do_package ()
 
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/arch/$LINUX_ARCH/boot/$LINUX_IMAGE_TYPE \
     ${OUTDIR}/$LINUX_IMAGE_TYPE
+
+    # Sign the kernel with DB key
+    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt ${OUTDIR}/$LINUX_IMAGE_TYPE --output ${OUTDIR}/$LINUX_IMAGE_TYPE
 
     #Copy drivers for packaging into Ramdisk
     mkdir -p $TOP_DIR/ramdisk/drivers

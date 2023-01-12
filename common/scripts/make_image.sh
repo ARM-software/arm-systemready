@@ -41,6 +41,7 @@ OUTDIR=${PLATDIR}
 GRUB_FS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
 GRUB_BUILDROOT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub-buildroot.cfg
 EFI_CONFIG_FILE=${TOP_DIR}/build-scripts/config/startup.nsh
+SIE_STARTUP_FILE=${TOP_DIR}/build-scripts/config/sie_startup.nsh
 BSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bsa.nsh
 SBSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/sbsa.nsh
 BBR_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bbr.nsh
@@ -58,6 +59,7 @@ create_cfgfiles ()
 
     if [ "$BUILD_PLAT" = "SR" ] || [ "$BUILD_PLAT" = "ES" ]; then
         mcopy -i  $fatpart_name -o ${GRUB_BUILDROOT_CONFIG_FILE} ::/grub.cfg
+        mcopy -i  $fatpart_name -o ${SIE_STARTUP_FILE}     ::/EFI/BOOT/
     else
         mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
     fi
@@ -95,6 +97,10 @@ create_fatpart ()
     mcopy -i $fatpart_name $OUTDIR/Image ::/
     if [ "$BUILD_PLAT" = "SR" ] || [ "$BUILD_PLAT" = "ES" ]; then
         mcopy -i $fatpart_name $PLATDIR/ramdisk-buildroot.img  ::/
+        # ship SIE public keys
+        mmd -i $fatpart_name ::/security-interface-extension-keys
+        mcopy -i $fatpart_name ${TOP_DIR}/security-interface-extension-keys/*.der ::/security-interface-extension-keys
+        mcopy -i $fatpart_name ${TOP_DIR}/security-interface-extension-keys/*.auth ::/security-interface-extension-keys
     else
         mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
     fi

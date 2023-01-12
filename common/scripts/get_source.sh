@@ -237,6 +237,16 @@ get_buildroot_src()
     popd
 }
 
+get_efitools_src()
+{
+  if [ -z $EFITOOLS_SRC_TAG ]; then
+      echo "Downloading EFI tools source code."
+      git clone --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
+  else
+      echo "Downloading EFI tools source code. TAG : ${EFITOOLS_SRC_TAG}"
+      git clone --depth 1 --branch ${EFITOOLS_SRC_TAG} https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
+  fi
+}
 
 source /etc/lsb-release
 
@@ -262,6 +272,7 @@ fi
 
 get_uefi_src
 get_bsa_src
+get_efitools_src
 
 if [ $BAND == "SR" ]; then
     get_sbsa_src

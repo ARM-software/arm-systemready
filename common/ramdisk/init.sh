@@ -94,6 +94,15 @@ ADDITIONAL_CMD_OPTION="";
 ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
+ if [ $ADDITIONAL_CMD_OPTION == "secureboot" ]; then
+  echo "Call SIE ACS"
+  /usr/bin/secure_init.sh
+  echo "SIE ACS run is completed\n"
+  echo "Please press <Enter> to continue ..."
+  sync /mnt
+  sleep 3
+  exec sh
+ fi
  #linux debug dump
  mkdir -p /mnt/acs_results/linux_dump
  lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log

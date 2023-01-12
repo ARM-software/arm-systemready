@@ -56,6 +56,7 @@ fi
 
 GRUB_PATH=grub
 GRUB_PLAT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub_prefix.cfg
+KEYS_DIR=$TOP_DIR/security-interface-extension-keys
 
 do_build ()
 {
@@ -120,7 +121,10 @@ do_clean ()
 
 do_package ()
 {
-    :
+    # sign grub with db key
+    pushd $TOP_DIR/$GRUB_PATH
+    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt output/grubaa64.efi --output output/grubaa64.efi
+    popd
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -51,7 +51,9 @@ fi
 BAND=$1
 PACKAGE=$2
 
-source ./build-scripts/build-uefi.sh
+source ./build-scripts/build-efitools.sh
+source ./build-scripts/build-sie-keys.sh
+source ./build-scripts/build-uefi.sh $@
 source ./build-scripts/build-bsaefi.sh $@
 
 if [ $BAND == "SR" ]; then
