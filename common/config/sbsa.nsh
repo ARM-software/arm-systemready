@@ -47,7 +47,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 endif
                 FS%j:\EFI\BOOT\bsa\Bsa.efi -sbsa -skip 900 -f BsaTempResults.log
                 if exist FS%i:\acs_results\uefi\BsaTempResults.log then
-                    echo " SystemReady SR ACS v1.1.0" > BsaResults.log
+                    echo " SystemReady SR ACS v2.0.0_BETA-0" > BsaResults.log
                     stall 200000
                     type BsaTempResults.log >> BsaResults.log
                     cp BsaTempResults.log temp/
@@ -64,7 +64,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 endif
                 FS%j:\EFI\BOOT\bsa\sbsa\Sbsa.efi -skip 800 -f SbsaTempResults.log
                 if exist FS%i:\acs_results\uefi\SbsaTempResults.log then
-                    echo " SystemReady SR ACS v1.1.0" > SbsaResults.log
+                    echo " SystemReady SR ACS v2.0.0_BETA-0" > SbsaResults.log
                     stall 200000
                     type SbsaTempResults.log >> SbsaResults.log
                     cp SbsaTempResults.log temp/
