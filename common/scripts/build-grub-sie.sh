@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -78,14 +78,22 @@ do_build ()
         fi
 
         ./autogen.sh
-        ./configure STRIP=$CROSS_COMPILE_DIR/aarch64-linux-gnu-strip \
-        --target=aarch64-linux-gnu --with-platform=efi \
-        --prefix=$TOP_DIR/$GRUB_PATH/output/ \
-        TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
+
+        if [[ $arch = "aarch64" ]]; then
+            ./configure \
+            --target=aarch64-linux-gnu --with-platform=efi \
+            --prefix=$TOP_DIR/$GRUB_PATH/output/ \
+            --disable-werror
+        else
+            ./configure STRIP=$CROSS_COMPILE_DIR/aarch64-linux-gnu-strip \
+            --target=aarch64-linux-gnu --with-platform=efi \
+            --prefix=$TOP_DIR/$GRUB_PATH/output/ \
+            TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
+        fi
 
         make -j8 install
         output/bin/grub-mkstandalone -v \
-        -o output/grubaa64.efi -O arm64-efi --pubkey $KEYS_DIR/TestDB1.pubgpg --disable-shim-lock \
+        -o output/grubaa64.efi -O arm64-efi --disable-shim-lock \
         --modules "pgp gcry_sha512 gcry_rsa part_gpt part_msdos ntfs ntfscomp hfsplus fat ext2 normal chain \
         boot configfile linux help part_msdos terminal terminfo configfile tpm \
         lsefi search normal gettext loadenv read search_fs_file search_fs_uuid search_label" \
@@ -104,9 +112,6 @@ do_clean ()
         git clean -fdX
         popd
     fi
-
-    # delete the gpg generated sig file
-    rm -f $GRUB_CONFIG_FILE.sig
 }
 
 do_package ()
