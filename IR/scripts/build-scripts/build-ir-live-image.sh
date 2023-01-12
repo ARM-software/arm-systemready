@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -45,6 +45,8 @@ create_scripts_link()
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-sct.sh             $TOP_DIR/build-scripts/build-sct.sh
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-fwts.sh            $TOP_DIR/build-scripts/build-fwts.sh
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-uefi-apps.sh       $TOP_DIR/build-scripts/build-uefi-apps.sh
+ ln -s $TOP_DIR/../../common/scripts/build-efitools.sh          $TOP_DIR/build-scripts/build-efitools.sh
+ ln -s $TOP_DIR/../../common/scripts/build-sie-keys.sh          $TOP_DIR/build-scripts/build-sie-keys.sh
 }
 
 init_dir()
@@ -52,7 +54,8 @@ init_dir()
  rm -rf $TOP_DIR/ramdisk
  rm -rf $TOP_DIR/build-scripts/config
  cp -r $TOP_DIR/../../common/ramdisk                      $TOP_DIR 
- cp -r $TOP_DIR/../../common/config                       $TOP_DIR/build-scripts 
+ cp -r $TOP_DIR/../../common/config                       $TOP_DIR/build-scripts
+ mkdir -p $TOP_DIR/output
 }
 
 create_scripts_link

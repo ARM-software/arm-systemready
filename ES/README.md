@@ -6,7 +6,7 @@ SystemReady Embedded Server (ES) is a band of system certification in the Arm Sy
 
 SystemReady ES-certified platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. Compliant systems must conform to the:
 * [Base System Architecture (BSA) specification](https://developer.arm.com/documentation/den0094/latest)
-* SBBR recipe of the [Base Boot Requirements (BBR) specification](https://developer.arm.com/documentation/den0044/latest)
+* SBBR recipe of the [Base Boot Requirements (BBR) specification](https://developer.arm.com/documentation/den0044/f/?lang=en)
 * The SystemReady ES certification and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
 This section contains the build scripts and the live-images for the SystemReady ES Band.
@@ -60,7 +60,7 @@ Before starting the ACS build, ensure that the following requirements are met:
 5. If all the above steps are successful, then the  bootable image will be available at **/path-to-arm-systemready/ES/scripts/output/es_acs_live_image.img.xz**
 
 Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before it is used.<br />
-Note: For the build instructions of the Security Interface Extension ACS, refer to the [SIE README](./../SIE//README.md) for further details.<br />
+
 
 ## Build output
 This image comprises of two FAT file system partitions recognized by UEFI: <br />
@@ -127,19 +127,24 @@ The live image boots to UEFI Shell. The different test applications can be run i
 1. [SCT tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
 2. [UEFI Shell application](https://github.com/ARM-software/bsa-acs/blob/main/README.md) for BSA compliance.
 3. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
-4. [OS tests](https://github.com/ARM-software/bsa-acs/blob/main/README.md) for Linux BSA compliance. <br />
-Note: To skip FWTS and OS tests for debugging, append "noacs" to the Linux command by editing the "Linux Boot" option in the grub menu during image boot.<br />
-To start an extended run of UEFI-SCT append "-nostartup startup.nsh sct_extd" to the shell.efi command by editing the "bbr/bsa" option in the grub menu during image boot.<br />
+4. [OS tests](https://github.com/ARM-software/bsa-acs/blob/main/README.md) for Linux BSA compliance.
+Note: To skip FWTS and OS tests for debugging, append "noacs" to the Linux command by editing the "Linux Boot" option in the grub menu during image boot.
+To start an extended run of UEFI-SCT append "-nostartup startup.nsh sct_extd" to the shell.efi command by editing the "bbr/bsa" option in the grub menu during image boot.
+
+### Running Security interface extension (SIE) ACS components.
+Now SIE ACS is integrated with ES ACS image, which can be accessed through GRUB options.
+
+For the verification steps of SIE ACS on QEMU with TPM support, refer to the [SIE ACS Verification](../common/docs/SIE_ACS_Verification.md).
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v22.09.00
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v22.11.00
 
-- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v22.10_REL1.0.2
+- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.01_REL1.0.3
 
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: : v22.10_REL1.1.0
+- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: : v23.01_SR_REL2.0.0_BETA-0_ES_REL_1.2.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: f628bec2193da1f9402ef749fbca50f61c812d6f
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 06f84debb796b2f6ac893b130e90ab5599195b29
 
 
 
@@ -158,5 +163,5 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2021-2022, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2021-2023, Arm Limited and Contributors. All rights reserved.*
 

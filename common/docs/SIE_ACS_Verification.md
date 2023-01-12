@@ -1,9 +1,19 @@
-# Running SIE ACS on QEMU-Virt with TPM support
+# Introduction to the SystemReady Security Interface Extension (SIE)
 
-In this version, the SIE ACS is integrated into the IR ACS Prebuilt image.
+The SystemReady Security Interface Extension provides a way to certify that Secure Boot and secure firmware update are implemented as prescribed by the Arm [Base Boot Security Specification](https://developer.arm.com/documentation/den0107/latest) (BBSR).  The Security Interface Extension is an extension to the bands of the SystemReady program and a pre-requisite for a Security Interface Extension certification in one of the IR, ES, or SR bands.
 
-See the Section 3.4 [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the secureboot keys.
-This document also contains the background information on the SIE related specification and ACS. 
+The Security Interface Extension ACS tests the following security related interfaces:
+* Authenticated variables
+* Secure Boot variables
+* Secure firmware update using update capsules
+* For systems with Trusted Platform Modules(TPMs), TPM measured boot and the TCG2 protocol
+
+# Running SIE ACS on QEMU (virt) with TPM support
+
+The Prebuilt SR/ES/IR band images can now be used to verify the requirements of SIE from this release, as they are integrated with the SIE ACS.
+
+See the Section 3.4 [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the SecureBoot keys.
+This document also contains the background information on the SIE related specification and ACS.
 
 ## Installing swtpm package (TPM emulator)
 Note: Install only if there is no past installation of swtpm present. Check by running "swtpm -v" in the terminal, which should output the version.
@@ -53,7 +63,7 @@ truncate -s 64M flash0.img
 truncate -s 64M flash1.img
 ```
 
-## Running IR ACS prebuilt image on QEMU -Virt model
+## Running SIE ACS with Prebuilt SystemReady band images on QEMU -Virt model
 1. Create a script "run_qemu.sh" as below with variables configured as per your environment:
 
 ```
@@ -62,7 +72,7 @@ truncate -s 64M flash1.img
 QEMU=<path to QEMU model>
 FLASH0=<path to flash0.img>
 FLASH1=<path to flash1.img>
-IMG=<path to ir-acs-live-image-generic-arm64.wic>
+IMG=<path to systemready IR/ES/SR image>
 
 WD=`pwd`
 TPMSOCK=/tmp/swtpm-sock$$
@@ -90,14 +100,16 @@ $QEMU -M virt -cpu cortex-a57 -smp 8 -m 2048 \
 
 Once QEMU execution begins, immediately press Esc key to go into the UEFI settings. Follow the steps in Section 3.4 for "Enrolling keys in EDK2" in the [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the secureboot keys.
 
+Note: The SecureBoot keys are present in \<bootfs>/security-interface-extension-keys
+
 
 3. In the grub options, choose
 ```
-SCT for Security Interface Extension (optional)                            |
+SCT for Security Interface Extension (optional) for SIE SCT tests
 and
-Linux Boot for Security Interface Extension (optional)
+Linux Boot for Security Interface Extension (optional) for Secure Linux boot, SIE FWTS and TPM2 logs.
 ```
 to run the SIE ACS suites.
 
 --------------
-*Copyright (c) 2022, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2023, Arm Limited and Contributors. All rights reserved.*

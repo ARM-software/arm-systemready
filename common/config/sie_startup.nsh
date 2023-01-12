@@ -26,46 +26,26 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+echo -off
 
-#Linux kernel version. Source downloaded from https://github.com/torvalds/linux.git
-LINUX_KERNEL_VERSION=6.0
-
-#EDK2 source tag from https://github.com/tianocore/edk2.git
-EDK2_SRC_VERSION=edk2-stable202208
-
-# EDK2-TEST source tag from  https://github.com/tianocore/edk2-test
-SCT_SRC_TAG=06f84debb796b2f6ac893b130e90ab5599195b29
-
-# GRUB2 source from https://github.com/rhboot/grub2.git
-GRUB_SRC_TAG=grub-2.06
-
-# UEFI secure boot toolkit source tag from
-# https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
-EFITOOLS_SRC_TAG=v1.9.2
-
-#Arm BSA source tag.
-#NOTE: If the value is NULL then the latest BSA source will be downloaded
-ARM_BSA_TAG=""
-
-#Arm SBSA source tag. Applicable only for SR build.
-#NOTE: If the value is NULL then the latest SBSA source will be downloaded
-ARM_SBSA_TAG=""
-
-#Arm BBR source tag
-#NOTE: If the value is NULL then the latest BBR source will be downloaded
-ARM_BBR_TAG=""
-
-#Arm LINUX ACS source tag
-#NOTE: If the value is NULL then the latest Linux ACS source will be downloaded
-ARM_LINUX_ACS_TAG=""
-
-#Buildroot version used for sbsa7.1
-BUILDROOT_SRC_VERSION=2022.08.1
-
-#Cross compiler tools from https://releases.linaro.org/components/toolchain/binaries
-GCC_TOOLS_VERSION=10.3-2021.07
-CROSS_COMPILER_URL=https://developer.arm.com/-/media/Files/downloads/gnu-a/${GCC_TOOLS_VERSION}/binrel/gcc-arm-${GCC_TOOLS_VERSION}-x86_64-aarch64-none-linux-gnu.tar.xz
-
-#Export Tool chain path
-GCC=tools/gcc-arm-${GCC_TOOLS_VERSION}-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%i:\EFI\BOOT\bbr\sie_SctStartup.nsh then
+        FS%i:\EFI\BOOT\bbr\sie_SctStartup.nsh
+        for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+            if  exist FS%k:\acs_results\SIE\sct_results\ then
+                if  exist FS%i:\EFI\BOOT\bbr\SCT\Overall then
+                    cp -r FS%i:\EFI\BOOT\bbr\SCT\Overall FS%k:\acs_results\SIE\sct_results\
+                endif
+                if  exist FS%i:\EFI\BOOT\bbr\SCT\Dependency\EfiCompliantBBTest then
+                    cp -r FS%i:\EFI\BOOT\bbr\SCT\Dependency\EfiCompliantBBTest FS%k:\acs_results\SIE\sct_results\
+                endif
+                if  exist FS%i:\EFI\BOOT\bbr\SCT\Sequence then
+                    cp -r FS%i:\EFI\BOOT\bbr\SCT\Sequence FS%k:\acs_results\SIE\sct_results\
+                endif
+            endif
+        endfor
+        echo "SIE SCT test suite execution is complete. Resetting the system"
+        reset
+    endif
+endfor
 

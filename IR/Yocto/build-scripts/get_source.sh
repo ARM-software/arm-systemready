@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2022-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -48,7 +48,8 @@ export GIT_SSL_NO_VERIFY=1
 sudo apt install git curl mtools gdisk gcc liblz4-tool zstd \
  openssl automake autotools-dev libtool bison flex \
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
- make gcc g++ python gnu-efi libfile-slurp-perl help2man 
+ make gcc g++ python gnu-efi libfile-slurp-perl help2man \
+ python3-pip chrpath diffstat -y
 
 sudo pip3 install kas
 

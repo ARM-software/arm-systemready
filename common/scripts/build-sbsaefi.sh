@@ -64,6 +64,7 @@ PATCH_DIR=$TOP_DIR/../patches
 COMMON_PATCH_DIR=$TOP_DIR/../../common/patches
 OUTDIR=${TOP_DIR}/output
 SBSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
+KEYS_DIR=$TOP_DIR/security-interface-extension-keys
 
 do_build()
 {
@@ -112,7 +113,9 @@ do_package ()
 {
     echo "Packaging SBSA...";
     # Copy binaries to output folder
-   cp $TOP_DIR/$SBSA_EFI_PATH/Sbsa.efi $OUTDIR/Sbsa.efi
+    cp $TOP_DIR/$SBSA_EFI_PATH/Sbsa.efi $OUTDIR/Sbsa.efi
+    # sign Sbsa.efi with db key
+    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $OUTDIR/Sbsa.efi --output $OUTDIR/Sbsa.efi
 }
 
 exit_fun() {
