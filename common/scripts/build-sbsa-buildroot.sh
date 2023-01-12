@@ -43,15 +43,20 @@
 set -x
 TOP_DIR=`pwd`
 BAND=$1
-. $TOP_DIR/../../common/config/sr_es_common_config.cfg
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    . $TOP_DIR/../../common/config/sr_es_common_config.cfg
+else
+    . $TOP_DIR/../../common/config/common_config.cfg
+fi
 
 LINUX_ARCH=arm64
 BUILDROOT_PATH=buildroot
 BUILDROOT_ARCH=$LINUX_ARCH
+BUILDROOT_RAMDISK_PATH=$BUILDROOT_PATH/ramdisk
 BUILDROOT_OUT_DIR=out/$LINUX_ARCH
 BUILDROOT_RAMDISK_BUILDROOT_PATH=$BUILDROOT_PATH/$BUILDROOT_OUT_DIR/images
-BUILDROOT_DEFCONFIG=$TOP_DIR/$BUILDROOT_PATH/configs/buildroot_defconfig
-OUTDIR=$TOP_DIR/output
+BUILDROOT_DEFCONFIG=$TOP_DIR/$BUILDROOT_PATH/configs/buildroot_sbsa_defconfig
+
 LINUX_CONFIG_LIST="$LINUX_CONFIG_LIST $BUILDROOT_LINUX_CONFIG_LIST"
 LINUX_CONFIG_DEFAULT=$BUILDROOT_LINUX_CONFIG_LIST
 
@@ -59,39 +64,10 @@ do_build ()
 {
     export ARCH=$BUILDROOT_ARCH
 
-    cp $TOP_DIR/../../common/config/buildroot_defconfig  $TOP_DIR/$BUILDROOT_PATH/configs/
+    cp $TOP_DIR/../../common/config/buildroot_sbsa_defconfig  $TOP_DIR/$BUILDROOT_PATH/configs/
     pushd $TOP_DIR/$BUILDROOT_PATH
     mkdir -p $BUILDROOT_OUT_DIR
-    mkdir -p root_fs_overlay
-    mkdir -p root_fs_overlay/etc/init.d
-    cp  $TOP_DIR/../../common/ramdisk/inittab root_fs_overlay/etc
-    cp  $TOP_DIR/../../common/ramdisk/init.sh root_fs_overlay/etc/init.d/S10init.sh
-    chmod +x root_fs_overlay/etc/init.d/S10init.sh
-    mkdir -p root_fs_overlay/bin
-    mkdir -p root_fs_overlay/lib/modules
-    mkdir -p root_fs_overlay/usr/bin
-
-    cp  $TOP_DIR/ramdisk/linux-bsa/bsa root_fs_overlay/bin/
-    cp  $TOP_DIR/ramdisk/linux-bsa/bsa_acs.ko root_fs_overlay/lib/modules/
-    cp  $TOP_DIR/ramdisk/drivers/* root_fs_overlay/lib/modules/
-    cp  $TOP_DIR/ramdisk/secure_init.sh root_fs_overlay/usr/bin/
-    chmod +x root_fs_overlay/usr/bin/secure_init.sh
-    cp  $TOP_DIR/bbr-acs/bbsr/config/bbsr_fwts_tests.ini root_fs_overlay/bin/
-    cp  $TOP_DIR/../../common/config/verify_tpm_measurements.py root_fs_overlay/bin/
-
-    if [ $BAND == "IR" ]; then
-        cp  $TOP_DIR/bbr-acs/ebbr/config/ir_bbr_fwts_tests.ini root_fs_overlay/bin/
-    fi
-
-    if [ $BAND == "SR" ]; then
-        touch root_fs_overlay/bin/sr_bsa.flag
-        cp  $TOP_DIR/ramdisk/linux-sbsa/sbsa root_fs_overlay/bin/
-        cp $TOP_DIR/ramdisk/linux-sbsa/mte_test root_fs_overlay/bin/
-        cp  $TOP_DIR/ramdisk/linux-sbsa/sbsa_acs.ko root_fs_overlay/lib/modules/
-        cp -r  $TOP_DIR/ramdisk/linux-sbsa/pmuval root_fs_overlay/bin/
-    fi
-
-    make O=$BUILDROOT_OUT_DIR buildroot_defconfig
+    make O=$BUILDROOT_OUT_DIR buildroot_sbsa_defconfig
     make O=$BUILDROOT_OUT_DIR -j $PARALLELISM
     rm $BUILDROOT_DEFCONFIG
     popd
@@ -106,18 +82,13 @@ do_clean ()
     make O=$BUILDROOT_OUT_DIR clean
     popd
 
-    rm -f ${OUTDIR}/ramdisk-buildroot.img
-    rm -rf ${TOP_DIR}/buildroot/root_fs_overlay
+    rm -f ${PLATDIR}/ramdisk-buildroot.img
 
 }
 
 do_package ()
 {
-    echo "Packaging BUILDROOT... $VARIANT";
-    # Copy binary to output folder
-    pushd $TOP_DIR
-    cp $TOP_DIR/$BUILDROOT_RAMDISK_BUILDROOT_PATH/rootfs.cpio ${OUTDIR}/ramdisk-buildroot.img
-    popd
+    echo "Packaging BUILDROOT SR";
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )

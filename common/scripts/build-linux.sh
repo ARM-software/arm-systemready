@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -56,9 +56,8 @@
 
 TOP_DIR=`pwd`
 BAND=$1
-
-if [ $BAND == "SR" ]; then
-    . $TOP_DIR/../../common/config/sr_common_config.cfg
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    . $TOP_DIR/../../common/config/sr_es_common_config.cfg
 else
     . $TOP_DIR/../../common/config/common_config.cfg
 fi
@@ -81,7 +80,6 @@ do_build ()
         make ARCH=arm64 O=$LINUX_OUT_DIR olddefconfig
     else
         echo "x86 cross compile"
-        GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
         CROSS_COMPILE=$TOP_DIR/$GCC
         make ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC O=$LINUX_OUT_DIR olddefconfig
     fi
@@ -118,8 +116,6 @@ do_package ()
     echo "Packaging Linux... $VARIANT";
     # Copy binary to output folder
     pushd $TOP_DIR
-
-    mkdir -p ${OUTDIR}
 
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/arch/$LINUX_ARCH/boot/$LINUX_IMAGE_TYPE \
     ${OUTDIR}/$LINUX_IMAGE_TYPE

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -39,6 +39,7 @@ TOP_DIR=`pwd`
 PLATDIR=${TOP_DIR}/output
 OUTDIR=${PLATDIR}
 GRUB_FS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
+GRUB_BUILDROOT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub-buildroot.cfg
 EFI_CONFIG_FILE=${TOP_DIR}/build-scripts/config/startup.nsh
 BSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/bsa.nsh
 SBSA_CONFIG_FILE=${TOP_DIR}/build-scripts/config/sbsa.nsh
@@ -55,14 +56,18 @@ create_cfgfiles ()
 {
     local fatpart_name="$1"
 
-    mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
-    mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh
-    if [ "$BUILD_PLAT" = "SR" ]; then
-        mcopy -i  $fatpart_name -o ${SBSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/sbsa.nsh
+    if [ "$BUILD_PLAT" = "SR" ] || [ "$BUILD_PLAT" = "ES" ]; then
+        mcopy -i  $fatpart_name -o ${GRUB_BUILDROOT_CONFIG_FILE} ::/grub.cfg
     else
-        mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/bsa.nsh
+        mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
     fi
-    mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/debug_dump.nsh
+    mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/
+    if [ "$BUILD_PLAT" = "SR" ]; then
+        mcopy -i  $fatpart_name -o ${SBSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/
+    else
+        mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}    ::/EFI/BOOT/bsa/
+    fi
+    mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}    ::/EFI/BOOT/debug/
     #mcopy -i  $fatpart_name -o ${BBR_CONFIG_FILE}    ::/EFI/BOOT/bbr/bbr.nsh
 
 }
@@ -88,7 +93,11 @@ create_fatpart ()
     mcopy -i $fatpart_name bootaa64.efi ::/EFI/BOOT
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
     mcopy -i $fatpart_name $OUTDIR/Image ::/
-    mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
+    if [ "$BUILD_PLAT" = "SR" ] || [ "$BUILD_PLAT" = "ES" ]; then
+        mcopy -i $fatpart_name $PLATDIR/ramdisk-buildroot.img  ::/
+    else
+        mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img  ::/
+    fi
     mcopy -i $fatpart_name Bsa.efi ::/EFI/BOOT/bsa
 
     if [ "$BUILD_PLAT" = "SR" ]; then

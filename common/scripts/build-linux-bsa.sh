@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 TOP_DIR=`pwd`
-. $TOP_DIR/../../common/config/common_config.cfg
+BAND=$1
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    . $TOP_DIR/../../common/config/sr_es_common_config.cfg
+else
+    . $TOP_DIR/../../common/config/common_config.cfg
+fi
 
 export KERNEL_SRC=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}/out
 LINUX_PATH=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}
@@ -45,7 +50,6 @@ build_bsa_kernel_driver()
         echo "arm64 native build"
         export CROSS_COMPILE=''
     else
-        GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
         export CROSS_COMPILE=$TOP_DIR/$GCC
     fi
  ./setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
