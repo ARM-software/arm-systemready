@@ -12,8 +12,8 @@ SystemReady ES-certified platforms implement a minimum set of hardware and firmw
 This section contains the build scripts and the live-images for the SystemReady ES Band.
 
 ## Release details
- - Code Quality: v1.1.0
- - **The latest pre-built release of ACS is available for download here: [v22.10_1.1.0](prebuilt_images/v22.10_1.1.0)**
+ - Code Quality: v1.2.0
+ - **The latest pre-built release of ACS is available for download here: [v23.01_1.2.0](prebuilt_images/v23.01_1.2.0)**
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
@@ -34,7 +34,7 @@ This section contains the build scripts and the live-images for the SystemReady 
 - The prebuilt images are archived after compression to the .xz format. On Linux, use the xz utility to uncompress the image `xz -d es_acs_live_image.img.xz`. On Windows, use the 7zip or a similar utility.
 - If you choose to use the prebuilt image, skip the build steps, and navigate to the "Verification" section below.
 
-Note: The latest pre-built image contains Linux kernel version 5.13. To build a image with a different Linux kernel version, update the `LINUX_KERNEL_VERSION` in the configuration file `<path to arm-systemready>/common/config/common_config.cfg` before the build (after step 3 below). To see the list of kernel versions for which Linux BSA patches are available, see the [folder](https://gitlab.arm.com/linux-arm/linux-acs/-/tree/master/kernel/src)
+Note: The latest pre-built image contains Linux kernel version 6.0. To build a image with a different Linux kernel version, update the `LINUX_KERNEL_VERSION` in the configuration file `<path to arm-systemready>/common/config/common_config.cfg` before the build (after step 3 below). To see the list of kernel versions for which Linux BSA patches are available, see the [folder](https://gitlab.arm.com/linux-arm/linux-acs/-/tree/master/kernel/src)
 
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:

@@ -31,6 +31,7 @@
 #Mount things needed by this script
 /bin/busybox mount -t proc proc /proc
 /bin/busybox mount -t sysfs sysfs /sys
+mount -t efivarfs efivarfs /sys/firmware/efi/efivars
 echo "init.sh"
 
 #Create a link of S10init.sh to init.sh
@@ -114,6 +115,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  cat /proc/iomem > /mnt/acs_results/linux_dump/iomem.log
  ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
  cp -r /sys/firmware /mnt/acs_results/linux_dump/
+ dmidecode > /mnt/acs_results/linux_dump/dmidecode.log
+ efibootmgr > /mnt/acs_results/linux_dump/efibootmgr.log
 
  mkdir -p /mnt/acs_results/fwts
 
@@ -139,9 +142,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
    #Case of ES
    insmod /lib/modules/bsa_acs.ko
    if [ -f /bin/sr_bsa.flag ]; then
-    echo $'SystemReady SR ACS v1.1.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+    echo $'SystemReady SR ACS v2.0.0_BETA-0\n' > /mnt/acs_results/linux/BsaResultsApp.log
    else
-    echo $'SystemReady ES ACS v1.1.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+    echo $'SystemReady ES ACS v1.2.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
    fi
    /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
@@ -154,7 +157,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
    if [ -f  /lib/modules/sbsa_acs.ko ]; then
     #Case of SR
     insmod /lib/modules/sbsa_acs.ko
-    echo $'SystemReady SR ACS v1.1.0\n' > /mnt/acs_results/linux/SbsaResultsApp.log
+    echo $'SystemReady SR ACS v2.0.0_BETA-0\n' > /mnt/acs_results/linux/SbsaResultsApp.log
     /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
     dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
    else
