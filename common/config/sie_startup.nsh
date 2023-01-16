@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2022-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -28,54 +26,26 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-TOP_DIR=`pwd`
-BAND=$1
-if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
-    . $TOP_DIR/../../common/config/sr_es_common_config.cfg
-else
-    . $TOP_DIR/../../common/config/common_config.cfg
-fi
+echo -off
 
-export KERNEL_SRC=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}/out
-LINUX_PATH=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}
-BSA_PATH=$TOP_DIR/edk2/ShellPkg/Application/bsa-acs
-
-build_bsa_kernel_driver()
-{
- pushd $TOP_DIR/linux-acs/bsa-acs-drv/files
-    arch=$(uname -m)
-    echo $arch
-    if [[ $arch = "aarch64" ]]
-    then
-        echo "arm64 native build"
-        export CROSS_COMPILE=''
-    else
-        export CROSS_COMPILE=$TOP_DIR/$GCC
-    fi
- ./setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
- ./linux_bsa_acs.sh
- popd
-}
-
-
-build_bsa_app()
-{
- pushd $BSA_PATH/linux_app/bsa-acs-app
- make clean
- make
- popd
-}
-
-pack_in_ramdisk()
-{
-  if [ ! -d $TOP_DIR/ramdisk/linux-bsa ]; then
-    mkdir $TOP_DIR/ramdisk/linux-bsa
-  fi
-  cp $TOP_DIR/linux-acs/bsa-acs-drv/files/bsa_acs.ko $TOP_DIR/ramdisk/linux-bsa
-  cp $BSA_PATH/linux_app/bsa-acs-app/bsa $TOP_DIR/ramdisk/linux-bsa
-}
-
-build_bsa_kernel_driver
-build_bsa_app
-pack_in_ramdisk
+for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%i:\EFI\BOOT\bbr\sie_SctStartup.nsh then
+        FS%i:\EFI\BOOT\bbr\sie_SctStartup.nsh
+        for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+            if  exist FS%k:\acs_results\SIE\sct_results\ then
+                if  exist FS%i:\EFI\BOOT\bbr\SCT\Overall then
+                    cp -r FS%i:\EFI\BOOT\bbr\SCT\Overall FS%k:\acs_results\SIE\sct_results\
+                endif
+                if  exist FS%i:\EFI\BOOT\bbr\SCT\Dependency\EfiCompliantBBTest then
+                    cp -r FS%i:\EFI\BOOT\bbr\SCT\Dependency\EfiCompliantBBTest FS%k:\acs_results\SIE\sct_results\
+                endif
+                if  exist FS%i:\EFI\BOOT\bbr\SCT\Sequence then
+                    cp -r FS%i:\EFI\BOOT\bbr\SCT\Sequence FS%k:\acs_results\SIE\sct_results\
+                endif
+            endif
+        endfor
+        echo "SIE SCT test suite execution is complete. Resetting the system"
+        reset
+    endif
+endfor
 

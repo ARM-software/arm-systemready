@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2022-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -28,15 +28,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 TOP_DIR=`pwd`
-. $TOP_DIR/../../common/config/sr_common_config.cfg
+BAND=$1
+. $TOP_DIR/../../common/config/sr_es_common_config.cfg
 
 export KERNEL_SRC=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}/out
 LINUX_PATH=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}
 SBSA_PATH=$TOP_DIR/edk2/ShellPkg/Application/sbsa-acs
 
+BUILDROOT_PATH=buildroot
+BUILDROOT_ARCH=arm64
+BUILDROOT_OUT_DIR=out/$BUILDROOT_ARCH
+PLATDIR=${TOP_DIR}/output
+
 build_sbsa_kernel_driver()
 {
- pushd $TOP_DIR/linux-acs/sbsa-acs-drv/files
+    pushd $TOP_DIR/linux-acs/sbsa-acs-drv/files
     arch=$(uname -m)
     echo $arch
     if [[ $arch = "aarch64" ]]
@@ -44,33 +50,82 @@ build_sbsa_kernel_driver()
         echo "aarch64 native build"
         export CROSS_COMPILE=''
     else
-        GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
         export CROSS_COMPILE=$TOP_DIR/$GCC
     fi
- ./setup.sh $TOP_DIR/edk2/ShellPkg/Application/sbsa-acs
- ./linux_sbsa_acs.sh
- popd
+    ./setup.sh $TOP_DIR/edk2/ShellPkg/Application/sbsa-acs
+    ./linux_sbsa_acs.sh
+    popd
 }
 
 
 build_sbsa_app()
 {
- pushd $SBSA_PATH/linux_app/sbsa-acs-app
- make clean
- make
- popd
+    pushd $SBSA_PATH/linux_app/sbsa-acs-app
+    make clean
+    make
+    popd
+}
+
+build_pmu_app()
+{
+    pushd $SBSA_PATH/linux_app/pmu_app
+        arch=$(uname -m)
+        echo $arch
+        if [[ $arch = "aarch64" ]]
+        then
+            echo "arm64 native build"
+            export CROSS_COMPILE=''
+        else
+            export CROSS_COMPILE=$TOP_DIR/$GCC
+        fi
+        export PYTHON=$TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/host/usr/bin/python
+        export CROSSBASE=$TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target
+        source build_pmu.sh
+    popd
+}
+
+build_mte_test()
+{
+    pushd $SBSA_PATH/linux_app/mte
+        arch=$(uname -m)
+        echo "ARCH = $arch"
+        if [[ $arch = "aarch64" ]]
+        then
+            echo "arm64 native build"
+            export CROSS_COMPILE=''
+        else
+            export CROSS_COMPILE=$TOP_DIR/$GCC
+        fi
+        source build_mte.sh
+    popd
 }
 
 pack_in_ramdisk()
 {
-  if [ ! -d $TOP_DIR/ramdisk/linux-sbsa ]; then
-    mkdir $TOP_DIR/ramdisk/linux-sbsa
-  fi
-  cp $TOP_DIR/linux-acs/sbsa-acs-drv/files/sbsa_acs.ko $TOP_DIR/ramdisk/linux-sbsa
+  echo "Packaging"
+
+  rm -rf $TOP_DIR/ramdisk/linux-sbsa
+  mkdir $TOP_DIR/ramdisk/linux-sbsa
+
+  # Add all needed packages to build root
+  cp $TOP_DIR/linux-acs/sbsa-acs-drv/files/sbsa_acs.ko $TOP_DIR/ramdisk/linux-sbsa/
   cp $SBSA_PATH/linux_app/sbsa-acs-app/sbsa $TOP_DIR/ramdisk/linux-sbsa
+  cp -r $SBSA_PATH/linux_app/pmu_app/pmuval $TOP_DIR/ramdisk/linux-sbsa
+
+  #copy mte test to ramdisk
+  cp $SBSA_PATH/linux_app/mte/mte_test $TOP_DIR/ramdisk/linux-sbsa
+
+  rm -rf $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.so
+  rm -rf $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.so
+  cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.* \
+     $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.so
+  cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.* \
+     $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.so
 }
 
 build_sbsa_kernel_driver
 build_sbsa_app
+build_pmu_app
+build_mte_test
 pack_in_ramdisk
 

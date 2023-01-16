@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -42,7 +42,7 @@ if [ $1 == "SIE" ]; then
     source ./build-scripts/build-sct.sh $@
     source ./build-scripts/build-uefi-apps.sh $@
     source ./build-scripts/build-grub-sie.sh $@
-    source ./build-scripts/build-buildroot.sh
+    source ./build-scripts/build-buildroot-sie.sh
     # return to the parent script
     return
 fi
@@ -51,22 +51,29 @@ fi
 BAND=$1
 PACKAGE=$2
 
-source ./build-scripts/build-uefi.sh
+source ./build-scripts/build-efitools.sh
+source ./build-scripts/build-sie-keys.sh
+source ./build-scripts/build-uefi.sh $@
 source ./build-scripts/build-bsaefi.sh $@
 
 if [ $BAND == "SR" ]; then
-    source ./build-scripts/build-sbsaefi.sh
+    source ./build-scripts/build-sbsaefi.sh $@
 fi
 
 source ./build-scripts/build-sct.sh $@
 source ./build-scripts/build-uefi-apps.sh $@
-source ./build-scripts/build-linux.sh $BAND
-source ./build-scripts/build-linux-bsa.sh
+source ./build-scripts/build-linux.sh $@
+source ./build-scripts/build-linux-bsa.sh $@
+source ./build-scripts/build-grub.sh $@
 
 if [ $BAND == "SR" ]; then
-    source ./build-scripts/build-linux-sbsa.sh
+    source ./build-scripts/build-sbsa-buildroot.sh $@
+    source ./build-scripts/build-linux-sbsa.sh $@
 fi
 
-source ./build-scripts/build-grub.sh $@
-source ./build-scripts/build-fwts.sh $@
-source ./build-scripts/build-busybox.sh $@
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    source ./build-scripts/build-buildroot.sh $@
+else
+    source ./build-scripts/build-fwts.sh $@
+    source ./build-scripts/build-busybox.sh $@
+fi

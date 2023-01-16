@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -56,15 +56,15 @@
 
 TOP_DIR=`pwd`
 BAND=$1
-
-if [ $BAND == "SR" ]; then
-    . $TOP_DIR/../../common/config/sr_common_config.cfg
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    . $TOP_DIR/../../common/config/sr_es_common_config.cfg
 else
     . $TOP_DIR/../../common/config/common_config.cfg
 fi
 
 LINUX_ARCH=arm64
 LINUX_IMAGE_TYPE=Image
+KEYS_DIR=$TOP_DIR/security-interface-extension-keys
 
 do_build ()
 {
@@ -81,7 +81,6 @@ do_build ()
         make ARCH=arm64 O=$LINUX_OUT_DIR olddefconfig
     else
         echo "x86 cross compile"
-        GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
         CROSS_COMPILE=$TOP_DIR/$GCC
         make ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC O=$LINUX_OUT_DIR olddefconfig
     fi
@@ -91,6 +90,17 @@ do_build ()
     sed -i 's/# CONFIG_CGROUP_FREEZER is not set/CONFIG_CGROUP_FREEZER=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_COMMON_CLK_ZYNQMP is not set/CONFIG_COMMON_CLK_ZYNQMP=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER is not set/CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER=y/g' $LINUX_OUT_DIR/.config
+    #Configurations for SecureBoot and TCG for SIE ACS
+    sed -i 's/# CONFIG_TCG_TPM is not set/CONFIG_TCG_TPM=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_TIS is not set/CONFIG_TCG_TIS=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_TIS_SPI is not set/CONFIG_TCG_TIS_SPI=y/g' $LINUX_OUT_DIR/.config
+    echo "CONFIG_TCG_TIS_SPI_CR50=y" >> $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_TIS_SYNQUACER is not set/CONFIG_TCG_TIS_SYNQUACER=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_TIS_I2C_CR50 is not set/CONFIG_TCG_TIS_I2C_CR50=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_CRB is not set/CONFIG_TCG_CRB=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TCG_FTPM_TEE is not set/CONFIG_TCG_FTPM_TEE=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_TEE is not set/CONFIG_TEE=y/g' $LINUX_OUT_DIR/.config
+    sed -i 's/# CONFIG_OPTEE is not set/CONFIG_OPTEE=y/g' $LINUX_OUT_DIR/.config
 
     if [[ $arch = "aarch64" ]]
     then
@@ -119,10 +129,11 @@ do_package ()
     # Copy binary to output folder
     pushd $TOP_DIR
 
-    mkdir -p ${OUTDIR}
-
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/arch/$LINUX_ARCH/boot/$LINUX_IMAGE_TYPE \
     ${OUTDIR}/$LINUX_IMAGE_TYPE
+
+    # Sign the kernel with DB key
+    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt ${OUTDIR}/$LINUX_IMAGE_TYPE --output ${OUTDIR}/$LINUX_IMAGE_TYPE
 
     #Copy drivers for packaging into Ramdisk
     mkdir -p $TOP_DIR/ramdisk/drivers

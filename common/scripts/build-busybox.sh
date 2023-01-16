@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2015-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2015-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -50,11 +50,7 @@
 TOP_DIR=`pwd`
 BAND=$1
 
-if [ $BAND == "SR" ]; then
-    . $TOP_DIR/../../common/config/sr_common_config.cfg
-else
-    . $TOP_DIR/../../common/config/common_config.cfg
-fi
+. $TOP_DIR/../../common/config/common_config.cfg
 
 BUSYBOX_ARCH=arm64
 BUSYBOX_PATH=busybox

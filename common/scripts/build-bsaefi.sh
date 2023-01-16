@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -49,18 +49,24 @@
 
 
 TOP_DIR=`pwd`
-. $TOP_DIR/../../common/config/common_config.cfg
-
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+     . $TOP_DIR/../../common/config/sr_es_common_config.cfg
+else
+     . $TOP_DIR/../../common/config/common_config.cfg
+fi
 UEFI_PATH=edk2
 UEFI_TOOLCHAIN=GCC49
 UEFI_BUILD_MODE=RELEASE
-GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+
+
+
 CROSS_COMPILE=$TOP_DIR/$GCC
 UEFI_LIBC_PATH=edk2-libc
 PATCH_DIR=$TOP_DIR/../patches
 COMMON_PATCH_DIR=$TOP_DIR/../../common/patches
 OUTDIR=${TOP_DIR}/output
 BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
+KEYS_DIR=$TOP_DIR/security-interface-extension-keys
 
 do_build()
 {
@@ -139,8 +145,9 @@ do_package ()
 {
     echo "Packaging BSA... $VARIANT";
     # Copy binaries to output folder
-    mkdir -p $OUTDIR
     cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi $OUTDIR/Bsa.efi
+    # sign Bsa.efi with db key
+    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $OUTDIR/Bsa.efi --output $OUTDIR/Bsa.efi
 }
 
 exit_fun() {

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -27,10 +27,13 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
 TOP_DIR=`pwd`
 BAND=$1
-if [ $BAND == "SR" ]; then
-    . $TOP_DIR/../../common/config/sr_common_config.cfg
+CLEAN_BUILD=$3
+
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    . $TOP_DIR/../../common/config/sr_es_common_config.cfg
 else
     . $TOP_DIR/../../common/config/common_config.cfg
 fi
@@ -75,7 +78,9 @@ OUTDIR=${PLATDIR}
 LINUX_OUT_DIR=out
 LINUX_PATH=linux-${LINUX_KERNEL_VERSION}
 
-do_clean
+if [ $CLEAN_BUILD == "C" ]; then
+    do_clean
+fi
 do_build
 do_package
 

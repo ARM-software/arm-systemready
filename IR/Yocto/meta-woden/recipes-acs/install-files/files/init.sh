@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2022-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -135,7 +135,7 @@ if [ -f /sys/firmware/fdt ]; then
 
  sed -i '1s/^/DeviceTree bindings of Linux kernel version: 5.19.10 \ndtschema version: 2022.9 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
  if [ ! -s /mnt/acs_results/linux_tools/dt-validate.log ]; then
-    echo $'The FDT is compliant according to schema ' >> /mnt/acs_results/linux_tools/dt-validate.log
+  echo $'The FDT is compliant according to schema ' >> /mnt/acs_results/linux_tools/dt-validate.log
  fi
 else
  echo  $'Error: The FDT devicetree file ,fdt , does not exist at /sys/firmware/fdt. Cannot run dt-schema tool ' | tee /mnt/acs_results/linux_tools/dt-validate.log

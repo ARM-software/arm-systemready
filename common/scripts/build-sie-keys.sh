@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -73,11 +73,6 @@ do_build()
     cert-to-efi-sig-list $NAME.crt $NAME.esl
     sign-efi-sig-list -c TestKEK1.crt -k TestKEK1.key db $NAME.esl $NAME.auth
 
-    # Convert TestDB1 to gpg form and import to gpg toolchain for use in signing grub
-    cat TestDB1.key | PEM2OPENPGP_USAGE_FLAGS=certify,sign pem2openpgp "TestDB1"  > TestDB1.gpgkey
-    gpg --import --allow-secret-key-import TestDB1.gpgkey
-    gpg --export > TestDB1.pubgpg
-
     # generate TestDBX1: DER and signed siglist
     NAME=TestDBX1
     openssl req -x509 -sha256 -newkey rsa:2048 -subj /CN=TEST_PK/  -keyout $NAME.key -out $NAME.crt -nodes -days 4000
@@ -91,12 +86,6 @@ do_build()
 do_clean()
 {
     echo "do_clean: security-interface-extension-keys"
-
-    # delete gpg keys from previous runs
-    keyname=$(gpg --list-keys "TestDB1" | head -2 | tail -1 | sed 's/^ *//g')
-    gpg --batch --yes --delete-secret-keys $keyname
-    gpg --batch --yes --delete-keys $keyname
-
     rm -rf $KEYS_DIR
 }
 

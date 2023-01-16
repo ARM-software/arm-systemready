@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -40,7 +40,6 @@ PLATDIR=${TOP_DIR}/output
 OUTDIR=${PLATDIR}
 GRUB_FS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub.cfg
 EFI_CONFIG_FILE=${TOP_DIR}/build-scripts/config/startup.nsh
-GRUB_FS_CONFIG_FILE_SIG=${TOP_DIR}/build-scripts/config/grub.cfg.sig
 BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
 GRUB_PATH=grub
@@ -53,8 +52,7 @@ create_cfgfiles ()
     local fatpart_name="$1"
 
     mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE} ::/grub.cfg
-    mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh   
-    mcopy -i  $fatpart_name -o ${GRUB_FS_CONFIG_FILE_SIG} ::/grub.cfg.sig
+    mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/startup.nsh
 }
 
 create_fatpart ()
@@ -80,9 +78,6 @@ create_fatpart ()
     mcopy -s -i $fatpart_name SCT/* ::/EFI/BOOT/bbr
     mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/EFI/BOOT/app
 
-    mcopy -i $fatpart_name Shell.efi.sig ::/EFI/BOOT
-    mcopy -i $fatpart_name $OUTDIR/Image.sig ::/
-    mcopy -i $fatpart_name $PLATDIR/ramdisk-busybox.img.sig  ::/
     mcopy -i $fatpart_name ${TOP_DIR}/security-interface-extension-keys/*.der ::/EFI/BOOT/bbr/security-interface-extension-keys
     mcopy -i $fatpart_name ${TOP_DIR}/security-interface-extension-keys/*.auth ::/EFI/BOOT/bbr/security-interface-extension-keys
 
@@ -121,7 +116,6 @@ prepare_disk_image ()
     echo "Preparing disk image for busybox boot"
     echo "-------------------------------------"
 
-    
     IMG_BB=sie_acs_live_image.img
     echo -e "\e[1;32m Build SIE Live Image at $PLATDIR/$IMG_BB \e[0m"
 
@@ -136,7 +130,6 @@ prepare_disk_image ()
     rm -f $PLATDIR/$IMG_BB
     cp grubaa64.efi bootaa64.efi
     cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi Shell.efi
-    cp $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi.sig Shell.efi.sig
 
     cp -Tr $TOP_DIR/$SCT_PATH/ SCT
     grep -q -F 'mtools_skip_check=1' ~/.mtoolsrc || echo "mtools_skip_check=1" >> ~/.mtoolsrc
@@ -156,7 +149,7 @@ prepare_disk_image ()
     #Result partition
     create_fatpart2 "RESULT" $FAT2_SIZE
     cat RESULT >> $IMG_BB
-    
+
     #Space for backup partition table at the bottom (1M)
     cat part_table >> $IMG_BB
 

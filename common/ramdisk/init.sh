@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -31,7 +31,13 @@
 #Mount things needed by this script
 /bin/busybox mount -t proc proc /proc
 /bin/busybox mount -t sysfs sysfs /sys
+mount -t efivarfs efivarfs /sys/firmware/efi/efivars
 echo "init.sh"
+
+#Create a link of S10init.sh to init.sh
+if [ ! -f /init.sh ]; then
+ ln -s  /etc/init.d/S10init.sh /init.sh
+fi
 
 #Create all the symlinks to /bin/busybox
 /bin/busybox --install -s
@@ -89,6 +95,15 @@ ADDITIONAL_CMD_OPTION="";
 ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
+ if [ $ADDITIONAL_CMD_OPTION == "secureboot" ]; then
+  echo "Call SIE ACS"
+  /usr/bin/secure_init.sh
+  echo "SIE ACS run is completed\n"
+  echo "Please press <Enter> to continue ..."
+  sync /mnt
+  sleep 3
+  exec sh
+ fi
  #linux debug dump
  mkdir -p /mnt/acs_results/linux_dump
  lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
@@ -100,6 +115,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  cat /proc/iomem > /mnt/acs_results/linux_dump/iomem.log
  ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
  cp -r /sys/firmware /mnt/acs_results/linux_dump/
+ dmidecode > /mnt/acs_results/linux_dump/dmidecode.log
+ efibootmgr > /mnt/acs_results/linux_dump/efibootmgr.log
 
  mkdir -p /mnt/acs_results/fwts
 
@@ -107,11 +124,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  if [ -f  /bin/ir_bbr_fwts_tests.ini ]; then
   test_list=`cat /bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
   echo "Test Executed are $test_list"
-  /bin/fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
+  fwts `echo $test_list` -f -r /mnt/acs_results/fwts/FWTSResults.log
  else
   #SBBR Execution
   echo "Executing FWTS for SBBR"
-  /bin/fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/fwts/FWTSResults.log
+  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/fwts/FWTSResults.log
  fi
 
  sleep 2
@@ -125,9 +142,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
    #Case of ES
    insmod /lib/modules/bsa_acs.ko
    if [ -f /bin/sr_bsa.flag ]; then
-    echo $'SystemReady SR ACS v1.1.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+    echo $'SystemReady SR ACS v2.0.0_BETA-0\n' > /mnt/acs_results/linux/BsaResultsApp.log
    else
-    echo $'SystemReady ES ACS v1.1.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+    echo $'SystemReady ES ACS v1.2.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
    fi
    /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
@@ -140,7 +157,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
    if [ -f  /lib/modules/sbsa_acs.ko ]; then
     #Case of SR
     insmod /lib/modules/sbsa_acs.ko
-    echo $'SystemReady SR ACS v1.1.0\n' > /mnt/acs_results/linux/SbsaResultsApp.log
+    echo $'SystemReady SR ACS v2.0.0_BETA-0\n' > /mnt/acs_results/linux/SbsaResultsApp.log
     /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
     dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
    else

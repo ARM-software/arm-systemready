@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -86,12 +86,12 @@ get_efitools_src()
 
 get_buildroot_src()
 {
-  git clone --single-branch git://git.buildroot.net/buildroot
+  git clone -b $BUILDROOT_SRC_TAG http://git.buildroot.net/buildroot
   pushd $TOP_DIR/buildroot
-  git checkout $BUILDROOT_SRC_TAG
+
+
   echo "Updating buildroot..."
-  # uprev tpm2-tools to 5.1.1
-  patch -p1 < $TOP_DIR/../../common/config/buildroot/tpm2-tools-5.1.1.patch
+
   # copy in a customized kernel config
   mkdir -p ./board/arm/system-ready
   cp $TOP_DIR/../../common/config/buildroot/kernel.config ./board/arm/system-ready
@@ -118,12 +118,23 @@ get_bbr_acs_src()
   fi
 }
 
-sudo apt install git curl mtools gdisk gcc\
+source /etc/lsb-release
+
+sudo apt install git curl mtools gdisk gcc \
  openssl automake autotools-dev libtool bison flex\
- bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint\
- make gcc g++ python\
- sbsigntool uuid-runtime monkeysphere make g++ gnu-efi\
- libfile-slurp-perl help2man
+ bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
+ make g++ build-essential wget gettext dosfstools unzip \
+ sbsigntool uuid-runtime monkeysphere gnu-efi \
+ libfile-slurp-perl help2man -y
+
+REL="${DISTRIB_RELEASE//[!0-9]/}"
+MAJORREL=${REL:0:2}
+
+if [ $MAJORREL -gt 18 ]; then
+    sudo apt install python-is-python3 -y
+else
+    sudo apt install python -y
+fi
 
 get_uefi_src
 get_bbr_acs_src

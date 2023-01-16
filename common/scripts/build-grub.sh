@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -45,21 +45,24 @@
 TOP_DIR=`pwd`
 arch=$(uname -m)
 BAND=$1
-if [ $BAND == "SR" ]; then
-    . $TOP_DIR/../../common/config/sr_common_config.cfg
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    . $TOP_DIR/../../common/config/sr_es_common_config.cfg
+    GRUB_TARGET=aarch64-none-linux-gnu
+
 else
     . $TOP_DIR/../../common/config/common_config.cfg
+    GRUB_TARGET=aarch64-linux-gnu
 fi
 
 GRUB_PATH=grub
 GRUB_PLAT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub_prefix.cfg
+KEYS_DIR=$TOP_DIR/security-interface-extension-keys
 
 do_build ()
 {
     if [[ $arch = "aarch64" ]]; then
         CROSS_COMPILE_DIR=''
     else
-        GCC=tools/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
         CROSS_COMPILE=$TOP_DIR/$GCC
         CROSS_COMPILE_DIR=$(dirname $CROSS_COMPILE)
         PATH="$PATH:$CROSS_COMPILE_DIR"
@@ -87,18 +90,20 @@ do_build ()
             --prefix=$TOP_DIR/$GRUB_PATH/output/ \
             --disable-werror
         else
-            ./configure STRIP=$CROSS_COMPILE_DIR/aarch64-linux-gnu-strip \
-            --target=aarch64-linux-gnu --with-platform=efi \
+            ./configure STRIP=${CROSS_COMPILE}strip \
+            --target=$GRUB_TARGET --with-platform=efi \
             --prefix=$TOP_DIR/$GRUB_PATH/output/ \
-            TARGET_CC=$CROSS_COMPILE_DIR/aarch64-linux-gnu-gcc --disable-werror
+            TARGET_CC=${CROSS_COMPILE}gcc --disable-werror
         fi
 
         make -j $PARALLELISM install
         output/bin/grub-mkimage -v -c ${GRUB_PLAT_CONFIG_FILE} \
-        -o output/grubaa64.efi -O arm64-efi -p "" \
+        -o output/grubaa64.efi -O arm64-efi --disable-shim-lock -p "" \
         part_gpt part_msdos ntfs ntfscomp hfsplus fat ext2 normal chain \
-        boot configfile linux help part_msdos terminal terminfo configfile \
-        lsefi search normal gettext loadenv read search_fs_file search_fs_uuid search_label
+        boot configfile linux help  terminal terminfo configfile \
+        lsefi search normal gettext loadenv read search_fs_file search_fs_uuid search_label \
+        pgp gcry_sha512 gcry_rsa tpm
+
         popd
     fi
 
@@ -113,9 +118,13 @@ do_clean ()
         popd
     fi
 }
+
 do_package ()
 {
-    :
+    # sign grub with db key
+    pushd $TOP_DIR/$GRUB_PATH
+    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt output/grubaa64.efi --output output/grubaa64.efi
+    popd
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )

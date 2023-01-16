@@ -116,7 +116,9 @@ The live image boots to UEFI Shell. The different test applications can be run i
 2. [UEFI Shell application](https://github.com/ARM-software/bsa-acs/blob/main/README.md) for BSA compliance.
 3. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
 
-For the verification steps of SIE ACS on QEMU with TPM support, refer to the [SIE ACS Verification](SIE_ACS_Verification.md).
+### Running Security interface extension (SIE) ACS.
+
+For the verification steps of SIE ACS on QEMU with TPM support, refer to the [SIE ACS Verification](../../common/docs/SIE_ACS_Verification.md).
 
 ## Baselines for Open Source Software in this release:
 
@@ -145,5 +147,5 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2022, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2022-2023, Arm Limited and Contributors. All rights reserved.*
 

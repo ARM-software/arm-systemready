@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -38,13 +38,15 @@ create_scripts_link()
  ln -s $TOP_DIR/../../common/scripts/build-linux.sh             $TOP_DIR/build-scripts/build-linux.sh
  ln -s $TOP_DIR/../../common/scripts/build-linux-bsa.sh         $TOP_DIR/build-scripts/build-linux-bsa.sh
  ln -s $TOP_DIR/../../common/scripts/build-grub.sh              $TOP_DIR/build-scripts/build-grub.sh
- ln -s $TOP_DIR/../../common/scripts/build-busybox.sh           $TOP_DIR/build-scripts/build-busybox.sh
+ ln -s $TOP_DIR/../../common/scripts/build-buildroot.sh         $TOP_DIR/build-scripts/build-buildroot.sh
  ln -s $TOP_DIR/../../common/scripts/framework.sh               $TOP_DIR/build-scripts/framework.sh
  ln -s $TOP_DIR/../../common/scripts/parse_params.sh            $TOP_DIR/build-scripts/parse_params.sh
  ln -s $TOP_DIR/../../common/scripts/make_image.sh              $TOP_DIR/build-scripts/make_image.sh
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-sct.sh             $TOP_DIR/build-scripts/build-sct.sh
- ln -s $TOP_DIR/bbr-acs/common/scripts/build-fwts.sh            $TOP_DIR/build-scripts/build-fwts.sh
+
  ln -s $TOP_DIR/bbr-acs/common/scripts/build-uefi-apps.sh       $TOP_DIR/build-scripts/build-uefi-apps.sh
+ ln -s $TOP_DIR/../../common/scripts/build-efitools.sh          $TOP_DIR/build-scripts/build-efitools.sh
+ ln -s $TOP_DIR/../../common/scripts/build-sie-keys.sh          $TOP_DIR/build-scripts/build-sie-keys.sh
 }
 
 init_dir()
@@ -53,6 +55,7 @@ init_dir()
  rm -rf $TOP_DIR/build-scripts/config
  cp -r $TOP_DIR/../../common/ramdisk                      $TOP_DIR 
  cp -r $TOP_DIR/../../common/config                       $TOP_DIR/build-scripts 
+ mkdir -p $TOP_DIR/output
 }
 
 create_scripts_link

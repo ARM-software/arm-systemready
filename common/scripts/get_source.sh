@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2022, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -45,11 +45,12 @@ popd
 
 echo "Getting the sources for $BAND "
 
-if [ $BAND == "SR" ]; then
-    . $TOP_DIR/../../common/config/sr_common_config.cfg
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    . $TOP_DIR/../../common/config/sr_es_common_config.cfg
 else
     . $TOP_DIR/../../common/config/common_config.cfg
 fi
+
 
 #The shell variables use in this file are defined in common_config.cfg
 
@@ -143,6 +144,30 @@ get_cross_compiler()
     fi
 }
 
+get_cross_compiler2()
+{
+    if [ $(uname -m) == "aarch64" ]; then
+        echo "=================================================================="
+        echo "aarch64 native build"
+        echo "WARNING: no cross compiler needed, GCC version recommended: ${GCC_TOOLS_VERSION}"
+        echo "=================================================================="
+    else
+        echo "Downloading cross compiler. Version : ${GCC_TOOLS_VERSION}"
+        if [ $TARGET_ARCH == "arm" ]; then
+            TAG=arm-linux-gnueabihf
+        else
+            TAG=aarch64-none-linux-gnu
+        fi
+        mkdir -p tools
+        pushd $TOP_DIR/tools
+        wget $CROSS_COMPILER_URL
+        tar -xf gcc-arm-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
+        rm gcc-arm-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
+        popd
+    fi
+}
+
+
 get_grub_src()
 {
     echo "Downloading grub source code,Version: ${GRUB_SRC_TAG}"
@@ -202,35 +227,69 @@ get_bbr_acs_src()
     fi
 }
 
+get_buildroot_src()
+{
+    echo "Downloading Buildroot source code. TAG : $BUILDROOT_SRC_VERSION"
+    git clone -b $BUILDROOT_SRC_VERSION http://git.buildroot.net/buildroot
+    pushd $TOP_DIR/buildroot/package/fwts
+        echo "Applying Buildroot FWTS patch..."
+        git apply $TOP_DIR/../../common/patches/build_fwts_version.patch
+    popd
+}
+
+get_efitools_src()
+{
+  if [ -z $EFITOOLS_SRC_TAG ]; then
+      echo "Downloading EFI tools source code."
+      git clone --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
+  else
+      echo "Downloading EFI tools source code. TAG : ${EFITOOLS_SRC_TAG}"
+      git clone --depth 1 --branch ${EFITOOLS_SRC_TAG} https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
+  fi
+}
+
 source /etc/lsb-release
 
-sudo apt install git curl mtools gdisk gcc\
+sudo apt install git curl mtools gdisk gcc \
  openssl automake autotools-dev libtool bison flex\
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
- make gcc g++ build-essential wget gettext dosfstools
+ make g++ build-essential wget gettext dosfstools unzip \
+ sbsigntool uuid-runtime monkeysphere gnu-efi \
+ libfile-slurp-perl help2man -y
 
-if [ $DISTRIB_CODENAME == "focal" ]; then
-	sudo apt install python-is-python3
+REL="${DISTRIB_RELEASE//[!0-9]/}"
+MAJORREL=${REL:0:2}
+
+if [ $MAJORREL -gt 18 ]; then
+    sudo apt install python-is-python3 -y
 else
-	sudo apt install python
+    sudo apt install python -y
 fi
 
 if [ $TARGET_ARCH == "arm" ]; then
-    sudo apt-get install libmpc-dev
+    sudo apt-get install libmpc-dev -y
 fi
 
 get_uefi_src
 get_bsa_src
+get_efitools_src
 
 if [ $BAND == "SR" ]; then
     get_sbsa_src
 fi
 
+
+if [ $BAND == "SR" ] || [ $BAND == "ES" ]; then
+    get_buildroot_src
+    get_cross_compiler2
+else
+    get_busybox_src
+    get_fwts_src
+    get_cross_compiler
+fi
+
 get_bbr_acs_src
 get_sct_src
 get_grub_src
-get_busybox_src
 get_linux_src
-get_cross_compiler
-get_fwts_src
 get_linux-acs_src
