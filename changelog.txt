@@ -1,3 +1,18 @@
+v23.01_SR_REL2.0.0_BETA-0_ES_REL_1.2.0
+**SystemReady SR ES**
+* Movement of SR and ES ACS images from busybox to buildroot filesystem and updates in related build scripts.
+* SIE ACS integrated to ES & SR ACS image, which can now acccessed from Grub window.
+* FWTS version upgraded to v22.11.00.
+* SIE ACS Bug fixes.
+* Debug dump for dmicheck and efibootmgr.
+* Automation of eventlog and TPM measurements comparison.
+* BSA: BSA ACS Bug fixes.
+* SBSA: SBSA ACS updated to SBSA7.1 specification.
+* SBSA: SBSA ACS Bug fixes.
+* SBSA: Build scripts for PMU Application.
+* General enhancements and bug fixes
+
+
 v22.10_SR_ES_SIE_REL1.1.0
 **SystemReady SR ES SIE**
 * Upgraded the Linux kernel version to 6.0
