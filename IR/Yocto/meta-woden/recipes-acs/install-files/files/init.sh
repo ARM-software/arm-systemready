@@ -110,7 +110,7 @@ mkdir -p /mnt/acs_results/linux_acs/bsa_acs_app
 echo "Loading BSA ACS Linux Driver"
 insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
 echo "Executing BSA ACS Application "
-echo $'SystemReady IR ACS v2.0.0 Beta-1\nBSA v1.0.1' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+echo $'SystemReady IR ACS v2.0.0 Beta-1\nBSA v1.0.2' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
 bsa >> /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
 dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
 
