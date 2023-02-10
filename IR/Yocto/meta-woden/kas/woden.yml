@@ -6,13 +6,13 @@ repos:
 
   poky:
     url: https://git.yoctoproject.org/git/poky
-    refspec: kirkstone-4.0.3
+    refspec: langdale
     layers:
       meta:
 
   meta-arm:
     url: https://git.yoctoproject.org/git/meta-arm
-    refspec: b086301d4621926cb8762c04b68ddffb295a7063
+    refspec: a590d6e1b88638f570ba5af7811c3b27f73e7cc2
     layers:
       meta-arm:
       meta-arm-bsp:
@@ -20,14 +20,14 @@ repos:
 
   meta-openembedded:
     url: https://git.openembedded.org/meta-openembedded
-    refspec: kirkstone
+    refspec: langdale
     layers:
       meta-oe:
       meta-perl:
 
   meta-secure-core:
     url: https://github.com/jiazhang0/meta-secure-core
-    refspec: 1a74be5b363ee61256093e0a3efaa78fd370a27c
+    refspec: d218a980afafcb2764cf900e0ec27a41546a20e3
     layers:
       meta:
       meta-efi-secure-boot:
