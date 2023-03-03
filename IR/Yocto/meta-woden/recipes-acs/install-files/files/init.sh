@@ -101,7 +101,7 @@ mkdir -p /mnt/acs_results/fwts
 echo "Executing FWTS for EBBR"
 test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
 echo "Test Executed are $test_list"
-echo $'SystemReady IR ACS v2.0.0 Beta-1\nFWTS v22.07.00' > /mnt/acs_results/fwts/FWTSResults.log
+echo $'SystemReady IR ACS v2.0.0 Beta-1\nFWTS v23.01.00' > /mnt/acs_results/fwts/FWTSResults.log
 /usr/bin/fwts --ebbr `echo $test_list` -r /mnt/acs_results/fwts/FWTSResults.log
 echo -e -n "\n"
 

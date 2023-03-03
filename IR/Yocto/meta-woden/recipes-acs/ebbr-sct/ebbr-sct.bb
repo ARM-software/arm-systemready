@@ -12,7 +12,6 @@ SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=ht
             git://github.com/tianocore/edk2-test;destsuffix=edk2-test;protocol=https;nobranch=1;name=edk2-test \
             gitsm://github.com/tianocore/edk2.git;destsuffix=edk2-test/edk2;protocol=https;nobranch=1;name=edk2 \
             file://sctversion.patch;patch=1;patchdir=edk2-test \
-            file://BBR_SCT.dsc  \
 "
 
 S = "${WORKDIR}"

@@ -44,8 +44,23 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 endif
             endif
         endfor
-        echo "SIE SCT test suite execution is complete. Resetting the system"
-        reset
+        for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+            if exist FS%l:\Image and exist FS%l:\ramdisk-buildroot.img then
+                FS%l:
+                cd FS%l:\
+                Image initrd=\ramdisk-buildroot.img systemd.log_target=null plymouth.ignore-serial-consoles debug crashkernel=512M,high log_buf_len=1M efi=debug acpi=on crashkernel=256M earlycon uefi_debug
+            endif
+            if exist FS%l:\Image and exist FS%l:\ramdisk-busybox.img then
+                FS%l:
+                cd FS%l:\
+                Image initrd=\ramdisk-busybox.img systemd.log_target=null plymouth.ignore-serial-consoles debug crashkernel=512M,high log_buf_len=1M efi=debug acpi=on crashkernel=256M earlycon uefi_debug
+            endif
+            if exist FS%l:\Image and exist FS%l:\yocto_image.flag then
+                FS%l:
+                cd FS%l:\
+                Image LABEL=Boot root=partuid rootfstype=ext4
+            endif
+        endfor
     endif
 endfor
 
