@@ -129,7 +129,8 @@ copy_recipes()
 
     # remove connect -r from startup.nsh, since it is not required for IR systems
     sed -i 's/connect -r//g' startup.nsh
-
+    cp $TOP_DIR/../../common/ramdisk/secure_init.sh $TOP_DIR/meta-woden/recipes-acs/install-files/files
+    cp $TOP_DIR/../../common/config/sie_startup.nsh $TOP_DIR/meta-woden/recipes-acs/install-files/files
     popd
 
 }

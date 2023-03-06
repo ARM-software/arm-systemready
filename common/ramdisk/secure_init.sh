@@ -35,6 +35,16 @@
 # give linux time to finish initializing disks
 sleep 5
 
+if [ "$(which mokutil)" != "" ]; then
+  SB_STATE=`mokutil --sb-state`
+  echo $SB_STATE
+  if [ "$SB_STATE" = "SecureBoot enabled" ]; then
+    echo "The system is in SecureBoot mode"
+  else
+    echo "WARNING: The System is not in SecureBoot mode"
+  fi
+fi
+
 mkdir -p /mnt/acs_results/SIE/fwts
 
 if [ -f  /bin/bbsr_fwts_tests.ini ]; then
