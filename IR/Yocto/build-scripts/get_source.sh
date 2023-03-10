@@ -43,13 +43,21 @@ echo "Getting the sources for $BAND "
 #The shell variables use in this file are defined in common_config.cfg
 
 export GIT_SSL_NO_VERIFY=1
+source /etc/lsb-release
 
+REL="${DISTRIB_RELEASE//[!0-9]/}"
+MAJORREL=${REL:0:2}
+if [ $MAJORREL -gt 18 ]; then
+    sudo apt install python-is-python3 -y
+else
+    sudo apt install python -y
+fi
 
 sudo apt install git curl mtools gdisk gcc liblz4-tool zstd \
  openssl automake autotools-dev libtool bison flex \
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
- make gcc g++ python gnu-efi libfile-slurp-perl help2man \
- python3-pip chrpath diffstat -y
+ make gcc g++ gnu-efi libfile-slurp-perl help2man \
+ python3-pip chrpath diffstat lz4 -y
 
 sudo pip3 install kas
 
