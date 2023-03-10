@@ -77,6 +77,16 @@ Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". In
 ### Verification of the IR image on Qemu arm machine
 
 #### Follow the Build instructions mentioned in [qemu download page](https://www.qemu.org/download/#source) to build latest qemu model.
+NOTE: For qemu versions >= 7.2.0, perform the steps listed below to support user-mode networking.
+- Install libslirp-dev
+
+`sudo apt install libslirp-dev`
+
+- Enable slirp during the Qemu build
+
+`./configure --enable-slirp`
+
+For more information visit https://wiki.qemu.org/ChangeLog/7.2#SLIRP_module_(user-mode_networking)
 
 #### To build the firmware image, follow below steps
 
@@ -86,6 +96,13 @@ cd working_directory
 repo init -u https://github.com/glikely/u-boot-manifest
 repo sync
 export CROSS_COMPILE=<path to gcc-arm-10.2-2020.11-x86_64-aarch64-none-elf/bin/aarch64-none-elf->
+
+# The upstream u-boot code has issue in boot flow. The below steps are temprorary steps to avoid the issue.
+cd u-boot
+git checkout v2023.01
+cd ..
+# End of u-boot steps
+
 make qemu_arm64_defconfig
 make
 ```

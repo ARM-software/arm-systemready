@@ -11,10 +11,10 @@ SystemReady IR-certified platforms implement a minimum set of hardware and firmw
 This section of the repository contains the build scripts and the live-images for the SystemReady IR Band.
 
 ## Release details
- - Code Quality: IR ACS v2.0.0 Beta-1
- - The latest pre-built release of IR ACS is available for download here: [v22.10_2.0.0_BETA-1](https://github.com/ARM-software/arm-systemready/tree/main/IR/prebuilt_images/v22.10_2.0.0_BETA-1)
+ - Code Quality: IR ACS v2.0.0
+ - The latest pre-built release of IR ACS is available for download here: [v23.03_2.0.0](https://github.com/ARM-software/arm-systemready/tree/main/IR/prebuilt_images/v23.03_2.0.0)
  - The BSA tests are written for version 1.0 of the BSA specification.
- - The BBR tests are written for version 1.0 of the BBR specification.
+ - The BBR tests are written for version 2.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
 
@@ -37,7 +37,7 @@ This section of the repository contains the build scripts and the live-images fo
 
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
- - Ubuntu 18.04 or 20.04 LTS with at least 32GB of free disk space.
+ - Ubuntu 18.04, 20.04 or 22.04 LTS with at least 32GB of free disk space.
  - Availability of the Bash shell.
  - **sudo** privilege to install tools required for the build.
  - `git` installed using `sudo apt install git`.
@@ -77,6 +77,16 @@ Note: The default UEFI EDK2 setting for "Console Preference" is "Graphical". In 
 ### Verification of the IR image on QEMU Arm machine
 
 #### Follow the Build instructions mentioned in [qemu download page](https://www.qemu.org/download/#source) to build latest QEMU model.
+NOTE: For qemu versions >= 7.2.0, perform the steps listed below to support user-mode networking.
+- Install libslirp-dev
+
+`sudo apt install libslirp-dev`
+
+- Enable slirp during the Qemu build
+
+`./configure --enable-slirp`
+
+For more information visit https://wiki.qemu.org/ChangeLog/7.2#SLIRP_module_(user-mode_networking)
 
 NOTE: Download the toolchain from [arm developer page](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads/10-2-2020-11) <br />
 NOTE: If repo sync fails due to incorrect repo version , please update repo using the below steps.<br />
@@ -95,6 +105,13 @@ cd working_directory
 repo init -u https://github.com/glikely/u-boot-manifest
 repo sync
 export CROSS_COMPILE=<path to gcc-arm-10.2-2020.11-x86_64-aarch64-none-elf/bin/aarch64-none-elf->
+
+# The upstream u-boot code has issue in boot flow. The below steps are temprorary steps to avoid the issue.
+cd u-boot
+git checkout v2023.01
+cd ..
+# End of u-boot steps
+
 make qemu_arm64_defconfig
 make
 ```
@@ -122,13 +139,13 @@ For the verification steps of SIE ACS on QEMU with TPM support, refer to the [SI
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v22.07.00
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.01.00
 
-- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v22.06_IR_2.0.0_BETA-1
+- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.03_REL1.0.4
 
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v22.06_IR_2.0.0_BETA-1
+- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v23.03_IR_2.0.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 4a25c3b3c79f63bd9f98b4fffcb21b5c66dd14bb
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 8713740892bdb857e970a2841de9800b2c6b5552
 
 
 

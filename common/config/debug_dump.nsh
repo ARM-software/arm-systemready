@@ -1,4 +1,4 @@
-# Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021,2023, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -25,9 +25,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
 echo -off
-
 for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%m:\acs_results then
         FS%m:
@@ -45,16 +43,16 @@ for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         dh -d > dh.log
         memmap > memmap.log
         bcfg boot dump > bcfg.log
-        map -r > map.log
         devtree > devtree.log
         ver > uefi_version.log
         ifconfig -l > ifconfig.log
         dmem > dmem.log
-
         for %n in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 if exist FS%n:\EFI\BOOT\bsa\ir_bsa.flag then
                     #IR Specific ->DT
                 else
+                    echo "" > map.log
+                    map -r >> map.log
                     smbiosview > smbiosview.log
                     acpiview -l  > acpiview_l.log
                     acpiview -r 2 > acpiview_r.log

@@ -124,7 +124,7 @@ do_dir_deploy() {
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/sie_startup.nsh sie_startup.nsh
 
     sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD}"'/g' startup.nsh
-    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD}"'/g' sie_startup.nsh
+    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD} secureboot"'/g' sie_startup.nsh
 
     wic cp startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/startup.nsh
     wic cp sie_startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/sie_startup.nsh
