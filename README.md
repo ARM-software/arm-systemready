@@ -21,7 +21,7 @@ For the legacy SystemReady SR ACS, refer to the [Arm Enterprise ACS repository](
 ## SystemReady bands:
 Navigate to the ES, IR, or SR band for further details on specific scripts and prebuilt images through the directories below:
 * [ES](./ES)
-* [IR](./IR)
+* [IR](./IR/Yocto/)
 * [SR](./SR)
 * [LS](./LS)
 
