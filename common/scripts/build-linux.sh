@@ -101,6 +101,8 @@ do_build ()
     sed -i 's/# CONFIG_TCG_FTPM_TEE is not set/CONFIG_TCG_FTPM_TEE=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_TEE is not set/CONFIG_TEE=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_OPTEE is not set/CONFIG_OPTEE=y/g' $LINUX_OUT_DIR/.config
+    #Configurations to enable rshim support in ES/SR ACS images
+    echo "CONFIG_MLXBF_TMFIFO=y" >> $LINUX_OUT_DIR/.config
 
     if [[ $arch = "aarch64" ]]
     then
