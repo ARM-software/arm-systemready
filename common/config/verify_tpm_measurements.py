@@ -18,8 +18,6 @@
 import sys
 file_list = sys.argv
 
-flag = 0
-
 def get_line_number(word1):
     '''this method will return the line number of the string passed as argument '''
     line_number_list = []
@@ -64,6 +62,7 @@ def compare():
     with open(file_list[1], 'r') as fp ,open(file_list[2], 'r') as fp1:
         read_eventlog = fp.readlines()
         read_pcr = fp1.readlines()
+        flag = 0    # Set flag on error.
 
         for x in range(iterations):
             ev = _256_line[0]  + x + 1
@@ -77,8 +76,7 @@ def compare():
                 print("Event log PCR value: ")
                 print(remove(pcr_data.lower()))
                 flag = 1
-            else:
-                flag = 0
+
         if flag == 1 :
             print("FAILURE: TPM measurements not matching with event log.")
         else:
