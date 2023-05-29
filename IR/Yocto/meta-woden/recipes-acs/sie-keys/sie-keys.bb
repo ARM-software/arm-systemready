@@ -5,6 +5,9 @@ S = "${WORKDIR}"
 
 SRC_URI = "git://git.kernel.org/pub/scm/linux/kernel/git/jejb/efitools.git;destsuffix=efitools;protocol=https;nobranch=1;name=efitools"
 
+DEPENDS += "help2man-native libfile-slurp-perl-native"
+
+inherit perlnative
 
 SRCREV_efitools = "392836a46ce3c92b55dc88a1aebbcfdfc5dcddce"
 
@@ -15,6 +18,7 @@ do_configure() {
     export PATH="${PATH}:/usr/bin"
     echo "TARGET_PREFIX = ${TARGET_PREFIX} , OLD_TARGET_PREFIX=${OLD_TARGET_PREFIX}, CROSS_COMPILE = ${CROSS_COMPILE} BUILD_CC=${BUILD_CC} $BUILD_LD"
     cd ${S}/efitools
+    sed -i -e "1s:#!.*:#!/usr/bin/env nativeperl:" xxdi.pl
     sed -i  '1 i\CC = ${BUILD_CC}' ${S}/efitools/Make.rules
     sed -i  '1 i\LD = ${BUILD_LD}' ${S}/efitools/Make.rules
 
