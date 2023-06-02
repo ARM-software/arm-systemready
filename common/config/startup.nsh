@@ -32,6 +32,14 @@ connect -r
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\EFI\BOOT\bbr\SctStartup.nsh then
         FS%i:\EFI\BOOT\bbr\SctStartup.nsh %1
+        goto DoneSCT
+    endif
+endfor
+:DoneSCT
+
+for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%k:\EFI\BOOT\bbr\ScrtStartup.nsh then
+        FS%k:\EFI\BOOT\bbr\ScrtStartup.nsh
         goto Donebbr
     endif
 endfor
