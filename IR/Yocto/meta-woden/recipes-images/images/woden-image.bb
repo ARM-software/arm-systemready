@@ -71,7 +71,7 @@ do_dir_deploy() {
     # copying bbr directory to /boot partition
     wic cp ${DEPLOY_DIR_IMAGE}/bbr ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/
     wic cp ${DEPLOY_DIR_IMAGE}/security-interface-extension-keys ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
- 
+
     do_sign_images;
 
     wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/security-interface-extension-keys/*.crt
@@ -80,7 +80,7 @@ do_dir_deploy() {
 
     # create and copy empty acs_results directory to /results partition
     mkdir -p acs_results
-    wic cp acs_results ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:3/
+    wic cp acs_results ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
 
     #add bsa/bbr bootloder entry and set it has default boot
 

@@ -78,7 +78,7 @@ OUTDIR=${PLATDIR}
 LINUX_OUT_DIR=out
 LINUX_PATH=linux-${LINUX_KERNEL_VERSION}
 
-if [ $CLEAN_BUILD == "C" ]; then
+if [ -n "$CLEAN_BUILD" ] && [ "$CLEAN_BUILD" = "C" ]; then
     do_clean
 fi
 do_build
