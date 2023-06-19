@@ -91,6 +91,7 @@ create_fatpart ()
     mmd -i $fatpart_name ::/EFI/BOOT/bbr
     mmd -i $fatpart_name ::/EFI/BOOT/debug
     mmd -i $fatpart_name ::/EFI/BOOT/app
+    mmd -i $fatpart_name ::/acs_results
 
     mcopy -i $fatpart_name bootaa64.efi ::/EFI/BOOT
     mcopy -i $fatpart_name Shell.efi ::/EFI/BOOT
@@ -122,27 +123,13 @@ create_fatpart ()
     echo "FAT partition image created"
 }
 
-create_fatpart2 ()
-{
-    local fatpart_name="$1"  #Name of the FAT partition disk image
-    local fatpart_size="$2"  #FAT partition size (in 512-byte blocks)
-
-    dd if=/dev/zero of=$fatpart_name bs=$BLOCK_SIZE count=$fatpart_size
-    mkfs.vfat $fatpart_name -n $fatpart_name
-    mmd -i $fatpart_name ::/acs_results
-    echo "FAT partition 2 image created"
-}
-
 create_diskimage ()
 {
     local image_name="$1"
     local part_start="$2"
     local fatpart_size="$3"
-    local fatpart2_size="$4"
 
     (echo n; echo 1; echo $part_start; echo +$((fatpart_size-1));\
-    echo 0700; echo w; echo y) | gdisk $image_name
-    (echo n; echo 2; echo $((part_start+fatpart_size)); echo +$((fatpart2_size-1));\
     echo 0700; echo w; echo y) | gdisk $image_name
 }
 
@@ -170,11 +157,9 @@ prepare_disk_image ()
 
     pushd $TOP_DIR/$GRUB_PATH/output
 
-    local FAT_SIZE_MB=512
-    local FAT2_SIZE_MB=128
+    local FAT_SIZE_MB=640
     local PART_START=$((1*SEC_PER_MB))
     local FAT_SIZE=$((FAT_SIZE_MB*SEC_PER_MB))
-    local FAT2_SIZE=$((FAT2_SIZE_MB*SEC_PER_MB))
 
     rm -f $PLATDIR/$IMG_BB
     cp grubaa64.efi bootaa64.efi
@@ -199,23 +184,22 @@ prepare_disk_image ()
     create_fatpart "BOOT" $FAT_SIZE
     create_cfgfiles "BOOT"
     cat BOOT >> $IMG_BB
-
-    #Result partition
-    create_fatpart2 "RESULT" $FAT2_SIZE
-    cat RESULT >> $IMG_BB
     
     #Space for backup partition table at the bottom (1M)
     cat part_table >> $IMG_BB
 
     # create disk image and copy into output folder
-    create_diskimage $IMG_BB $PART_START $FAT_SIZE $FAT2_SIZE
+    create_diskimage $IMG_BB $PART_START $FAT_SIZE
     cp $IMG_BB $PLATDIR
 
     #remove intermediate files
     rm -f part_table
     rm -f BOOT
     rm -f RESULT
-
+    #remove compressed image if present from previous build
+    if [ -f $PLATDIR/$IMG_BB.xz ]; then
+        rm $PLATDIR/$IMG_BB.xz
+    fi
     echo "Compressing the image : $PLATDIR/$IMG_BB"
     xz -z $PLATDIR/$IMG_BB
 

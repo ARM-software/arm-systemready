@@ -64,10 +64,10 @@ Note: The image is generated in a compressed (.xz) format. The image must be unc
 
 ## Build output
 This image comprises of two FAT file system partitions recognized by UEFI: <br />
-- 'acs-results' <br />
-  Stores logs of the automated execution of ACS. (Approximate size: 128 MB) <br/>
 - 'boot' <br />
-  Contains bootable applications and test suites. (Approximate size: 500 MB)
+  Approximate size: 640 MB <br />
+  contains bootable applications and test suites.<br />
+  contains a 'acs_results' directory which stores logs of the automated execution of ACS.
 
 
 ## Verification
