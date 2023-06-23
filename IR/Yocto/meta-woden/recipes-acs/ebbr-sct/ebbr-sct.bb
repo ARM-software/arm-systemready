@@ -37,7 +37,7 @@ do_configure() {
     git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/common/patches/edk2-test-bbr-build.patch
     # Copy sbbr-test cases from bbr-acs to uefi-sct
     cp -r ${SBBR_TEST_DIR}/SbbrBootServices uefi-sct/SctPkg/TestCase/UEFI/EFI/BootServices/
-    cp -r ${SBBR_TEST_DIR}/SbbrEfiSpecVerLvl ${SBBR_TEST_DIR}/SbbrRequiredUefiProtocols ${SBBR_TEST_DIR}/SbbrSmbios ${SBBR_TEST_DIR}/SbbrSysEnvConfig uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
+    cp -r ${SBBR_TEST_DIR}/SbbrEfiSpecVerLvl ${SBBR_TEST_DIR}/SbbrRequiredUefiProtocols ${SBBR_TEST_DIR}/SbbrSysEnvConfig uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
     cp -r ${SBBR_TEST_DIR}/SBBRRuntimeServices uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices/
     cp ${SBBR_TEST_DIR}/BBR_SCT.dsc uefi-sct/SctPkg/UEFI/
     cp ${SBBR_TEST_DIR}/build_bbr.sh uefi-sct/SctPkg/
