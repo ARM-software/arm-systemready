@@ -55,41 +55,17 @@ insmod /lib/modules/nvme.ko
 
 sleep 5
 
-RESULT_DEVICE="";
 #Skip running of ACS Tests if the grub option is added
 ADDITIONAL_CMD_OPTION="";
 ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  #mount result partition
- cat /proc/partitions | tail -n +3 > partition_table.lst
- while read -r line
- do
-    # do something with $line here
-    MAJOR=`echo $line | awk '{print $1}'`
-    MINOR=`echo $line | awk '{print $2}'`
-    DEVICE=`echo $line | awk '{print $4}'`
-    echo "$MAJOR $MINOR $DEVICE"
-    mknod /dev/$DEVICE b $MAJOR $MINOR
-    mount /dev/$DEVICE /mnt
-    if [ -d /mnt/acs_results ]; then
-         #Partition is mounted. Break from loop
-         RESULT_DEVICE="/dev/$DEVICE"
-         echo "Setting RESULT_DEVICE to $RESULT_DEVICE"
-         break;
-         #Note: umount must be done from the calling function
-    else
-         #acs_results is not found, so move to next
-         umount /mnt
-    fi
- done < partition_table.lst
- 
- rm partition_table.lst
- 
- 
- 
- if [ ! -z "$RESULT_DEVICE" ]; then
-  echo "Mounted the results partition on device $RESULT_DEVICE"
+ BLOCK_DEVICE_NAME=$(blkid | grep "BOOT" | awk -F: '{print $1}')
+
+ if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
+  mount $BLOCK_DEVICE_NAME /mnt
+  echo "Mounted the results partition on device $BLOCK_DEVICE_NAME"
  else
   echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
  fi
