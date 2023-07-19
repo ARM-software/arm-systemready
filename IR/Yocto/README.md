@@ -72,57 +72,58 @@ This image comprises of two FAT file system partitions recognized by UEFI: <br /
 
 ## Verification
 
-Note: The default UEFI EDK2 setting for "Console Preference" is "Graphical". In this default setting, the Linux output goes only to the graphical console (HDMI monitor). To force serial console output, you may change "Console Preference" to "Serial".
-
 ### Verification of the IR image on QEMU Arm machine
 
-#### Follow the Build instructions mentioned in [qemu download page](https://www.qemu.org/download/#source) to build latest QEMU model.
-NOTE: For qemu versions >= 7.2.0, perform the steps listed below to support user-mode networking.
-- Install libslirp-dev
+#### Building the firmware and QEMU
 
-`sudo apt install libslirp-dev`
+The U-Boot firmware and QEMU can be built with
+[Buildroot](https://buildroot.org/).
 
-- Enable slirp during the Qemu build
-
-`./configure --enable-slirp`
-
-For more information visit https://wiki.qemu.org/ChangeLog/7.2#SLIRP_module_(user-mode_networking)
-
-NOTE: Download the toolchain from [arm developer page](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads/10-2-2020-11) <br />
-NOTE: If repo sync fails due to incorrect repo version , please update repo using the below steps.<br />
-```
-mkdir -p ~/.bin
-PATH="${HOME}/.bin:${PATH}"
-curl https://storage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
-chmod a+rx ~/.bin/repo
-```
-
-#### To build the firmware image, follow the below steps
+To download and build the firmware code, do the following:
 
 ```
-mkdir working_directory
-cd working_directory
-repo init -u https://github.com/glikely/u-boot-manifest
-repo sync
-export CROSS_COMPILE=<path to gcc-arm-10.2-2020.11-x86_64-aarch64-none-elf/bin/aarch64-none-elf->
-
-# The upstream u-boot code has issue in boot flow. The below steps are temprorary steps to avoid the issue.
-cd u-boot
-git checkout v2023.01
-cd ..
-# End of u-boot steps
-
-make qemu_arm64_defconfig
+git clone https://git.buildroot.net/buildroot -b 2023.05.x
+cd buildroot
+make qemu_aarch64_ebbr_defconfig
 make
 ```
-nor_flash.bin is generated once the build is completed.
 
+When the build completes, it generates the firmware file
+`output/images/flash.bin`, comprising TF-A, OP-TEE and the U-Boot bootloader. A
+QEMU executable is also generated at `output/host/bin/qemu-system-aarch64`.
+
+Specific information for this Buildroot configuration is available in the file
+`board/qemu/aarch64-ebbr/readme.txt`.
+
+More information on Buildroot is available in [The Buildroot user
+manual](https://buildroot.org/downloads/manual/manual.html).
 
 #### Verifying the ACS-IR pre-built image
-Launch the model with the below command
+
+Launch the model using the following command:
 
 ```
-<path to qemu-system-aarch64> -bios <path to nor_flash.bin>  -drive file=<path to ir-acs-live-image-generic-arm64.wic>,if=virtio,format=raw  -cpu cortex-a57 -smp 2 -m 2048 -M virt,secure=on -monitor null -no-acpi -nodefaults -nographic -rtc base=utc,clock=host -serial stdio -d unimp,guest_errors -machine virtualization=on
+./output/host/bin/qemu-system-aarch64 \
+    -bios output/images/flash.bin \
+    -cpu cortex-a53 \
+    -d unimp \
+    -device virtio-blk-device,drive=hd1 \
+    -device virtio-blk-device,drive=hd0 \
+    -device virtio-net-device,netdev=eth0 \
+    -device virtio-rng-device,rng=rng0 \
+    -drive file=<path-to/ir-acs-live-image-generic-arm64.wic>,if=none,format=raw,id=hd0 \
+    -drive file=output/images/disk.img,if=none,id=hd1 \
+    -m 1024 \
+    -machine virt,secure=on \
+    -monitor null \
+    -netdev user,id=eth0 \
+    -no-acpi \
+    -nodefaults \
+    -nographic \
+    -object rng-random,filename=/dev/urandom,id=rng0 \
+    -rtc base=utc,clock=host \
+    -serial stdio \
+    -smp 2
 ```
 
 ### Automation
