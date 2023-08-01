@@ -26,7 +26,7 @@ repos:
       meta-perl:
 
   meta-secure-core:
-    url: https://github.com/jiazhang0/meta-secure-core
+    url: https://github.com/Wind-River/meta-secure-core
     refspec: d218a980afafcb2764cf900e0ec27a41546a20e3
     layers:
       meta:
