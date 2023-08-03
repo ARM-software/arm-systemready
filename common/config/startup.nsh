@@ -89,17 +89,17 @@ for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%l:\Image and exist FS%l:\ramdisk-buildroot.img then
         FS%l:
         cd FS%l:\
-        Image initrd=\ramdisk-buildroot.img systemd.log_target=null plymouth.ignore-serial-consoles debug crashkernel=512M,high log_buf_len=1M efi=debug acpi=on crashkernel=256M earlycon uefi_debug
+        Image initrd=\ramdisk-buildroot.img debug crashkernel=512M,high log_buf_len=1M print-fatal-signals=1 efi=debug acpi=on earlycon systemd.log_target=null plymouth.ignore-serial-consoles
     endif
     if exist FS%l:\Image and exist FS%l:\ramdisk-busybox.img then
         FS%l:
         cd FS%l:\
-        Image initrd=\ramdisk-busybox.img systemd.log_target=null plymouth.ignore-serial-consoles debug crashkernel=512M,high log_buf_len=1M efi=debug acpi=on crashkernel=256M earlycon uefi_debug
+        Image initrd=\ramdisk-busybox.img debug crashkernel=512M,high log_buf_len=1M print-fatal-signals=1 efi=debug acpi=on earlycon systemd.log_target=null plymouth.ignore-serial-consoles
     endif
     if exist FS%l:\Image and exist FS%l:\yocto_image.flag then
         FS%l:
         cd FS%l:\
-        Image LABEL=Boot root=partuid rootfstype=ext4
+        Image LABEL=BOOT root=partuid rootfstype=ext4
     endif
 endfor
 echo "Image not found"
