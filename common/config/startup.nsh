@@ -89,7 +89,7 @@ for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%l:\Image and exist FS%l:\ramdisk-buildroot.img then
         FS%l:
         cd FS%l:\
-        Image initrd=\ramdisk-buildroot.img debug crashkernel=512M,high log_buf_len=1M print-fatal-signals=1 efi=debug acpi=on earlycon systemd.log_target=null plymouth.ignore-serial-consoles
+        Image initrd=\ramdisk-buildroot.img debug crashkernel=512M,high log_buf_len=1M print-fatal-signals=1 efi=debug acpi=on earlycon systemd.log_target=null plymouth.ignore-serial-consoles console=tty0 console=ttyS0
     endif
     if exist FS%l:\Image and exist FS%l:\ramdisk-busybox.img then
         FS%l:
