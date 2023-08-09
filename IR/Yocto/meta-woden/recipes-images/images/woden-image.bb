@@ -140,6 +140,11 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         process-schema \
                         dmidecode \
                         efibootmgr \
+                        ethtool \
+                        tree \
+                        util-linux \
+                        lshw \
+                        usbutils \
 "
 
 addtask dir_deploy before do_populate_lic_deploy after do_image_complete

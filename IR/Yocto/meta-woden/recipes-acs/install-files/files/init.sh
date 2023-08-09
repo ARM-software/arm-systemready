@@ -68,7 +68,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  #linux debug dump
  mkdir -p /mnt/acs_results/linux_dump
  lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
- #lsusb > /mnt/acs_results/linux_dump/lsusb.log
+ lsusb > /mnt/acs_results/linux_dump/lsusb.log
  uname -a > /mnt/acs_results/linux_dump/uname.log
  cat /proc/interrupts > /mnt/acs_results/linux_dump/interrupts.log
  cat /proc/cpuinfo > /mnt/acs_results/linux_dump/cpuinfo.log
