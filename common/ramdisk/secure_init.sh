@@ -64,12 +64,12 @@ if [ -f /sys/kernel/security/tpm0/binary_bios_measurements ]; then
   echo "  PCRs: /mnt/acs_results/SIE/tpm2/pcr.log"
   rm /tmp/binary_bios_measurements
   if grep -q "pcrs:" "/mnt/acs_results/SIE/tpm2/eventlog.log"; then
-    echo "Comparing eventlog.log and pcr.log"
-    #TPM2 logs event log v/s tpm.log check
-    python3 /bin/verify_tpm_measurements.py /mnt/acs_results/SIE/tpm2/eventlog.log mnt/acs_results/SIE/tpm2/pcr.log > /mnt/acs_results/SIE/tpm2/eventlog_pcr_diff.log
+      echo "PCR reg entry found at the end of eventlog, comparing eventlog vs pcr "
+      #TPM2 logs event log v/s tpm.log check
+      python3 /bin/verify_tpm_measurements.py /mnt/acs_results/SIE/tpm2/pcr.log /mnt/acs_results/SIE/tpm2/eventlog.log | tee /mnt/acs_results/SIE/tpm2/verify_tpm_measurements.log
   else
-    echo "Info: PCR register entries not found at the end of event log, eventlog.log vs pcr.log, auto-comparison is not possible"
-  fi 
+      echo "PCR reg entry not found at the end of event log, eventlog vs pcr comparision not possible "
+  fi
 else
    echo "TPM event log not found at /sys/kernel/security/tpm0/binary_bios_measurements"
 fi
