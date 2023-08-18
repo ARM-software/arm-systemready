@@ -233,7 +233,7 @@ get_buildroot_src()
     git clone -b $BUILDROOT_SRC_VERSION http://git.buildroot.net/buildroot
     pushd $TOP_DIR/buildroot/package/fwts
         echo "Applying Buildroot FWTS patch..."
-        git apply $TOP_DIR/../../common/patches/build_fwts_version.patch
+        git apply $TOP_DIR/../../common/patches/build_fwts_version_23.07.00.patch
     popd
 }
 
