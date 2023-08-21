@@ -34,9 +34,9 @@
 mount -t efivarfs efivarfs /sys/firmware/efi/efivars
 echo "init.sh"
 
-#Create a link of S10init.sh to init.sh
+#Create a link of S99init.sh to init.sh
 if [ ! -f /init.sh ]; then
- ln -s  /etc/init.d/S10init.sh /init.sh
+ ln -s  /etc/init.d/S99init.sh /init.sh
 fi
 
 #Create all the symlinks to /bin/busybox

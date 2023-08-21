@@ -65,8 +65,9 @@ do_build ()
     mkdir -p root_fs_overlay
     mkdir -p root_fs_overlay/etc/init.d
     cp  $TOP_DIR/../../common/ramdisk/inittab root_fs_overlay/etc
-    cp  $TOP_DIR/../../common/ramdisk/init.sh root_fs_overlay/etc/init.d/S10init.sh
-    chmod +x root_fs_overlay/etc/init.d/S10init.sh
+    cp  $TOP_DIR/../../common/ramdisk/init.sh root_fs_overlay/etc/init.d/S99init.sh
+    cp  $TOP_DIR/../../common/ramdisk/resolv.conf root_fs_overlay/etc/resolv.conf
+    chmod +x root_fs_overlay/etc/init.d/S99init.sh
     mkdir -p root_fs_overlay/bin
     mkdir -p root_fs_overlay/lib/modules
     mkdir -p root_fs_overlay/usr/bin
