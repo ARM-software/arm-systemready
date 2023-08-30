@@ -57,7 +57,6 @@ for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                     acpiview -l  > acpiview_l.log
                     acpiview -r 2 > acpiview_r.log
                     acpiview > acpiview.log
-                    acpiview -d -s acpiview_d
                     goto Done
                 endif
                 goto Done
