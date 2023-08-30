@@ -32,6 +32,16 @@
 #Already mounted on Yocto Linux
 /bin/mount -t securityfs securityfs /sys/kernel/security
 
+# Following modules are built into Yocto image and shipped
+# as loadable in buildroot build.
+if ! grep -qi "yocto" /proc/version ; then
+  echo "Loading TPM kernel modules..."
+  insmod /lib/modules/tpm_tis.ko
+  insmod /lib/modules/tpm_tis_spi.ko
+  insmod /lib/modules/tpm_tis_i2c_cr50.ko
+  insmod /lib/modules/spi-tegra210-quad.ko
+fi
+
 # give linux time to finish initializing disks
 sleep 5
 
