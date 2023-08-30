@@ -84,7 +84,7 @@ copy_recipes()
     sed -i 's/\/grub\-core\//\/grub\-core\/\ --disable-shim-lock/g' $TOP_DIR/meta-woden/poky/meta/recipes-bsp/grub/grub-efi_2.06.bb
 
     #Remove the existing recipe
-    rm $TOP_DIR/meta-woden/poky/meta/recipes-kernel/linux/linux-yocto_5.15.bb 
+    rm $TOP_DIR/meta-woden/poky/meta/recipes-kernel/linux/linux-yocto_5.15.bb
 
     #copy linux_yocto.bbappend with empty defconfig
     cp $TOP_DIR/config/linux-yocto_%.bbappend $TOP_DIR/meta-woden/meta-arm/meta-arm/recipes-kernel/linux/linux-yocto_%.bbappend
@@ -140,6 +140,8 @@ copy_recipes()
     cp $TOP_DIR/../../common/ramdisk/secure_init.sh $TOP_DIR/meta-woden/recipes-acs/install-files/files
     cp $TOP_DIR/../../common/config/verify_tpm_measurements.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
     popd
+    # copy any patches to linux src files directory
+    cp $COMMON_DIR_PATH/patches/tpm-tis-spi-Add-hardware-wait-polling.patch $TOP_DIR/meta-woden/recipes-kernel/linux/files
 
 }
 

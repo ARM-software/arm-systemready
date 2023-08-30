@@ -18,6 +18,7 @@ SRC_URI = "git://git.yoctoproject.org/linux-yocto.git;name=machine;branch=${KBRA
            git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-6.4;destsuffix=${KMETA} \
            https://gitlab.arm.com/linux-arm/linux-acs/-/raw/master/kernel/src/0001-BSA-ACS-Linux-6.4.patch;patch=1;md5sum=9df0cb7e5c1a60de982f622bb5a0c99b \
            file://0002-Fix-for-CompuLab-IOT-GATE-iMX8-boot-issue.patch;patch=1 \
+           file://tpm-tis-spi-Add-hardware-wait-polling.patch;patch=1 \
 "
 FILESEXTRAPATHS:prepend := "${TOPDIR}/../meta-arm/meta-arm/recipes-kernel/linux/files:"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"

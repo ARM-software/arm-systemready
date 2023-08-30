@@ -92,11 +92,7 @@ do_build ()
     sed -i 's/# CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER is not set/CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER=y/g' $LINUX_OUT_DIR/.config
     #Configurations for SecureBoot and TCG for SIE ACS
     sed -i 's/# CONFIG_TCG_TPM is not set/CONFIG_TCG_TPM=y/g' $LINUX_OUT_DIR/.config
-    sed -i 's/# CONFIG_TCG_TIS is not set/CONFIG_TCG_TIS=y/g' $LINUX_OUT_DIR/.config
-    sed -i 's/# CONFIG_TCG_TIS_SPI is not set/CONFIG_TCG_TIS_SPI=y/g' $LINUX_OUT_DIR/.config
-    echo "CONFIG_TCG_TIS_SPI_CR50=y" >> $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_TCG_TIS_SYNQUACER is not set/CONFIG_TCG_TIS_SYNQUACER=y/g' $LINUX_OUT_DIR/.config
-    sed -i 's/# CONFIG_TCG_TIS_I2C_CR50 is not set/CONFIG_TCG_TIS_I2C_CR50=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_TCG_CRB is not set/CONFIG_TCG_CRB=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_TCG_FTPM_TEE is not set/CONFIG_TCG_FTPM_TEE=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_TEE is not set/CONFIG_TEE=y/g' $LINUX_OUT_DIR/.config
@@ -143,7 +139,10 @@ do_package ()
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/nvme/host/nvme-core.ko $TOP_DIR/ramdisk/drivers
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci-renesas.ko $TOP_DIR/ramdisk/drivers
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci.ko $TOP_DIR/ramdisk/drivers
-
+    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/char/tpm/tpm_tis.ko $TOP_DIR/ramdisk/drivers
+    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/char/tpm/tpm_tis_spi.ko $TOP_DIR/ramdisk/drivers
+    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/char/tpm/tpm_tis_i2c_cr50.ko $TOP_DIR/ramdisk/drivers
+    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/spi/spi-tegra210-quad.ko $TOP_DIR/ramdisk/drivers
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
