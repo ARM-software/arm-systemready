@@ -142,7 +142,7 @@ copy_recipes()
     popd
     # copy any patches to linux src files directory
     cp $COMMON_DIR_PATH/patches/tpm-tis-spi-Add-hardware-wait-polling.patch $TOP_DIR/meta-woden/recipes-kernel/linux/files
-
+    cp $COMMON_DIR_PATH/patches/fwts_last_attempt_status.patch $TOP_DIR/meta-woden/recipes-acs/fwts/files
 }
 
 copy_recipes
