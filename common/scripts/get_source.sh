@@ -238,6 +238,7 @@ get_buildroot_src()
     pushd $TOP_DIR/buildroot/package/fwts
         echo "Applying Buildroot FWTS patch..."
         git apply $TOP_DIR/../../common/patches/build_fwts_version_23.07.00.patch
+        git apply $TOP_DIR/../../common/patches/fwts_last_attempt_status.patch
     popd
 }
 
