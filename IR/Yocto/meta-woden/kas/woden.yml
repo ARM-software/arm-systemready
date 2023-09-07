@@ -6,13 +6,13 @@ repos:
 
   poky:
     url: https://git.yoctoproject.org/git/poky
-    refspec: langdale
+    refspec: mickledore
     layers:
       meta:
 
   meta-arm:
     url: https://git.yoctoproject.org/git/meta-arm
-    refspec: a590d6e1b88638f570ba5af7811c3b27f73e7cc2
+    refspec: mickledore
     layers:
       meta-arm:
       meta-arm-bsp:
@@ -20,14 +20,14 @@ repos:
 
   meta-openembedded:
     url: https://git.openembedded.org/meta-openembedded
-    refspec: langdale
+    refspec: mickledore
     layers:
       meta-oe:
       meta-perl:
 
   meta-secure-core:
-    url: https://github.com/jiazhang0/meta-secure-core
-    refspec: d218a980afafcb2764cf900e0ec27a41546a20e3
+    url: https://github.com/Wind-River/meta-secure-core
+    refspec: mickledore
     layers:
       meta:
       meta-efi-secure-boot:
