@@ -145,6 +145,7 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         util-linux \
                         lshw \
                         usbutils \
+                        edk2-test-parser \
 "
 
 addtask dir_deploy before do_populate_lic_deploy after do_image_complete

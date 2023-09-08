@@ -79,6 +79,7 @@ build_pmu_app()
             export CROSS_COMPILE=$TOP_DIR/$GCC
         fi
         export PYTHON=$TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/host/usr/bin/python
+        export PYTHONPATH=$TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/
         export CROSSBASE=$TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target
         source build_pmu.sh
     popd
@@ -117,9 +118,13 @@ pack_in_ramdisk()
 
   rm -rf $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.so
   rm -rf $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.so
+  cp -r $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/PyPerf-0.0.0-py3.10-linux-x86_64.egg/pyperf \
+     $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/
+  cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/PySweep-0.0.0-py3.10-linux-x86_64.egg/pysweep.cpython-310-x86_64-linux-gnu.so \
+     $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/
   cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.* \
      $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.so
-  cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.* \
+  cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.cpython-310-x86_64-linux-gnu.so \
      $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.so
 }
 
@@ -128,4 +133,3 @@ build_sbsa_app
 build_pmu_app
 build_mte_test
 pack_in_ramdisk
-
