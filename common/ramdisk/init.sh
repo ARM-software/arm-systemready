@@ -140,6 +140,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
    fi
   fi
  fi
+ if [ -d "/mnt/acs_results/sct_results" ]; then
+     echo "Running edk2-test-parser tool "
+     mkdir -p /mnt/acs_results/edk2-test-parser
+     cd /usr/bin/edk2-test-parser
+     ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/BBSR.seq
+ else
+     echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
+ fi
 else
  echo ""
  echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
