@@ -1,6 +1,14 @@
 name: Build ES 1.2 ACS image
 
-on: [push, pull_request]
+on:
+  push:
+    branches:                # trigger on push to master
+      - main
+  pull_request:              # trigger on pull requests to master
+    branches:
+      - main
+  schedule:
+    - cron: '30 17 * * *'    # Runs everyday at 11 PM IST (17:30 UTC)
 
 jobs:
   build_image:
