@@ -16,7 +16,7 @@ KBRANCH:class-devupstream = "v6.4/base"
 
 SRC_URI = "git://git.yoctoproject.org/linux-yocto.git;name=machine;branch=${KBRANCH}; \
            git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-6.4;destsuffix=${KMETA} \
-           https://gitlab.arm.com/linux-arm/linux-acs/-/raw/master/kernel/src/0001-BSA-ACS-Linux-6.4.patch;patch=1;md5sum=9df0cb7e5c1a60de982f622bb5a0c99b \
+           https://gitlab.arm.com/linux-arm/linux-acs/-/raw/master/kernel/src/0001-BSA-ACS-Linux-6.4.patch;patch=1;md5sum=7a4ce9635bc4af637c0463d8fdd038c0 \
            file://0002-Fix-for-CompuLab-IOT-GATE-iMX8-boot-issue.patch;patch=1 \
            file://tpm-tis-spi-Add-hardware-wait-polling.patch;patch=1 \
 "
