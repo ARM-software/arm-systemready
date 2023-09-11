@@ -30,7 +30,15 @@
 
 #Mount things needed by this script
 /bin/busybox mount -t proc proc /proc
-/bin/busybox mount -t sysfs sysfs /sys
+
+
+if ! mountpoint -q /sys; then
+        echo "Mounting /sysfs..."
+        /bin/busybox mount -t sysfs sysfs /sys
+else
+        echo "/sysfs is already mounted."
+fi
+
 mount -t efivarfs efivarfs /sys/firmware/efi/efivars
 echo "init.sh"
 
@@ -77,7 +85,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Please press <Enter> to continue ..."
   sync /mnt
   sleep 3
-  exec sh
+  exec sh +m
  fi
  #linux debug dump
  mkdir -p /mnt/acs_results/linux_dump
@@ -157,4 +165,4 @@ fi
 sync /mnt
 sleep 3
 
-exec sh
+exec sh +m
