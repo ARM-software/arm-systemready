@@ -86,7 +86,7 @@ if __name__ == "__main__":
             else:
                 print_color(f"INFO: Ethernet interface {intrf} doesn't supports ethtool self test", "green")
             print("\n****************************************************************\n")
-            exit(0)
+        exit(0)
     except Exception as e:
         print_color(f"Error occurred: {e}", "red")
         exit(1)
