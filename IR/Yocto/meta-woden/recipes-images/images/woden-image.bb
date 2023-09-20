@@ -141,7 +141,6 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         process-schema \
                         dmidecode \
                         efibootmgr \
-
                         ethtool \
                         tree \
                         util-linux \
