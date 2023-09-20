@@ -102,7 +102,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Running dt-validate tool "
   dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results/linux_tools/dt-validate.log
  
-  sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.1.2 \ndtschema version: 2022.9 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
+  sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.5 \ndtschema version: 2023.7 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
   if [ ! -s /mnt/acs_results/linux_tools/dt-validate.log ]; then
    echo $'The FDT is compliant according to schema ' >> /mnt/acs_results/linux_tools/dt-validate.log
   fi
@@ -113,7 +113,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
      echo "Running edk2-test-parser tool "
      mkdir -p /mnt/acs_results/edk2-test-parser
      cd /usr/bin/edk2-test-parser
-     ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/EBBR.seq
+     ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/EBBR.seq  > /dev/null 2>&1
  else
      echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
  fi

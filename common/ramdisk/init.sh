@@ -164,7 +164,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
      echo "Running edk2-test-parser tool "
      mkdir -p /mnt/acs_results/edk2-test-parser
      cd /usr/bin/edk2-test-parser
-     ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/BBSR.seq
+     ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/SBBR.seq > /dev/null 2>&1
  else
      echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
  fi

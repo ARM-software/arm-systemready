@@ -124,7 +124,7 @@ get_cross_compiler()
         GCC=${TAG}/gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
         mkdir -p tools
         pushd $TOP_DIR/tools
-        wget $LINARO/$VERSION/$GCC
+        wget $LINARO/$VERSION/$GCC --no-check-certificate
         tar -xf gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
         rm gcc-linaro-${LINARO_TOOLS_VERSION}-x86_64_${TAG}.tar.xz
         popd
@@ -147,7 +147,7 @@ get_cross_compiler2()
         fi
         mkdir -p tools
         pushd $TOP_DIR/tools
-        wget $CROSS_COMPILER_URL
+        wget $CROSS_COMPILER_URL --no-check-certificate
         tar -xf gcc-arm-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
         rm gcc-arm-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
         popd
@@ -256,7 +256,7 @@ sudo apt install git curl mtools gdisk gcc \
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
  make g++ build-essential wget gettext dosfstools unzip \
  sbsigntool uuid-runtime monkeysphere gnu-efi \
- libfile-slurp-perl help2man -y
+ libfile-slurp-perl help2man libbsd-dev -y
 
 REL="${DISTRIB_RELEASE//[!0-9]/}"
 MAJORREL=${REL:0:2}
