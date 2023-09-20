@@ -9,9 +9,11 @@ SRC_URI:append = " file://acs_run-before-login-prompt.service \
                    file://secure_init.sh \
                    file://verify_tpm_measurements.py \
                    file://ethtool-test.py \
+                   file://device_driver_info.sh \
 		 "
 
 FILES:${PN} += "${systemd_unitdir}/system"
+RDEPENDS:${PN} += "bash"
 
 do_install:append() {
   echo "S is ${S}"
@@ -25,5 +27,5 @@ do_install:append() {
   install -m 0644 ${WORKDIR}/acs_run-before-login-prompt.service ${D}${systemd_unitdir}/system
   install -m 0770 ${WORKDIR}/verify_tpm_measurements.py          ${D}/bin
   install -m 0770 ${WORKDIR}/ethtool-test.py                     ${D}/bin
-
+  install -m 0770 ${WORKDIR}/device_driver_info.sh                          ${D}${bindir}
 }

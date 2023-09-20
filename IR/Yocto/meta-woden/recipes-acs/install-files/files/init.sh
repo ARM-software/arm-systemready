@@ -90,7 +90,20 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  
  mkdir -p /home/root/fdt
  mkdir -p /mnt/acs_results/linux_tools
- 
+
+ pushd /usr/bin
+ echo "running device_driver_info.sh device and driver info created"
+ ./device_driver_info.sh
+ cp device_driver_info.log /mnt/acs_results/linux_tools
+ popd
+
+ # Generate the .dts file and move it to /mnt/acs_results/linux_tools
+ dtc -I fs -O dts -o /mnt/acs_results/linux_tools/device_tree.dts /sys/firmware/devicetree/base 2>/dev/null
+
+ # Generate tree format of sys hierarchy and saving it into logs.
+ tree -d /sys > /mnt/acs_results/linux_dump/sys_hierarchy.log
+
+
  if [ -f /sys/firmware/fdt ]; then
   echo "copying fdt "
   cp /sys/firmware/fdt /home/root/fdt
@@ -101,7 +114,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  
   echo "Running dt-validate tool "
   dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results/linux_tools/dt-validate.log
- 
   sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.5 \ndtschema version: 2023.7 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
   if [ ! -s /mnt/acs_results/linux_tools/dt-validate.log ]; then
    echo $'The FDT is compliant according to schema ' >> /mnt/acs_results/linux_tools/dt-validate.log
@@ -113,7 +125,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
      echo "Running edk2-test-parser tool "
      mkdir -p /mnt/acs_results/edk2-test-parser
      cd /usr/bin/edk2-test-parser
-     ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/EBBR.seq  > /dev/null 2>&1
+     ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/EBBR.seq > /dev/null 2>&1
  else
      echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
  fi
