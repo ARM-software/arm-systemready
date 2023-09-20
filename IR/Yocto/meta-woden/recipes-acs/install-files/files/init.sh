@@ -118,7 +118,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
      echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
  fi
 
- # run ethtool-test.py, dump ethernet information and run self-tests if supported
+ # update resolv.conf with 8.8.8.8 DNS server
+ echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+
+ # run ethtool-test.py, dump ethernet information, run self-tests if supported, and ping
  python3 /bin/ethtool-test.py | tee ethtool-test.log
  # remove color characters from log and save
  awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results/linux_tools/ethtool-test.log
