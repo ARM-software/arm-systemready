@@ -1,0 +1,282 @@
+From b728f5812b14f03766d5d4169a19b42bb99b5e93 Mon Sep 17 00:00:00 2001
+From: gurrev01 <gururaj.revankar@arm.com>
+Date: Fri, 15 Sep 2023 19:20:48 +0530
+Subject: [PATCH] UpdateVar updates for SecureBoot automatic provision
+
+Signed-off-by: gurrev01 <gururaj.revankar@arm.com>
+---
+ Make.rules    |  17 ++++----
+ Makefile      | 113 +-------------------------------------------------
+ UpdateVars.c  |  25 ++++++-----
+ lib/console.c |   4 +-
+ lib/sha256.c  |   4 +-
+ 5 files changed, 28 insertions(+), 135 deletions(-)
+
+diff --git a/Make.rules b/Make.rules
+index 903a5a4..ec5fc52 100644
+--- a/Make.rules
++++ b/Make.rules
+@@ -1,7 +1,10 @@
++GNU_EFI_PATH=${STAGING_DIR_TARGET}/../gnu-efi
++CC =  ${TARGET_PREFIX}gcc
++LD =  ${TARGET_PREFIX}ld
+ EFISIGNED = $(patsubst %.efi,%-signed.efi,$(EFIFILES))
+ MANPAGES = $(patsubst doc/%.1.in,doc/%.1,$(wildcard doc/*.1.in))
+ HELP2MAN = help2man
+-ARCH	 = $(shell uname -m | sed 's/i.86/ia32/;s/arm.*/arm/')
++ARCH     = aarch64
+ ifeq ($(ARCH),ia32)
+ ARCH3264 = -m32
+ else ifeq ($(ARCH),x86_64)
+@@ -13,21 +16,21 @@ ARCH3264 =
+ else
+ $(error unknown architecture $(ARCH))
+ endif
+-INCDIR	   = -I$(TOPDIR)include/ -I/usr/include/efi -I/usr/include/efi/$(ARCH) -I/usr/include/efi/protocol
++INCDIR	   = -I${STAGING_DIR_TARGET}/usr/include -I${GNU_EFI_PATH}/inc -I${GNU_EFI_PATH}/inc/aarch64 -I$(TOPDIR)include/ -I${STAGING_DIR_TARGET}/usr/include/efi -I${STAGING_DIR_TARGET}/usr/include/efi/$(ARCH) -I${STAGING_DIR_TARGET}/usr/include/efi/protocol
+ CPPFLAGS   = -DCONFIG_$(ARCH)
+ CFLAGS	   = -O2 -g $(ARCH3264) -fpic -Wall -fshort-wchar -fno-strict-aliasing -fno-merge-constants -fno-stack-protector -ffreestanding -fno-stack-check
+ LDFLAGS	   = -nostdlib
+ CRTOBJ		= crt0-efi-$(ARCH).o
+-CRTPATHS	= /lib /lib64 /lib/efi /lib64/efi /usr/lib /usr/lib64 /usr/lib/efi /usr/lib64/efi /usr/lib/gnuefi /usr/lib64/gnuefi
++CRTPATHS	= lib /lib64 /lib/efi /lib64/efi /usr/lib /usr/lib64 /usr/lib/efi /usr/lib64/efi /usr/lib/gnuefi /usr/lib64/gnuefi ${GNU_EFI_PATH}/aarch64/gnuefi
+ CRTPATH		= $(shell for f in $(CRTPATHS); do if [ -e $$f/$(CRTOBJ) ]; then echo $$f; break; fi; done)
+ CRTOBJS		= $(CRTPATH)/$(CRTOBJ)
+ # there's a bug in the gnu tools ... the .reloc section has to be
+ # aligned otherwise the file alignment gets screwed up
+-LDSCRIPT	= elf_$(ARCH)_efi.lds
+-LDFLAGS		+= -shared -Bsymbolic $(CRTOBJS) -L $(CRTPATH) -L /usr/lib -L /usr/lib64 -T $(LDSCRIPT)
+-LOADLIBES	= -lefi -lgnuefi $(shell $(CC) $(ARCH3264) -print-libgcc-file-name)
++LDSCRIPT	= ${GNU_EFI_PATH}/gnuefi/elf_$(ARCH)_efi.lds
++LDFLAGS		+= -shared -Bsymbolic $(CRTOBJS) -L $(CRTPATH) -L${GNU_EFI_PATH}/aarch64/lib -L ${STAGING_DIR_TARGET}/usr/lib -L ${STAGING_DIR_TARGET}/usr/lib64 -T $(LDSCRIPT)
++LOADLIBES	= -lefi -lgnuefi ${STAGING_DIR_TARGET}/usr/lib/aarch64-oe-linux/*/libgcc.a
+ FORMAT		= --target=efi-app-$(ARCH)
+-OBJCOPY		= objcopy
++OBJCOPY		=  ${TARGET_PREFIX}objcopy
+ MYGUID		= 11111111-2222-3333-4444-123456789abc
+ INSTALL		= install
+ BINDIR		= $(DESTDIR)/usr/bin
+diff --git a/Makefile b/Makefile
+index 7d471da..bc044e7 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,126 +1,17 @@
+-EFIFILES = HelloWorld.efi LockDown.efi Loader.efi ReadVars.efi UpdateVars.efi \
+-	KeyTool.efi HashTool.efi SetNull.efi ShimReplace.efi
+-BINARIES = cert-to-efi-sig-list sig-list-to-certs sign-efi-sig-list \
+-	hash-to-efi-sig-list efi-readvar efi-updatevar cert-to-efi-hash-list \
+-	flash-var
+-
+-ifeq ($(ARCH),x86_64)
+-EFIFILES += PreLoader.efi
+-endif
+-
+-MSGUID = 77FA9ABD-0359-4D32-BD60-28F4E78F784B
+-
+-KEYS = PK KEK DB
+-EXTRAKEYS = DB1 DB2
+-EXTERNALKEYS = ms-uefi ms-kek
+-
+-ALLKEYS = $(KEYS) $(EXTRAKEYS) $(EXTERNALKEYS)
+-
+-KEYAUTH = $(ALLKEYS:=.auth)
+-KEYUPDATEAUTH = $(ALLKEYS:=-update.auth) $(ALLKEYS:=-pkupdate.auth)
+-KEYBLACKLISTAUTH = $(ALLKEYS:=-blacklist.auth)
+-KEYHASHBLACKLISTAUTH = $(ALLKEYS:=-hash-blacklist.auth)
+-
+ export TOPDIR	:= $(shell pwd)/
+ 
+ include Make.rules
+ 
+-EFISIGNED = $(patsubst %.efi,%-signed.efi,$(EFIFILES))
+-
+-all: $(EFISIGNED) $(BINARIES) $(MANPAGES) noPK.auth $(KEYAUTH) \
+-	$(KEYUPDATEAUTH) $(KEYBLACKLISTAUTH) $(KEYHASHBLACKLISTAUTH)
+-
+-
+-install: all
+-	$(INSTALL) -m 755 -d $(MANDIR)
+-	$(INSTALL) -m 644 $(MANPAGES) $(MANDIR)
+-	$(INSTALL) -m 755 -d $(EFIDIR)
+-	$(INSTALL) -m 755 $(EFIFILES) $(EFIDIR)
+-	$(INSTALL) -m 755 -d $(BINDIR)
+-	$(INSTALL) -m 755 $(BINARIES) $(BINDIR)
+-	$(INSTALL) -m 755 mkusb.sh $(BINDIR)/efitool-mkusb
+-	$(INSTALL) -m 755 -d $(DOCDIR)
+-	$(INSTALL) -m 644 README COPYING $(DOCDIR)
++all: UpdateVars.efi
+ 
+ lib/lib.a lib/lib-efi.a: FORCE
+ 	$(MAKE) -C lib $(notdir $@)
+ 
+-lib/asn1/libasn1.a lib/asn1/libasn1-efi.a: FORCE
+-	$(MAKE) -C lib/asn1 $(notdir $@)
+-
+-.SUFFIXES: .crt
+-
+-.KEEP: PK.crt KEK.crt DB.crt PK.key KEK.key DB.key PK.esl DB.esl KEK.esl \
+-	$(EFIFILES)
+-
+-LockDown.o: PK.h KEK.h DB.h
+-PreLoader.o: hashlist.h
+-
+-PK.h: PK.auth
+-
+-KEK.h: KEK.auth
+-
+-DB.h: DB.auth
+-
+-noPK.esl:
+-	> noPK.esl
+-
+-noPK.auth: noPK.esl PK.crt sign-efi-sig-list
+-	./sign-efi-sig-list -t "$(shell date --date='1 second' +'%Y-%m-%d %H:%M:%S')" -c PK.crt -k PK.key PK $< $@
+-
+-ms-%.esl: ms-%.crt cert-to-efi-sig-list
+-	./cert-to-efi-sig-list -g $(MSGUID) $< $@
+-
+-hashlist.h: HashTool.hash
+-	cat $^ > /tmp/tmp.hash
+-	./xxdi.pl /tmp/tmp.hash > $@
+-	rm -f /tmp/tmp.hash
+-
+-
+-Loader.so: lib/lib-efi.a
+-ReadVars.so: lib/lib-efi.a lib/asn1/libasn1-efi.a
+ UpdateVars.so: lib/lib-efi.a
+-LockDown.so: lib/lib-efi.a
+-KeyTool.so: lib/lib-efi.a lib/asn1/libasn1-efi.a
+-HashTool.so: lib/lib-efi.a
+-PreLoader.so: lib/lib-efi.a
+-HelloWorld.so: lib/lib-efi.a
+-ShimReplace.so: lib/lib-efi.a
+-
+-cert-to-efi-sig-list: cert-to-efi-sig-list.o lib/lib.a
+-	$(CC) $(ARCH3264) -o $@ $< lib/lib.a -lcrypto
+-
+-sig-list-to-certs: sig-list-to-certs.o lib/lib.a
+-	$(CC) $(ARCH3264) -o $@ $< lib/lib.a -lcrypto
+-
+-sign-efi-sig-list: sign-efi-sig-list.o lib/lib.a
+-	$(CC) $(ARCH3264) -o $@ $< lib/lib.a -lcrypto
+-
+-hash-to-efi-sig-list: hash-to-efi-sig-list.o lib/lib.a
+-	$(CC) $(ARCH3264) -o $@ $< lib/lib.a
+-
+-cert-to-efi-hash-list: cert-to-efi-hash-list.o lib/lib.a
+-	$(CC) $(ARCH3264) -o $@ $< lib/lib.a -lcrypto
+-
+-efi-keytool: efi-keytool.o lib/lib.a
+-	$(CC) $(ARCH3264) -o $@ $< lib/lib.a
+-
+-efi-readvar: efi-readvar.o lib/lib.a
+-	$(CC) $(ARCH3264) -o $@ $< lib/lib.a -lcrypto
+-
+-efi-updatevar: efi-updatevar.o lib/lib.a
+-	$(CC) $(ARCH3264) -o $@ $< lib/lib.a -lcrypto
+-
+-flash-var: flash-var.o lib/lib.a
+-	$(CC) $(ARCH3264) -o $@ $< lib/lib.a
+ 
+ clean:
+-	rm -f PK.* KEK.* DB.* $(EFIFILES) $(EFISIGNED) $(BINARIES) *.o *.so
+-	rm -f noPK.*
+-	rm -f doc/*.1
++	rm -f  *.o *.so
+ 	$(MAKE) -C lib clean
+-	$(MAKE) -C lib/asn1 clean
+-
+ FORCE:
+ 
+ 
+diff --git a/UpdateVars.c b/UpdateVars.c
+index 2d21563..ebdd56d 100644
+--- a/UpdateVars.c
++++ b/UpdateVars.c
+@@ -16,6 +16,8 @@
+ #include <shell.h>
+ #include "efiauthenticated.h"
+ 
++#define ARRAY_SIZE(a) (sizeof (a) / sizeof ((a)[0]))
++
+ EFI_STATUS
+ efi_main (EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
+ {
+@@ -26,18 +28,13 @@ efi_main (EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
+ 	void *buf;
+ 	UINTN size, options = 0;
+ 	EFI_GUID *owner;
+-	CHAR16 **variables;
+-	EFI_GUID **owners;
++        CHAR16 *variables[] = { L"PK", L"KEK", L"db", L"dbx", L"MokList" };
++	EFI_GUID *owners[] = { &GV_GUID, &GV_GUID, &SIG_DB, &SIG_DB,
++			       &MOK_OWNER };
+ 
+ 	InitializeLib(image, systab);
+ 
+-	if (GetOSIndications() & EFI_OS_INDICATIONS_TIMESTAMP_REVOCATION) {
+-		variables = (CHAR16 *[]){ L"PK", L"KEK", L"db", L"dbx", L"dbt", L"MokList" , NULL};
+-		owners = (EFI_GUID *[]){ &GV_GUID, &GV_GUID, &SIG_DB, &SIG_DB, &SIG_DB, &MOK_OWNER };
+-	} else {
+-		variables = (CHAR16 *[]){ L"PK", L"KEK", L"db", L"dbx", L"MokList" , NULL};
+-		owners = (EFI_GUID *[]){ &GV_GUID, &GV_GUID, &SIG_DB, &SIG_DB, &MOK_OWNER };
+-	}
++
+ 
+ 	status = argsplit(image, &argc, &ARGV);
+ 
+@@ -79,15 +76,17 @@ efi_main (EFI_HANDLE image, EFI_SYSTEM_TABLE *systab)
+ 	var = ARGV[1];
+ 	name = ARGV[2];
+ 
+-	for(i = 0; variables[i] != NULL; i++) {
+-		if (StrCmp(var, variables[i]) == 0) {
++	for(i = 0; i < ARRAY_SIZE(variables); i++) {
++	if (StrCmp(var, variables[i]) == 0) {
+ 			owner = owners[i];
+ 			break;
+ 		}
+ 	}
+-	if (variables[i] == NULL) {
++        if (i == ARRAY_SIZE(variables)) {
++	//if (variables[i] == NULL) {
+ 		Print(L"Invalid Variable %s\nVariable must be one of: ", var);
+-		for (i = 0; variables[i] != NULL; i++)
++                for (i = 0; i < ARRAY_SIZE(variables); i++)
++		//for (i = 0; variables[i] != NULL; i++)
+ 			Print(L"%s ", variables[i]);
+ 		Print(L"\n");
+ 		return EFI_INVALID_PARAMETER;
+diff --git a/lib/console.c b/lib/console.c
+index 9c10560..dd47794 100644
+--- a/lib/console.c
++++ b/lib/console.c
+@@ -3,8 +3,8 @@
+  *
+  * see COPYING file
+  */
+-#include <efi/efi.h>
+-#include <efi/efilib.h>
++#include <efi.h>
++#include <efilib.h>
+ 
+ #include <console.h>
+ #include <errors.h>
+diff --git a/lib/sha256.c b/lib/sha256.c
+index 180fa16..43cd7f6 100644
+--- a/lib/sha256.c
++++ b/lib/sha256.c
+@@ -18,8 +18,8 @@
+  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  */
+ 
+-#include <efi/efi.h>
+-#include <efi/efilib.h>
++#include <efi.h>
++#include <efilib.h>
+ #ifdef CONFIG_arm
+ #ifndef BUILD_EFI
+ /* FIXME:
+-- 
+2.25.1
+

@@ -20,6 +20,7 @@ IMAGE_INSTALL = "packagegroup-core-boot \
 EXTRA_IMAGEDEPENDS += "bsa-acs \
                        shell-app \
                        uefi-apps \
+                       update-vars \
                        ebbr-sct \
                        bootfs-files \
 "
@@ -32,6 +33,7 @@ IMAGE_EFI_BOOT_FILES += "Bsa.efi;EFI/BOOT/bsa/Bsa.efi \
                          sie_startup.nsh;EFI/BOOT/sie_startup.nsh \
                          sie_SctStartup.nsh;EFI/BOOT/bbr/sie_SctStartup.nsh \
                          CapsuleApp.efi;EFI/BOOT/app/CapsuleApp.efi \
+                         UpdateVars.efi;EFI/BOOT/app/UpdateVars.efi \
                          Shell.efi;EFI/BOOT/Shell.efi \
 "
 
@@ -54,9 +56,8 @@ do_sign_images() {
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/Shell.efi --output DO_SIGN/EFI/BOOT/Shell.efi
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/bootaa64.efi --output DO_SIGN/EFI/BOOT/bootaa64.efi
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/app/CapsuleApp.efi --output DO_SIGN/EFI/BOOT/app/CapsuleApp.efi
+    sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/app/UpdateVars.efi --output DO_SIGN/EFI/BOOT/app/UpdateVars.efi
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/Image --output DO_SIGN/Image
-
-    #TO DO: Should the file system be signed?
 
     echo "Signing images complete."
     wic cp DO_SIGN/EFI ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
@@ -140,6 +141,7 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         process-schema \
                         dmidecode \
                         efibootmgr \
+
                         ethtool \
                         tree \
                         util-linux \
