@@ -55,7 +55,7 @@ for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         cd app_output
         for %q in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             if exist FS%q:\EFI\BOOT\app\CapsuleApp.efi then
-                echo "Running CapsuleApp"
+                echo "Running CapsuleApp "
                 FS%q:\EFI\BOOT\app\CapsuleApp.efi -P > CapsuleApp_FMP_protocol_info.log
                 FS%q:\EFI\BOOT\app\CapsuleApp.efi -E > CapsuleApp_ESRT_table_info.log
                 goto DoneApp
@@ -85,6 +85,7 @@ for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 
 :Donebsa
+echo "Booting Linux"
 for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%l:\Image and exist FS%l:\ramdisk-buildroot.img then
         FS%l:

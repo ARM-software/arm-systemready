@@ -40,13 +40,14 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         endif
         #BSA_VERSION_PRINT_PLACEHOLDER
         if exist FS%i:\EFI\BOOT\bsa\Bsa.efi then
-            echo Press any key to start BSA in verbose mode. If no key is pressed then BSA will be run in normal mode
+            echo "Press any key to start BSA in verbose mode."
+            echo "If no key is pressed then BSA will be run in normal mode"
             FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
             if %lasterror% == 0 then
                 if exist FS%i:\acs_results\uefi\BsaVerboseResults.log then
-                    echo BSA ACS in verbose mode is already run.
-                    echo Press any key to start BSA ACS execution from the beginning.
-                    echo WARNING: Ensure you have backed up the existing logs.
+                    echo "BSA ACS in verbose mode is already run."
+                    echo "Press any key to start BSA ACS execution from the beginning."
+                    echo "WARNING: Ensure you have backed up the existing logs."
                     FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
                     if %lasterror% == 0 then
                         #Backup the existing logs
@@ -58,7 +59,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                     goto BsaNormalRun
                 endif
 :BsaVerboseRun
-                echo "running BSA in verbose mode"
+                echo "Running BSA in verbose mode"
                 FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -sbsa -skip 900 -f BsaVerboseTempResults.log
                 stall 200000
                 if exist FS%i:\acs_results\uefi\BsaVerboseTempResults.log then
@@ -75,9 +76,9 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             endif
 :BsaNormalRun
             if exist FS%i:\acs_results\uefi\BsaResults.log then
-                echo BSA ACS is already run.
-                echo Press any key to start BSA ACS execution from the beginning.
-                echo WARNING: Ensure you have backed up the existing logs.
+                echo "BSA ACS is already run."
+                echo "Press any key to start BSA ACS execution from the beginning."
+                echo "WARNING: Ensure you have backed up the existing logs."
                 FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
                 if %lasterror% == 0 then
                     #Backup the existing logs
@@ -111,9 +112,9 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
             if %lasterror% == 0 then
                 if exist FS%i:\acs_results\uefi\SbsaVerboseResults.log then
-                    echo SBSA ACS in verbose mode is already run.
-                    echo Press any key to start SBSA ACS execution from the beginning.
-                    echo WARNING: Ensure you have backed up the existing logs.
+                    echo "SBSA ACS in verbose mode is already run."
+                    echo "Press any key to start SBSA ACS execution from the beginning."
+                    echo "WARNING: Ensure you have backed up the existing logs."
                     FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
                     if %lasterror% == 0 then
                         #Backup the existing logs
@@ -125,7 +126,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                     goto SbsaNormalMode
                 endif
 :SbsaVerboseRun
-                echo "running SBSA in verbose mode"
+                echo "Running SBSA in verbose mode"
                 FS%i:\EFI\BOOT\bsa\sbsa\Sbsa.efi -v 1 -skip 900 -f SbsaVerboseTempResults.log
                 stall 200000
                 if exist FS%i:\acs_results\uefi\SbsaVerboseTempResults.log then
@@ -142,9 +143,9 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             endif
 :SbsaNormalMode
             if exist FS%i:\acs_results\uefi\SbsaResults.log then
-                echo SBSA ACS is already run.
-                echo Press any key to start SBSA ACS execution from the beginning.
-                echo WARNING: Ensure you have backed up the existing logs.
+                echo "SBSA ACS is already run."
+                echo "Press any key to start SBSA ACS execution from the beginning."
+                echo "WARNING: Ensure you have backed up the existing logs."
                 FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
                 if %lasterror% == 0 then
                     #Backup the existing logs
