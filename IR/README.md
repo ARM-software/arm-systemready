@@ -124,6 +124,10 @@ Launch model with below command
 ```
 <path to qemu-system-aarch64> -bios <path to nor_flash.bin>  -drive file=<path to ir_acs_live_image.img>,if=virtio,format=raw  -cpu cortex-a57 -smp 2 -m 2048 -M virt,secure=on -monitor null -no-acpi -nodefaults -nographic -rtc base=utc,clock=host -serial stdio -d unimp,guest_errors -machine virtualization=on
 ```
+
+Note:
+When verifiying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
+
 ### Automation
 The test suite execution can be automated or manual. Automated execution is the default execution method when no key is pressed during boot. <br />
 The live image boots to UEFI Shell. The different test applications can be run in the following order:

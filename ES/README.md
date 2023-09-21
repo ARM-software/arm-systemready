@@ -119,6 +119,8 @@ The execution will continue from the test that is next in sequence of the test p
 2. It may appear that the test execution has stalled with the message “Waiting for few seconds for signal …” displayed on the console.
 This is expected behavior and the forward progress of tests will continue after a 20-minute delay.
 
+Note:
+When verifiying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
 
 ### Automation
 The test suite execution can be automated or manual. Automated execution is the default execution method when no key is pressed during boot. <br />
