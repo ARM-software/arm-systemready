@@ -53,8 +53,7 @@ NUM_CPUS=$((`getconf _NPROCESSORS_ONLN` + 2))
 export GCC5_AARCH64_PREFIX=<set compiler prefix path for aarch64-linux-gnu->
 build -n $NUM_CPUS -a AARCH64 -t GCC5 -p ArmVirtPkg/ArmVirtQemu.dsc -b RELEASE -D TTY_TERMINAL -D SECURE_BOOT_ENABLE -D TPM2_ENABLE -D TTY_TERMINAL all
 ```
-NOTE: Download the toolchain from [tool chain](https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/aarch64-linux-gnu/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz) <br />
-
+NOTE: Download GCC-ARM 10.3 or later toolchain from [here](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads). <br />
 3. Create the required flash images
 ```
 #uefi firmware image

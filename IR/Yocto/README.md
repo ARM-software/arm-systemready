@@ -72,6 +72,8 @@ This image comprises of two FAT file system partitions recognized by UEFI: <br /
 
 ## Verification
 
+Note: The default UEFI EDK2 setting for "Console Preference" is "Graphical". In this default setting, the Linux output goes only to the graphical console (HDMI monitor). To force serial console output, you may change "Console Preference" to "Serial".
+
 ### Verification of the IR image on QEMU Arm machine
 
 #### Building the firmware and QEMU
@@ -125,6 +127,9 @@ Launch the model using the following command:
     -serial stdio \
     -smp 2
 ```
+
+Note:
+When verifiying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
 
 ### Automation
 The test suite execution can be automated or manual. Automated execution is the default execution method when no key is pressed during boot. <br />
