@@ -37,7 +37,7 @@ for %q in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         cd FS%q:\EFI\BOOT\app
         echo "Printing SecureBoot state"
         setvar SecureBoot
-        echo ""
+        echo " "
         setvar SecureBoot > secure.state
         echo "00" >v secure_boot_on
         parse secure.state 01 1 -s 0  >v secure_boot_on
@@ -48,26 +48,26 @@ for %q in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         #The state is normal. Attempt to provision secureboot keys
         echo "The System is in normal mode"
         echo "Provisioning the SecureBoot keys..."
-        echo ""
+        echo " "
         UpdateVars db TestDB1.auth
         UpdateVars dbx TestDBX1.auth
         UpdateVars KEK TestKEK1.auth
         UpdateVars PK TestPK1.auth
         echo "Printing SecureBoot state"
         setvar SecureBoot
-        echo ""
+        echo " "
         setvar SecureBoot > new_secure.state
         echo "00" >v new_secure_boot_on
         parse new_secure.state 01 1 -s 0  >v new_secure_boot_on
         if %new_secure_boot_on% == 01 then
             echo "Automatic provision of secureboot keys is success."
             echo "The System is now in SecureBoot mode"
-            echo ""
+            echo " "
             goto StartTest
         else
             echo "Automatic provision of secureboot keys is failed."
             echo "Provision the secureboot keys manually and choose this option again in the grub menu"
-            echo ""
+            echo " "
             echo "The system will reset in 20 seconds"
             #Stall for 20 seconds
             stall 2000000

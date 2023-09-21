@@ -138,6 +138,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  # remove color characters from log and save
  awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results/linux_tools/ethtool-test.log
 
+ # run read_blk_devices.py, parse block devices, and perform read if partition doesn't belond
+ # in precious partitions
+ python3 /bin/read_blk_devices.py | tee /mnt/acs_results/linux_tools/read_blk_devices.log
 else
  echo ""
  echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"

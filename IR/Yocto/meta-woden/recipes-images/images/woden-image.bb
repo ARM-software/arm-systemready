@@ -14,6 +14,8 @@ IMAGE_INSTALL = "packagegroup-core-boot \
                  tpm2-tools \
                  tpm2-abrmd \
                  rng-tools \
+                 gptfdisk \
+                 coreutils \
                  ${CORE_IMAGE_EXTRA_INSTALL} \
 "
 

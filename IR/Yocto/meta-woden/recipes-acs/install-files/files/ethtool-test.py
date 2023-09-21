@@ -19,6 +19,7 @@
 
 import subprocess
 import re
+import time
 
 def print_color(text, color="default"):
     colors = {
@@ -65,8 +66,45 @@ if __name__ == "__main__":
             for index, intrf in enumerate(ether_interfaces):
                 print_color(f"{index}: {intrf}", "yellow")
 
+        # bring down all ethernet devices
+        print_color("\nINFO: Bringing down all ethernet interfaces using ifconfig", "green")
+        for intrf in ether_interfaces:
+            command = f"ifconfig {intrf} down"
+            print(command)
+            result_down= subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+
+            if result_down.returncode != 0:
+                print_color(f"INFO: Unable to bring down ethernet interface {intrf} using ifconfig, Exiting ...", "red")
+                exit(1)
+
         print("\n****************************************************************\n")
+        previous_eth_intrf = ""
         for index, intrf in enumerate(ether_interfaces):
+
+            if previous_eth_intrf != "":
+                # bring down current ethernet interface
+                print_color(f"\nINFO: Bringing down ethernet interface: {previous_eth_intrf}", "green")
+                command = f"ifconfig {previous_eth_intrf} down"
+                result_down= subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+                time.sleep(10)
+                if result_down.returncode != 0:
+                    print_color(f"INFO: Unable to bring down ethernet interface {previous_eth_intrf} using ifconfig", "red")
+                    print_color(f"INFO: Exiting the tool...", "red")
+
+            # update previous_eth_intrf with current intrf for next iteration
+            previous_eth_intrf = intrf
+
+
+            # bring up current ethernet interface
+            print_color(f"\nINFO: Bringing up ethernet interface: {intrf}", "green")
+            command = f"ifconfig {intrf} up"
+            result_up= subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+            time.sleep(10)
+            if result_up.returncode != 0:
+                print_color(f"INFO: Unable to bring up ethernet interface {intrf} using ifconfig", "red")
+                continue
+                print("\n****************************************************************\n")
+
             # Dump ethtool prints for each ethernet interface reported
             print_color(f"INFO: Running \"ethtool {intrf} \" :", "green")
             command = f"ethtool {intrf}"
@@ -91,6 +129,7 @@ if __name__ == "__main__":
             if "Link detected: yes" not in result_ethdump.stdout:
                 print_color(f"INFO: Link not detected for {intrf}", "red")
                 continue
+                print("\n****************************************************************\n")
             else:
                 print_color(f"INFO: Link detected on {intrf}", "green")
 
@@ -103,6 +142,7 @@ if __name__ == "__main__":
             if "dynamic" not in result_dhcp.stdout:
                 print_color(f"INFO: {intrf} doesn't support DHCP", "red")
                 continue
+                print("\n****************************************************************\n")
             else:
                 print_color(f"INFO: {intrf} support DHCP", "green")
 
@@ -122,6 +162,7 @@ if __name__ == "__main__":
             else:
                 print_color(f"INFO: Unable to find Router/Gateway IP for {intrf}", "red")
                 continue
+                print("\n****************************************************************\n")
 
             command = f"ping -w 1000 -c 3 -I {intrf} {ip_address}"
             print_color(f"INFO: Running {command} :", "green")
@@ -133,6 +174,7 @@ if __name__ == "__main__":
             if result_ping.returncode != 0 and "100% packet loss" in result_ping.stdout:
                 print_color(f"INFO: Failed to ping router/gateway[{ip_address}] for {intrf}", "red")
                 continue
+                print("\n****************************************************************\n")
             else:
                 print_color(f"INFO: Ping to router/gateway[{ip_address}] for {intrf} is successful", "green")
 
