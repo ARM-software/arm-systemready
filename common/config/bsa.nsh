@@ -40,13 +40,14 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         endif
         #BSA_VERSION_PRINT_PLACEHOLDER
         if exist FS%i:\EFI\BOOT\bsa\Bsa.efi then
-            echo Press any key to start BSA in verbose mode. If no key is pressed then BSA will be run in normal mode
+            echo "Press any key to start BSA in verbose mode."
+            echo "If no key is pressed then BSA will be run in normal mode"
             FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
             if %lasterror% == 0 then
                 if exist FS%i:\acs_results\uefi\BsaVerboseResults.log then
-                    echo BSA ACS in verbose mode is already run.
-                    echo Press any key to start BSA ACS in verbose mode execution from the beginning.
-                    echo WARNING: Ensure you have backed up the existing logs.
+                    echo "BSA ACS in verbose mode is already run."
+                    echo "Press any key to start BSA ACS in verbose mode execution from the beginning."
+                    echo "WARNING: Ensure you have backed up the existing logs."
                     FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
                     if %lasterror% == 0 then
                         #Backup the existing logs
@@ -58,11 +59,20 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                     goto BsaNormalRun
                 endif
 :BsaVerboseRun
-                echo "running BSA in verbose mode"
-                FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -sbsa -skip 900 -f BsaVerboseTempResults.log
+                echo "Running BSA in verbose mode"
+                if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
+                    #Executing for BSA IR. Execute only OS tests
+                    FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -os -skip 900 -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
+                else
+                   FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -sbsa -skip 900 -f BsaVerboseTempResults.log
+                endif
                 stall 200000
                 if exist FS%i:\acs_results\uefi\BsaVerboseTempResults.log then
-                    echo " SystemReady SR ACS v2.0.0_BETA-0" > BsaVerboseResults.log
+                    if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
+                        echo " SystemReady IR ACS v2.0.0" > BsaVerboseResults.log
+                    else
+                        echo " SystemReady ES ACS v1.3.0" > BsaVerboseResults.log
+                    endif
                     stall 200000
                     type BsaVerboseTempResults.log >> BsaVerboseResults.log
                     cp BsaVerboseTempResults.log temp/
@@ -74,9 +84,9 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             endif
 :BsaNormalRun
             if exist FS%i:\acs_results\uefi\BsaResults.log then
-                echo BSA ACS is already run.
-                echo Press any key to start BSA ACS execution from the beginning.
-                echo WARNING: Ensure you have backed up the existing logs.
+                echo "BSA ACS is already run."
+                echo "Press any key to start BSA ACS execution from the beginning."
+                echo "WARNING: Ensure you have backed up the existing logs."
                 FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
                 if %lasterror% == 0 then
                     #Backup the existing logs
@@ -88,10 +98,19 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 goto Done
             endif
 :BsaRun
-            FS%i:\EFI\BOOT\bsa\Bsa.efi -sbsa -skip 900 -f BsaTempResults.log
+            if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
+               #Executing for BSA IR. Execute only OS tests
+               FS%i:\EFI\BOOT\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaTempResults.log
+            else
+               FS%i:\EFI\BOOT\bsa\Bsa.efi -sbsa -skip 900 -f BsaTempResults.log
+            endif
             stall 200000
             if exist FS%i:\acs_results\uefi\BsaTempResults.log then
-                echo " SystemReady SR ACS v2.0.0_BETA-0" > BsaResults.log
+                if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
+                    echo " SystemReady IR ACS v2.0.0" > BsaResults.log
+                else
+                    echo " SystemReady ES ACS v1.2.0" > BsaResults.log
+                endif
                 stall 200000
                 type BsaTempResults.log >> BsaResults.log
                 cp BsaTempResults.log temp/
