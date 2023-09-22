@@ -102,8 +102,8 @@ if __name__ == "__main__":
             time.sleep(10)
             if result_up.returncode != 0:
                 print_color(f"INFO: Unable to bring up ethernet interface {intrf} using ifconfig", "red")
-                continue
                 print("\n****************************************************************\n")
+                continue
 
             # Dump ethtool prints for each ethernet interface reported
             print_color(f"INFO: Running \"ethtool {intrf} \" :", "green")
@@ -128,8 +128,8 @@ if __name__ == "__main__":
             # don't continue testing if link not detected using ethtool
             if "Link detected: yes" not in result_ethdump.stdout:
                 print_color(f"INFO: Link not detected for {intrf}", "red")
-                continue
                 print("\n****************************************************************\n")
+                continue
             else:
                 print_color(f"INFO: Link detected on {intrf}", "green")
 
@@ -141,8 +141,8 @@ if __name__ == "__main__":
             print(result_dhcp.stderr)
             if "dynamic" not in result_dhcp.stdout:
                 print_color(f"INFO: {intrf} doesn't support DHCP", "red")
-                continue
                 print("\n****************************************************************\n")
+                continue
             else:
                 print_color(f"INFO: {intrf} support DHCP", "green")
 
@@ -161,8 +161,8 @@ if __name__ == "__main__":
                 print_color(f"INFO: Router/Gateway IP for {intrf} : {ip_address}", "green")
             else:
                 print_color(f"INFO: Unable to find Router/Gateway IP for {intrf}", "red")
-                continue
                 print("\n****************************************************************\n")
+                continue
 
             command = f"ping -w 1000 -c 3 -I {intrf} {ip_address}"
             print_color(f"INFO: Running {command} :", "green")
@@ -173,8 +173,8 @@ if __name__ == "__main__":
             # skip other tests if ping doesn't work
             if result_ping.returncode != 0 and "100% packet loss" in result_ping.stdout:
                 print_color(f"INFO: Failed to ping router/gateway[{ip_address}] for {intrf}", "red")
-                continue
                 print("\n****************************************************************\n")
+                continue
             else:
                 print_color(f"INFO: Ping to router/gateway[{ip_address}] for {intrf} is successful", "green")
 
