@@ -64,7 +64,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                     #Executing for BSA IR. Execute only OS tests
                     FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -os -skip 900 -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
                 else
-                   FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -sbsa -skip 900 -f BsaVerboseTempResults.log
+                   FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -skip 900 -f BsaVerboseTempResults.log
                 endif
                 stall 200000
                 if exist FS%i:\acs_results\uefi\BsaVerboseTempResults.log then
@@ -102,7 +102,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                #Executing for BSA IR. Execute only OS tests
                FS%i:\EFI\BOOT\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaTempResults.log
             else
-               FS%i:\EFI\BOOT\bsa\Bsa.efi -sbsa -skip 900 -f BsaTempResults.log
+               FS%i:\EFI\BOOT\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
             endif
             stall 200000
             if exist FS%i:\acs_results\uefi\BsaTempResults.log then
