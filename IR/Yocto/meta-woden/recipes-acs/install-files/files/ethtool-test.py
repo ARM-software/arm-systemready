@@ -86,7 +86,7 @@ if __name__ == "__main__":
                 print_color(f"\nINFO: Bringing down ethernet interface: {previous_eth_intrf}", "green")
                 command = f"ifconfig {previous_eth_intrf} down"
                 result_down= subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
-                time.sleep(10)
+                time.sleep(20)
                 if result_down.returncode != 0:
                     print_color(f"INFO: Unable to bring down ethernet interface {previous_eth_intrf} using ifconfig", "red")
                     print_color(f"INFO: Exiting the tool...", "red")
@@ -99,7 +99,7 @@ if __name__ == "__main__":
             print_color(f"\nINFO: Bringing up ethernet interface: {intrf}", "green")
             command = f"ifconfig {intrf} up"
             result_up= subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
-            time.sleep(10)
+            time.sleep(20)
             if result_up.returncode != 0:
                 print_color(f"INFO: Unable to bring up ethernet interface {intrf} using ifconfig", "red")
                 print("\n****************************************************************\n")
@@ -164,7 +164,13 @@ if __name__ == "__main__":
                 print("\n****************************************************************\n")
                 continue
 
-            command = f"ping -w 1000 -c 3 -I {intrf} {ip_address}"
+            # making sure link is up before ping test
+            command = f"ifconfig {intrf} up"
+            print_color(f"INFO: Running {command} :", "green")
+            result_ping = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+            time.sleep(20)
+
+            command = f"ping -w 10000 -c 3 -I {intrf} {ip_address}"
             print_color(f"INFO: Running {command} :", "green")
             result_ping = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
             print(result_ping.stdout)
@@ -179,7 +185,7 @@ if __name__ == "__main__":
                 print_color(f"INFO: Ping to router/gateway[{ip_address}] for {intrf} is successful", "green")
 
             # ping www.arm.com to check whether DNS is working
-            command = f"ping -w 1000 -c 3 -I {intrf} www.arm.com"
+            command = f"ping -w 10000 -c 3 -I {intrf} www.arm.com"
             print_color(f"INFO: Running {command} :", "green")
             result_ping = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
             print(result_ping.stdout)
