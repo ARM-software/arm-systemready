@@ -139,6 +139,9 @@ Now SIE ACS is integrated with SR ACS image, which can be accessed through GRUB 
 
 For the verification steps of SIE ACS on QEMU with TPM support, refer to the [SIE ACS Verification](../common/docs/SIE_ACS_Verification.md).
 
+### Running Server Base Manageability Requirements (SBMR) ACS
+SBMR ACS in band tests are built into SR ACS Image, which can be accessed through GRUB option "Server Base Manageability Requirements (SBMR) ACS In-Band tests (optional)"
+
 ## Baselines for Open Source Software in this release:
 
 - [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v22.11.00

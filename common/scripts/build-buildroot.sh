@@ -71,6 +71,7 @@ do_build ()
     mkdir -p root_fs_overlay/bin
     mkdir -p root_fs_overlay/lib/modules
     mkdir -p root_fs_overlay/usr/bin
+    mkdir -p root_fs_overlay/usr/bin/sbmr-acs
 
     cp -r $TOP_DIR/edk2-test-parser root_fs_overlay/usr/bin/ 
     cp  $TOP_DIR/ramdisk/linux-bsa/bsa root_fs_overlay/bin/
@@ -80,6 +81,7 @@ do_build ()
     chmod +x root_fs_overlay/usr/bin/secure_init.sh
     cp  $TOP_DIR/bbr-acs/bbsr/config/bbsr_fwts_tests.ini root_fs_overlay/bin/
     cp  $TOP_DIR/../../common/config/verify_tpm_measurements.py root_fs_overlay/bin/
+    tar -xf $TOP_DIR/sbmr-acs/sbmr-acs_master.tar.gz -C root_fs_overlay/usr/bin/sbmr-acs
 
     if [ $BAND == "IR" ]; then
         cp  $TOP_DIR/bbr-acs/ebbr/config/ir_bbr_fwts_tests.ini root_fs_overlay/bin/

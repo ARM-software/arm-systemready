@@ -47,6 +47,10 @@ get_linux_src()
 {
     echo "Downloading Linux source code. Version : $LINUX_KERNEL_VERSION"
     git clone --depth 1 --branch v$LINUX_KERNEL_VERSION https://github.com/torvalds/linux.git linux-${LINUX_KERNEL_VERSION}
+    pushd $TOP_DIR/linux-$LINUX_KERNEL_VERSION
+    echo "Applying Linux defconfig..."
+    cp $TOP_DIR/../../common/config/buildroot/kernel.config arch/arm64/configs/defconfig
+    popd
 }
 
 get_busybox_src()
@@ -218,6 +222,15 @@ get_bbr_acs_src()
     fi
 }
 
+get_sbmr_acs_src()
+{
+    echo "Downloading sbmr-acs source code."
+    git clone --depth 1 https://github.com/ARM-software/sbmr-acs sbmr-acs
+    pushd $TOP_DIR/sbmr-acs
+        git archive --format=tar.gz -o sbmr-acs_master.tar.gz master
+    popd
+}
+
 get_buildroot_src()
 {
     echo "Downloading Buildroot source code. TAG : $BUILDROOT_SRC_VERSION"
@@ -226,6 +239,10 @@ get_buildroot_src()
         echo "Applying Buildroot FWTS patch..."
         git apply $TOP_DIR/../../common/patches/build_fwts_version_23.07.00.patch
         git apply $TOP_DIR/../../common/patches/fwts_last_attempt_status.patch
+    popd
+    pushd $TOP_DIR/buildroot
+        echo "Applying Buildroot SBMR-ACS patch..."
+        git apply $TOP_DIR/../../common/patches/build_sbmr_acs.patch
     popd
 }
 
@@ -295,3 +312,4 @@ get_sct_src
 get_grub_src
 get_linux_src
 get_linux-acs_src
+get_sbmr_acs_src
