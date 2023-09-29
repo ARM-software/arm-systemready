@@ -1,3 +1,19 @@
+v23.09_SR_REL2.0.0_ES_REL1.3.0_IR_REL2.1.0
+**SystemReady SR ES IR**
+* Upgraded Linux kernel version to v6.4
+* Integration of edk2-test parser in the ACS image automation
+* BSA/SBSA : Test Bug Fixes & Enhancements
+* BSA/SBSA : Reference Documents for PCIe Exerciser
+* FWTS version upgraded to v23.07.00.
+* ES/SR : New LinuxBoot in grub with SetVirtualAddressMap enabled
+* ES/SR : Automatic running of SCRT Test suites
+* IR : Upgraded Yocto to Mickledore version
+* IR : Provision SecureBoot keys automatically
+* IR : ACS Integration for ability of boot sources supported by the Vendor
+* IR : ACS verification for coverage on boot and install devices enabled peripherals as per DT
+* IR : Device tree phase 2 update integration: Updated dt-validate and related scripts
+* IR : Automatic DHCP enable, ethtool and pin testing in the ACS Linux environment.
+
 v23.03_IR_2.0.0
 **SystemReady IR**
 * Upgraded Linux kernel to version 6.0
