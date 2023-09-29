@@ -8,7 +8,7 @@ The Security Interface Extension ACS tests the following security related interf
 * Secure firmware update using update capsules
 * For systems with Trusted Platform Modules(TPMs), TPM measured boot and the TCG2 protocol
 
-# Running SIE ACS on QEMU (virt) with TPM support
+# Running SIE ACS
 
 The Prebuilt SR/ES/IR band images can now be used to verify the requirements of SIE from this release, as they are integrated with the SIE ACS.
 
@@ -63,7 +63,7 @@ truncate -s 64M flash0.img
 truncate -s 64M flash1.img
 ```
 
-## Running SIE ACS with Prebuilt SystemReady band images on QEMU -Virt model
+## Running SIE ACS with Prebuilt SystemReady band images on QEMU
 1. Create a script "run_qemu.sh" as below with variables configured as per your environment:
 
 ```

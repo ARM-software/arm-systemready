@@ -70,7 +70,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  echo "Executing FWTS for EBBR"
  test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
  echo "Test Executed are $test_list"
- echo $'SystemReady IR ACS v2.0.0 \nFWTS v23.01.00' > /mnt/acs_results/fwts/FWTSResults.log
+ echo $'SystemReady IR ACS v2.1.0 \nFWTS v23.07.00' > /mnt/acs_results/fwts/FWTSResults.log
  /usr/bin/fwts --ebbr `echo $test_list` -r /mnt/acs_results/fwts/FWTSResults.log
  echo -e -n "\n"
  
@@ -79,7 +79,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  echo "Loading BSA ACS Linux Driver"
  insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
  echo "Executing BSA ACS Application "
- echo $'SystemReady IR ACS v2.0.0 \nBSA v1.0.4' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+ echo $'SystemReady IR ACS v2.1.0 \nBSA v1.0.6' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
  bsa >> /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
  dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
  

@@ -69,7 +69,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 stall 200000
                 if exist FS%i:\acs_results\uefi\BsaVerboseTempResults.log then
                     if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
-                        echo " SystemReady IR ACS v2.0.0" > BsaVerboseResults.log
+                        echo " SystemReady IR ACS v2.1.0" > BsaVerboseResults.log
                     else
                         echo " SystemReady ES ACS v1.3.0" > BsaVerboseResults.log
                     endif
@@ -107,9 +107,9 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             stall 200000
             if exist FS%i:\acs_results\uefi\BsaTempResults.log then
                 if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
-                    echo " SystemReady IR ACS v2.0.0" > BsaResults.log
+                    echo " SystemReady IR ACS v2.1.0" > BsaResults.log
                 else
-                    echo " SystemReady ES ACS v1.2.0" > BsaResults.log
+                    echo " SystemReady ES ACS v1.3.0" > BsaResults.log
                 endif
                 stall 200000
                 type BsaTempResults.log >> BsaResults.log
