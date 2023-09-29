@@ -1,3 +1,5 @@
+## **_Note_**: SIE Standalone build is deprecated and no longer supported. The last stable build tag was v22.10_SIE_REL1.1.0. SIE ACS is now integrated with IR, ES, SR Bands. Please Refer to respective README for instructions.
+
 # SystemReady Security Interface Extension ACS
 
 ## Introduction to the SystemReady Security Interface Extension
@@ -27,7 +29,7 @@ This section describes the steps to build the ACS or obtain the pre-built live i
 ## Steps to build SystemReady Security Inteface Extension ACS live image
 
 ## GitHub branch
-- To pick up the release version of the code, checkout the release tag v22.10_SIE_REL1.1.0
+- To pick up the latest stable version of the code, checkout the release tag v22.10_SIE_REL1.1.0
 
 ## ACS build steps
 
@@ -62,9 +64,9 @@ Before starting the ACS build, ensure that the following requirements are met:
 ## Build output
 This image comprises of two FAT file system partitions recognized by UEFI: <br />
 - 'acs-results' <br />
-  Stores logs and is used to install UEFI-SCT. (Approximate size: 120 MB) <br/>
+  Stores logs and is used to install UEFI-SCT. (Approximate size: 128 MB) <br/>
 - 'boot' <br />
-  Contains bootable applications and test suites. (Approximate size: 400 MB)
+  Contains bootable applications and test suites. (Approximate size: 500 MB)
 
 ## Running the Security Interface Extension ACS
 The test suite consists of both automated and manual tests.  See the [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for addition information.
@@ -91,4 +93,4 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2022, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2022-2023, Arm Limited and Contributors. All rights reserved.*

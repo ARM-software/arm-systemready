@@ -11,10 +11,10 @@ SystemReady IR-certified platforms implement a minimum set of hardware and firmw
 This section of the repository contains the build scripts and the live-images for the SystemReady IR Band.
 
 ## Release details
- - Code Quality: IR ACS v2.0.0
- - The latest pre-built release of IR ACS is available for download here: [v23.03_2.0.0](https://github.com/ARM-software/arm-systemready/tree/main/IR/prebuilt_images/v23.03_2.0.0)
+ - Code Quality: IR ACS v2.1.0
+ - The latest pre-built release of IR ACS is available for download here: [v23.09_2.1.0](https://github.com/ARM-software/arm-systemready/tree/main/IR/prebuilt_images/v23.09_2.1.0)
  - The BSA tests are written for version 1.0 of the BSA specification.
- - The BBR tests are written for version 2.0 of the BBR specification.
+ - The BBR tests are written for EBBR section of version 2.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
 
@@ -37,7 +37,7 @@ This section of the repository contains the build scripts and the live-images fo
 
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
- - Ubuntu 18.04, 20.04 or 22.04 LTS with at least 32GB of free disk space.
+ - Ubuntu 18.04 or later LTS with at least 32GB of free disk space.
  - Availability of the Bash shell.
  - **sudo** privilege to install tools required for the build.
  - `git` installed using `sudo apt install git`.
@@ -62,7 +62,7 @@ Before starting the ACS build, ensure that the following requirements are met:
 Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before using the same for verification.<br />
 
 ## Build output
-This image comprises of two FAT file system partitions recognized by UEFI: <br />
+This image comprises of single FAT file system partition recognized by UEFI: <br />
 - '/' <br />
   Root partition for Linux which contains test-suites to run in Linux environment. <br/>
 - 'boot' <br />
@@ -141,17 +141,17 @@ The live image boots to UEFI Shell. The different test applications can be run i
 
 ### Running Security interface extension (SIE) ACS.
 
-For the verification steps of SIE ACS on QEMU with TPM support, refer to the [SIE ACS Verification](../../common/docs/SIE_ACS_Verification.md).
+For the verification steps of SIE ACS, refer to the [SIE ACS Verification](../../common/docs/SIE_ACS_Verification.md).
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.01.00
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.07.00
 
-- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.03_REL1.0.4
+- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.09_REL1.0.6
 
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v23.03_IR_2.0.0
+- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v23.09_SR_REL2.0.0_ES_REL1.3.0_IR_REL2.1.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 8713740892bdb857e970a2841de9800b2c6b5552
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 315e3a56a6d9261d4fad4c1950f2d01a052eeba4
 
 
 

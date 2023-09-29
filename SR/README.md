@@ -14,8 +14,8 @@ This section contains the build scripts and the live-images for the SystemReady 
 **The collection of code and scripts under [arm-systemready/SR](https://github.com/ARM-software/arm-systemready/tree/main/SR) is an enhanced replacement of the [Arm Enterprise ACS](https://github.com/ARM-software/arm-enterprise-acs) repository**
 
 ## Release details
- - Code quality: v2.0.0 BETA-0
- - **The latest pre-built release of ACS is available for download here: [v23.01_2.0.0_BETA-0](prebuilt_images/v23.01_2.0.0_BETA-0)**
+ - Code quality: v2.0.0
+ - **The latest pre-built release of ACS is available for download here: [v23.09_2.0.0](prebuilt_images/v23.09_2.0.0)**
  - The SBSA tests are written for version 7.1 of the SBSA specification.
  - The BBR tests are written for the SBBR section in version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
@@ -38,7 +38,7 @@ This section contains the build scripts and the live-images for the SystemReady 
 
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
- - Ubuntu 18.04 or 20.04 LTS with at least 32GB of free disk space.
+ - Ubuntu 18.04 or later LTS with at least 32GB of free disk space.
  - Use bash shell.
  - You must have **sudo** privilege to install tools required for build.
  - Install `git` using `sudo apt install git`
@@ -62,7 +62,7 @@ Before starting the ACS build, ensure that the following requirements are met:
 Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before it is used.<br />
 
 ## Build output
-This image comprises two FAT file system partitions recognized by UEFI: <br />
+This image comprise of single FAT file system partition recognized by UEFI: <br />
 - 'boot' <br />
   Approximate size: 640 MB <br />
   contains bootable applications and test suites. <br />
@@ -78,7 +78,7 @@ Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". Wh
 #### Prerequisites
 sudo permission is required for  building RD-N2 software stack.
 
-#### Follow the steps mentioned in [RD-N2 platform software user guide](https://gitlab.arm.com/arm-reference-solutions/arm-reference-solutions-docs/-/tree/master/docs/infra/rdn2) to obtain RD-N2 FVP.
+#### Follow the steps mentioned in [RD-N2 platform software user guide](https://neoverse-reference-design.docs.arm.com/en/latest/platforms/rdn2/readme.html#rd-n2-readme-label) to obtain RD-N2 FVP.
 
 ### For software stack build instructions, follow BusyBox Boot link under Supported Features by RD-N2 platform software stack section in the same guide.
 
@@ -137,19 +137,19 @@ To start an extended run of UEFI-SCT append "-nostartup startup.nsh sct_extd" to
 ### Running Security interface extension (SIE) ACS components.
 Now SIE ACS is integrated with SR ACS image, which can be accessed through GRUB options.
 
-For the verification steps of SIE ACS on QEMU with TPM support, refer to the [SIE ACS Verification](../common/docs/SIE_ACS_Verification.md).
+For the verification steps of SIE ACS, refer to the [SIE ACS Verification](../common/docs/SIE_ACS_Verification.md).
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v22.11.00
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.07.00
 
-- [Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs) TAG: v23.01_REL7.1.0_BETA-0
+- [Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs) TAG: v23.09_REL7.1.3
 
-- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.01_REL1.0.3
+- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.09_REL1.0.6
 
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v23.01_SR_REL2.0.0_BETA-0_ES_REL_1.2.0
+- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v23.09_SR_REL2.0.0_ES_REL1.3.0_IR_REL2.1.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 06f84debb796b2f6ac893b130e90ab5599195b29
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 315e3a56a6d9261d4fad4c1950f2d01a052eeba4
 
 
 
