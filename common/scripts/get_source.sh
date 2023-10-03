@@ -227,7 +227,7 @@ get_sbmr_acs_src()
     echo "Downloading sbmr-acs source code."
     git clone --depth 1 https://github.com/ARM-software/sbmr-acs sbmr-acs
     pushd $TOP_DIR/sbmr-acs
-        git archive --format=tar.gz -o sbmr-acs_master.tar.gz master
+        git archive --format=tar.gz -o sbmr-acs.tar.gz main
     popd
 }
 
