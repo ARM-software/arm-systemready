@@ -27,9 +27,22 @@ sudo apt install swtpm
 
 For Ubuntu 20.04 LTS
 ```
-sudo add-apt-repository ppa:itrue/swtpm
-sudo apt-get update
-sudo apt-get install swtpm swtpm-tools
+# Steps to build and install SWTPM manually:
+
+sudo apt-get install git g++ gcc automake autoconf libtool make gcc libc-dev libssl-dev pkg-config libtasn1-6-dev libjson-glib-dev expect gawk socat libseccomp-dev -y
+cd ~
+git clone https://github.com/stefanberger/swtpm.git
+git clone https://github.com/stefanberger/libtpms.git
+cd libtpms
+./autogen.sh --prefix=/usr --with-tpm2 --with-openssl
+make
+sudo make install
+cd ../swtpm
+./autogen.sh --prefix=/usr
+make
+sudo make install
+cd ..
+rm -rf swtpm/ libtpms/
 ```
 
 ## Building UEFI Firmware
