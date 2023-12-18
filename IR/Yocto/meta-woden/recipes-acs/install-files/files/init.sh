@@ -129,6 +129,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  else
      echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
  fi
+ mkdir -p /mnt/acs_results/linux_tools/psci
+ mount -t debugfs none /sys/kernel/debug
+ cat /sys/kernel/debug/psci > /mnt/acs_results/linux_tools/psci/psci.log
+ dmesg | grep psci > /mnt/acs_results/linux_tools/psci/psci_kernel.log
 
  # update resolv.conf with 8.8.8.8 DNS server
  echo "nameserver 8.8.8.8" >> /etc/resolv.conf
