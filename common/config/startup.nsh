@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2024, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -85,6 +85,35 @@ for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 
 :Donebsa
+
+for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%m:\EFI\BOOT\debug\pingtest.nsh and exist FS%m:\yocto_image.flag then
+        FS%m:
+        cd FS%m:\acs_results
+        if not exist network_logs then
+            mkdir network_logs
+        endif
+        cd network_logs
+        echo Running ping test...
+        ifconfig -r
+        echo Waiting for network to come up...
+        stall 200000
+        echo "" > ping.log
+        ping 8.8.8.8 >> ping.log
+        type ping.log
+        FS%m:\EFI\BOOT\debug\pingtest.nsh ping.log > pingtest.log
+        set pingreturn %lasterror%
+        type pingtest.log
+        if %pingreturn% == 0x0 then
+            echo Ping test passed.
+        else
+            echo Ping test failed.
+        endif
+        goto DonePing
+    endif
+endfor
+:DonePing
+
 echo "Booting Linux"
 for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%l:\Image and exist FS%l:\ramdisk-buildroot.img then
