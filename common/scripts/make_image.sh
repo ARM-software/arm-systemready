@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2024, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -181,10 +181,10 @@ prepare_disk_image ()
     cat part_table > $IMG_BB
 
     #Create fat partition
-    create_fatpart "BOOT" $FAT_SIZE
-    create_cfgfiles "BOOT"
-    cat BOOT >> $IMG_BB
-    
+    create_fatpart "BOOT_ACS" $FAT_SIZE
+    create_cfgfiles "BOOT_ACS"
+    cat BOOT_ACS >> $IMG_BB
+
     #Space for backup partition table at the bottom (1M)
     cat part_table >> $IMG_BB
 
@@ -194,8 +194,7 @@ prepare_disk_image ()
 
     #remove intermediate files
     rm -f part_table
-    rm -f BOOT
-    rm -f RESULT
+    rm -f BOOT_ACS
     #remove compressed image if present from previous build
     if [ -f $PLATDIR/$IMG_BB.xz ]; then
         rm $PLATDIR/$IMG_BB.xz

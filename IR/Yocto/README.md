@@ -62,12 +62,12 @@ Before starting the ACS build, ensure that the following requirements are met:
 Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before using the same for verification.<br />
 
 ## Build output
-This image comprises of single FAT file system partition recognized by UEFI: <br />
+This image comprises of 2 FAT file system partition recognized by UEFI: <br />
 - '/' <br />
   Root partition for Linux which contains test-suites to run in Linux environment. <br/>
-- 'boot' <br />
+- 'BOOT_ACS' <br />
   Approximate size: 150 MB <br />
-  contains bootable applications and test suites. (Approximate size: 150MB) <br />
+  contains bootable applications and test suites. <br />
   contains a 'acs_results' directory which stores logs of the automated execution of ACS.
 
 ## Verification
