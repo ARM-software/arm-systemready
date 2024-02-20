@@ -91,6 +91,23 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   exec sh +m
  fi
 
+ #run sbmr-acs out of band tests
+ if [ $ADDITIONAL_CMD_OPTION == "sbmr-acs" ]; then
+  echo "Call SBMR ACS"
+  cd /usr/bin
+  python redfish-finder
+  cd sbmr-acs
+  ./run-sbmr-acs.sh linux
+  mkdir -p /mnt/acs_results/SBMR
+  cp -r logs /mnt/acs_results/SBMR
+  cd /
+  echo "SBMR ACS run is completed\n"
+  echo "Please press <Enter> to continue ..."
+  sync /mnt
+  sleep 3
+  exec sh +m
+ fi
+
  if [ $ADDITIONAL_CMD_OPTION == "acsforcevamap" ]; then
   echo "Linux Boot with SetVirtualMap enabled"
   mkdir -p /mnt/acs_results/SetVAMapMode/fwts

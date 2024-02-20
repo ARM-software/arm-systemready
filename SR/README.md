@@ -44,20 +44,23 @@ Before starting the ACS build, ensure that the following requirements are met:
  - Install `git` using `sudo apt install git`
  - `git config --global user.name "Your Name"` and `git config --global user.email "Your Email"` must be configured.
 
-### Steps to build SystemReady SR ACS live image
+### Steps to build SystemReady SR ACS live image with integrated SBMR-ACS in-band tests
 1. Clone the arm-systemready repository <br />
  `git clone https://github.com/ARM-software/arm-systemready.git`
 
-2. Navigate to the SR/scripts directory <br />
+2. Checkout to "server-base-manageability-requirements-acs" branch  <br />
+ `git -C arm-systemready checkout server-base-manageability-requirements-acs`
+
+3. Navigate to the SR/scripts directory <br />
  `cd arm-systemready/SR/scripts`
 
-3. Run get_source.sh to download all related sources and tools for the build. Provide the sudo permission when prompted <br />
+4. Run get_source.sh to download all related sources and tools for the build. Provide the sudo permission when prompted <br />
  `./build-scripts/get_source.sh` <br />
 
-4. To start the build of the SR ACS live image, execute the below step <br />
+5. To start the build of the SR ACS live image, execute the below step <br />
  `./build-scripts/build-sr-live-image.sh`
 
-5. If all the above steps are successful, then the  bootable image will be available at **/path-to-arm-systemready/SR/scripts/output/sr_acs_live_image.img.xz**
+6. If all the above steps are successful, then the  bootable image will be available at **/path-to-arm-systemready/SR/scripts/output/sr_acs_live_image.img.xz**
 
 Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before it is used.<br />
 
@@ -138,6 +141,9 @@ To start an extended run of UEFI-SCT append "-nostartup startup.nsh sct_extd" to
 Now SIE ACS is integrated with SR ACS image, which can be accessed through GRUB options.
 
 For the verification steps of SIE ACS, refer to the [SIE ACS Verification](../common/docs/SIE_ACS_Verification.md).
+
+### Running Server Base Manageability Requirements (SBMR) ACS
+SBMR ACS in-band tests are built into SR ACS Image, which can be accessed through GRUB option "Server Base Manageability Requirements (SBMR) ACS In-Band tests (optional)"
 
 ## Baselines for Open Source Software in this release:
 
