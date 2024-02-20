@@ -30,37 +30,47 @@ for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%m:\acs_results then
         FS%m:
         cd FS%m:\acs_results
-        if not exist uefi_dump then
-            mkdir uefi_dump
-        endif
-        cd uefi_dump
-        echo "Starting UEFI Debug dump"
-        connect -r
-        pci > pci.log
-        drivers > drivers.log
-        devices > devices.log
-        dmpstore -all > dmpstore.log
-        dh -d > dh.log
-        memmap > memmap.log
-        bcfg boot dump > bcfg.log
-        devtree > devtree.log
-        ver > uefi_version.log
-        ifconfig -l > ifconfig.log
-        dmem > dmem.log
-        for %n in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-                if exist FS%n:\EFI\BOOT\bsa\ir_bsa.flag then
-                    #IR Specific ->DT
-                else
-                    echo "" > map.log
-                    map -r >> map.log
-                    smbiosview > smbiosview.log
-                    acpiview -l  > acpiview_l.log
-                    acpiview -r 2 > acpiview_r.log
-                    acpiview > acpiview.log
-                    goto Done
-                endif
+        if exist uefi_dump then
+            echo "UEFI debug logs already run"
+            echo "press any key to rerun UEFI debug logs"
+            FS%m:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
+            if %lasterror% == 0 then
+                goto DEBUG_DUMP
+            else
                 goto Done
-        endfor
+            endif
+        else
+            mkdir uefi_dump
+:DEBUG_DUMP
+            cd uefi_dump
+            echo "Starting UEFI Debug dump"
+            connect -r
+            pci > pci.log
+            drivers > drivers.log
+            devices > devices.log
+            dmpstore -all > dmpstore.log
+            dh -d > dh.log
+            memmap > memmap.log
+            bcfg boot dump > bcfg.log
+            devtree > devtree.log
+            ver > uefi_version.log
+            ifconfig -l > ifconfig.log
+            dmem > dmem.log
+            for %n in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+                    if exist FS%n:\EFI\BOOT\bsa\ir_bsa.flag then
+                        #IR Specific ->DT
+                    else
+                        echo "" > map.log
+                        map -r >> map.log
+                        smbiosview > smbiosview.log
+                        acpiview -l  > acpiview_l.log
+                        acpiview -r 2 > acpiview_r.log
+                        acpiview > acpiview.log
+                        goto Done
+                    endif
+                    goto Done
+            endfor
+        endif
     endif
 endfor
 :Done

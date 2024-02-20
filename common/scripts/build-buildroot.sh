@@ -73,7 +73,10 @@ do_build ()
     mkdir -p root_fs_overlay/usr/bin
     mkdir -p root_fs_overlay/usr/bin/sbmr-acs
 
-    cp -r $TOP_DIR/edk2-test-parser root_fs_overlay/usr/bin/ 
+    if [ ! -d root_fs_overlay/usr/bin/edk2-test-parser ]; then
+        cp -r $TOP_DIR/edk2-test-parser root_fs_overlay/usr/bin/ 
+    fi
+
     cp  $TOP_DIR/ramdisk/linux-bsa/bsa root_fs_overlay/bin/
     cp  $TOP_DIR/ramdisk/linux-bsa/bsa_acs.ko root_fs_overlay/lib/modules/
     cp  $TOP_DIR/ramdisk/drivers/* root_fs_overlay/lib/modules/

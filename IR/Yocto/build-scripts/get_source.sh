@@ -57,7 +57,7 @@ popd
 customise_image()
 {
     #Remove the root login prompt after the startup
-    sed -i 's/ExecStart=.*/ExecStart=\-\/sbin\/agetty \-a root \-8 \-L \%I \@BAUDRATE\@ \$TERM/' $TOP_DIR/meta-woden/poky/meta/recipes-core/systemd/systemd-serialgetty/serial-getty@.service
+    sed -i 's/ExecStart=.*/ExecStart=\-\/sbin\/agetty \-a root \-8 \-L \--keep-baud \%I \@BAUDRATE\@ \$TERM/' $TOP_DIR/meta-woden/poky/meta/recipes-core/systemd/systemd-serialgetty/serial-getty@.service
 
 }
 
