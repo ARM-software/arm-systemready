@@ -8,7 +8,7 @@ The Security Interface Extension ACS tests the following security related interf
 * Secure firmware update using update capsules
 * For systems with Trusted Platform Modules(TPMs), TPM measured boot and the TCG2 protocol
 
-# Running SIE ACS on QEMU (virt) with TPM support
+# Running SIE ACS
 
 The Prebuilt SR/ES/IR band images can now be used to verify the requirements of SIE from this release, as they are integrated with the SIE ACS.
 
@@ -27,9 +27,22 @@ sudo apt install swtpm
 
 For Ubuntu 20.04 LTS
 ```
-sudo add-apt-repository ppa:itrue/swtpm
-sudo apt-get update
-sudo apt-get install swtpm swtpm-tools
+# Steps to build and install SWTPM manually:
+
+sudo apt-get install git g++ gcc automake autoconf libtool make gcc libc-dev libssl-dev pkg-config libtasn1-6-dev libjson-glib-dev expect gawk socat libseccomp-dev -y
+cd ~
+git clone https://github.com/stefanberger/swtpm.git
+git clone https://github.com/stefanberger/libtpms.git
+cd libtpms
+./autogen.sh --prefix=/usr --with-tpm2 --with-openssl
+make
+sudo make install
+cd ../swtpm
+./autogen.sh --prefix=/usr
+make
+sudo make install
+cd ..
+rm -rf swtpm/ libtpms/
 ```
 
 ## Building UEFI Firmware
@@ -63,7 +76,7 @@ truncate -s 64M flash0.img
 truncate -s 64M flash1.img
 ```
 
-## Running SIE ACS with Prebuilt SystemReady band images on QEMU -Virt model
+## Running SIE ACS with Prebuilt SystemReady band images on QEMU
 1. Create a script "run_qemu.sh" as below with variables configured as per your environment:
 
 ```

@@ -149,6 +149,11 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         lshw \
                         usbutils \
                         edk2-test-parser \
+                        xz \
+                        zip \
+                        openssh \
+                        openssh-sftp \
+                        openssh-sftp-server \
 "
 
 addtask dir_deploy before do_populate_lic_deploy after do_image_complete

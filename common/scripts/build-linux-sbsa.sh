@@ -118,14 +118,15 @@ pack_in_ramdisk()
 
   rm -rf $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.so
   rm -rf $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.so
-  cp -r $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/PyPerf-0.0.0-py3.10-linux-x86_64.egg/pyperf \
-     $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/
-  cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/PySweep-0.0.0-py3.10-linux-x86_64.egg/pysweep.cpython-310-x86_64-linux-gnu.so \
-     $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/
+    arch=$(uname -m)
+  cp -r $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/PyPerf-0.0.0-py3.10-linux-${arch}.egg/pyperf \
+   $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/
+  cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/PySweep-0.0.0-py3.10-linux-${arch}.egg/pysweep.cpython-310-${arch}-linux-gnu.so \
+   $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/
+  cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.cpython-310-${arch}-linux-gnu.so \
+   $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.so
   cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.* \
      $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.so
-  cp $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.cpython-310-x86_64-linux-gnu.so \
-     $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.so
 }
 
 build_sbsa_kernel_driver

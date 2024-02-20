@@ -26,11 +26,11 @@ Navigate to the ES, IR, or SR band for further details on specific scripts and p
 * [LS](./LS)
 
 ## SystemReady Security Interface Extension:
-The SystemReady Security Interface Extension certifies that firmware meets the requirements specified by the Arm [Base Boot Security Requirements specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). The Security Interface Extension is optionally applicable to SystemReady SR, ES and IR bands, but not the LS band.
-Further details on Security Interface Extension, including pre-built images, are here:
+The SystemReady Security Interface Extension certifies that firmware meets the requirements specified by the Arm [Base Boot Security Requirements specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). The Security Interface Extension is now integrated to SystemReady SR, ES and IR bands, but not the LS band.
+Further details on Security Interface Extension is here:
 * [SIE](./SIE)
 
-Note: For the IR band, SIE ACS is integrated to the IR ACS prebuilt image. For more details, refer the [IR README](./IR/Yocto/README.md).
+Note: For the SR,ES,IR band, SIE ACS is integrated to the ACS prebuilt image.
 
 ## Limitations
 
@@ -49,9 +49,9 @@ The details of the hardware or Verification IP which enable these exerciser test
 
 |APIs                         |Description                                                                   |Affected tests          |
 |-----------------------------|------------------------------------------------------------------------------|------------------------|
-|pal_pcie_p2p_support         |Return 0 if the test system PCIe supports peer to peer transaction, else 1    |453, 454, 456, 812, 813 |
-|pal_pcie_is_cache_present    |Return 1 if the test system supports PCIe address translation cache, else 0   |452                     |
-|pal_pcie_get_legacy_irq_map  |Return 0 if system legacy irq map is filled, else 1                           |412, 450, 806           |
+|pal_pcie_dev_p2p_support     |Return 0 if the test system PCIe supports peer to peer transaction, else 1    |856, 857                |
+|pal_pcie_is_cache_present    |Return 1 if the test system supports PCIe address translation cache, else 0   |852                     |
+|pal_pcie_get_legacy_irq_map  |Return 0 if system legacy irq map is filled, else 1                           |850                     |
 
    Below exerciser capabilities are required by exerciser test.
    - MSI-X interrupt generation.
@@ -59,7 +59,7 @@ The details of the hardware or Verification IP which enable these exerciser test
    - Initiating transacions from and to the exerciser.
    - Ability to check on BDF and register address seen for each configuration address along with access type.
 
- - SBSA Test 403 (Check ECAM Memory accessibility) execution time depends on the system PCIe hierarchy. For systems with multiple ECAMs the time taken to complete can be long which is normal. Please wait until the test completes.
+ - SBSA Test 803 (Check ECAM Memory accessibility) execution time depends on the system PCIe hierarchy. For systems with multiple ECAMs the time taken to complete can be long which is normal. Please wait until the test completes.
 
 ## License
 
@@ -74,5 +74,5 @@ Arm SystemReady ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2021-2022, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2021-2023, Arm Limited and Contributors. All rights reserved.*
 

@@ -31,6 +31,9 @@
 #Mount things needed by this script
 /bin/busybox mount -t proc proc /proc
 
+#softlink current console to /dev/tty for ssh/scp utility
+rm /dev/tty
+ln -s $(tty) /dev/tty
 
 if ! mountpoint -q /sys; then
         echo "Mounting /sysfs..."

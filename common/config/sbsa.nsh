@@ -63,7 +63,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -sbsa -skip 900 -f BsaVerboseTempResults.log
                 stall 200000
                 if exist FS%i:\acs_results\uefi\BsaVerboseTempResults.log then
-                    echo " SystemReady SR ACS v2.0.0_BETA-0" > BsaVerboseResults.log
+                    echo " SystemReady SR ACS v2.0.0" > BsaVerboseResults.log
                     stall 200000
                     type BsaVerboseTempResults.log >> BsaVerboseResults.log
                     cp BsaVerboseTempResults.log temp/
@@ -93,7 +93,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%i:\EFI\BOOT\bsa\Bsa.efi -sbsa -skip 900 -f BsaTempResults.log
             stall 200000
             if exist FS%i:\acs_results\uefi\BsaTempResults.log then
-                echo " SystemReady SR ACS v2.0.0_BETA-0" > BsaResults.log
+                echo " SystemReady SR ACS v2.0.0" > BsaResults.log
                 stall 200000
                 type BsaTempResults.log >> BsaResults.log
                 cp BsaTempResults.log temp/
@@ -130,7 +130,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 FS%i:\EFI\BOOT\bsa\sbsa\Sbsa.efi -v 1 -skip 900 -f SbsaVerboseTempResults.log
                 stall 200000
                 if exist FS%i:\acs_results\uefi\SbsaVerboseTempResults.log then
-                    echo " SystemReady SR ACS v2.0.0_BETA-0" > SbsaVerboseResults.log
+                    echo " SystemReady SR ACS v2.0.0" > SbsaVerboseResults.log
                     stall 200000
                     type SbsaVerboseTempResults.log >> SbsaVerboseResults.log
                     cp SbsaVerboseTempResults.log temp/
@@ -160,7 +160,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%i:\EFI\BOOT\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
             stall 200000
             if exist FS%i:\acs_results\uefi\SbsaTempResults.log then
-                echo " SystemReady SR ACS v2.0.0_BETA-0" > SbsaResults.log
+                echo " SystemReady SR ACS v2.0.0" > SbsaResults.log
                 stall 200000
                 type SbsaTempResults.log >> SbsaResults.log
                 cp SbsaTempResults.log temp/

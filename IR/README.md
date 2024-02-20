@@ -1,6 +1,6 @@
-# SystemReady IR ACS
+## **_Note_**: IR busybox build is deprecated and no longer supported. The last stable build tag is v21.09_1.0. Please Refer to [Yocto README](Yocto/README.md) for instructions to build latest IR Yocto Image.
 
-**_Note_**: Refer to [Yocto README](Yocto/README.md) for the details on the SystemReady IR ACS v2.0.0 **Beta-1** version and instructions to build using Yocto.
+# SystemReady IR ACS
 
 ## Introduction to SystemReady IR
 SystemReady IoT Ready (IR) is a band of system certification in the Arm SystemReady program. This certification is for devices in the IoT edge sector that are built around SoCs based on the Arm A-profile architecture. It ensures interoperability with embedded Linux and other embedded operating systems.
@@ -15,7 +15,8 @@ This section of the repository contains the build scripts and the live-images fo
 
 ## Release details
  - Code Quality: v1.0
- - **The latest pre-built release of IR ACS is available for download here: [v21.09_1.0](prebuilt_images/v21.09_1.0)**
+ - **The last stable pre-built release of IR ACS with busybox is available for download here: [v21.09_1.0](prebuilt_images/v21.09_1.0)**
+ - **Please refer to IR Yocto build for latest IR Image**
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
@@ -25,8 +26,8 @@ This section of the repository contains the build scripts and the live-images fo
 ## Steps to build SystemReady IR ACS live image
 
 ## Code download
-- To build a release version of the code, checkout the main branch with the appropriate release tag.
-- To build the latest version of the code with bug fixes and new features, use the main branch.
+- To build latest version of the code, use [Yocto README](Yocto/README.md).
+- To build the last stable version of IR ACS with Busybox use tag v21.09_REL1.0.
 
 ## ACS build steps
 
@@ -40,13 +41,14 @@ Note: The latest pre-built image contains Linux kernel version 5.13. To build a 
 
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
- - Ubuntu 18.04 or 20.04 LTS with at least 32GB of free disk space.
+ - Ubuntu 18.04 or later LTS with at least 32GB of free disk space.
  - Must use Bash shell.
  - You must have **sudo** privilege to install tools required for build.
  - Install `git` using `sudo apt install git`
  - `git config --global user.name "Your Name"` and `git config --global user.email "Your Email"` must be configured.
 
-### Steps to build SystemReady IR ACS live image
+### Steps to build SystemReady IR ACS with Busybox Support live image
+Note : For latest build steps of IR ACS, use [Yocto README](Yocto/README.md).
 1. Clone the arm-systemready repository <br />
  `git clone https://github.com/ARM-software/arm-systemready.git`
 
@@ -77,16 +79,6 @@ Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". In
 ### Verification of the IR image on Qemu arm machine
 
 #### Follow the Build instructions mentioned in [qemu download page](https://www.qemu.org/download/#source) to build latest qemu model.
-NOTE: For qemu versions >= 7.2.0, perform the steps listed below to support user-mode networking.
-- Install libslirp-dev
-
-`sudo apt install libslirp-dev`
-
-- Enable slirp during the Qemu build
-
-`./configure --enable-slirp`
-
-For more information visit https://wiki.qemu.org/ChangeLog/7.2#SLIRP_module_(user-mode_networking)
 
 #### To build the firmware image, follow below steps
 
