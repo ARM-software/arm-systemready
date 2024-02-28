@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2021-2023, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2021-2024, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -72,7 +72,7 @@ ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  #mount result partition
- BLOCK_DEVICE_NAME=$(blkid | grep "BOOT" | awk -F: '{print $1}')
+ BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}')
 
  if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
   mount $BLOCK_DEVICE_NAME /mnt

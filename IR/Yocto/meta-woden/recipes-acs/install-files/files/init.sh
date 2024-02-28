@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2023, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  echo "Attempting to mount the results partition ..." 
  #mount result partition
- BLOCK_DEVICE_NAME=$(blkid | grep "BOOT" | awk -F: '{print $1}')
+ BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}')
 
  if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
   mount $BLOCK_DEVICE_NAME /mnt

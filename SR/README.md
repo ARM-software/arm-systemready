@@ -66,7 +66,7 @@ Note: The image is generated in a compressed (.xz) format. The image must be unc
 
 ## Build output
 This image comprise of single FAT file system partition recognized by UEFI: <br />
-- 'boot' <br />
+- 'BOOT_ACS' <br />
   Approximate size: 640 MB <br />
   contains bootable applications and test suites. <br />
   contains a 'acs_results' directory which stores logs of the automated execution of ACS.
