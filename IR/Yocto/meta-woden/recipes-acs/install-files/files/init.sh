@@ -141,12 +141,13 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  # run read_blk_devices.py, parse block devices, and perform read if partition doesn't belond
  # in precious partitions
  python3 /bin/read_blk_devices.py | tee /mnt/acs_results/linux_tools/read_blk_devices.log
+ echo "ACS run is completed"
 else
  echo ""
  echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
  echo ""
 fi
-echo "ACS run is completed"
+
 echo "Please press <Enter> to continue ..."
 echo -e -n "\n"
 exit 0
