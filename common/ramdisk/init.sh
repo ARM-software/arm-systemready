@@ -171,6 +171,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  else
      echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
  fi
+ echo "The ACS test suites are completed."
 else
  echo ""
  echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
@@ -179,6 +180,5 @@ fi
 
 sync /mnt
 sleep 3
-echo "The ACS test suites are completed."
 
 exec sh +m
