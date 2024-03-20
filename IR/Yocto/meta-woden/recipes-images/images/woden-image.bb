@@ -155,6 +155,7 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         openssh \
                         openssh-sftp \
                         openssh-sftp-server \
+                        kernel-module-tpm-ftpm-tee \
 "
 
 addtask dir_deploy before do_populate_lic_deploy after do_image_complete
