@@ -70,7 +70,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  echo "Executing FWTS for EBBR"
  test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
  echo "Test Executed are $test_list"
- echo $'SystemReady IR ACS v2.1.0 \nFWTS v23.07.00' > /mnt/acs_results/fwts/FWTSResults.log
+ echo $'SystemReady IR ACS v2.1.0 \nFWTS v24.01.00' > /mnt/acs_results/fwts/FWTSResults.log
  /usr/bin/fwts --ebbr `echo $test_list` -r /mnt/acs_results/fwts/FWTSResults.log
  echo -e -n "\n"
  

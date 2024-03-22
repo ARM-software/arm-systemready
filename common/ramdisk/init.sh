@@ -95,7 +95,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Linux Boot with SetVirtualMap enabled"
   mkdir -p /mnt/acs_results/SetVAMapMode/fwts
   echo "Executing FWTS"
-  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
+  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
   sync /mnt
   sleep 3
   echo "The ACS test suites are completed."
