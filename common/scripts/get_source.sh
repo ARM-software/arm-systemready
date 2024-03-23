@@ -198,6 +198,7 @@ get_linux-acs_src()
     #The same patch is applicable BSA and SBSA
     echo "Applying Linux ACS xBSA Patch..."
     git am $TOP_DIR/linux-acs/kernel/src/0001-BSA-ACS-Linux-${LINUX_KERNEL_VERSION}.patch
+    git am $TOP_DIR/../../common/patches/0001-SystemReady-Linux-${LINUX_KERNEL_VERSION}.patch
     #apply patches to linux source
     if [ $LINUX_KERNEL_VERSION == "6.4" ]; then
         git am $TOP_DIR/../../common/patches/tpm-tis-spi-Add-hardware-wait-polling.patch
