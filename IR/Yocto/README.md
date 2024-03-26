@@ -151,7 +151,7 @@ For the verification steps of SIE ACS, refer to the [SIE ACS Verification](../..
 
 - [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v23.09_SR_REL2.0.0_ES_REL1.3.0_IR_REL2.1.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 315e3a56a6d9261d4fad4c1950f2d01a052eeba4
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 032822757792c5d4d0bfed1fd8524e69ef4f2d17
 
 
 
@@ -170,5 +170,5 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2022-2023, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2022-2024, Arm Limited and Contributors. All rights reserved.*
 
