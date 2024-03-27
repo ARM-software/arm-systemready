@@ -129,7 +129,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  else
      echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
  fi
+ mkdir -p /mnt/acs_results/linux_tools/psci
+ mount -t debugfs none /sys/kernel/debug
+ cat /sys/kernel/debug/psci > /mnt/acs_results/linux_tools/psci/psci.log
+ dmesg | grep psci > /mnt/acs_results/linux_tools/psci/psci_kernel.log
 
+ pushd /usr/kernel-selftest
+ ./run_kselftest.sh -t dt:test_unprobed_devices.sh > /mnt/acs_results/linux_tools/dt_kselftest.log
+ popd
  # update resolv.conf with 8.8.8.8 DNS server
  echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
@@ -138,9 +145,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  # remove color characters from log and save
  awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results/linux_tools/ethtool-test.log
 
- # run read_blk_devices.py, parse block devices, and perform read if partition doesn't belond
+ # run read_write_check_blk_devices.py, parse block devices, and perform read if partition doesn't belond
  # in precious partitions
- python3 /bin/read_blk_devices.py | tee /mnt/acs_results/linux_tools/read_blk_devices.log
+ python3 /bin/read_write_check_blk_devices.py | tee /mnt/acs_results/linux_tools/read_write_check_blk_devices.log
  echo "ACS run is completed"
 else
  echo ""
