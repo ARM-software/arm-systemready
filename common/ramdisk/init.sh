@@ -126,7 +126,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  else
   #SBBR Execution
   echo "Executing FWTS for SBBR"
-  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/fwts/FWTSResults.log
+  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 > /mnt/acs_results/fwts/FWTSResults.log
  fi
 
  sleep 2
