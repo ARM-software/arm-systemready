@@ -19,7 +19,7 @@ MODULE_NAME = "bsa_acs"
 
 do_configure(){
     cd ${S}/linux-acs/acs-drv/files/
-    ./setup.sh ${S}/bsa-acs
+    ./bsa_setup.sh ${S}/bsa-acs
 }
 
 do_compile() {
