@@ -42,7 +42,10 @@ PLATDIR=${TOP_DIR}/output
 
 build_sbsa_kernel_driver()
 {
-    pushd $TOP_DIR/linux-acs/sbsa-acs-drv/files
+    pushd $TOP_DIR/linux-acs/acs-drv/files
+    rm -rf $TOP_DIR/linux-acs/acs-drv/files/val
+    rm -rf $TOP_DIR/linux-acs/acs-drv/files/test_pool
+
     arch=$(uname -m)
     echo $arch
     if [[ $arch = "aarch64" ]]
@@ -52,7 +55,7 @@ build_sbsa_kernel_driver()
     else
         export CROSS_COMPILE=$TOP_DIR/$GCC
     fi
-    ./setup.sh $TOP_DIR/edk2/ShellPkg/Application/sbsa-acs
+    ./sbsa_setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs  $TOP_DIR/edk2/ShellPkg/Application/sbsa-acs
     ./linux_sbsa_acs.sh
     popd
 }
@@ -109,7 +112,7 @@ pack_in_ramdisk()
   mkdir $TOP_DIR/ramdisk/linux-sbsa
 
   # Add all needed packages to build root
-  cp $TOP_DIR/linux-acs/sbsa-acs-drv/files/sbsa_acs.ko $TOP_DIR/ramdisk/linux-sbsa/
+  cp $TOP_DIR/linux-acs/acs-drv/files/sbsa_acs.ko $TOP_DIR/ramdisk/linux-sbsa/
   cp $SBSA_PATH/linux_app/sbsa-acs-app/sbsa $TOP_DIR/ramdisk/linux-sbsa
   cp -r $SBSA_PATH/linux_app/pmu_app/pmuval $TOP_DIR/ramdisk/linux-sbsa
 

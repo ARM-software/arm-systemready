@@ -42,8 +42,11 @@ BSA_PATH=$TOP_DIR/edk2/ShellPkg/Application/bsa-acs
 
 build_bsa_kernel_driver()
 {
- pushd $TOP_DIR/linux-acs/bsa-acs-drv/files
-    arch=$(uname -m)
+ pushd $TOP_DIR/linux-acs/acs-drv/files
+ rm -rf $TOP_DIR/linux-acs/acs-drv/files/val
+ rm -rf $TOP_DIR/linux-acs/acs-drv/files/test_pool
+
+ arch=$(uname -m)
     echo $arch
     if [[ $arch = "aarch64" ]]
     then
@@ -52,7 +55,7 @@ build_bsa_kernel_driver()
     else
         export CROSS_COMPILE=$TOP_DIR/$GCC
     fi
- ./setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
+ ./bsa_setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
  ./linux_bsa_acs.sh
  popd
 }
@@ -71,7 +74,7 @@ pack_in_ramdisk()
   if [ ! -d $TOP_DIR/ramdisk/linux-bsa ]; then
     mkdir $TOP_DIR/ramdisk/linux-bsa
   fi
-  cp $TOP_DIR/linux-acs/bsa-acs-drv/files/bsa_acs.ko $TOP_DIR/ramdisk/linux-bsa
+  cp $TOP_DIR/linux-acs/acs-drv/files/bsa_acs.ko $TOP_DIR/ramdisk/linux-bsa
   cp $BSA_PATH/linux_app/bsa-acs-app/bsa $TOP_DIR/ramdisk/linux-bsa
 }
 

@@ -17,7 +17,7 @@ index a8b6de3..85dc2c0 100644
    DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
    ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
 +  BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
-+  BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi_acpi/BsaPalLib.inf
++  BsaPalLib|ShellPkg/Application/bsa-acs/pal/uefi_acpi/BsaPalLib.inf
  
  [LibraryClasses.ARM,LibraryClasses.AARCH64]
    #
