@@ -8,14 +8,14 @@ The Security Interface Extension ACS tests the following security related interf
 * Secure firmware update using update capsules
 * For systems with Trusted Platform Modules(TPMs), TPM measured boot and the TCG2 protocol
 
-# Running SIE ACS
-
-The Prebuilt SR/ES/IR band images can now be used to verify the requirements of SIE from this release, as they are integrated with the SIE ACS.
-
-See the Section 3.4 [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the SecureBoot keys.
+Note:
+1. The Prebuilt SR/ES/IR band images can be used to verify the requirements of SIE.
+2. See the Section 3.4 [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the SecureBoot keys.
 This document also contains the background information on the SIE related specification and ACS.
 
-## Installing swtpm package (TPM emulator)
+## Prerequisite for running SIE ACS on QEMU
+
+### Install swtpm package (TPM emulator)
 Note: Install only if there is no past installation of swtpm present. Check by running "swtpm -v" in the terminal, which should output the version.
 
 The following commands should fetch and install the swtpm package:
@@ -45,7 +45,18 @@ cd ..
 rm -rf swtpm/ libtpms/
 ```
 
-## Building UEFI Firmware
+## Running SIE ACS on QEMU with UEFI firmware
+
+### Build QEMU model
+Follow build instructions from https://www.qemu.org/download/#source
+
+Note: During configure stage, enable slirp library build by appending ./configure with --enable-slirp <br>
+slirp is a networking library, required by netdev in QEMU run command.
+```
+./configure --enable-slirp
+```
+
+### Build UEFI Firmware
 To build the UEFI firmware images, follow these steps:
 1. Fetch edk2 source
 ```
@@ -66,7 +77,9 @@ NUM_CPUS=$((`getconf _NPROCESSORS_ONLN` + 2))
 export GCC5_AARCH64_PREFIX=<set compiler prefix path for aarch64-linux-gnu->
 build -n $NUM_CPUS -a AARCH64 -t GCC5 -p ArmVirtPkg/ArmVirtQemu.dsc -b RELEASE -D TTY_TERMINAL -D SECURE_BOOT_ENABLE -D TPM2_ENABLE -D TTY_TERMINAL all
 ```
+
 NOTE: Download GCC-ARM 10.3 or later toolchain from [here](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads). <br />
+
 3. Create the required flash images
 ```
 #uefi firmware image
@@ -76,7 +89,7 @@ truncate -s 64M flash0.img
 truncate -s 64M flash1.img
 ```
 
-## Running SIE ACS with Prebuilt SystemReady band images on QEMU
+### Running SIE ACS with Prebuilt SystemReady SR/ES ACS images on QEMU
 1. Create a script "run_qemu.sh" as below with variables configured as per your environment:
 
 ```
@@ -85,7 +98,7 @@ truncate -s 64M flash1.img
 QEMU=<path to QEMU model>
 FLASH0=<path to flash0.img>
 FLASH1=<path to flash1.img>
-IMG=<path to systemready IR/ES/SR image>
+IMG=<path to systemready SR/ES image>
 
 WD=`pwd`
 TPMSOCK=/tmp/swtpm-sock$$
@@ -110,19 +123,82 @@ $QEMU -M virt -cpu cortex-a57 -smp 8 -m 2048 \
 ```
 
 2. To run the SIE ACS, execute the "run_qemu.sh".
-
-Once QEMU execution begins, immediately press Esc key to go into the UEFI settings. Follow the steps in Section 3.4 for "Enrolling keys in EDK2" in the [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the secureboot keys.
-
-Note: The SecureBoot keys are present in \<bootfs>/security-interface-extension-keys
+Once QEMU execution begins, immediately press Esc key to go into the UEFI settings. Follow the steps in Section 3.4 for "Enrolling keys in EDK2" in the [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the secureboot keys. <br>
+Note: The SecureBoot keys are present in \<bootfs>\security-interface-extension-keys
 
 
-3. In the grub options, choose
+3. To run the SIE ACS suites, choose following in grub options.
 ```
-SCT for Security Interface Extension (optional) for SIE SCT tests
+"SCT for Security Interface Extension (optional)" for SIE SCT tests
 and
-Linux Boot for Security Interface Extension (optional) for Secure Linux boot, SIE FWTS and TPM2 logs.
+"Linux Boot for Security Interface Extension (optional)" for Secure Linux boot, SIE FWTS and TPM2 logs.
 ```
-to run the SIE ACS suites.
+
+Note: IR ACS image can also be run using the above steps, if the underlying firmware is UEFI.
+
+## Running SIE ACS on QEMU with uboot firmware
+
+### Build u-boot firmware and QEMU
+Follow the instructions provided in [Verification of the IR image on QEMU Arm machine](../../IR/Yocto/README.md#verification-of-the-ir-image-on-qemu-arm-machine) section of IR Yocto README.
+
+### Running SIE ACS with Prebuilt SystemReady IR ACS image on QEMU
+1. Create a script "run_qemu.sh" as below with variables configured as per your environment:
+
+```
+#! /bin/bash
+
+IMG=<PATH to IR ACS image>
+BUILD_PATH=<path to buildroot directory where QEMU and uboot firmware is built>
+QEMU=$BUILD_PATH/output/host/bin/qemu-system-aarch64
+FLASH_BIN=$BUILD_PATH/output/images/flash.bin
+DISK_IMG=$BUILD_PATH/output/images/disk.img
+
+WD=`pwd`
+TPMSOCK=/tmp/swtpm-sock$$
+
+echo "Creating TPM Emulator socket"
+[ -e $WD/tpm ] || mkdir $WD/tpm
+swtpm socket --tpm2 -t -d --tpmstate dir=$WD/tpm --ctrl type=unixio,path=$TPMSOCK
+echo $TPMSOCK
+
+echo "Running QEMU EBBR + TPM....."
+
+$QEMU \
+    -bios $FLASH_BIN \
+    -cpu cortex-a53 \
+    -d unimp \
+    -device virtio-blk-device,drive=hd1 \
+    -device virtio-blk-device,drive=hd0 \
+    -device virtio-net-device,netdev=eth0 \
+    -device virtio-rng-device,rng=rng0 \
+    -drive file=$IMG,if=none,format=raw,id=hd0 \
+    -drive file=$DISK_IMG,if=none,id=hd1 \
+    -m 1024 \
+    -machine virt,secure=on \
+    -monitor null \
+    -chardev socket,id=chrtpm,path=$TPMSOCK \
+    -tpmdev emulator,id=tpm0,chardev=chrtpm \
+    -device tpm-tis-device,tpmdev=tpm0 \
+    -netdev user,id=eth0 \
+    -no-acpi \
+    -nodefaults \
+    -nographic \
+    -object rng-random,filename=/dev/urandom,id=rng0 \
+    -rtc base=utc,clock=host \
+    -serial stdio \
+    -smp 2 | tee qemu_ebbr_sie_run.log
+
+```
+
+3. Execute the "run_qemu.sh", To run the SIE ACS suites, choose following in grub options.
+```
+"SCT for Security Interface Extension (optional)" for SIE SCT tests
+and
+"Linux Boot for Security Interface Extension (optional)" for Secure Linux boot, SIE FWTS and TPM2 logs.
+```
+
+Note: IR Yocto ACS supports automatic enrollment of secure boot keys, still if the system fails to enter SecureBoot mode, Please refer to "Enrolling keys in U-boot" section of [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll manually. <br>
+Note: The SecureBoot keys are present in \<bootfs>\security-interface-extension-keys
 
 --------------
-*Copyright (c) 2023, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2023-24, Arm Limited and Contributors. All rights reserved.*

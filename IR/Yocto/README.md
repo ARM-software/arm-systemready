@@ -143,6 +143,18 @@ The live image boots to UEFI Shell. The different test applications can be run i
 
 For the verification steps of SIE ACS, refer to the [SIE ACS Verification](../../common/docs/SIE_ACS_Verification.md).
 
+### Enabling Initcall debug prints in IR Yocto Linux boot
+
+Enabling initcall debug prints allows the kernel to print traces of initcall functions. This feature is not enabled by default, but manually booting Linux with initcall_debug can assist users in debugging kernel issues.
+
+Edit the "Linux boot" boot option by pressing `e` in grub window and append the boot command with following command line options.
+
+```
+initcall_debug ignore_loglevel=1
+```
+
+Press Ctrl+x to boot the Yocto linux with initcall debug prints enabled.
+
 ## Baselines for Open Source Software in this release:
 
 - [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.07.00
