@@ -137,6 +137,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  pushd /usr/kernel-selftest
  ./run_kselftest.sh -t dt:test_unprobed_devices.sh > /mnt/acs_results/linux_tools/dt_kselftest.log
  popd
+
  # update resolv.conf with 8.8.8.8 DNS server
  echo "nameserver 8.8.8.8" >> /etc/resolv.conf
 
