@@ -14,8 +14,8 @@ This section contains the build scripts and the live-images for the SystemReady 
 **The collection of code and scripts under [arm-systemready/SR](https://github.com/ARM-software/arm-systemready/tree/main/SR) is an enhanced replacement of the [Arm Enterprise ACS](https://github.com/ARM-software/arm-enterprise-acs) repository**
 
 ## Release details
- - Code quality: v2.0.0
- - **The latest pre-built release of ACS is available for download here: [v23.09_2.0.0](prebuilt_images/v23.09_2.0.0)**
+ - Code quality: v2.1.0
+ - **The latest pre-built release of ACS is available for download here: [v24.03_2.1.0](prebuilt_images/v24.03_2.1.0)**
  - The SBSA tests are written for version 7.1 of the SBSA specification.
  - The BBR tests are written for the SBBR section in version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.

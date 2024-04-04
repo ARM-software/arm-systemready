@@ -12,8 +12,8 @@ SystemReady ES-certified platforms implement a minimum set of hardware and firmw
 This section contains the build scripts and the live-images for the SystemReady ES Band.
 
 ## Release details
- - Code Quality: v1.3.0
- - **The latest pre-built release of ACS is available for download here: [v23.09_1.3.0](prebuilt_images/v23.09_1.3.0)**
+ - Code Quality: v1.4.0
+ - **The latest pre-built release of ACS is available for download here: [v24.03_1.4.0](prebuilt_images/v24.03_1.4.0)**
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for the SBBR section in version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
