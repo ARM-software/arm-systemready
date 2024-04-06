@@ -126,6 +126,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  else
   #SBBR Execution
   echo "Executing FWTS for SBBR"
+  echo $'SystemReady SR ACS v2.1.0 \nFWTS v24.01.00' > /mnt/acs_results/fwts/FWTSResults.log
   fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 > /mnt/acs_results/fwts/FWTSResults.log
  fi
 
@@ -140,9 +141,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
    #Case of ES
    insmod /lib/modules/bsa_acs.ko
    if [ -f /bin/sr_bsa.flag ]; then
-    echo $'SystemReady SR ACS v2.0.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+    echo $'SystemReady SR ACS v2.1.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
    else
-    echo $'SystemReady ES ACS v1.3.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+    echo $'SystemReady ES ACS v1.4.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
    fi
    /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
@@ -155,7 +156,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
    if [ -f  /lib/modules/sbsa_acs.ko ]; then
     #Case of SR
     insmod /lib/modules/sbsa_acs.ko
-    echo $'SystemReady SR ACS v2.0.0\n' > /mnt/acs_results/linux/SbsaResultsApp.log
+    echo $'SystemReady SR ACS v2.1.0\n' > /mnt/acs_results/linux/SbsaResultsApp.log
     /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
     dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
    else

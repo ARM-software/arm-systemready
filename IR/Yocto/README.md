@@ -11,8 +11,8 @@ SystemReady IR-certified platforms implement a minimum set of hardware and firmw
 This section of the repository contains the build scripts and the live-images for the SystemReady IR Band.
 
 ## Release details
- - Code Quality: IR ACS v2.1.0
- - The latest pre-built release of IR ACS is available for download here: [v23.09_2.1.0](https://github.com/ARM-software/arm-systemready/tree/main/IR/prebuilt_images/v23.09_2.1.0)
+ - Code Quality: IR ACS v2.1.1
+ - The latest pre-built release of IR ACS is available for download here: [v24.03_2.1.1](https://github.com/ARM-software/arm-systemready/tree/main/IR/prebuilt_images/v24.03_2.1.1)
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for EBBR section of version 2.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
@@ -157,7 +157,7 @@ Press Ctrl+x to boot the Yocto linux with initcall debug prints enabled.
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.07.00
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v24.01.00
 
 - [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.09_REL1.0.6
 
