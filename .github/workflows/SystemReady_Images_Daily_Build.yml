@@ -6,7 +6,7 @@ on:
   workflow_dispatch:         # to dispatch from Github Actions
 
 jobs:
-  build_image:
+  ES_Build:
     name: ES ACS Daily Build Image
     runs-on: ubuntu-22.04
     strategy:
@@ -38,8 +38,8 @@ jobs:
         name: es_acs_live_image.img.xz
         path: ES/scripts/output/es_acs_live_image.img.xz
         if-no-files-found: error
-jobs:
-  build_image:
+        
+  SR_Build:
     name: SR ACS Daily Build Image
     runs-on: ubuntu-22.04
     strategy:
@@ -71,8 +71,8 @@ jobs:
         name: sr_acs_live_image.img.xz
         path: SR/scripts/output/sr_acs_live_image.img.xz
         if-no-files-found: error
-jobs:
-  build_image:
+  
+  IR_Build:
     name: IR ACS Image Daily Build 
     runs-on: ubuntu-22.04
     strategy:
@@ -105,8 +105,8 @@ jobs:
         name: ir-acs-live-image-generic-arm64.wic.xz
         path: IR/Yocto/meta-woden/build/tmp/deploy/images/generic-arm64/ir-acs-live-image-generic-arm64.wic.xz
         if-no-files-found: error
-jobs:
-  build_image:
+
+  SBMR_Build:
     name: SR ACS with SBMR-ACS Image Daily Build
     runs-on: ubuntu-22.04
     strategy:
