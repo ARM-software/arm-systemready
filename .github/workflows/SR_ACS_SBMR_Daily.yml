@@ -10,7 +10,7 @@ on:
   workflow_dispatch:         # to dispatch from Github Actions
 jobs:
   build_image:
-    name: Build SR ACS with SBMR-ACS in-band tests integrated
+    name: SR ACS with SBMR-ACS Build Check
     runs-on: ubuntu-22.04
     strategy:
       matrix:

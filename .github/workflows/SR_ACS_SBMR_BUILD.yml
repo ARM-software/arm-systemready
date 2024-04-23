@@ -1,17 +1,16 @@
-name: SR ACS Build Checker
 
+name: SR ACS with SBMR-ACS Build Checker
 on:
   push:
-    branches:                # trigger on push to master
-      - main
-  pull_request:              # trigger on pull requests to master
+    branches:                # trigger on push to server-base-manageability-requirements-acs
+      - server-base-manageability-requirements-acs
+  pull_request:              # trigger on pull requests to server-base-manageability-requirements-acs
     branches:
-      - main
+      - server-base-manageability-requirements-acs
   workflow_dispatch:         # to dispatch from Github Actions
-
 jobs:
   build_image:
-    name: SR ACS Build Check
+    name: SR ACS with SBMR-ACS Build Check
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -39,7 +38,6 @@ jobs:
         ./build-scripts/build-sr-live-image.sh
     - uses: actions/upload-artifact@v3
       with:
-        name: sr_acs_live_image.img.xz
+        name: sr_acs_live_image_sbmr_inband.img.xz
         path: SR/scripts/output/sr_acs_live_image.img.xz
         if-no-files-found: error
-
