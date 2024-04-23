@@ -1,7 +1,7 @@
 SUMMARY = "BSA-ACS Linux driver"
 LICENSE = "GPLv2 & Apache-2.0"
 LIC_FILES_CHKSUM = "file://bsa-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13 \
-                    file://linux-acs/bsa-acs-drv/files/COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e \
+                    file://linux-acs/acs-drv/files/COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e \
 "
 COMPATIBLE_MACHINE:generic-arm64 = "generic-arm64"
 
@@ -18,19 +18,19 @@ S = "${WORKDIR}"
 MODULE_NAME = "bsa_acs"
 
 do_configure(){
-    cd ${S}/linux-acs/bsa-acs-drv/files/
-    ./setup.sh ${S}/bsa-acs
+    cd ${S}/linux-acs/acs-drv/files/
+    ./bsa_setup.sh ${S}/bsa-acs
 }
 
 do_compile() {
     export KERNEL_SRC=${STAGING_KERNEL_DIR}
-    cd ${S}/linux-acs/bsa-acs-drv/files/
+    cd ${S}/linux-acs/acs-drv/files/
     ./linux_bsa_acs.sh
 }
 
 do_install() {
     install -d ${D}/${base_libdir}/modules/${KERNEL_VERSION}/kernel/${MODULE_NAME}
-    install -m 0644 ${S}/linux-acs/bsa-acs-drv/files/${MODULE_NAME}.ko \
+    install -m 0644 ${S}/linux-acs/acs-drv/files/${MODULE_NAME}.ko \
     ${D}/${base_libdir}/modules/${KERNEL_VERSION}/kernel/${MODULE_NAME}/${MODULE_NAME}.ko
 }
 

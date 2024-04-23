@@ -9,6 +9,7 @@ S = "${WORKDIR}"
 SRC_URI = " file://bsa.nsh \
             file://debug_dump.nsh \
             file://startup.nsh \
+            file://pingtest.nsh \
             file://sie_startup.nsh \
             "
 
@@ -26,6 +27,7 @@ do_deploy() {
    cp bsa.nsh ${DEPLOYDIR}/
    cp debug_dump.nsh ${DEPLOYDIR}/
    cp startup.nsh ${DEPLOYDIR}/
+   cp pingtest.nsh ${DEPLOYDIR}/
    cp sie_startup.nsh ${DEPLOYDIR}/
    cp ${S}/../../../armv8a-oe-linux/ebbr-sct/1.0-r0/bbr-acs/bbsr/config/sie_SctStartup.nsh ${DEPLOYDIR}/
 

@@ -12,8 +12,8 @@ SystemReady ES-certified platforms implement a minimum set of hardware and firmw
 This section contains the build scripts and the live-images for the SystemReady ES Band.
 
 ## Release details
- - Code Quality: v1.3.0
- - **The latest pre-built release of ACS is available for download here: [v23.09_1.3.0](prebuilt_images/v23.09_1.3.0)**
+ - Code Quality: v1.4.0
+ - **The latest pre-built release of ACS is available for download here: [v24.03_1.4.0](prebuilt_images/v24.03_1.4.0)**
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for the SBBR section in version 1.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
@@ -146,7 +146,7 @@ For the verification steps of SIE ACS, refer to the [SIE ACS Verification](../co
 
 - [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: : v23.09_SR_REL2.0.0_ES_REL1.3.0_IR_REL2.1.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 315e3a56a6d9261d4fad4c1950f2d01a052eeba4
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 032822757792c5d4d0bfed1fd8524e69ef4f2d17
 
 
 
@@ -165,5 +165,5 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2021-2023, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2021-2024, Arm Limited and Contributors. All rights reserved.*
 

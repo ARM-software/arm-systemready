@@ -26,11 +26,9 @@ Navigate to the ES, IR, or SR band for further details on specific scripts and p
 * [LS](./LS)
 
 ## SystemReady Security Interface Extension:
-The SystemReady Security Interface Extension certifies that firmware meets the requirements specified by the Arm [Base Boot Security Requirements specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). The Security Interface Extension is now integrated to SystemReady SR, ES and IR bands, but not the LS band.
-Further details on Security Interface Extension is here:
-* [SIE](./SIE)
+The SystemReady Security Interface Extension tests if the firmware meets the requirements specified by the Arm [Base Boot Security Requirements specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). Security Interface Extension ACS is integrated in SystemReady SR, ES and IR ACS prebuilt images.
 
-Note: For the SR,ES,IR band, SIE ACS is integrated to the ACS prebuilt image.
+For further details on Security Interface Extension ACS, please refer to [SIE ACS Verification Guide](./common/docs/SIE_ACS_Verification.md).
 
 ## Limitations
 
@@ -74,5 +72,5 @@ Arm SystemReady ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2021-2023, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2021-2024, Arm Limited and Contributors. All rights reserved.*
 
