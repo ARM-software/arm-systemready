@@ -1,4 +1,4 @@
-name: Build SR 2.0 ACS image
+name: SR ACS Build Checker
 
 on:
   push:
@@ -7,13 +7,11 @@ on:
   pull_request:              # trigger on pull requests to master
     branches:
       - main
-  schedule:
-    - cron: '30 17 * * *'    # Runs everyday at 11 PM IST (17:30 UTC)
   workflow_dispatch:         # to dispatch from Github Actions
 
 jobs:
   build_image:
-    name: Build SR 2.0 ACS image
+    name: SR ACS Build Check
     runs-on: ubuntu-22.04
     strategy:
       matrix:
