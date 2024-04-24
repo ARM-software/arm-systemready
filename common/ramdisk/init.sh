@@ -112,7 +112,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Linux Boot with SetVirtualMap enabled"
   mkdir -p /mnt/acs_results/SetVAMapMode/fwts
   echo "Executing FWTS"
-  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
+  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
   sync /mnt
   sleep 3
   echo "The ACS test suites are completed."
@@ -143,7 +143,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  else
   #SBBR Execution
   echo "Executing FWTS for SBBR"
-  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath > /mnt/acs_results/fwts/FWTSResults.log
+  echo $'SystemReady SR ACS v2.1.0 \nFWTS v24.01.00' > /mnt/acs_results/fwts/FWTSResults.log
+  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 > /mnt/acs_results/fwts/FWTSResults.log
  fi
 
  sleep 2
@@ -157,9 +158,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
    #Case of ES
    insmod /lib/modules/bsa_acs.ko
    if [ -f /bin/sr_bsa.flag ]; then
-    echo $'SystemReady SR ACS v2.0.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+    echo $'SystemReady SR ACS v2.1.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
    else
-    echo $'SystemReady ES ACS v1.3.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
+    echo $'SystemReady ES ACS v1.4.0\n' > /mnt/acs_results/linux/BsaResultsApp.log
    fi
    /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
@@ -172,7 +173,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
    if [ -f  /lib/modules/sbsa_acs.ko ]; then
     #Case of SR
     insmod /lib/modules/sbsa_acs.ko
-    echo $'SystemReady SR ACS v2.0.0\n' > /mnt/acs_results/linux/SbsaResultsApp.log
+    echo $'SystemReady SR ACS v2.1.0\n' > /mnt/acs_results/linux/SbsaResultsApp.log
     /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
     dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
    else
@@ -188,6 +189,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  else
      echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
  fi
+ echo "The ACS test suites are completed."
 else
  echo ""
  echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
@@ -196,6 +198,5 @@ fi
 
 sync /mnt
 sleep 3
-echo "The ACS test suites are completed."
 
 exec sh +m

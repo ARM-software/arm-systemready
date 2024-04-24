@@ -1,22 +1,22 @@
-From ab62f2e0676f5e6ced8ed2c81359dc3cfc9300e7 Mon Sep 17 00:00:00 2001
-From: gurrev01 <gururaj.revankar@arm.com>
-Date: Mon, 21 Aug 2023 13:27:40 +0530
-Subject: [PATCH] sctversion
+From 3b8246cc87727132eae9c97fafeecf3491ea53dd Mon Sep 17 00:00:00 2001
+From: Guru9902 <gururaj.revankar@arm.com>
+Date: Fri, 5 Apr 2024 08:51:20 +0000
+Subject: [PATCH] ctversion
 
-Signed-off-by: gurrev01 <gururaj.revankar@arm.com>
+Signed-off-by: Guru9902 <gururaj.revankar@arm.com>
 ---
  .../SCT/Drivers/StandardTest/StandardTest.c     | 17 +++++++++--------
  1 file changed, 9 insertions(+), 8 deletions(-)
 
 diff --git a/uefi-sct/SctPkg/TestInfrastructure/SCT/Drivers/StandardTest/StandardTest.c b/uefi-sct/SctPkg/TestInfrastructure/SCT/Drivers/StandardTest/StandardTest.c
-index 94cae289..903f871f 100644
+index 94cae289..c9930cac 100644
 --- a/uefi-sct/SctPkg/TestInfrastructure/SCT/Drivers/StandardTest/StandardTest.c
 +++ b/uefi-sct/SctPkg/TestInfrastructure/SCT/Drivers/StandardTest/StandardTest.c
 @@ -29,9 +29,10 @@ Abstract:
  #include "EfiTest.h"
  #include "StandardTest.h"
  #include <Library/EntsLib.h>
-+#define ACS_VERSION "SystemReady IR ACS v2.1.0\nBBR ACS 1.0.5 (EBBR)"
++#define ACS_VERSION "SystemReady IR ACS v2.1.1\nBBR ACS 1.0.5 (EBBR)"
 +
 +static EFI_TIME Epoch = { .Year = 1970, .Month = 1, .Day = 1 };
  
@@ -59,5 +59,5 @@ index 94cae289..903f871f 100644
    SecondsElapsed = SecondsElapsedFromBaseYear (
                       Private->StartTime.Year,
 -- 
-2.25.1
+2.34.1
 

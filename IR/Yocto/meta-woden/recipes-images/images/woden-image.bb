@@ -28,6 +28,7 @@ EXTRA_IMAGEDEPENDS += "bsa-acs \
 "
 IMAGE_EFI_BOOT_FILES += "Bsa.efi;EFI/BOOT/bsa/Bsa.efi \
                          bsa.nsh;EFI/BOOT/bsa/bsa.nsh \
+                         pingtest.nsh;EFI/BOOT/debug/pingtest.nsh \
                          ir_bsa.flag;EFI/BOOT/bsa/ir_bsa.flag \
                          yocto_image.flag \
                          debug_dump.nsh;EFI/BOOT/debug/debug_dump.nsh \
@@ -154,6 +155,8 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         openssh \
                         openssh-sftp \
                         openssh-sftp-server \
+                        kernel-module-tpm-ftpm-tee \
+                        curl \
 "
 
 addtask dir_deploy before do_populate_lic_deploy after do_image_complete

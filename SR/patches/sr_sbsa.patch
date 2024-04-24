@@ -16,8 +16,8 @@ index 6f0d092..61caf7e 100644
    DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
    DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
    ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
-+  SbsaValLib|ShellPkg/Application/sbsa-acs/val/SbsaValLib.inf
-+  SbsaPalLib|ShellPkg/Application/sbsa-acs/platform/pal_uefi/SbsaPalLib.inf
++  SbsaValLib|ShellPkg/Application/bsa-acs/val/SbsaValLib.inf
++  SbsaPalLib|ShellPkg/Application/bsa-acs/pal/uefi_acpi/SbsaPalLib.inf
  
  [LibraryClasses.ARM,LibraryClasses.AARCH64]
    #

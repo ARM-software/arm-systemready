@@ -70,7 +70,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  echo "Executing FWTS for EBBR"
  test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
  echo "Test Executed are $test_list"
- echo $'SystemReady IR ACS v2.1.0 \nFWTS v23.07.00' > /mnt/acs_results/fwts/FWTSResults.log
+ echo $'SystemReady IR ACS v2.1.1 \nFWTS v24.01.00' > /mnt/acs_results/fwts/FWTSResults.log
  /usr/bin/fwts --ebbr `echo $test_list` -r /mnt/acs_results/fwts/FWTSResults.log
  echo -e -n "\n"
  
@@ -79,7 +79,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  echo "Loading BSA ACS Linux Driver"
  insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
  echo "Executing BSA ACS Application "
- echo $'SystemReady IR ACS v2.1.0 \nBSA v1.0.6' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+ echo $'SystemReady IR ACS v2.1.1 \nBSA v1.0.6' > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
  bsa >> /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
  dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
  
@@ -114,7 +114,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  
   echo "Running dt-validate tool "
   dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results/linux_tools/dt-validate.log
-  sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.5 \ndtschema version: 2023.11 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
+  sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.5 \ndtschema version: 2024.2 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
   if [ ! -s /mnt/acs_results/linux_tools/dt-validate.log ]; then
    echo $'The FDT is compliant according to schema ' >> /mnt/acs_results/linux_tools/dt-validate.log
   fi
@@ -129,6 +129,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  else
      echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
  fi
+ mkdir -p /mnt/acs_results/linux_tools/psci
+ mount -t debugfs none /sys/kernel/debug
+ cat /sys/kernel/debug/psci > /mnt/acs_results/linux_tools/psci/psci.log
+ dmesg | grep psci > /mnt/acs_results/linux_tools/psci/psci_kernel.log
+
+ pushd /usr/kernel-selftest
+ ./run_kselftest.sh -t dt:test_unprobed_devices.sh > /mnt/acs_results/linux_tools/dt_kselftest.log
+ popd
 
  # update resolv.conf with 8.8.8.8 DNS server
  echo "nameserver 8.8.8.8" >> /etc/resolv.conf
@@ -138,15 +146,16 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  # remove color characters from log and save
  awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results/linux_tools/ethtool-test.log
 
- # run read_blk_devices.py, parse block devices, and perform read if partition doesn't belond
+ # run read_write_check_blk_devices.py, parse block devices, and perform read if partition doesn't belond
  # in precious partitions
- python3 /bin/read_blk_devices.py | tee /mnt/acs_results/linux_tools/read_blk_devices.log
+ python3 /bin/read_write_check_blk_devices.py | tee /mnt/acs_results/linux_tools/read_write_check_blk_devices.log
+ echo "ACS run is completed"
 else
  echo ""
  echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
  echo ""
 fi
-echo "ACS run is completed"
+
 echo "Please press <Enter> to continue ..."
 echo -e -n "\n"
 exit 0

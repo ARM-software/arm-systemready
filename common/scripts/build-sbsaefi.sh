@@ -94,7 +94,7 @@ do_build()
     fi
 
     export PACKAGES_PATH=$TOP_DIR/$UEFI_PATH:$TOP_DIR/$UEFI_PATH/$UEFI_LIBC_PATH
-    source ShellPkg/Application/sbsa-acs/tools/scripts/avsbuild.sh
+    source ShellPkg/Application/sbsa-acs/tools/scripts/acsbuild.sh
     popd
 }
 

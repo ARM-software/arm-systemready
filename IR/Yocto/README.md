@@ -11,8 +11,8 @@ SystemReady IR-certified platforms implement a minimum set of hardware and firmw
 This section of the repository contains the build scripts and the live-images for the SystemReady IR Band.
 
 ## Release details
- - Code Quality: IR ACS v2.1.0
- - The latest pre-built release of IR ACS is available for download here: [v23.09_2.1.0](https://github.com/ARM-software/arm-systemready/tree/main/IR/prebuilt_images/v23.09_2.1.0)
+ - Code Quality: IR ACS v2.1.1
+ - The latest pre-built release of IR ACS is available for download here: [v24.03_2.1.1](https://github.com/ARM-software/arm-systemready/tree/main/IR/prebuilt_images/v24.03_2.1.1)
  - The BSA tests are written for version 1.0 of the BSA specification.
  - The BBR tests are written for EBBR section of version 2.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
@@ -143,15 +143,27 @@ The live image boots to UEFI Shell. The different test applications can be run i
 
 For the verification steps of SIE ACS, refer to the [SIE ACS Verification](../../common/docs/SIE_ACS_Verification.md).
 
+### Enabling Initcall debug prints in IR Yocto Linux boot
+
+Enabling initcall debug prints allows the kernel to print traces of initcall functions. This feature is not enabled by default, but manually booting Linux with initcall_debug can assist users in debugging kernel issues.
+
+Edit the "Linux boot" boot option by pressing `e` in grub window and append the boot command with following command line options.
+
+```
+initcall_debug ignore_loglevel=1
+```
+
+Press Ctrl+x to boot the Yocto linux with initcall debug prints enabled.
+
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.07.00
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v24.01.00
 
 - [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.09_REL1.0.6
 
 - [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v23.09_SR_REL2.0.0_ES_REL1.3.0_IR_REL2.1.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 315e3a56a6d9261d4fad4c1950f2d01a052eeba4
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 032822757792c5d4d0bfed1fd8524e69ef4f2d17
 
 
 
@@ -170,5 +182,5 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2022-2023, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2022-2024, Arm Limited and Contributors. All rights reserved.*
 
