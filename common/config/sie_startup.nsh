@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023, ARM Limited and Contributors. All rights reserved.
+# Copyright (c) 2022-2024, ARM Limited and Contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -80,7 +80,11 @@ endfor
 
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\EFI\BOOT\bbr\sie_SctStartup.nsh then
+        # create a file to mark BBSR SCT in progress
+        echo "" > FS%i:\EFI\BOOT\bbr\bbsr_sct_inprogress.flag
         FS%i:\EFI\BOOT\bbr\sie_SctStartup.nsh
+        # remove bbsr_sct_inprogress.flag file to mark BBSR SCT complete
+        rm FS%i:\EFI\BOOT\bbr\bbsr_sct_inprogress.flag
         for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             if  exist FS%k:\acs_results\SIE\sct_results\ then
                 if  exist FS%i:\EFI\BOOT\bbr\SCT\Overall then

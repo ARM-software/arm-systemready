@@ -29,6 +29,14 @@
 echo -off
 connect -r
 
+# check if BBSR SCT in progress, if yes resume the run.
+for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%i:\EFI\BOOT\bbr\bbsr_sct_inprogress.flag then
+        echo BBSR SCT in progress, Resuming ...
+        FS%i:\EFI\BOOT\sie_startup.nsh
+    endif
+endfor
+
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\EFI\BOOT\bbr\SctStartup.nsh then
         FS%i:\EFI\BOOT\bbr\SctStartup.nsh %1
