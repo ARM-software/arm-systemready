@@ -43,12 +43,9 @@ do_configure() {
     cp ${SBBR_TEST_DIR}/build_bbr.sh uefi-sct/SctPkg/
     cp ${S}/bbr-acs/ebbr/config/EfiCompliant_EBBR.ini uefi-sct/SctPkg/UEFI/
 
-
     echo "Applying security interface extension ACS patch..."
     cp -r ${S}/bbr-acs/bbsr/sct-tests/BBSRVariableSizeTest uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices
     cp -r ${S}/bbr-acs/bbsr/sct-tests/SecureBoot uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices
-    cp -r ${S}/bbr-acs/bbsr/sct-tests/TCG2Protocol uefi-sct/SctPkg/TestCase/UEFI/EFI/Protocol
-    cp -r ${S}/bbr-acs/bbsr/sct-tests/TCG2.h uefi-sct/SctPkg/UEFI/Protocol
 
     git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/bbsr/patches/0001-SIE-Patch-for-UEFI-SCT-Build.patch
 
