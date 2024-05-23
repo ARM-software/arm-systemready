@@ -104,17 +104,39 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
  #linux debug dump
  mkdir -p /mnt/acs_results/linux_dump
- lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
- lsusb > /mnt/acs_results/linux_dump/lsusb.log
- uname -a > /mnt/acs_results/linux_dump/uname.log
+ dmesg > /mnt/acs_results/linux_dump/dmesg.log
+ lspci > /mnt/acs_results/linux_dump/lspci.log
+ lspci -vvv &> /mnt/acs_results/linux_dump/lspci-vvv.log
  cat /proc/interrupts > /mnt/acs_results/linux_dump/interrupts.log
  cat /proc/cpuinfo > /mnt/acs_results/linux_dump/cpuinfo.log
  cat /proc/meminfo > /mnt/acs_results/linux_dump/meminfo.log
  cat /proc/iomem > /mnt/acs_results/linux_dump/iomem.log
+ lscpu > /mnt/acs_results/linux_dump/lscpu.log
+ lsblk > /mnt/acs_results/linux_dump/lsblk.log
+ lsusb > /mnt/acs_results/linux_dump/lsusb.log
+ dmidecode > /mnt/acs_results/linux_dump/dmidecode.log
+ dmidecode --dump-bin /mnt/acs_results/linux_dump/dmidecode.bin
+ uname -a > /mnt/acs_results/linux_dump/uname.log
+ cat /etc/os-release > /mnt/acs_results/linux_dump/cat-etc-os-release.log
+ date > /mnt/acs_results/linux_dump/date.log
+ # timedatectl > /mnt/acs_results/linux_dump/timedatectl.txt
+ hwclock > /mnt/acs_results/linux_dump/hwclock.log
+ efibootmgr > /mnt/acs_results/linux_dump/efibootmgr.log
+ efibootmgr -t 20 > /mnt/acs_results/linux_dump/efibootmgr-t-20.log
+ efibootmgr -t 5 > /mnt/acs_results/linux_dump/efibootmgr-t-5.log
+ efibootmgr -c > /mnt/acs_results/linux_dump/efibootmgr-c.txt
+ ifconfig > /mnt/acs_results/linux_dump/ifconfig.log
+ ip addr show > /mnt/acs_results/linux_dump/ip-addr-show.log
+ ping -c 5 www.arm.com > /mnt/acs_results/linux_dump/ping-c-5-www-arm-com.log
+ # acpidump > /mnt/acs_results/linux_dump/acpi.log
+ # acpixtract -a > /mnt/acs_results/linux_dump/acpi.log
+ # iasl -d /mnt/acs_results/linux_dump/*.dat
+ # date --set="20221215 05:30" > /mnt/acs_results/linux_dump/date-set-202212150530.log
+ # date > /mnt/acs_results/linux_dump/date-after-set.log
+ # hwclock --set --date "2023-01-01 09:10:15" > /mnt/acs_results/linux_dump/hw-colock-set-20230101091015.log
+ # hwclock > /mnt/acs_results/linux_dump/hwclock-after-set.log
  ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
  cp -r /sys/firmware /mnt/acs_results/linux_dump/
- dmidecode > /mnt/acs_results/linux_dump/dmidecode.log
- efibootmgr > /mnt/acs_results/linux_dump/efibootmgr.log
 
  mkdir -p /mnt/acs_results/fwts
 
