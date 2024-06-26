@@ -128,9 +128,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  ifconfig > /mnt/acs_results/linux_dump/ifconfig.log
  ip addr show > /mnt/acs_results/linux_dump/ip-addr-show.log
  ping -c 5 www.arm.com > /mnt/acs_results/linux_dump/ping-c-5-www-arm-com.log
- # acpidump > /mnt/acs_results/linux_dump/acpi.log
- # acpixtract -a > /mnt/acs_results/linux_dump/acpi.log
- # iasl -d /mnt/acs_results/linux_dump/*.dat
+ acpidump > /mnt/acs_results/linux_dump/acpi.log
+ acpixtract -a > /mnt/acs_results/linux_dump/acpi.log
+ iasl -d /mnt/acs_results/linux_dump/*.dat
  # date --set="20221215 05:30" > /mnt/acs_results/linux_dump/date-set-202212150530.log
  # date > /mnt/acs_results/linux_dump/date-after-set.log
  # hwclock --set --date "2023-01-01 09:10:15" > /mnt/acs_results/linux_dump/hw-colock-set-20230101091015.log
