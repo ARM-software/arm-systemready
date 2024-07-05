@@ -131,10 +131,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  acpidump > /mnt/acs_results/linux_dump/acpi.log
  acpixtract -a > /mnt/acs_results/linux_dump/acpi.log
  iasl -d /mnt/acs_results/linux_dump/*.dat
- # date --set="20221215 05:30" > /mnt/acs_results/linux_dump/date-set-202212150530.log
- # date > /mnt/acs_results/linux_dump/date-after-set.log
- # hwclock --set --date "2023-01-01 09:10:15" > /mnt/acs_results/linux_dump/hw-colock-set-20230101091015.log
- # hwclock > /mnt/acs_results/linux_dump/hwclock-after-set.log
+ date --set="20221215 05:30" > /mnt/acs_results/linux_dump/date-set-202212150530.log
+ date > /mnt/acs_results/linux_dump/date-after-set.log
+ hwclock --set --date "2023-01-01 09:10:15" > /mnt/acs_results/linux_dump/hw-colock-set-20230101091015.log
+ hwclock > /mnt/acs_results/linux_dump/hwclock-after-set.log
  ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
  cp -r /sys/firmware /mnt/acs_results/linux_dump/
 
