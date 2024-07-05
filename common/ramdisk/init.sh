@@ -120,6 +120,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  cat /etc/os-release > /mnt/acs_results/linux_dump/cat-etc-os-release.log
  date > /mnt/acs_results/linux_dump/date.log
  # timedatectl > /mnt/acs_results/linux_dump/timedatectl.txt
+ cat /proc/driver/rtc > /mnt/acs_results/linux_dump/rtc.log
  hwclock > /mnt/acs_results/linux_dump/hwclock.log
  efibootmgr > /mnt/acs_results/linux_dump/efibootmgr.log
  efibootmgr -t 20 > /mnt/acs_results/linux_dump/efibootmgr-t-20.log
@@ -129,11 +130,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  ip addr show > /mnt/acs_results/linux_dump/ip-addr-show.log
  ping -c 5 www.arm.com > /mnt/acs_results/linux_dump/ping-c-5-www-arm-com.log
  acpidump > /mnt/acs_results/linux_dump/acpi.log
- acpixtract -a > /mnt/acs_results/linux_dump/acpi.log
+ acpixtract -a >> /mnt/acs_results/linux_dump/acpi.log
  iasl -d /mnt/acs_results/linux_dump/*.dat
  date --set="20221215 05:30" > /mnt/acs_results/linux_dump/date-set-202212150530.log
  date > /mnt/acs_results/linux_dump/date-after-set.log
- hwclock --set --date "2023-01-01 09:10:15" > /mnt/acs_results/linux_dump/hw-colock-set-20230101091015.log
+ hwclock --set --date "2023-01-01 09:10:15" > /mnt/acs_results/linux_dump/hw-clock-set-20230101091015.log
  hwclock > /mnt/acs_results/linux_dump/hwclock-after-set.log
  ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
  cp -r /sys/firmware /mnt/acs_results/linux_dump/
