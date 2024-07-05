@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @file
-# Copyright (c) 2021-2023, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -175,10 +175,10 @@ get_fwts_src()
 }
 get_sct_src()
 {
-    echo "Downloading SCT (edk2-test) source code. TAG : ${SCT_SRC_TAG}"
+    echo "Downloading SCT (edk2-test) source code. TAG : ${SCT_SRC_VERSION}"
     git clone --single-branch https://github.com/tianocore/edk2-test
     pushd $TOP_DIR/edk2-test
-    git checkout $SCT_SRC_TAG
+    git checkout $SCT_SRC_VERSION
     popd
 }
 
