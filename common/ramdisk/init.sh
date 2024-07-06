@@ -119,7 +119,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  uname -a > /mnt/acs_results/linux_dump/uname.log
  cat /etc/os-release > /mnt/acs_results/linux_dump/cat-etc-os-release.log
  date > /mnt/acs_results/linux_dump/date.log
- # timedatectl > /mnt/acs_results/linux_dump/timedatectl.txt
  cat /proc/driver/rtc > /mnt/acs_results/linux_dump/rtc.log
  hwclock > /mnt/acs_results/linux_dump/hwclock.log
  efibootmgr > /mnt/acs_results/linux_dump/efibootmgr.log
