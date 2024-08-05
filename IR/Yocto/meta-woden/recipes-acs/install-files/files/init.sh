@@ -156,6 +156,7 @@ else
  echo ""
 fi
 
+sync /mnt
 echo "Please press <Enter> to continue ..."
 echo -e -n "\n"
 exit 0
