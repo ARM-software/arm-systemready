@@ -40,6 +40,8 @@ IMAGE_EFI_BOOT_FILES += "Bsa.efi;EFI/BOOT/bsa/Bsa.efi \
                          Shell.efi;EFI/BOOT/Shell.efi \
 "
 
+DEPENDS += "sbsigntool-native"
+
 do_sign_images() {
     rm -rf DO_SIGN
     mkdir DO_SIGN
@@ -51,9 +53,6 @@ do_sign_images() {
     #Sign the executables
     TEST_DB1_KEY=$KEYS_DIR/TestDB1.key
     TEST_DB1_CRT=$KEYS_DIR/TestDB1.crt
-
-    #For sbsign
-    export PATH="${PATH}:/usr/bin"
 
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/bsa/Bsa.efi --output DO_SIGN/EFI/BOOT/bsa/Bsa.efi
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/Shell.efi --output DO_SIGN/EFI/BOOT/Shell.efi

@@ -5,7 +5,7 @@ S = "${WORKDIR}"
 
 SRC_URI = "git://git.kernel.org/pub/scm/linux/kernel/git/jejb/efitools.git;destsuffix=efitools;protocol=https;nobranch=1;name=efitools"
 
-DEPENDS += "help2man-native libfile-slurp-perl-native"
+DEPENDS += "help2man-native libfile-slurp-perl-native openssl-native sbsigntool-native"
 
 inherit perlnative
 
@@ -15,7 +15,6 @@ SRCREV_efitools = "392836a46ce3c92b55dc88a1aebbcfdfc5dcddce"
 #do_configure[noexec] = "1"
 do_configure() {
     echo "Building efitools..."
-    export PATH="${PATH}:/usr/bin"
     echo "TARGET_PREFIX = ${TARGET_PREFIX} , OLD_TARGET_PREFIX=${OLD_TARGET_PREFIX}, CROSS_COMPILE = ${CROSS_COMPILE} BUILD_CC=${BUILD_CC} $BUILD_LD"
     cd ${S}/efitools
     sed -i -e "1s:#!.*:#!/usr/bin/env nativeperl:" xxdi.pl
@@ -35,9 +34,9 @@ do_compile() {
     mkdir -p $KEYS_DIR
     cd $KEYS_DIR
 
-    #For openssl
+    #Add efitools to the PATH
     echo "S is ${S}"
-    export PATH="${S}/efitools:/usr/bin:${PATH}"
+    export PATH="${S}/efitools:${PATH}"
     echo "New Path: $PATH";
 
     # generate TestPK1: DER and signed siglist

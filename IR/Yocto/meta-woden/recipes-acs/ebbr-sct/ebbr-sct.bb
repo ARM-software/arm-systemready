@@ -3,7 +3,7 @@ DESCRIPTION = "UEFI SCT tests to check for compliance against the EBBR recipe"
 HOMEPAGE = "https://github.com/ARM-software/bbr-acs"
 
 inherit deploy
-DEPENDS = "sie-keys"
+DEPENDS = "sbsigntool-native sie-keys"
 
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://bbr-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13"
@@ -124,9 +124,9 @@ do_signimage() {
 }
 
 do_compile() {
-    #For openssl
+    #For efitools
     echo "S is ${S}"
-    export PATH="${S}/../../../generic_arm64-oe-linux/sie-keys/1.0-r0/efitools:/usr/bin:${PATH}"
+    export PATH="${S}/../../../generic_arm64-oe-linux/sie-keys/1.0-r0/efitools:${PATH}"
     echo "New Path: $PATH";
 
     cd ${S}/edk2-test
@@ -140,8 +140,6 @@ do_compile() {
 
     echo "UEFI-SCT Build done..."
 
-    #For sbsign
-    export PATH="${PATH}:/usr/bin"
     do_signimage
 
 }
