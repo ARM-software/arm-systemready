@@ -45,7 +45,8 @@ sudo apt install git curl mtools gdisk gcc liblz4-tool zstd \
  openssl automake autotools-dev libtool bison flex \
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
  make gcc g++ gnu-efi libfile-slurp-perl help2man \
- python3-pip chrpath diffstat lz4 -y
+ python3-pip chrpath diffstat lz4 cpio gawk locales wget -y
+sudo locale-gen en_US.utf8
 
 sudo pip3 install kas
 
