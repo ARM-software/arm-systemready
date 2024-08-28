@@ -45,7 +45,7 @@ sudo apt install git curl mtools gdisk gcc liblz4-tool zstd \
  openssl automake autotools-dev libtool bison flex \
  bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
  make gcc g++ gnu-efi libfile-slurp-perl help2man \
- python3-pip chrpath diffstat lz4 -y
+ python3-pip chrpath diffstat lz4 cpio gawk wget -y
 
 sudo pip3 install kas
 
@@ -107,7 +107,7 @@ copy_recipes()
     if [ ! -z "$ARM_LINUX_ACS_TAG" ]; then
         sed -i -E 's/SRCREV_linux-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_linux-acs = \"'${ARM_LINUX_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-drv/bsa-acs-drv.bb
     fi
-    
+
     if [ ! -z "$EDK2_TEST_PARSER_TAG" ]; then
         sed -i -E 's/SRCREV_edk2-test-parser\s+=\s+"\$\{AUTOREV\}"/SRCREV_edk2-test-parser = \"'${EDK2_TEST_PARSER_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/edk2-test-parser/edk2-test-parser.bb
     fi
@@ -139,4 +139,3 @@ copy_recipes()
 
 copy_recipes
 customise_image
-
