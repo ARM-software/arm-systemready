@@ -143,7 +143,7 @@ For the verification steps of SIE ACS, refer to the [SIE ACS Verification](../co
 
 - [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.07.00
 
-- [Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs) TAG: v23.09_REL7.1.3
+- [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs) TAG: v23.09_REL7.1.3
 
 - [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.09_REL1.0.6
 
