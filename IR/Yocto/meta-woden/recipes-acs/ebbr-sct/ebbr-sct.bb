@@ -46,6 +46,7 @@ do_configure() {
     echo "Applying security interface extension ACS patch..."
     cp -r ${S}/bbr-acs/bbsr/sct-tests/BBSRVariableSizeTest uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices
     cp -r ${S}/bbr-acs/bbsr/sct-tests/SecureBoot uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices
+    cp -r ${S}/bbr-acs/bbsr/sct-tests/PlatformResetAttackMitigationPsciTest uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
 
     git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/bbsr/patches/0001-SIE-Patch-for-UEFI-SCT-Build.patch
 
