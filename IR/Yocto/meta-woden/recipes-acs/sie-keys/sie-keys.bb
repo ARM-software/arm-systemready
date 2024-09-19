@@ -3,30 +3,15 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit deploy
 S = "${WORKDIR}"
 
-SRC_URI = "git://git.kernel.org/pub/scm/linux/kernel/git/jejb/efitools.git;destsuffix=efitools;protocol=https;nobranch=1;name=efitools"
-
-DEPENDS += "help2man-native libfile-slurp-perl-native"
+DEPENDS += "\
+    efitools-native \
+    help2man-native \
+    libfile-slurp-perl-native \
+    openssl-native \
+    sbsigntool-native \
+"
 
 inherit perlnative
-
-SRCREV_efitools = "392836a46ce3c92b55dc88a1aebbcfdfc5dcddce"
-
-# no configure step
-#do_configure[noexec] = "1"
-do_configure() {
-    echo "Building efitools..."
-    export PATH="${PATH}:/usr/bin"
-    echo "TARGET_PREFIX = ${TARGET_PREFIX} , OLD_TARGET_PREFIX=${OLD_TARGET_PREFIX}, CROSS_COMPILE = ${CROSS_COMPILE} BUILD_CC=${BUILD_CC} $BUILD_LD"
-    cd ${S}/efitools
-    sed -i -e "1s:#!.*:#!/usr/bin/env nativeperl:" xxdi.pl
-    sed -i  '1 i\CC = ${BUILD_CC}' ${S}/efitools/Make.rules
-    sed -i  '1 i\LD = ${BUILD_LD}' ${S}/efitools/Make.rules
-
-    make clean
-    echo " =================Clean done===================="
-    make
-    echo "efitools is built successfully"
-}
 
 do_compile() {
 
@@ -34,11 +19,6 @@ do_compile() {
     echo "do_compile: security-interface-extension-keys"
     mkdir -p $KEYS_DIR
     cd $KEYS_DIR
-
-    #For openssl
-    echo "S is ${S}"
-    export PATH="${S}/efitools:/usr/bin:${PATH}"
-    echo "New Path: $PATH";
 
     # generate TestPK1: DER and signed siglist
     NAME=TestPK1

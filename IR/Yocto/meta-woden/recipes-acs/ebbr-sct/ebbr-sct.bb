@@ -3,7 +3,13 @@ DESCRIPTION = "UEFI SCT tests to check for compliance against the EBBR recipe"
 HOMEPAGE = "https://github.com/ARM-software/bbr-acs"
 
 inherit deploy
-DEPENDS = "sie-keys"
+DEPENDS = "efitools-native sbsigntool-native"
+
+# When the sie-keys package is built it deploys the signing keys. This
+# recipe uses the deployed keys so we need to ensure do_deploy has
+# completed before we attempt to sign anything.
+do_compile[depends] = "sie-keys:do_deploy"
+export KEYS_DIR="${DEPLOY_DIR_IMAGE}/security-interface-extension-keys"
 
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://bbr-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13"
@@ -50,10 +56,6 @@ do_configure() {
     git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/bbsr/patches/0001-SIE-Patch-for-UEFI-SCT-Build.patch
 
 }
-
-export KEYS_DIR="${S}/../../../generic_arm64-oe-linux/sie-keys/1.0-r0/security-interface-extension-keys"
-
-
 
 # *********************************************
 # sign .efi executables for Secure Boot
@@ -121,11 +123,6 @@ do_signimage() {
 }
 
 do_compile() {
-    #For openssl
-    echo "S is ${S}"
-    export PATH="${S}/../../../generic_arm64-oe-linux/sie-keys/1.0-r0/efitools:/usr/bin:${PATH}"
-    echo "New Path: $PATH";
-
     cd ${S}/edk2-test
     # create softlink to SctPkg
     ln -sf ${S}/edk2-test/uefi-sct/SctPkg SctPkg
@@ -137,8 +134,6 @@ do_compile() {
 
     echo "UEFI-SCT Build done..."
 
-    #For sbsign
-    export PATH="${PATH}:/usr/bin"
     do_signimage
 
 }
