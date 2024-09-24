@@ -147,31 +147,35 @@ YELLOW='\033[0;33m'
 NC='\033[0m'
 
 echo -e "${GREEN}Finding hardware, driver, and device errors...${NC}"
-echo -e "${YELLOW}Errors and warnings from Linux and UEFI dump:${NC}" >> $LOG_FILE
+echo -e "${YELLOW}Hardware/Device/Firmware errors and warnings from Linux and UEFI dump:${NC}" >> $LOG_FILE
 grep -rnEi '(error|fail|fault).*?(hardware|hw|driver|device|firmware|pcie|usb)' \
     $(find "$PARENT_DIR"/linux_dump -type f ! -name 'dmesg.log') \
     "$PARENT_DIR"/uefi_dump >> $LOG_FILE
-
+echo -e "${YELLOW}All other errors and warnings from Linux and UEFI dump:${NC}" >> $LOG_FILE
+grep -rnEi '(error|fail|fault)' \
+    $(find "$PARENT_DIR"/linux_dump -type f ! -name 'dmesg.log') \
+    "$PARENT_DIR"/uefi_dump >> $LOG_FILE
 if [ $(wc -l < "$LOG_FILE") -gt 1 ]; then
-    echo -e "${GREEN}Hardware/Device/Firmware error summary saved to $LOG_FILE${NC}"
+    echo -e "${GREEN}Hardware/Device/Firmware error summary saved to $LOG_FILE${NC}. Please review the logs manually."
     cat $LOG_FILE
 else
-    echo -e "${GREEN}No device/driver errors or faults were found in linux_dump (excluding dmesg.log) and uefi_dump.${NC}"
-    echo -e "No device/driver errors or faults were found in linux_dump (excluding dmesg.log) and uefi_dump." >> $LOG_FILE
+    echo -e "${GREEN}No device/driver errors or faults were found in linux_dump (excluding dmesg.log) and uefi_dump. Please review the logs manually.${NC}"
+    echo -e "No device/driver errors or faults were found in linux_dump (excluding dmesg.log) and uefi_dump. Please review the logs manually." >> $LOG_FILE
 fi
 
 #Go through dmesg to retrieve hardware/device/driver failures/errors/faults
 DMESG_FILE="/mnt/acs_results/linux_dump/dmesg.log"
 LOG_FILE="/mnt/acs_results/sniff_test_dmesg_$(date +%Y%m%d_%H%M%S).log"
-echo -e "${YELLOW}Errors and warnings from dmesg:${NC}" >> $LOG_FILE
+echo -e "${YELLOW}Hardware/Device/Firmware errors and warnings from dmesg:${NC}" >> $LOG_FILE
 grep -nEi '(error|fail|fault).*?(hardware|hw|driver|device|firmware|pcie|usb)' "$DMESG_FILE" >> $LOG_FILE
-
+echo -e "${YELLOW}All other errors and warnings from dmesg:${NC}" >> $LOG_FILE
+grep -nEi '(error|fail| fault)' "$DMESG_FILE" >> $LOG_FILE
 if [ $(wc -l < "$LOG_FILE") -gt 1 ]; then
-    echo -e "${GREEN}Hardware/Device/Firmware error summary saved to $LOG_FILE${NC}"
+    echo -e "${GREEN}Hardware/Device/Firmware error summary saved to $LOG_FILE$. Please review the logs manually.{NC}"
     cat $LOG_FILE
 else
-    echo -e "${GREEN}No device/driver errors or faults were found in dmesg.log.${NC}"
-    echo -e "No device/driver errors or faults were found in dmesg.log" >> $LOG_FILE
+    echo -e "${GREEN}No device/driver errors or faults were found in dmesg.log. Please review the logs manually.${NC}"
+    echo -e "No device/driver errors or faults were found in dmesg.log. Please review the logs manually." >> $LOG_FILE
 fi
 
  mkdir -p /mnt/acs_results/fwts
