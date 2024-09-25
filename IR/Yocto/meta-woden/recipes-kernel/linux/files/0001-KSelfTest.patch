@@ -16,8 +16,8 @@ Signed-off-by: gurrev01 <gururaj.revankar@arm.com>
  create mode 100644 tools/testing/selftests/dt/.gitignore
  create mode 100644 tools/testing/selftests/dt/Makefile
  create mode 100644 tools/testing/selftests/dt/compatible_ignore_list
- create mode 100644 tools/testing/selftests/dt/ktap_helpers.sh
- create mode 100644 tools/testing/selftests/dt/test_unprobed_devices.sh
+ create mode 755 tools/testing/selftests/dt/ktap_helpers.sh
+ create mode 755 tools/testing/selftests/dt/test_unprobed_devices.sh
 
 diff --git a/MAINTAINERS b/MAINTAINERS
 index dd5de540ec0b..24b14a71b4f9 100644
