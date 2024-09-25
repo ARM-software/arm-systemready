@@ -53,19 +53,24 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  fi
  
  #linux debug dump
- mkdir -p /mnt/acs_results/linux_dump
- lspci -vvv &> /mnt/acs_results/linux_dump/lspci.log
- lsusb > /mnt/acs_results/linux_dump/lsusb.log
- uname -a > /mnt/acs_results/linux_dump/uname.log
- cat /proc/interrupts > /mnt/acs_results/linux_dump/interrupts.log
- cat /proc/cpuinfo > /mnt/acs_results/linux_dump/cpuinfo.log
- cat /proc/meminfo > /mnt/acs_results/linux_dump/meminfo.log
- cat /proc/iomem > /mnt/acs_results/linux_dump/iomem.log
- ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
- cp -r /sys/firmware /mnt/acs_results/linux_dump/
- dmidecode > /mnt/acs_results/linux_dump/dmidecode.log
- efibootmgr > /mnt/acs_results/linux_dump/efibootmgr.log
- 
+ LINUX_DUMP_DIR="/mnt/acs_results/linux_dump"
+ mkdir -p $LINUX_DUMP_DIR
+ lspci -vvv &> $LINUX_DUMP_DIR/lspci.log
+ lsusb    > $LINUX_DUMP_DIR/lsusb.log
+ uname -a > $LINUX_DUMP_DIR/uname.log
+ cat /proc/interrupts > $LINUX_DUMP_DIR/interrupts.log
+ cat /proc/cpuinfo    > $LINUX_DUMP_DIR/cpuinfo.log
+ cat /proc/meminfo    > $LINUX_DUMP_DIR/meminfo.log
+ cat /proc/iomem      > $LINUX_DUMP_DIR/iomem.log
+ ls -lR /sys/firmware > $LINUX_DUMP_DIR/firmware.log
+ cp -r /sys/firmware $LINUX_DUMP_DIR/
+ dmidecode  > $LINUX_DUMP_DIR/dmidecode.log
+ efibootmgr > $LINUX_DUMP_DIR/efibootmgr.log
+ fwupdmgr get-devices          &> $LINUX_DUMP_DIR/fwupd_getdevices.log
+ echo "0" | fwupdtool esp-list &> $LINUX_DUMP_DIR/fwupd_esplist.log
+ fwupdmgr get-bios-settings    &> $LINUX_DUMP_DIR/fwupd_bios_setting.log
+ fwupdmgr get-history          &> $LINUX_DUMP_DIR/fwupd_get_history.log
+
  mkdir -p /mnt/acs_results/fwts
  echo "Executing FWTS for EBBR"
  test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
