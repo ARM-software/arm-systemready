@@ -32,12 +32,12 @@ TOP_DIR=`pwd`
 pushd $TOP_DIR/meta-woden
 kas build kas/woden.yml
 if [ $? -eq 0 ]; then
-    if [ -f $TOP_DIR/meta-woden/build/tmp/deploy/images/generic-arm64/woden-image-generic-arm64.wic ]; then
-      cd $TOP_DIR/meta-woden/build/tmp/deploy/images/generic-arm64
-      rm ir-acs-live-image-generic-arm64.wic.xz 2> /dev/null
-      cp woden-image-generic-arm64.wic ir-acs-live-image-generic-arm64.wic
+    if [ -f $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64/woden-image-genericarm64.rootfs.wic ]; then
+      cd $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64
+      rm ir-acs-live-image-genericarm64.wic.xz 2> /dev/null
+      cp woden-image-genericarm64.rootfs.wic ir-acs-live-image-generic-arm64.wic
       xz -z ir-acs-live-image-generic-arm64.wic
-      echo "The built image is at $TOP_DIR/meta-woden/build/tmp/deploy/images/generic-arm64/ir-acs-live-image-generic-arm64.wic.xz"
+      echo "The built image is at $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64/ir-acs-live-image-generic-arm64.wic.xz"
     fi
 fi
 popd

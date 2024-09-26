@@ -3,7 +3,7 @@ LICENSE = "GPLv2 & Apache-2.0"
 LIC_FILES_CHKSUM = "file://bsa-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13 \
                     file://linux-acs/acs-drv/files/COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e \
 "
-COMPATIBLE_MACHINE:generic-arm64 = "generic-arm64"
+COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
 
 inherit module-base
 

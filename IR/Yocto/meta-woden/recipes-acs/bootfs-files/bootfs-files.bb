@@ -29,7 +29,7 @@ do_deploy() {
    cp startup.nsh ${DEPLOYDIR}/
    cp pingtest.nsh ${DEPLOYDIR}/
    cp sie_startup.nsh ${DEPLOYDIR}/
-   cp ${S}/../../../armv8a-oe-linux/ebbr-sct/1.0-r0/bbr-acs/bbsr/config/sie_SctStartup.nsh ${DEPLOYDIR}/
+   cp ${S}/../../../armv8a-oe-linux/ebbr-sct/1.0/bbr-acs/bbsr/config/sie_SctStartup.nsh ${DEPLOYDIR}/
 
    # create and copy necessary flags to deploy directory
    touch ir_bsa.flag yocto_image.flag

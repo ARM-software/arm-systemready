@@ -20,14 +20,13 @@ do_install:append() {
   echo "S is ${S}"
   install -d ${D}${systemd_unitdir}/system
   install -d ${D}${bindir}
-  install -d ${D}/bin
   install -m 0770 ${WORKDIR}/init.sh                             ${D}${bindir}
-  install -m 0770 ${WORKDIR}/../../ebbr-sct/1.0-r0/bbr-acs/ebbr/config/ir_bbr_fwts_tests.ini ${D}${bindir}
+  install -m 0770 ${WORKDIR}/../../ebbr-sct/1.0/bbr-acs/ebbr/config/ir_bbr_fwts_tests.ini ${D}${bindir}
   install -m 0770 ${WORKDIR}/secure_init.sh                      ${D}${bindir}
-  install -m 0770 ${WORKDIR}/../../ebbr-sct/1.0-r0/bbr-acs/bbsr/config/bbsr_fwts_tests.ini   ${D}/bin
+  install -m 0770 ${WORKDIR}/../../ebbr-sct/1.0/bbr-acs/bbsr/config/bbsr_fwts_tests.ini   ${D}${bindir}
   install -m 0644 ${WORKDIR}/acs_run-before-login-prompt.service ${D}${systemd_unitdir}/system
-  install -m 0770 ${WORKDIR}/verify_tpm_measurements.py          ${D}/bin
-  install -m 0770 ${WORKDIR}/ethtool-test.py                     ${D}/bin
-  install -m 0770 ${WORKDIR}/read_write_check_blk_devices.py     ${D}/bin
+  install -m 0770 ${WORKDIR}/verify_tpm_measurements.py          ${D}${bindir}
+  install -m 0770 ${WORKDIR}/ethtool-test.py                     ${D}${bindir}
+  install -m 0770 ${WORKDIR}/read_write_check_blk_devices.py     ${D}${bindir}
   install -m 0770 ${WORKDIR}/device_driver_info.sh               ${D}${bindir}
 }
