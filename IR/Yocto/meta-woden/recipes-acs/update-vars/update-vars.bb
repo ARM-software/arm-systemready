@@ -6,11 +6,13 @@ SRC_URI = " git://git.code.sf.net/p/gnu-efi/code;destsuffix=gnu-efi;protocol=htt
             git://git.kernel.org/pub/scm/linux/kernel/git/jejb/efitools.git;destsuffix=efitools;branch=master;protocol=https;name=efitools  \
             file://0001-UpdateVar-updates-for-SecureBoot-automatic-provision.patch;patch=1;patchdir=efitools  "
 
+SRCREV_FORMAT = "gnu-efi efitools "
+
 SRCREV_gnu-efi = "183ec634eec7aee214e4e2baa728bc9c68c492f0"
 SRCREV_efitools = "392836a46ce3c92b55dc88a1aebbcfdfc5dcddce"
 
 
-COMPATIBLE_MACHINE:generic-arm64 = "generic-arm64"
+COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
 
 do_configure() {
     echo "Building gnu-efi..."

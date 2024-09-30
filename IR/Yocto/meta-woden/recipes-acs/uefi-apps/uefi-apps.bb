@@ -7,7 +7,7 @@ PROVIDES:remove = "virtual/uefi-firmware"
 PROVIDES:remove = "virtual/bootloader"
 
 LICENSE = "CLOSED"
-COMPATIBLE_MACHINE:generic-arm64 = "generic-arm64"
+COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
 
 COMPATIBLE_HOST = "aarch64.*-linux"
 EDK2_ARCH = "AARCH64"

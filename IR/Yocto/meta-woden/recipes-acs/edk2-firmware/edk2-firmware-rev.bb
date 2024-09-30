@@ -2,7 +2,7 @@
 SRCREV_edk2           ?= "${AUTOREV}"
 SRCREV_edk2-platforms ?= "${AUTOREV}"
 
-FILESEXTRAPATHS:prepend := "${TOPDIR}/../meta-arm/meta-arm/recipes-bsp/uefi/files:"
+FILESEXTRAPATHS:prepend := "${TOPDIR}/../meta-arm/meta-arm/recipes-bsp/uefi/files:${TOPDIR}/../recipes-acs/edk2-firmware/files:"
 
 require recipes-bsp/uefi/edk2-firmware.inc
 

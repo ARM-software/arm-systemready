@@ -6,13 +6,14 @@ repos:
 
   poky:
     url: https://git.yoctoproject.org/git/poky
-    refspec: mickledore
+    refspec: scarthgap
     layers:
       meta:
+      meta-yocto-bsp :
 
   meta-arm:
     url: https://git.yoctoproject.org/git/meta-arm
-    refspec: mickledore
+    refspec: scarthgap
     layers:
       meta-arm:
       meta-arm-bsp:
@@ -20,16 +21,17 @@ repos:
 
   meta-openembedded:
     url: https://git.openembedded.org/meta-openembedded
-    refspec: mickledore
+    refspec: scarthgap
     layers:
       meta-oe:
       meta-perl:
+      meta-python:
 
   meta-secure-core:
     url: https://github.com/Wind-River/meta-secure-core
-    refspec: mickledore
+    refspec: scarthgap
     layers:
-      meta:
+      meta-secure-core-common:
       meta-efi-secure-boot:
       meta-signing-key:
       meta-tpm2:
@@ -40,6 +42,6 @@ local_conf_header:
     PARALLEL_MAKE = "-j16"
 
 distro: woden
-machine: generic-arm64
+machine: genericarm64
 target:
   - woden-image

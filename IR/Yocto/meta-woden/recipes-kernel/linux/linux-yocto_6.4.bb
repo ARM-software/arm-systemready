@@ -34,7 +34,7 @@ PV = "${LINUX_VERSION}+git${SRCPV}"
 KMETA = "kernel-meta"
 KCONF_BSP_AUDIT_LEVEL = "1"
 
-COMPATIBLE_MACHINE:generic-arm64 = "generic-arm64"
+COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
 
 # Functionality flags
 KERNEL_EXTRA_FEATURES ?= "features/netfilter/netfilter.scc"

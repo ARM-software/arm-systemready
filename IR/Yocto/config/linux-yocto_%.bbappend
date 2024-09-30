@@ -1,8 +1,8 @@
 ARMFILESPATHS := "${THISDIR}/${PN}:"
 
-COMPATIBLE_MACHINE:generic-arm64 = "generic-arm64"
-FILESEXTRAPATHS:prepend:generic-arm64 = "${ARMFILESPATHS}"
-SRC_URI:append:generic-arm64 = " "
+COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
+FILESEXTRAPATHS:prepend:genericarm64 = "${ARMFILESPATHS}"
+SRC_URI:append:genericarm64 = " "
 
 FILESEXTRAPATHS:prepend:qemuarm64-sbsa = "${ARMFILESPATHS}"
 SRC_URI:append:qemuarm64-sbsa = " \
