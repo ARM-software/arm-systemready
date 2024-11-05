@@ -1,0 +1,70 @@
+diff --git a/.gitmodules b/.gitmodules
+index 60d54b4..6203d92 100644
+--- a/.gitmodules
++++ b/.gitmodules
+@@ -23,9 +23,6 @@
+ [submodule "UnitTestFrameworkPkg/Library/GoogleTestLib/googletest"]
+ 	path = UnitTestFrameworkPkg/Library/GoogleTestLib/googletest
+ 	url = https://github.com/google/googletest.git
+-[submodule "UnitTestFrameworkPkg/Library/SubhookLib/subhook"]
+-	path = UnitTestFrameworkPkg/Library/SubhookLib/subhook
+-	url = https://github.com/Zeex/subhook.git
+ [submodule "MdePkg/Library/BaseFdtLib/libfdt"]
+ 	path = MdePkg/Library/BaseFdtLib/libfdt
+ 	url = https://github.com/devicetree-org/pylibfdt.git
+diff --git a/.pytool/CISettings.py b/.pytool/CISettings.py
+index ec3beb0..3bcf480 100644
+--- a/.pytool/CISettings.py
++++ b/.pytool/CISettings.py
+@@ -229,8 +229,6 @@ class Settings(CiBuildSettingsManager, UpdateSettingsManager, SetupSettingsManag
+             "BaseTools/Source/C/BrotliCompress/brotli", False))
+         rs.append(RequiredSubmodule(
+             "RedfishPkg/Library/JsonLib/jansson", False))
+-        rs.append(RequiredSubmodule(
+-            "UnitTestFrameworkPkg/Library/SubhookLib/subhook", False))
+         rs.append(RequiredSubmodule(
+             "MdePkg/Library/BaseFdtLib/libfdt", False))
+         rs.append(RequiredSubmodule(
+diff --git a/UnitTestFrameworkPkg/Test/UnitTestFrameworkPkgHostTest.dsc b/UnitTestFrameworkPkg/Test/UnitTestFrameworkPkgHostTest.dsc
+index b1b8eb0..0a29e50 100644
+--- a/UnitTestFrameworkPkg/Test/UnitTestFrameworkPkgHostTest.dsc
++++ b/UnitTestFrameworkPkg/Test/UnitTestFrameworkPkgHostTest.dsc
+@@ -36,6 +36,5 @@
+   UnitTestFrameworkPkg/Library/GoogleTestLib/GoogleTestLib.inf
+   UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf
+   UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf
+-  UnitTestFrameworkPkg/Library/SubhookLib/SubhookLib.inf
+   UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibCmocka.inf
+   UnitTestFrameworkPkg/Library/UnitTestDebugAssertLib/UnitTestDebugAssertLibHost.inf
+diff --git a/UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec b/UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+index ef0a148..a45fe9e 100644
+--- a/UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
++++ b/UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+@@ -20,7 +20,6 @@
+   Library/CmockaLib/cmocka/include
+   Library/GoogleTestLib/googletest/googletest/include
+   Library/GoogleTestLib/googletest/googlemock/include
+-  Library/SubhookLib/subhook
+ 
+ [Includes.Common.Private]
+   PrivateInclude
+@@ -36,7 +35,6 @@
+   ## @libraryclass GoogleTest infrastructure
+   #
+   GoogleTestLib|Include/Library/GoogleTestLib.h
+-  SubhookLib|Include/Library/SubhookLib.h
+   FunctionMockLib|Include/Library/FunctionMockLib.h
+ 
+ [LibraryClasses.Common.Private]
+diff --git a/UnitTestFrameworkPkg/UnitTestFrameworkPkgHost.dsc.inc b/UnitTestFrameworkPkg/UnitTestFrameworkPkgHost.dsc.inc
+index 83d3205..11295be 100644
+--- a/UnitTestFrameworkPkg/UnitTestFrameworkPkgHost.dsc.inc
++++ b/UnitTestFrameworkPkg/UnitTestFrameworkPkgHost.dsc.inc
+@@ -15,7 +15,6 @@
+   CacheMaintenanceLib|MdePkg/Library/BaseCacheMaintenanceLibNull/BaseCacheMaintenanceLibNull.inf
+   CmockaLib|UnitTestFrameworkPkg/Library/CmockaLib/CmockaLib.inf
+   GoogleTestLib|UnitTestFrameworkPkg/Library/GoogleTestLib/GoogleTestLib.inf
+-  SubhookLib|UnitTestFrameworkPkg/Library/SubhookLib/SubhookLib.inf
+   FunctionMockLib|UnitTestFrameworkPkg/Library/FunctionMockLib/FunctionMockLib.inf
+   UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibCmocka.inf
+   DebugLib|UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf

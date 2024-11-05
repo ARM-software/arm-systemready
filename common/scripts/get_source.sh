@@ -64,6 +64,9 @@ get_uefi_src()
     git clone --depth 1 --single-branch \
     --branch $EDK2_SRC_VERSION https://github.com/tianocore/edk2.git
     pushd $TOP_DIR/edk2
+    git apply $TOP_DIR/../../common/patches/edk2_subhook_patch
+    git add .gitmodules
+    git rm --cached UnitTestFrameworkPkg/Library/SubhookLib/subhook
     git submodule update --init
     popd
 }
