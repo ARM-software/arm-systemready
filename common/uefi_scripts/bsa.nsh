@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # @file
 # Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
@@ -27,16 +29,16 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             mkdir temp
         endif
         #BSA_VERSION_PRINT_PLACEHOLDER
-        if exist FS%i:\EFI\BOOT\bsa\Bsa.efi then
+        if exist FS%i:\acs_tests\bsa\Bsa.efi then
             echo "Press any key to start BSA in verbose mode."
             echo "If no key is pressed then BSA will be run in normal mode"
-            FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
+            FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
             if %lasterror% == 0 then
                 if exist FS%i:\acs_results\uefi\BsaVerboseResults.log then
                     echo "BSA ACS in verbose mode is already run."
                     echo "Press any key to start BSA ACS in verbose mode execution from the beginning."
                     echo "WARNING: Ensure you have backed up the existing logs."
-                    FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
+                    FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
                     if %lasterror% == 0 then
                         #Backup the existing logs
                         rm -q FS%i:\acs_results\uefi\BsaVerboseResults_previous_run.log
@@ -48,20 +50,20 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 endif
 :BsaVerboseRun
                 echo "Running BSA in verbose mode"
-                if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
-                    #Executing for BSA IR. Execute only OS tests
-                    FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -os -skip 900 -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
+                if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
+                    #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
+                    FS%i:\acs_tests\bsa\Bsa.efi -v 1 -os -skip 900 -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
                 else
-                   FS%i:\EFI\BOOT\bsa\Bsa.efi -v 1 -skip 900 -f BsaVerboseTempResults.log
+                   FS%i:\acs_tests\bsa\Bsa.efi -v 1 -skip 900 -f BsaVerboseTempResults.log
                 endif
                 stall 200000
                 if exist FS%i:\acs_results\uefi\BsaVerboseTempResults.log then
-                    if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
-                        echo " SystemReady IR ACS v2.1.1" > BsaVerboseResults.log
+                    if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
+                        echo " SystemReady devicetree band ACS v3.0.0" > BsaVerboseResults.log
                     else
-                        echo " SystemReady ES ACS v1.4.0" > BsaVerboseResults.log
+                        echo " SystemReady band ACS v3.0.0" > BsaVerboseResults.log
                     endif
-                    stall 200000
+		    stall 200000
                     type BsaVerboseTempResults.log >> BsaVerboseResults.log
                     cp BsaVerboseTempResults.log temp/
                     rm BsaVerboseTempResults.log
@@ -75,7 +77,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 echo "BSA ACS is already run."
                 echo "Press any key to start BSA ACS execution from the beginning."
                 echo "WARNING: Ensure you have backed up the existing logs."
-                FS%i:\EFI\BOOT\bbr\SCT\stallforkey.efi 10
+                FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
                 if %lasterror% == 0 then
                     #Backup the existing logs
                     rm -q FS%i:\acs_results\uefi\BsaResults_previous_run.log
@@ -86,18 +88,18 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 goto Done
             endif
 :BsaRun
-            if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
-               #Executing for BSA IR. Execute only OS tests
-               FS%i:\EFI\BOOT\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaTempResults.log
+            if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
+               #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
+               FS%i:\acs_tests\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaTempResults.log
             else
-               FS%i:\EFI\BOOT\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
+               FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
             endif
             stall 200000
             if exist FS%i:\acs_results\uefi\BsaTempResults.log then
-                if exist FS%i:\EFI\BOOT\bsa\ir_bsa.flag then
-                    echo " SystemReady IR ACS v2.1.1" > BsaResults.log
+                if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
+                    echo " SystemReady devicetree band ACS v3.0.0" > BsaResults.log
                 else
-                    echo " SystemReady ES ACS v1.4.0" > BsaResults.log
+                    echo " SystemReady band ACS v3.0.0" > BsaResults.log
                 endif
                 stall 200000
                 type BsaTempResults.log >> BsaResults.log
