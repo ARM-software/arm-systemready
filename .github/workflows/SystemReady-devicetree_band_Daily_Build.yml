@@ -37,5 +37,5 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: systemready-dt_acs_live_image.wic.xz
-        path: IR/Yocto/meta-woden/build/tmp/deploy/images/generic-arm64/systemready-dt_acs_live_image.wic.xz
+        path: SystemReady-devicetree-band/Yocto/meta-woden/build/tmp/deploy/images/generic-arm64/systemready-dt_acs_live_image.wic.xz
         if-no-files-found: error
