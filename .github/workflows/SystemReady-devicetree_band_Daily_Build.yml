@@ -1,4 +1,4 @@
-name: SystemReady Band Daily Builds
+name: SystemReady devicetree Band Daily Builds
 
 on:
   schedule:
