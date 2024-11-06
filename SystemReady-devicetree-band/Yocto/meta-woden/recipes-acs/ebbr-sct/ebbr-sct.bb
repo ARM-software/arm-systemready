@@ -14,7 +14,8 @@ export KEYS_DIR="${DEPLOY_DIR_IMAGE}/bbsr-keys"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://bbr-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13"
 
-SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=https;branch=main;name=bbr-acs \
+# TODO 
+SRC_URI += "git://github.com/chetan-rathore/bbr-acs-1;destsuffix=bbr-acs;protocol=https;branch=main;name=bbr-acs \
             git://github.com/tianocore/edk2-test;destsuffix=edk2-test;protocol=https;nobranch=1;name=edk2-test \
             gitsm://github.com/tianocore/edk2.git;destsuffix=edk2-test/edk2;protocol=https;nobranch=1;name=edk2 \
             file://sctversion.patch;patch=1;patchdir=edk2-test \
@@ -36,13 +37,8 @@ export PYTHON_COMMAND = "python3"
 
 
 do_configure() {
-    #THIS CHANGE IS ONLY FOR PIVOT GERRIT
-    cd ${S}
-    git clone "ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bbr"
-    mv bbr-acs bbr-githun
-    mv syscomp_bbr bbr-acs
-
     cd ${S}/edk2-test
+
     # patch edk2-test
     echo "Applying SCT patch ..."
     git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/common/patches/edk2-test-bbr.patch

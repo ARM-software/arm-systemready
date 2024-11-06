@@ -127,7 +127,6 @@ get_sct_src()
     popd
 }
 
-#TODO:  Change all github to gerrit after release
 get_linux-acs_src()
 {
   if [ -z $ARM_LINUX_ACS_TAG ]; then
@@ -156,8 +155,8 @@ get_linux-acs_src()
 get_bbr_acs_src()
 {
     echo "Downloading Arm BBR source code."
-    git clone ssh://ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_bbr bbr-acs
-
+    #TODO change branch to main
+    git clone https://github.com/chetan-rathore/bbr-acs-1.git bbr-acs
     if [ -n "$ARM_BBR_TAG" ]; then
         # TAG provided.
         echo "Checking out Arm BBR TAG: $ARM_BBR_TAG"
