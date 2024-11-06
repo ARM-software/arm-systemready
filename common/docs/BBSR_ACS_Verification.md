@@ -1,19 +1,19 @@
-# Introduction to the SystemReady Security Interface Extension (SIE)
+# Introduction to the SystemReady BBSR (BBSR)
 
-The SystemReady Security Interface Extension provides a way to certify that Secure Boot and secure firmware update are implemented as prescribed by the Arm [Base Boot Security Specification](https://developer.arm.com/documentation/den0107/latest) (BBSR).  The Security Interface Extension is an extension to the bands of the SystemReady program and a pre-requisite for a Security Interface Extension certification in one of the IR, ES, or SR bands.
+The SystemReady BBSR provides a way to verify that Secure Boot and secure firmware update are implemented as prescribed by the Arm [Base Boot Security Specification](https://developer.arm.com/documentation/den0107/latest) (BBSR).  The BBSR is an extension to the bands of the SystemReady program and a pre-requisite for a BBSR certification in one of the SystemReady-devicetree or SystemReady bands.
 
-The Security Interface Extension ACS tests the following security related interfaces:
+The BBSR ACS tests the following security related interfaces:
 * Authenticated variables
 * Secure Boot variables
 * Secure firmware update using update capsules
 * For systems with Trusted Platform Modules(TPMs), TPM measured boot and the TCG2 protocol
 
 Note:
-1. The Prebuilt SR/ES/IR band images can be used to verify the requirements of SIE.
-2. See the Section 3.4 [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the SecureBoot keys.
-This document also contains the background information on the SIE related specification and ACS.
+1. The Prebuilt band images can be used to verify the requirements of BBSR.
+2. See the Section 3.4 [BBSR ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the SecureBoot keys.
+This document also contains the background information on the BBSR related specification and ACS.
 
-## Prerequisite for running SIE ACS on QEMU
+## Prerequisite for running BBSR ACS on QEMU
 
 ### Install swtpm package (TPM emulator)
 Note: Install only if there is no past installation of swtpm present. Check by running "swtpm -v" in the terminal, which should output the version.
@@ -45,7 +45,7 @@ cd ..
 rm -rf swtpm/ libtpms/
 ```
 
-## Running SIE ACS on QEMU with UEFI firmware
+## Running BBSR ACS on QEMU with UEFI firmware
 
 ### Build QEMU model
 Follow build instructions from https://www.qemu.org/download/#source
@@ -89,7 +89,7 @@ truncate -s 64M flash0.img
 truncate -s 64M flash1.img
 ```
 
-### Running SIE ACS with Prebuilt SystemReady SR/ES ACS images on QEMU
+### Running BBSR ACS with Prebuilt SystemReady band image on QEMU
 1. Create a script "run_qemu.sh" as below with variables configured as per your environment:
 
 ```
@@ -98,7 +98,7 @@ truncate -s 64M flash1.img
 QEMU=<path to QEMU model>
 FLASH0=<path to flash0.img>
 FLASH1=<path to flash1.img>
-IMG=<path to systemready SR/ES image>
+IMG=<path to systemready band image>
 
 WD=`pwd`
 TPMSOCK=/tmp/swtpm-sock$$
@@ -122,32 +122,32 @@ $QEMU -M virt -cpu cortex-a57 -smp 8 -m 2048 \
 -nographic "$@"
 ```
 
-2. To run the SIE ACS, execute the "run_qemu.sh".
-Once QEMU execution begins, immediately press Esc key to go into the UEFI settings. Follow the steps in Section 3.4 for "Enrolling keys in EDK2" in the [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the secureboot keys. <br>
-Note: The SecureBoot keys are present in \<bootfs>\security-interface-extension-keys
+2. To run the BBSR ACS, execute the "run_qemu.sh".
+Once QEMU execution begins, immediately press Esc key to go into the UEFI settings. Follow the steps in Section 3.4 for "Enrolling keys in EDK2" in the [BBSR ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the secureboot keys. <br>
+Note: The SecureBoot keys are present in \<bootfs>\bbsr-keys
 
 
-3. To run the SIE ACS suites, choose following in grub options.
+3. To run the BBSR ACS suites, choose following in grub options.
 ```
-"SCT for Security Interface Extension (optional)" for SIE SCT tests
+"SCT for BBSR (optional)" for BBSR SCT tests
 and
-"Linux Boot for Security Interface Extension (optional)" for Secure Linux boot, SIE FWTS and TPM2 logs.
+"Linux Boot for BBSR (optional)" for Secure Linux boot, BBSR FWTS and TPM2 logs.
 ```
 
-Note: IR ACS image can also be run using the above steps, if the underlying firmware is UEFI.
+Note: SystemReady-devicetree-band ACS image can also be run using the above steps, if the underlying firmware is UEFI.
 
-## Running SIE ACS on QEMU with uboot firmware
+## Running BBSR ACS on QEMU with uboot firmware
 
 ### Build u-boot firmware and QEMU
-Follow the instructions provided in [Verification of the IR image on QEMU Arm machine](../../IR/Yocto/README.md#verification-of-the-ir-image-on-qemu-arm-machine) section of IR Yocto README.
+Follow the instructions provided in [Verification of the SystemReady-devicetree-band image on QEMU Arm machine](../../SystemReady-devicetree-band/Yocto/README.md#verification-of-the-ir-image-on-qemu-arm-machine) section of SystemReady-devicetree-band Yocto README.
 
-### Running SIE ACS with Prebuilt SystemReady IR ACS image on QEMU
+### Running BBSR ACS with Prebuilt SystemReady-devicetree-band ACS image on QEMU
 1. Create a script "run_qemu.sh" as below with variables configured as per your environment:
 
 ```
 #! /bin/bash
 
-IMG=<PATH to IR ACS image>
+IMG=<PATH to SystemReady-devicetree-band ACS image>
 BUILD_PATH=<path to buildroot directory where QEMU and uboot firmware is built>
 QEMU=$BUILD_PATH/output/host/bin/qemu-system-aarch64
 FLASH_BIN=$BUILD_PATH/output/images/flash.bin
@@ -186,19 +186,19 @@ $QEMU \
     -object rng-random,filename=/dev/urandom,id=rng0 \
     -rtc base=utc,clock=host \
     -serial stdio \
-    -smp 2 | tee qemu_ebbr_sie_run.log
+    -smp 2 | tee qemu_ebbr_bbsr_run.log
 
 ```
 
-3. Execute the "run_qemu.sh", To run the SIE ACS suites, choose following in grub options.
+3. Execute the "run_qemu.sh", To run the BBSR ACS suites, choose following in grub options.
 ```
-"SCT for Security Interface Extension (optional)" for SIE SCT tests
+"SCT for BBSR (optional)" for BBSR SCT tests
 and
-"Linux Boot for Security Interface Extension (optional)" for Secure Linux boot, SIE FWTS and TPM2 logs.
+"Linux Boot for BBSR (optional)" for Secure Linux boot, BBSR FWTS and TPM2 logs.
 ```
 
-Note: IR Yocto ACS supports automatic enrollment of secure boot keys, still if the system fails to enter SecureBoot mode, Please refer to "Enrolling keys in U-boot" section of [Security Interface Extension ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll manually. <br>
-Note: The SecureBoot keys are present in \<bootfs>\security-interface-extension-keys
+Note: SystemReady-devicetree-band Yocto ACS supports automatic enrollment of secure boot keys, still if the system fails to enter SecureBoot mode, Please refer to "Enrolling keys in U-boot" section of [BBSR ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll manually. <br>
+Note: The SecureBoot keys are present in \<bootfs>\bbsr-keys
 
 --------------
 *Copyright (c) 2023-24, Arm Limited and Contributors. All rights reserved.*
