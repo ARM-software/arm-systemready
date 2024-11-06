@@ -1,0 +1,7 @@
+ACS version: ACS v23.03_2.0.0
+SRS version: SRS 3.0 
+BSA version: BSA v1.0C
+BBR version: BBR v2.0 
+EBBR version: EBBR v2.1.0
+BBSR version: BBSR v1.2
+Band: SystemReady Devicetree 3.0 
