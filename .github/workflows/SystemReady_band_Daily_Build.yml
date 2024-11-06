@@ -36,5 +36,5 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: systemready_acs_live_image.img.xz
-        path: SR/scripts/output/systemready_acs_live_image.img.xz
+        path: SystemReady-band/scripts/output/systemready_acs_live_image.img.xz
         if-no-files-found: error
