@@ -1,0 +1,228 @@
+#!/usr/bin/env python3
+# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# SPDX-License-Identifier : Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import argparse
+import chardet
+import json
+import re
+from collections import defaultdict
+
+def detect_file_encoding(file_path):
+    with open(file_path, 'rb') as file:
+        raw_data = file.read()
+        result = chardet.detect(raw_data)
+        return result['encoding']
+
+def main(input_file, output_file):
+    processing = False
+    in_test = False
+    suite_name = ""
+    test_number = ""
+    test_name = ""
+    test_description = ""
+    result = ""
+    rules = ""
+    result_mapping = {"PASS": "PASSED", "FAIL": "FAILED", "SKIPPED": "SKIPPED"}
+
+    file_encoding = detect_file_encoding(input_file)
+
+    result_data = defaultdict(list)
+    suite_summary = {
+        "total_PASSED": 0,
+        "total_FAILED": 0,
+        "total_ABORTED": 0,
+        "total_SKIPPED": 0,
+        "total_WARNINGS": 0
+    }
+
+    with open(input_file, "r", encoding=file_encoding, errors="ignore") as file:
+        lines = file.read().splitlines()
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            if "*** Starting" in line:
+                suite_name_match = re.search(r'\*\*\* Starting (.*) tests \*\*\*', line)
+                if suite_name_match:
+                    suite_name = suite_name_match.group(1).strip()
+                else:
+                    suite_name = line.strip().split("*** Starting")[1].split("tests")[0].strip()
+                processing = True
+                in_test = False
+                i += 1
+                continue
+            elif processing:
+                if not line.strip():
+                    i +=1
+                    continue
+                # Try to match test line with result on same line
+                result_line_match = re.match(r'^\s*(\d+)\s*:\s*(.*?)\s*: Result:\s*(\w+)$', line)
+                if result_line_match:
+                    test_number = result_line_match.group(1).strip()
+                    test_name = result_line_match.group(2).strip()
+                    result = result_mapping.get(result_line_match.group(3).strip(), result_line_match.group(3).strip())
+                    test_description = ""
+                    rules = ""
+                    # Create subtest_entry
+                    subtest_entry = {
+                        "sub_Test_Number": test_number,
+                        "sub_Test_Description": test_name,
+                        "sub_test_result": result
+                    }
+                    # Append subtest_entry to result_data
+                    result_data[suite_name].append(subtest_entry)
+                    # Update suite_summary
+                    if result == "PASSED":
+                        suite_summary["total_PASSED"] += 1
+                    elif result == "FAILED":
+                        suite_summary["total_FAILED"] += 1
+                    elif result == "ABORTED":
+                        suite_summary["total_ABORTED"] += 1
+                    elif result == "SKIPPED":
+                        suite_summary["total_SKIPPED"] += 1
+                    elif result == "WARNING":
+                        suite_summary["total_WARNINGS"] += 1
+                    # Reset variables
+                    in_test = False
+                    test_number = ""
+                    test_name = ""
+                    test_description = ""
+                    result = ""
+                    rules = ""
+                    i +=1
+                    continue
+                # Try to match test line without result
+                test_line_match = re.match(r'^\s*(\d+)\s*:\s*(.*)$', line)
+                if test_line_match:
+                    test_number = test_line_match.group(1).strip()
+                    test_name = test_line_match.group(2).strip()
+                    in_test = True
+                    test_description = ""
+                    result = ""
+                    rules = ""
+                    i +=1
+                    continue
+                elif in_test:
+                    if ': Result:' in line:
+                        result_match = re.search(r': Result:\s*(\w+)', line)
+                        if result_match:
+                            result = result_mapping.get(result_match.group(1).strip(), result_match.group(1).strip())
+                        else:
+                            result = "UNKNOWN"
+                        # Create subtest_entry
+                        subtest_entry = {
+                            "sub_Test_Number": test_number,
+                            "sub_Test_Description": test_name,
+                            "sub_test_result": result
+                        }
+                        # Add rules if any
+                        if result == "FAILED" and rules:
+                            subtest_entry["RULES FAILED"] = rules.strip()
+                        elif result == "SKIPPED" and rules:
+                            subtest_entry["RULES SKIPPED"] = rules.strip()
+                        # Append subtest_entry to result_data
+                        result_data[suite_name].append(subtest_entry)
+                        # Update suite_summary
+                        if result == "PASSED":
+                            suite_summary["total_PASSED"] += 1
+                        elif result == "FAILED":
+                            suite_summary["total_FAILED"] += 1
+                        elif result == "ABORTED":
+                            suite_summary["total_ABORTED"] += 1
+                        elif result == "SKIPPED":
+                            suite_summary["total_SKIPPED"] += 1
+                        elif result == "WARNING":
+                            suite_summary["total_WARNINGS"] += 1
+                        # Reset variables
+                        in_test = False
+                        test_number = ""
+                        test_name = ""
+                        test_description = ""
+                        result = ""
+                        rules = ""
+                        i +=1
+                        continue
+                    else:
+                        # Check if line is rules
+                        if re.match(r'^[A-Z0-9_ ,]+$', line.strip()) or line.strip().startswith('Appendix'):
+                            if rules:
+                                rules += ' ' + line.strip()
+                            else:
+                                rules = line.strip()
+                        else:
+                            # Append to test_description
+                            if test_description:
+                                test_description += ' ' + line.strip()
+                            else:
+                                test_description = line.strip()
+                        i +=1
+                        continue
+                else:
+                    i +=1
+                    continue
+            else:
+                i +=1
+                continue
+
+    # Prepare the final output structure
+    formatted_result = []
+
+    for test_suite, subtests in result_data.items():
+        # Initialize test suite summary
+        test_suite_summary = {
+            "total_PASSED": 0,
+            "total_FAILED": 0,
+            "total_ABORTED": 0,
+            "total_SKIPPED": 0,
+            "total_WARNINGS": 0
+        }
+
+        # Count test results for the suite
+        for subtest in subtests:
+            result = subtest['sub_test_result']
+            if result == "PASSED":
+                test_suite_summary["total_PASSED"] += 1
+            elif result == "FAILED":
+                test_suite_summary["total_FAILED"] += 1
+            elif result == "ABORTED":
+                test_suite_summary["total_ABORTED"] += 1
+            elif result == "SKIPPED":
+                test_suite_summary["total_SKIPPED"] += 1
+            elif result == "WARNING":
+                test_suite_summary["total_WARNINGS"] += 1
+
+        # Add the test suite and subtests to the result along with the test suite summary
+        formatted_result.append({
+            "Test_suite": test_suite,
+            "subtests": subtests,
+            "test_suite_summary": test_suite_summary  # Nesting the summary within the test suite object
+        })
+
+    # Add the overall Suite_summary at the end
+    formatted_result.append({
+        "Suite_summary": suite_summary
+    })
+
+    # Write the result to the JSON file
+    with open(output_file, 'w') as json_file:
+        json.dump(formatted_result, json_file, indent=2)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Parse a Log file and save results to a JSON file.")
+    parser.add_argument("input_file", help="Input Log file")
+    parser.add_argument("output_file", help="Output JSON file")
+
+    args = parser.parse_args()
+    main(args.input_file, args.output_file)
