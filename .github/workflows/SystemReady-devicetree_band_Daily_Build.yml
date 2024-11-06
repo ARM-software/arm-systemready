@@ -1,17 +1,13 @@
-name: IR ACS Build Checker
+name: SystemReady Band Daily Builds
 
 on:
-  push:
-    branches:                # trigger on push to master
-      - main
-  pull_request:              # trigger on pull requests to master
-    branches:
-      - main
+  schedule:
+    - cron: '30 17 * * *'    # Runs everyday at 11 PM IST
   workflow_dispatch:         # to dispatch from Github Actions
 
 jobs:
-  build_image:
-    name: IR ACS Build Check
+  SystemReady-devicetree_Build:
+    name: SystemReady-devicetree band Daily Build Image
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -26,7 +22,7 @@ jobs:
         remove-haskell: 'true'
         remove-codeql: 'true'
         remove-docker-images: 'true'
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 1
     - name: Start building
@@ -34,13 +30,12 @@ jobs:
         sudo -s;
         git config --global user.name "arm-systemready";
         git config --global user.email "arm-systemready@arm.com";
-        cd IR/Yocto;
+        cd SystemReady-devicetree-band/Yocto;
         ./build-scripts/get_source.sh;
         sed -i 's/if 0 == os.getuid/if 1 == os.getuid/' meta-woden/poky/meta/classes-global/sanity.bbclass;
-        ./build-scripts/build-ir-live-image.sh
-    - uses: actions/upload-artifact@v3
+        ./build-scripts/build-systemready-dt-live-image.sh
+    - uses: actions/upload-artifact@v4
       with:
-        name: ir-acs-live-image-generic-arm64.wic.xz
-        path: IR/Yocto/meta-woden/build/tmp/deploy/images/generic-arm64/ir-acs-live-image-generic-arm64.wic.xz
+        name: systemready-dt_acs_live_image.wic.xz
+        path: IR/Yocto/meta-woden/build/tmp/deploy/images/generic-arm64/systemready-dt_acs_live_image.wic.xz
         if-no-files-found: error
-

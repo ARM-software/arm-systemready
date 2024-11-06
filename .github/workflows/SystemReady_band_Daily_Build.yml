@@ -1,17 +1,13 @@
-name: SR ACS Build Checker
+name: SystemReady Bands Daily Builds
 
 on:
-  push:
-    branches:                # trigger on push to master
-      - main
-  pull_request:              # trigger on pull requests to master
-    branches:
-      - main
+  schedule:
+    - cron: '30 17 * * *'    # Runs everyday at 11 PM IST
   workflow_dispatch:         # to dispatch from Github Actions
 
 jobs:
-  build_image:
-    name: SR ACS Build Check
+  SystemReady_Build:
+    name: SystemReady band Daily Build Image
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -26,7 +22,7 @@ jobs:
         remove-haskell: 'true'
         remove-codeql: 'true'
         remove-docker-images: 'true'
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 1
     - name: Start building
@@ -34,12 +30,11 @@ jobs:
         sudo -s;
         git config --global user.name "arm-systemready";
         git config --global user.email "arm-systemready@arm.com";
-        cd SR/scripts;
+        cd SystemReady/;
         ./build-scripts/get_source.sh;
-        ./build-scripts/build-sr-live-image.sh
-    - uses: actions/upload-artifact@v3
+        ./build-scripts/build-systemready-live-image.sh
+    - uses: actions/upload-artifact@v4
       with:
-        name: sr_acs_live_image.img.xz
-        path: SR/scripts/output/sr_acs_live_image.img.xz
+        name: systemready_acs_live_image.img.xz
+        path: SR/scripts/output/systemready_acs_live_image.img.xz
         if-no-files-found: error
-

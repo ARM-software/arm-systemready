@@ -1,4 +1,4 @@
-name: ES ACS Build Checker
+name: SystemReady band Build Checker
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   build_image:
-    name: ES ACS Build check
+    name: SystemReady band Build Check
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -34,12 +34,12 @@ jobs:
         sudo -s;
         git config --global user.name "arm-systemready";
         git config --global user.email "arm-systemready@arm.com";
-        cd ES/scripts;
+        cd SystemReady-band;
         ./build-scripts/get_source.sh;
-        ./build-scripts/build-es-live-image.sh
+        ./build-scripts/build-systemready-band-live-image.sh
     - uses: actions/upload-artifact@v3
       with:
-        name: es_acs_live_image.img.xz
-        path: ES/scripts/output/es_acs_live_image.img.xz
+        name: systemready_acs_live_image.img.xz
+        path: SR/scripts/output/systemready_acs_live_image.img.xz
         if-no-files-found: error
 
