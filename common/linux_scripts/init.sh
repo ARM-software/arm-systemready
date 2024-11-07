@@ -60,7 +60,7 @@ ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   #mount result partition
-  BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}')
+  BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1)
 
   if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
     mount $BLOCK_DEVICE_NAME /mnt
