@@ -33,7 +33,7 @@ jobs:
         cd SystemReady-devicetree-band/Yocto;
         ./build-scripts/get_source.sh;
         sed -i 's/if 0 == os.getuid/if 1 == os.getuid/' meta-woden/poky/meta/classes-global/sanity.bbclass;
-        ./build-scripts/build-systemready-dt-live-image.sh
+        ./build-scripts/build-systemready-dt-band-live-image.sh
     - uses: actions/upload-artifact@v4
       with:
         name: systemready-dt_acs_live_image.wic.xz

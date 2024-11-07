@@ -32,7 +32,7 @@ jobs:
         git config --global user.email "arm-systemready@arm.com";
         cd SystemReady-band/;
         ./build-scripts/get_source.sh;
-        ./build-scripts/build-systemready-live-image.sh
+        ./build-scripts/build-systemready-band-live-image.sh
     - uses: actions/upload-artifact@v4
       with:
         name: systemready_acs_live_image.img.xz
