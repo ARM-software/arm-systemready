@@ -1,4 +1,4 @@
-name: SystemReady Bands Daily Builds
+name: SystemReady band Daily-Build
 
 on:
   schedule:
@@ -30,11 +30,11 @@ jobs:
         sudo -s;
         git config --global user.name "arm-systemready";
         git config --global user.email "arm-systemready@arm.com";
-        cd SystemReady/;
+        cd SystemReady-band/;
         ./build-scripts/get_source.sh;
         ./build-scripts/build-systemready-live-image.sh
     - uses: actions/upload-artifact@v4
       with:
         name: systemready_acs_live_image.img.xz
-        path: SystemReady-band/scripts/output/systemready_acs_live_image.img.xz
+        path: SystemReady-band/output/systemready_acs_live_image.img.xz
         if-no-files-found: error
