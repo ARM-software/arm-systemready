@@ -35,6 +35,7 @@ BBR_CONFIG_FILE=${TOP_DIR}/uefi_scripts/bbr.nsh
 DEBUG_CONFIG_FILE=${TOP_DIR}/uefi_scripts/debug_dump.nsh
 ACS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_config.txt
 SYSTEM_CONFIG_FILE=${TOP_DIR}/build-scripts/config/system_config.txt
+CONFIG_PARSER_EFI=${TOP_DIR}/parser/Parser.efi
 BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
 GRUB_PATH=grub
@@ -75,6 +76,7 @@ create_fatpart ()
     mmd -i $fatpart_name ::/acs_tests/bbsr-keys
     mmd -i $fatpart_name ::/acs_results
     mmd -i $fatpart_name ::/acs_tests/config
+    mmd -i $fatpart_name ::/acs_tests/parser
 
     mcopy -i $fatpart_name $OUTDIR/bootaa64.efi ::/EFI/BOOT
     mcopy -i $fatpart_name $OUTDIR/Shell.efi ::/EFI/BOOT
@@ -92,6 +94,7 @@ create_fatpart ()
     mcopy -i $fatpart_name ${TOP_DIR}/bbsr-keys/*.auth ::/acs_tests/bbsr-keys
 
     mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/acs_tests/app
+    mcopy -i $fatpart_name $CONFIG_PARSER_EFI  ::/acs_tests/parser
 
     echo "FAT partition image created"
 }

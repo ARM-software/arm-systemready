@@ -154,10 +154,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run."
   fi
 
-  # Presence of sbsa flag means user has skipped SBSA run on UEFI
-  if [ -f /mnt/acs_tests/bsa/sbsa/sbsa.flag ]; then
-    echo "Skipping Linux SBSA tests"
-  else
+  # Read the value of SbsaRunEnabled
+  SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/acs_tests/config/acs_run_config.ini" | cut -d'=' -f2)
+  if [ "$SbsaRunEnabled" == "1" ]; then
     echo "Running Linux SBSA tests"
     if [ -f  /lib/modules/sbsa_acs.ko ]; then
       insmod /lib/modules/sbsa_acs.ko

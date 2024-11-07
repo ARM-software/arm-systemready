@@ -29,15 +29,8 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             mkdir temp
         endif
         if exist FS%i:\acs_tests\bsa\sbsa\Sbsa.efi then
-	    echo "Press any key to skip SBSA run."
-	    echo "If no key is pressed then SBSA will run."
-	    FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
-	    if %lasterror% == 0 then
-	      echo "" > FS%i:\acs_tests\bsa\sbsa\sbsa.flag
-	      goto Done
-	    endif
-	    if exist FS%i:\acs_tests\bsa\sbsa\sbsa.flag then
-	        rm FS%i:\acs_tests\bsa\sbsa\sbsa.flag
+	    if not exist FS%i:\acs_tests\parser\SbsaRunEnabled.flag then
+	        goto Done
 	    endif
             echo "Press any key to start SBSA in verbose mode."
             echo "If no key is pressed then SBSA will be run in normal mode"
