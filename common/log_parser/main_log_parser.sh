@@ -152,9 +152,6 @@ if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
         echo "WARNING: Skipping SBSA log parsing as the log file is missing."
         echo ""
     fi
-else
-    echo "YOCTO_FLAG is present. Skipping SBSA processing."
-    echo ""
 fi
 
 # FWTS UEFI Log Parsing (Processed regardless of the flag)
@@ -239,9 +236,6 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         MVP_PROCESSED=1
         python3 "$SCRIPTS_PATH/mvp/json_to_html.py" "${MVP_JSONS[@]}" "$MVP_DETAILED_HTML" "$MVP_SUMMARY_HTML" --include-drop-down
     fi
-else
-    echo "YOCTO_FLAG is not present. Skipping MVP processing."
-    echo ""
 fi
 
 # Paths for UEFI version log and Device Tree DTS
@@ -254,10 +248,12 @@ if [ ! -f "$UEFI_VERSION_LOG" ]; then
     UEFI_VERSION_LOG=""
 fi
 
-# Check if DEVICE_TREE_DTS exists
-if [ ! -f "$DEVICE_TREE_DTS" ]; then
-    echo "WARNING: Device Tree DTS file '$(basename "$DEVICE_TREE_DTS")' not found."
-    DEVICE_TREE_DTS=""
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+    # Check if DEVICE_TREE_DTS exists
+    if [ ! -f "$DEVICE_TREE_DTS" ]; then
+        echo "WARNING: Device Tree DTS file '$(basename "$DEVICE_TREE_DTS")' not found."
+        DEVICE_TREE_DTS=""
+    fi
 fi
 
 # Generate ACS Summary

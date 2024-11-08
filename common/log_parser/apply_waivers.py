@@ -331,7 +331,7 @@ def main(suite_name, json_file, waiver_file='waiver.json', output_json_file='tes
         with open(json_file, 'r') as f:
             json_data = json.load(f)
     except Exception as e:
-        print(f"ERROR: Failed to read or parse {json_file}: {e}")
+        print(f"WARNING: Failed to read or parse {json_file}: {e}")
         return
 
     # Load waiver.json
@@ -339,7 +339,7 @@ def main(suite_name, json_file, waiver_file='waiver.json', output_json_file='tes
         with open(waiver_file, 'r') as f:
             waiver_data = json.load(f)
     except Exception as e:
-        print(f"ERROR: Failed to read or parse {waiver_file}: {e}")
+        print(f"INFO: Failed to read or parse {waiver_file}: {e}")
         return
 
     # Load test_category.json
@@ -347,7 +347,7 @@ def main(suite_name, json_file, waiver_file='waiver.json', output_json_file='tes
         with open(output_json_file, 'r') as f:
             output_json_data = json.load(f)
     except Exception as e:
-        print(f"ERROR: Failed to read or parse {output_json_file}: {e}")
+        print(f"WARNING: Failed to read or parse {output_json_file}: {e}")
         return
 
     # Get waivers for the suite, categorized by their scope
