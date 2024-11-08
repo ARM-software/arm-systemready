@@ -20,17 +20,17 @@ echo -off
 connect -r
 
 # Run the config parser
-for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%i:\acs_tests\parser\Parser.efi  then
-        FS%i:\acs_tests\parser\Parser.efi
+for %a in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%a:\acs_tests\parser\Parser.efi  then
+        FS%a:\acs_tests\parser\Parser.efi
     endif
 endfor
 
 # check if BBSR SCT in progress, if yes resume the run.
-for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%i:\acs_tests\bbr\bbsr_sct_inprogress.flag then
+for %b in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%b:\acs_tests\bbr\bbsr_sct_inprogress.flag then
         echo "BBSR SCT in progress, Resuming ..."
-        FS%i:\EFI\BOOT\bbsr_startup.nsh
+        FS%b:\EFI\BOOT\bbsr_startup.nsh
     endif
 endfor
 

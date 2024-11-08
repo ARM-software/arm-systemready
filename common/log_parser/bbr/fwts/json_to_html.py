@@ -128,7 +128,7 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                 font-weight: bold;
             }
             .skipped {
-                background-color: #ffc107;
+                background-color: #ffe0b2;
                 font-weight: bold;
             }
             .summary-table {

@@ -68,7 +68,12 @@ def get_system_info():
         system_info['Vendor'] = 'Unknown'
 
     # Add date when the summary was generated
-    system_info['Summary Generated On Date/time'] = subprocess.check_output(["date", "+%Y-%m-%d %H:%M:%S"]).decode().strip()
+    try:
+        system_info['Summary Generated On Date/time'] = subprocess.check_output(
+            ["date", "+%Y-%m-%d %H:%M:%S"], universal_newlines=True).strip()
+    except Exception as e:
+        system_info['Summary Generated On Date/time'] = 'Unknown'
+
     return system_info
 
 def parse_config(config_path):
@@ -139,15 +144,101 @@ def read_html_content(file_path):
     else:
         return None
 
+def get_failed_with_waiver_counts(content):
+    """
+    Parses the summary HTML content to extract the number of Failed and Failed with Waiver tests.
+    Returns a tuple (failed, failed_with_waiver). If parsing fails, returns (0, 0).
+    """
+    failed = 0
+    failed_with_waiver = 0
+
+    # Split the content into lines for easier processing
+    lines = content.splitlines()
+
+    # Initialize index
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        # Search for "Failed with Waiver"
+        if "Failed with Waiver" in line:
+            try:
+                # Next line should have the count
+                count_line = lines[i + 1].strip()
+                # Extract number between '>' and '</td>'
+                start = count_line.find('>') + 1
+                end = count_line.find('</td>', start)
+                num_part = count_line[start:end].strip()
+                failed_with_waiver = int(num_part)
+                i += 1  # Skip the next line as it's processed
+            except (IndexError, ValueError):
+                pass
+        # Search for "Failed" but exclude lines containing "Failed with Waiver"
+        elif "Failed" in line and "Failed with Waiver" not in line:
+            try:
+                # Next line should have the count
+                count_line = lines[i + 1].strip()
+                # Extract number between '>' and '</td>'
+                start = count_line.find('>') + 1
+                end = count_line.find('</td>', start)
+                num_part = count_line[start:end].strip()
+                failed = int(num_part)
+                i += 1  # Skip the next line as it's processed
+            except (IndexError, ValueError):
+                pass
+        i += 1
+
+    return failed, failed_with_waiver
+
+
 def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts_summary_content, sct_summary_content, mvp_summary_content):
-    # Initialize as 'Compliant'
+    # Initialize compliance status
     overall_compliance = 'Compliant'
-    # Check for 'Failed' or 'Aborted' in any of the summaries
-    for content in [bsa_summary_content, sbsa_summary_content, fwts_summary_content, sct_summary_content, mvp_summary_content]:
+
+    # List of all summary contents
+    summaries = {
+        'BSA': bsa_summary_content,
+        'SBSA': sbsa_summary_content,
+        'FWTS': fwts_summary_content,
+        'SCT': sct_summary_content,
+        'MVP': mvp_summary_content
+    }
+
+    # Flags to track compliance with waivers and overall compliance
+    all_failed_zero = True
+    compliant_with_waivers = True
+
+    # Dictionary to store counts for debugging
+    suite_counts = {}
+
+    for suite, content in summaries.items():
         if content:
-            if 'Failed' in content or 'Aborted' in content:
-                overall_compliance = 'Not compliant'
+            failed, failed_with_waiver = get_failed_with_waiver_counts(content)
+            suite_counts[suite] = {'Failed': failed, 'Failed with Waiver': failed_with_waiver}
+            print(f"Suite: {suite}, Failed: {failed}, Failed with Waiver: {failed_with_waiver}")  # Debug Statement
+            if failed != failed_with_waiver:
+                compliant_with_waivers = False
+            if failed != 0 or failed_with_waiver != 0:
+                all_failed_zero = False
+        else:
+            print(f"Suite: {suite} summary not provided or empty. Skipping.")
+
+    if all_failed_zero:
+        overall_compliance = 'Compliant'
+    elif compliant_with_waivers:
+        # Ensure that there is at least one failed test that is waived
+        any_failures = False
+        for suite, counts in suite_counts.items():
+            if counts['Failed with Waiver'] > 0:
+                any_failures = True
                 break
+        if any_failures:
+            overall_compliance = 'Compliant with Waivers'
+        else:
+            overall_compliance = 'Compliant'
+    else:
+        overall_compliance = 'Not compliant'
+
+    print(f"Overall Compliance: {overall_compliance}")  # Debug Statement
     return overall_compliance
 
 def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
@@ -418,11 +509,11 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
     html_output = template.render(
         system_info=system_info,
         acs_results_summary=acs_results_summary,
-        bsa_summary_content=read_html_content(bsa_summary_path),
-        sbsa_summary_content=read_html_content(sbsa_summary_path),
-        fwts_summary_content=read_html_content(fwts_summary_path),
-        sct_summary_content=read_html_content(sct_summary_path),
-        mvp_summary_content=read_html_content(mvp_summary_path)
+        bsa_summary_content=bsa_summary_content,
+        sbsa_summary_content=sbsa_summary_content,
+        fwts_summary_content=fwts_summary_content,
+        sct_summary_content=sct_summary_content,
+        mvp_summary_content=mvp_summary_content
     )
 
     with open(output_html_path, 'w') as html_file:
@@ -461,13 +552,14 @@ if __name__ == "__main__":
     # Extract and remove date from system_info to place it in acs_results_summary
     summary_generated_date = system_info.pop('Summary Generated On Date/time', 'Unknown')
 
-    # Determine Overall Compliance Results
+    # Read summary contents
     bsa_summary_content = read_html_content(args.bsa_summary_path)
     sbsa_summary_content = read_html_content(args.sbsa_summary_path)
     fwts_summary_content = read_html_content(args.fwts_summary_path)
     sct_summary_content = read_html_content(args.sct_summary_path)
     mvp_summary_content = read_html_content(args.mvp_summary_path)
 
+    # Determine Overall Compliance Results
     overall_compliance = determine_overall_compliance(
         bsa_summary_content,
         sbsa_summary_content,

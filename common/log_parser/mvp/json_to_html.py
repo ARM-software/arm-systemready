@@ -128,7 +128,7 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
                 background-color: #f8d7da;
             }
             .waiver {
-                background-color: #ffeeba; /* Color for Failed with Waiver */
+                background-color: #f39c12; /* Color for Failed with Waiver */
             }
             .summary-table {
                 margin: 0 auto;

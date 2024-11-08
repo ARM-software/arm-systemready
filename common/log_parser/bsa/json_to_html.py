@@ -114,7 +114,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                 font-weight: bold;
             }
             .fail-waiver {  /* CSS class for Failed with Waiver */
-                background-color: #ffeeba;
+                background-color: #f39c12;
                 font-weight: bold;
             }
             .warning {
@@ -126,7 +126,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                 font-weight: bold;
             }
             .skipped {
-                background-color: #ffc107;
+                background-color: #ffe0b2;
                 font-weight: bold;
             }
             .summary-table {
