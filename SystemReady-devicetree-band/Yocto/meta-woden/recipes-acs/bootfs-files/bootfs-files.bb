@@ -11,7 +11,7 @@ SRC_URI = " file://bsa.nsh \
             file://startup.nsh \
             file://pingtest.nsh \
             file://bbsr_startup.nsh \
-            file://acs_config.txt \
+            file://acs_config_dt.txt \
             file://system_config.txt \
             "
 
@@ -31,7 +31,7 @@ do_deploy() {
    cp startup.nsh ${DEPLOYDIR}/
    cp pingtest.nsh ${DEPLOYDIR}/
    cp bbsr_startup.nsh ${DEPLOYDIR}/
-   cp acs_config.txt ${DEPLOYDIR}/
+   cp acs_config_dt.txt ${DEPLOYDIR}/
    cp system_config.txt ${DEPLOYDIR}/
    cp ${S}/../../../armv8a-oe-linux/ebbr-sct/1.0/bbr-acs/bbsr/config/BBSRStartup.nsh  ${DEPLOYDIR}/bbsr_SctStartup.nsh
 

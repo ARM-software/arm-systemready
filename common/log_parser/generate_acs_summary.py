@@ -106,28 +106,6 @@ def get_uefi_version(uefi_version_log):
         print(f"Error reading UEFI version log: {e}")
     return uefi_version
 
-def get_device_tree_version(device_tree_dts):
-    dt_version = 'Unknown'
-    try:
-        if device_tree_dts and os.path.exists(device_tree_dts):
-            with open(device_tree_dts, 'r', encoding='utf-8', errors='ignore') as file:
-                for line in file:
-                    if '/dts-v' in line:
-                        # Extract the version number
-                        start_index = line.find('/dts-v') + len('/dts-v')
-                        end_index = line.find(';', start_index)
-                        if end_index == -1:
-                            end_index = len(line)
-                        version_info = line[start_index:end_index].strip()
-                        version_info = version_info.rstrip('/;')
-                        dt_version = 'v' + version_info
-                        break
-        else:
-            dt_version = 'Not provided'
-    except Exception as e:
-        print(f"Error reading Device Tree DTS file: {e}")
-    return dt_version
-
 def remove_result_summary_headings(content):
     # Use regular expressions to remove any heading containing 'Result Summary'
     pattern = r'<h[1-6][^>]*>\s*Result Summary\s*</h[1-6]>'
@@ -540,14 +518,12 @@ if __name__ == "__main__":
 
     # Merge configurations into system_info
     system_info.update(acs_config_info)
-    system_info.update(system_config_info)
-
     uefi_version = get_uefi_version(args.uefi_version_log)
-    dt_version = get_device_tree_version(args.device_tree_dts)
 
     # Add UEFI and Device Tree versions to system_info
     system_info['UEFI Version'] = uefi_version
-    system_info['Device Tree Version'] = dt_version
+
+    system_info.update(system_config_info)
 
     # Extract and remove date from system_info to place it in acs_results_summary
     summary_generated_date = system_info.pop('Summary Generated On Date/time', 'Unknown')

@@ -199,7 +199,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   echo "Running acs log parser tool "
   if [ -d "/mnt/acs_results" ]; then
-    /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt
+    /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config_dt.txt /mnt/acs_tests/config/system_config.txt
   fi
   sleep 3
   sync /mnt
