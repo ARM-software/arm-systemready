@@ -128,7 +128,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   hwclock --set --date "2023-01-01 09:10:15" > /mnt/acs_results/linux_dump/hw-clock-set-20230101091015.log
   hwclock > /mnt/acs_results/linux_dump/hwclock-after-set.log
   ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
-  cp -r /sys/firmware /mnt/acs_results/linux_dump/
+  cp -r /sys/firmware /mnt/acs_results/linux_dump/ >> firmware.log 2>&1
   # Capturing System PSCI command output
   mkdir -p /mnt/acs_results/linux_tools/psci
   mount -t debugfs none /sys/kernel/debug
