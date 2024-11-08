@@ -104,7 +104,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   lsblk > /mnt/acs_results/linux_dump/lsblk.log
   lsusb > /mnt/acs_results/linux_dump/lsusb.log
   dmidecode > /mnt/acs_results/linux_dump/dmidecode.log
-  dmidecode --dump-bin /mnt/acs_results/linux_dump/dmidecode.bin
+  dmidecode --dump-bin /mnt/acs_results/linux_dump/dmidecode.bin >> /mnt/acs_results/linux_dump/dmidecode.log 2>&1
   uname -a > /mnt/acs_results/linux_dump/uname.log
   cat /etc/os-release > /mnt/acs_results/linux_dump/cat-etc-os-release.log
   date > /mnt/acs_results/linux_dump/date.log
@@ -155,7 +155,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   fi
 
   # Read the value of SbsaRunEnabled
-  SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/acs_tests/config/acs_run_config.ini" | cut -d'=' -f2)
+  SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/mnt/acs_tests/config/acs_run_config.ini" | cut -d'=' -f2)
   if [ "$SbsaRunEnabled" == "1" ]; then
     echo "Running Linux SBSA tests"
     if [ -f  /lib/modules/sbsa_acs.ko ]; then
