@@ -120,7 +120,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   acpidump > /mnt/acs_results/linux_dump/acpi.log
   acpidump > /mnt/acs_results/linux_dump/acpi.dat
   cd /mnt/acs_results/linux_dump
-  acpixtract -a acpi.dat
+  acpixtract -a acpi.dat > acpixtract.log 2>&1
   iasl -d *.dat > iasl.log 2>&1
   cd -
   date --set="20221215 05:30" > /mnt/acs_results/linux_dump/date-set-202212150530.log
