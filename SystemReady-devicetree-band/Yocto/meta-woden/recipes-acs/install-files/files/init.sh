@@ -148,7 +148,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo "Running DT Kernel Self Test"
       pushd /usr/kernel-selftest
       chmod +x dt/test_unprobed_devices.sh
-      chmod +x dt/ktap_helpers.sh
+      chmod +x kselftest/ktap_helpers.sh
       ./run_kselftest.sh -t dt:test_unprobed_devices.sh > /mnt/acs_results/linux_tools/dt_kselftest.log
       popd
       sync /mnt
