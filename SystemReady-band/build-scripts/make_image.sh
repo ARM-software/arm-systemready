@@ -35,6 +35,7 @@ BBR_CONFIG_FILE=${TOP_DIR}/uefi_scripts/bbr.nsh
 DEBUG_CONFIG_FILE=${TOP_DIR}/uefi_scripts/debug_dump.nsh
 ACS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_config.txt
 SYSTEM_CONFIG_FILE=${TOP_DIR}/build-scripts/config/system_config.txt
+ACS_RUN_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_run_config.ini
 CONFIG_PARSER_EFI=${TOP_DIR}/parser/Parser.efi
 BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
@@ -55,6 +56,7 @@ create_cfgfiles ()
     mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}   ::/acs_tests/debug/
     mcopy -i  $fatpart_name -o ${ACS_CONFIG_FILE}     ::/acs_tests/config/
     mcopy -i  $fatpart_name -o ${SYSTEM_CONFIG_FILE}  ::/acs_tests/config/
+    mcopy -i  $fatpart_name -o ${ACS_RUN_CONFIG_FILE}  ::/acs_tests/config/
 
 }
 
