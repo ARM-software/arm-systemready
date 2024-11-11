@@ -67,8 +67,13 @@ copy_recipes()
     #woden.conf will be changed
     #sed -i 's/PREFERRED_VERSION_linux-yocto ?= \"[0-9]\.[0-9][0-9]\%\"/PREFERRED_VERSION_linux-yocto ?= \"'${YOCTO_LINUX_KERNEL_VERSION}'\%\"/' $TOP_DIR/meta-woden/poky/meta-poky/conf/distro/poky.conf
 
+    #grub-2.06 config to workaround secureboot issue seen with 2.12
+    pushd $TOP_DIR/meta-woden/poky/meta/recipes-bsp
+    git checkout 0a010ac1b46651aaaf57008fb9e6db656822b2e4 -- grub
+    popd
+
     #Adding build option to grub that is required for SecureBoot
-    sed -i 's/\/grub\-core\//\/grub\-core\/\ --disable-shim-lock/g' $TOP_DIR/meta-woden/poky/meta/recipes-bsp/grub/grub-efi_2.12.bb
+    sed -i 's/\/grub\-core\//\/grub\-core\/\ --disable-shim-lock/g' $TOP_DIR/meta-woden/poky/meta/recipes-bsp/grub/grub-efi_2.06.bb
 
     #Remove the existing recipe
     rm $TOP_DIR/meta-woden/poky/meta/recipes-kernel/linux/linux-yocto_6.6.bb
@@ -136,6 +141,7 @@ copy_recipes()
     cp $COMMON_DIR_PATH/patches/tpm-tis-spi-Add-hardware-wait-polling.patch $TOP_DIR/meta-woden/recipes-kernel/linux/files
     cp $COMMON_DIR_PATH/patches/0001-disable-psci-checker.patch $TOP_DIR/meta-woden/recipes-kernel/linux/files
     cp $COMMON_DIR_PATH/patches/fwts_last_attempt_status.patch $TOP_DIR/meta-woden/recipes-acs/fwts/files
+
 }
 
 copy_recipes
