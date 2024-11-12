@@ -64,9 +64,6 @@ customise_image()
 copy_recipes()
 {
 
-    #woden.conf will be changed
-    #sed -i 's/PREFERRED_VERSION_linux-yocto ?= \"[0-9]\.[0-9][0-9]\%\"/PREFERRED_VERSION_linux-yocto ?= \"'${YOCTO_LINUX_KERNEL_VERSION}'\%\"/' $TOP_DIR/meta-woden/poky/meta-poky/conf/distro/poky.conf
-
     #grub-2.06 config to workaround secureboot issue seen with 2.12
     pushd $TOP_DIR/meta-woden/poky/meta/recipes-bsp
     git checkout 0a010ac1b46651aaaf57008fb9e6db656822b2e4 -- grub
@@ -77,6 +74,10 @@ copy_recipes()
 
     #Remove the existing recipe
     rm $TOP_DIR/meta-woden/poky/meta/recipes-kernel/linux/linux-yocto_6.6.bb
+
+    #Increase the initramfs size to hold more storage drivers in ACS image
+    sed -i 's/INITRAMFS_MAXSIZE ??= "131072"/INITRAMFS_MAXSIZE ??= "140000"/' $TOP_DIR/meta-woden/poky/meta/conf/bitbake.conf
+
 
     #copy linux_yocto.bbappend with empty defconfig
     cp $TOP_DIR/config/linux-yocto_%.bbappend $TOP_DIR/meta-woden/meta-arm/meta-arm/recipes-kernel/linux/linux-yocto_%.bbappend
