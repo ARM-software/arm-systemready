@@ -211,6 +211,7 @@ else
 fi
 
 sync /mnt
+umount /mnt
 echo "Please press <Enter> to continue ..."
 echo -e -n "\n"
 exit 0

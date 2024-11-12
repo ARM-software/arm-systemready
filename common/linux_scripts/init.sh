@@ -208,5 +208,6 @@ fi
 
 sync /mnt
 sleep 3
+umount /mnt
 
 exec sh +m
