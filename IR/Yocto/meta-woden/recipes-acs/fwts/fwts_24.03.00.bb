@@ -10,6 +10,7 @@ SRC_URI = "http://fwts.ubuntu.com/release/fwts-V${PV}.tar.gz;subdir=${BP} \
            file://0004-Define-__SWORD_TYPE-if-not-defined-by-libc.patch \
            file://0005-Undefine-PAGE_SIZE.patch \
            file://0001-uefi-esrt-Added-esrt_test2-for-EBBR.patch \
+           file://0008-acpi-iort-memory-access-flag-update.patch \
            "
 SRC_URI[sha256sum] = "d7f2642b1ec3697be798409decd6593d52bb1438f0d2dc697cbc85f52d19b41e"
 
