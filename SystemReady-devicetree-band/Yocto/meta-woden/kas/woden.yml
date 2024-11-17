@@ -1,0 +1,47 @@
+header:
+  version: 11
+
+repos:
+  meta-woden:
+
+  poky:
+    url: https://git.yoctoproject.org/git/poky
+    refspec: scarthgap
+    layers:
+      meta:
+      meta-yocto-bsp :
+
+  meta-arm:
+    url: https://git.yoctoproject.org/git/meta-arm
+    refspec: scarthgap
+    layers:
+      meta-arm:
+      meta-arm-bsp:
+      meta-arm-toolchain:
+
+  meta-openembedded:
+    url: https://git.openembedded.org/meta-openembedded
+    refspec: scarthgap
+    layers:
+      meta-oe:
+      meta-perl:
+      meta-python:
+
+  meta-secure-core:
+    url: https://github.com/Wind-River/meta-secure-core
+    refspec: scarthgap
+    layers:
+      meta-secure-core-common:
+      meta-efi-secure-boot:
+      meta-signing-key:
+      meta-tpm2:
+
+local_conf_header:
+  threads: |
+    BB_NUMBER_THREADS = "16"
+    PARALLEL_MAKE = "-j16"
+
+distro: woden
+machine: genericarm64
+target:
+  - woden-image
