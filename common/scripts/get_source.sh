@@ -214,7 +214,7 @@ get_linux-acs_src()
 get_bbr_acs_src()
 {
     echo "Downloading Arm BBR source code."
-    git clone https://github.com/ARM-software/bbr-acs.git bbr-acs
+    git clone -b legacy_systemready https://github.com/ARM-software/bbr-acs.git bbr-acs
 
     if [ -n "$ARM_BBR_TAG" ]; then
         # TAG provided.
