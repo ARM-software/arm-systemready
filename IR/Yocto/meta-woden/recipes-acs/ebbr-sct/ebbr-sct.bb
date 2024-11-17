@@ -14,7 +14,7 @@ export KEYS_DIR="${DEPLOY_DIR_IMAGE}/security-interface-extension-keys"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://bbr-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13"
 
-SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=https;branch=main;name=bbr-acs \
+SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=https;branch=legacy_systemready;name=bbr-acs \
             git://github.com/tianocore/edk2-test;destsuffix=edk2-test;protocol=https;nobranch=1;name=edk2-test \
             gitsm://github.com/tianocore/edk2.git;destsuffix=edk2-test/edk2;protocol=https;nobranch=1;name=edk2 \
             file://sctversion.patch;patch=1;patchdir=edk2-test \
@@ -23,8 +23,8 @@ SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=ht
 S = "${WORKDIR}"
 
 SRCREV_FORMAT    = "edk2-test_edk2_bbr-acs"
-SRCREV_edk2 = "${AUTOREV}"
-SRCREV_edk2-test = "${AUTOREV}"
+SRCREV_edk2 = "f80f052277c88a67c55e107b550f504eeea947d3"
+SRCREV_edk2-test = "0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4"
 SRCREV_bbr-acs   = "${AUTOREV}"
 
 # set variables as required by edk2 based build
