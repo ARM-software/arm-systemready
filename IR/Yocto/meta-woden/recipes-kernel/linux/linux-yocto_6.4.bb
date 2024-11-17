@@ -19,7 +19,6 @@ SRC_URI = "git://git.yoctoproject.org/linux-yocto.git;name=machine;branch=${KBRA
            https://gitlab.arm.com/linux-arm/linux-acs/-/raw/master/kernel/src/0001-BSA-ACS-Linux-6.4.patch;patch=1;md5sum=7a4ce9635bc4af637c0463d8fdd038c0 \
            file://0002-Fix-for-CompuLab-IOT-GATE-iMX8-boot-issue.patch;patch=1 \
            file://tpm-tis-spi-Add-hardware-wait-polling.patch;patch=1 \
-           file://0001-disable-default-psci-checker-run.patch;patch=1 \
 "
 FILESEXTRAPATHS:prepend := "${TOPDIR}/../meta-arm/meta-arm/recipes-kernel/linux/files:"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"

@@ -113,7 +113,7 @@ do_dir_deploy() {
     then
         echo "grub entry for Linux Boot for Security Interface Extension already present"
     else
-        awk '/menuentry '\''Linux Boot'\''/, /ext4/' grub.cfg | sed 's/Linux Boot/Linux Boot for Security Interface Extension (optional)/' | sed 's/ext4/ext4 secureboot/' >> grub.cfg
+        awk '/menuentry '\''Linux Boot'\''/, /ext4/' grub.cfg | sed 's/Linux Boot/Linux Boot for Security Interface Extension (optional)/' | sed 's/ext4/ext4 secureboot initcall_blacklist=psci_checker/' >> grub.cfg
         echo "}" >> grub.cfg
     fi
 
