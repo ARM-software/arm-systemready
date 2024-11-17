@@ -40,7 +40,6 @@ SRC_URI = "git://git.yoctoproject.org/linux-yocto.git;name=machine;branch=${KBRA
            https://gitlab.arm.com/linux-arm/linux-acs/-/raw/master/kernel/src/0001-BSA-ACS-Linux-6.6.patch;patch=1;md5sum=89b6c420ece275846f79c8b6f6f9cb09 \
            file://0001-KSelfTest.patch;patch=1 \
            file://0001-dt-extract-compatibles.patch;patch=1 \
-           file://0001-disable-default-psci-checker-run.patch;patch=1 \
 "
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
