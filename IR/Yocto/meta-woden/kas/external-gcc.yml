@@ -1,9 +1,0 @@
-header:
-  version: 11
-
-env:
-  EXTERNAL_TOOLCHAIN: "/usr/local/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/"
-
-local_conf_header:
-  cc: |
-    TCMODE = "external-arm"
