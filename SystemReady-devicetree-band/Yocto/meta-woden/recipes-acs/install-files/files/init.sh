@@ -29,7 +29,7 @@ ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Attempting to mount the results partition ..." 
   #mount result partition
-  BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}')
+  BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1 )
 
   if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
     mount $BLOCK_DEVICE_NAME /mnt
@@ -181,8 +181,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fi
       sync /mnt
 
+      umount /mnt
       echo "System is rebooting for Capsule update"
-      reboot
+      reboot -f
     else
       if [ -f /mnt/acs_tests/app/capsule_update_done.flag ]; then
         echo "Capsule update has done successfully..."
@@ -214,7 +215,6 @@ else
 fi
 
 sync /mnt
-umount /mnt
 echo "Please press <Enter> to continue ..."
 echo -e -n "\n"
 exit 0

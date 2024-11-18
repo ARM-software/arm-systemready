@@ -124,32 +124,61 @@ FWTS_PROCESSED=0
 SCT_PROCESSED=0
 MVP_PROCESSED=0
 
-# BSA UEFI Log Parsing (Processed regardless of the flag)
+# BSA UEFI and Kernel Log Parsing (Processed regardless of the flag)
 BSA_LOG="$LOGS_PATH/uefi/BsaResults.log"
+BSA_KERNEL_LOG="$LOGS_PATH/linux_acs/bsa_acs_app/BsaResultsKernel.log"
+if [ ! -f "$BSA_KERNEL_LOG" ]; then
+    BSA_KERNEL_LOG="$LOGS_PATH/linux/BsaResultsKernel.log"
+fi
+
 BSA_JSON="$JSONS_DIR/BSA.json"
+
+BSA_LOGS=()
+
 if check_file "$BSA_LOG"; then
+    BSA_LOGS+=("$BSA_LOG")
+fi
+
+if check_file "$BSA_KERNEL_LOG"; then
+    BSA_LOGS+=("$BSA_KERNEL_LOG")
+fi
+
+if [ ${#BSA_LOGS[@]} -gt 0 ]; then
     BSA_PROCESSED=1
-    python3 "$SCRIPTS_PATH/bsa/logs_to_json.py" "$BSA_LOG" "$BSA_JSON"
+    python3 "$SCRIPTS_PATH/bsa/logs_to_json.py" "${BSA_LOGS[@]}" "$BSA_JSON"
     # Apply waivers
     apply_waivers "BSA" "$BSA_JSON"
     python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$BSA_JSON" "$HTMLS_DIR/BSA_detailed.html" "$HTMLS_DIR/BSA_summary.html"
 else
-    echo "WARNING: Skipping BSA log parsing as the log file is missing."
+    echo "WARNING: Skipping BSA log parsing as the log files are missing."
     echo ""
 fi
 
-# SBSA UEFI Log Parsing (Process only if the flag is not present)
+# SBSA UEFI and Kernel Log Parsing (Process only if the flag is not present)
 SBSA_LOG="$LOGS_PATH/uefi/SbsaResults.log"
+SBSA_KERNEL_LOG="$LOGS_PATH/linux/SbsaResultsKernel.log"
+
 SBSA_JSON="$JSONS_DIR/SBSA.json"
+
+SBSA_LOGS=()
+
 if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
     if check_file "$SBSA_LOG"; then
+        SBSA_LOGS+=("$SBSA_LOG")
+    fi
+
+    if check_file "$SBSA_KERNEL_LOG"; then
+        SBSA_LOGS+=("$SBSA_KERNEL_LOG")
+    fi
+
+    if [ ${#SBSA_LOGS[@]} -gt 0 ]; then
         SBSA_PROCESSED=1
-        python3 "$SCRIPTS_PATH/bsa/logs_to_json.py" "$SBSA_LOG" "$SBSA_JSON"
+        python3 "$SCRIPTS_PATH/bsa/logs_to_json.py" "${SBSA_LOGS[@]}" "$SBSA_JSON"
         # Apply waivers
         apply_waivers "SBSA" "$SBSA_JSON"
         python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$SBSA_JSON" "$HTMLS_DIR/SBSA_detailed.html" "$HTMLS_DIR/SBSA_summary.html"
     else
-        echo "WARNING: Skipping SBSA log parsing as the log file is missing."
+        echo "WARNING: Skipping SBSA log parsing as the log files are missing."
         echo ""
     fi
 fi

@@ -119,7 +119,7 @@ do_dir_deploy() {
     then
         echo "grub entry for Linux Boot for BBSR already present"
     else
-        awk '/menuentry '\''Linux Boot'\''/, /ext4/' grub.cfg | sed 's/Linux Boot/Linux Boot for BBSR (optional)/' | sed 's/ext4/ext4  psci_checker=disable secureboot/' >> grub.cfg
+        awk '/menuentry '\''Linux Boot'\''/, /ext4/' grub.cfg | sed 's/Linux Boot/Linux Boot for BBSR (optional)/' | sed 's/ext4/ext4  psci_checker=disable video=efifb:off secureboot/' >> grub.cfg
         echo "}" >> grub.cfg
     fi
 
@@ -143,8 +143,8 @@ do_dir_deploy() {
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/startup.nsh startup.nsh
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/bbsr_startup.nsh bbsr_startup.nsh
 
-    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1}"'/g' startup.nsh
-    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} secureboot"'/g' bbsr_startup.nsh
+    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} video=efifb:off"'/g' startup.nsh
+    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} video=efifb:off secureboot "'/g' bbsr_startup.nsh
 
     wic cp startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/startup.nsh
     wic cp bbsr_startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/bbsr_startup.nsh
