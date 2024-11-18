@@ -8,7 +8,7 @@ SRC_URI[systemready-scripts.sha256sum] = "80b79a5e2e79ed997772b93593d573f6192757
 
 SRCREV_systemready-scripts = "${AUTOREV}"
 
-RDEPENDS:${PN} += "bash "
+RDEPENDS:${PN} += "bash python3-requests python3-construct"
 
 do_install(){
     install -d ${D}${bindir}
