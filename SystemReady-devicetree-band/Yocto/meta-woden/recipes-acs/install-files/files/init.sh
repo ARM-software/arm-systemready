@@ -80,6 +80,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fwupdmgr get-bios-settings    &> $LINUX_DUMP_DIR/fwupd_bios_setting.log
       fwupdmgr get-history          &> $LINUX_DUMP_DIR/fwupd_get_history.log
       sync /mnt
+      sleep 5
 
       mkdir -p /mnt/acs_results/fwts
       echo "Executing FWTS for EBBR"
@@ -98,7 +99,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       bsa >> /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
       dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
       sync /mnt 
-      sleep 3
+      sleep 5
  
       mkdir -p /home/root/fdt
       mkdir -p /mnt/acs_results/linux_tools
@@ -110,6 +111,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo "device driver script run completed"
       popd
       sync /mnt
+      sleep 5
 
       # Generate the .dts file and move it to /mnt/acs_results/linux_tools
       dtc -I fs -O dts -o /mnt/acs_results/linux_tools/device_tree.dts /sys/firmware/devicetree/base 2>/dev/null
@@ -137,6 +139,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo  "Error: The FDT devicetree file, fdt, does not exist at /sys/firmware/fdt. Cannot run dt-schema tool" | tee /mnt/acs_results/linux_tools/dt-validate.log
       fi
       sync /mnt
+      sleep 5
 
       # Capturing System PSCI command output
       mkdir -p /mnt/acs_results/linux_tools/psci
@@ -152,6 +155,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       ./run_kselftest.sh -t dt:test_unprobed_devices.sh > /mnt/acs_results/linux_tools/dt_kselftest.log
       popd
       sync /mnt
+      sleep 5
 
       # Ethtool test run
       echo "Running Ethtool"
@@ -163,27 +167,19 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       # remove color characters from log and save
       awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results/linux_tools/ethtool-test.log
       sync /mnt
+      sleep 5
 
       # RUN read_write_check_blk_devices.py, parse block devices, and perform read if partition doesn't belond in precious partitions
       echo "Running BLK devices read and write check"
       python3 /bin/read_write_check_blk_devices.py | tee /mnt/acs_results/linux_tools/read_write_check_blk_devices.log
       sync /mnt
-
-      # EDK2 Parser Tool run
-      if [ -d "/mnt/acs_results/sct_results" ]; then
-        echo "Running edk2-test-parser tool "
-        mkdir -p /mnt/acs_results/edk2-test-parser
-        cd /usr/bin/edk2-test-parser
-        ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/EBBR.seq > /dev/null 2>&1
-        echo "edk2-test-parser run completed"
-      else
-        echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
-      fi
-      sync /mnt
+      sleep 5
 
       umount /mnt
+      sleep 5
       echo "System is rebooting for Capsule update"
-      reboot -f
+      reboot
+      sleep 5
     else
       if [ -f /mnt/acs_tests/app/capsule_update_done.flag ]; then
         echo "Capsule update has done successfully..."
@@ -195,26 +191,36 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Capsule update has ignored..."
         rm /mnt/acs_tests/app/capsule_update_ignore.flag
       fi
+      # EDK2 Parser Tool run
+      if [ -d "/mnt/acs_results/sct_results" ]; then
+        echo "Running edk2-test-parser tool "
+        mkdir -p /mnt/acs_results/edk2-test-parser
+        cd /usr/bin/edk2-test-parser
+        ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/EBBR.seq > /dev/null 2>&1
+        echo "edk2-test-parser run completed"
+      else
+        echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
+      fi
+      sync /mnt
+      sleep 5
+      echo "Running acs log parser tool "
+      if [ -d "/mnt/acs_results" ]; then
+        if [ -d "/mnt/acs_results/acs_summary" ]; then
+          rm -r /mnt/acs_results/acs_summary 
+        fi
+      /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config_dt.txt /mnt/acs_tests/config/system_config.txt
+      fi
+      sync /mnt
+      sleep 5
+      echo "ACS run is completed"
     fi
   fi
-
-  echo "Running acs log parser tool "
-  if [ -d "/mnt/acs_results" ]; then
-    if [ -d "/mnt/acs_results/acs_summary" ]; then
-        rm -r /mnt/acs_results/acs_summary 
-    fi
-    /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config_dt.txt /mnt/acs_tests/config/system_config.txt
-  fi
-  sleep 3
-  sync /mnt
-  echo "ACS run is completed"
 else
   echo ""
   echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
   echo ""
 fi
 
-sync /mnt
 echo "Please press <Enter> to continue ..."
 echo -e -n "\n"
 exit 0
