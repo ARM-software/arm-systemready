@@ -172,8 +172,10 @@ get_buildroot_src()
     git clone -b $BUILDROOT_SRC_VERSION http://git.buildroot.net/buildroot
     pushd $TOP_DIR/buildroot/package/fwts
         echo "Applying Buildroot FWTS patch..."
+        # patch buildroot config
         git apply $TOP_DIR/../common/patches/build_fwts_version_24.09.00.patch
-        git apply $TOP_DIR/../common/patches/fwts_last_attempt_status.patch
+        # copy patches for fwts source
+        cp $TOP_DIR/../common/patches/0008-acpi-iort-memory-access-flag-update.patch .
     popd
 }
 

@@ -141,7 +141,7 @@ copy_recipes()
     # copy any patches to linux src files directory
     cp $COMMON_DIR_PATH/patches/tpm-tis-spi-Add-hardware-wait-polling.patch $TOP_DIR/meta-woden/recipes-kernel/linux/files
     cp $COMMON_DIR_PATH/patches/0001-disable-psci-checker.patch $TOP_DIR/meta-woden/recipes-kernel/linux/files
-    cp $COMMON_DIR_PATH/patches/fwts_last_attempt_status.patch $TOP_DIR/meta-woden/recipes-acs/fwts/files
+    cp $COMMON_DIR_PATH/patches/0008-acpi-iort-memory-access-flag-update.patch $TOP_DIR/meta-woden/recipes-acs/fwts/files
 
 }
 
