@@ -8,8 +8,9 @@ LIC_FILES_CHKSUM = "file://src/main.c;beginline=1;endline=16;md5=ccd2fa23a65cba0
 SRC_URI = "http://fwts.ubuntu.com/release/fwts-V${PV}.tar.gz;subdir=${BP} \
            file://0001-Add-correct-printf-qualifier-for-off_t.patch \
            file://0004-Define-__SWORD_TYPE-if-not-defined-by-libc.patch \
-           file://0005-Undefine-PAGE_SIZE.patch \           
+           file://0005-Undefine-PAGE_SIZE.patch \
            file://0001-uefi-esrt-Added-esrt_test2-for-EBBR.patch \
+           file://0008-acpi-iort-memory-access-flag-update.patch \
            "
 SRC_URI[sha256sum] = "4f352dedd630217a3551bb4f6e8d61f8514be457d37b90c936c3b6cfb6a6fa7e"
 
