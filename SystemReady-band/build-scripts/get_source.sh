@@ -67,7 +67,6 @@ get_bsa_src()
 get_sbsa_src()
 {
     pushd $TOP_DIR/edk2
-    git clone https://github.com/tianocore/edk2-libc
     if [ -z $ARM_SBSA_TAG ]; then
         #No TAG is provided. Download the latest code
         echo "Downloading Arm SBSA source code."
@@ -96,6 +95,7 @@ get_cross_compiler()
         pushd $TOP_DIR/tools
         wget $CROSS_COMPILER_URL --no-check-certificate
         tar -xf arm-gnu-toolchain-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
+	mv arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu
         rm arm-gnu-toolchain-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
         popd
     fi
@@ -133,10 +133,10 @@ get_linux-acs_src()
 {
   if [ -z $ARM_LINUX_ACS_TAG ]; then
       echo "Downloading Arm Linux ACS source code."
-      git clone --depth 1 https://gitlab.arm.com/linux-arm/linux-acs linux-acs
+      git clone --depth 1 https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
   else
       echo "Downloading Arm Linux ACS source code. TAG : ${ARM_LINUX_ACS_TAG}"
-      git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs linux-acs
+      git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
   fi
 
     pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
@@ -169,7 +169,7 @@ get_bbr_acs_src()
 get_buildroot_src()
 {
     echo "Downloading Buildroot source code. TAG : $BUILDROOT_SRC_VERSION"
-    git clone -b $BUILDROOT_SRC_VERSION http://git.buildroot.net/buildroot
+    git clone -b $BUILDROOT_SRC_VERSION https://git.busybox.net/buildroot/
     pushd $TOP_DIR/buildroot/package/fwts
         echo "Applying Buildroot FWTS patch..."
         # patch buildroot config
