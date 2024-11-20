@@ -51,16 +51,16 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     exit 0
   fi
 
-  if [ -f /mnt/yocto_image.flag ] && [ ! -f /mnt/acs_tests/app/capsule_update_check.flag ]; then
     check_flag=0
-    if [ -f /mnt/acs_tests/app/capsule_update_done.flag ] || [ -f /mnt/acs_tests/app/capsule_update_ignore.flag ] || [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
+    if [ -f /mnt/acs_tests/app/capsule_update_done.flag ] || [ -f /mnt/acs_tests/app/capsule_update_ignore.flag ] || [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ] || [ -f /mnt/acs_tests/app/linux_run_complete.flag ]; then
       check_flag=1
     fi
 
     if [ $check_flag -eq 0 ]; then
       touch /mnt/acs_tests/app/capsule_update_check.flag
+      touch /mnt/acs_tests/app/linux_run_complete.flag
 
-      #linux debug dump
+      #LINUX DEBUG DUMP
 
       LINUX_DUMP_DIR="/mnt/acs_results/linux_dump"
       mkdir -p $LINUX_DUMP_DIR
@@ -82,6 +82,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt
       sleep 5
 
+      # FWTS EBBR run
+
       mkdir -p /mnt/acs_results/fwts
       echo "Executing FWTS for EBBR"
       test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
@@ -89,8 +91,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo "SystemReady devicetree band ACS v3.0.0" > /mnt/acs_results/fwts/FWTSResults.log
       /usr/bin/fwts --ebbr `echo $test_list` -r stdout >> /mnt/acs_results/fwts/FWTSResults.log
       echo -e -n "\n"
+      sync /mnt
+      sleep 5
  
-      #run linux bsa app
+      #LINUX BSA RUN
+
       mkdir -p /mnt/acs_results/linux_acs/bsa_acs_app
       echo "Loading BSA ACS Linux Driver"
       insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
@@ -101,9 +106,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt 
       sleep 5
  
+      # Device Driver Info script
+
       mkdir -p /home/root/fdt
       mkdir -p /mnt/acs_results/linux_tools
-      # Device Driver Info script 
       pushd /usr/bin
       echo "running device_driver_info.sh device and driver info created"
       ./device_driver_info.sh
@@ -113,12 +119,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt
       sleep 5
 
+      # DT VALIDATE RUN
+
       # Generate the .dts file and move it to /mnt/acs_results/linux_tools
       dtc -I fs -O dts -o /mnt/acs_results/linux_tools/device_tree.dts /sys/firmware/devicetree/base 2>/dev/null
-
       # Generate tree format of sys hierarchy and saving it into logs.
       tree -d /sys > /mnt/acs_results/linux_dump/sys_hierarchy.log
-
       if [ -f /sys/firmware/fdt ]; then
         echo "copying fdt "
         cp /sys/firmware/fdt /home/root/fdt
@@ -128,7 +134,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         if [ -f /results/acs_results/linux_tools/dt-validate.log ]; then
           mv /results/acs_results/linux_tools/dt-validate.log /results/acs_results/linux_tools/dt-validate.log.old
         fi
- 
         echo "Running dt-validate tool "
         dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results/linux_tools/dt-validate.log
         sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.5 \ndtschema version: 2024.2 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
@@ -142,12 +147,16 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sleep 5
 
       # Capturing System PSCI command output
+
       mkdir -p /mnt/acs_results/linux_tools/psci
       mount -t debugfs none /sys/kernel/debug
       cat /sys/kernel/debug/psci > /mnt/acs_results/linux_tools/psci/psci.log
       dmesg | grep psci > /mnt/acs_results/linux_tools/psci/psci_kernel.log
+      sync /mnt
+      sleep 5
 
-      # Compatible Devices driver association check script
+      # DT Kernel Self test run
+
       echo "Running DT Kernel Self Test"
       pushd /usr/kernel-selftest
       chmod +x dt/test_unprobed_devices.sh
@@ -157,17 +166,19 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt
       sleep 5
 
-      # Ethtool test run
+      # ETHTOOL test run
+
       echo "Running Ethtool"
       # update resolv.conf with 8.8.8.8 DNS server
       echo "nameserver 8.8.8.8" >> /etc/resolv.conf
-
       # run ethtool-test.py, dump ethernet information, run self-tests if supported, and ping
       python3 /bin/ethtool-test.py | tee ethtool-test.log
       # remove color characters from log and save
       awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results/linux_tools/ethtool-test.log
       sync /mnt
       sleep 5
+
+      # READ_WRITE_BLOCK_DEVICE run
 
       # RUN read_write_check_blk_devices.py, parse block devices, and perform read if partition doesn't belond in precious partitions
       echo "Running BLK devices read and write check"
@@ -191,7 +202,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Capsule update has ignored..."
         rm /mnt/acs_tests/app/capsule_update_ignore.flag
       fi
+
       # EDK2 Parser Tool run
+
       if [ -d "/mnt/acs_results/sct_results" ]; then
         echo "Running edk2-test-parser tool "
         mkdir -p /mnt/acs_results/edk2-test-parser
@@ -203,6 +216,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fi
       sync /mnt
       sleep 5
+
+      # ACS Log Parser run
+
       echo "Running acs log parser tool "
       if [ -d "/mnt/acs_results" ]; then
         if [ -d "/mnt/acs_results/acs_summary" ]; then
@@ -212,9 +228,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fi
       sync /mnt
       sleep 5
+
       echo "ACS run is completed"
     fi
-  fi
 else
   echo ""
   echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"

@@ -11,7 +11,6 @@ SRC_URI = "http://fwts.ubuntu.com/release/fwts-V${PV}.tar.gz;subdir=${BP} \
            file://0005-Undefine-PAGE_SIZE.patch \
            file://0006-use-intptr_t-to-fix-pointer-to-int-cast-issues.patch \
            file://0001-uefi-esrt-Added-esrt_test2-for-EBBR.patch \
-           file://fwts_last_attempt_status.patch \
            "
 SRC_URI[sha256sum] = "a15e11c42856e9dfcf7ac23ed370618d2777eb996dd7843accf12d45b21b551c"
 
