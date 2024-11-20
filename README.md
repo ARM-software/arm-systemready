@@ -4,15 +4,15 @@
 Systems that are designed to just work for the end user with the ability to install and run generic, off-the-shelf operating systems out of the box, must follow a set of minimum hardware and firmware requirements.
 
 
-For the Arm ecosystem, this requirement first surfaced in the server segment. The Arm ServerReady compliance program provides this 'just works' solution for servers, allowing you to deploy Arm servers with confidence. The program is based on industry standards and is accompanied by a compliance test suite, and a process for complaince.
+For the Arm ecosystem, this requirement first surfaced in the server segment. The Arm ServerReady compliance program provides this 'just works' solution for servers, allowing you to deploy Arm servers with confidence. The program is based on industry standards and is accompanied by a compliance test suite, and a process for compliance.
 
-The Arm SystemReady program is a natural extension of the Arm ServerReady program. Different market segments may target different sets of operating systems and hypervisors with different hardware and firmware requirements. We use the term band to identify these differences, with a shorthand notation for each band. The bands are:
+The Arm SystemReady program is a natural extension of the Arm ServerReady program. Different market segments may target different sets of operating systems and hypervisors with different hardware and firmware requirements. We use the term band to identify these differences. The bands are:
 * [SystemReady-band](https://www.arm.com/architecture/systems/systemready-certification-program/sr)
 * [SystemReady-devicetree-band](https://www.arm.com/architecture/systems/systemready-certification-program/ir)
 
 For more information on the Arm SystemReady Compliance Program, visit: [Arm SystemReady](https://www.arm.com/architecture/systems/systemready-certification-program)
 
-This repository contains the infrastructure to build the Arm SystemReady Architecture Compliance Suite (ACS) and the bootable prebuilt images to be used for the complaince of various bands of SystemReady.<br />
+This repository contains the infrastructure to build the Arm SystemReady Architecture Compliance Suite (ACS) and the bootable prebuilt images to be used for the compliance of various bands of SystemReady.<br />
 
 
 ## SystemReady bands:
@@ -31,7 +31,7 @@ For further details on BBSR ACS, please refer to [BBSR ACS Verification Guide](.
 Validating the compliance of certain PCIe rules defined in the BSA specification require the PCIe end-point generate specific stimulus during the runtime of the test. Examples of such stimulus are  P2P, PASID, ATC, etc. The tests that requires these stimuli are grouped together in the exerciser module. The exerciser layer is an abstraction layer that enables the integration of hardware capable of generating such stimuli to the test framework.
 The details of the hardware or Verification IP which enable these exerciser tests platform specific and are beyond the scope of this document.
 
-The Live image does not allow customizations, hence, the exerciser module is not included in the Live image. To enable exerciser tests for greater coverage of PCIe rules, please refer to [BSA](https://github.com/ARM-software/bsa-acs) Or contact your Arm representative for details.
+The ACS image does not allow customizations, hence, the exerciser module is not included in the ACS image. To enable exerciser tests for greater coverage of PCIe rules, please refer to [BSA](https://github.com/ARM-software/bsa-acs) Or contact your Arm representative for details.
 
 ### SBSA
 Validating the compliance of certain PCIe rules defined in the SBSA specification requires the PCIe end-point to generate specific stimulus during the runtime of the test. Examples of such stimulus are  P2P, PASID, ATC, etc. The tests that requires these stimuli are grouped together in the exerciser module. The exerciser layer is an abstraction layer that enables the integration of hardware capable of generating such stimuli to the test framework.
@@ -49,7 +49,7 @@ The details of the hardware or Verification IP which enable these exerciser test
    Below exerciser capabilities are required by exerciser test.
    - MSI-X interrupt generation.
    - Incoming Transaction Monitoring(order, type).
-   - Initiating transacions from and to the exerciser.
+   - Initiating transactions from and to the exerciser.
    - Ability to check on BDF and register address seen for each configuration address along with access type.
 
  - SBSA Test 803 (Check ECAM Memory accessibility) execution time depends on the system PCIe hierarchy. For systems with multiple ECAMs the time taken to complete can be long which is normal. Please wait until the test completes.

@@ -124,7 +124,7 @@ $QEMU -M virt -cpu cortex-a57 -smp 8 -m 2048 \
 
 2. To run the BBSR ACS, execute the "run_qemu.sh".
 Once QEMU execution begins, immediately press Esc key to go into the UEFI settings. Follow the steps in Section 3.4 for "Enrolling keys in EDK2" in the [BBSR ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll the secureboot keys. <br>
-Note: The SecureBoot keys are present in \<bootfs>\bbsr-keys
+Note: The SecureBoot keys are present in \<bootfs>\acs_tests/bbsr-keys
 
 
 3. To run the BBSR ACS suites, choose following in grub options.
@@ -139,7 +139,7 @@ Note: SystemReady-devicetree-band ACS image can also be run using the above step
 ## Running BBSR ACS on QEMU with uboot firmware
 
 ### Build u-boot firmware and QEMU
-Follow the instructions provided in [Verification of the SystemReady-devicetree-band image on QEMU Arm machine](../../SystemReady-devicetree-band/Yocto/README.md#verification-of-the-ir-image-on-qemu-arm-machine) section of SystemReady-devicetree-band Yocto README.
+Follow the instructions provided in [Verification of the SystemReady-devicetree-band image on QEMU Arm machine](../../SystemReady-devicetree-band/README.md#verification-of-the-systemready-devicetree-band-image-on-qemu-arm-machine) section of SystemReady-devicetree-band Yocto README.
 
 ### Running BBSR ACS with Prebuilt SystemReady-devicetree-band ACS image on QEMU
 1. Create a script "run_qemu.sh" as below with variables configured as per your environment:
@@ -198,7 +198,7 @@ and
 ```
 
 Note: SystemReady-devicetree-band Yocto ACS supports automatic enrollment of secure boot keys, still if the system fails to enter SecureBoot mode, Please refer to "Enrolling keys in U-boot" section of [BBSR ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll manually. <br>
-Note: The SecureBoot keys are present in \<bootfs>\bbsr-keys
+Note: The SecureBoot keys are present in \<bootfs>\acs_tests\bbsr-keys
 
 --------------
 *Copyright (c) 2023-24, Arm Limited and Contributors. All rights reserved.*

@@ -2,12 +2,12 @@
 
 
 ## Introduction to SystemReady band
-SystemReady band is a band of system complaince in the Arm SystemReady program that ensures interoperability of Arm based servers with standard operating systems and hypervisors.
+SystemReady band is a band of system compliance in the Arm SystemReady program that ensures interoperability of Arm based servers with standard operating systems and hypervisors.
 
-SystemReady band complaint platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. Compliant systems must conform to the:
+SystemReady band compliant platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. Compliant systems must conform to the:
 * [Server Base System Architecture (SBSA) specification](https://developer.arm.com/documentation/den0029/h/?lang=en)
 * SBBR recipe of the [Base Boot Requirements (BBR) specification](https://developer.arm.com/documentation/den0044/f/?lang=en)
-* The SystemReady band complaince and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
+* The SystemReady band compliance and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
 This section contains the build scripts and the live-images for the SystemReady band.
 
@@ -45,7 +45,7 @@ Before starting the ACS build, ensure that the following requirements are met:
 
 ### Steps to build SystemReady band ACS live image
 1. Clone the arm-systemready repository <br />
- `git clone "ssh://$USER@ap-gerrit-1.ap01.arm.com:29418/avk/syscomp_systemready" arm-systemready`
+ `git clone https://github.com/ARM-software/arm-systemready.git`
 
 2. Navigate to the SystemReady band directory <br />
  `cd arm-systemready/SystemReady-band`
@@ -54,7 +54,7 @@ Before starting the ACS build, ensure that the following requirements are met:
  `./build-scripts/get_source.sh` <br />
 
 4. To start the build of the ACS live image, execute the below step <br />
- `./build-scripts/build-systemready-live-image.sh`
+ `./build-scripts/build-systemready-band-live-image.sh`
 
 5. If all the above steps are successful, then the  bootable image will be available at **/path-to-arm-systemready/SystemReady-band/output/systemready_acs_live_image.img.xz**
 
@@ -119,7 +119,7 @@ The execution continues from the test that is next in sequence of the test prior
 This is expected behavior and the progress of tests will continue after a 20-minute delay.
 
 Note:
-When verifiying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
+When verifying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
 
 ### Automation
 The test suite execution can be automated or manual. Automated execution is the default execution method when no key is pressed during boot. <br />
