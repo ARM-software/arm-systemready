@@ -123,8 +123,8 @@ SBSA_PROCESSED=0
 FWTS_PROCESSED=0
 SCT_PROCESSED=0
 MVP_PROCESSED=0
-SIE_FWTS_PROCESSED=0
-SIE_SCT_PROCESSED=0
+BBSR_FWTS_PROCESSED=0
+BBSR_SCT_PROCESSED=0
 MANUAL_TESTS_PROCESSED=0  # Added flag for manual tests
 
 # BSA UEFI and Kernel Log Parsing (Processed regardless of the flag)
@@ -232,7 +232,7 @@ fi
 BBSR_SCT_LOG="$LOGS_PATH/BBSR/sct_results/Overall/Summary.log"
 BBSR_SCT_JSON="$JSONS_DIR/bbsr-sct.json"
 if check_file "$BBSR_SCT_LOG"; then
-    SIE_SCT_PROCESSED=1
+    BBSR_SCT_PROCESSED=1
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$BBSR_SCT_LOG" "$BBSR_SCT_JSON"
     # Apply waivers
     apply_waivers "BBSR-SCT" "$BBSR_SCT_JSON"
@@ -470,21 +470,21 @@ if [ $SCT_PROCESSED -eq 1 ]; then
     echo ""
 fi
 
-# Print SIE FWTS messages
-if [ $SIE_FWTS_PROCESSED -eq 1 ]; then
-    echo "SIE FWTS Log              : $SIE_FWTS_LOG"
-    echo "SIE FWTS JSON             : $SIE_FWTS_JSON"
-    echo "SIE FWTS Detailed Summary : $HTMLS_DIR/bbsr-fwts_detailed.html"
-    echo "SIE FWTS Summary          : $HTMLS_DIR/bbsr-fwts_summary.html"
+# Print BBSR FWTS messages
+if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
+    echo "BBSR FWTS Log              : $BBSR_FWTS_LOG"
+    echo "BBSR FWTS JSON             : $BBSR_FWTS_JSON"
+    echo "BBSR FWTS Detailed Summary : $HTMLS_DIR/bbsr-fwts_detailed.html"
+    echo "BBSR FWTS Summary          : $HTMLS_DIR/bbsr-fwts_summary.html"
     echo ""
 fi
 
-# Print SIE SCT messages
-if [ $SIE_SCT_PROCESSED -eq 1 ]; then
-    echo "SIE SCT Log               : $SIE_SCT_LOG"
-    echo "SIE SCT JSON              : $SIE_SCT_JSON"
-    echo "SIE SCT Detailed Summary  : $HTMLS_DIR/bbsr-sct_detailed.html"
-    echo "SIE SCT Summary           : $HTMLS_DIR/bbsr-sct_summary.html"
+# Print BBSR SCT messages
+if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
+    echo "BBSR SCT Log               : $BBSR_SCT_LOG"
+    echo "BBSR SCT JSON              : $BBSR_SCT_JSON"
+    echo "BBSR SCT Detailed Summary  : $HTMLS_DIR/bbsr-sct_detailed.html"
+    echo "BBSR SCT Summary           : $HTMLS_DIR/bbsr-sct_summary.html"
     echo ""
 fi
 
@@ -541,18 +541,18 @@ else
     echo "WARNING: $(basename "$SCT_JSON") not found. Skipping this file."
 fi
 
-# Include SIE FWTS JSON file
-if [ $SIE_FWTS_PROCESSED -eq 1 ] && [ -f "$SIE_FWTS_JSON" ]; then
-    JSON_FILES+=("$SIE_FWTS_JSON")
+# Include BBSR FWTS JSON file
+if [ $BBSR_FWTS_PROCESSED -eq 1 ] && [ -f "$BBSR_FWTS_JSON" ]; then
+    JSON_FILES+=("$BBSR_FWTS_JSON")
 else
-    echo "WARNING: $(basename "$SIE_FWTS_JSON") not found. Skipping this file."
+    echo "WARNING: $(basename "$BBSR_FWTS_JSON") not found. Skipping this file."
 fi
 
-# Include SIE SCT JSON file
-if [ $SIE_SCT_PROCESSED -eq 1 ] && [ -f "$SIE_SCT_JSON" ]; then
-    JSON_FILES+=("$SIE_SCT_JSON")
+# Include BBSR SCT JSON file
+if [ $BBSR_SCT_PROCESSED -eq 1 ] && [ -f "$BBSR_SCT_JSON" ]; then
+    JSON_FILES+=("$BBSR_SCT_JSON")
 else
-    echo "WARNING: $(basename "$SIE_SCT_JSON") not found. Skipping this file."
+    echo "WARNING: $(basename "$BBSR_SCT_JSON") not found. Skipping this file."
 fi
 
 # Include MVP JSON files only if processed

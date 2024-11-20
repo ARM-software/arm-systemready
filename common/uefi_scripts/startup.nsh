@@ -150,7 +150,7 @@ for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 	    else
 	       echo " template directory not present"
 	       goto BootLinux
-	    fi
+	    endif
             smbiosview > FS%r:\acs_results_template\fw\smbiosview_before_update.log
             FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_before_update.log
             FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_before_update.log
