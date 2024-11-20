@@ -59,9 +59,9 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 stall 200000
                 if exist FS%i:\acs_results\uefi\BsaVerboseTempResults.log then
                     if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
-                        echo " SystemReady devicetree band ACS v3.0.0" > BsaVerboseResults.log
+                        echo " SystemReady devicetree band ACS v3.0.0-BETA0" > BsaVerboseResults.log
                     else
-                        echo " SystemReady band ACS v3.0.0" > BsaVerboseResults.log
+                        echo " SystemReady band ACS v3.0.0-BETA0" > BsaVerboseResults.log
                     endif
 		    stall 200000
                     type BsaVerboseTempResults.log >> BsaVerboseResults.log
@@ -97,9 +97,9 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             stall 200000
             if exist FS%i:\acs_results\uefi\BsaTempResults.log then
                 if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
-                    echo " SystemReady devicetree band ACS v3.0.0" > BsaResults.log
+                    echo " SystemReady devicetree band ACS v3.0.0-BETA0" > BsaResults.log
                 else
-                    echo " SystemReady band ACS v3.0.0" > BsaResults.log
+                    echo " SystemReady band ACS v3.0.0-BETA0" > BsaResults.log
                 endif
                 stall 200000
                 type BsaTempResults.log >> BsaResults.log

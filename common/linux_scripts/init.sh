@@ -83,7 +83,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "Linux Boot with SetVirtualMap enabled"
     mkdir -p /mnt/acs_results/SetVAMapMode/fwts
     echo "Executing FWTS"
-    echo "Systemready band ACS v3.0.0" > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
+    echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
     fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
     sync /mnt
     sleep 3
@@ -138,7 +138,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   mkdir -p /mnt/acs_results/fwts
   #SBBR Execution
   echo "Executing FWTS for SBBR"
-  echo "SystemReady band ACS v3.0.0" > /mnt/acs_results/fwts/FWTSResults.log
+  echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/fwts/FWTSResults.log
   fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
 
   sleep 2
@@ -147,7 +147,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Running Linux BSA tests"
   if [ -f  /lib/modules/bsa_acs.ko ]; then
     insmod /lib/modules/bsa_acs.ko
-    echo "SystemReady band ACS v3.0.0" > /mnt/acs_results/linux/BsaResultsApp.log
+    echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/linux/BsaResultsApp.log
     /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
     dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
   else
@@ -161,7 +161,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo "Running Linux SBSA tests"
       if [ -f  /lib/modules/sbsa_acs.ko ]; then
         insmod /lib/modules/sbsa_acs.ko
-        echo "SystemReady band ACS v3.0.0" > /mnt/acs_results/linux/SbsaResultsApp.log
+        echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/linux/SbsaResultsApp.log
         /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
       else

@@ -1,63 +1,12 @@
-From ab62f2e0676f5e6ced8ed2c81359dc3cfc9300e7 Mon Sep 17 00:00:00 2001
-From: gurrev01 <gururaj.revankar@arm.com>
-Date: Mon, 21 Aug 2023 13:27:40 +0530
-Subject: [PATCH] sctversion
-
-Signed-off-by: gurrev01 <gururaj.revankar@arm.com>
----
- .../SCT/Drivers/StandardTest/StandardTest.c     | 17 +++++++++--------
- 1 file changed, 9 insertions(+), 8 deletions(-)
-
 diff --git a/uefi-sct/SctPkg/TestInfrastructure/SCT/Drivers/StandardTest/StandardTest.c b/uefi-sct/SctPkg/TestInfrastructure/SCT/Drivers/StandardTest/StandardTest.c
-index 94cae289..903f871f 100644
+index 94cae289..5ecc0946 100644
 --- a/uefi-sct/SctPkg/TestInfrastructure/SCT/Drivers/StandardTest/StandardTest.c
 +++ b/uefi-sct/SctPkg/TestInfrastructure/SCT/Drivers/StandardTest/StandardTest.c
-@@ -29,9 +29,10 @@ Abstract:
- #include "EfiTest.h"
+@@ -30,6 +30,7 @@ Abstract:
  #include "StandardTest.h"
  #include <Library/EntsLib.h>
-+#define ACS_VERSION "SystemReady devicetree ACS v3.0.0\nBBR ACS 1.0.5 (EBBR)"
-+
-+static EFI_TIME Epoch = { .Year = 1970, .Month = 1, .Day = 1 };
  
--static EFI_TIME Epoch = { .Year = 1970, .Month = 1, .Day = 1 };
--
++#define ACS_VERSION "SystemReady devicetree ACS v3.0.0-BETA0\nBBR ACS 2.2.0-BETA0 (EBBR)"
+ static EFI_TIME Epoch = { .Year = 1970, .Month = 1, .Day = 1 };
+ 
  //
- // Prototypes
- //
-@@ -1083,8 +1084,8 @@ Returns:
-     StslWriteLogFile (Private, Buffer);
- 
-     CurrentTime = &Private->StartTime;
--    if (tRT->GetTime (CurrentTime, NULL) != EFI_SUCCESS)
--      *CurrentTime = Epoch;
-+    if (tRT->GetTime (CurrentTime, NULL) != EFI_SUCCESS)
-+      *CurrentTime = Epoch;
- 
-   } else {
-     StslWriteLogFile (Private, DashLine);
-@@ -1121,8 +1122,8 @@ Returns:
- 
-     StslWriteLogFileName (Private);
-     CurrentTime = &Private->StartTime;
--    if (tRT->GetTime (CurrentTime, NULL) != EFI_SUCCESS)
--      *CurrentTime = Epoch;
-+    if (tRT->GetTime (CurrentTime, NULL) != EFI_SUCCESS)
-+      *CurrentTime = Epoch;
-     SctSPrint (Buffer, EFI_MAX_PRINT_BUFFER, L"Test Started: %t\n", CurrentTime);
-     StslWriteLogFile (Private, Buffer);
- 
-@@ -1242,8 +1243,8 @@ Returns:
- 
-   StslWriteLogFileName (Private);
- 
--  if (tRT->GetTime (&CurrentTime, NULL) != EFI_SUCCESS)
--    CurrentTime = Epoch;
-+  if (tRT->GetTime (&CurrentTime, NULL) != EFI_SUCCESS)
-+    CurrentTime = Epoch;
- 
-   SecondsElapsed = SecondsElapsedFromBaseYear (
-                      Private->StartTime.Year,
--- 
-2.25.1
-
