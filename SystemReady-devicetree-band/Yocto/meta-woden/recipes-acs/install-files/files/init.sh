@@ -217,6 +217,25 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt
       sleep 5
 
+      # systemready-scripts running
+
+      if [ -d "/mnt/acs_results_template" ]; then
+        echo "Running post scripts "
+        cd /mnt/acs_results_template
+	if [ -d "/mnt/acs_results_template/acs_results" ]; then
+	  rm -r acs_results/
+	  sync /mnt
+	  sleep 5
+	fi
+	cp -r /mnt/acs_results /mnt_acs_results_template/
+	sync /mnt
+	sleep 5
+	mkdir /usr/cache_dir
+	/usr/bin/systemready-scripts/check-sr-results.py --cache-dir=/usr/cache_dir/
+      fi
+      sync /mnt
+      sleep 5
+
       # ACS Log Parser run
 
       echo "Running acs log parser tool "

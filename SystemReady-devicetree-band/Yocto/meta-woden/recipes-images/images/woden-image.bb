@@ -90,6 +90,10 @@ do_dir_deploy() {
     mkdir -p acs_results
     wic cp acs_results ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
 
+    # create and copy empty acs_results_template directory to /results partition
+    mkdir -p acs_results_template
+    wic cp acs_results_template ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
+
     #add bsa/bbr bootloder entry and set it has default boot
 
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/grub.cfg grub.cfg
@@ -98,7 +102,7 @@ do_dir_deploy() {
     LINUX_BOOT_CMD_TEMP=`grep -Po 'Image\s+[a-zA-Z]+=.*' < grub.cfg`
     LINUX_BOOT_CMD=`echo $LINUX_BOOT_CMD_TEMP | head -1`
 
-    sed -i 's/ext4/ext4 video=efifb:off/g' grub.cfg
+    sed -i 's\ext4\ext4 video=efifb:off\g' grub.cfg
 
     if grep  -Eq "menuentry.*bbr/bsa"  grub.cfg
     then
