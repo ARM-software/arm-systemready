@@ -625,17 +625,38 @@
     },
     "catID: 30": {
         "SuiteID: 5": {
-            "SName: SIE": [
+            "SName: BBSR-SCT": [
                 {
                     "TestSuiteID": 4,
-                    "TSName": "SIE",
+                    "TSName": "RuntimeServicesTest",
                     "testcase": [],
                     "specID": 3,
                     "specName": "BBSR",
                     "severityID": 2,
                     "Severity": "Major",
-                    "waivableID": 2,
+                    "waivableID": 1,
                     "Waivable": "no",
+                    "scopeID": 2,
+                    "scope": "extension",
+                    "FunctionID": 3,
+                    "Function": "security"
+                }
+            ]
+        }
+    },
+    "catID: 31": {
+        "SuiteID: 6": {
+            "SName: BBSR-FWTS": [
+                {
+                    "TestSuiteID": 4,
+                    "TSName": "RuntimeServicesTest",
+                    "testcase": [],
+                    "specID": 3,
+                    "specName": "BBSR",
+                    "severityID": 2,
+                    "Severity": "Major",
+                    "waivableID": 1,
+                    "Waivable": "YES",
                     "scopeID": 2,
                     "scope": "extension",
                     "FunctionID": 3,

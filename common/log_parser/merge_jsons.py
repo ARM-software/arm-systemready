@@ -56,10 +56,14 @@ def merge_json_files(json_files, output_file):
                 section_name = "Suite_Name: BSA"
             elif "SBSA" in file_name:
                 section_name = "Suite_Name: SBSA"
-            elif "FWTS" in file_name:
+            elif "FWTS" in file_name and not "BBSR-FWTS" in file_name:
                 section_name = "Suite_Name: FWTS"
-            elif "SCT" in file_name:
+            elif "SCT" in file_name and not "BBSR-SCT" in file_name:
                 section_name = "Suite_Name: SCT"
+            elif "BBSR-FWTS" in file_name:
+                section_name = "Suite_Name: BBSR-FWTS"
+            elif "BBSR-SCT" in file_name:
+                section_name = "Suite_Name: BBSR-SCT"
             elif "DT_KSELFTEST" in file_name:
                 section_name = "Suite_Name: DT Kselftest"
             elif "DT_VALIDATE" in file_name:

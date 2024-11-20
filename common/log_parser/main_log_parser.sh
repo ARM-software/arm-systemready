@@ -123,6 +123,9 @@ SBSA_PROCESSED=0
 FWTS_PROCESSED=0
 SCT_PROCESSED=0
 MVP_PROCESSED=0
+SIE_FWTS_PROCESSED=0
+SIE_SCT_PROCESSED=0
+MANUAL_TESTS_PROCESSED=0  # Added flag for manual tests
 
 # BSA UEFI and Kernel Log Parsing (Processed regardless of the flag)
 BSA_LOG="$LOGS_PATH/uefi/BsaResults.log"
@@ -211,6 +214,34 @@ else
     echo ""
 fi
 
+# BBSR FWTS Log Parsing
+BBSR_FWTS_LOG="$LOGS_PATH/BBSR/fwts/FWTSResults.log"
+BBSR_FWTS_JSON="$JSONS_DIR/bbsr-fwts.json"
+if check_file "$BBSR_FWTS_LOG"; then
+    BBSR_FWTS_PROCESSED=1
+    python3 "$SCRIPTS_PATH/bbr/fwts/logs_to_json.py" "$BBSR_FWTS_LOG" "$BBSR_FWTS_JSON"
+    # Apply waivers
+    apply_waivers "BBSR-FWTS" "$BBSR_FWTS_JSON"
+    python3 "$SCRIPTS_PATH/bbr/fwts/json_to_html.py" "$BBSR_FWTS_JSON" "${HTMLS_DIR}/bbsr-fwts_detailed.html" "${HTMLS_DIR}/bbsr-fwts_summary.html"
+else
+    echo "WARNING: Skipping BBSR FWTS log parsing as the log file is missing."
+    echo ""
+fi
+
+# BBSR SCT Log Parsing
+BBSR_SCT_LOG="$LOGS_PATH/BBSR/sct_results/Overall/Summary.log"
+BBSR_SCT_JSON="$JSONS_DIR/bbsr-sct.json"
+if check_file "$BBSR_SCT_LOG"; then
+    SIE_SCT_PROCESSED=1
+    python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$BBSR_SCT_LOG" "$BBSR_SCT_JSON"
+    # Apply waivers
+    apply_waivers "BBSR-SCT" "$BBSR_SCT_JSON"
+    python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$BBSR_SCT_JSON" "${HTMLS_DIR}/bbsr-sct_detailed.html" "${HTMLS_DIR}/bbsr-sct_summary.html"
+else
+    echo "WARNING: Skipping BBSR SCT log parsing as the log file is missing."
+    echo ""
+fi
+
 # MVP Logs Parsing (Process only if the flag is present)
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     LINUX_TOOLS_LOGS_PATH="$LOGS_PATH/linux_tools"
@@ -285,6 +316,63 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     fi
 fi
 
+# ---------------------------------------------------------
+# Manual Tests Logs Parsing (New Code Added Below)
+# ---------------------------------------------------------
+
+# Hardcoded path for os-logs
+OS_LOGS_PATH="/mnt/acs_results_template/os-logs"  # Replace this with the actual path
+
+MANUAL_JSONS_DIR="$JSONS_DIR"
+mkdir -p "$MANUAL_JSONS_DIR"
+
+MANUAL_JSONS=()
+BOOT_SOURCES_PATHS=()  # Initialize array for boot_sources_paths
+
+# Find all directories under os-logs starting with 'linux'
+if [ -d "$OS_LOGS_PATH" ]; then
+    for OS_DIR in "$OS_LOGS_PATH"/linux*; do
+        if [ -d "$OS_DIR" ]; then
+            OS_NAME=$(basename "$OS_DIR")
+            ETH_TOOL_LOG="$OS_DIR/ethtool_test.log"
+            BOOT_SOURCES_LOG="$OS_DIR/boot_sources.log"  # Path to boot_sources.log
+
+            if [ -f "$ETH_TOOL_LOG" ]; then
+                # Generate output JSON file path
+                OUTPUT_JSON="$MANUAL_JSONS_DIR/ethtool_test_${OS_NAME}.json"
+                # Call logs_to_json.py
+                python3 "$SCRIPTS_PATH/manual_tests/logs_to_json.py" "$ETH_TOOL_LOG" "$OUTPUT_JSON" "$OS_NAME"
+                # Add to list of JSONs
+                MANUAL_JSONS+=("$OUTPUT_JSON")
+                # Apply waivers if necessary
+                apply_waivers "Manual Tests" "$OUTPUT_JSON"
+                MANUAL_TESTS_PROCESSED=1
+                # Add BOOT_SOURCES_LOG path to BOOT_SOURCES_PATHS
+                if [ -f "$BOOT_SOURCES_LOG" ]; then
+                    BOOT_SOURCES_PATHS+=("$BOOT_SOURCES_LOG")
+                else
+                    BOOT_SOURCES_PATHS+=("Unknown")
+                fi
+            else
+                echo "WARNING: ethtool_test.log not found in $OS_DIR"
+            fi
+        fi
+    done
+else
+    echo "WARNING: os-logs directory not found at $OS_LOGS_PATH"
+fi
+
+# Generate combined manual tests detailed and summary HTML reports
+if [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
+    MANUAL_DETAILED_HTML="$HTMLS_DIR/manual_tests_detailed.html"
+    MANUAL_SUMMARY_HTML="$HTMLS_DIR/manual_tests_summary.html"
+    # Pass the boot_sources_paths as arguments
+    python3 "$SCRIPTS_PATH/manual_tests/json_to_html.py" "${MANUAL_JSONS[@]}" "$MANUAL_DETAILED_HTML" "$MANUAL_SUMMARY_HTML" --include-drop-down --boot-sources-paths "${BOOT_SOURCES_PATHS[@]}"
+fi
+# ---------------------------------------------------------
+# End of Manual Tests Processing
+# ---------------------------------------------------------
+
 # Generate ACS Summary
 ACS_SUMMARY_HTML="$HTMLS_DIR/acs_summary.html"
 
@@ -310,6 +398,13 @@ GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/SCT_summary.html\""
 # Include MVP summary only if processed
 if [ $MVP_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$MVP_SUMMARY_HTML\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# Include Manual Tests summary only if processed
+if [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$MANUAL_SUMMARY_HTML\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
@@ -341,49 +436,75 @@ eval $GENERATE_ACS_SUMMARY_CMD
 
 # Always print BSA messages
 if [ $BSA_PROCESSED -eq 1 ]; then
-    echo "BSA UEFI Log          : $BSA_LOG"
-    echo "BSA JSON              : $BSA_JSON"
-    echo "BSA Detailed Summary  : $HTMLS_DIR/BSA_detailed.html"
-    echo "BSA Summary           : $HTMLS_DIR/BSA_summary.html"
+    echo "BSA UEFI Log              : $BSA_LOG"
+    echo "BSA JSON                  : $BSA_JSON"
+    echo "BSA Detailed Summary      : $HTMLS_DIR/BSA_detailed.html"
+    echo "BSA Summary               : $HTMLS_DIR/BSA_summary.html"
     echo ""
 fi
 
 # Print SBSA messages only if processed
 if [ $SBSA_PROCESSED -eq 1 ]; then
-    echo "SBSA UEFI Log         : $SBSA_LOG"
-    echo "SBSA JSON             : $SBSA_JSON"
-    echo "SBSA Detailed Summary : $HTMLS_DIR/SBSA_detailed.html"
-    echo "SBSA Summary          : $HTMLS_DIR/SBSA_summary.html"
+    echo "SBSA UEFI Log             : $SBSA_LOG"
+    echo "SBSA JSON                 : $SBSA_JSON"
+    echo "SBSA Detailed Summary     : $HTMLS_DIR/SBSA_detailed.html"
+    echo "SBSA Summary               : $HTMLS_DIR/SBSA_summary.html"
     echo ""
 fi
 
 # Always print FWTS messages
 if [ $FWTS_PROCESSED -eq 1 ]; then
-    echo "FWTS Log              : $FWTS_LOG"
-    echo "FWTS JSON             : $FWTS_JSON"
-    echo "FWTS Detailed Summary : $HTMLS_DIR/fwts_detailed.html"
-    echo "FWTS Summary          : $HTMLS_DIR/fwts_summary.html"
+    echo "FWTS Log                  : $FWTS_LOG"
+    echo "FWTS JSON                 : $FWTS_JSON"
+    echo "FWTS Detailed Summary     : $HTMLS_DIR/fwts_detailed.html"
+    echo "FWTS Summary               : $HTMLS_DIR/fwts_summary.html"
     echo ""
 fi
 
 # Always print SCT messages
 if [ $SCT_PROCESSED -eq 1 ]; then
-    echo "SCT Log               : $SCT_LOG"
-    echo "SCT JSON              : $SCT_JSON"
-    echo "SCT Detailed Summary  : $HTMLS_DIR/SCT_detailed.html"
-    echo "SCT Summary           : $HTMLS_DIR/SCT_summary.html"
+    echo "SCT Log                   : $SCT_LOG"
+    echo "SCT JSON                  : $SCT_JSON"
+    echo "SCT Detailed Summary      : $HTMLS_DIR/SCT_detailed.html"
+    echo "SCT Summary               : $HTMLS_DIR/SCT_summary.html"
+    echo ""
+fi
+
+# Print SIE FWTS messages
+if [ $SIE_FWTS_PROCESSED -eq 1 ]; then
+    echo "SIE FWTS Log              : $SIE_FWTS_LOG"
+    echo "SIE FWTS JSON             : $SIE_FWTS_JSON"
+    echo "SIE FWTS Detailed Summary : $HTMLS_DIR/bbsr-fwts_detailed.html"
+    echo "SIE FWTS Summary          : $HTMLS_DIR/bbsr-fwts_summary.html"
+    echo ""
+fi
+
+# Print SIE SCT messages
+if [ $SIE_SCT_PROCESSED -eq 1 ]; then
+    echo "SIE SCT Log               : $SIE_SCT_LOG"
+    echo "SIE SCT JSON              : $SIE_SCT_JSON"
+    echo "SIE SCT Detailed Summary  : $HTMLS_DIR/bbsr-sct_detailed.html"
+    echo "SIE SCT Summary           : $HTMLS_DIR/bbsr-sct_summary.html"
     echo ""
 fi
 
 # Print MVP messages only if processed
 if [ $MVP_PROCESSED -eq 1 ]; then
     echo "MVP Logs Processed"
-    echo "MVP Detailed Summary : $MVP_DETAILED_HTML"
-    echo "MVP Summary          : $MVP_SUMMARY_HTML"
+    echo "MVP Detailed Summary      : $MVP_DETAILED_HTML"
+    echo "MVP Summary               : $MVP_SUMMARY_HTML"
     echo ""
 fi
 
-echo "ACS Summary  : $ACS_SUMMARY_HTML"
+# Print Manual Tests messages only if processed
+if [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
+    echo "Manual Tests Logs Processed"
+    echo "Manual Tests Detailed Summary : $MANUAL_DETAILED_HTML"
+    echo "Manual Tests Summary          : $MANUAL_SUMMARY_HTML"
+    echo ""
+fi
+
+echo "ACS Summary               : $ACS_SUMMARY_HTML"
 echo ""
 
 # Output merged JSON file
@@ -420,11 +541,32 @@ else
     echo "WARNING: $(basename "$SCT_JSON") not found. Skipping this file."
 fi
 
+# Include SIE FWTS JSON file
+if [ $SIE_FWTS_PROCESSED -eq 1 ] && [ -f "$SIE_FWTS_JSON" ]; then
+    JSON_FILES+=("$SIE_FWTS_JSON")
+else
+    echo "WARNING: $(basename "$SIE_FWTS_JSON") not found. Skipping this file."
+fi
+
+# Include SIE SCT JSON file
+if [ $SIE_SCT_PROCESSED -eq 1 ] && [ -f "$SIE_SCT_JSON" ]; then
+    JSON_FILES+=("$SIE_SCT_JSON")
+else
+    echo "WARNING: $(basename "$SIE_SCT_JSON") not found. Skipping this file."
+fi
+
 # Include MVP JSON files only if processed
 if [ $MVP_PROCESSED -eq 1 ] && [ ${#MVP_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${MVP_JSONS[@]}")
 elif [ $MVP_PROCESSED -eq 1 ]; then
     echo "WARNING: No MVP JSON files found. Skipping MVP files."
+fi
+
+# Include manual tests JSON files in merged JSON
+if [ $MANUAL_TESTS_PROCESSED -eq 1 ] && [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
+    JSON_FILES+=("${MANUAL_JSONS[@]}")
+elif [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
+    echo "WARNING: No Manual Tests JSON files found. Skipping Manual Tests files."
 fi
 
 # Merge all existing JSON files into one

@@ -134,7 +134,9 @@ test_mapping = {
             "QueryVariableInfo_Conf",
             "QueryVariableInfo_Func",
             "SetVariable_Conf",
-            "SetVariable_Func"
+            "SetVariable_Func",
+            "AuthVar_Conf",
+            "AuthVar_Func"
         ],
         "TimeServicesTest": [
             "GetTime_Conf",
@@ -154,6 +156,36 @@ test_mapping = {
         "SBBRRuntimeServicesTest": [
             "Non-volatile Variable Reset Test",
             "Runtime Services Test"
+        ],
+        "SecureBootTest":[
+            "ImageLoading",
+            "VariableAttributes",
+            "VariableUpdates"
+        ],
+        "BBSRVariableSizeTest":[
+            "BBSRVariableSizeTest_func"
+        ],
+        "TCGMemoryOverwriteRequestTest":[
+            "Test MOR and MORLOCK"
+        ]
+    },
+    "TCG2ProtocolTest":{
+        "GetActivePcrBanks_Conf":[
+            "GetActivePcrBanks_Conf"
+        ],
+        "GetCapability_Conf":[
+            "GetCapability_Conf"
+        ],
+        "HashLogExtendEvent_Conf":[
+            "HashLogExtendEvent_Conf"
+        ],
+        "SubmitCommand_Conf":[
+            "SubmitCommand_Conf"
+        ]
+    },
+    "PlatformResetAttackMitigationPsciTest":{
+        "PlatformResetAttackMitigationPsciTest_func":[
+            "PlatformResetAttackMitigationPsciTest_func"
         ]
     },
     "LoadedImageProtocolTest": {
