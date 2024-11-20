@@ -145,20 +145,28 @@ for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         endif
 :CapsuleUpdate
         if exist FS%r:\acs_tests\app\signed_capsule.bin then
-            smbiosview > FS%r:\acs_results\app_output\smbiosview_before_update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results\app_output\CapsuleApp_ESRT_table_info_before_update.log
-            rm FS%r:\acs_tests\app\capsule_update_check.flag
+	    if exist FS%r:\acs_results_template then
+	        mkdir FS%r:\acs_results_template\fw
+	    else
+	       echo " template directory not present"
+	       goto BootLinux
+	    fi
+            smbiosview > FS%r:\acs_results_template\fw\smbiosview_before_update.log
+            FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_before_update.log
+            FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_before_update.log
+	    rm FS%r:\acs_tests\app\capsule_update_check.flag
             echo "" > FS%r:\acs_tests\app\capsule_update_done.flag
             echo "UEFI capsule update is in progress, system will reboot after update ..."
-            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\unauth.bin
-            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\tampered.bin
-            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\signed_capsule.bin -OD
-            echo "UEFI capsule update has failed..."
+            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\unauth.bin > FS%r:\acs_results_template\fw\capsule-update.log
+            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\tampered.bin >> FS%r:\acs_results_template\fw\capsule-update.log
+            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\signed_capsule.bin -OD > FS%r:\acs_results_template\fw\capsule-on-disk.log
+            echo "UEFI capsule update has failed..." >> FS%r:\acs_results_template\fw\capsule-on-disk.log
             rm FS%r:\acs_tests\app\capsule_update_check.flag
             rm FS%r:\acs_tests\app\capsule_update_done.flag
             echo "" > FS%r:\acs_tests\app\capsule_update_unsupport.flag
-            smbiosview > FS%r:\acs_results\app_output\smbiosview_after_update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results\app_output\CapsuleApp_ESRT_table_info_after_update.log
+            smbiosview > FS%r:\acs_results_template\fw\smbiosview_after_update.log
+            FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_after_update.log
+            FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_after_update.log
         else
             rm FS%r:\acs_tests\app\capsule_update_check.flag
             echo "" > FS%r:\acs_tests\app\capsule_update_unsupport.flag
@@ -167,9 +175,10 @@ for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         goto BootLinux
     else
         if exist FS%r:\yocto_image.flag and exist FS%r:\acs_tests\app\capsule_update_done.flag then
-            smbiosview > FS%r:\acs_results\app_output\smbiosview_after_update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results\app_output\CapsuleApp_ESRT_table_info_after_update.log
-            echo "Capsule Update done!!!"
+            smbiosview > FS%r:\acs_results_template\fw\smbiosview_after_update.log
+            FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_after_update.log
+            FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_after_update.log
+	    echo "Capsule Update done!!!"
         endif
         goto BootLinux
     endif
