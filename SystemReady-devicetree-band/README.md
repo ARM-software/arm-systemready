@@ -1,9 +1,9 @@
 # SystemReady-devicetree band ACS
 
 ## Introduction to SystemReady-devicetree band
-SystemReady-devicetree band is a band of system complaince in the Arm SystemReady program. This complaince is for devices in the IoT edge sector that are built around SoCs based on the Arm A-profile architecture. It ensures interoperability with embedded Linux and other embedded operating systems.
+SystemReady-devicetree band is a band of system compliance in the Arm SystemReady program. This compliance is for devices in the IoT edge sector that are built around SoCs based on the Arm A-profile architecture. It ensures interoperability with embedded Linux and other embedded operating systems.
 
-SystemReady-devicetree band complaint platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. Compliant systems must conform to the:
+SystemReady-devicetree band compliant platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. Compliant systems must conform to the:
 * [Base System Architecture (BSA) specification](https://developer.arm.com/documentation/den0094/latest)
 * [Embedded Base Boot Requirements (EBBR)](https://developer.arm.com/architectures/platform-design/embedded-systems)
 * EBBR recipe of the [Arm Base Boot Requirements (BBR) specification](https://developer.arm.com/documentation/den0044/latest)
@@ -17,8 +17,6 @@ This section of the repository contains the build scripts and the live-images fo
  - The BBR tests are written for EBBR section of version 2.0 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
-
-
 
 ## Steps to build SystemReady-devicetree band ACS live image using the Yocto build system
 
@@ -54,7 +52,7 @@ Before starting the ACS build, ensure that the following requirements are met:
  `./build-scripts/get_source.sh` <br />
 
 4. To start the build of the SystemReady-devicetree band ACS live image, execute the below step <br />
- `./build-scripts/build-systemready-dt-live-image.sh`
+ `./build-scripts/build-systemready-dt-band-live-image.sh`
 
 5. If the above steps are successful, the bootable image will be available at <br />
   **/path-to-arm-systemready/SystemReady-devicetree-band/Yocto/meta-woden/build/tmp/deploy/images/generic-arm64/systemready-dt_acs_live_image.wic.xz**
@@ -129,7 +127,7 @@ Launch the model using the following command:
 ```
 
 Note:
-When verifiying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
+When verifying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
 
 ### Automation
 The test suite execution can be automated or manual. Automated execution is the default execution method when no key is pressed during boot. <br />
