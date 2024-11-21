@@ -91,7 +91,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     exec sh +m
   fi
 
-  #linux debug dump
+
+  #Linux debug dump
+
+  echo "Collecting Linux Debug Dump"
   mkdir -p /mnt/acs_results/linux_dump
   dmesg > /mnt/acs_results/linux_dump/dmesg.log
   lspci > /mnt/acs_results/linux_dump/lspci.log
@@ -134,41 +137,58 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   mount -t debugfs none /sys/kernel/debug
   cat /sys/kernel/debug/psci > /mnt/acs_results/linux_tools/psci/psci.log
   dmesg | grep psci > /mnt/acs_results/linux_tools/psci/psci_kernel.log
+  sync /mnt
+  sleep 5
+  echo "Linux Debug Dump - Completed"
+
+  # FWTS (SBBR) Execution
 
   mkdir -p /mnt/acs_results/fwts
-  #SBBR Execution
   echo "Executing FWTS for SBBR"
   echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/fwts/FWTSResults.log
   fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
+  sync /mnt
+  sleep 5
+  echo "FWTS Execution - Completed"
 
-  sleep 2
+  # Linux BSA Execution
 
   mkdir -p /mnt/acs_results/linux
-  echo "Running Linux BSA tests"
   if [ -f  /lib/modules/bsa_acs.ko ]; then
+    echo "Running Linux BSA tests"
     insmod /lib/modules/bsa_acs.ko
     echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/linux/BsaResultsApp.log
     /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
     dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
+    sync /mnt
+    sleep 5
+    echo "Linux BSA test Execution - Completed"
   else
     echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run."
   fi
+
+  # Linux SBSA Execution
 
   # Read the value of SbsaRunEnabled
   if [ -f  /mnt/acs_tests/config/acs_run_config.ini ]; then
     SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/mnt/acs_tests/config/acs_run_config.ini" | cut -d'=' -f2 || echo "0")
     if [ "$SbsaRunEnabled" == "1" ]; then
-      echo "Running Linux SBSA tests"
       if [ -f  /lib/modules/sbsa_acs.ko ]; then
-        insmod /lib/modules/sbsa_acs.ko
+        echo "Running Linux SBSA tests"
+      	insmod /lib/modules/sbsa_acs.ko
         echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/linux/SbsaResultsApp.log
         /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
+	sync /mnt
+	sleep 5
+        echo "Linux SBSA test Execution - Completed"
       else
         echo "Error: SBSA kernel Driver is not found. Linux SBSA tests cannot be run."
       fi
     fi
   fi
+
+  # EDK2 test parser
 
   if [ -d "/mnt/acs_results/sct_results" ]; then
     echo "Running edk2-test-parser tool "
@@ -176,12 +196,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     cd /usr/bin/edk2-test-parser
     ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/SBBR.seq > /dev/null 2>&1
     cd -
-    sleep 3
     echo "edk2-test-parser run completed"
     sync /mnt
+    sleep 5
   else
     echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
   fi
+
+  # Device Driver script run
 
   if [ -f "/mnt/acs_results/uefi_dump/devices.log" ] && [ -f "/mnt/acs_results/uefi_dump/drivers.log" ] && [ -f "/mnt/acs_results/uefi_dump/dh.log" ]; then
     echo "Running Device Driver Matching Script"
@@ -189,20 +211,26 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     ./device_driver.sh --md /mnt/acs_results/linux_dump/device_driver.log /mnt/acs_results/uefi_dump/devices.log /mnt/acs_results/uefi_dump/drivers.log /mnt/acs_results/uefi_dump/dh.log > /dev/null 2>&1
     cd -
     echo "Device Driver script run completed"
+    sync /mnt
+    sleep 5
   else
     echo "Devices/Driver/dh log does not exist, cannot run the script"
   fi
+
+  # ACS log parser run
 
   echo "Running acs log parser tool "
   if [ -d "/mnt/acs_results" ]; then
     if [ -d "/mnt/acs_results/acs_summary" ]; then
         rm -r /mnt/acs_results/acs_summary
     fi
-    /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt
+    /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
+    sync /mnt
+    sleep 5
   fi
-  sleep 3
 
-  echo "The ACS test suites are completed."
+  echo "ACS automated test suites run is completed."
+  echo "Please reboot to run BBSR tests if not done"
 else
   echo ""
   echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
@@ -210,6 +238,6 @@ else
 fi
 
 sync /mnt
-sleep 3
+sleep 5
 
 exec sh +m

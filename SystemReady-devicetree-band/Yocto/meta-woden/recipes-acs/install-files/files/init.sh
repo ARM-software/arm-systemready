@@ -62,6 +62,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
       #LINUX DEBUG DUMP
 
+      echo "Collecting Linux debug logs"
       LINUX_DUMP_DIR="/mnt/acs_results/linux_dump"
       mkdir -p $LINUX_DUMP_DIR
       lspci -vvv &> $LINUX_DUMP_DIR/lspci.log
@@ -81,7 +82,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fwupdmgr get-history          &> $LINUX_DUMP_DIR/fwupd_get_history.log
       sync /mnt
       sleep 5
-
+      echo "Linux debug logs run - Completed"
       # FWTS EBBR run
 
       mkdir -p /mnt/acs_results/fwts
@@ -93,18 +94,23 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo -e -n "\n"
       sync /mnt
       sleep 5
+      echo "FWTS test execution - Completed"
  
       #LINUX BSA RUN
 
       mkdir -p /mnt/acs_results/linux_acs/bsa_acs_app
-      echo "Loading BSA ACS Linux Driver"
-      insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
-      echo "Executing BSA ACS Application "
-      echo "SystemReady devicetree band ACS v3.0.0-BETA0" > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
-      bsa >> /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
-      dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
-      sync /mnt 
-      sleep 5
+      if [ -f /lib/modules/*/kernel/bsa_acs/bsa_acs.ko ]; then
+        echo "Running Linux BSA tests"
+        insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
+        echo "SystemReady devicetree band ACS v3.0.0-BETA0" > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+        bsa >> /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+        dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
+	sync /mnt
+	sleep 5
+	echo "Linux BSA test execution - Completed"
+      else
+	echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run"
+      fi
  
       # Device Driver Info script
 
@@ -148,12 +154,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
       # Capturing System PSCI command output
 
+      echo "Collecting psci command output"
       mkdir -p /mnt/acs_results/linux_tools/psci
       mount -t debugfs none /sys/kernel/debug
       cat /sys/kernel/debug/psci > /mnt/acs_results/linux_tools/psci/psci.log
       dmesg | grep psci > /mnt/acs_results/linux_tools/psci/psci_kernel.log
       sync /mnt
       sleep 5
+      echo "PSCI command output - Completed"
 
       # DT Kernel Self test run
 
@@ -165,10 +173,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       popd
       sync /mnt
       sleep 5
+      echo "DT Kernel Self test run - Completed"
 
       # ETHTOOL test run
 
-      echo "Running Ethtool"
+      echo "Running Ethtool test"
       # update resolv.conf with 8.8.8.8 DNS server
       echo "nameserver 8.8.8.8" >> /etc/resolv.conf
       # run ethtool-test.py, dump ethernet information, run self-tests if supported, and ping
@@ -177,6 +186,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results/linux_tools/ethtool-test.log
       sync /mnt
       sleep 5
+      echo "Ethtool test run - Completed"
 
       # READ_WRITE_BLOCK_DEVICE run
 
@@ -185,6 +195,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       python3 /bin/read_write_check_blk_devices.py | tee /mnt/acs_results/linux_tools/read_write_check_blk_devices.log
       sync /mnt
       sleep 5
+      echo "BLK devices read and write check - Completed" 
 
       umount /mnt
       sleep 5
@@ -256,12 +267,13 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         if [ -d "/mnt/acs_results/acs_summary" ]; then
           rm -r /mnt/acs_results/acs_summary 
         fi
-      /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config_dt.txt /mnt/acs_tests/config/system_config.txt
+      /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config_dt.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
       fi
       sync /mnt
       sleep 5
 
-      echo "ACS run is completed"
+      echo "ACS automated test suites run is completed."
+      echo "Please reboot to run BBSR tests if not done"
     fi
 else
   echo ""
