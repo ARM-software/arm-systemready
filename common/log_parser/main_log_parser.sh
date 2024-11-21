@@ -121,9 +121,10 @@ SBSA_PROCESSED=0
 FWTS_PROCESSED=0
 SCT_PROCESSED=0
 MVP_PROCESSED=0
-BBSR_FWTS_PROCESSED=0
-BBSR_SCT_PROCESSED=0
-MANUAL_TESTS_PROCESSED=0  # Added flag for manual tests
+SIE_FWTS_PROCESSED=0
+SIE_SCT_PROCESSED=0
+MANUAL_TESTS_PROCESSED=0
+CAPSULE_PROCESSED=0  # Added flag for Capsule Update
 
 # BSA UEFI and Kernel Log Parsing (Processed regardless of the flag)
 BSA_LOG="$LOGS_PATH/uefi/BsaResults.log"
@@ -315,7 +316,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
 fi
 
 # ---------------------------------------------------------
-# Manual Tests Logs Parsing (New Code Added Below)
+# Manual Tests Logs Parsing
 # ---------------------------------------------------------
 
 # Hardcoded path for os-logs
@@ -371,6 +372,28 @@ fi
 # End of OS Tests Processing
 # ---------------------------------------------------------
 
+# Capsule Update Logs Parsing
+CAPSULE_LOG="/home/ashsha06/capsule_test_results.log"
+CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
+
+if [ -f "$CAPSULE_LOG" ]; then
+    echo "Processing Capsule Update Logs..."
+    CAPSULE_PROCESSED=1
+    python3 "$SCRIPTS_PATH/capsule_update/logs_to_json.py" "$CAPSULE_LOG" "$CAPSULE_JSON"
+    # Apply waivers if necessary
+    apply_waivers "Capsule Update" "$CAPSULE_JSON"
+    # Generate HTML reports
+    python3 "$SCRIPTS_PATH/capsule_update/json_to_html.py" "$CAPSULE_JSON" "$HTMLS_DIR/capsule_update_detailed.html" "$HTMLS_DIR/capsule_update_summary.html"
+    echo "Capsule Update Log              : $CAPSULE_LOG"
+    echo "Capsule Update JSON             : $CAPSULE_JSON"
+    echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
+    echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
+    echo ""
+else
+    echo "WARNING: Skipping Capsule Update log parsing as the log file is missing."
+    echo ""
+fi
+
 # Generate ACS Summary
 ACS_SUMMARY_HTML="$HTMLS_DIR/acs_summary.html"
 
@@ -403,6 +426,13 @@ fi
 # Include OS Tests summary only if processed
 if [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$MANUAL_SUMMARY_HTML\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# Include Capsule Update summary only if processed
+if [ $CAPSULE_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/capsule_update_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
@@ -502,6 +532,16 @@ if [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
     echo ""
 fi
 
+# Print Capsule Update messages only if processed
+if [ $CAPSULE_PROCESSED -eq 1 ]; then
+    echo "Capsule Update Logs Processed"
+    echo "Capsule Update Log              : $CAPSULE_LOG"
+    echo "Capsule Update JSON             : $CAPSULE_JSON"
+    echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
+    echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
+    echo ""
+fi
+
 echo "ACS Summary               : $ACS_SUMMARY_HTML"
 echo ""
 
@@ -565,6 +605,13 @@ if [ $MANUAL_TESTS_PROCESSED -eq 1 ] && [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${MANUAL_JSONS[@]}")
 elif [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
     echo "WARNING: No Manual Tests JSON files found. Skipping Manual Tests files."
+fi
+
+# Include Capsule Update JSON file
+if [ $CAPSULE_PROCESSED -eq 1 ] && [ -f "$CAPSULE_JSON" ]; then
+    JSON_FILES+=("$CAPSULE_JSON")
+else
+    echo "WARNING: $(basename "$CAPSULE_JSON") not found. Skipping this file."
 fi
 
 # Merge all existing JSON files into one
