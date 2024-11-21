@@ -343,13 +343,16 @@ def main(suite_name, json_file, waiver_file='waiver.json', output_json_file='tes
         print(f"INFO: Failed to read or parse {waiver_file}: {e}")
         return
 
-    # Load test_category.json
-    try:
-        with open(output_json_file, 'r') as f:
-            output_json_data = json.load(f)
-    except Exception as e:
-        print(f"WARNING: Failed to read or parse {output_json_file}: {e}")
-        return
+    # Load test_category.json if provided
+    if output_json_file:
+        try:
+            with open(output_json_file, 'r') as f:
+                output_json_data = json.load(f)
+        except Exception as e:
+                print(f"WARNING: Failed to read or parse {output_json_file}: {e}")
+            output_json_data = None
+    else:
+        output_json_data = None
 
     # Get waivers for the suite, categorized by their scope
     suite_level_waivers, testsuite_level_waivers, subsuite_level_waivers, testcase_level_waivers, subtest_level_waivers = load_waivers(waiver_data, suite_name)
@@ -368,7 +371,8 @@ def main(suite_name, json_file, waiver_file='waiver.json', output_json_file='tes
     elif isinstance(json_data, dict):
         test_suite_entries = [json_data]
     else:
-        print(f"ERROR: Unexpected JSON data structure in {json_file}")
+        if verbose:
+            print(f"ERROR: Unexpected JSON data structure in {json_file}")
         return
 
     # Process each test suite in the JSON data
@@ -377,22 +381,27 @@ def main(suite_name, json_file, waiver_file='waiver.json', output_json_file='tes
         if not test_suite_name:
             continue  # Skip entries that are not test suites
 
-        # Check if the test suite is waivable according to test_category.json
-        waivable = False
-        for catID, catData in output_json_data.items():
-            for suiteID, suiteData in catData.items():
-                for sname_key, sname_value in suiteData.items():
-                    if sname_key.startswith('SName:') and sname_key == f'SName: {suite_name}':
-                        ts_list = sname_value  # This is a list
-                        for ts_entry in ts_list:
-                            if ts_entry.get('TSName').lower() == test_suite_name.lower():
-                                if ts_entry.get('Waivable', '').lower() == 'yes':
-                                    waivable = True
-                                    break  # Found a waivable test suite, exit the loops
-                        if waivable:
-                            break
-            if waivable:
-                break
+        # Determine if waivers should be applied based on test_category.json
+        if output_json_data is None:
+            # test_category.json not provided, apply all waivers
+            waivable = True
+        else:
+            # Check if the test suite is waivable according to test_category.json
+            waivable = False
+            for catID, catData in output_json_data.items():
+                for suiteID, suiteData in catData.items():
+                    for sname_key, sname_value in suiteData.items():
+                        if sname_key.startswith('SName:') and sname_key == f'SName: {suite_name}':
+                            ts_list = sname_value  # This is a list
+                            for ts_entry in ts_list:
+                                if ts_entry.get('TSName').lower() == test_suite_name.lower():
+                                    if ts_entry.get('Waivable', '').lower() == 'yes':
+                                        waivable = True
+                                        break  # Found a waivable test suite, exit the loops
+                            if waivable:
+                                break
+                if waivable:
+                    break
 
         if not waivable:
             # Do not process non-waivable test suites
@@ -483,14 +492,21 @@ def main(suite_name, json_file, waiver_file='waiver.json', output_json_file='tes
         print(f"ERROR: Failed to write updated data to {json_file}: {e}")
         return
 
+def main():
+    parser = argparse.ArgumentParser(description='Apply waivers to test suite JSON results.')
+    parser.add_argument('suite_name', help='Name of the test suite')
+    parser.add_argument('json_file', help='Path to the JSON file')
+    parser.add_argument('waiver_file', nargs='?', default='waiver.json', help='Path to the waiver file (default: waiver.json)')
+    parser.add_argument('output_json_file', nargs='?', default=None, help='Path to the test category file (default: None)')
+    parser.add_argument('--quiet', action='store_true', help='Suppress detailed output')
+    args = parser.parse_args()
+
+    # Set the global verbosity flag
+    global verbose
+    verbose = not args.quiet
+
+    # Now call the apply_waivers function
+    apply_waivers(args.suite_name, args.json_file, args.waiver_file, args.output_json_file)
+
 if __name__ == '__main__':
-    if len(sys.argv) < 3 or len(sys.argv) > 5:
-        print("Usage: apply_waivers.py <suite_name> <json_file> [waiver.json] [test_category.json]")
-        sys.exit(1)
-
-    suite_name = sys.argv[1]
-    json_file = sys.argv[2]
-    waiver_file = sys.argv[3] if len(sys.argv) >= 4 else 'waiver.json'
-    output_json_file = sys.argv[4] if len(sys.argv) == 5 else 'test_category.json'
-
-    main(suite_name, json_file, waiver_file, output_json_file)
+    main()
