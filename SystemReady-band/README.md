@@ -12,11 +12,11 @@ SystemReady band compliant platforms implement a minimum set of hardware and fir
 This section contains the build scripts and the live-images for the SystemReady band.
 
 ## Release details
- - Code quality: v3.0.0
- - **The latest pre-built release of ACS is available for download here: [v23.09_2.0.0](prebuilt_images/v23.09_2.0.0)**
+ - Code quality: v3.0.0-BET0
+ - **The latest pre-built release of ACS is available for download here: [v24.11_3.0.0-BET0](prebuilt_images/v24.11_3.0.0-BET0)**
  - The SBSA tests are written for version 7.1 of the SBSA specification.
  - The BSA tests are written for version 1.0 (c) of the BSA specification.
- - The BBR tests are written for the SBBR section in version 1.0 of the BBR specification.
+ - The BBR tests are written for the SBBR section in version 2.1 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
 
@@ -77,7 +77,7 @@ Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". Wh
 #### Prerequisites
 sudo permission is required for  building RD-N2 software stack.
 
-#### Follow the steps mentioned in [RD-N2 platform software user guide](https://neoverse-reference-design.docs.arm.com/en/latest/platforms/rdn2/readme.html#rd-n2-readme-label) to obtain RD-N2 FVP.
+#### Follow the steps mentioned in [RD-N2 platform software user guide](https://neoverse-reference-design.docs.arm.com/en/latest/platforms/rdn2.html) to obtain RD-N2 FVP.
 
 ### For software stack build instructions, follow BusyBox Boot link under Supported Features by RD-N2 platform software stack section in the same guide.
 
@@ -126,10 +126,10 @@ The test suite execution can be automated or manual. Automated execution is the 
 The live image boots to UEFI Shell. The different test applications can run in the following order:
 
 1. [SCT tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
-2. [UEFI Shell application](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for SBSA compliance.
-                           (https://github.com/ARM-software/bsa-acs/blob/main/README.md)    for BSA compliance.
-3. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
-4. [OS tests](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for Linux SBSA compliance.<br />
+2. [BSA](https://github.com/ARM-software/bsa-acs/blob/main/README.md) for BSA compliance.
+3. [SBSA](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for SBSA compliance.
+4. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
+5. [OS tests](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for Linux SBSA compliance.<br />
 Note: To skip FWTS and OS tests for debugging, append "noacs" to the Linux command by editing the "Linux Boot" option in the grub menu during image boot.<br />
 To start an extended run of UEFI-SCT append "-nostartup startup.nsh sct_extd" to the shell.efi command by editing the "bbr/bsa" option in the grub menu during image boot.<br />
 
@@ -140,15 +140,15 @@ For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.07.00
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v24.09.00
 
-- [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs) TAG: v23.09_REL7.1.3
+- [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs) TAG: v24.11_REL7.2.1
 
-- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.09_REL1.0.6
+- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v24.11_REL1.0.9
 
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v23.09_SR_REL2.0.0_ES_REL1.3.0_IR_REL2.1.0
+- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 032822757792c5d4d0bfed1fd8524e69ef4f2d17
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4
 
 
 

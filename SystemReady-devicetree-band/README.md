@@ -11,10 +11,9 @@ SystemReady-devicetree band compliant platforms implement a minimum set of hardw
 This section of the repository contains the build scripts and the live-images for the SystemReady-devicetree band.
 
 ## Release details
- - Code Quality: ACS v3.0.0
- - The latest pre-built release of SystemReady-devicetree band ACS is available for download here: [v23.09_2.1.0](https://github.com/ARM-software/arm-systemready/tree/main/SystemReady-devicetree-band/prebuilt_images/v23.09_2.1.0)
- - The BSA tests are written for version 1.0(c) of the BSA specification.
- - The BBR tests are written for EBBR section of version 2.0 of the BBR specification.
+ - Code Quality: ACS v3.0.0-BET0
+ - **The latest pre-built release of SystemReady-devicetree band ACS is available for download here: [v24.11_3.0.0-BET0](prebuilt_images/v24.11_3.0.0-BET0)**
+ - The BBR tests are written for EBBR section of version 2.2 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
 
@@ -134,7 +133,7 @@ The test suite execution can be automated or manual. Automated execution is the 
 The live image boots to UEFI Shell. The different test applications can be run in the following order:
 
 1. [SCT tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
-2. [UEFI Shell application](https://github.com/ARM-software/bsa-acs/blob/main/README.md) for BSA compliance.
+2. [BSA](https://github.com/ARM-software/bsa-acs/blob/main/README.md) for BSA compliance.
 3. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
 
 ### Running BBSR (BBSR) ACS.
@@ -155,13 +154,13 @@ Press Ctrl+x to boot the Yocto linux with initcall debug prints enabled.
 
 ## Baselines for Open Source Software in this release:
 
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v23.07.00
+- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v24.09.00
 
-- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v23.09_REL1.0.6
+- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v24.11_REL1.0.9
 
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v23.09_SR_REL2.0.0_ES_REL1.3.0_IR_REL2.1.0
+- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0
 
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 032822757792c5d4d0bfed1fd8524e69ef4f2d17
+- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4
 
 
 
