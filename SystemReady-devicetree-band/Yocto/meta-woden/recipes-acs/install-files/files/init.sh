@@ -211,8 +211,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         cur_fw_ver=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log)
         last_attempted_status=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_status_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log)
 
-        echo "Testing signed_capsule.bin sanity" > /mnt/acs_results/app_output/capsule_test_results.log
-	/usr/bin/systemready-scripts/capsule-tool.py /mnt/acs_tests/app/signed_capsule.bin >> /mnt/acs_results/app_output/capsule_test_results.log 2>&1
 
 	fw_status="0x0"
         echo "Testing ESRT FW version update" >> /mnt/acs_results/app_output/capsule_test_results.log
