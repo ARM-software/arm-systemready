@@ -1,8 +1,8 @@
-ACS version: ACS v24.11_3.0.0
+ACS version: ACS v24.11_3.0.0-BET0
 SRS version: SRS 3.0
 BSA version: BSA v1.0C
-BBR version: BBR v2.0
-EBBR version: EBBR v2.1.0
-BBSR version: BBSR v1.2
+BBR version: BBR v2.1
+EBBR version: EBBR v2.2.0
+BBSR version: BBSR v1.3
 Band: SystemReady Devicetree band 3.0
 Device Tree Version:v0.4 

@@ -2,6 +2,6 @@ ACS version: ACS v24.11_3.0.0-BET0
 SRS version: SRS 3.0
 BSA version: BSA v1.0C
 SBSA version: SBSA v7.1
-SBBR version: BBR v2.0
-BBSR version: BBSR v1.2
+SBBR version: BBR v2.1
+BBSR version: BBSR v1.3
 Band: SystemReady band 3.0
