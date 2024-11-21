@@ -455,7 +455,175 @@
             ]
         }    
     },
-   "catID: 30": {
+    "catID: 22": {
+        "SuiteID: 4": {
+            "SName: MVP": [
+                {
+                    "TestSuiteID": 1,
+                    "TSName": "Network",
+                    "testcase": [],
+                    "specID": 8,
+                    "specName": "SRS",
+                    "severityID": 2,
+                    "Severity": "Major",
+                    "waivableID": 1,
+                    "Waivable": "yes",
+                    "scopeID": 1,
+                    "scope": "core",
+                    "FunctionID": 4,
+                    "Function": "runtime"
+                }
+            ]
+        }    
+    },
+    "catID: 23": {
+        "SuiteID: 4": {
+            "SName: MVP": [
+                {
+                    "TestSuiteID": 2,
+                    "TSName": "Peripherals",
+                    "testcase": [],
+                    "specID": 8,
+                    "specName": "SRS",
+                    "severityID": 2,
+                    "Severity": "Major",
+                    "waivableID": 1,
+                    "Waivable": "yes",
+                    "scopeID": 2,
+                    "scope": "extension",
+                    "FunctionID": 4,
+                    "Function": "runtime"
+                }
+            ]
+        }
+    },
+    "catID: 24": {
+        "SuiteID: 4": {
+            "SName: MVP": [
+                {
+                    "TestSuiteID": 3,
+                    "TSName": "security",
+                    "testcase": [],
+                    "specID": 3,
+                    "specName": "BBSR",
+                    "severityID": 3,
+                    "Severity": "Minor",
+                    "waivableID": 1,
+                    "Waivable": "yes",
+                    "scopeID": 2,
+                    "scope": "extension",
+                    "FunctionID": 3,
+                    "Function": "security"
+                }
+            ]
+        }
+    },
+    "catID: 25": {
+        "SuiteID: 4": {
+            "SName: MVP": [
+                {
+                    "TestSuiteID": 4,
+                    "TSName": "A/B support",
+                    "testcase": [],
+                    "specID": 8,
+                    "specName": "SRS",
+                    "severityID": 3,
+                    "Severity": "Minor",
+                    "waivableID": 1,
+                    "Waivable": "yes",
+                    "scopeID": 2,
+                    "scope": "extension",
+                    "FunctionID": 2,
+                    "Function": "maintenance"
+                }
+            ]
+        }
+    },
+    "catID: 26": {
+        "SuiteID: 4": {
+            "SName: MVP": [
+                {
+                    "TestSuiteID": 5,
+                    "TSName": "LinuxInstall",
+                    "testcase": [],
+                    "specID": 8,
+                    "specName": "SRS",
+                    "severityID": 1,
+                    "Severity": "Critical",
+                    "waivableID": 2,
+                    "Waivable": "no",
+                    "scopeID": 1,
+                    "scope": "core",
+                    "FunctionID": 6,
+                    "Function": "other"
+                }
+            ]
+        }
+    },
+    "catID: 27": {
+        "SuiteID: 4": {
+            "SName: MVP": [
+                {
+                    "TestSuiteID": 6,
+                    "TSName": "CapsuleAutherntication",
+                    "testcase": [],
+                    "specID": 8,
+                    "specName": "SRS",
+                    "severityID": 2,
+                    "Severity": "Major",
+                    "waivableID": 2,
+                    "Waivable": "no",
+                    "scopeID": 1,
+                    "scope": "core",
+                    "FunctionID": 2,
+                    "Function": "maintenance"
+                }
+            ]
+        }
+    },
+    "catID: 28": {
+        "SuiteID: 4": {
+            "SName: MVP": [
+                {
+                    "TestSuiteID": 7,
+                    "TSName": "DTValidation",
+                    "testcase": [],
+                    "specID": 8,
+                    "specName": "SRS",
+                    "severityID": 1,
+                    "Severity": "Critical",
+                    "waivableID": 1,
+                    "Waivable": "no",
+                    "scopeID": 1,
+                    "scope": "core",
+                    "FunctionID": 1,
+                    "Function": "boot"
+                }
+            ]
+        }
+    },
+    "catID: 29": {
+        "SuiteID: 5": {
+            "SName: MVP": [
+                {
+                    "TestSuiteID": 8,
+                    "TSName": "Boot sources",
+                    "testcase": [],
+                    "specID": 3,
+                    "specName": "DT",
+                    "severityID": 2,
+                    "Severity": "Major",
+                    "waivableID": 1,
+                    "Waivable": "yes",
+                    "scopeID": 1,
+                    "scope": "core",
+                    "FunctionID": 1,
+                    "Function": "boot"
+                }
+            ]
+        }
+    },
+    "catID: 30": {
         "SuiteID: 5": {
             "SName: BBSR-SCT": [
                 {

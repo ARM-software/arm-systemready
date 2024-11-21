@@ -1,5 +1,18 @@
 #!/usr/bin/env python3
-# JSON to HTML Converter Script
+# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# SPDX-License-Identifier : Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import json
 import matplotlib.pyplot as plt
@@ -75,9 +88,9 @@ def get_subtest_status(subtest_result):
         return 'INFO'  # For informational entries
 
 # Function to generate HTML content for both summary and detailed pages
-def generate_html(suite_summary, test_cases_list, boot_sources_list, output_html_path, is_summary_page=True, include_drop_down=False):
-    # Set the test suite name to 'Manual Tests'
-    test_suite_name = 'Manual Tests'
+def generate_html(suite_summary, test_results_list, output_html_path, is_summary_page=True, include_drop_down=False):
+    # Set the test suite name to 'OS Tests'
+    test_suite_name = 'OS Tests'
 
     # Template for both summary and detailed pages
     template = Template("""
@@ -244,36 +257,33 @@ def generate_html(suite_summary, test_cases_list, boot_sources_list, output_html
         {% if not is_summary_page %}
         {% if include_drop_down %}
         <div class="dropdown">
-            <label for="sectionSelect">Jump to Section:</label>
+            <label for="sectionSelect">Jump to Test Case:</label>
             <select id="sectionSelect" onchange="jumpToSection()">
-                {% for idx, boot_source in enumerate(boot_sources_list) %}
-                <option value="boot_sources_{{ idx }}">Boot Sources for {{ boot_source.os_name }}</option>
+                {% for idx, test_results in enumerate(test_results_list) %}
+                {% for test_idx, test in enumerate(test_results) %}
+                {% if not test.is_boot_source %}
+                <option value="section{{ idx }}_{{ test_idx }}">{{ test.Test_case }}</option>
+                {% endif %}
                 {% endfor %}
-                {% for idx, test_case in enumerate(test_cases_list) %}
-                <option value="test_case_{{ idx }}">{{ test_case.Test_case }}</option>
                 {% endfor %}
             </select>
         </div>
         {% endif %}
         <div class="detailed-summary">
-            {% for idx, boot_source in enumerate(boot_sources_list) %}
-            <a id="boot_sources_{{ idx }}"></a>
-            <div class="test-suite-header">Test Suite: {{ boot_source.Test_suite_name }}</div>
-            <div class="test-suite-description">Description: {{ boot_source.Test_suite_description }}</div>
+            {% for idx, test_results in enumerate(test_results_list) %}
+            {% for test_idx, test in enumerate(test_results) %}
+            <a id="section{{ idx }}_{{ test_idx }}"></a>
+            <div class="test-suite-header">Test Suite: {{ test.Test_suite_name }}</div>
+            <div class="test-suite-description">Description: {{ test.Test_suite_description }}</div>
             
-            <div class="test-case-header">Test Case: {{ boot_source.Test_case }}</div>
-            <div class="test-case-description">Description: {{ boot_source.Test_case_description }}</div>
-            {% endfor %}
+            {% if test.Test_case %}
+            <div class="test-case-header">Test Case: {{ test.Test_case }}</div>
+            {% endif %}
+            {% if test.Test_case_description %}
+            <div class="test-case-description">Description: {{ test.Test_case_description }}</div>
+            {% endif %}
             
-            {% for idx, test_case in enumerate(test_cases_list) %}
-            <a id="test_case_{{ idx }}"></a>
-            <div class="test-suite-header">Test Suite: {{ test_case.Test_suite_name }}</div>
-            <div class="test-suite-description">Description: {{ test_case.Test_suite_description }}</div>
-            
-            <div class="test-case-header">Test Case: {{ test_case.Test_case }}</div>
-            <div class="test-case-description">Description: {{ test_case.Test_case_description }}</div>
-            
-            {% if test_case.subtests %}
+            {% if test.subtests %}
             <table>
                 <thead>
                     <tr>
@@ -286,7 +296,7 @@ def generate_html(suite_summary, test_cases_list, boot_sources_list, output_html
                     </tr>
                 </thead>
                 <tbody>
-                    {% for subtest in test_case.subtests %}
+                    {% for subtest in test.subtests %}
                     {% set subtest_status = get_subtest_status(subtest.sub_test_result) %}
                     <tr>
                         <td>{{ subtest.sub_Test_Number }}</td>
@@ -302,6 +312,7 @@ def generate_html(suite_summary, test_cases_list, boot_sources_list, output_html
                 </tbody>
             </table>
             {% endif %}
+            {% endfor %}
             {% endfor %}
         </div>
         {% endif %}
@@ -325,11 +336,11 @@ def generate_html(suite_summary, test_cases_list, boot_sources_list, output_html
         total_PASSED=suite_summary.get("total_PASSED", 0),
         total_FAILED=suite_summary.get("total_FAILED", 0),
         total_SKIPPED=suite_summary.get("total_SKIPPED", 0),
-        test_cases_list=test_cases_list,
-        boot_sources_list=boot_sources_list,
+        test_results_list=test_results_list,
         is_summary_page=is_summary_page,
         include_drop_down=include_drop_down,
         chart_data=chart_data,  # Will be None if is_summary_page is True
+        enumerate=enumerate,
         get_subtest_status=get_subtest_status  # Pass the function to the template
     )
 
@@ -347,8 +358,7 @@ def main():
     args = parser.parse_args()
 
     # Load JSON data
-    test_cases_list = []
-    boot_sources_list = []
+    test_results_list = []
 
     # Initialize counts
     total_tests = 0
@@ -368,71 +378,74 @@ def main():
                 continue
 
             test_results = data.get("test_results", [])
-            # Extract os_name from boot_sources_path
-            if idx < len(boot_sources_paths):
-                boot_sources_path = boot_sources_paths[idx]
-                os_name = os.path.basename(os.path.dirname(boot_sources_path))
-            else:
-                boot_sources_path = "Unknown"
-                os_name = "Unknown"
+            os_name = data.get("os_name", "Unknown")  # Extract os_name from JSON
+            if test_results:
+                # Append the Boot Sources test to test_results
+                if idx < len(boot_sources_paths):
+                    boot_sources_path = boot_sources_paths[idx]
+                else:
+                    boot_sources_path = "Unknown"
 
-            # Collect Boot Sources info
-            boot_sources_info = {
-                "Test_suite_name": "Boot Sources",
-                "Test_suite_description": "Check for boot sources",
-                "Test_case": f"Boot Sources for {os_name}",
-                "Test_case_description": f"Please review the boot source OS logs for {os_name} - path of {boot_sources_path}",
-                "subtests": []
-            }
-            boot_sources_list.append(boot_sources_info)
+                # Correct OS name if it's "Unknown"
+                if os_name == "Unknown" and boot_sources_path != "Unknown":
+                    # Try to extract OS name from the boot_sources_path
+                    os_name = boot_sources_path.split('/')[-2]  # Get the directory name before 'boot_sources.log'
 
-            # Process test cases (exclude Boot Sources)
-            for test in test_results:
-                # Assuming Boot Sources are already appended separately and not part of test_results
-                test_case = {
-                    "Test_suite_name": test.get("Test_suite_name", "Unknown Suite"),
-                    "Test_suite_description": test.get("Test_suite_description", "No Description"),
-                    "Test_case": test.get("Test_case", "Unknown Test Case"),
-                    "Test_case_description": test.get("Test_case_description", "No Description"),
-                    "subtests": test.get("subtests", [])
+                boot_sources_test = {
+                    "Test_suite_name": "Boot Sources",
+                    "Test_suite_description": "Check for boot sources",
+                    "Test_case": f"Boot Sources for {os_name}",
+                    "Test_case_description": f"Please review the boot source OS logs for {os_name} - path of {boot_sources_path}",
+                    "subtests": [],
+                    "is_boot_source": True  # Flag to identify boot source tests
                 }
 
-                # Determine test case status based on subtests
-                test_status = 'PASSED'
-                has_skipped = False
+                test_results.append(boot_sources_test)
 
-                if test_case['subtests']:
-                    for subtest in test_case['subtests']:
-                        subtest_status = get_subtest_status(subtest.get('sub_test_result', {}))
-                        if subtest_status == 'FAILED':
-                            test_status = 'FAILED'
-                            break
-                        elif subtest_status == 'SKIPPED':
-                            has_skipped = True
-                        elif subtest_status != 'PASSED':
-                            # Treat any other status as failure
-                            test_status = 'FAILED'
-                            break
+                # Now, process each test in test_results to determine its status
+                for test in test_results:
+                    # Skip counting Boot Sources test
+                    if test.get('is_boot_source'):
+                        continue
+
+                    total_tests += 1  # Increment total tests
+
+                    # Determine test status based on subtests
+                    test_status = 'PASSED'
+                    has_skipped = False
+
+                    if test.get('subtests'):
+                        for subtest in test['subtests']:
+                            subtest_status = get_subtest_status(subtest['sub_test_result'])
+                            if subtest_status == 'FAILED':
+                                test_status = 'FAILED'
+                                break
+                            elif subtest_status == 'SKIPPED':
+                                has_skipped = True
+                            elif subtest_status != 'PASSED':
+                                # Treat any other status as failure
+                                test_status = 'FAILED'
+                                break
+                        else:
+                            # No failures in subtests
+                            if has_skipped and test_status != 'FAILED':
+                                test_status = 'SKIPPED'
                     else:
-                        # No failures in subtests
-                        if has_skipped and test_status != 'FAILED':
-                            test_status = 'SKIPPED'
-                else:
-                    # No subtests; treat as SKIPPED
-                    test_status = 'SKIPPED'
+                        # No subtests; treat as SKIPPED
+                        test_status = 'SKIPPED'
 
-                # Update counts based on test_status
-                if test_status == 'PASSED':
-                    total_passed += 1
-                elif test_status == 'FAILED':
-                    total_failed += 1
-                elif test_status == 'SKIPPED':
-                    total_skipped += 1
-                else:
-                    # Treat any other status as skipped
-                    total_skipped += 1
+                    # Update counts based on test_status
+                    if test_status == 'PASSED':
+                        total_passed += 1
+                    elif test_status == 'FAILED':
+                        total_failed += 1
+                    elif test_status == 'SKIPPED':
+                        total_skipped += 1
+                    else:
+                        # Treat any other status as skipped
+                        total_skipped += 1
 
-                test_cases_list.append(test_case)
+                test_results_list.append(test_results)
 
     # Now, create the suite_summary dictionary
     suite_summary = {
@@ -441,8 +454,6 @@ def main():
         'total_SKIPPED': total_skipped,
     }
 
-    total_tests = suite_summary['total_PASSED'] + suite_summary['total_FAILED'] + suite_summary['total_SKIPPED']
-
     if total_tests == 0:
         print("No valid JSON data found in input files.")
         sys.exit(1)
@@ -450,8 +461,7 @@ def main():
     # Generate the detailed summary page
     generate_html(
         suite_summary,
-        test_cases_list,
-        boot_sources_list,
+        test_results_list,
         args.detailed_html_file,
         is_summary_page=False,
         include_drop_down=args.include_drop_down
@@ -460,8 +470,7 @@ def main():
     # Generate the summary page (with bar graph)
     generate_html(
         suite_summary,
-        test_cases_list,
-        boot_sources_list,
+        test_results_list,
         args.summary_html_file,
         is_summary_page=True
     )

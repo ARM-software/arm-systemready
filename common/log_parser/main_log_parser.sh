@@ -22,61 +22,8 @@ SCRIPTS_PATH="$BASE_DIR"
 
 # Check for required arguments
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <acs_results_directory> [acs_config.txt] [system_config.txt] [waiver.json] [test_category.json]"
+    echo "Usage: $0 <acs_results_directory> [acs_config.txt] [system_config.txt] [waiver.json]"
     exit 1
-fi
-
-LOGS_PATH=$1
-ACS_CONFIG_PATH=$2
-SYSTEM_CONFIG_PATH=$3
-WAIVER_JSON=$4
-test_category=$5
-
-# Check if ACS_CONFIG_PATH is provided
-if [ -z "$ACS_CONFIG_PATH" ]; then
-    echo "WARNING: ACS information will be affected on summary page as acs_config.txt is not provided"
-    echo ""
-    echo "If you want ACS information, please use this format: $0 <acs_results_directory> [acs_config.txt] [system_config.txt] [waiver.json] [test_category.json]"
-    echo ""
-fi
-
-# Check if SYSTEM_CONFIG_PATH is provided
-if [ -z "$SYSTEM_CONFIG_PATH" ]; then
-    echo "WARNING: System information may be incomplete as system_config.txt is not provided"
-    echo ""
-    echo "If you want complete system information, please use this format: $0 <acs_results_directory> [acs_config.txt] [system_config.txt] [waiver.json] [test_category.json]"
-    echo ""
-fi
-
-# Initialize waiver-related variables
-WAIVERS_APPLIED=0
-
-# Check if waiver.json and test_category.json are provided
-if [ -n "$WAIVER_JSON" ] && [ -n "$test_category" ]; then
-    if [ -f "$WAIVER_JSON" ] && [ -f "$test_category" ]; then
-        WAIVERS_APPLIED=1
-        echo "Waivers will be applied using:"
-        echo "  Waiver File        : $WAIVER_JSON"
-        echo "  Output JSON File   : $test_category"
-        echo ""
-    else
-        echo "WARNING: Both waiver.json ('$WAIVER_JSON') and test_category.json ('$test_category') must be provided and exist to apply waivers."
-        echo "Waivers will not be applied."
-        echo ""
-        WAIVER_JSON=""
-        test_category=""
-    fi
-else
-    if [ -n "$WAIVER_JSON" ] || [ -n "$test_category" ]; then
-        echo "WARNING: Both waiver.json and test_category.json must be provided to apply waivers."
-        echo "Waivers will not be applied."
-        echo ""
-    else
-        echo "WARNING: waiver.json and test_category.json not provided. Waivers will not be applied."
-        echo ""
-    fi
-    WAIVER_JSON=""
-    test_category=""
 fi
 
 # Add the YOCTO_FLAG variable
@@ -88,6 +35,57 @@ if [ -f "$YOCTO_FLAG" ]; then
 else
     YOCTO_FLAG_PRESENT=0
 fi
+
+LOGS_PATH=$1
+ACS_CONFIG_PATH=$2
+SYSTEM_CONFIG_PATH=$3
+WAIVER_JSON=$4
+
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then 
+  test_category="/usr/bin/log_parser/test_categoryDT.json"
+else
+  test_category="/usr/bin/log_parser/test_category.json"
+fi
+
+# Check if ACS_CONFIG_PATH is provided
+if [ -z "$ACS_CONFIG_PATH" ]; then
+    echo "WARNING: ACS information will be affected on summary page as acs_config.txt is not provided"
+    echo ""
+    echo "If you want ACS information, please use this format: $0 <acs_results_directory> [acs_config.txt] [system_config.txt] [waiver.json]"
+    echo ""
+fi
+
+# Check if SYSTEM_CONFIG_PATH is provided
+if [ -z "$SYSTEM_CONFIG_PATH" ]; then
+    echo "WARNING: System information may be incomplete as system_config.txt is not provided"
+    echo ""
+    echo "If you want complete system information, please use this format: $0 <acs_results_directory> [acs_config.txt] [system_config.txt] [waiver.json]"
+    echo ""
+fi
+
+# Initialize waiver-related variables
+WAIVERS_APPLIED=0
+
+# Check if waiver.json and test_category.json are provided
+if [ -n "$WAIVER_JSON" ];  then
+    if [ -f "$WAIVER_JSON" ]; then
+        WAIVERS_APPLIED=1
+        echo "Waivers will be applied using:"
+        echo "  Waiver File        : $WAIVER_JSON"
+#        echo "  Output JSON File   : $test_category"
+        echo ""
+    else
+        echo "WARNING: waiver.json ('$WAIVER_JSON') must be provided to apply waivers."
+        echo "Waivers will not be applied."
+        echo ""
+        WAIVER_JSON=""
+    fi
+else
+    echo "WARNING: waiver.json and test_category.json not provided. Waivers will not be applied."
+    echo ""
+    WAIVER_JSON=""
+fi
+
 
 # Function to check if a file exists
 check_file() {
@@ -105,8 +103,8 @@ apply_waivers() {
 
     if [ "$WAIVERS_APPLIED" -eq 1 ]; then
         python3 "$SCRIPTS_PATH/apply_waivers.py" "$suite_name" "$json_file" "$WAIVER_JSON" "$test_category"
-    else
-        echo "Waivers not applied for suite '$suite_name' as waiver files are not provided."
+ #   else
+ #       echo "Waivers not applied for suite '$suite_name' as waiver files are not provided."
     fi
 }
 
@@ -125,7 +123,8 @@ SCT_PROCESSED=0
 MVP_PROCESSED=0
 BBSR_FWTS_PROCESSED=0
 BBSR_SCT_PROCESSED=0
-MANUAL_TESTS_PROCESSED=0  # Added flag for manual tests
+MANUAL_TESTS_PROCESSED=0
+CAPSULE_PROCESSED=0  # Added flag for Capsule Update
 
 # BSA UEFI and Kernel Log Parsing (Processed regardless of the flag)
 BSA_LOG="$LOGS_PATH/uefi/BsaResults.log"
@@ -317,7 +316,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
 fi
 
 # ---------------------------------------------------------
-# Manual Tests Logs Parsing (New Code Added Below)
+# Manual Tests Logs Parsing
 # ---------------------------------------------------------
 
 # Hardcoded path for os-logs
@@ -362,7 +361,7 @@ else
     echo "WARNING: os-logs directory not found at $OS_LOGS_PATH"
 fi
 
-# Generate combined manual tests detailed and summary HTML reports
+# Generate combined OS tests detailed and summary HTML reports
 if [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
     MANUAL_DETAILED_HTML="$HTMLS_DIR/manual_tests_detailed.html"
     MANUAL_SUMMARY_HTML="$HTMLS_DIR/manual_tests_summary.html"
@@ -370,8 +369,30 @@ if [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
     python3 "$SCRIPTS_PATH/manual_tests/json_to_html.py" "${MANUAL_JSONS[@]}" "$MANUAL_DETAILED_HTML" "$MANUAL_SUMMARY_HTML" --include-drop-down --boot-sources-paths "${BOOT_SOURCES_PATHS[@]}"
 fi
 # ---------------------------------------------------------
-# End of Manual Tests Processing
+# End of OS Tests Processing
 # ---------------------------------------------------------
+
+# Capsule Update Logs Parsing
+CAPSULE_LOG="/mnt/acs_results/app_output/capsule_test_results.log"
+CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
+
+if [ -f "$CAPSULE_LOG" ]; then
+    echo "Processing Capsule Update Logs..."
+    CAPSULE_PROCESSED=1
+    python3 "$SCRIPTS_PATH/capsule_update/logs_to_json.py" "$CAPSULE_LOG" "$CAPSULE_JSON"
+    # Apply waivers if necessary
+    apply_waivers "Capsule Update" "$CAPSULE_JSON"
+    # Generate HTML reports
+    python3 "$SCRIPTS_PATH/capsule_update/json_to_html.py" "$CAPSULE_JSON" "$HTMLS_DIR/capsule_update_detailed.html" "$HTMLS_DIR/capsule_update_summary.html"
+    echo "Capsule Update Log              : $CAPSULE_LOG"
+    echo "Capsule Update JSON             : $CAPSULE_JSON"
+    echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
+    echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
+    echo ""
+else
+    echo "WARNING: Skipping Capsule Update log parsing as the log file is missing."
+    echo ""
+fi
 
 # Generate ACS Summary
 ACS_SUMMARY_HTML="$HTMLS_DIR/acs_summary.html"
@@ -402,9 +423,16 @@ else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# Include Manual Tests summary only if processed
+# Include OS Tests summary only if processed
 if [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$MANUAL_SUMMARY_HTML\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# Include Capsule Update summary only if processed
+if [ $CAPSULE_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/capsule_update_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
@@ -496,11 +524,21 @@ if [ $MVP_PROCESSED -eq 1 ]; then
     echo ""
 fi
 
-# Print Manual Tests messages only if processed
+# Print OS Tests messages only if processed
 if [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
     echo "Manual Tests Logs Processed"
     echo "Manual Tests Detailed Summary : $MANUAL_DETAILED_HTML"
     echo "Manual Tests Summary          : $MANUAL_SUMMARY_HTML"
+    echo ""
+fi
+
+# Print Capsule Update messages only if processed
+if [ $CAPSULE_PROCESSED -eq 1 ]; then
+    echo "Capsule Update Logs Processed"
+    echo "Capsule Update Log              : $CAPSULE_LOG"
+    echo "Capsule Update JSON             : $CAPSULE_JSON"
+    echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
+    echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
     echo ""
 fi
 
@@ -562,11 +600,18 @@ elif [ $MVP_PROCESSED -eq 1 ]; then
     echo "WARNING: No MVP JSON files found. Skipping MVP files."
 fi
 
-# Include manual tests JSON files in merged JSON
+# Include OS tests JSON files in merged JSON
 if [ $MANUAL_TESTS_PROCESSED -eq 1 ] && [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${MANUAL_JSONS[@]}")
 elif [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
     echo "WARNING: No Manual Tests JSON files found. Skipping Manual Tests files."
+fi
+
+# Include Capsule Update JSON file
+if [ $CAPSULE_PROCESSED -eq 1 ] && [ -f "$CAPSULE_JSON" ]; then
+    JSON_FILES+=("$CAPSULE_JSON")
+else
+    echo "WARNING: $(basename "$CAPSULE_JSON") not found. Skipping this file."
 fi
 
 # Merge all existing JSON files into one
