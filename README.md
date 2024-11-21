@@ -7,10 +7,10 @@ Systems that are designed to just work for the end user with the ability to inst
 For the Arm ecosystem, this requirement first surfaced in the server segment. The Arm ServerReady compliance program provides this 'just works' solution for servers, allowing you to deploy Arm servers with confidence. The program is based on industry standards and is accompanied by a compliance test suite, and a process for compliance.
 
 The Arm SystemReady program is a natural extension of the Arm ServerReady program. Different market segments may target different sets of operating systems and hypervisors with different hardware and firmware requirements. We use the term band to identify these differences. The bands are:
-* [SystemReady-band](https://www.arm.com/architecture/systems/systemready-certification-program/sr)
-* [SystemReady-devicetree-band](https://www.arm.com/architecture/systems/systemready-certification-program/ir)
+* [SystemReady-band](https://www.arm.com/architecture/system-architectures/systemready-compliance-program/systemready-band)
+* [SystemReady-devicetree-band](https://www.arm.com/architecture/system-architectures/systemready-compliance-program/systemready-devicetree-band)
 
-For more information on the Arm SystemReady Compliance Program, visit: [Arm SystemReady](https://www.arm.com/architecture/systems/systemready-certification-program)
+For more information on the Arm SystemReady Compliance Program, visit: [Arm SystemReady](https://www.arm.com/architecture/system-architectures/systemready-compliance-program)
 
 This repository contains the infrastructure to build the Arm SystemReady Architecture Compliance Suite (ACS) and the bootable prebuilt images to be used for the compliance of various bands of SystemReady.<br />
 
