@@ -373,7 +373,7 @@ fi
 # ---------------------------------------------------------
 
 # Capsule Update Logs Parsing
-CAPSULE_LOG="/home/ashsha06/capsule_test_results.log"
+CAPSULE_LOG="/mnt/acs_results/app_output/capsule_test_results.log"
 CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
 
 if [ -f "$CAPSULE_LOG" ]; then
