@@ -157,9 +157,12 @@ for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 	    rm FS%r:\acs_tests\app\capsule_update_check.flag
             echo "" > FS%r:\acs_tests\app\capsule_update_done.flag
             echo "UEFI capsule update is in progress, system will reboot after update ..."
-            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\unauth.bin > FS%r:\acs_results_template\fw\capsule-update.log
+            echo "Testing unauth.bin update" > FS%r:\acs_results_template\fw\capsule-update.log
+            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\unauth.bin >> FS%r:\acs_results_template\fw\capsule-update.log
+            echo "Testing tampered.bin update" >> FS%r:\acs_results_template\fw\capsule-update.log
             FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\tampered.bin >> FS%r:\acs_results_template\fw\capsule-update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\signed_capsule.bin -OD > FS%r:\acs_results_template\fw\capsule-on-disk.log
+            echo "Testing signed_capsule.bin OD update" > FS%r:\acs_results_template\fw\capsule-on-disk.log
+            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\signed_capsule.bin -OD >> FS%r:\acs_results_template\fw\capsule-on-disk.log
             echo "UEFI capsule update has failed..." >> FS%r:\acs_results_template\fw\capsule-on-disk.log
             rm FS%r:\acs_tests\app\capsule_update_check.flag
             rm FS%r:\acs_tests\app\capsule_update_done.flag

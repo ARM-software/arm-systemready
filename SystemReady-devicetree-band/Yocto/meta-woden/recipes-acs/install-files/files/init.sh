@@ -211,16 +211,23 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         cur_fw_ver=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log)
         last_attempted_status=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_status_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log)
 
-        #echo prev_fw_ver: $prev_fw_ver
-        #echo cur_fw_ver: $cur_fw_ver
-        #echo last_attempted_status: $last_attempted_status
-        fw_status="0x0"
-        if [ "$((cur_fw_ver))" -gt "$((prev_fw_ver))" ] && [ "$((last_attempted_status))" == "$((fw_status))" ]; then
-          echo "Capsule update has done successfully from version $prev_fw_ver to $cur_fw_ver"
+        echo "TESTING: Check for signed_capsule.bin sanity" >> /mnt/acs_results/app_output/capsule_test_results.log
+	/usr/bin/systemready-scripts/capsule-tool.py /mnt/acs_tests/app/signed_capsule.bin >> /mnt/acs_results/app_output/capsule_test_results.log 2>&1
+
+	fw_status="0x0"
+        echo "TESTING: Check for ESRT FW version update" >> /mnt/acs_results/app_output/capsule_test_results.log
+	echo "INFO: prev version: $prev_fw_ver,  current version: $cur_fw_ver, last attempted status: $last_attempted_status" >> /mnt/acs_results/app_output/capsule_test_results.log
+	if [ "$((cur_fw_ver))" -gt "$((prev_fw_ver))" ] && [ "$((last_attempted_status))" == "$((fw_status))" ]; then
+          echo "RESULTS: PASSED" >> /mnt/acs_results/app_output/capsule_test_results.log
+	  echo "Capsule update has passed"
+        else
+	  echo "RESULTS: FAILED" >> /mnt/acs_results/app_output/capsule_test_results.log
+	  echo "Capsule update has failed"
         fi
         rm /mnt/acs_tests/app/capsule_update_done.flag
       elif [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
-        echo "Capsule update has failed ..."
+	echo "Capsule update has failed"
+        echo "Capsule update has failed ..." >> /mnt/acs_results/app_output/capsule_test_results.log
         rm /mnt/acs_tests/app/capsule_update_unsupport.flag
       else
         echo "Capsule update has ignored..."
