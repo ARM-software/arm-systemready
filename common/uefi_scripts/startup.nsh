@@ -183,6 +183,7 @@ for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_after_update.log
         else
             rm FS%r:\acs_tests\app\capsule_update_check.flag
+	    mkdir FS%r:\acs_results_template\fw
             echo "" > FS%r:\acs_tests\app\capsule_update_unsupport.flag
 	    echo "Testing signed_capsule.bin OD update" > FS%r:\acs_results_template\fw\capsule-on-disk.log
 	    echo "Test_Info" >> FS%r:\acs_results_template\fw\capsule-on-disk.log
