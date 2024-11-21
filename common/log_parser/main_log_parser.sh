@@ -81,7 +81,7 @@ if [ -n "$WAIVER_JSON" ];  then
         WAIVER_JSON=""
     fi
 else
-    echo "WARNING: waiver.json and test_category.json not provided. Waivers will not be applied."
+    echo "WARNING: waiver.json not provided. Waivers will not be applied."
     echo ""
     WAIVER_JSON=""
 fi
@@ -373,26 +373,27 @@ fi
 # ---------------------------------------------------------
 
 # Capsule Update Logs Parsing
-CAPSULE_LOG="/mnt/acs_results/app_output/capsule_test_results.log"
+CAPSULE_PROCESSED=0  # Initialize flag
+
+# We no longer need to define logs directory or pass arguments since paths are hardcoded in the script
 CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
 
-if [ -f "$CAPSULE_LOG" ]; then
-    echo "Processing Capsule Update Logs..."
+# Run the logs_to_json.py script
+python3 "$SCRIPTS_PATH/capsule_update/logs_to_json.py"
+
+# Check if the JSON file was created
+if [ -f "$CAPSULE_JSON" ]; then
     CAPSULE_PROCESSED=1
-    python3 "$SCRIPTS_PATH/capsule_update/logs_to_json.py" "$CAPSULE_LOG" "$CAPSULE_JSON"
     # Apply waivers if necessary
     apply_waivers "Capsule Update" "$CAPSULE_JSON"
     # Generate HTML reports
     python3 "$SCRIPTS_PATH/capsule_update/json_to_html.py" "$CAPSULE_JSON" "$HTMLS_DIR/capsule_update_detailed.html" "$HTMLS_DIR/capsule_update_summary.html"
-    echo "Capsule Update Log              : $CAPSULE_LOG"
-    echo "Capsule Update JSON             : $CAPSULE_JSON"
-    echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
-    echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
     echo ""
 else
-    echo "WARNING: Skipping Capsule Update log parsing as the log file is missing."
+    echo "WARNING: Capsule Update JSON file not created. Skipping Capsule Update log parsing."
     echo ""
 fi
+
 
 # Generate ACS Summary
 ACS_SUMMARY_HTML="$HTMLS_DIR/acs_summary.html"
