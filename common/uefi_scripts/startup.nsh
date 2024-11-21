@@ -158,10 +158,21 @@ for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             echo "" > FS%r:\acs_tests\app\capsule_update_done.flag
             echo "UEFI capsule update is in progress, system will reboot after update ..."
             echo "Testing unauth.bin update" > FS%r:\acs_results_template\fw\capsule-update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\unauth.bin >> FS%r:\acs_results_template\fw\capsule-update.log
+	    echo "Test_Info" >>  FS%r:\acs_results_template\fw\capsule-update.log
+	    if exist FS%r:\acs_tests\app\unauth.bin then
+              FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\unauth.bin >> FS%r:\acs_results_template\fw\capsule-update.log
+	    else
+	      echo "unauth.bin not present"
+	    endif
             echo "Testing tampered.bin update" >> FS%r:\acs_results_template\fw\capsule-update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\tampered.bin >> FS%r:\acs_results_template\fw\capsule-update.log
+	    echo "Test_Info" >>  FS%r:\acs_results_template\fw\capsule-update.log
+	    if exist FS%r:\acs_tests\app\tampered.bin then
+              FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\tampered.bin >> FS%r:\acs_results_template\fw\capsule-update.log
+	    else
+	      echo "tampered.bin not present"
+	    endif
             echo "Testing signed_capsule.bin OD update" > FS%r:\acs_results_template\fw\capsule-on-disk.log
+	    echo "Test_Info" >> FS%r:\acs_results_template\fw\capsule-on-disk.log
             FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\signed_capsule.bin -OD >> FS%r:\acs_results_template\fw\capsule-on-disk.log
             echo "UEFI capsule update has failed..." >> FS%r:\acs_results_template\fw\capsule-on-disk.log
             rm FS%r:\acs_tests\app\capsule_update_check.flag
@@ -173,6 +184,9 @@ for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         else
             rm FS%r:\acs_tests\app\capsule_update_check.flag
             echo "" > FS%r:\acs_tests\app\capsule_update_unsupport.flag
+	    echo "Testing signed_capsule.bin OD update" > FS%r:\acs_results_template\fw\capsule-on-disk.log
+	    echo "Test_Info" >> FS%r:\acs_results_template\fw\capsule-on-disk.log
+	    echo "signed_capsule.bin not present" >  FS%r:\acs_results_template\fw\capsule-on-disk.log
             echo "signed_capsule.bin file is not present, please copy the same file into acs_tests/app partition"
         endif
         goto BootLinux

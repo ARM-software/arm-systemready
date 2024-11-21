@@ -211,11 +211,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         cur_fw_ver=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log)
         last_attempted_status=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_status_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log)
 
-        echo "TESTING: Check for signed_capsule.bin sanity" >> /mnt/acs_results/app_output/capsule_test_results.log
+        echo "Testing signed_capsule.bin sanity" > /mnt/acs_results/app_output/capsule_test_results.log
 	/usr/bin/systemready-scripts/capsule-tool.py /mnt/acs_tests/app/signed_capsule.bin >> /mnt/acs_results/app_output/capsule_test_results.log 2>&1
 
 	fw_status="0x0"
-        echo "TESTING: Check for ESRT FW version update" >> /mnt/acs_results/app_output/capsule_test_results.log
+        echo "Testing ESRT FW version update" >> /mnt/acs_results/app_output/capsule_test_results.log
 	echo "INFO: prev version: $prev_fw_ver,  current version: $cur_fw_ver, last attempted status: $last_attempted_status" >> /mnt/acs_results/app_output/capsule_test_results.log
 	if [ "$((cur_fw_ver))" -gt "$((prev_fw_ver))" ] && [ "$((last_attempted_status))" == "$((fw_status))" ]; then
           echo "RESULTS: PASSED" >> /mnt/acs_results/app_output/capsule_test_results.log
@@ -262,7 +262,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 	sync /mnt
 	sleep 5
 	mkdir /usr/cache_dir
-	/usr/bin/systemready-scripts/check-sr-results.py --cache-dir=/usr/cache_dir/
+	mkdir -p /mnt/acs_results/post-script
+	/usr/bin/systemready-scripts/check-sr-results.py --cache-dir=/usr/cache_dir/ > /mnt/acs_results/post-script/post-script.log 2&>1
+	cd -
       fi
       sync /mnt
       sleep 5

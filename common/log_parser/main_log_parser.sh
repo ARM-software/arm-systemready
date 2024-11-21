@@ -67,8 +67,8 @@ fi
 WAIVERS_APPLIED=0
 
 # Check if waiver.json and test_category.json are provided
-if [ -n "$WAIVER_JSON" ]  then
-    if [ -f "$WAIVER_JSON" ] then
+if [ -n "$WAIVER_JSON" ];  then
+    if [ -f "$WAIVER_JSON" ]; then
         WAIVERS_APPLIED=1
         echo "Waivers will be applied using:"
         echo "  Waiver File        : $WAIVER_JSON"
@@ -121,8 +121,8 @@ SBSA_PROCESSED=0
 FWTS_PROCESSED=0
 SCT_PROCESSED=0
 MVP_PROCESSED=0
-SIE_FWTS_PROCESSED=0
-SIE_SCT_PROCESSED=0
+BBSR_FWTS_PROCESSED=0
+BBSR_SCT_PROCESSED=0
 MANUAL_TESTS_PROCESSED=0
 CAPSULE_PROCESSED=0  # Added flag for Capsule Update
 
