@@ -18,12 +18,8 @@ for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%m:\acs_results then
         FS%m:
         cd FS%m:\acs_results
-        goto DoneCheck
-    else
-        goto Done
     endif
 endfor
-:DoneCheck
 
 if exist uefi_dump then
     echo "UEFI debug logs already run"
