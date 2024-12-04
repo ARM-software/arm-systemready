@@ -102,7 +102,7 @@ apply_waivers() {
     local json_file="$2"
 
     if [ "$WAIVERS_APPLIED" -eq 1 ]; then
-        python3 "$SCRIPTS_PATH/apply_waivers.py" "$suite_name" "$json_file" "$WAIVER_JSON" "$test_category"
+        python3 "$SCRIPTS_PATH/apply_waivers.py" "$suite_name" "$json_file" "$WAIVER_JSON" "$test_category" --quiet
  #   else
  #       echo "Waivers not applied for suite '$suite_name' as waiver files are not provided."
     fi
