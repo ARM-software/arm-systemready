@@ -65,6 +65,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo "Collecting Linux debug logs"
       LINUX_DUMP_DIR="/mnt/acs_results/linux_dump"
       mkdir -p $LINUX_DUMP_DIR
+      echo 1 > /proc/sys/kernel/printk
+      timedatectl set-ntp true &> $LINUX_DUMP_DIR/set_ntp_time.log
+      timedatectl &> $LINUX_DUMP_DIR/timedatectl.log
+      echo 7 > /proc/sys/kernel/printk
       lspci -vvv &> $LINUX_DUMP_DIR/lspci.log
       lsusb    > $LINUX_DUMP_DIR/lsusb.log
       uname -a > $LINUX_DUMP_DIR/uname.log
