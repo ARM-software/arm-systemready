@@ -3,24 +3,27 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Latest Release details](#release-details)
+- [Latest Release details](#latest-release-details)
 - [Prebuilt Images](#prebuilt-images)
-- [Steps to Manually Build an Image](#build-steps)
-- [Verification on Arm Neoverse N2 reference design (RD-N2)](#verification)
-- [Examples](#examples)
-- [Understanding the Waiver Application Process](#understanding-the-waiver-application-process)
-- [Important Notes](#important-notes)
+- [Steps to Manually Build Image](#steps-to-manually-build-image)
+- [Image Directory Structure](#image-directory-structure)
+- [Image Features](#image-features)
+- [Verification on Arm Neoverse N2 reference design](#verification-on-arm-neoverse-n2-reference-design)
+- [Security Implication](#security-implication)
+- [License](#license)
+- [Feedback, contributions, and support](#feedback-contributions-and-support)
+
 
 
 ## Introduction
 SystemReady band is a band of system compliance in the Arm SystemReady program that ensures interoperability of Arm based servers with standard operating systems and hypervisors.
 
-SystemReady band compliant platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. 
+SystemReady band compliant platforms must implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. 
 
-* The SystemReady band compliance and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
+The SystemReady band compliance and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
 ## Latest Release details
- - Code quality: v3.0.0-BET0
+ - Release version: v3.0.0-BET0
  - **The latest pre-built release of ACS is available for download here: [v24.11_3.0.0-BET0](prebuilt_images/v24.11_3.0.0-BET0)**
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
@@ -37,12 +40,13 @@ SystemReady band compliant platforms implement a minimum set of hardware and fir
 
 
 ## Prebuilt Images
-- Prebuilt images for each release are available in the prebuilt_images folder. You can either choose to use these images or build your own image by following the build steps.
-- To access the prebuilt_images, click [prebuilt_images](prebuilt_images/)
-- The prebuilt images are archived after compression to the .xz format. On Linux, use the xz utility to uncompress the image `xz -d systemready_acs_live_image.img.xz`. On Windows, use the 7zip or a similar utility.
-- If you choose to use the prebuilt image, skip the build steps and navigate to the [Verification](#Verification) section below.
+- Prebuilt images for each release are available in the prebuilt_images folder.To access the prebuilt_images, click [prebuilt_images](prebuilt_images/).
+- The prebuilt images are archived after compression to the .xz format. On Linux, use the xz utility to uncompress the image <br />
+  `xz -d  systemready_acs_live_image.img.xz` <br />
+   On Windows, use the 7zip or a similar utility.
+- If you choose to use the prebuilt image, skip the build steps and navigate to the [Verification on Arm Neoverse N2 reference design](#verification-on-arm-neoverse-n2-reference-design).
 
-## Steps to Manually Build an Image
+## Steps to Manually Build Image
 
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
@@ -56,7 +60,7 @@ Before starting the ACS build, ensure that the following requirements are met:
 - To build a release version of the code, checkout the main branch with the appropriate release [tag](https://github.com/ARM-software/arm-systemready/tags).
 - To build the latest version of the code with bug fixes and new features, use the main branch.
 
-### Steps to build SystemReady band ACS live image
+### Build Steps
 1. Clone the arm-systemready repository <br />
  `git clone https://github.com/ARM-software/arm-systemready.git`
 
@@ -82,7 +86,100 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
   contains a 'acs_results' directory which stores logs of the automated execution of ACS.
 
 
-## Verification on Arm Neoverse N2 reference design (RD-N2)
+## Image Directory Structure
+```
+├── EFI
+│   └── BOOT
+│       ├── Shell.efi
+│       ├── bbsr_startup.nsh
+│       ├── bootaa64.efi
+│       ├── grub.cfg
+│       └── startup.nsh
+├── acs_tests
+│   ├── app
+│   │   └── CapsuleApp.efi
+│   ├── bbr
+│   │   ├── SCT
+│   │   ├── ScrtStartup.nsh
+│   │   ├── SctStartup.nsh
+│   │   └── bbsr_SctStartup.nsh
+│   ├── bbsr-keys
+│   │   ├── NullPK.auth
+│   │   ├── TestDB1.auth
+│   │   ├── TestDB1.der
+│   │   ├── TestDBX1.auth
+│   │   ├── TestDBX1.der
+│   │   ├── TestKEK1.auth
+│   │   ├── TestKEK1.der
+│   │   ├── TestPK1.auth
+│   │   └── TestPK1.der
+│   ├── bsa
+│   │   ├── Bsa.efi
+│   │   ├── bsa.nsh
+│   │   └── sbsa
+│   ├── config
+│   │   ├── acs_config.txt
+│   │   ├── acs_run_config.ini
+│   │   └── system_config.txt
+│   ├── debug
+│   │   └── debug_dump.nsh
+│   └── parser
+│       └── Parser.efi
+├── acs_results
+├── Image
+└── ramdisk-buildroot.img
+```
+- EFI/BOOT contains the uefi automation startup scripts and grub related files
+- acs_tests contains executable files and configs related for test suites
+  - app directory contains CapsuleApp.efi
+  - bbr directory contains SCT related bianries and sequence files
+  - bbsr-keys contains cryptographic keys for secure boot and testing secure firmware updates
+  - bsa directory contains bsa uefi executable for bsa complaince
+  - bsa/sbsa directory contains sbsa uefi executable for bsa complaince
+  - config directory contains system, acs related config files
+  - debug directory contains script to gather debug information
+  - parser directory contains uefi parser executable to parse acs_config file
+- acs_results will contain result logs of various test suite run
+- Image - Linux kernel image file, also contains linux test suites and processing scripts
+  - /init.sh - linux automation script
+  - /usr/bin/fwts - fwts executable
+  - /lib/modules/bsa_acs.ko  - BSA Linux test kernel module
+  - /bin/bsa  - BSA Linux app
+  - /lib/modules/sbsa_acs.ko  - SBSA Linux test kernel module
+  - /bin/sbsa  - SBSA Linux app
+  - /usr/bin/edk2-test-parser - SCT results parser
+  - /usr/bin/device_driver.sh - device driver script
+  - /usr/bin/log_parser - directory containing results post processing script
+- ramdisk-buildroot.img - ram disk file
+
+## Image Features
+
+### Image Grub Menu
+```
+ │ Linux Boot                                    │
+ │*SystemReady band ACS (Automation)             │
+ │ SCT for BBSR (optional)                       │
+ │ Linux Boot for BBSR (optional)                │
+ │ Linux Boot with SetVirtualAddressMap enabled  |
+```
+ - **Linux Boot** : This option will boot the ACS Linux kernel and run the default Linux tool (linux debug dump, fwts, linux bsa, linux sbsa (if selected))
+   - noacs command line parameter: Edit the Linux Boot grub menu option and add **noacs** at the end of Linux Boot grub menu option, to boot into ACS Linux kernel without running the default Linux test suites.
+   - initcall_blacklist=psci_checker command line parameter: Edit the Linux Boot grub menu option and add **initcall_blacklist=psci_checker** to skip default linux psci_checker tool.
+ - **SystemReady band ACS (Automation)** : This is **default** option and will the automated complaince run
+   - UEFI complaince run - SCT, BSA UEFI, SBSA UEFI (if selected)
+   - Boots to Linux and run Linux complaince run - FWTS, BSA Linux, SBSA Linux (if selected)
+ - **SCT for BBSR (optional)** : This option will run the SCT tests required for BBSR complaince. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
+ - **Linux Boot for BBSR (optional)** : This option will run the SCT tests required for BBSR complaince. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
+ - **Linux Boot with SetVirtualAddressMap enabled** : This option is for debug purpose, to boot ACS Linux with SetVAMap on.
+
+### ACS configs file
+### Log Parser scripts
+- The scripts will parse the results generated by various test suite tools and consolidate them into JSON files. These JSON files will adhere to a standard format, maintaining a consistent structure for all test suites
+- Also for easier intrepretation, results will also be captured in HTML format.
+- The JSON and HTML formatted results are present in /acs_results/**acs_summary**  folder.
+
+
+## Verification on Arm Neoverse N2 reference design
 
 Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". When that is selected, Linux output will goes to the graphical console (HDMI monitor). To force serial console output, you may change the "Console Preference" to "Serial".
 
@@ -109,7 +206,7 @@ RD-N2 should be built with the GIC changes as mentioned below as applicable.<br 
 >          +mGicNumInterrupts      = ARM_GIC_MAX_NUM_INTERRUPT;
 
 
-### Verifying the ACS-SR pre-built image
+### Verifying the image
 
 1. Set the environment variable 'MODEL' <br />
   `export MODEL=<absolute path to the RD-N2 FVP binary/FVP_RD_N2>`
@@ -133,24 +230,6 @@ The execution continues from the test that is next in sequence of the test prior
 This is expected behavior and the progress of tests will continue after a 20-minute delay.
 
 Note: When verifying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
-
-### Automation
-The test suite execution can be automated or manual. Automated execution is the default execution method when no key is pressed during boot. <br />
-The live image boots to UEFI Shell. The different test applications can run in the following order:
-
-1. [SCT tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
-2. [BSA](https://github.com/ARM-software/bsa-acs/blob/main/README.md) for BSA compliance.
-3. [SBSA](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for SBSA compliance.
-4. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
-5. [OS tests](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for Linux SBSA compliance.<br />
-
-Note: To skip FWTS and OS tests for debugging, append "noacs" to the Linux command by editing the "Linux Boot" option in the grub menu during image boot.<br />
-To start an extended run of UEFI-SCT append "-nostartup startup.nsh sct_extd" to the shell.efi command by editing the "bbr/bsa" option in the grub menu during image boot.<br />
-
-### Running BBSR (BBSR) ACS components.
-Now BBSR ACS is integrated with SR ACS image, which can be accessed through GRUB options.
-
-For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
 
 ## Security Implication
 Arm SystemReady band ACS test suite may run at higher privilege level. An attacker may utilize these tests as a means to elevate privilege which can potentially reveal the platform security assets. To prevent the leakage of Secure information, it is strongly recommended that the ACS test suite is run only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
