@@ -1,39 +1,48 @@
-# SystemReadyband ACS
+# SystemReady band ACS
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Latest Release details](#release-details)
+- [Prebuilt Images](#prebuilt-images)
+- [Steps to Manually Build an Image](#build-steps)
+- [Verification on Arm Neoverse N2 reference design (RD-N2)](#verification)
+- [Examples](#examples)
+- [Understanding the Waiver Application Process](#understanding-the-waiver-application-process)
+- [Important Notes](#important-notes)
 
 
-## Introduction to SystemReady band
+## Introduction
 SystemReady band is a band of system compliance in the Arm SystemReady program that ensures interoperability of Arm based servers with standard operating systems and hypervisors.
 
-SystemReady band compliant platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. Compliant systems must conform to the:
-* [Server Base System Architecture (SBSA) specification](https://developer.arm.com/documentation/den0029/h/?lang=en)
-* SBBR recipe of the [Base Boot Requirements (BBR) specification](https://developer.arm.com/documentation/den0044/f/?lang=en)
+SystemReady band compliant platforms implement a minimum set of hardware and firmware features that an operating system can depend on to deploy the operating system image. 
+
 * The SystemReady band compliance and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
-This section contains the build scripts and the live-images for the SystemReady band.
-
-## Release details
+## Latest Release details
  - Code quality: v3.0.0-BET0
  - **The latest pre-built release of ACS is available for download here: [v24.11_3.0.0-BET0](prebuilt_images/v24.11_3.0.0-BET0)**
- - The SBSA tests are written for version 7.1 of the SBSA specification.
- - The BSA tests are written for version 1.0 (c) of the BSA specification.
- - The BBR tests are written for the SBBR section in version 2.1 of the BBR specification.
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
+ - SystemReady-band Image Test Suite details
+
+| Test Suite                                                                                   | Test Suite Tag                                               | Specification Version |
+|----------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------|
+| [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs)                    | v24.11_REL1.0.9                                              | BSA v1.0 (c)          |
+| [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs)           | v24.11_REL7.2.1                                              | SBSA v7.1             |
+| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0 | BBR v2.1              |
+| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0 | BBSR v1.3             |
+| [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4                     |                       |
+| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v24.09.00                                                    |                        |
 
 
-## Steps to build SystemReady band ACS live image
-
-## Code download
-- To build a release version of the code, checkout the main branch with the appropriate release tag.
-- To build the latest version of the code with bug fixes and new features, use the main branch.
-
-## ACS build steps
-
-### Prebuilt images
+## Prebuilt Images
 - Prebuilt images for each release are available in the prebuilt_images folder. You can either choose to use these images or build your own image by following the build steps.
 - To access the prebuilt_images, click [prebuilt_images](prebuilt_images/)
 - The prebuilt images are archived after compression to the .xz format. On Linux, use the xz utility to uncompress the image `xz -d systemready_acs_live_image.img.xz`. On Windows, use the 7zip or a similar utility.
 - If you choose to use the prebuilt image, skip the build steps and navigate to the [Verification](#Verification) section below.
+
+## Steps to Manually Build an Image
 
 ### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
@@ -42,6 +51,10 @@ Before starting the ACS build, ensure that the following requirements are met:
  - You must have **sudo** privilege to install tools required for build.
  - Install `git` using `sudo apt install git`
  - `git config --global user.name "Your Name"` and `git config --global user.email "Your Email"` must be configured.
+
+### Code download
+- To build a release version of the code, checkout the main branch with the appropriate release [tag](https://github.com/ARM-software/arm-systemready/tags).
+- To build the latest version of the code with bug fixes and new features, use the main branch.
 
 ### Steps to build SystemReady band ACS live image
 1. Clone the arm-systemready repository <br />
@@ -56,11 +69,12 @@ Before starting the ACS build, ensure that the following requirements are met:
 4. To start the build of the ACS live image, execute the below step <br />
  `./build-scripts/build-systemready-band-live-image.sh`
 
-5. If all the above steps are successful, then the  bootable image will be available at **/path-to-arm-systemready/SystemReady-band/output/systemready_acs_live_image.img.xz**
+5. If all the above steps are successful, then the  bootable image will be available at <br />
+   `/path-to-arm-systemready/SystemReady-band/output/systemready_acs_live_image.img.xz`
 
 Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before it is used.<br />
 
-## Build output
+### Build output
 This image comprise of single FAT file system partition recognized by UEFI: <br />
 - 'BOOT_ACS' <br />
   Approximate size: 640 MB <br />
@@ -68,18 +82,20 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
   contains a 'acs_results' directory which stores logs of the automated execution of ACS.
 
 
-## Verification
+## Verification on Arm Neoverse N2 reference design (RD-N2)
 
 Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". When that is selected, Linux output will goes to the graphical console (HDMI monitor). To force serial console output, you may change the "Console Preference" to "Serial".
 
-### Verification of the SystemReady band image on the Arm Neoverse N2 reference design (RD-N2)
+### Arm Neoverse N2 reference design (RD-N2) FVP
+
+Follow the steps mentioned in [RD-N2 platform software user guide](https://neoverse-reference-design.docs.arm.com/en/latest/platforms/rdn2.html) to obtain RD-N2 FVP.
+
+### Arm Neoverse N2 reference design (RD-N2) software stack
 
 #### Prerequisites
 sudo permission is required for  building RD-N2 software stack.
 
-#### Follow the steps mentioned in [RD-N2 platform software user guide](https://neoverse-reference-design.docs.arm.com/en/latest/platforms/rdn2.html) to obtain RD-N2 FVP.
-
-### For software stack build instructions, follow BusyBox Boot link under Supported Features by RD-N2 platform software stack section in the same guide.
+#### For software stack build instructions, follow BusyBox Boot link under Supported Features by RD-N2 platform software stack section in the same guide.
 
 Note: After the download of software stack code, please do the below changes before starting the build steps.<br />
 RD-N2 should be built with the GIC changes as mentioned below as applicable.<br />
@@ -93,17 +109,15 @@ RD-N2 should be built with the GIC changes as mentioned below as applicable.<br 
 >          +mGicNumInterrupts      = ARM_GIC_MAX_NUM_INTERRUPT;
 
 
-#### Verifying the ACS-SR pre-built image
+### Verifying the ACS-SR pre-built image
 
-1. Set the environment variable 'MODEL'
-```
-export MODEL=<absolute path to the RD-N2 FVP binary/FVP_RD_N2>
-```
-2. Launch the RD-N2 FVP with the pre-built image with the following command
-```
-cd /path to RD-N2_FVP platform software/model-scripts/rdinfra/platforms/rdn2
-./run_model.sh -v /path-to-systemready-acs-live-image/systemready_acs_live_image.img
-```
+1. Set the environment variable 'MODEL' <br />
+  `export MODEL=<absolute path to the RD-N2 FVP binary/FVP_RD_N2>`
+
+3. Launch the RD-N2 FVP with the pre-built image with the following command <br />
+  `cd /path to RD-N2_FVP platform software/model-scripts/rdinfra/platforms/rdn2` <br />
+  `./run_model.sh -v /path-to-systemready-acs-live-image/systemready_acs_live_image.img`
+
 This starts the ACS live image automation and run the test suites in sequence.
 
 Known limitations:<br />
@@ -118,8 +132,7 @@ The execution continues from the test that is next in sequence of the test prior
 2. It may appear that the test execution has stalled with the message “Waiting for few seconds for signal …” displayed on the console.
 This is expected behavior and the progress of tests will continue after a 20-minute delay.
 
-Note:
-When verifying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
+Note: When verifying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
 
 ### Automation
 The test suite execution can be automated or manual. Automated execution is the default execution method when no key is pressed during boot. <br />
@@ -130,6 +143,7 @@ The live image boots to UEFI Shell. The different test applications can run in t
 3. [SBSA](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for SBSA compliance.
 4. [FWTS tests](https://github.com/ARM-software/bbr-acs/blob/main/README.md) for BBR compliance.
 5. [OS tests](https://github.com/ARM-software/sbsa-acs/blob/master/README.md) for Linux SBSA compliance.<br />
+
 Note: To skip FWTS and OS tests for debugging, append "noacs" to the Linux command by editing the "Linux Boot" option in the grub menu during image boot.<br />
 To start an extended run of UEFI-SCT append "-nostartup startup.nsh sct_extd" to the shell.efi command by editing the "bbr/bsa" option in the grub menu during image boot.<br />
 
@@ -137,20 +151,6 @@ To start an extended run of UEFI-SCT append "-nostartup startup.nsh sct_extd" to
 Now BBSR ACS is integrated with SR ACS image, which can be accessed through GRUB options.
 
 For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
-
-## Baselines for Open Source Software in this release:
-
-- [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git) TAG: v24.09.00
-
-- [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs) TAG: v24.11_REL7.2.1
-
-- [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs) TAG: v24.11_REL1.0.9
-
-- [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs) TAG: v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0
-
-- [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test) TAG: 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4
-
-
 
 ## Security Implication
 Arm SystemReady band ACS test suite may run at higher privilege level. An attacker may utilize these tests as a means to elevate privilege which can potentially reveal the platform security assets. To prevent the leakage of Secure information, it is strongly recommended that the ACS test suite is run only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
