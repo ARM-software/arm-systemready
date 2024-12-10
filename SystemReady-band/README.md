@@ -147,6 +147,7 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 - acs_results will contain result logs of various test suite run
 - Image - Linux kernel image file, also contains linux test suites and processing scripts
   - /init.sh - linux automation script
+  - /usr/bin/secure_init.sh - linux automation script for bbsr
   - /usr/bin/fwts - fwts executable
   - /lib/modules/bsa_acs.ko  - BSA Linux test kernel module
   - /bin/bsa  - BSA Linux app
