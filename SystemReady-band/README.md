@@ -130,6 +130,11 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 └── ramdisk-buildroot.img
 ```
 - EFI/BOOT contains the uefi automation startup scripts and grub related files
+  - Shell.efi - uefi shell executable
+  - bbsr_startup.nsh - bbsr uefi test startup file
+  - bootaa64.efi - grub executable
+  - grub.cfg - grub config file
+  - startup.nsh - uefi automation run startup file
 - acs_tests contains executable files and configs related for test suites
   - app directory contains CapsuleApp.efi
   - bbr directory contains SCT related bianries and sequence files
