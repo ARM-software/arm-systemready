@@ -8,6 +8,9 @@
 - [Steps to Manually Build Image](#steps-to-manually-build-image)
 - [Image Directory Structure](#image-directory-structure)
 - [Details and Functionalities of the Image](#details-and-functionalities-of-the-image)
+  - [Grub Menu & Complaince Run](#grub-menu--complaince-run)
+  - [ACS configs file](#acs-configs-file)
+  - [Log Parser scripts](#log-parser-scripts)
 - [Verification on Arm Neoverse N2 reference design](#verification-on-arm-neoverse-n2-reference-design)
 - [Security Implication](#security-implication)
 - [License](#license)
@@ -154,7 +157,7 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 
 ## Details and Functionalities of the Image
 
-### Grub Menu
+### Grub Menu & Complaince Run
 ```
  │ Linux Boot                                    │
  │*SystemReady band ACS (Automation)             │
