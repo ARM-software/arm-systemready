@@ -224,7 +224,7 @@ RD-N2 should be built with the GIC changes as mentioned below as applicable.<br 
 >          +mGicNumInterrupts      = ARM_GIC_MAX_NUM_INTERRUPT;
 
 
-### Verifying the image
+### Running the image
 
 1. Set the environment variable 'MODEL' <br />
   `export MODEL=<absolute path to the RD-N2 FVP binary/FVP_RD_N2>`
