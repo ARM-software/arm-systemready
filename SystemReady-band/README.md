@@ -16,8 +16,6 @@
 - [License](#license)
 - [Feedback, contributions, and support](#feedback-contributions-and-support)
 
-
-
 ## Introduction
 SystemReady band is a band of system compliance in the Arm SystemReady program that ensures interoperability of Arm based servers with standard operating systems and hypervisors.
 
@@ -39,8 +37,7 @@ The SystemReady band compliance and testing requirements are specified in the [A
 | [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0 | BBR v2.1              |
 | [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0 | BBSR v1.3             |
 | [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4                     |                       |
-| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v24.09.00                                                    |                        |
-
+| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v24.09.00                                                    |                       |
 
 ## Prebuilt Images
 - Prebuilt images for each release are available in the prebuilt_images folder.To access the prebuilt_images, click [prebuilt_images](prebuilt_images/).
@@ -233,7 +230,8 @@ RD-N2 should be built with the GIC changes as mentioned below as applicable.<br 
   `cd /path to RD-N2_FVP platform software/model-scripts/rdinfra/platforms/rdn2` <br />
   `./run_model.sh -v /path-to-systemready-acs-live-image/systemready_acs_live_image.img`
 
-This starts the ACS live image automation and run the test suites in sequence.
+**Note: When verifying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.**
+
 
 Known limitations:<br />
 On FVP models, with versions previous to 11.15.23, during the execution of the UEFI-SCT suite, the following behavior is observed:
@@ -247,7 +245,6 @@ The execution continues from the test that is next in sequence of the test prior
 2. It may appear that the test execution has stalled with the message “Waiting for few seconds for signal …” displayed on the console.
 This is expected behavior and the progress of tests will continue after a 20-minute delay.
 
-Note: When verifying ACS on hardware, ensure that ACS image is not in two different boot medias (USB, NVMe drives etc) attached to the device.
 
 ## Security Implication
 Arm SystemReady band ACS test suite may run at higher privilege level. An attacker may utilize these tests as a means to elevate privilege which can potentially reveal the platform security assets. To prevent the leakage of Secure information, it is strongly recommended that the ACS test suite is run only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
