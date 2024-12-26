@@ -39,7 +39,7 @@ else
     pci > pci.log
     drivers > drivers.log
     devices > devices.log
-    dh -d > dh.log
+    dh -d -v > dh.log
     dmpstore -all -s dmpstore.bin
     dmpstore -all > dmpstore.log
     memmap > memmap.log
