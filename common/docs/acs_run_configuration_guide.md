@@ -14,7 +14,7 @@
 
 - To modify the acs_run_config.ini before building.
 
-- Goto systemready repo /common/docs.
+- Goto systemready repo /common/config.
 
 - Edit acs_run_config.ini file to enable or disable the testsuits.
 
