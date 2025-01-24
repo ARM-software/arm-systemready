@@ -1,0 +1,30 @@
+From ec761526eaad78ca12ea888dc58c1ed906b5a5a2 Mon Sep 17 00:00:00 2001
+From: Simon Wang <simowang@nvidia.com>
+Date: Fri, 1 Nov 2024 04:17:17 -0700
+Subject: acpi: iort: memory access flag update.
+
+BugLink: https://bugs.launchpad.net/fwts/+bug/2086029
+Update the reserved bits of memory access flag with IORT spec E.f.
+
+Signed-off-by: Simon Wang <simowang@nvidia.com>
+Acked-by: Ivan Hu <ivan.hu@canonical.com>
+---
+ src/acpi/iort/iort.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/acpi/iort/iort.c b/src/acpi/iort/iort.c
+index e586e2ca..82933083 100644
+--- a/src/acpi/iort/iort.c
++++ b/src/acpi/iort/iort.c
+@@ -405,7 +405,7 @@ static void iort_memory_access_properties_check(
+ 	fwts_acpi_reserved_zero("IORT", field, properties->reserved, passed);
+ 
+ 	snprintf(field, sizeof(field), "%s  Memory Access Flags", name);
+-	fwts_acpi_reserved_bits("IORT", field, properties->memory_access_flags, 2, 7, passed);
++	fwts_acpi_reserved_bits("IORT", field, properties->memory_access_flags, 3, 7, passed);
+ 
+ 	cca = properties->cache_coherent & 1;
+ 	cpm = properties->memory_access_flags & 1;
+-- 
+cgit v1.2.3
+
