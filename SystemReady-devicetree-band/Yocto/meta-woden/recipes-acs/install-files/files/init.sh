@@ -263,9 +263,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 	cp -r /mnt/acs_results /mnt_acs_results_template/
 	sync /mnt
 	sleep 5
-	mkdir /usr/cache_dir
 	mkdir -p /mnt/acs_results/post-script
-	/usr/bin/systemready-scripts/check-sr-results.py --cache-dir=/usr/cache_dir/ > /mnt/acs_results/post-script/post-script.log 2&>1
+	/usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template > /mnt/acs_results/post-script/post-script.log 2>&1
 	cd -
       fi
       sync /mnt
