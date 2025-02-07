@@ -154,7 +154,8 @@ def check_events(event_list):
                 count = count + 1
                 # check if event data matches recommended string
                 for pattern in sec_wd_patterns:
-                    if re.match(pattern, event['event_data']):
+                    if isinstance(event['event_data'], (str, bytes)) and \
+                                                           re.match(pattern, event['event_data']):
                        match_found = True
                        break
                 if not match_found :
