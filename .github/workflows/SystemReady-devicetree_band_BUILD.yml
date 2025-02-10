@@ -26,7 +26,7 @@ jobs:
         remove-haskell: 'true'
         remove-codeql: 'true'
         remove-docker-images: 'true'
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 1
     - name: Start building
@@ -38,7 +38,7 @@ jobs:
         ./build-scripts/get_source.sh;
         sed -i 's/if 0 == os.getuid/if 1 == os.getuid/' meta-woden/poky/meta/classes-global/sanity.bbclass;
         ./build-scripts/build-systemready-dt-band-live-image.sh
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: systemready-dt_acs_live_image.wic.xz
         path: SystemReady-devicetree-band/Yocto/meta-woden/build/tmp/deploy/images/generic-arm64/systemready-dt_acs_live_image.wic.xz
