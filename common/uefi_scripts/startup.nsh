@@ -21,8 +21,8 @@ connect -r
 
 # check if BBSR SCT in progress, if yes resume the run.
 for %b in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%b:\acs_tests\bbr\bbsr_sct_inprogress.flag then
-        echo "BBSR SCT in progress, Resuming ..."
+    if exist FS%b:\acs_tests\bbr\bbsr_inprogress.flag then
+        echo "BBSR compliance testing in progress, Resuming ..."
         FS%b:\EFI\BOOT\bbsr_startup.nsh
     endif
 endfor
