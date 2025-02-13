@@ -17,6 +17,7 @@
 import json
 import os
 import re
+import argparse
 
 def parse_capsule_update_log(lines):
     tests = []
@@ -44,7 +45,6 @@ def parse_capsule_update_log(lines):
                     while i < total_lines:
                         info_line = lines[i].strip()
                         if re.match(r"Testing\s+", info_line, re.IGNORECASE):
-                            # Next test starts
                             i -= 1
                             break
                         info_lines.append(info_line)
@@ -84,26 +84,21 @@ def parse_capsule_on_disk_log(lines):
             test_info = ''
             test_result = 'FAILED'  # Default to FAILED
             i += 1
-            # Look for 'Test_Info'
             while i < total_lines:
                 current_line = lines[i].strip()
                 if re.match(r"Testing\s+", current_line, re.IGNORECASE):
-                    # Next test starts
                     break
                 elif re.match(r"Test[_\s]Info", current_line, re.IGNORECASE):
-                    # Start collecting Test_Info
                     i += 1
                     info_lines = []
                     while i < total_lines:
                         info_line = lines[i].strip()
                         if re.match(r"Testing\s+", info_line, re.IGNORECASE):
-                            # Next test starts
                             i -= 1
                             break
                         info_lines.append(info_line)
                         i += 1
                     test_info = '\n'.join(info_lines)
-                    # Determine result based on user specification
                     if "signed_capsule.bin not present" in test_info.lower():
                         test_result = 'FAILED'
                     elif "succeed to write signed_capsule.bin" in test_info.lower():
@@ -131,7 +126,6 @@ def parse_capsule_test_results_log(lines):
     total_lines = len(lines)
     while i < total_lines:
         line = lines[i].strip()
-        # Flexible matching for different test descriptions
         sanity_match = re.match(r"Testing\s+signed_capsule\.bin\s+sanity", line, re.IGNORECASE)
         esrt_match = re.match(r"(Testing|Test:\s+Testing)\s+ESRT\s+FW\s+version\s+update", line, re.IGNORECASE)
         
@@ -143,7 +137,6 @@ def parse_capsule_test_results_log(lines):
             while i < total_lines:
                 current_line = lines[i].strip()
                 if re.match(r"Testing\s+", current_line, re.IGNORECASE) or re.match(r"Test:\s+", current_line, re.IGNORECASE):
-                    # Next test starts
                     break
                 elif "error sanity_check_capsule" in current_line.lower():
                     test_info = current_line
@@ -168,7 +161,6 @@ def parse_capsule_test_results_log(lines):
             while i < total_lines:
                 current_line = lines[i].strip()
                 if re.match(r"Testing\s+", current_line, re.IGNORECASE) or re.match(r"Test:\s+", current_line, re.IGNORECASE):
-                    # Next test starts
                     break
                 elif current_line.lower().startswith("info:"):
                     test_info = current_line[len("INFO:"):].strip()
@@ -192,85 +184,76 @@ def parse_capsule_test_results_log(lines):
     return tests
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Parse capsule update logs and output JSON for Capsule Update Tests."
+    )
+    parser.add_argument("--capsule_update_log", required=True, help="Path to capsule-update.log")
+    parser.add_argument("--capsule_on_disk_log", required=True, help="Path to capsule-on-disk.log")
+    parser.add_argument("--capsule_test_results_log", required=True, help="Path to capsule_test_results.log")
+    parser.add_argument("--output_file", required=True, help="Output JSON file path")
+    args = parser.parse_args()
+
     tests = []
 
-    # Hardcoded paths to the log files
-    capsule_update_log_path = '/mnt/acs_results_template/fw/capsule-update.log'
-    capsule_on_disk_log_path = '/mnt/acs_results_template/fw/capsule-on-disk.log'
-    capsule_test_results_log_path = '/mnt/acs_results/app_output/capsule_test_results.log'
-
-    # Output JSON file path
-    output_file = '/mnt/acs_results/acs_summary/acs_jsons/capsule_update.json'
-
-    # Function to read log file with specified encoding and debugging
     def read_log_file(path, encoding='utf-8'):
         try:
             with open(path, 'r', encoding=encoding, errors='ignore') as file:
                 lines = file.readlines()
-            print(f"Successfully read {path} with encoding {encoding}. Total lines: {len(lines)}")
+            print(f"Successfully read {path} ({len(lines)} lines)")
             return lines
         except Exception as e:
-            print(f"Error reading {path} with encoding {encoding}: {e}")
+            print(f"Error reading {path}: {e}")
             return []
 
-    # Parse capsule-update.log (UTF-16 LE)
-    if os.path.exists(capsule_update_log_path):
-        lines = read_log_file(capsule_update_log_path, encoding='utf-16')  # Use 'utf-16' to handle BOM
+    # Parse capsule_update.log (assumed to be UTF-16)
+    if os.path.exists(args.capsule_update_log):
+        lines = read_log_file(args.capsule_update_log, encoding='utf-16')
         if lines:
-            parsed_update_tests = parse_capsule_update_log(lines)
-            tests.extend(parsed_update_tests)
-            print(f"Parsed {len(parsed_update_tests)} tests from {capsule_update_log_path}")
-        else:
-            print(f"No content found or failed to read {capsule_update_log_path}")
+            parsed_update = parse_capsule_update_log(lines)
+            tests.extend(parsed_update)
+            print(f"Parsed {len(parsed_update)} tests from capsule-update.log")
     else:
-        print(f"Error: {capsule_update_log_path} not found.")
+        print(f"Error: {args.capsule_update_log} not found.")
 
-    # Parse capsule-on-disk.log (UTF-8)
-    if os.path.exists(capsule_on_disk_log_path):
-        lines = read_log_file(capsule_on_disk_log_path, encoding='utf-8')  # Use 'UTF-8' to handle BOM
+    # Parse capsule-on-disk.log (assumed UTF-8)
+    if os.path.exists(args.capsule_on_disk_log):
+        lines = read_log_file(args.capsule_on_disk_log, encoding='utf-16')
         if lines:
-            parsed_on_disk_tests = parse_capsule_on_disk_log(lines)
-            tests.extend(parsed_on_disk_tests)
-            print(f"Parsed {len(parsed_on_disk_tests)} tests from {capsule_on_disk_log_path}")
-        else:
-            print(f"No content found or failed to read {capsule_on_disk_log_path}")
+            parsed_on_disk = parse_capsule_on_disk_log(lines)
+            tests.extend(parsed_on_disk)
+            print(f"Parsed {len(parsed_on_disk)} tests from capsule-on-disk.log")
     else:
-        print(f"Error: {capsule_on_disk_log_path} not found.")
+        print(f"Error: {args.capsule_on_disk_log} not found.")
 
-    # Parse capsule_test_results.log (UTF-8)
-    if os.path.exists(capsule_test_results_log_path):
-        lines = read_log_file(capsule_test_results_log_path, encoding='utf-8')
+    # Parse capsule_test_results.log (assumed UTF-8)
+    if os.path.exists(args.capsule_test_results_log):
+        lines = read_log_file(args.capsule_test_results_log, encoding='utf-8')
         if lines:
-            parsed_test_results = parse_capsule_test_results_log(lines)
-            tests.extend(parsed_test_results)
-            print(f"Parsed {len(parsed_test_results)} tests from {capsule_test_results_log_path}")
-        else:
-            print(f"No content found or failed to read {capsule_test_results_log_path}")
+            parsed_results = parse_capsule_test_results_log(lines)
+            tests.extend(parsed_results)
+            print(f"Parsed {len(parsed_results)} tests from capsule_test_results.log")
     else:
-        print(f"Error: {capsule_test_results_log_path} not found.")
+        print(f"Error: {args.capsule_test_results_log} not found.")
 
-    # Calculate summary
     summary = {
         'total_PASSED': sum(1 for t in tests if t['Test_Result'] == 'PASSED'),
         'total_FAILED': sum(1 for t in tests if t['Test_Result'] == 'FAILED'),
         'total_SKIPPED': sum(1 for t in tests if t['Test_Result'] == 'SKIPPED'),
     }
 
-    # Prepare final JSON structure
     output_data = {
         'Test_Suite': 'Capsule Update Tests',
         'Tests': tests,
         'Summary': summary
     }
 
-    # Write to JSON file
+    os.makedirs(os.path.dirname(args.output_file), exist_ok=True)
     try:
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        with open(output_file, 'w', encoding='utf-8') as json_file:
-            json.dump(output_data, json_file, indent=2)
-        print(f"Parsing complete. Results saved to {output_file}")
+        with open(args.output_file, 'w', encoding='utf-8') as outfile:
+            json.dump(output_data, outfile, indent=2)
+        print(f"Parsing complete. Results saved to {args.output_file}")
     except Exception as e:
-        print(f"Error writing to {output_file}: {e}")
+        print(f"Error writing to {args.output_file}: {e}")
 
 if __name__ == "__main__":
-        main()
+    main()
