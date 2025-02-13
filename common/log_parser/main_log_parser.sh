@@ -320,7 +320,7 @@ fi
 # ---------------------------------------------------------
 
 # Hardcoded path for os-logs
-OS_LOGS_PATH="/mnt/acs_results_template/os-logs"  # Replace this with the actual path
+OS_LOGS_PATH="$(dirname "$LOGS_PATH")/os-logs"
 
 MANUAL_JSONS_DIR="$JSONS_DIR"
 mkdir -p "$MANUAL_JSONS_DIR"
@@ -379,7 +379,12 @@ CAPSULE_PROCESSED=0  # Initialize flag
 CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
 
 # Run the logs_to_json.py script
-python3 "$SCRIPTS_PATH/capsule_update/logs_to_json.py"
+python3 "$SCRIPTS_PATH/capsule_update/logs_to_json.py" \
+    --capsule_update_log "$(dirname "$LOGS_PATH")/fw/capsule-update.log" \
+    --capsule_on_disk_log "$(dirname "$LOGS_PATH")/fw/capsule-on-disk.log" \
+    --capsule_test_results_log "$LOGS_PATH/app_output/capsule_test_results.log" \
+    --output_file "$CAPSULE_JSON"
+
 
 # Check if the JSON file was created
 if [ -f "$CAPSULE_JSON" ]; then
