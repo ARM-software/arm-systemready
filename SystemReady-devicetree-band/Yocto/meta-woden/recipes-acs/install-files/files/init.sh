@@ -20,6 +20,11 @@ echo "init.sh"
 echo "Mounting efivarfs ..."
 mount -t efivarfs efivarfs /sys/firmware/efi/efivars
 
+if ! grep -q "ttySC0" /etc/securetty; then
+  echo "ttySC0" >> /etc/securetty
+  echo "added ttySC0"
+fi
+
 sleep 5
 
 #Skip running of ACS Tests if the grub option is added
