@@ -188,7 +188,7 @@ def get_failed_with_waiver_counts(content):
     return failed, failed_with_waiver
 
 def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts_summary_content, sct_summary_content,
-                                 mvp_summary_content, bbsr_fwts_summary_content, bbsr_sct_summary_content,
+                                 bbsr_fwts_summary_content, bbsr_sct_summary_content, mvp_summary_content,
                                  manual_tests_summary_content, capsule_update_summary_content):
     # Initialize compliance status
     overall_compliance = 'Compliant'
@@ -199,9 +199,9 @@ def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts
         'SBSA': sbsa_summary_content,
         'FWTS': fwts_summary_content,
         'SCT': sct_summary_content,
-        'MVP': mvp_summary_content,
         'BBSR-FWTS': bbsr_fwts_summary_content,
         'BBSR-SCT': bbsr_sct_summary_content,
+        'MVP': mvp_summary_content,
         'Manual Tests': manual_tests_summary_content,
         'Capsule Update': capsule_update_summary_content  # Added Capsule Update
     }
@@ -222,8 +222,8 @@ def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts
                 compliant_with_waivers = False
             if failed != 0 or failed_with_waiver != 0:
                 all_failed_zero = False
-        else:
-            print(f"Suite: {suite} summary not provided or empty. Skipping.")
+       # else:
+       #     print(f"Suite: {suite} summary not provided or empty. Skipping.")
 
     if all_failed_zero:
         overall_compliance = 'Compliant'
@@ -241,19 +241,19 @@ def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts
     else:
         overall_compliance = 'Not compliant'
 
-    print(f"Overall Compliance: {overall_compliance}")  # Debug Statement
+    print(f"\nOverall Compliance: {overall_compliance}\n")  # Debug Statement
     return overall_compliance
 
 def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
-                  mvp_summary_path, bbsr_fwts_summary_path, bbsr_sct_summary_path, manual_tests_summary_path, capsule_update_summary_path, output_html_path):
+                  bbsr_fwts_summary_path, bbsr_sct_summary_path, mvp_summary_path,manual_tests_summary_path, capsule_update_summary_path, output_html_path):
     # Read summary contents
     bsa_summary_content = read_html_content(bsa_summary_path)
     sbsa_summary_content = read_html_content(sbsa_summary_path)
     fwts_summary_content = read_html_content(fwts_summary_path)
     sct_summary_content = read_html_content(sct_summary_path)
-    mvp_summary_content = read_html_content(mvp_summary_path)
     bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path)
+    mvp_summary_content = read_html_content(mvp_summary_path)
     manual_tests_summary_content = read_html_content(manual_tests_summary_path)
     capsule_update_summary_content = read_html_content(capsule_update_summary_path)  # Added this line
 
@@ -529,7 +529,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="bbsr_fwts_summary">
                     {{ bbsr_fwts_summary_content | safe }}
                     <div class="details-link">
-                        <a href="bbsr-fwts_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-FWTS</a>
+                        <a href="bbsr_fwts_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-FWTS</a>
                     </div>
                 </div>
                 {% endif %}
@@ -537,7 +537,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="bbsr_sct_summary">
                     {{ bbsr_sct_summary_content | safe }}
                     <div class="details-link">
-                        <a href="bbsr-sct_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-SCT</a>
+                        <a href="bbsr_sct_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-SCT</a>
                     </div>
                 </div>
                 {% endif %}
@@ -571,9 +571,9 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
         sbsa_summary_content=sbsa_summary_content,
         fwts_summary_content=fwts_summary_content,
         sct_summary_content=sct_summary_content,
-        mvp_summary_content=mvp_summary_content,
         bbsr_fwts_summary_content=bbsr_fwts_summary_content,
         bbsr_sct_summary_content=bbsr_sct_summary_content,
+        mvp_summary_content=mvp_summary_content,
         manual_tests_summary_content=manual_tests_summary_content,
         capsule_update_summary_content=capsule_update_summary_content  # Added this line
     )
@@ -583,8 +583,8 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
 
     # Adjust headings in detailed summary pages for BBSR-FWTS, BBSR-SCT, OS Tests, and Capsule Update
     detailed_summaries = [
-        (os.path.join(os.path.dirname(output_html_path), 'bbsr-fwts_detailed.html'), 'BBSR-FWTS'),
-        (os.path.join(os.path.dirname(output_html_path), 'bbsr-sct_detailed.html'), 'BBSR-SCT'),
+        (os.path.join(os.path.dirname(output_html_path), 'bbsr_fwts_detailed.html'), 'BBSR-FWTS'),
+        (os.path.join(os.path.dirname(output_html_path), 'bbsr_sct_detailed.html'), 'BBSR-SCT'),
         (os.path.join(os.path.dirname(output_html_path), 'manual_tests_detailed.html'), 'OS Tests'),  # Changed to 'OS Tests'
         (os.path.join(os.path.dirname(output_html_path), 'capsule_update_detailed.html'), 'Capsule Update')  # Added this line
     ]
@@ -598,9 +598,11 @@ if __name__ == "__main__":
     parser.add_argument("sbsa_summary_path", help="Path to the SBSA summary HTML file")
     parser.add_argument("fwts_summary_path", help="Path to the FWTS summary HTML file")
     parser.add_argument("sct_summary_path", help="Path to the SCT summary HTML file")
+    parser.add_argument("bbsr_fwts_summary_path", help="Path to the BBSR FWTS summary HTML file")
+    parser.add_argument("bbsr_sct_summary_path", help="Path to the BBSR SCT summary HTML file")
     parser.add_argument("mvp_summary_path", help="Path to the MVP summary HTML file")
-    parser.add_argument("manual_tests_summary_path", help="Path to the OS Tests summary HTML file")  # Changed this line
-    parser.add_argument("capsule_update_summary_path", help="Path to the Capsule Update summary HTML file")  # Added this line
+    parser.add_argument("manual_tests_summary_path", help="Path to the OS Tests summary HTML file")
+    parser.add_argument("capsule_update_summary_path", help="Path to the Capsule Update summary HTML file")
     parser.add_argument("output_html_path", help="Path to the output ACS summary HTML file")
     parser.add_argument("--acs_config_path", default="", help="Path to the acs_config.txt file")
     parser.add_argument("--system_config_path", default="", help="Path to the system_config.txt file")
@@ -630,18 +632,14 @@ if __name__ == "__main__":
     sbsa_summary_content = read_html_content(args.sbsa_summary_path)
     fwts_summary_content = read_html_content(args.fwts_summary_path)
     sct_summary_content = read_html_content(args.sct_summary_path)
+    bbsr_fwts_summary_content = read_html_content(args.bbsr_fwts_summary_path)
+    bbsr_sct_summary_content = read_html_content(args.bbsr_sct_summary_path)
     mvp_summary_content = read_html_content(args.mvp_summary_path)
     manual_tests_summary_content = read_html_content(args.manual_tests_summary_path)
     capsule_update_summary_content = read_html_content(args.capsule_update_summary_path)  # Added this line
 
     # Paths to bbsr-fwts and bbsr-sct summary files (assumed to be in the same directory as output_html_path)
     summary_dir = os.path.dirname(args.output_html_path)
-    bbsr_fwts_summary_path = os.path.join(summary_dir, 'bbsr-fwts_summary.html')
-    bbsr_sct_summary_path = os.path.join(summary_dir, 'bbsr-sct_summary.html')
-
-    # Read bbsr-fwts and bbsr-sct summaries if they exist
-    bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path) if os.path.exists(bbsr_fwts_summary_path) else None
-    bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path) if os.path.exists(bbsr_sct_summary_path) else None
 
     # Determine Overall Compliance Results
     overall_compliance = determine_overall_compliance(
@@ -649,9 +647,9 @@ if __name__ == "__main__":
         sbsa_summary_content,
         fwts_summary_content,
         sct_summary_content,
-        mvp_summary_content,
         bbsr_fwts_summary_content,
         bbsr_sct_summary_content,
+        mvp_summary_content,
         manual_tests_summary_content,
         capsule_update_summary_content  # Added this line
     )
@@ -670,9 +668,9 @@ if __name__ == "__main__":
         args.sbsa_summary_path,
         args.fwts_summary_path,
         args.sct_summary_path,
+        args.bbsr_fwts_summary_path,
+        args.bbsr_sct_summary_path,
         args.mvp_summary_path,
-        bbsr_fwts_summary_path if os.path.exists(bbsr_fwts_summary_path) else "",
-        bbsr_sct_summary_path if os.path.exists(bbsr_sct_summary_path) else "",
         args.manual_tests_summary_path,
         args.capsule_update_summary_path,  # Added this line
         args.output_html_path
