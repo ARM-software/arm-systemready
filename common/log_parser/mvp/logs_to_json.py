@@ -578,4 +578,4 @@ if __name__ == "__main__":
     with open(output_file_path, 'w') as outfile:
         json.dump(output_json, outfile, indent=4)
 
-    print(f"Log parsed successfully. JSON output saved to {output_file_path}")
+   # print(f"Log parsed successfully. JSON output saved to {output_file_path}")

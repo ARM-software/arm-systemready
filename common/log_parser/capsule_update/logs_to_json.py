@@ -199,7 +199,7 @@ def main():
         try:
             with open(path, 'r', encoding=encoding, errors='ignore') as file:
                 lines = file.readlines()
-            print(f"Successfully read {path} ({len(lines)} lines)")
+         #   print(f"Successfully read {path} ({len(lines)} lines)")
             return lines
         except Exception as e:
             print(f"Error reading {path}: {e}")
@@ -211,7 +211,7 @@ def main():
         if lines:
             parsed_update = parse_capsule_update_log(lines)
             tests.extend(parsed_update)
-            print(f"Parsed {len(parsed_update)} tests from capsule-update.log")
+          #  print(f"Parsed {len(parsed_update)} tests from capsule-update.log")
     else:
         print(f"Error: {args.capsule_update_log} not found.")
 
@@ -221,7 +221,7 @@ def main():
         if lines:
             parsed_on_disk = parse_capsule_on_disk_log(lines)
             tests.extend(parsed_on_disk)
-            print(f"Parsed {len(parsed_on_disk)} tests from capsule-on-disk.log")
+          #  print(f"Parsed {len(parsed_on_disk)} tests from capsule-on-disk.log")
     else:
         print(f"Error: {args.capsule_on_disk_log} not found.")
 
@@ -231,9 +231,9 @@ def main():
         if lines:
             parsed_results = parse_capsule_test_results_log(lines)
             tests.extend(parsed_results)
-            print(f"Parsed {len(parsed_results)} tests from capsule_test_results.log")
+          #  print(f"Parsed {len(parsed_results)} tests from capsule_test_results.log")
     else:
-        print(f"Error: {args.capsule_test_results_log} not found.")
+        print(f"WARNING: {args.capsule_test_results_log} not found.")
 
     summary = {
         'total_PASSED': sum(1 for t in tests if t['Test_Result'] == 'PASSED'),
@@ -251,7 +251,7 @@ def main():
     try:
         with open(args.output_file, 'w', encoding='utf-8') as outfile:
             json.dump(output_data, outfile, indent=2)
-        print(f"Parsing complete. Results saved to {args.output_file}")
+       # print(f"Parsing complete. Results saved to {args.output_file}")
     except Exception as e:
         print(f"Error writing to {args.output_file}: {e}")
 

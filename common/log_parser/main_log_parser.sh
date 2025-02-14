@@ -14,6 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Define color codes
+YELLOW='\033[1;33m' # Yellow for WARNING
+RED='\033[0;31m'   # Red for ERROR
+NC='\033[0m' # No Color (Reset)
+
 # Determine the base directory of the script
 BASE_DIR=$(dirname "$(realpath "$0")")
 
@@ -90,7 +95,7 @@ fi
 # Function to check if a file exists
 check_file() {
     if [ ! -f "$1" ]; then
-        echo "WARNING: Log file '$(basename "$1")' is not present at the given directory."
+        echo -e "${YELLOW}WARNING: Log file '$(basename "$1")' is not present at the given directory.${NC}"
         return 1
     fi
     return 0
@@ -133,7 +138,7 @@ if [ ! -f "$BSA_KERNEL_LOG" ]; then
     BSA_KERNEL_LOG="$LOGS_PATH/linux/BsaResultsKernel.log"
 fi
 
-BSA_JSON="$JSONS_DIR/BSA.json"
+BSA_JSON="$JSONS_DIR/bsa.json"
 
 BSA_LOGS=()
 
@@ -150,7 +155,7 @@ if [ ${#BSA_LOGS[@]} -gt 0 ]; then
     python3 "$SCRIPTS_PATH/bsa/logs_to_json.py" "${BSA_LOGS[@]}" "$BSA_JSON"
     # Apply waivers
     apply_waivers "BSA" "$BSA_JSON"
-    python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$BSA_JSON" "$HTMLS_DIR/BSA_detailed.html" "$HTMLS_DIR/BSA_summary.html"
+    python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$BSA_JSON" "$HTMLS_DIR/bsa_detailed.html" "$HTMLS_DIR/bsa_summary.html"
 else
     echo "WARNING: Skipping BSA log parsing as the log files are missing."
     echo ""
@@ -160,7 +165,7 @@ fi
 SBSA_LOG="$LOGS_PATH/uefi/SbsaResults.log"
 SBSA_KERNEL_LOG="$LOGS_PATH/linux/SbsaResultsKernel.log"
 
-SBSA_JSON="$JSONS_DIR/SBSA.json"
+SBSA_JSON="$JSONS_DIR/sbsa.json"
 
 SBSA_LOGS=()
 
@@ -178,7 +183,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
         python3 "$SCRIPTS_PATH/bsa/logs_to_json.py" "${SBSA_LOGS[@]}" "$SBSA_JSON"
         # Apply waivers
         apply_waivers "SBSA" "$SBSA_JSON"
-        python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$SBSA_JSON" "$HTMLS_DIR/SBSA_detailed.html" "$HTMLS_DIR/SBSA_summary.html"
+        python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$SBSA_JSON" "$HTMLS_DIR/sbsa_detailed.html" "$HTMLS_DIR/sbsa_summary.html"
     else
         echo "WARNING: Skipping SBSA log parsing as the log files are missing."
         echo ""
@@ -187,7 +192,7 @@ fi
 
 # FWTS UEFI Log Parsing (Processed regardless of the flag)
 FWTS_LOG="$LOGS_PATH/fwts/FWTSResults.log"
-FWTS_JSON="$JSONS_DIR/FWTSResults.json"
+FWTS_JSON="$JSONS_DIR/fwts.json"
 if check_file "$FWTS_LOG"; then
     FWTS_PROCESSED=1
     python3 "$SCRIPTS_PATH/bbr/fwts/logs_to_json.py" "$FWTS_LOG" "$FWTS_JSON"
@@ -201,13 +206,13 @@ fi
 
 # SCT Log Parsing (Processed regardless of the flag)
 SCT_LOG="$LOGS_PATH/sct_results/Overall/Summary.log"
-SCT_JSON="$JSONS_DIR/SCT.json"
+SCT_JSON="$JSONS_DIR/sct.json"
 if check_file "$SCT_LOG"; then
     SCT_PROCESSED=1
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$SCT_LOG" "$SCT_JSON"
     # Apply waivers
     apply_waivers "SCT" "$SCT_JSON"
-    python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$SCT_JSON" "$HTMLS_DIR/SCT_detailed.html" "$HTMLS_DIR/SCT_summary.html"
+    python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$SCT_JSON" "$HTMLS_DIR/sct_detailed.html" "$HTMLS_DIR/sct_summary.html"
 else
     echo "WARNING: Skipping SCT log parsing as the log file is missing."
     echo ""
@@ -363,8 +368,8 @@ fi
 
 # Generate combined OS tests detailed and summary HTML reports
 if [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
-    MANUAL_DETAILED_HTML="$HTMLS_DIR/manual_tests_detailed.html"
-    MANUAL_SUMMARY_HTML="$HTMLS_DIR/manual_tests_summary.html"
+    MANUAL_DETAILED_HTML="$HTMLS_DIR/os_tests_detailed.html"
+    MANUAL_SUMMARY_HTML="$HTMLS_DIR/os_tests_summary.html"
     # Pass the boot_sources_paths as arguments
     python3 "$SCRIPTS_PATH/manual_tests/json_to_html.py" "${MANUAL_JSONS[@]}" "$MANUAL_DETAILED_HTML" "$MANUAL_SUMMARY_HTML" --include-drop-down --boot-sources-paths "${BOOT_SOURCES_PATHS[@]}"
 fi
@@ -407,11 +412,11 @@ ACS_SUMMARY_HTML="$HTMLS_DIR/acs_summary.html"
 GENERATE_ACS_SUMMARY_CMD="python3 \"$SCRIPTS_PATH/generate_acs_summary.py\""
 
 # Include BSA summary (always processed)
-GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/BSA_summary.html\""
+GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bsa_summary.html\""
 
 # Include SBSA summary only if processed
 if [ $SBSA_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/SBSA_summary.html\""
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sbsa_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
@@ -420,7 +425,7 @@ fi
 GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/fwts_summary.html\""
 
 # Include SCT summary (always processed)
-GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/SCT_summary.html\""
+GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sct_summary.html\""
 
 # Include MVP summary only if processed
 if [ $MVP_PROCESSED -eq 1 ]; then
@@ -470,25 +475,25 @@ eval $GENERATE_ACS_SUMMARY_CMD
 
 # Always print BSA messages
 if [ $BSA_PROCESSED -eq 1 ]; then
-    echo "BSA UEFI Log              : $BSA_LOG"
+#    echo "BSA UEFI Log              : $BSA_LOG"
     echo "BSA JSON                  : $BSA_JSON"
-    echo "BSA Detailed Summary      : $HTMLS_DIR/BSA_detailed.html"
-    echo "BSA Summary               : $HTMLS_DIR/BSA_summary.html"
+    echo "BSA Detailed Summary      : $HTMLS_DIR/bsa_detailed.html"
+    echo "BSA Summary               : $HTMLS_DIR/bsa_summary.html"
     echo ""
 fi
 
 # Print SBSA messages only if processed
 if [ $SBSA_PROCESSED -eq 1 ]; then
-    echo "SBSA UEFI Log             : $SBSA_LOG"
+#    echo "SBSA UEFI Log             : $SBSA_LOG"
     echo "SBSA JSON                 : $SBSA_JSON"
-    echo "SBSA Detailed Summary     : $HTMLS_DIR/SBSA_detailed.html"
-    echo "SBSA Summary               : $HTMLS_DIR/SBSA_summary.html"
+    echo "SBSA Detailed Summary     : $HTMLS_DIR/sbsa_detailed.html"
+    echo "SBSA Summary               : $HTMLS_DIR/sbsa_summary.html"
     echo ""
 fi
 
 # Always print FWTS messages
 if [ $FWTS_PROCESSED -eq 1 ]; then
-    echo "FWTS Log                  : $FWTS_LOG"
+#    echo "FWTS Log                  : $FWTS_LOG"
     echo "FWTS JSON                 : $FWTS_JSON"
     echo "FWTS Detailed Summary     : $HTMLS_DIR/fwts_detailed.html"
     echo "FWTS Summary               : $HTMLS_DIR/fwts_summary.html"
@@ -497,34 +502,33 @@ fi
 
 # Always print SCT messages
 if [ $SCT_PROCESSED -eq 1 ]; then
-    echo "SCT Log                   : $SCT_LOG"
+#    echo "SCT Log                   : $SCT_LOG"
     echo "SCT JSON                  : $SCT_JSON"
-    echo "SCT Detailed Summary      : $HTMLS_DIR/SCT_detailed.html"
-    echo "SCT Summary               : $HTMLS_DIR/SCT_summary.html"
+    echo "SCT Detailed Summary      : $HTMLS_DIR/sct_detailed.html"
+    echo "SCT Summary               : $HTMLS_DIR/sct_summary.html"
     echo ""
 fi
 
 # Print BBSR FWTS messages
 if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
-    echo "BBSR FWTS Log              : $BBSR_FWTS_LOG"
-    echo "BBSR FWTS JSON             : $BBSR_FWTS_JSON"
-    echo "BBSR FWTS Detailed Summary : $HTMLS_DIR/bbsr-fwts_detailed.html"
-    echo "BBSR FWTS Summary          : $HTMLS_DIR/bbsr-fwts_summary.html"
+#    echo "BBSR FWTS Log             : $BBSR_FWTS_LOG"
+    echo "BBSR FWTS JSON            : $BBSR_FWTS_JSON"
+    echo "BBSR FWTS Detailed Summary: $HTMLS_DIR/bbsr-fwts_detailed.html"
+    echo "BBSR FWTS Summary         : $HTMLS_DIR/bbsr-fwts_summary.html"
     echo ""
 fi
 
 # Print BBSR SCT messages
 if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
-    echo "BBSR SCT Log               : $BBSR_SCT_LOG"
-    echo "BBSR SCT JSON              : $BBSR_SCT_JSON"
-    echo "BBSR SCT Detailed Summary  : $HTMLS_DIR/bbsr-sct_detailed.html"
-    echo "BBSR SCT Summary           : $HTMLS_DIR/bbsr-sct_summary.html"
+#    echo "BBSR SCT Log              : $BBSR_SCT_LOG"
+    echo "BBSR SCT JSON             : $BBSR_SCT_JSON"
+    echo "BBSR SCT Detailed Summary : $HTMLS_DIR/bbsr-sct_detailed.html"
+    echo "BBSR SCT Summary          : $HTMLS_DIR/bbsr-sct_summary.html"
     echo ""
 fi
 
 # Print MVP messages only if processed
 if [ $MVP_PROCESSED -eq 1 ]; then
-    echo "MVP Logs Processed"
     echo "MVP Detailed Summary      : $MVP_DETAILED_HTML"
     echo "MVP Summary               : $MVP_SUMMARY_HTML"
     echo ""
@@ -532,16 +536,14 @@ fi
 
 # Print OS Tests messages only if processed
 if [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
-    echo "Manual Tests Logs Processed"
-    echo "Manual Tests Detailed Summary : $MANUAL_DETAILED_HTML"
-    echo "Manual Tests Summary          : $MANUAL_SUMMARY_HTML"
+    echo "OS Tests Detailed Summary : $MANUAL_DETAILED_HTML"
+    echo "OS Tests Summary          : $MANUAL_SUMMARY_HTML"
     echo ""
 fi
 
 # Print Capsule Update messages only if processed
 if [ $CAPSULE_PROCESSED -eq 1 ]; then
-    echo "Capsule Update Logs Processed"
-    echo "Capsule Update Log              : $CAPSULE_LOG"
+ #   echo "Capsule Update Log              : $CAPSULE_LOG"
     echo "Capsule Update JSON             : $CAPSULE_JSON"
     echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
     echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
@@ -610,7 +612,7 @@ fi
 if [ $MANUAL_TESTS_PROCESSED -eq 1 ] && [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${MANUAL_JSONS[@]}")
 elif [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
-    echo "WARNING: No Manual Tests JSON files found. Skipping Manual Tests files."
+    echo "WARNING: No OS Tests JSON files found. Skipping Manual Tests files."
 fi
 
 # Include Capsule Update JSON file
