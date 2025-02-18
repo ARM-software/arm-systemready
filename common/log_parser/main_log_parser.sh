@@ -126,7 +126,7 @@ FWTS_PROCESSED=0
 SCT_PROCESSED=0
 BBSR_FWTS_PROCESSED=0
 BBSR_SCT_PROCESSED=0
-STANDALONE_PROCESSED=0
+Standalone_PROCESSED=0
 OS_TESTS_PROCESSED=0
 CAPSULE_PROCESSED=0
 
@@ -271,12 +271,12 @@ else
 fi
 
 
-# STANDALONE Logs Parsing
+# Standalone tests Logs Parsing
 ##################
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     LINUX_TOOLS_LOGS_PATH="$LOGS_PATH/linux_tools"
 
-    # Paths for STANDALONE logs and JSON files
+    # Paths for Standalone tests logs and JSON files
     DT_KSELFTEST_LOG="$LINUX_TOOLS_LOGS_PATH/dt_kselftest.log"
     DT_VALIDATE_LOG="$LINUX_TOOLS_LOGS_PATH/dt-validate.log"
     ETHTOOL_TEST_LOG="$LINUX_TOOLS_LOGS_PATH/ethtool-test.log"
@@ -287,40 +287,40 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     ETHTOOL_TEST_JSON="$JSONS_DIR/ethtool_test.json"
     READ_WRITE_CHECK_JSON="$JSONS_DIR/read_write_check_blk_devices.json"
 
-    STANDALONE_JSONS=()
+    Standalone_JSONS=()
 
-    # Process each STANDALONE log
+    # Process each Standalone tests log
     if check_file "$DT_KSELFTEST_LOG"; then
-        python3 "$SCRIPTS_PATH/standalone/logs_to_json.py" "$DT_KSELFTEST_LOG" "$DT_KSELFTEST_JSON"
-        STANDALONE_JSONS+=("$DT_KSELFTEST_JSON")
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" "$DT_KSELFTEST_LOG" "$DT_KSELFTEST_JSON"
+        Standalone_JSONS+=("$DT_KSELFTEST_JSON")
         # Apply waivers
-        apply_waivers "STANDALONE" "$DT_KSELFTEST_JSON"
+        apply_waivers "Standalone_tests" "$DT_KSELFTEST_JSON"
     fi
     if check_file "$DT_VALIDATE_LOG"; then
-        python3 "$SCRIPTS_PATH/standalone/logs_to_json.py" "$DT_VALIDATE_LOG" "$DT_VALIDATE_JSON"
-        STANDALONE_JSONS+=("$DT_VALIDATE_JSON")
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" "$DT_VALIDATE_LOG" "$DT_VALIDATE_JSON"
+        Standalone_JSONS+=("$DT_VALIDATE_JSON")
         # Apply waivers
-        apply_waivers "STANDALONE" "$DT_VALIDATE_JSON"
+        apply_waivers "Standalone_tests" "$DT_VALIDATE_JSON"
     fi
     if check_file "$ETHTOOL_TEST_LOG"; then
-        python3 "$SCRIPTS_PATH/standalone/logs_to_json.py" "$ETHTOOL_TEST_LOG" "$ETHTOOL_TEST_JSON"
-        STANDALONE_JSONS+=("$ETHTOOL_TEST_JSON")
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" "$ETHTOOL_TEST_LOG" "$ETHTOOL_TEST_JSON"
+        Standalone_JSONS+=("$ETHTOOL_TEST_JSON")
         # Apply waivers
-        apply_waivers "STANDALONE" "$ETHTOOL_TEST_JSON"
+        apply_waivers "Standalone_tests" "$ETHTOOL_TEST_JSON"
     fi
     if check_file "$READ_WRITE_CHECK_LOG"; then
-        python3 "$SCRIPTS_PATH/standalone/logs_to_json.py" "$READ_WRITE_CHECK_LOG" "$READ_WRITE_CHECK_JSON"
-        STANDALONE_JSONS+=("$READ_WRITE_CHECK_JSON")
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" "$READ_WRITE_CHECK_LOG" "$READ_WRITE_CHECK_JSON"
+        Standalone_JSONS+=("$READ_WRITE_CHECK_JSON")
         # Apply waivers
-        apply_waivers "STANDALONE" "$READ_WRITE_CHECK_JSON"
+        apply_waivers "Standalone_tests" "$READ_WRITE_CHECK_JSON"
     fi
-    # Generate combined STANDALONE detailed and summary HTML reports
-    STANDALONE_DETAILED_HTML="$HTMLS_DIR/standalone_detailed.html"
-    STANDALONE_SUMMARY_HTML="$HTMLS_DIR/standalone_summary.html"
+    # Generate combined Standalone detailed and summary HTML reports
+    Standalone_DETAILED_HTML="$HTMLS_DIR/standalone_detailed.html"
+    Standalone_SUMMARY_HTML="$HTMLS_DIR/standalone_summary.html"
 
-    if [ ${#STANDALONE_JSONS[@]} -gt 0 ]; then
-        STANDALONE_PROCESSED=1
-        python3 "$SCRIPTS_PATH/standalone/json_to_html.py" "${STANDALONE_JSONS[@]}" "$STANDALONE_DETAILED_HTML" "$STANDALONE_SUMMARY_HTML" --include-drop-down
+    if [ ${#Standalone_JSONS[@]} -gt 0 ]; then
+        Standalone_PROCESSED=1
+        python3 "$SCRIPTS_PATH/standalone_tests/json_to_html.py" "${Standalone_JSONS[@]}" "$Standalone_DETAILED_HTML" "$Standalone_SUMMARY_HTML" --include-drop-down
     fi
 fi
 
@@ -346,11 +346,11 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
                     # Generate output JSON file path
                     OUTPUT_JSON="$OS_JSONS_DIR/ethtool_test_${OS_NAME}.json"
                     # Call logs_to_json.py
-                    python3 "$SCRIPTS_PATH/OS_tests/logs_to_json.py" "$ETH_TOOL_LOG" "$OUTPUT_JSON" "$OS_NAME"
+                    python3 "$SCRIPTS_PATH/os_tests/logs_to_json.py" "$ETH_TOOL_LOG" "$OUTPUT_JSON" "$OS_NAME"
                     # Add to list of JSONs
                     OS_JSONS+=("$OUTPUT_JSON")
                     # Apply waivers if necessary
-                    apply_waivers "OS Tests" "$OUTPUT_JSON"
+                    apply_waivers "os Tests" "$OUTPUT_JSON"
                     OS_TESTS_PROCESSED=1
                     # Add BOOT_SOURCES_LOG path to BOOT_SOURCES_PATHS
                     if [ -f "$BOOT_SOURCES_LOG" ]; then
@@ -371,7 +371,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         OS_DETAILED_HTML="$HTMLS_DIR/os_tests_detailed.html"
         OS_SUMMARY_HTML="$HTMLS_DIR/os_tests_summary.html"
         # Pass the boot_sources_paths as arguments
-        python3 "$SCRIPTS_PATH/OS_tests/json_to_html.py" "${OS_JSONS[@]}" "$OS_DETAILED_HTML" "$OS_SUMMARY_HTML" --include-drop-down --boot-sources-paths "${BOOT_SOURCES_PATHS[@]}"
+        python3 "$SCRIPTS_PATH/os_tests/json_to_html.py" "${OS_JSONS[@]}" "$OS_DETAILED_HTML" "$OS_SUMMARY_HTML" --include-drop-down --boot-sources-paths "${BOOT_SOURCES_PATHS[@]}"
     fi
 fi
 
@@ -469,9 +469,9 @@ else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# Include STANDALONE summary only if processed
-if [ $STANDALONE_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$STANDALONE_SUMMARY_HTML\""
+# Include Standalone summary only if processed
+if [ $Standalone_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$Standalone_SUMMARY_HTML\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
@@ -572,10 +572,10 @@ if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
     echo ""
 fi
 
-# Print STANDALONE messages only if processed
-if [ $STANDALONE_PROCESSED -eq 1 ]; then
-    echo "STANDALONE Detailed Summary      : $STANDALONE_DETAILED_HTML"
-    echo "STANDALONE Summary               : $STANDALONE_SUMMARY_HTML"
+# Print Standalone messages only if processed
+if [ $Standalone_PROCESSED -eq 1 ]; then
+    echo "Standalone Detailed Summary      : $Standalone_DETAILED_HTML"
+    echo "Standalone Summary               : $Standalone_SUMMARY_HTML"
     echo ""
 fi
 
@@ -647,18 +647,18 @@ else
     echo -e "${YELLOW}WARNING: NO bbsr sct tests json file found. Skipping this file.${NC}"
 fi
 
-# Include STANDALONE JSON files only if processed
-if [ $STANDALONE_PROCESSED -eq 1 ] && [ ${#STANDALONE_JSONS[@]} -gt 0 ]; then
-    JSON_FILES+=("${STANDALONE_JSONS[@]}")
-elif [ $STANDALONE_PROCESSED -eq 1 ]; then
-    echo -e "${YELLOW}WARNING: NO STANDALONE tests json files found. Skipping STANDALONE files.${NC}"
+# Include Standalone JSON files only if processed
+if [ $Standalone_PROCESSED -eq 1 ] && [ ${#Standalone_JSONS[@]} -gt 0 ]; then
+    JSON_FILES+=("${Standalone_JSONS[@]}")
+elif [ $Standalone_PROCESSED -eq 1 ]; then
+    echo -e "${YELLOW}WARNING: NO Standalone tests json files found. Skipping Standalone files.${NC}"
 fi
 
 # Include OS tests JSON files in merged JSON
 if [ $OS_TESTS_PROCESSED -eq 1 ] && [ ${#OS_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${OS_JSONS[@]}")
 elif [ $OS_TESTS_PROCESSED -eq 1 ]; then
-    echo -e "${YELLOW}WARNING: NO OS tests json files found. Skipping OS Tests files.${NC}"
+    echo -e "${YELLOW}WARNING: NO OS tests json files found. Skipping os Tests files.${NC}"
 fi
 
 # Include Capsule Update JSON file
