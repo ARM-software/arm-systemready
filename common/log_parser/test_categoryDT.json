@@ -457,7 +457,7 @@
     },
     "catID: 22": {
         "SuiteID: 4": {
-            "SName: MVP": [
+            "SName: Standalone": [
                 {
                     "TestSuiteID": 1,
                     "TSName": "Network",
@@ -478,7 +478,7 @@
     },
     "catID: 23": {
         "SuiteID: 4": {
-            "SName: MVP": [
+            "SName: Standalone": [
                 {
                     "TestSuiteID": 2,
                     "TSName": "Peripherals",
@@ -499,7 +499,7 @@
     },
     "catID: 24": {
         "SuiteID: 4": {
-            "SName: MVP": [
+            "SName: Standalone": [
                 {
                     "TestSuiteID": 3,
                     "TSName": "security",
@@ -520,7 +520,7 @@
     },
     "catID: 25": {
         "SuiteID: 4": {
-            "SName: MVP": [
+            "SName: Standalone": [
                 {
                     "TestSuiteID": 4,
                     "TSName": "A/B support",
@@ -541,7 +541,7 @@
     },
     "catID: 26": {
         "SuiteID: 4": {
-            "SName: MVP": [
+            "SName: Standalone": [
                 {
                     "TestSuiteID": 5,
                     "TSName": "LinuxInstall",
@@ -562,7 +562,7 @@
     },
     "catID: 27": {
         "SuiteID: 4": {
-            "SName: MVP": [
+            "SName: Standalone": [
                 {
                     "TestSuiteID": 6,
                     "TSName": "CapsuleAutherntication",
@@ -583,7 +583,7 @@
     },
     "catID: 28": {
         "SuiteID: 4": {
-            "SName: MVP": [
+            "SName: Standalone": [
                 {
                     "TestSuiteID": 7,
                     "TSName": "DTValidation",
@@ -604,7 +604,7 @@
     },
     "catID: 29": {
         "SuiteID: 5": {
-            "SName: MVP": [
+            "SName: Standalone": [
                 {
                     "TestSuiteID": 8,
                     "TSName": "Boot sources",

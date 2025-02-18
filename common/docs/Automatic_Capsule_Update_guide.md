@@ -21,7 +21,7 @@ Capsule update is the standard interface to update the firmware. The SystemReady
 
 2. First, the UEFI-based tests, including SCT, BSA, and the Ethernet port test, will run. After these tests complete, ACS will automatically boot to Linux.
 
-3. In Linux, the FWTS, BSA, and MVP tests will be executed. The image will automatically detect if a capsule update test is required and will reboot to perform the testing.
+3. In Linux, the FWTS, BSA, and Standalone tests will be executed. The image will automatically detect if a capsule update test is required and will reboot to perform the testing.
 
 4. After rebooting to the UEFI shell, SCT and BSA tests will be skipped, as they were already completed in the first run.
 

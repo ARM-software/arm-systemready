@@ -31,8 +31,8 @@ Waivers can be applied at various levels within a test suite. The hierarchy is a
 
 1. **Suite-Level Waiver**: Applies to all failed subtests in the entire suite.
 2. **TestSuite-Level Waiver**: Applies to all failed subtests within a specific test suite.
-3. **SubSuite-Level Waiver**: Applies to all failed subtests within a specific sub-suite (applicable for suites like `SCT`, `MVP`, `BBSR-SCT`, `BBSR-FWTS`).
-4. **TestCase-Level Waiver**: Applies to all failed subtests within a specific test case (applicable for suites like `SCT`, `MVP`, `BBSR-SCT`, `BBSR-FWTS`).
+3. **SubSuite-Level Waiver**: Applies to all failed subtests within a specific sub-suite (applicable for suites like `SCT`, `Standalone`, `BBSR-SCT`, `BBSR-FWTS`).
+4. **TestCase-Level Waiver**: Applies to all failed subtests within a specific test case (applicable for suites like `SCT`, `Standalone`, `BBSR-SCT`, `BBSR-FWTS`).
 5. **SubTest-Level Waiver**: Applies to individual subtests based on `SubTestID` or `sub_Test_Description`.
 
 Waivers are applied in the order listed above. If a waiver is applicable at multiple levels, the most specific waiver (lowest level) takes precedence.
@@ -87,7 +87,7 @@ Applies to all failed subtests within a specific test suite.
 
 ### SubSuite-Level Waiver
 
-Applies to all failed subtests within a specific sub-suite. Applicable for suites like `SCT`, `MVP`, `BBSR-SCT`, and `BBSR-FWTS`.
+Applies to all failed subtests within a specific sub-suite. Applicable for suites like `SCT`, `Standalone`, `BBSR-SCT`, and `BBSR-FWTS`.
 
 ```json
 {
@@ -112,7 +112,7 @@ Applies to all failed subtests within a specific sub-suite. Applicable for suite
 
 ### TestCase-Level Waiver
 
-Applies to all failed subtests within a specific test case. Applicable for suites like `SCT`, `MVP`, `BBSR-SCT`, and `BBSR-FWTS`.
+Applies to all failed subtests within a specific test case. Applicable for suites like `SCT`, `Standalone`, `BBSR-SCT`, and `BBSR-FWTS`.
 
 ```json
 {
@@ -166,7 +166,7 @@ Applies to individual subtests based on `SubTestID` or `sub_Test_Description`.
 ```
 
 - **`SubTestID`**: Identifier of the subtest (used in suites like `BSA`, `SBSA`).
-- **`sub_Test_Description`**: Description of the subtest (used in suites like `FWTS`, `MVP`, `SCT`, `BBSR-FWTS`, `BBSR-SCT`).
+- **`sub_Test_Description`**: Description of the subtest (used in suites like `FWTS`, `Standalone`, `SCT`, `BBSR-FWTS`, `BBSR-SCT`).
 - **`Reason`**: Explanation for the waiver.
 
 ---
@@ -254,13 +254,13 @@ Waiving the `CheckEvent_Func` test case within the `SCT` suite.
 
 ### 5. SubTest-Level Waiver
 
-Waiving a specific subtest based on description within the `MVP` suite.
+Waiving a specific subtest based on description within the `Standalone` suite.
 
 ```json
 {
     "Suites": [
         {
-            "Suite": "MVP",
+            "Suite": "Standalone",
             "TestSuites": [
                 {
                     "TestCase": {
@@ -298,7 +298,7 @@ The `apply_waivers.py` script processes waivers in a hierarchical manner:
 
 ## Important Notes
 
-- **Suites Supporting SubSuite/TestCase-Level Waivers**: Only certain suites (`SCT`, `MVP`, `BBSR-SCT`, `BBSR-FWTS`) support waivers at the SubSuite and TestCase levels.
+- **Suites Supporting SubSuite/TestCase-Level Waivers**: Only certain suites (`SCT`, `Standalone`, `BBSR-SCT`, `BBSR-FWTS`) support waivers at the SubSuite and TestCase levels.
 - **Waiver Application Order**: Waivers are applied from the highest level (suite) to the lowest level (subtest). Lower-level waivers override higher-level waivers if both are applicable.
 - **Updating Test Results**: The script modifies the original test results JSON file. Ensure you have a backup if you need to retain the original data.
 - **Waiver Effect on Statistics**: Failed tests that are waived are counted under `FAILED_WITH_WAIVER`, and the overall failed count is adjusted accordingly.
