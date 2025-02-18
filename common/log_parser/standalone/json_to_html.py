@@ -60,8 +60,8 @@ def generate_bar_chart(suite_summary):
                 fontsize=12
             )
 
-    plt.title('MVP Test Results', fontsize=16, fontweight='bold', pad=20)
-    plt.ylabel('Number of MVPs', fontsize=14)
+    plt.title('STANDALONE Test Results', fontsize=16, fontweight='bold', pad=20)
+    plt.ylabel('Number of STANDALONEs', fontsize=14)
     plt.tight_layout()
 
     # Save the figure to a buffer
@@ -73,8 +73,8 @@ def generate_bar_chart(suite_summary):
 
 # Function to generate HTML content for both summary and detailed pages
 def generate_html(suite_summary, test_results_list, output_html_path, is_summary_page=True, include_drop_down=False):
-    # Set the test suite name to 'MVP' when combining multiple tests
-    test_suite_name = 'MVP'
+    # Set the test suite name to 'STANDALONE' when combining multiple tests
+    test_suite_name = 'STANDALONE'
 
     # Template for both summary and detailed pages
     template = Template("""
@@ -205,7 +205,7 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
 
         {% if not is_summary_page %}
         <div class="chart-container">
-            <img src="data:image/png;base64,{{ chart_data }}" alt="MVP Test Results">
+            <img src="data:image/png;base64,{{ chart_data }}" alt="STANDALONE Test Results">
         </div>
         {% endif %}
 
@@ -220,7 +220,7 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Total MVPs</td>
+                        <td>Total STANDALONEs</td>
                         <td class="total-tests">{{ total_tests }}</td>
                     </tr>
                     <tr>
@@ -242,7 +242,7 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
         {% if not is_summary_page %}
         {% if include_drop_down %}
         <div class="dropdown">
-            <label for="sectionSelect">Jump to MVP Test:</label>
+            <label for="sectionSelect">Jump to STANDALONE Test:</label>
             <select id="sectionSelect" onchange="jumpToSection()">
                 {% for idx, test_results in enumerate(test_results_list) %}
                 {% if test_results and test_results[0] %}
@@ -321,7 +321,7 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
     </html>
     """)
 
-    # Calculate total MVPs
+    # Calculate total STANDALONEs
     total_tests = suite_summary.get('total_PASSED', 0) + suite_summary.get('total_FAILED', 0) + suite_summary.get('total_FAILED_WITH_WAIVER', 0)
 
     # If not summary page, generate chart data
@@ -395,12 +395,12 @@ def main():
             if test_results:
                 test_results_list.append(test_results)
 
-                # For each MVP (test suite), determine overall result
+                # For each STANDALONE (test suite), determine overall result
                 for test in test_results:
-                    mvp_failed = False
+                    standalone_failed = False
                     failed_with_waiver = False
 
-                    # Flags to determine if MVP is failed with waiver only
+                    # Flags to determine if STANDALONE is failed with waiver only
                     has_failed_without_waiver = False
                     has_failed_with_waiver = False
 
@@ -420,15 +420,15 @@ def main():
                     else:
                         combined_suite_summary['total_PASSED'] += 1
 
-    # Calculate total MVPs
-    total_mvps = combined_suite_summary['total_PASSED'] + combined_suite_summary['total_FAILED'] + combined_suite_summary['total_FAILED_WITH_WAIVER']
+    # Calculate total STANDALONEs
+    total_standalones = combined_suite_summary['total_PASSED'] + combined_suite_summary['total_FAILED'] + combined_suite_summary['total_FAILED_WITH_WAIVER']
 
-    if total_mvps == 0:
+    if total_standalones == 0:
         print("No valid JSON data found in input files.")
         sys.exit(1)
 
     # Update the combined_suite_summary with total_tests
-    combined_suite_summary['total_tests'] = total_mvps
+    combined_suite_summary['total_tests'] = total_standalones
 
     # Generate the detailed summary page
     generate_html(
