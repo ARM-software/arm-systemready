@@ -188,8 +188,8 @@ def get_failed_with_waiver_counts(content):
     return failed, failed_with_waiver
 
 def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts_summary_content, sct_summary_content,
-                                 bbsr_fwts_summary_content, bbsr_sct_summary_content, mvp_summary_content,
-                                 manual_tests_summary_content, capsule_update_summary_content):
+                                 bbsr_fwts_summary_content, bbsr_sct_summary_content, standalone_summary_content,
+                                 OS_tests_summary_content, capsule_update_summary_content):
     # Initialize compliance status
     overall_compliance = 'Compliant'
 
@@ -201,8 +201,8 @@ def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts
         'SCT': sct_summary_content,
         'BBSR-FWTS': bbsr_fwts_summary_content,
         'BBSR-SCT': bbsr_sct_summary_content,
-        'MVP': mvp_summary_content,
-        'Manual Tests': manual_tests_summary_content,
+        'Standalone': standalone_summary_content,
+        'OS Tests': OS_tests_summary_content,
         'Capsule Update': capsule_update_summary_content  # Added Capsule Update
     }
 
@@ -245,7 +245,7 @@ def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts
     return overall_compliance
 
 def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
-                  bbsr_fwts_summary_path, bbsr_sct_summary_path, mvp_summary_path,manual_tests_summary_path, capsule_update_summary_path, output_html_path):
+                  bbsr_fwts_summary_path, bbsr_sct_summary_path, standalone_summary_path,OS_tests_summary_path, capsule_update_summary_path, output_html_path):
     # Read summary contents
     bsa_summary_content = read_html_content(bsa_summary_path)
     sbsa_summary_content = read_html_content(sbsa_summary_path)
@@ -253,15 +253,16 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
     sct_summary_content = read_html_content(sct_summary_path)
     bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path)
-    mvp_summary_content = read_html_content(mvp_summary_path)
-    manual_tests_summary_content = read_html_content(manual_tests_summary_path)
+    standalone_summary_content = read_html_content(standalone_summary_path)
+    OS_tests_summary_content = read_html_content(OS_tests_summary_path)
     capsule_update_summary_content = read_html_content(capsule_update_summary_path)  # Added this line
 
-    # Adjust headings for BBSR-FWTS, BBSR-SCT, Manual Tests, and Capsule Update summaries
+    # Adjust headings for BBSR-FWTS, BBSR-SCT, OS Tests, and Capsule Update summaries
     bbsr_fwts_summary_content = adjust_bbsr_headings(bbsr_fwts_summary_content, 'BBSR-FWTS')
     bbsr_sct_summary_content = adjust_bbsr_headings(bbsr_sct_summary_content, 'BBSR-SCT')
-    manual_tests_summary_content = adjust_bbsr_headings(manual_tests_summary_content, 'OS Tests')  # Changed to 'OS Tests'
+    OS_tests_summary_content = adjust_bbsr_headings(OS_tests_summary_content, 'OS')  # Changed to 'OS Tests'
     capsule_update_summary_content = adjust_bbsr_headings(capsule_update_summary_content, 'Capsule Update')  # Added this line
+    standalone_summary_content  = adjust_bbsr_headings(standalone_summary_content, 'Standalone') 
 
     html_template = '''
     <!DOCTYPE html>
@@ -466,8 +467,8 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                     {% if sct_summary_content %}
                     <a href="#sct_summary">SCT Summary</a>
                     {% endif %}
-                    {% if mvp_summary_content %}
-                    <a href="#mvp_summary">MVP Summary</a>
+                    {% if standalone_summary_content %}
+                    <a href="#standalone_summary">Standalone Summary</a>
                     {% endif %}
                     {% if bbsr_fwts_summary_content %}
                     <a href="#bbsr_fwts_summary">BBSR-FWTS Summary</a>
@@ -475,8 +476,8 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                     {% if bbsr_sct_summary_content %}
                     <a href="#bbsr_sct_summary">BBSR-SCT Summary</a>
                     {% endif %}
-                    {% if manual_tests_summary_content %}
-                    <a href="#manual_tests_summary">OS Tests Summary</a>  <!-- Changed to 'OS Tests Summary' -->
+                    {% if OS_tests_summary_content %}
+                    <a href="#OS_tests_summary">OS Tests Summary</a>
                     {% endif %}
                     {% if capsule_update_summary_content %}
                     <a href="#capsule_update_summary">Capsule Update Summary</a>
@@ -517,11 +518,11 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                     </div>
                 </div>
                 {% endif %}
-                {% if mvp_summary_content %}
-                <div class="summary" id="mvp_summary">
-                    {{ mvp_summary_content | safe }}
+                {% if standalone_summary_content %}
+                <div class="summary" id="standalone_summary">
+                    {{ standalone_summary_content | safe }}
                     <div class="details-link">
-                        <a href="MVP_detailed.html" target="_blank">Click here to go to the detailed summary for MVP</a>
+                        <a href="standalone_detailed.html" target="_blank">Click here to go to the detailed summary for Standalone tests</a>
                     </div>
                 </div>
                 {% endif %}
@@ -541,11 +542,11 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                     </div>
                 </div>
                 {% endif %}
-                {% if manual_tests_summary_content %}
-                <div class="summary" id="manual_tests_summary">
-                    {{ manual_tests_summary_content | safe }}
+                {% if OS_tests_summary_content %}
+                <div class="summary" id="OS_tests_summary">
+                    {{ OS_tests_summary_content | safe }}
                     <div class="details-link">
-                        <a href="manual_tests_detailed.html" target="_blank">Click here to go to the detailed summary for OS Tests</a>  <!-- Changed to 'OS Tests' -->
+                        <a href="os_tests_detailed.html" target="_blank">Click here to go to the detailed summary for OS Tests</a>
                     </div>
                 </div>
                 {% endif %}
@@ -573,8 +574,8 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
         sct_summary_content=sct_summary_content,
         bbsr_fwts_summary_content=bbsr_fwts_summary_content,
         bbsr_sct_summary_content=bbsr_sct_summary_content,
-        mvp_summary_content=mvp_summary_content,
-        manual_tests_summary_content=manual_tests_summary_content,
+        standalone_summary_content=standalone_summary_content,
+        OS_tests_summary_content=OS_tests_summary_content,
         capsule_update_summary_content=capsule_update_summary_content  # Added this line
     )
 
@@ -585,8 +586,9 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
     detailed_summaries = [
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_fwts_detailed.html'), 'BBSR-FWTS'),
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_sct_detailed.html'), 'BBSR-SCT'),
-        (os.path.join(os.path.dirname(output_html_path), 'manual_tests_detailed.html'), 'OS Tests'),  # Changed to 'OS Tests'
-        (os.path.join(os.path.dirname(output_html_path), 'capsule_update_detailed.html'), 'Capsule Update')  # Added this line
+        (os.path.join(os.path.dirname(output_html_path), 'os_tests_detailed.html'), 'OS'),
+        (os.path.join(os.path.dirname(output_html_path), 'capsule_update_detailed.html'), 'Capsule Update'),
+        (os.path.join(os.path.dirname(output_html_path), 'standalone_detailed.html'), 'Standalone')
     ]
 
     for file_path, suite_name in detailed_summaries:
@@ -600,8 +602,8 @@ if __name__ == "__main__":
     parser.add_argument("sct_summary_path", help="Path to the SCT summary HTML file")
     parser.add_argument("bbsr_fwts_summary_path", help="Path to the BBSR FWTS summary HTML file")
     parser.add_argument("bbsr_sct_summary_path", help="Path to the BBSR SCT summary HTML file")
-    parser.add_argument("mvp_summary_path", help="Path to the MVP summary HTML file")
-    parser.add_argument("manual_tests_summary_path", help="Path to the OS Tests summary HTML file")
+    parser.add_argument("standalone_summary_path", help="Path to the Standalone tests summary HTML file")
+    parser.add_argument("OS_tests_summary_path", help="Path to the OS Tests summary HTML file")
     parser.add_argument("capsule_update_summary_path", help="Path to the Capsule Update summary HTML file")
     parser.add_argument("output_html_path", help="Path to the output ACS summary HTML file")
     parser.add_argument("--acs_config_path", default="", help="Path to the acs_config.txt file")
@@ -634,8 +636,8 @@ if __name__ == "__main__":
     sct_summary_content = read_html_content(args.sct_summary_path)
     bbsr_fwts_summary_content = read_html_content(args.bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(args.bbsr_sct_summary_path)
-    mvp_summary_content = read_html_content(args.mvp_summary_path)
-    manual_tests_summary_content = read_html_content(args.manual_tests_summary_path)
+    standalone_summary_content = read_html_content(args.standalone_summary_path)
+    OS_tests_summary_content = read_html_content(args.OS_tests_summary_path)
     capsule_update_summary_content = read_html_content(args.capsule_update_summary_path)  # Added this line
 
     # Paths to bbsr-fwts and bbsr-sct summary files (assumed to be in the same directory as output_html_path)
@@ -649,8 +651,8 @@ if __name__ == "__main__":
         sct_summary_content,
         bbsr_fwts_summary_content,
         bbsr_sct_summary_content,
-        mvp_summary_content,
-        manual_tests_summary_content,
+        standalone_summary_content,
+        OS_tests_summary_content,
         capsule_update_summary_content  # Added this line
     )
 
@@ -670,8 +672,8 @@ if __name__ == "__main__":
         args.sct_summary_path,
         args.bbsr_fwts_summary_path,
         args.bbsr_sct_summary_path,
-        args.mvp_summary_path,
-        args.manual_tests_summary_path,
+        args.standalone_summary_path,
+        args.OS_tests_summary_path,
         args.capsule_update_summary_path,  # Added this line
         args.output_html_path
     )
