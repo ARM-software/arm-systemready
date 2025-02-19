@@ -60,7 +60,7 @@ def generate_bar_chart(suite_summary):
                 fontsize=12
             )
 
-    plt.title('Standalone Test Results', fontsize=16, fontweight='bold', pad=20)
+    plt.title('Standalone test Results', fontsize=16, fontweight='bold', pad=20)
     plt.ylabel('Number of Standalone tests', fontsize=14)
     plt.tight_layout()
 
@@ -74,7 +74,7 @@ def generate_bar_chart(suite_summary):
 # Function to generate HTML content for both summary and detailed pages
 def generate_html(suite_summary, test_results_list, output_html_path, is_summary_page=True, include_drop_down=False):
     # Set the test suite name to 'Standalone tests' when combining multiple tests
-    test_suite_name = 'Standalone tests'
+    test_suite_name = 'Standalone'
 
     # Template for both summary and detailed pages
     template = Template("""
