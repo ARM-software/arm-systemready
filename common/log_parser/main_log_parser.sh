@@ -483,11 +483,6 @@ else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 9) CAPSULE: if you want a separate link, keep this. Otherwise remove it:
-# We'll remove it to rely on Standalone integration only:
-# For minimal approach, let's set it to "" because we do not want separate HTML.
-GENERATE_ACS_SUMMARY_CMD+=" \"\""
-
 # Finally pass the output
 GENERATE_ACS_SUMMARY_CMD+=" \"$ACS_SUMMARY_HTML\""
 
@@ -510,6 +505,78 @@ fi
 
 eval $GENERATE_ACS_SUMMARY_CMD
 
+i# Summary Prints
+print_path=0  # For debug only
+if [ $print_path -eq 1 ]; then
+# Always print BSA messages
+if [ $BSA_PROCESSED -eq 1 ]; then
+#    echo "BSA UEFI Log              : $BSA_LOG"
+    echo "BSA JSON                  : $BSA_JSON"
+    echo "BSA Detailed Summary      : $HTMLS_DIR/bsa_detailed.html"
+    echo "BSA Summary               : $HTMLS_DIR/bsa_summary.html"
+    echo ""
+fi
+# Print SBSA messages only if processed
+if [ $SBSA_PROCESSED -eq 1 ]; then
+#    echo "SBSA UEFI Log             : $SBSA_LOG"
+    echo "SBSA JSON                 : $SBSA_JSON"
+    echo "SBSA Detailed Summary     : $HTMLS_DIR/sbsa_detailed.html"
+    echo "SBSA Summary               : $HTMLS_DIR/sbsa_summary.html"
+    echo ""
+fi
+# Always print FWTS messages
+if [ $FWTS_PROCESSED -eq 1 ]; then
+#    echo "FWTS Log                  : $FWTS_LOG"
+    echo "FWTS JSON                 : $FWTS_JSON"
+    echo "FWTS Detailed Summary     : $HTMLS_DIR/fwts_detailed.html"
+    echo "FWTS Summary              : $HTMLS_DIR/fwts_summary.html"
+    echo ""
+fi
+# Always print SCT messages
+if [ $SCT_PROCESSED -eq 1 ]; then
+#    echo "SCT Log                   : $SCT_LOG"
+    echo "SCT JSON                  : $SCT_JSON"
+    echo "SCT Detailed Summary      : $HTMLS_DIR/sct_detailed.html"
+    echo "SCT Summary               : $HTMLS_DIR/sct_summary.html"
+    echo ""
+fi
+# Print BBSR FWTS messages
+if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
+#    echo "BBSR FWTS Log             : $BBSR_FWTS_LOG"
+    echo "BBSR FWTS JSON            : $BBSR_FWTS_JSON"
+    echo "BBSR FWTS Detailed Summary: $HTMLS_DIR/bbsr_fwts_detailed.html"
+    echo "BBSR FWTS Summary         : $HTMLS_DIR/bbsr_fwts_summary.html"
+    echo ""
+fi
+# Print BBSR SCT messages
+if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
+#    echo "BBSR SCT Log              : $BBSR_SCT_LOG"
+    echo "BBSR SCT JSON             : $BBSR_SCT_JSON"
+    echo "BBSR SCT Detailed Summary : $HTMLS_DIR/bbsr_sct_detailed.html"
+    echo "BBSR SCT Summary          : $HTMLS_DIR/bbsr_sct_summary.html"
+    echo ""
+fi
+# Print Standalone messages only if processed
+if [ $Standalone_PROCESSED -eq 1 ]; then
+    echo "Standalone tests Detailed Summary      : $Standalone_DETAILED_HTML"
+    echo "Standalone tests Summary               : $Standalone_SUMMARY_HTML"
+    echo ""
+fi
+# Print OS Tests messages only if processed
+if [ $OS_TESTS_PROCESSED -eq 1 ]; then
+    echo "OS tests Detailed Summary : $OS_DETAILED_HTML"
+    echo "OS tests Summary          : $OS_SUMMARY_HTML"
+    echo ""
+fi
+# Print Capsule Update messages only if processed
+if [ $CAPSULE_PROCESSED -eq 1 ]; then
+ #   echo "Capsule Update Log              : $CAPSULE_LOG"
+    echo "Capsule Update JSON             : $CAPSULE_JSON"
+    echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
+    echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
+    echo ""
+fi
+fi
 echo "ACS Summary    : $ACS_SUMMARY_HTML"
 echo ""
 
