@@ -201,8 +201,8 @@ def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts
         'SCT': sct_summary_content,
         'BBSR-FWTS': bbsr_fwts_summary_content,
         'BBSR-SCT': bbsr_sct_summary_content,
-        'Standalone': standalone_summary_content,
-        'OS Tests': OS_tests_summary_content,
+        'Standalone tests': standalone_summary_content,
+        'OS tests': OS_tests_summary_content,
         'Capsule Update': capsule_update_summary_content  # Added Capsule Update
     }
 
@@ -468,7 +468,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                     <a href="#sct_summary">SCT Summary</a>
                     {% endif %}
                     {% if standalone_summary_content %}
-                    <a href="#standalone_summary">Standalone Summary</a>
+                    <a href="#standalone_summary">Standalone tests Summary</a>
                     {% endif %}
                     {% if bbsr_fwts_summary_content %}
                     <a href="#bbsr_fwts_summary">BBSR-FWTS Summary</a>
@@ -477,7 +477,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                     <a href="#bbsr_sct_summary">BBSR-SCT Summary</a>
                     {% endif %}
                     {% if OS_tests_summary_content %}
-                    <a href="#OS_tests_summary">OS Tests Summary</a>
+                    <a href="#OS_tests_summary">OS tests Summary</a>
                     {% endif %}
                     {% if capsule_update_summary_content %}
                     <a href="#capsule_update_summary">Capsule Update Summary</a>
@@ -490,7 +490,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="bsa_summary">
                     {{ bsa_summary_content | safe }}
                     <div class="details-link">
-                        <a href="BSA_detailed.html" target="_blank">Click here to go to the detailed summary for BSA</a>
+                        <a href="bsa_detailed.html" target="_blank">Click here to go to the detailed summary for BSA</a>
                     </div>
                 </div>
                 {% endif %}
@@ -498,7 +498,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="sbsa_summary">
                     {{ sbsa_summary_content | safe }}
                     <div class="details-link">
-                        <a href="SBSA_detailed.html" target="_blank">Click here to go to the detailed summary for SBSA</a>
+                        <a href="sbsa_detailed.html" target="_blank">Click here to go to the detailed summary for SBSA</a>
                     </div>
                 </div>
                 {% endif %}
@@ -514,7 +514,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="sct_summary">
                     {{ sct_summary_content | safe }}
                     <div class="details-link">
-                        <a href="SCT_detailed.html" target="_blank">Click here to go to the detailed summary for SCT</a>
+                        <a href="sct_detailed.html" target="_blank">Click here to go to the detailed summary for SCT</a>
                     </div>
                 </div>
                 {% endif %}
@@ -522,7 +522,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="standalone_summary">
                     {{ standalone_summary_content | safe }}
                     <div class="details-link">
-                        <a href="standalone_detailed.html" target="_blank">Click here to go to the detailed summary for Standalone tests</a>
+                        <a href="standalone_tests_detailed.html" target="_blank">Click here to go to the detailed summary for Standalone tests</a>
                     </div>
                 </div>
                 {% endif %}

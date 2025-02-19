@@ -32,7 +32,7 @@ if [ $# -lt 1 ]; then
 fi
 
 # Add the YOCTO_FLAG variable
-YOCTO_FLAG="/data_sda/ashsha06/yocto_image.flag"
+YOCTO_FLAG="/mnt/c/Users/cherat01/ATEG/LOG_POST_SCRIPTS/yocto_image.flag"
 
 # Check if the YOCTO_FLAG exists
 if [ -f "$YOCTO_FLAG" ]; then
@@ -315,8 +315,8 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         apply_waivers "Standalone_tests" "$READ_WRITE_CHECK_JSON"
     fi
     # Generate combined Standalone detailed and summary HTML reports
-    Standalone_DETAILED_HTML="$HTMLS_DIR/standalone_detailed.html"
-    Standalone_SUMMARY_HTML="$HTMLS_DIR/standalone_summary.html"
+    Standalone_DETAILED_HTML="$HTMLS_DIR/standalone_tests_detailed.html"
+    Standalone_SUMMARY_HTML="$HTMLS_DIR/standalone_tests_summary.html"
 
     if [ ${#Standalone_JSONS[@]} -gt 0 ]; then
         Standalone_PROCESSED=1
@@ -574,15 +574,15 @@ fi
 
 # Print Standalone messages only if processed
 if [ $Standalone_PROCESSED -eq 1 ]; then
-    echo "Standalone Detailed Summary      : $Standalone_DETAILED_HTML"
-    echo "Standalone Summary               : $Standalone_SUMMARY_HTML"
+    echo "Standalone tests Detailed Summary      : $Standalone_DETAILED_HTML"
+    echo "Standalone tests Summary               : $Standalone_SUMMARY_HTML"
     echo ""
 fi
 
 # Print OS Tests messages only if processed
 if [ $OS_TESTS_PROCESSED -eq 1 ]; then
-    echo "OS Tests Detailed Summary : $OS_DETAILED_HTML"
-    echo "OS Tests Summary          : $OS_SUMMARY_HTML"
+    echo "OS tests Detailed Summary : $OS_DETAILED_HTML"
+    echo "OS tests Summary          : $OS_SUMMARY_HTML"
     echo ""
 fi
 
@@ -651,14 +651,14 @@ fi
 if [ $Standalone_PROCESSED -eq 1 ] && [ ${#Standalone_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${Standalone_JSONS[@]}")
 elif [ $Standalone_PROCESSED -eq 1 ]; then
-    echo -e "${YELLOW}WARNING: NO Standalone tests json files found. Skipping Standalone files.${NC}"
+    echo -e "${YELLOW}WARNING: NO Standalone tests json files found. Skipping this files.${NC}"
 fi
 
 # Include OS tests JSON files in merged JSON
 if [ $OS_TESTS_PROCESSED -eq 1 ] && [ ${#OS_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${OS_JSONS[@]}")
 elif [ $OS_TESTS_PROCESSED -eq 1 ]; then
-    echo -e "${YELLOW}WARNING: NO OS tests json files found. Skipping os Tests files.${NC}"
+    echo -e "${YELLOW}WARNING: NO OS tests json files found. Skipping this files.${NC}"
 fi
 
 # Include Capsule Update JSON file

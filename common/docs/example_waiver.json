@@ -52,7 +52,7 @@
             ]
         },
         {
-            "Suite": "MVP",
+            "Suite": "Standalone",
             "TestSuites": [
                 {
                     "TestSuite": "DTValidation",
