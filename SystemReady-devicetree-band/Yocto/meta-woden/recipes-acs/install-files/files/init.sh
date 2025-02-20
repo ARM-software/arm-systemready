@@ -37,7 +37,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1 )
 
   if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
-    mount $BLOCK_DEVICE_NAME /mnt
+    mount -o rw $BLOCK_DEVICE_NAME /mnt
     echo "Mounted the results partition on device $BLOCK_DEVICE_NAME"
   else
     echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
@@ -62,7 +62,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     fi
 
     if [ $check_flag -eq 0 ]; then
+      capsule_update_check=0
       touch /mnt/acs_tests/app/capsule_update_check.flag
+      if [ $? -eq 0 ]; then
+        echo "Successfully created capsule update check flag"
+        capsule_update_check=1
+      else
+        echo "Failed to create capsule update check flag"
+      fi
       touch /mnt/acs_tests/app/linux_run_complete.flag
 
       #LINUX DEBUG DUMP
@@ -206,11 +213,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sleep 5
       echo "BLK devices read and write check - Completed" 
 
-      umount /mnt
-      sleep 5
-      echo "System is rebooting for Capsule update"
-      reboot
-      sleep 5
+      if [ $capsule_update_check -eq 1 ]; then
+        umount /mnt
+        sleep 5
+        echo "System is rebooting for Capsule update"
+        reboot
+      fi
     else
       if [ -f /mnt/acs_tests/app/capsule_update_done.flag ]; then
         fw_pattern="FwVersion\s*-\s*(0x[0-9A-Fa-f]+)"
