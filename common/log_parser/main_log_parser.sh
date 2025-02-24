@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,20 @@ fi
 # Initialize waiver-related variables
 WAIVERS_APPLIED=0
 
+###############################################################################
+#               Gather ACS Info (acs_info.py)
+###############################################################################
+ACS_SUMMARY_DIR="$LOGS_PATH/acs_summary"
+mkdir -p "$ACS_SUMMARY_DIR"
+
+echo "Gathering ACS info into acs_info.txt and acs_info.json..."
+python3 "$SCRIPTS_PATH/acs_info.py" \
+    --acs_config_path "$ACS_CONFIG_PATH" \
+    --system_config_path "$SYSTEM_CONFIG_PATH" \
+    --uefi_version_log "$LOGS_PATH/uefi_dump/uefi_version.log" \
+    --output_dir "$ACS_SUMMARY_DIR"
+echo ""
+
 # Check if waiver.json is provided
 if [ -n "$WAIVER_JSON" ]; then
     if [ -f "$WAIVER_JSON" ]; then
@@ -110,7 +124,6 @@ apply_waivers() {
 }
 
 # Create directories for JSONs and HTMLs inside acs_summary
-ACS_SUMMARY_DIR="$LOGS_PATH/acs_summary"
 JSONS_DIR="$ACS_SUMMARY_DIR/acs_jsons"
 HTMLS_DIR="$ACS_SUMMARY_DIR/html_detailed_summaries"
 mkdir -p "$JSONS_DIR"
@@ -483,6 +496,10 @@ else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
+# 9) CAPSULE UPDATE SUMMARY (provide an empty string if not generated separately)
+CAPSULE_SUMMARY_HTML=""
+GENERATE_ACS_SUMMARY_CMD+=" \"$CAPSULE_SUMMARY_HTML\""
+
 # Finally pass the output
 GENERATE_ACS_SUMMARY_CMD+=" \"$ACS_SUMMARY_HTML\""
 
@@ -505,7 +522,6 @@ fi
 
 eval $GENERATE_ACS_SUMMARY_CMD
 
-i# Summary Prints
 print_path=0  # For debug only
 if [ $print_path -eq 1 ]; then
 # Always print BSA messages
@@ -584,6 +600,16 @@ echo ""
 MERGED_JSON="$JSONS_DIR/merged_results.json"
 JSON_FILES=()
 
+###############################################################################
+#             Add acs_info.JSON to the Merge
+###############################################################################
+acs_info_json="$ACS_SUMMARY_DIR/acs_info.json"
+if [ -f "$acs_info_json" ]; then
+    JSON_FILES+=("$acs_info_json")
+else
+    echo -e "${YELLOW}WARNING: acs_info.json not found. Skipping this file.${NC}"
+fi
+
 # Add BSA
 if [ -f "$BSA_JSON" ]; then
     JSON_FILES+=("$BSA_JSON")
@@ -640,7 +666,7 @@ elif [ $OS_TESTS_PROCESSED -eq 1 ]; then
     echo -e "${YELLOW}WARNING: NO OS tests json files found. Skipping these files.${NC}"
 fi
 
-# We do NOT separately handle CAPSULE_JSON now, because it's integrated in Standalone_JSONS.
+# (Capsule JSON is already part of Standalone_JSONS if it exists)
 
 if [ ${#JSON_FILES[@]} -gt 0 ]; then
     python3 "$SCRIPTS_PATH/merge_jsons.py" "$MERGED_JSON" "${JSON_FILES[@]}"
