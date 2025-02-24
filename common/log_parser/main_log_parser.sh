@@ -75,14 +75,16 @@ WAIVERS_APPLIED=0
 #               Gather ACS Info (acs_info.py)
 ###############################################################################
 ACS_SUMMARY_DIR="$LOGS_PATH/acs_summary"
+JSONS_DIR="$ACS_SUMMARY_DIR/acs_jsons"
 mkdir -p "$ACS_SUMMARY_DIR"
+mkdir -p "$JSONS_DIR"
 
 echo "Gathering ACS info into acs_info.txt and acs_info.json..."
 python3 "$SCRIPTS_PATH/acs_info.py" \
     --acs_config_path "$ACS_CONFIG_PATH" \
     --system_config_path "$SYSTEM_CONFIG_PATH" \
     --uefi_version_log "$LOGS_PATH/uefi_dump/uefi_version.log" \
-    --output_dir "$ACS_SUMMARY_DIR"
+    --output_dir "$JSONS_DIR"
 echo ""
 
 # Check if waiver.json is provided
@@ -124,9 +126,7 @@ apply_waivers() {
 }
 
 # Create directories for JSONs and HTMLs inside acs_summary
-JSONS_DIR="$ACS_SUMMARY_DIR/acs_jsons"
 HTMLS_DIR="$ACS_SUMMARY_DIR/html_detailed_summaries"
-mkdir -p "$JSONS_DIR"
 mkdir -p "$HTMLS_DIR"
 
 # Initialize processing flags
@@ -603,7 +603,7 @@ JSON_FILES=()
 ###############################################################################
 #             Add acs_info.JSON to the Merge
 ###############################################################################
-acs_info_json="$ACS_SUMMARY_DIR/acs_info.json"
+acs_info_json="$JSONS_DIR/acs_info.json"
 if [ -f "$acs_info_json" ]; then
     JSON_FILES+=("$acs_info_json")
 else

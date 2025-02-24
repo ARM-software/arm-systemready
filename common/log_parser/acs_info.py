@@ -169,20 +169,7 @@ def main():
     with open(json_path, "w") as jf:
         json.dump(final_json, jf, indent=4)
 
-    # 8) Write to TXT, including ALL fields from system_info and ACS Results Summary
-    txt_path = os.path.join(args.output_dir, "acs_info.txt")
-    with open(txt_path, "w") as tf:
-        tf.write("System Info:\n")
-        # Loop over every field in system_info so text matches JSON
-        for key, value in system_info.items():
-            tf.write(f"  {key}: {value}\n")
-
-        tf.write("\nACS Results Summary:\n")
-        for key, value in acs_results_summary.items():
-            tf.write(f"  {key}: {value}\n")
-
     print(f"acs_info.json created at: {json_path}")
-    print(f"acs_info.txt created at:  {txt_path}")
 
 if __name__ == "__main__":
     main()
