@@ -129,9 +129,7 @@ Note: The SecureBoot keys are present in \<bootfs>\acs_tests/bbsr-keys
 
 3. To run the BBSR ACS suites, choose following in grub options.
 ```
-"SCT for BBSR (optional)" for BBSR SCT tests
-and
-"Linux Boot for BBSR (optional)" for Secure Linux boot, BBSR FWTS and TPM2 logs.
+"BBSR Compliance (Automation)" for BBSR SCT tests, Secure Linux boot, BBSR FWTS and TPM2 logs.
 ```
 
 Note: SystemReady-devicetree-band ACS image can also be run using the above steps, if the underlying firmware is UEFI.
@@ -192,9 +190,7 @@ $QEMU \
 
 3. Execute the "run_qemu.sh", To run the BBSR ACS suites, choose following in grub options.
 ```
-"SCT for BBSR (optional)" for BBSR SCT tests
-and
-"Linux Boot for BBSR (optional)" for Secure Linux boot, BBSR FWTS and TPM2 logs.
+"BBSR Compliance (Automation)" for BBSR SCT tests, Secure Linux boot, BBSR FWTS and TPM2 logs.
 ```
 
 Note: SystemReady-devicetree-band Yocto ACS supports automatic enrollment of secure boot keys, still if the system fails to enter SecureBoot mode, Please refer to "Enrolling keys in U-boot" section of [BBSR ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll manually. <br>

@@ -114,26 +114,14 @@ do_dir_deploy() {
     sed -i 's\default=boot\default=bbr/bsa\g' grub.cfg
     sed -i 's\boot\Linux Boot\g' grub.cfg
 
-    if grep  -Eq "SCT for BBSR"  grub.cfg
+    if grep  -Eq "BBSR Compliance (Automation)"  grub.cfg
     then
-        echo "grub entry for SCT for BBSR already present"
+        echo "grub entry for BBSR Compliance (Automation) already present"
     else
-        echo "menuentry 'SCT for BBSR (optional)' {chainloader /EFI/BOOT/Shell.efi -nostartup bbsr_startup.nsh}" >> grub.cfg
-    fi
-
-    if grep  -Eq "Linux Boot for BBSR"  grub.cfg
-    then
-        echo "grub entry for Linux Boot for BBSR already present"
-    else
-        awk '/menuentry '\''Linux Boot'\''/, /ext4/' grub.cfg | sed 's/Linux Boot/Linux Boot for BBSR (optional)/' | sed 's/ext4/ext4  psci_checker=disable video=efifb:off secureboot/' >> grub.cfg
-        echo "}" >> grub.cfg
+        echo "menuentry 'BBSR Compliance (Automation)' {chainloader /EFI/BOOT/Shell.efi -nostartup bbsr_startup.nsh}" >> grub.cfg
     fi
 
     sed -i "/menuentry 'Linux Boot'/,/}/{ /linux /a \
-    initrd /core-image-initramfs-boot-genericarm64.cpio.gz
-    }" grub.cfg
-
-    sed -i "/menuentry 'Linux Boot for BBSR (optional)'/,/}/{ /linux /a \
     initrd /core-image-initramfs-boot-genericarm64.cpio.gz
     }" grub.cfg
 
