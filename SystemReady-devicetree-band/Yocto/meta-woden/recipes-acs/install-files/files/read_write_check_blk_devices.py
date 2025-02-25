@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script parses for block devices and perform block read operation if the partition
-# doesn't belong precious partitions set.
+# This script parses for block devices and perform block read and write operation if the partition doesn't belong precious partitions set.
 
 import subprocess
 import re
@@ -58,7 +57,6 @@ def calculate_sha256(file_path):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
-
 def get_partition_space(partition_path): #to calculate used blocks and available blocks
     command = f"df -B 512 {partition_path} --output=used,avail"
     result = subprocess.run(command, shell=True, text=True, check=True, capture_output=True)
@@ -72,7 +70,22 @@ def get_partition_space(partition_path): #to calculate used blocks and available
         print(f"WARNING: Unable to parse partition space for {partition_path}.")
         return 0, 0  # Default to 0 if parsing fails
 
+def is_mounted(device):
+    command = f"findmnt -n {device}"
+    result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
+    return result.returncode == 0
+
+def is_mtd_block_device(device):
+    return device.startswith('mtdblock')
+
+def is_ram_disk(device):
+    return device.startswith('ram')
+
 def perform_write_check(partition_label, partition_id, precious_parts):
+
+    if is_mounted(f"/dev/{partition_label}"):
+        print(f"INFO: /dev/{partition_label} is mounted, skipping write test.")
+        return
 
     # Check if partition is precious
     user_input = 'no' if partition_id in precious_parts.values() else input_with_timeout(
@@ -96,7 +109,7 @@ def perform_write_check(partition_label, partition_id, precious_parts):
             subprocess.run(backup_command, shell=True, check=True)
 
             # Write padded hello.txt to the device
-            print("INFO: Writing test data to the device for write check...") 
+            print("INFO: Writing test data to the device for write check...")
             write_command = f"dd if=hello.txt of=/dev/{partition_label} bs=512 count=1 seek={used_blocks}"
             subprocess.run(write_command, shell=True, check=True)
 
@@ -131,7 +144,6 @@ def perform_write_check(partition_label, partition_id, precious_parts):
         else:
             print(f"WARNING: No available space for write check on /dev/{partition_label}. Skipping write check.")
 
-
 if __name__ == "__main__":
     try:
         # find all disk block devices
@@ -150,6 +162,16 @@ if __name__ == "__main__":
         print("\n********************************************************************************************************************************\n")
 
         for disk in disks:
+            # Skip MTD block devices
+            if is_mtd_block_device(disk):
+                print(f"INFO: Skipping MTD block device /dev/{disk}")
+                continue
+
+            # Skip RAM disks
+            if is_ram_disk(disk):
+                print(f"INFO: Skipping RAM disk /dev/{disk}")
+                continue
+
             print(f"INFO: Block device : /dev/{disk}")
 
             # check whether disk uses MBR or GPT partition table
@@ -161,21 +183,34 @@ if __name__ == "__main__":
             elif "GPT: present" in result.stdout:
                 part_table = "GPT"
             else:
-                print(f"INFO: Invalid partition table or not found for {disk}")
-                continue
+                print(f"INFO: No valid partition table found for {disk}, treating as raw device.")
+                part_table = "RAW"
 
             print(f"INFO: Partition table type : {part_table}\n")
 
             # get number of partitions available for given disk
             command = f"lsblk /dev/{disk} | grep -c part"
             result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
-            num_parts = 0
-            num_parts = int(result.stdout)
+            num_parts = int(result.stdout.strip())
 
-            # skip if no partitions
-            if num_parts == 0:
-                print(f"INFO: No partitions detected for {disk}, skipping block read/write...")
-                continue
+            if part_table == "RAW" or num_parts == 0:
+                print(f"INFO: No partitions detected for {disk}, treating as raw device.")
+                part_lables = [disk]  # Treat the whole disk as a 'partition'
+
+                # Process the raw disk
+                for part_label in part_lables:
+                    print(f"INFO: Performing block read on /dev/{part_label}")
+                    command = f"dd if=/dev/{part_label} bs=1M count=1 > /dev/null"
+                    result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
+                    if result.returncode == 0:
+                        print(f"INFO: Block read on /dev/{part_label} successful")
+                        # Since we don't have partition IDs, pass empty string to perform_write_check
+                        perform_write_check(part_label, '', {})
+                    else:
+                        print(f"INFO: Block read on /dev/{part_label} failed")
+
+                print("\n********************************************************************************************************************************\n")
+                continue  # Continue to next disk
 
             # get partition labels
             command = f"lsblk /dev/{disk}  | grep part"
@@ -211,7 +246,7 @@ if __name__ == "__main__":
                         for key, value in precious_parts_mbr.items():
                             if value == mbr_part_ids[index]:
                                 print(f"INFO: {part_lables[index]} partition is PRECIOUS")
-                                used_blocks = get_partition_space(f"/dev/{part_lables[index]}")
+                                used_blocks, _ = get_partition_space(f"/dev/{part_lables[index]}")
                                 print(f"INFO: Number of 512B blocks used on /dev/{part_lables[index]}: {used_blocks}")
                                 print(f"      {key} : {value}")
                                 print("      Skipping block read/write...")
@@ -223,7 +258,7 @@ if __name__ == "__main__":
                         if result.returncode == 0:
                             print(f"INFO: Block read on /dev/{part_lables[index]} mbr_part_id = {mbr_part_ids[index]} successful")
                             # Call the perform_write_check function for the partition
-                            perform_write_check(part_lables[index], partition_guid_code, precious_parts_gpt)
+                            perform_write_check(part_lables[index], mbr_part_ids[index], precious_parts_mbr)
                         else:
                             print(f"INFO: Block read on /dev/{part_lables[index]} mbr_part_id = {mbr_part_ids[index]} failed")
                 print("\n********************************************************************************************************************************\n")
@@ -272,7 +307,7 @@ if __name__ == "__main__":
                     # check if the partition is precious
                     if partition_guid_code in precious_parts_gpt.values():
 
-                        used_blocks = get_partition_space(f"/dev/{part_lables[index]}")
+                        used_blocks, _ = get_partition_space(f"/dev/{part_lables[index]}")
 
                         for key, value in precious_parts_gpt.items():
                             if value == partition_guid_code:
