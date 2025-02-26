@@ -38,7 +38,8 @@ repos:
 
 local_conf_header:
   threads: |
-    GLIBC_GENERATE_LOCALES = "en_US.UTF-8 fr_FR.UTF-8"
+    GLIBC_GENERATE_LOCALES = "en_US.UTF-8 en_GB.UTF-8 C.UTF-8"
+    IMAGE_LINGUAS = "en-us en-gb"
     BB_NUMBER_THREADS = "16"
     PARALLEL_MAKE = "-j16"
 
