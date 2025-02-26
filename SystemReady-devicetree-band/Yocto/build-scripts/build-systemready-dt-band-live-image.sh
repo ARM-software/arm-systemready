@@ -19,7 +19,7 @@
 set -x
 TOP_DIR=`pwd`
 pushd $TOP_DIR/meta-woden
-kas shell kas/woden.yml --command "bitbake llvm-native && bitbake rust-native && bitbake glibc && bitbake glibc-locale && bitbake qemu-system-native && && bitbake cargo-native && bitbake linux-yocto && bitbake woden-image"
+kas shell kas/woden.yml --command "bitbake llvm-native && bitbake rust-native && bitbake glibc && bitbake glibc-locale && bitbake qemu-system-native && bitbake cargo-native && bitbake linux-yocto && bitbake woden-image"
 if [ $? -eq 0 ]; then
     if [ -f $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64/woden-image-genericarm64.rootfs.wic ]; then
       cd $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64
