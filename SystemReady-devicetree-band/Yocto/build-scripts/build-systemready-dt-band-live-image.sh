@@ -19,33 +19,7 @@
 set -x
 TOP_DIR=`pwd`
 pushd $TOP_DIR/meta-woden
-kas shell kas/woden.yml
-bitbake llvm-native
-if [ $? -eq 1 ]; then
-    echo "llvm-native recipe failed"
-    exit
-fi
-bitbake rust-native
-if [ $? -eq 1 ]; then
-    echo "rust-native recipe failed"
-    exit
-fi
-bitbake glibc
-if [ $? -eq 1 ]; then
-    echo "glibc recipe failed"
-    exit
-fi
-bitbake glibc-locale
-if [ $? -eq 1 ]; then
-    echo "glibc-locale recipe failed"
-    exit
-fi
-bitbake qemu-system-native
-if [ $? -eq 1 ]; then
-    echo "qemu-system-native recipe failed"
-    exit
-fi
-bitbake woden-image
+kas shell kas/woden.yml --command "bitbake llvm-native && bitbake rust-native && bitbake glibc && bitbake glibc-locale && bitbake qemu-system-native && bitbake woden-image"
 if [ $? -eq 0 ]; then
     if [ -f $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64/woden-image-genericarm64.rootfs.wic ]; then
       cd $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64
