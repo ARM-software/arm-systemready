@@ -38,6 +38,7 @@ repos:
 
 local_conf_header:
   threads: |
+    GLIBC_GENERATE_LOCALES = "en_US.UTF-8 fr_FR.UTF-8"
     BB_NUMBER_THREADS = "16"
     PARALLEL_MAKE = "-j16"
 
