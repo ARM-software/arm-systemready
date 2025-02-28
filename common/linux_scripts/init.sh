@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,7 +63,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1)
 
   if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
-    mount $BLOCK_DEVICE_NAME /mnt
+    mount -o rw $BLOCK_DEVICE_NAME /mnt
     echo "Mounted the results partition on device $BLOCK_DEVICE_NAME"
   else
     echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
