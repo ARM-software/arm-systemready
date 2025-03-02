@@ -24,8 +24,8 @@ SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=ht
 S = "${WORKDIR}"
 
 SRCREV_FORMAT    = "edk2-test_edk2_bbr-acs"
-SRCREV_edk2 = "f80f052277c88a67c55e107b550f504eeea947d3"
-SRCREV_edk2-test = "0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4"
+SRCREV_edk2 = "${AUTOREV}"
+SRCREV_edk2-test = "${AUTOREV}"
 SRCREV_bbr-acs   = "${AUTOREV}"
 
 # set variables as required by edk2 based build
