@@ -75,7 +75,6 @@ def update_suite_summary(suite_summary, status):
         key = f"total_{status}"
         suite_summary[key] += 1
 
-
 def parse_dt_kselftest_log(log_data):
     test_suite_key = "dt_kselftest"
     mapping = test_suite_mapping[test_suite_key]
@@ -120,6 +119,20 @@ def parse_dt_kselftest_log(log_data):
             suite_summary[f"total_{status}"] += 1
             subtest_number += 1
 
+    # >>> REMOVE EMPTY REASON ARRAYS <<<
+    for subtest in current_test["subtests"]:
+        subres = subtest["sub_test_result"]
+        if not subres["pass_reasons"]:
+            del subres["pass_reasons"]
+        if not subres["fail_reasons"]:
+            del subres["fail_reasons"]
+        if not subres["abort_reasons"]:
+            del subres["abort_reasons"]
+        if not subres["skip_reasons"]:
+            del subres["skip_reasons"]
+        if not subres["warning_reasons"]:
+            del subres["warning_reasons"]
+
     return {
         "test_results": [current_test],
         "suite_summary": suite_summary
@@ -158,6 +171,20 @@ def parse_dt_validate_log(log_data):
             current_test["test_suite_summary"]["total_FAILED"] += 1
             suite_summary["total_FAILED"] += 1
             subtest_number += 1
+
+    # >>> REMOVE EMPTY REASON ARRAYS <<<
+    for subtest in current_test["subtests"]:
+        subres = subtest["sub_test_result"]
+        if not subres["pass_reasons"]:
+            del subres["pass_reasons"]
+        if not subres["fail_reasons"]:
+            del subres["fail_reasons"]
+        if not subres["abort_reasons"]:
+            del subres["abort_reasons"]
+        if not subres["skip_reasons"]:
+            del subres["skip_reasons"]
+        if not subres["warning_reasons"]:
+            del subres["warning_reasons"]
 
     return {
         "test_results": [current_test],
@@ -354,6 +381,20 @@ def parse_ethtool_test_log(log_data):
             suite_summary["total_SKIPPED"] += 1
             subtest_number += 1
 
+    # >>> REMOVE EMPTY REASON ARRAYS <<<
+    for subtest in current_test["subtests"]:
+        subres = subtest["sub_test_result"]
+        if not subres["pass_reasons"]:
+            del subres["pass_reasons"]
+        if not subres["fail_reasons"]:
+            del subres["fail_reasons"]
+        if not subres["abort_reasons"]:
+            del subres["abort_reasons"]
+        if not subres["skip_reasons"]:
+            del subres["skip_reasons"]
+        if not subres["warning_reasons"]:
+            del subres["warning_reasons"]
+
     return {
         "test_results": [current_test],
         "suite_summary": suite_summary
@@ -488,6 +529,20 @@ def parse_read_write_check_blk_devices_log(log_data):
         else:
             i += 1
 
+    # >>> REMOVE EMPTY REASON ARRAYS <<<
+    for subtest in current_test["subtests"]:
+        subres = subtest["sub_test_result"]
+        if not subres["pass_reasons"]:
+            del subres["pass_reasons"]
+        if not subres["fail_reasons"]:
+            del subres["fail_reasons"]
+        if not subres["abort_reasons"]:
+            del subres["abort_reasons"]
+        if not subres["skip_reasons"]:
+            del subres["skip_reasons"]
+        if not subres["warning_reasons"]:
+            del subres["warning_reasons"]
+
     return {
         "test_results": [current_test],
         "suite_summary": suite_summary
@@ -499,7 +554,7 @@ def parse_read_write_check_blk_devices_log(log_data):
 def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path, capsule_test_results_log_path):
     test_suite_key = "capsule_update"
     mapping = {
-        "Test_suite_name": "Capsule Update",  # same as the other standalone logs
+        "Test_suite_name": "Capsule Update",
         "Test_suite_description": "Tests for automatic capsule update",
         "Test_case_description": "Capsule Update"
     }
@@ -516,7 +571,7 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
         "Test_suite_name": mapping["Test_suite_name"],       # <--- 'Standalone tests'
         "Test_suite_description": mapping["Test_suite_description"],
         "Test_case": test_suite_key,                         # 'capsule_update'
-        "Test_case_description": mapping["Test_case_description"], 
+        "Test_case_description": mapping["Test_case_description"],
         "subtests": [],
         "test_suite_summary": suite_summary.copy()
     }
@@ -538,7 +593,6 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
 
     subtest_number = 1
 
-    # Helper to add subtest
     def add_subtest(desc, status, reason=""):
         nonlocal subtest_number
         sub = create_subtest(subtest_number, desc, status, reason)
@@ -561,7 +615,6 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
             while i < len(update_lines):
                 cur = update_lines[i].strip()
                 if re.match(r"Testing\s+", cur, re.IGNORECASE):
-                    # next test
                     i -= 1
                     break
                 elif re.match(r"Test[_\s]Info", cur, re.IGNORECASE):
@@ -690,6 +743,20 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
             add_subtest(test_desc, result, reason=test_info)
         else:
             i += 1
+
+    # >>> REMOVE EMPTY REASON ARRAYS <<<
+    for subtest in current_test["subtests"]:
+        subres = subtest["sub_test_result"]
+        if not subres["pass_reasons"]:
+            del subres["pass_reasons"]
+        if not subres["fail_reasons"]:
+            del subres["fail_reasons"]
+        if not subres["abort_reasons"]:
+            del subres["abort_reasons"]
+        if not subres["skip_reasons"]:
+            del subres["skip_reasons"]
+        if not subres["warning_reasons"]:
+            del subres["warning_reasons"]
 
     return {
         "test_results": [current_test],

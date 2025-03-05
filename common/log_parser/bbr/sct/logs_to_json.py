@@ -299,6 +299,7 @@ test_mapping = {
     }
 }
 
+
 def detect_file_encoding(file_path):
     with open(file_path, 'rb') as file:
         raw_data = file.read()
@@ -356,14 +357,14 @@ def main(input_file, output_file):
                     # Add the previous test entry to results before starting a new one
                     results.append(test_entry)
                 test_entry = {
-                    "Test_suite": "",          # New field
-                    "Sub_test_suite": "",      # New field
-                    "Test_case": "",           # Renamed from Test_suite
-                    "Test_case_description": "",  # Renamed from Test_suite_Description
+                    "Test_suite": "",
+                    "Sub_test_suite": "",
+                    "Test_case": "",
+                    "Test_case_description": "",
                     "Test Entry Point GUID": "",
                     "Returned Status Code": "",
                     "subtests": [],
-                    "test_case_summary": {     # Renamed from test_suite_summary
+                    "test_case_summary": {
                         "total_passed": 0,
                         "total_failed": 0,
                         "total_aborted": 0,
@@ -372,7 +373,8 @@ def main(input_file, output_file):
                     }
                 }
                 # Capture the next line for the Test_case name
-                test_entry["Test_case"] = lines[i + 1].strip()
+                if i + 1 < len(lines):
+                    test_entry["Test_case"] = lines[i + 1].strip()
                 sub_test_number = 0
 
                 # Find the Test_suite and Sub_test_suite from the mapping
@@ -398,7 +400,7 @@ def main(input_file, output_file):
             if "Returned Status Code" in line:
                 test_entry["Returned Status Code"] = line.split(':', 1)[1].strip()
 
-            # Capture sub-test descriptions and results (PASS, FAIL, etc.)
+            # Capture sub-test descriptions and results (PASS, FAIL, WARNING, etc.)
             if re.search(r'--\s*(PASS|FAIL|FAILURE|WARNING|NOT SUPPORTED)', line, re.IGNORECASE):
                 parts = line.rsplit(' -- ', 1)
                 test_desc = parts[0]
@@ -429,12 +431,21 @@ def main(input_file, output_file):
                 file_path = lines[i + 2].strip() if i + 2 < len(lines) else ""
 
                 sub_test_number += 1
+
+                # Extract the reason from the last part of the file_path (anything after the last colon)
+                reason = ""
+                if ":" in file_path:
+                    reason_split = file_path.rsplit(":", 1)
+                    if len(reason_split) > 1:
+                        reason = reason_split[1].strip()
+
                 sub_test = {
                     "sub_Test_Number": str(sub_test_number),
                     "sub_Test_Description": test_desc,
                     "sub_Test_GUID": test_guid,
                     "sub_test_result": result,
-                    "sub_Test_Path": file_path
+                    "sub_Test_Path": file_path,
+                    "reason": reason  # <-- New field
                 }
 
                 test_entry["subtests"].append(sub_test)
