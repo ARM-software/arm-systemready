@@ -208,9 +208,18 @@ def merge_json_files(json_files, output_file):
         elif "DT_VALIDATE" in fn:
             section_name = "Suite_Name: DT Validate"
             suite_key    = "DT_VALIDATE"
-        elif "ETHTOOL_TEST" in fn:
+        elif os.path.basename(json_path).lower() == "ethtool_test.json":
+            # Only if the filename is EXACTLY "ethtool_test.json"
             section_name = "Suite_Name: Ethtool Test"
             suite_key    = "ETHTOOL_TEST"
+
+        elif "ethtool_test" in fn.lower():
+            # For any other file *containing* "ethtool_test" in its name
+            # (like "ethtool_test_linux-debian-12.5.0.json"), put it in an OS suite.
+            base_name_no_ext = os.path.splitext(os.path.basename(json_path))[0]
+            # e.g. "ethtool_test_linux-debian-12.5.0"
+            section_name = f"Suite_Name: OS Tests - {base_name_no_ext}"
+            suite_key    = f"OS_{base_name_no_ext}"
         elif "READ_WRITE_CHECK_BLK_DEVICES" in fn:
             section_name = "Suite_Name: Read Write Check Block Devices"
             suite_key    = "READ_WRITE_CHECK_BLK_DEVICES"

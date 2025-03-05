@@ -58,7 +58,7 @@ def generate_bar_chart_improved(suite_summary):
         suite_summary['total_warnings']
     ]
     # Updated colors to include a color for 'Failed with Waiver'
-    colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']  # Added color for Failed with Waiver
+    colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']
 
     plt.figure(figsize=(12, 7))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
@@ -69,11 +69,11 @@ def generate_bar_chart_improved(suite_summary):
         yval = bar.get_height()
         percentage = (size / total_tests) * 100 if total_tests > 0 else 0
         plt.text(
-            bar.get_x() + bar.get_width()/2, 
-            yval + max(sizes)*0.01, 
-            f'{percentage:.2f}%', 
-            ha='center', 
-            va='bottom', 
+            bar.get_x() + bar.get_width()/2,
+            yval + max(sizes)*0.01,
+            f'{percentage:.2f}%',
+            ha='center',
+            va='bottom',
             fontsize=12
         )
 
@@ -136,7 +136,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                 background-color: #f8d7da;
                 font-weight: bold;
             }
-            .fail-waiver {  /* Added CSS class for Failed with Waiver */
+            .fail-waiver {
                 background-color: #f39c12;
                 font-weight: bold;
                 color: white;
@@ -195,8 +195,11 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                 text-align: center;
                 font-weight: bold;
             }
-            /* New CSS class for Waiver Reason */
             .waiver-reason {
+                text-align: center;
+                font-weight: normal;
+            }
+            .reason-col {
                 text-align: center;
                 font-weight: normal;
             }
@@ -234,7 +237,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                         <td class="fail">{{ total_failed }}</td>
                     </tr>
                     <tr>
-                        <td>Failed with Waiver</td>  <!-- Added row for Failed with Waiver -->
+                        <td>Failed with Waiver</td>
                         <td class="fail-waiver">{{ total_failed_with_waiver }}</td>
                     </tr>
                     <tr>
@@ -265,29 +268,33 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
             <table>
                 <thead>
                     <tr>
-                        <th>Sub Test Number</th>
+                        <!-- Remove "Sub Test Number" and make "Sub Test GUID" first column -->
+                        <th>Sub Test GUID</th>
                         <th>Sub Test Description</th>
                         <th>Sub Test Result</th>
-                        <th>Sub Test GUID</th>
                         <th>Sub Test Path</th>
-                        <th>Waiver Reason</th>  <!-- New Column Header -->
+                        <th>Reason</th>
+                        <th>Waiver Reason</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for subtest in test.subtests %}
                     <tr>
-                        <td>{{ subtest.sub_Test_Number }}</td>
+                        <!-- Sub Test GUID is now the first column -->
+                        <td>{{ subtest.sub_Test_GUID }}</td>
                         <td>{{ subtest.sub_Test_Description }}</td>
                         <td class="{{ subtest.sub_test_result | determine_css_class }}">{{ subtest.sub_test_result }}</td>
-                        <td>{{ subtest.sub_Test_GUID }}</td>
                         <td>{{ subtest.sub_Test_Path }}</td>
+                        <td class="reason-col">
+                            {{ subtest.reason if subtest.reason else "N/A" }}
+                        </td>
                         <td class="waiver-reason">
                             {% if 'FAILED WITH WAIVER' in subtest.sub_test_result.upper() or 'FAILURE (WITH WAIVER)' in subtest.sub_test_result.upper() %}
                                 {{ subtest.waiver_reason | default("N/A") }}
                             {% else %}
                                 N/A
                             {% endif %}
-                        </td>  <!-- New Data Cell -->
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -314,7 +321,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
         total_tests=total_tests,
         total_passed=suite_summary["total_passed"],
         total_failed=suite_summary["total_failed"],
-        total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),  # Safely get the value with default 0
+        total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),
         total_aborted=suite_summary["total_aborted"],
         total_skipped=suite_summary["total_skipped"],
         total_warnings=suite_summary["total_warnings"],
@@ -326,7 +333,6 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
     with open(output_html_path, "w") as file:
         file.write(html_content)
 
-# Main function to process the JSON file and generate the HTML report
 def main(input_json_file, detailed_html_file, summary_html_file):
     # Load JSON data
     with open(input_json_file, 'r') as json_file:
@@ -347,13 +353,12 @@ def main(input_json_file, detailed_html_file, summary_html_file):
 
     for test_suite in test_results:
         test_case_summary = test_suite.get('test_case_summary', {})
-        # Handle different cases for keys (case-insensitive)
-        suite_summary['total_passed'] += get_case_insensitive(test_case_summary, 'total_passed', test_case_summary.get('total_passed', 0))
-        suite_summary['total_failed'] += get_case_insensitive(test_case_summary, 'total_failed', test_case_summary.get('total_failed', 0))
-        suite_summary['total_failed_with_waiver'] += get_case_insensitive(test_case_summary, 'total_failed_with_waiver', test_case_summary.get('total_failed_with_waiver', 0))
-        suite_summary['total_aborted'] += get_case_insensitive(test_case_summary, 'total_aborted', test_case_summary.get('total_aborted', 0))
-        suite_summary['total_skipped'] += get_case_insensitive(test_case_summary, 'total_skipped', test_case_summary.get('total_skipped', 0))
-        suite_summary['total_warnings'] += get_case_insensitive(test_case_summary, 'total_warnings', test_case_summary.get('total_warnings', 0))
+        suite_summary['total_passed'] += get_case_insensitive(test_case_summary, 'total_passed', 0)
+        suite_summary['total_failed'] += get_case_insensitive(test_case_summary, 'total_failed', 0)
+        suite_summary['total_failed_with_waiver'] += get_case_insensitive(test_case_summary, 'total_failed_with_waiver', 0)
+        suite_summary['total_aborted'] += get_case_insensitive(test_case_summary, 'total_aborted', 0)
+        suite_summary['total_skipped'] += get_case_insensitive(test_case_summary, 'total_skipped', 0)
+        suite_summary['total_warnings'] += get_case_insensitive(test_case_summary, 'total_warnings', 0)
 
     # Generate improved bar chart as base64 encoded image
     chart_data = generate_bar_chart_improved(suite_summary)
