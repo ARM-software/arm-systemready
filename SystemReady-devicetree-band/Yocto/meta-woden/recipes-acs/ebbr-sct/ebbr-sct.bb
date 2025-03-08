@@ -24,7 +24,7 @@ SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=ht
 S = "${WORKDIR}"
 
 SRCREV_FORMAT    = "edk2-test_edk2_bbr-acs"
-SRCREV_edk2 = "f80f052277c88a67c55e107b550f504eeea947d3"
+SRCREV_edk2 = "${AUTOREV}"
 SRCREV_edk2-test = "${AUTOREV}"
 SRCREV_bbr-acs   = "${AUTOREV}"
 
@@ -35,6 +35,16 @@ EDK2_ARCH             = "AARCH64"
 UEFI_TOOLCHAIN        = "GCC5"
 export PYTHON_COMMAND = "python3"
 
+# These variables were changed in edk2 commit
+# 206168e83f0901cbc1815ef5df4ac6598ad9721b, which was part of edk2-202305
+export CC = "${BUILD_CC}"
+export CXX = "${BUILD_CXX}"
+export AS = "${BUILD_AS}"
+export AR = "${BUILD_AR}"
+export LD = "${BUILD_LD}"
+export CFLAGS = "${BUILD_CFLAGS}"
+export CPPFLAGS = "${BUILD_CPPFLAGS}"
+export LDFLAGS = "${BUILD_LFLAGS}"
 
 do_configure() {
     cd ${S}/edk2-test

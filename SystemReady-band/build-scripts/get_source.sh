@@ -181,7 +181,9 @@ get_bbr_acs_src()
 get_buildroot_src()
 {
     echo "Downloading Buildroot source code. TAG : $BUILDROOT_SRC_VERSION"
-    git clone -b $BUILDROOT_SRC_VERSION https://git.busybox.net/buildroot/
+    #git clone -b $BUILDROOT_SRC_VERSION https://git.busybox.net/buildroot/
+    #TODO  git clone was failing with busybox url, try gitlab
+    git clone -b $BUILDROOT_SRC_VERSION https://gitlab.com/buildroot.org/buildroot.git
     if [ $? -ne 0 ]; then
         echo "Error: Failed to download buildroot source code"
         exit 1
