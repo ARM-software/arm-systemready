@@ -18,9 +18,11 @@ for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%m:\acs_results then
         FS%m:
         cd FS%m:\acs_results
+	goto DebugRun
     endif
 endfor
 
+:DebugRun
 if exist uefi_dump then
     echo "UEFI debug logs already run"
     echo "Press any key to rerun UEFI debug logs"
