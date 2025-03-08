@@ -32,7 +32,7 @@ if [ $# -lt 1 ]; then
 fi
 
 # Add the YOCTO_FLAG variable
-YOCTO_FLAG="/data_sda/ashsha06/yocto_image.flag"
+YOCTO_FLAG="/mnt/yocto_image.flag"
 
 # Check if the YOCTO_FLAG exists
 if [ -f "$YOCTO_FLAG" ]; then
