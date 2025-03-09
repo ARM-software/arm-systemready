@@ -36,7 +36,7 @@ if [ $# -lt 2 ] || [ $# -gt 3 ]; then
    exit 1
 fi
 
-#sets various paths
+#Sets various paths
 acs_image_path="$1"
 operation="put"
 path_in_image="/acs_tests/config"
@@ -44,7 +44,7 @@ path_in_local="$2"
 path_for_results=${3:-$(dirname "$acs_image_path")}  # Default to ACS image directory if $3 is empty
 loop_variable="p1"
 
-#checks for valid loop
+#Checks for valid loop
 loop=$(sudo kpartx -a -v "$acs_image_path" | grep "add map" | grep "p1" | head -n1 | awk '{print $3}')
 if [ -z "$loop" ]; then
     echo "kpartx failed. Please check the arguments passed."
@@ -72,7 +72,7 @@ else
     echo "acs_results not copied"
 fi
 
-#performing the operation
+#Performing the operation
 if [ "$operation" = "get" ]; then
     sudo cp -r "/mnt/$path_in_image" "$(dirname "$path_in_local")"
     if [ $? -eq 0 ]; then
@@ -90,7 +90,7 @@ else
     fi
 fi
 
-#unmounting the loop
+# Unmount filesystem and remove loop partition mappings
 sudo umount /mnt
 if [ $? -ne 0 ]; then
     echo "unmount failed. Please unmount manually"
@@ -101,4 +101,3 @@ if [ $? -ne 0 ]; then
     echo "kpartx delete failed. Please unmount manually"
     exit 1
 fi
-
