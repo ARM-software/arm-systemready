@@ -104,6 +104,7 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
 │   │   └── UpdateVars.efi
 │   ├── bbr
 │   │   ├── SCT
+│   │   ├── ScrtStartup.nsh
 │   │   ├── SctStartup.nsh
 │   │   └── bbsr_SctStartup.nsh
 │   ├── bbsr-keys

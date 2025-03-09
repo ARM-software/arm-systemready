@@ -161,6 +161,7 @@ do_install() {
     cp ${S}/bbr-acs/ebbr/config/EBBR.seq ${D}/bbr/SCT/Sequence/EBBR.seq
     cp SctPkg/UEFI/EfiCompliant_EBBR.ini ${D}/bbr/SCT/Dependency/EfiCompliantBBTest/EfiCompliant.ini
     cp ${S}/bbr-acs/bbsr/config/BBSR.seq ${D}/bbr/SCT/Sequence/BBSR.seq
+    cp ${S}/bbr-acs/common/config/ScrtStartup.nsh ${D}/bbr/ScrtStartup.nsh
 
     echo "Install done..."
 
