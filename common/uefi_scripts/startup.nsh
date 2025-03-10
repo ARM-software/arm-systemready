@@ -43,7 +43,7 @@ endfor
 :DoneSCT
 
 for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%k:\acs_tests\bbr\ScrtStartup.nsh then
+    if exist FS%k:\acs_tests\bbr\ScrtStartup.nsh and not exist FS%k:\yocto_image.flag then
         FS%k:\acs_tests\bbr\ScrtStartup.nsh
         goto Donebbr
     endif
