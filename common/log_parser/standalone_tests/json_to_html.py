@@ -22,6 +22,45 @@ from jinja2 import Template
 import sys
 import argparse
 
+# 1) Detect which columns are used among all subtests in a given test
+def detect_columns_used(subtests):
+    """
+    We keep this function for minimal code changes, 
+    but the only value effectively used now is show_waiver.
+    """
+    show_pass = False
+    show_fail = False
+    show_abort = False
+    show_skip = False
+    show_warning = False
+    show_waiver = False
+
+    for subtest in subtests:
+        r = subtest.get('sub_test_result', {})
+        if r.get('pass_reasons'):
+            show_pass = True
+        if r.get('fail_reasons'):
+            show_fail = True
+        if r.get('abort_reasons'):
+            show_abort = True
+        if r.get('skip_reasons'):
+            show_skip = True
+        if r.get('warning_reasons'):
+            show_warning = True
+        # If any subtest has "FAILED_WITH_WAIVER", we show the Waiver column
+        if r.get('FAILED_WITH_WAIVER', 0) > 0:
+            show_waiver = True
+
+    return {
+        'show_pass': show_pass,
+        'show_fail': show_fail,
+        'show_abort': show_abort,
+        'show_skip': show_skip,
+        'show_warning': show_warning,
+        'show_waiver': show_waiver
+    }
+
+
 # Function to generate bar chart for test results
 def generate_bar_chart(suite_summary):
     labels = ['Passed', 'Failed', 'Failed with Waiver']  # We track "Failed with Waiver" separately
@@ -45,7 +84,7 @@ def generate_bar_chart(suite_summary):
             label = '0%'
         plt.text(
             bar.get_x() + bar.get_width() / 2,
-            yval + max(sizes)*0.02 if total_tests > 0 else 0.1,
+            yval + (max(sizes)*0.02 if total_tests > 0 else 0.1),
             label,
             ha='center',
             va='bottom',
@@ -62,7 +101,7 @@ def generate_bar_chart(suite_summary):
     buffer.seek(0)
     return base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-# Function to generate the HTML
+
 def generate_html(suite_summary, test_results_list, output_html_path,
                   is_summary_page=True, include_drop_down=False):
     test_suite_name = 'Standalone'
@@ -242,23 +281,21 @@ def generate_html(suite_summary, test_results_list, output_html_path,
         <a id="section{{ idx }}"></a>
         {% endif %}
         {% for test in test_results %}
+
         <div class="test-suite-header">Test Suite: {{ test.Test_suite_name }}</div>
         <div class="test-suite-description">Description: {{ test.Test_suite_description }}</div>
 
         <div class="test-case-header">Test Case: {{ test.Test_case }}</div>
         <div class="test-case-description">Description: {{ test.Test_case_description }}</div>
 
+        {# We ignore dynamic reason columns and use a single "Reason" + "Waiver Reason" #}
         <table>
             <thead>
                 <tr>
                     <th>Sub Test Number</th>
                     <th>Sub Test Description</th>
                     <th>Sub Test Result</th>
-                    <th>Pass Reasons</th>
-                    <th>Fail Reasons</th>
-                    <th>Abort Reasons</th>
-                    <th>Skip Reasons</th>
-                    <th>Warning Reasons</th>
+                    <th>Reason</th>
                     <th>Waiver Reason</th>
                 </tr>
             </thead>
@@ -284,12 +321,19 @@ def generate_html(suite_summary, test_results_list, output_html_path,
                             {{ status }}
                         {% endif %}
                     </td>
-                    <td>{{ r.pass_reasons | join(', ') }}</td>
-                    <td>{{ r.fail_reasons | join(', ') }}</td>
-                    <td>{{ r.abort_reasons | join(', ') }}</td>
-                    <td>{{ r.skip_reasons | join(', ') }}</td>
-                    <td>{{ r.warning_reasons | join(', ') }}</td>
-                    <td>{{ r.waiver_reason }}</td>
+                    {# Combine pass, fail, skip, abort, warning reasons into one "Reason" column #}
+                    {% set all_reasons = [] %}
+                    {% if r.pass_reasons %}{% for reason in r.pass_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                    {% if r.fail_reasons %}{% for reason in r.fail_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                    {% if r.abort_reasons %}{% for reason in r.abort_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                    {% if r.skip_reasons %}{% for reason in r.skip_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                    {% if r.warning_reasons %}{% for reason in r.warning_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                    <td>
+                        {{ all_reasons|join("; ") if all_reasons else "N/A" }}
+                    </td>
+                    <td>
+                        {{ r.waiver_reason if r.waiver_reason else "N/A" }}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -329,6 +373,7 @@ def generate_html(suite_summary, test_results_list, output_html_path,
     with open(output_html_path, "w") as f:
         f.write(html_content)
 
+
 def get_subtest_status(subtest_result):
     if subtest_result.get('PASSED', 0) > 0:
         return 'PASSED'
@@ -344,6 +389,7 @@ def get_subtest_status(subtest_result):
         return 'WARNINGS'
     else:
         return 'UNKNOWN'
+
 
 def main():
     parser = argparse.ArgumentParser(description='Generate HTML report from JSON data.')
@@ -371,10 +417,14 @@ def main():
 
         test_results = data.get("test_results", [])
         if test_results:
+            # 2) For each test in test_results, compute columns_used
+            for test in test_results:
+                subtests = test.get("subtests", [])
+                test["columns_used"] = detect_columns_used(subtests)
+
             test_results_list.append(test_results)
 
             # Determine overall pass/fail
-            # A single test suite block => check subtests
             for test in test_results:
                 has_failed_without_waiver = False
                 has_failed_with_waiver = False
@@ -393,7 +443,6 @@ def main():
                 else:
                     combined_suite_summary['total_PASSED'] += 1
 
-    # If no data, exit
     total_standalones = (combined_suite_summary['total_PASSED'] +
                          combined_suite_summary['total_FAILED'] +
                          combined_suite_summary['total_FAILED_WITH_WAIVER'])

@@ -66,7 +66,7 @@ def parse_fwts_log(log_path):
                 # Start a new main test
                 Test_suite_Description = line.split(':', 1)[1].strip() if ':' in line else "No description"
                 current_test = {
-                    "Test_suite": main_test,  # Changed field name from main_test to Test_suite
+                    "Test_suite": main_test,
                     "Test_suite_Description": Test_suite_Description,
                     "subtests": [],
                     "test_suite_summary": {
@@ -77,7 +77,7 @@ def parse_fwts_log(log_path):
                         "total_WARNINGS": 0
                     }
                 }
-                current_subtest = None  # Reset current_subtest when a new test suite starts
+                current_subtest = None  # Reset current_subtest
                 break
 
         # Detect subtest start, subtest number, and subtest description
@@ -90,9 +90,9 @@ def parse_fwts_log(log_path):
             sub_Test_Description = subtest_match.group(3).strip()
 
             current_subtest = {
-                "sub_Test_Number": subtest_number,  # Changed field name from subtest_number to sub_Test_Number
+                "sub_Test_Number": subtest_number,
                 "sub_Test_Description": sub_Test_Description,
-                "sub_test_result": {  # Changed field name from results to sub_test_result
+                "sub_test_result": {
                     "PASSED": 0,
                     "FAILED": 0,
                     "ABORTED": 0,
@@ -108,12 +108,12 @@ def parse_fwts_log(log_path):
             continue
 
         # Check for test abortion and properly append the whole reason
-        if "Aborted" in line or "ABORTED" in line:  # Detect all forms of abortion messages
+        if "Aborted" in line or "ABORTED" in line:
             if not current_subtest:
                 current_subtest = {
-                    "sub_Test_Number": "Test 1 of 1",  # Changed field name
+                    "sub_Test_Number": "Test 1 of 1",
                     "sub_Test_Description": "Aborted test",
-                    "sub_test_result": {  # Changed field name from results to sub_test_result
+                    "sub_test_result": {
                         "PASSED": 0,
                         "FAILED": 0,
                         "ABORTED": 1,
@@ -126,28 +126,32 @@ def parse_fwts_log(log_path):
                         "warning_reasons": []
                     }
                 }
-            abort_reason = line.strip()  # Take the entire line as the abort reason
+            abort_reason = line.strip()
             current_subtest["sub_test_result"]["abort_reasons"].append(abort_reason)
-            continue  # Do not increment counts here; will do it later based on subtests
+            continue
 
         # Capture pass/fail/abort/skip/warning info
         if current_subtest:
             if "PASSED" in line:
                 current_subtest["sub_test_result"]["PASSED"] += 1
-                reason_text = line.split("PASSED:")[1].strip() if "PASSED:" in line else "No specific reason"
-                current_subtest["sub_test_result"]["pass_reasons"].append(reason_text)
+                if "PASSED:" in line:
+                    reason_text = line.split("PASSED:")[1].strip()
+                    current_subtest["sub_test_result"]["pass_reasons"].append(reason_text)
             elif "FAILED" in line:
                 current_subtest["sub_test_result"]["FAILED"] += 1
-                reason_text = line.split("FAILED:")[1].strip() if "FAILED:" in line else "No specific reason"
-                current_subtest["sub_test_result"]["fail_reasons"].append(reason_text)
+                if "FAILED:" in line:
+                    reason_text = line.split("FAILED:")[1].strip()
+                    current_subtest["sub_test_result"]["fail_reasons"].append(reason_text)
             elif "SKIPPED" in line:
                 current_subtest["sub_test_result"]["SKIPPED"] += 1
-                reason_text = line.split("SKIPPED:")[1].strip() if "SKIPPED:" in line else "No specific reason"
-                current_subtest["sub_test_result"]["skip_reasons"].append(reason_text)
+                if "SKIPPED:" in line:
+                    reason_text = line.split("SKIPPED:")[1].strip()
+                    current_subtest["sub_test_result"]["skip_reasons"].append(reason_text)
             elif "WARNING" in line:
                 current_subtest["sub_test_result"]["WARNINGS"] += 1
-                reason_text = line.split("WARNING:")[1].strip() if "WARNING:" in line else "No specific reason"
-                current_subtest["sub_test_result"]["warning_reasons"].append(reason_text)
+                if "WARNING:" in line:
+                    reason_text = line.split("WARNING:")[1].strip()
+                    current_subtest["sub_test_result"]["warning_reasons"].append(reason_text)
         else:
             # Handle SKIPPED when no current_subtest exists
             if "SKIPPED" in line:
@@ -167,37 +171,84 @@ def parse_fwts_log(log_path):
                         "warning_reasons": []
                     }
                 }
-                reason_text = line.split("SKIPPED:")[1].strip() if "SKIPPED:" in line else "No specific reason"
-                current_subtest["sub_test_result"]["skip_reasons"].append(reason_text)
+                if "SKIPPED:" in line:
+                    reason_text = line.split("SKIPPED:")[1].strip()
+                    current_subtest["sub_test_result"]["skip_reasons"].append(reason_text)
                 current_test["subtests"].append(current_subtest)
-                current_subtest = None  # Reset current_subtest after adding to subtests
+                current_subtest = None
                 continue
 
         # Parse per-test summary lines
-        per_test_summary_match = re.match(r"^(\d+) passed,\s*(\d+) failed,\s*(\d+) warning,\s*(\d+) aborted,\s*(\d+) skipped,\s*(\d+) info only\.$", line.strip())
+        per_test_summary_match = re.match(
+            r"^(\d+) passed,\s*(\d+) failed,\s*(\d+) warning,\s*(\d+) aborted,\s*(\d+) skipped,\s*(\d+) info only\.$",
+            line.strip()
+        )
         if per_test_summary_match:
-            # We will not update counts here; instead, we will sum up counts from subtests
-            continue  # Move to the next line
+            # Not updating counts here; we sum from subtests anyway
+            continue
 
-    # After processing all lines, save the last test and subtest
+    # After processing all lines, save the last test + subtest
     if current_subtest:
         current_test["subtests"].append(current_subtest)
     if current_test:
-        # Update the test_suite_summary based on subtests
+        # Update the test_suite_summary from subtests
         for sub in current_test["subtests"]:
             for key in ["PASSED", "FAILED", "ABORTED", "SKIPPED", "WARNINGS"]:
                 current_test["test_suite_summary"][f"total_{key}"] += sub["sub_test_result"][key]
         results.append(current_test)
 
-    # After all tests, update the suite_summary based on test_suite_summary of all tests
+    # After all tests, update the suite_summary from each test's summary
     for test in results:
         for key in ["PASSED", "FAILED", "ABORTED", "SKIPPED", "WARNINGS"]:
             suite_summary[f"total_{key}"] += test["test_suite_summary"][f"total_{key}"]
 
-    # Return the parsed results with a suite summary
+    # -----------------------------
+    # POST-PROCESS THE RESULTS
+    # 1) Rename summary keys, add total_failed_with_waiver
+    # 2) Remove empty reason arrays from sub_test_result
+    # -----------------------------
+
+    # Rename the suite_summary keys & add total_failed_with_waiver
+    final_suite_summary = {
+        "total_passed": suite_summary.pop("total_PASSED"),
+        "total_failed": suite_summary.pop("total_FAILED"),
+        "total_failed_with_waiver": 0,  # Always 0 unless logic is added
+        "total_aborted": suite_summary.pop("total_ABORTED"),
+        "total_skipped": suite_summary.pop("total_SKIPPED"),
+        "total_warnings": suite_summary.pop("total_WARNINGS")
+    }
+
+    # Process each test in results
+    for test in results:
+        # Rename that test's summary keys, add total_failed_with_waiver
+        t = test["test_suite_summary"]
+        test["test_suite_summary"] = {
+            "total_passed": t.pop("total_PASSED"),
+            "total_failed": t.pop("total_FAILED"),
+            "total_failed_with_waiver": 0,  # same handling
+            "total_aborted": t.pop("total_ABORTED"),
+            "total_skipped": t.pop("total_SKIPPED"),
+            "total_warnings": t.pop("total_WARNINGS")
+        }
+
+        # Remove empty reason arrays from each subtest
+        for sub in test["subtests"]:
+            sub_res = sub["sub_test_result"]
+            # For each reason array, remove it if it's empty
+            if not sub_res["pass_reasons"]:
+                del sub_res["pass_reasons"]
+            if not sub_res["fail_reasons"]:
+                del sub_res["fail_reasons"]
+            if not sub_res["abort_reasons"]:
+                del sub_res["abort_reasons"]
+            if not sub_res["skip_reasons"]:
+                del sub_res["skip_reasons"]
+            if not sub_res["warning_reasons"]:
+                del sub_res["warning_reasons"]
+
     return {
         "test_results": results,
-        "suite_summary": suite_summary
+        "suite_summary": final_suite_summary
     }
 
 if __name__ == "__main__":

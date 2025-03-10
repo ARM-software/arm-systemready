@@ -102,7 +102,6 @@ def parse_ethtool_test_log(log_data, os_name):
 
         # Bringing Down Ethernet Interfaces
         if "INFO: Bringing down all ethernet interfaces using ifconfig" in line:
-            # Assume success unless an error is found
             status = "PASSED"
             description = "Bringing down all Ethernet interfaces"
             for j in range(i + 1, len(log_data)):
@@ -136,7 +135,6 @@ def parse_ethtool_test_log(log_data, os_name):
 
         # Running ethtool Command
         if f"INFO: Running \"ethtool {interface}\" :" in line:
-            # Assume the command runs successfully
             status = "PASSED"
             description = f"Running ethtool on {interface}"
             subtest = create_subtest(subtest_number, description, status)
@@ -257,7 +255,26 @@ def parse_ethtool_test_log(log_data, os_name):
             suite_summary[f"total_{status}"] += 1
             subtest_number += 1
 
+    # Finalize results
     results.append(current_test)
+
+    # --------------------------------------------------------------------------
+    # REMOVE EMPTY REASON ARRAYS IN EACH SUBTEST'S sub_test_result
+    # --------------------------------------------------------------------------
+    for test in results:
+        for subtest in test["subtests"]:
+            subres = subtest["sub_test_result"]
+            if not subres["pass_reasons"]:
+                del subres["pass_reasons"]
+            if not subres["fail_reasons"]:
+                del subres["fail_reasons"]
+            if not subres["abort_reasons"]:
+                del subres["abort_reasons"]
+            if not subres["skip_reasons"]:
+                del subres["skip_reasons"]
+            if not subres["warning_reasons"]:
+                del subres["warning_reasons"]
+
     return {
         "test_results": results,
         "suite_summary": suite_summary
@@ -266,7 +283,6 @@ def parse_ethtool_test_log(log_data, os_name):
 def parse_log(log_file_path, os_name):
     with open(log_file_path, 'r') as f:
         log_data = f.readlines()
-
     return parse_ethtool_test_log(log_data, os_name)
 
 if __name__ == "__main__":
@@ -286,5 +302,3 @@ if __name__ == "__main__":
 
     with open(output_file_path, 'w') as outfile:
         json.dump(output_json, outfile, indent=4)
-
-   # print(f"Log parsed successfully. JSON output saved to {output_file_path}")

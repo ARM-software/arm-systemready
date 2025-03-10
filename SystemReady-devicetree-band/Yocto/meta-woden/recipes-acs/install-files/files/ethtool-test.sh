@@ -99,7 +99,7 @@ for intrf in "${ether_interfaces[@]}"; do
         echo "****************************************************************"
         continue
     fi
-
+    echo ""
     # Dump ethtool prints for each ethernet interface reported
     echo "INFO: Running \"ethtool $intrf\" :"
     command="ethtool $intrf"
@@ -128,7 +128,7 @@ for intrf in "${ether_interfaces[@]}"; do
     else
         echo "INFO: Link detected on $intrf"
     fi
-
+    echo ""
     # Check if DHCP is enabled for the interface, else skip testing
     command="ip address show dev $intrf"
     result_dhcp=$(eval $command)
@@ -160,7 +160,7 @@ for intrf in "${ether_interfaces[@]}"; do
         echo "****************************************************************"
         continue
     fi
-
+    echo ""
     # Make sure link is up before ping test
     command="ifconfig $intrf up"
     echo "INFO: Running $command :"
@@ -173,13 +173,14 @@ for intrf in "${ether_interfaces[@]}"; do
     echo "$result_ping"
 
     # Skip other tests if ping doesn't work
-    if [ $? -ne 0 ] && [[ $result_ping == *"100% packet loss"* ]]; then
+    if [ $? -ne 0 ] || [[ $result_ping == *"100% packet loss"* ]]; then
         echo "INFO: Failed to ping router/gateway[$router_ip] for $intrf"
         echo "****************************************************************"
         continue
     else
         echo "INFO: Ping to router/gateway[$router_ip] for $intrf is successful"
     fi
+    echo ""    
 
     # Ping www.arm.com to check whether DNS is working
     command="ping -w 10000 -c 3 -I $intrf www.arm.com"
@@ -190,13 +191,34 @@ for intrf in "${ether_interfaces[@]}"; do
     if [[ $result_ping == *"bad address"* ]]; then
         echo "INFO: Unable to resolve www.arm.com, DNS not configured correctly for $intrf"
     fi
-
-    if [ $? -ne 0 ] && [[ $result_ping == *"100% packet loss"* ]]; then
+    if [ $? -ne 0 ] || [[ $result_ping == *"100% packet loss"* ]]; then
         echo "INFO: Failed to ping www.arm.com via $intrf"
     else
         echo "INFO: Ping to www.arm.com is successful"
     fi
+    echo ""
 
+    # Check connectivity using wget
+    wget_command="wget --spider -q --timeout=10 --tries=2 --bind-address=$intrf https://www.arm.com"
+    echo "INFO: Running $wget_command :"
+    wget_result=$(eval $wget_command && echo "SUCCESS" || echo "FAILURE")
+    if [[ $wget_result == "FAILURE" ]]; then
+        echo "INFO: wget failed to reach https://www.arm.com via $intrf"
+    else
+        echo "INFO: wget successfully accessed https://www.arm.com via $intrf"
+    fi
+    echo ""
+
+    # Check connectivity using curl
+    curl_command="curl -Is --connect-timeout 20 --interface $intrf  https://www.arm.com"
+    echo "INFO: Running $curl_command :"
+    curl_result=$(eval $curl_command)
+    echo "INFO: Curl Response: $curl_result"
+    if [[ $curl_result =~ "HTTP/2 200" || $curl_result =~ "HTTP/1.1 200 OK" ]]; then
+        echo "INFO: curl successfully fetched https://www.arm.com via $intrf"
+    else
+        echo "INFO: curl failed to fetch https://www.arm.com via $intrf"
+    fi
     echo "****************************************************************"
 done
 

@@ -63,7 +63,7 @@ def load_waivers(waiver_data, suite_name):
 
                 # Include 'BBSR-SCT' and 'BBSR-FWTS' suites
                 # Only load SubSuite and Test_case waivers if the suite is 'SCT', 'Standalone', 'BBSR-SCT', or 'BBSR-FWTS'
-                if suite_name.upper() in ['SCT', 'Standalone', 'BBSR-SCT', 'BBSR-FWTS']:
+                if suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS']:
                     # Check for SubSuite-level waiver
                     if 'SubSuite' in test_suite:
                         subsuite = test_suite['SubSuite']
@@ -242,7 +242,7 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
                     cleaned_waiver_desc = clean_description(waiver_desc)
                     cleaned_subtest_desc = clean_description(subtest_description)
                     # Special handling for "Boot sources" TestSuite
-                    if suite_name.upper() == 'Standalone':
+                    if suite_name.upper() == 'Standalone_tests':
                         # If TestSuite-level waiver is applied, all subtests should have waivers already
                         # Otherwise, handle individual subtest waivers
                         if cleaned_waiver_desc in cleaned_subtest_desc:
@@ -301,7 +301,7 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
             for waiver in subtest_waivers:
                 waiver_desc = waiver.get('sub_Test_Description')
                 waiver_id = waiver.get('SubTestID')
-                if suite_name.upper() in ['FWTS', 'Standalone', 'BBSR-FWTS']:
+                if suite_name.upper() in ['FWTS', 'Standalone_tests', 'BBSR-FWTS']:
                     # For FWTS, Standalone, and BBSR-FWTS, use descriptions
                     if waiver_desc:
                         cleaned_waiver_desc = clean_description(waiver_desc)
@@ -380,7 +380,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
     # Get waivers for the suite, categorized by their scope
     suite_level_waivers, testsuite_level_waivers, subsuite_level_waivers, testcase_level_waivers, subtest_level_waivers = load_waivers(waiver_data, suite_name)
 
-    if not (suite_level_waivers or testsuite_level_waivers or (suite_name.upper() in ['SCT', 'Standalone', 'BBSR-SCT', 'BBSR-FWTS'] and (subsuite_level_waivers or testcase_level_waivers)) or subtest_level_waivers):
+    if not (suite_level_waivers or testsuite_level_waivers or (suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS'] and (subsuite_level_waivers or testcase_level_waivers)) or subtest_level_waivers):
         if verbose:
             print(f"No valid waivers found for suite '{suite_name}'. No changes applied.")
         return
@@ -441,7 +441,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
 
         # Include 'BBSR-SCT' and 'BBSR-FWTS' suites
         # Only apply SubSuite and Test_case level waivers if the suite is 'SCT', 'Standalone', 'BBSR-SCT', or 'BBSR-FWTS'
-        if suite_name.upper() in ['SCT', 'Standalone', 'BBSR-SCT', 'BBSR-FWTS']:
+        if suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS']:
             # Apply SubSuite-level waivers if any
             if subsuite_level_waivers:
                 apply_subsuite_level_waivers(test_suite_entry, subsuite_level_waivers)
@@ -458,7 +458,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
         # Determine the summary field based on suite name
         if suite_name.upper() in ['SCT', 'BBSR-SCT']:
             summary_field = 'test_case_summary'
-        elif suite_name.upper() == 'Standalone':
+        elif suite_name.upper() == 'Standalone_tests':
             summary_field = 'test_suite_summary'
         else:
             summary_field = 'test_suite_summary'

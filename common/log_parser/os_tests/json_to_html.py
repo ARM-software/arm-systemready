@@ -23,6 +23,33 @@ import sys
 import argparse
 import os
 
+def detect_columns_used(subtests):
+    """
+    Returns a dict of booleans indicating whether "pass_reasons",
+    "fail_reasons", or "skip_reasons" columns are actually used by ANY subtest.
+
+    (We keep this logic so as not to break anything else,
+    though we won't actually render separate columns for them.)
+    """
+    show_pass = False
+    show_fail = False
+    show_skip = False
+
+    for subtest in subtests:
+        r = subtest.get('sub_test_result', {})
+        if r.get('pass_reasons'):  # Non-empty list
+            show_pass = True
+        if r.get('fail_reasons'):
+            show_fail = True
+        if r.get('skip_reasons'):
+            show_skip = True
+
+    return {
+        'show_pass': show_pass,
+        'show_fail': show_fail,
+        'show_skip': show_skip
+    }
+
 # Function to generate bar chart for test results
 def generate_bar_chart(suite_summary):
     labels = ['Passed', 'Failed', 'Skipped']
@@ -93,7 +120,7 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
     test_suite_name = 'OS Tests'
 
     # Template for both summary and detailed pages
-    template = Template("""
+    template = Template(r"""
     <!DOCTYPE html>
     <html>
     <head>
@@ -284,15 +311,15 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
             {% endif %}
             
             {% if test.subtests %}
+            <!-- Replace dynamic pass/fail/skip columns with single Reason + Waiver Reason columns -->
             <table>
                 <thead>
                     <tr>
                         <th>Sub Test Number</th>
                         <th>Sub Test Description</th>
                         <th>Sub Test Result</th>
-                        <th>Pass Reasons</th>
-                        <th>Fail Reasons</th>
-                        <th>Skip Reasons</th>
+                        <th>Reason</th>
+                        <th>Waiver Reason</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -304,9 +331,28 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
                         <td class="{% if subtest_status == 'PASSED' %}pass{% elif subtest_status == 'FAILED' %}fail{% elif subtest_status == 'SKIPPED' %}skipped{% else %}info{% endif %}">
                             {{ subtest_status }}
                         </td>
-                        <td>{{ subtest.sub_test_result.pass_reasons | join(', ') }}</td>
-                        <td>{{ subtest.sub_test_result.fail_reasons | join(', ') }}</td>
-                        <td>{{ subtest.sub_test_result.skip_reasons | join(', ') }}</td>
+                        {% set all_reasons = [] %}
+                        {% if subtest.sub_test_result.pass_reasons %}
+                            {% for reason in subtest.sub_test_result.pass_reasons %}
+                                {% set _ = all_reasons.append(reason) %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if subtest.sub_test_result.fail_reasons %}
+                            {% for reason in subtest.sub_test_result.fail_reasons %}
+                                {% set _ = all_reasons.append(reason) %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if subtest.sub_test_result.skip_reasons %}
+                            {% for reason in subtest.sub_test_result.skip_reasons %}
+                                {% set _ = all_reasons.append(reason) %}
+                            {% endfor %}
+                        {% endif %}
+                        <td>
+                            {{ all_reasons|join("; ") if all_reasons else "N/A" }}
+                        </td>
+                        <td>
+                            {{ subtest.sub_test_result.waiver_reason if subtest.sub_test_result.waiver_reason else "N/A" }}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -357,16 +403,12 @@ def main():
     parser.add_argument('--boot-sources-paths', nargs='*', help='Paths to boot_sources.log files for each OS')
     args = parser.parse_args()
 
-    # Load JSON data
     test_results_list = []
-
-    # Initialize counts
     total_tests = 0
     total_passed = 0
     total_failed = 0
     total_skipped = 0
 
-    # Ensure boot_sources_paths aligns with input_json_files
     boot_sources_paths = args.boot_sources_paths if args.boot_sources_paths else []
 
     for idx, input_json_file in enumerate(args.input_json_files):
@@ -378,39 +420,34 @@ def main():
                 continue
 
             test_results = data.get("test_results", [])
-            os_name = data.get("os_name", "Unknown")  # Extract os_name from JSON
+            os_name = data.get("os_name", "Unknown")
             if test_results:
-                # Append the Boot Sources test to test_results
                 if idx < len(boot_sources_paths):
                     boot_sources_path = boot_sources_paths[idx]
                 else:
                     boot_sources_path = "Unknown"
 
-                # Correct OS name if it's "Unknown"
                 if os_name == "Unknown" and boot_sources_path != "Unknown":
                     # Try to extract OS name from the boot_sources_path
-                    os_name = boot_sources_path.split('/')[-2]  # Get the directory name before 'boot_sources.log'
+                    os_name = boot_sources_path.split('/')[-2]  
 
+                # Insert the Boot Sources test
                 boot_sources_test = {
                     "Test_suite_name": "Boot Sources",
                     "Test_suite_description": "Check for boot sources",
                     "Test_case": f"Boot Sources for {os_name}",
                     "Test_case_description": f"Please review the boot source OS logs for {os_name} - path of {boot_sources_path}",
                     "subtests": [],
-                    "is_boot_source": True  # Flag to identify boot source tests
+                    "is_boot_source": True
                 }
-
                 test_results.append(boot_sources_test)
 
-                # Now, process each test in test_results to determine its status
+                # Tally pass/fail/skip
                 for test in test_results:
-                    # Skip counting Boot Sources test
                     if test.get('is_boot_source'):
                         continue
 
-                    total_tests += 1  # Increment total tests
-
-                    # Determine test status based on subtests
+                    total_tests += 1
                     test_status = 'PASSED'
                     has_skipped = False
 
@@ -422,32 +459,33 @@ def main():
                                 break
                             elif subtest_status == 'SKIPPED':
                                 has_skipped = True
-                            elif subtest_status != 'PASSED':
-                                # Treat any other status as failure
+                            elif subtest_status not in ('PASSED', 'SKIPPED'):
+                                # treat any other status as failure
                                 test_status = 'FAILED'
                                 break
                         else:
-                            # No failures in subtests
                             if has_skipped and test_status != 'FAILED':
                                 test_status = 'SKIPPED'
                     else:
-                        # No subtests; treat as SKIPPED
                         test_status = 'SKIPPED'
 
-                    # Update counts based on test_status
                     if test_status == 'PASSED':
                         total_passed += 1
                     elif test_status == 'FAILED':
                         total_failed += 1
-                    elif test_status == 'SKIPPED':
+                    else:  # 'SKIPPED' or fallback
                         total_skipped += 1
-                    else:
-                        # Treat any other status as skipped
-                        total_skipped += 1
+
+                #
+                # For each test, figure out which columns to show
+                #
+                for t in test_results:
+                    subtests = t.get("subtests", [])
+                    t["columns_used"] = detect_columns_used(subtests)
 
                 test_results_list.append(test_results)
 
-    # Now, create the suite_summary dictionary
+    # Build the suite_summary
     suite_summary = {
         'total_PASSED': total_passed,
         'total_FAILED': total_failed,
@@ -467,7 +505,7 @@ def main():
         include_drop_down=args.include_drop_down
     )
 
-    # Generate the summary page (with bar graph)
+    # Generate the summary page
     generate_html(
         suite_summary,
         test_results_list,
