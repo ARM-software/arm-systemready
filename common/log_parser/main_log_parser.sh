@@ -32,7 +32,7 @@ if [ $# -lt 1 ]; then
 fi
 
 # Add the YOCTO_FLAG variable
-YOCTO_FLAG="/mnt/yocto_image.flag"
+YOCTO_FLAG="/data_sda/ashsha06/yocto_image.flag"
 
 # Check if the YOCTO_FLAG exists
 if [ -f "$YOCTO_FLAG" ]; then
@@ -224,6 +224,9 @@ else
     echo -e "${YELLOW}WARNING: Skipping FWTS log parsing as the log file is missing.${NC}"
     echo ""
 fi
+
+# EDK2 Log Parsing: Process the edk2-test-parser.log
+python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json_edk2.py" "$LOGS_PATH/edk2-test-parser/edk2-test-parser.log" "$JSONS_DIR/edk2_test_parser.json"
 
 ################################################################################
 # SCT PARSING
