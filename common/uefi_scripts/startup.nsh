@@ -127,84 +127,13 @@ endfor
 # check for capsule update
 for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%r:\yocto_image.flag then
-        if exist FS%r:\acs_tests\app\capsule_update_check.flag then
-            echo "press any key to test capsule update"
-            FS%r:\acs_tests\bbr\SCT\stallforkey.efi 10
-            if %lasterror% == 0 then
-                goto CapsuleUpdate
-            else
-                if exist FS%r:\acs_tests\app\capsule_update_check.flag then
-                    echo "capsule update is pending, press any key to skip capsule update"
-                    FS%r:\acs_tests\bbr\SCT\stallforkey.efi 10
-                    if %lasterror% == 0 then
-                        rm FS%r:\acs_tests\app\capsule_update_check.flag
-                        echo "" > FS%r:\acs_tests\app\capsule_update_ignore.flag
-                        echo "Capsule Update is ignored!!!"
-                    else
-                        goto CapsuleUpdate
-                    endif
-                endif
-                goto BootLinux
-            endif
-:CapsuleUpdate
-            if exist FS%r:\acs_tests\app\signed_capsule.bin then
-                if exist FS%r:\acs_results_template then
-                    mkdir FS%r:\acs_results_template\fw
-                else
-                    echo " template directory not present"
-                    goto BootLinux
-                endif
-                smbiosview > FS%r:\acs_results_template\fw\smbiosview_before_update.log
-                FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_before_update.log
-                FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_before_update.log
-                rm FS%r:\acs_tests\app\capsule_update_check.flag
-                echo "" > FS%r:\acs_tests\app\capsule_update_done.flag
-                echo "UEFI capsule update is in progress, system will reboot after update ..."
-                echo "Testing unauth.bin update" > FS%r:\acs_results_template\fw\capsule-update.log
-                echo "Test_Info" >>  FS%r:\acs_results_template\fw\capsule-update.log
-                if exist FS%r:\acs_tests\app\unauth.bin then
-                    FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\unauth.bin >> FS%r:\acs_results_template\fw\capsule-update.log
-                else
-                    echo "unauth.bin not present"
-                endif
-                echo "Testing tampered.bin update" >> FS%r:\acs_results_template\fw\capsule-update.log
-                echo "Test_Info" >>  FS%r:\acs_results_template\fw\capsule-update.log
-                if exist FS%r:\acs_tests\app\tampered.bin then
-                    FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\tampered.bin >> FS%r:\acs_results_template\fw\capsule-update.log
-                else
-                    echo "tampered.bin not present"
-                endif
-                echo "Testing signed_capsule.bin OD update" > FS%r:\acs_results_template\fw\capsule-on-disk.log
-                echo "Test_Info" >> FS%r:\acs_results_template\fw\capsule-on-disk.log
-                FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\signed_capsule.bin -OD >> FS%r:\acs_results_template\fw\capsule-on-disk.log
-                echo "UEFI capsule update has failed..." >> FS%r:\acs_results_template\fw\capsule-on-disk.log
-                rm FS%r:\acs_tests\app\capsule_update_check.flag
-                rm FS%r:\acs_tests\app\capsule_update_done.flag
-                echo "" > FS%r:\acs_tests\app\capsule_update_unsupport.flag
-                smbiosview > FS%r:\acs_results_template\fw\smbiosview_after_update.log
-                FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_after_update.log
-                FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_after_update.log
-            else
-                rm FS%r:\acs_tests\app\capsule_update_check.flag
-                mkdir FS%r:\acs_results_template\fw
-                echo "" > FS%r:\acs_tests\app\capsule_update_unsupport.flag
-                echo "Testing signed_capsule.bin OD update" > FS%r:\acs_results_template\fw\capsule-on-disk.log
-                echo "Test_Info" >> FS%r:\acs_results_template\fw\capsule-on-disk.log
-                echo "signed_capsule.bin not present" >  FS%r:\acs_results_template\fw\capsule-on-disk.log
-                echo "signed_capsule.bin file is not present, please copy the same file into acs_tests/app partition"
-            endif
-            goto BootLinux
-        else
-            if exist FS%r:\acs_tests\app\capsule_update_done.flag then
-                smbiosview > FS%r:\acs_results_template\fw\smbiosview_after_update.log
-                FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_after_update.log
-                FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_after_update.log
-                echo "Capsule Update done!!!"
-            endif
-            goto BootLinux
+        if exist FS%r:\acs_tests\app\capsule_update.nsh then
+            FS%r:\acs_tests\app\capsule_update.nsh
+            goto DoneCapsuleUpdate
         endif
     endif
 endfor
+:DoneCapsuleUpdate
 
 :BootLinux
 echo "Booting Linux"

@@ -29,6 +29,7 @@ EXTRA_IMAGEDEPENDS += "bsa-acs \
 IMAGE_EFI_BOOT_FILES += "Bsa.efi;acs_tests/bsa/Bsa.efi \
                          bsa.nsh;acs_tests/bsa/bsa.nsh \
                          pingtest.nsh;acs_tests/debug/pingtest.nsh \
+                         capsule_update.nsh;acs_tests/app/capsule_update.nsh \
                          bsa_dt.flag;acs_tests/bsa/bsa_dt.flag \
                          yocto_image.flag \
                          debug_dump.nsh;acs_tests/debug/debug_dump.nsh \
