@@ -187,15 +187,15 @@ def merge_json_files(json_files, output_file):
         elif "SBSA" in fn:
             section_name = "Suite_Name: SBSA"
             suite_key    = "SBSA"
-        elif "BBSR-FWTS" in fn:
+        elif "BBSR" in fn and "FWTS" in fn:
             section_name = "Suite_Name: BBSR-FWTS"
             suite_key    = "BBSR-FWTS"
-        elif "BBSR-SCT" in fn:
-            section_name = "Suite_Name: BBSR-SCT"
-            suite_key    = "BBSR-SCT"
         elif "FWTS" in fn:
             section_name = "Suite_Name: FWTS"
             suite_key    = "FWTS"
+        elif "BBSR" in fn and "SCT" in fn:
+            section_name = "Suite_Name: BBSR-SCT"
+            suite_key    = "BBSR-SCT"
         elif "SCT" in fn:
             section_name = "Suite_Name: SCT"
             suite_key    = "SCT"
