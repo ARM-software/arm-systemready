@@ -46,6 +46,11 @@ test_suite_mapping = {
         "Test_suite_description": "Testing firmware capsule update mechanism",
         "Test_case_description": "Capsule Update Tests"
     },
+    "psci_check": {
+        "Test_suite_name": "PSCI",
+        "Test_suite_description": "PSCI version check",
+        "Test_case_description": "PSCI compliance"
+    },
 }
 
 def create_subtest(subtest_number, description, status, reason=""):
@@ -103,7 +108,6 @@ def parse_dt_kselftest_log(log_data):
         subtest_match = re.match(r'# (ok|not ok) (\d+) (.+)', line)
         if subtest_match:
             status_str = subtest_match.group(1)
-            # subtest_number = subtest_match.group(2)  # We can use our own subtest_number increment
             description_and_status = subtest_match.group(3)
 
             if '# SKIP' in description_and_status:
@@ -426,7 +430,6 @@ def parse_read_write_check_blk_devices_log(log_data):
     while i < len(log_data):
         line = log_data[i].strip()
         if "INFO: Detected following block devices with lsblk command :" in line:
-            # We only store them if needed, not mandatory
             i += 1
             while i < len(log_data) and log_data[i].strip() and not log_data[i].startswith("INFO"):
                 i += 1
@@ -435,7 +438,6 @@ def parse_read_write_check_blk_devices_log(log_data):
             device_name = line.split(":")[-1].strip()
             i += 1
             if i < len(log_data) and "Invalid partition table or not found for" in log_data[i]:
-                # Partition table is invalid
                 status = "FAILED"
                 reason = log_data[i].strip()
                 desc = f"Partition table check on {device_name}"
@@ -446,7 +448,6 @@ def parse_read_write_check_blk_devices_log(log_data):
                 subtest_number += 1
                 i += 1
                 continue
-            # Process partitions
             while i < len(log_data):
                 line = log_data[i].strip()
                 if line.startswith("INFO: Partition :"):
@@ -490,7 +491,6 @@ def parse_read_write_check_blk_devices_log(log_data):
                             write_reason = ""
 
                             if i < len(log_data) and "Do you want to perform a write check on" in log_data[i]:
-                                # We consider it SKIPPED
                                 write_status = "SKIPPED"
                                 write_reason = "Write check skipped due to user input or timeout"
                                 while i < len(log_data):
@@ -510,7 +510,6 @@ def parse_read_write_check_blk_devices_log(log_data):
                                 partition_status = "FAILED"
                                 partition_reason = read_reason
                         else:
-                            # Move on if unknown line
                             i += 1
 
                     if partition_status:
@@ -548,9 +547,7 @@ def parse_read_write_check_blk_devices_log(log_data):
         "suite_summary": suite_summary
     }
 
-#
 # PARSER FOR CAPSULE UPDATE 
-#
 def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path, capsule_test_results_log_path):
     test_suite_key = "capsule_update"
     mapping = {
@@ -568,9 +565,9 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
     }
 
     current_test = {
-        "Test_suite_name": mapping["Test_suite_name"],       # <--- 'Standalone tests'
+        "Test_suite_name": mapping["Test_suite_name"],
         "Test_suite_description": mapping["Test_suite_description"],
-        "Test_case": test_suite_key,                         # 'capsule_update'
+        "Test_case": test_suite_key,
         "Test_case_description": mapping["Test_case_description"],
         "subtests": [],
         "test_suite_summary": suite_summary.copy()
@@ -583,10 +580,6 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
         except:
             return []
 
-    # The original capsule script assumed certain encodings:
-    #   capsule_update.log => utf-16
-    #   capsule_on_disk.log => utf-16
-    #   capsule_test_results.log => utf-8
     update_lines = read_file_lines(capsule_update_log_path, encoding='utf-16')
     on_disk_lines = read_file_lines(capsule_on_disk_log_path, encoding='utf-16')
     results_lines = read_file_lines(capsule_test_results_log_path, encoding='utf-8')
@@ -605,12 +598,11 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
     i = 0
     while i < len(update_lines):
         line = update_lines[i].strip()
-        # e.g. "Testing unauth.bin update"
         match = re.match(r"Testing\s+(unauth\.bin|tampered\.bin)\s+update", line, re.IGNORECASE)
         if match:
             test_desc = line
             test_info = ""
-            result = "FAILED"  # default
+            result = "FAILED"
             i += 1
             while i < len(update_lines):
                 cur = update_lines[i].strip()
@@ -628,10 +620,7 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
                         info_lines.append(info_line)
                         i += 1
                     test_info = "\n".join(info_lines)
-
-                    # Determine pass/fail from text
                     if "failed to update capsule" in test_info.lower():
-                        # For unauth/tampered, failing to update is a PASS
                         result = "PASSED"
                     elif "not present" in test_info.lower():
                         result = "FAILED"
@@ -649,7 +638,6 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
     i = 0
     while i < len(on_disk_lines):
         line = on_disk_lines[i].strip()
-        # e.g. "Testing signed_capsule.bin OD update"
         match = re.match(r"Testing\s+signed_capsule\.bin\s+OD\s+update", line, re.IGNORECASE)
         if match:
             test_desc = line
@@ -691,7 +679,6 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
     i = 0
     while i < len(results_lines):
         line = results_lines[i].strip()
-        # e.g. "Testing signed_capsule.bin sanity" or "Testing ESRT FW version update"
         sanity_match = re.match(r"Testing\s+signed_capsule\.bin\s+sanity", line, re.IGNORECASE)
         esrt_match = re.match(r"(Testing|Test:\s+Testing)\s+ESRT\s+FW\s+version\s+update", line, re.IGNORECASE)
 
@@ -710,7 +697,6 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
                     test_info = cur
                     break
                 elif "warning" in cur.lower():
-                    # the original code interpreted warnings as PASSED
                     result = "PASSED"
                     test_info = cur
                     break
@@ -763,9 +749,92 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
         "suite_summary": suite_summary
     }
 
-#
-# DETECTION LOGIC FOR SINGLE-LOG STANDALONE vs. CAPSULE_UPDATE MODE
-#
+###############################################################################
+# PSCI Checker Parse
+###############################################################################
+def parse_psci_logs(psci_log_path):
+    test_suite_key = "psci_check"
+    mapping = test_suite_mapping[test_suite_key]
+
+    suite_summary = {
+        "total_PASSED": 0,
+        "total_FAILED": 0,
+        "total_SKIPPED": 0,
+        "total_ABORTED": 0,
+        "total_WARNINGS": 0
+    }
+
+    current_test = {
+        "Test_suite_name": mapping["Test_suite_name"],       # "PSCI"
+        "Test_suite_description": mapping["Test_suite_description"],  # "PSCI version check"
+        "Test_case": test_suite_key,                         # "psci_check"
+        "Test_case_description": mapping["Test_case_description"],  # "PSCI compliance"
+        "subtests": [],
+        "test_suite_summary": suite_summary.copy()
+    }
+
+    # If file not found => Instead of failing, let's mark this as a WARNING
+    if not os.path.isfile(psci_log_path):
+        sub = create_subtest(
+            subtest_number=1,
+            description="PSCI version checker(1.0 or above)",
+            status="WARNINGS",
+            reason=f"PSCI log file not found at {psci_log_path}"
+        )
+        current_test["subtests"].append(sub)
+        current_test["test_suite_summary"]["total_WARNINGS"] += 1
+        suite_summary["total_WARNINGS"] += 1
+        return {"test_results": [current_test], "suite_summary": suite_summary}
+
+    # Read lines
+    with open(psci_log_path, 'r') as f:
+        lines = f.readlines()
+
+    version_pattern = re.compile(r'psci:\s+PSCIv([\d\.]+)\s+detected in firmware\.', re.IGNORECASE)
+    version_found = None
+    for line in lines:
+        match = version_pattern.search(line.strip())
+        if match:
+            version_found = match.group(1)
+            break
+
+    # Subtest description now is "PSCI version checker(1.0 or above)"
+    subtest_desc = "PSCI version checker(1.0 or above)"
+
+    if version_found:
+        try:
+            val = float(version_found)
+            if val >= 1.0:
+                status = "PASSED"
+                reason = f"PSCI version {version_found} >= 1.0"
+            else:
+                # Below 1.0 => WARNING, not fail
+                status = "WARNINGS"
+                reason = f"PSCI version {version_found} < 1.0 => WARN"
+        except ValueError:
+            # Invalid format => WARNING, not fail
+            status = "WARNINGS"
+            reason = f"Invalid PSCI version format: {version_found}"
+    else:
+        # No PSCI line found => WARNING, not fail
+        status = "WARNINGS"
+        reason = "No 'PSCIvX.Y detected in firmware' line found"
+
+    sub = create_subtest(1, subtest_desc, status, reason)
+    current_test["subtests"].append(sub)
+    current_test["test_suite_summary"][f"total_{status}"] += 1
+    suite_summary[f"total_{status}"] += 1
+
+    # Cleanup reason arrays
+    for s in current_test["subtests"]:
+        subres = s["sub_test_result"]
+        for key_list in ["pass_reasons", "fail_reasons", "abort_reasons", "skip_reasons", "warning_reasons"]:
+            if not subres[key_list]:
+                del subres[key_list]
+
+    return {"test_results": [current_test], "suite_summary": current_test["test_suite_summary"]}
+
+
 def parse_single_log(log_file_path):
     with open(log_file_path, 'r') as f:
         log_data = f.readlines()
@@ -785,10 +854,6 @@ def parse_single_log(log_file_path):
         raise ValueError("Unknown or unsupported standalone log format.")
 
 if __name__ == "__main__":
-    # Two modes:
-    # 1) Single-Log parse:   logs_to_json.py <log> <output_json>
-    # 2) Capsule update:     logs_to_json.py capsule_update <capsule_update_log> <capsule_on_disk_log> <capsule_test_results_log> <output_json>
-    #
     args = sys.argv[1:]
     if len(args) == 2:
         # Single log usage
@@ -804,9 +869,17 @@ if __name__ == "__main__":
 
     elif len(args) == 5 and args[0].lower() == "capsule_update":
         # Capsule update usage
-        # logs_to_json.py capsule_update <update_log> <on_disk_log> <test_results_log> <output_json>
         _, update_log, on_disk_log, test_results_log, output_json = args
         result = parse_capsule_update_logs(update_log, on_disk_log, test_results_log)
+        with open(output_json, 'w') as out:
+            json.dump(result, out, indent=4)
+        sys.exit(0)
+
+    # PSCI check usage
+    elif len(args) == 3 and args[0].lower() == "psci_check":
+        # logs_to_json.py psci_check <psci_log> <output_json>
+        _, psci_log, output_json = args
+        result = parse_psci_logs(psci_log)
         with open(output_json, 'w') as out:
             json.dump(result, out, indent=4)
         sys.exit(0)
@@ -814,4 +887,5 @@ if __name__ == "__main__":
         print("Usage:")
         print("  1) Single log:      python3 logs_to_json.py <path_to_log> <output_JSON>")
         print("  2) Capsule update:  python3 logs_to_json.py capsule_update <update_log> <on_disk_log> <test_results_log> <output_JSON>")
+        print("  3) PSCI check:      python3 logs_to_json.py psci_check <psci_kernel.log> <output_JSON>")
         sys.exit(1)

@@ -335,6 +335,20 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     CAPSULE_TEST_RESULTS_LOG="$LOGS_PATH/app_output/capsule_test_results.log"
     CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
 
+    # 6) PSCI CHECK
+    PSCI_LOG="$LINUX_TOOLS_LOGS_PATH/psci/psci_kernel.log"
+    PSCI_JSON="$JSONS_DIR/psci.json"
+    if check_file "$PSCI_LOG"; then
+        echo "Parsing PSCI log..."
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" psci_check "$PSCI_LOG" "$PSCI_JSON"
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}ERROR: PSCI log parsing to json failed.${NC}"
+        else
+            # Important: add PSCI JSON to the same array that we pass to json_to_html!
+            Standalone_JSONS+=("$PSCI_JSON")
+        fi
+    fi
+
     if check_file "$CAPSULE_UPDATE_LOG" && check_file "$CAPSULE_ON_DISK_LOG" && check_file "$CAPSULE_TEST_RESULTS_LOG"; then
         python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
             capsule_update \
@@ -670,6 +684,14 @@ elif [ $OS_TESTS_PROCESSED -eq 1 ]; then
 fi
 
 # (Capsule JSON is already part of Standalone_JSONS if it exists)
+
+# PSCI JSON
+PSCI_JSON="$JSONS_DIR/psci.json"
+if [ -f "$PSCI_JSON" ]; then
+    JSON_FILES+=("$PSCI_JSON")
+else
+    echo -e "${YELLOW}WARNING: NO psci tests json file found. Skipping this file.${NC}"
+fi
 
 if [ ${#JSON_FILES[@]} -gt 0 ]; then
     python3 "$SCRIPTS_PATH/merge_jsons.py" "$MERGED_JSON" "${JSON_FILES[@]}"
