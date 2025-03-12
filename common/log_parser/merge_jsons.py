@@ -223,6 +223,9 @@ def merge_json_files(json_files, output_file):
         elif "READ_WRITE_CHECK_BLK_DEVICES" in fn:
             section_name = "Suite_Name: Read Write Check Block Devices"
             suite_key    = "READ_WRITE_CHECK_BLK_DEVICES"
+        elif "PSCI" in fn:
+            section_name = "Suite_Name: PSCI"
+            suite_key    = "PSCI"           
         else:
             section_name = "Suite_Name: Unknown"
             suite_key    = "Unknown"
