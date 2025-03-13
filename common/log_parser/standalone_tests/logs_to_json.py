@@ -365,6 +365,48 @@ def parse_ethtool_test_log(log_data):
             suite_summary[f"total_{status}"] += 1
             subtest_number += 1
 
+        # >>> Wget checks <<<
+        if "INFO: wget failed to reach https://www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "FAILED"
+            desc = f"Wget connectivity to https://www.arm.com on {intf}"
+            sub = create_subtest(subtest_number, desc, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(sub)
+            suite_summary[f"total_{status}"] += 1
+            subtest_number += 1
+
+        if "INFO: wget successfully accessed https://www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "PASSED"
+            desc = f"Wget connectivity to https://www.arm.com on {intf}"
+            sub = create_subtest(subtest_number, desc, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(sub)
+            suite_summary[f"total_{status}"] += 1
+            subtest_number += 1
+
+        # >>> Curl checks <<<
+        if "INFO: curl failed to fetch https://www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "FAILED"
+            desc = f"Curl connectivity to https://www.arm.com on {intf}"
+            sub = create_subtest(subtest_number, desc, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(sub)
+            suite_summary[f"total_{status}"] += 1
+            subtest_number += 1
+
+        if "INFO: curl successfully fetched https://www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "PASSED"
+            desc = f"Curl connectivity to https://www.arm.com on {intf}"
+            sub = create_subtest(subtest_number, desc, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(sub)
+            suite_summary[f"total_{status}"] += 1
+            subtest_number += 1    
+
         i += 1
 
     # If no ping tests found for the detected interfaces, add them as SKIPPED
