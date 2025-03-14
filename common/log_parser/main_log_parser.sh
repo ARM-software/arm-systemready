@@ -109,8 +109,12 @@ fi
 # Function to check if a file exists
 check_file() {
     if [ ! -f "$1" ]; then
-        echo -e "${YELLOW}WARNING: Log file '$(basename "$1")' is not present at the given directory.${NC}"
-        return 1
+        if [ "${2:-}" = "M" ]; then
+            echo -e "${RED}ERROR: Log file '$(basename "$1")' is not present at the given directory.${NC}"
+        else
+            echo -e "${YELLOW}WARNING: Log file '$(basename "$1")' is not present at the given directory.${NC}"
+        fi
+	return 1
     fi
     return 0
 }
@@ -151,11 +155,20 @@ fi
 BSA_JSON="$JSONS_DIR/bsa.json"
 BSA_LOGS=()
 
-if check_file "$BSA_LOG"; then
-    BSA_LOGS+=("$BSA_LOG")
-fi
-if check_file "$BSA_KERNEL_LOG"; then
-    BSA_LOGS+=("$BSA_KERNEL_LOG")
+if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
+    if check_file "$BSA_LOG" "M"; then
+        BSA_LOGS+=("$BSA_LOG")
+    fi
+    if check_file "$BSA_KERNEL_LOG" "M"; then
+        BSA_LOGS+=("$BSA_KERNEL_LOG")
+    fi
+else
+    if check_file "$BSA_LOG"; then
+        BSA_LOGS+=("$BSA_LOG")
+    fi
+    if check_file "$BSA_KERNEL_LOG"; then
+        BSA_LOGS+=("$BSA_KERNEL_LOG")
+    fi
 fi
 
 if [ ${#BSA_LOGS[@]} -gt 0 ]; then
@@ -168,9 +181,6 @@ if [ ${#BSA_LOGS[@]} -gt 0 ]; then
         apply_waivers "BSA" "$BSA_JSON"
         python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$BSA_JSON" "$HTMLS_DIR/bsa_detailed.html" "$HTMLS_DIR/bsa_summary.html"
     fi
-else
-    echo -e "${YELLOW}WARNING: Skipping BSA log parsing as the log files are missing.${NC}"
-    echo ""
 fi
 
 ################################################################################
@@ -182,10 +192,10 @@ if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
     SBSA_JSON="$JSONS_DIR/sbsa.json"
     SBSA_LOGS=()
 
-    if check_file "$SBSA_LOG"; then
+    if check_file "$SBSA_LOG" "M"; then
         SBSA_LOGS+=("$SBSA_LOG")
     fi
-    if check_file "$SBSA_KERNEL_LOG"; then
+    if check_file "$SBSA_KERNEL_LOG" "M"; then
         SBSA_LOGS+=("$SBSA_KERNEL_LOG")
     fi
 
@@ -199,9 +209,6 @@ if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
             apply_waivers "SBSA" "$SBSA_JSON"
             python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$SBSA_JSON" "$HTMLS_DIR/sbsa_detailed.html" "$HTMLS_DIR/sbsa_summary.html"
         fi
-    else
-        echo -e "${YELLOW}WARNING: Skipping SBSA log parsing as the log files are missing.${NC}"
-        echo ""
     fi
 fi
 
@@ -210,7 +217,7 @@ fi
 ################################################################################
 FWTS_LOG="$LOGS_PATH/fwts/FWTSResults.log"
 FWTS_JSON="$JSONS_DIR/fwts.json"
-if check_file "$FWTS_LOG"; then
+if check_file "$FWTS_LOG" "M"; then
     FWTS_PROCESSED=1
     python3 "$SCRIPTS_PATH/bbr/fwts/logs_to_json.py" "$FWTS_LOG" "$FWTS_JSON"
     if [ $? -ne 0 ]; then
@@ -220,9 +227,6 @@ if check_file "$FWTS_LOG"; then
         apply_waivers "FWTS" "$FWTS_JSON"
         python3 "$SCRIPTS_PATH/bbr/fwts/json_to_html.py" "$FWTS_JSON" "$HTMLS_DIR/fwts_detailed.html" "$HTMLS_DIR/fwts_summary.html"
     fi
-else
-    echo -e "${YELLOW}WARNING: Skipping FWTS log parsing as the log file is missing.${NC}"
-    echo ""
 fi
 
 # EDK2 Log Parsing: Process the edk2-test-parser.log
@@ -233,7 +237,7 @@ python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json_edk2.py" "$LOGS_PATH/edk2-test-parse
 ################################################################################
 SCT_LOG="$LOGS_PATH/sct_results/Overall/Summary.log"
 SCT_JSON="$JSONS_DIR/sct.json"
-if check_file "$SCT_LOG"; then
+if check_file "$SCT_LOG" "M"; then
     SCT_PROCESSED=1
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$SCT_LOG" "$SCT_JSON"
     if [ $? -ne 0 ]; then
@@ -243,9 +247,6 @@ if check_file "$SCT_LOG"; then
         apply_waivers "SCT" "$SCT_JSON"
         python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$SCT_JSON" "$HTMLS_DIR/sct_detailed.html" "$HTMLS_DIR/sct_summary.html"
     fi
-else
-    echo -e "${YELLOW}WARNING: Skipping SCT log parsing as the log file is missing.${NC}"
-    echo ""
 fi
 
 ################################################################################
@@ -258,9 +259,6 @@ if check_file "$BBSR_FWTS_LOG"; then
     python3 "$SCRIPTS_PATH/bbr/fwts/logs_to_json.py" "$BBSR_FWTS_LOG" "$BBSR_FWTS_JSON"
     apply_waivers "BBSR-FWTS" "$BBSR_FWTS_JSON"
     python3 "$SCRIPTS_PATH/bbr/fwts/json_to_html.py" "$BBSR_FWTS_JSON" "$HTMLS_DIR/bbsr_fwts_detailed.html" "$HTMLS_DIR/bbsr_fwts_summary.html"
-else
-    echo -e "${YELLOW}WARNING: Skipping BBSR FWTS log parsing as the log file is missing.${NC}"
-    echo ""
 fi
 
 ################################################################################
@@ -273,9 +271,6 @@ if check_file "$BBSR_SCT_LOG"; then
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$BBSR_SCT_LOG" "$BBSR_SCT_JSON"
     apply_waivers "BBSR-SCT" "$BBSR_SCT_JSON"
     python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$BBSR_SCT_JSON" "$HTMLS_DIR/bbsr_sct_detailed.html" "$HTMLS_DIR/bbsr_sct_summary.html"
-else
-    echo -e "${YELLOW}WARNING: Skipping BBSR SCT log parsing as the log file is missing.${NC}"
-    echo ""
 fi
 
 ################################################################################
@@ -299,7 +294,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     # 2) DT_VALIDATE
     DT_VALIDATE_LOG="$LINUX_TOOLS_LOGS_PATH/dt-validate.log"
     DT_VALIDATE_JSON="$JSONS_DIR/dt_validate.json"
-    if check_file "$DT_VALIDATE_LOG"; then
+    if check_file "$DT_VALIDATE_LOG" "M"; then
         python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
             "$DT_VALIDATE_LOG" \
             "$DT_VALIDATE_JSON"
@@ -310,7 +305,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     # 3) ETHTOOL_TEST
     ETHTOOL_TEST_LOG="$LINUX_TOOLS_LOGS_PATH/ethtool-test.log"
     ETHTOOL_TEST_JSON="$JSONS_DIR/ethtool_test.json"
-    if check_file "$ETHTOOL_TEST_LOG"; then
+    if check_file "$ETHTOOL_TEST_LOG" "M"; then
         python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
             "$ETHTOOL_TEST_LOG" \
             "$ETHTOOL_TEST_JSON"
@@ -321,7 +316,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     # 4) READ_WRITE_CHECK
     READ_WRITE_CHECK_LOG="$LINUX_TOOLS_LOGS_PATH/read_write_check_blk_devices.log"
     READ_WRITE_CHECK_JSON="$JSONS_DIR/read_write_check_blk_devices.json"
-    if check_file "$READ_WRITE_CHECK_LOG"; then
+    if check_file "$READ_WRITE_CHECK_LOG" "M"; then
         python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
             "$READ_WRITE_CHECK_LOG" \
             "$READ_WRITE_CHECK_JSON"
@@ -335,21 +330,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     CAPSULE_TEST_RESULTS_LOG="$LOGS_PATH/app_output/capsule_test_results.log"
     CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
 
-    # 6) PSCI CHECK
-    PSCI_LOG="$LINUX_TOOLS_LOGS_PATH/psci/psci_kernel.log"
-    PSCI_JSON="$JSONS_DIR/psci.json"
-    if check_file "$PSCI_LOG"; then
-        echo "Parsing PSCI log..."
-        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" psci_check "$PSCI_LOG" "$PSCI_JSON"
-        if [ $? -ne 0 ]; then
-            echo -e "${RED}ERROR: PSCI log parsing to json failed.${NC}"
-        else
-            # Important: add PSCI JSON to the same array that we pass to json_to_html!
-            Standalone_JSONS+=("$PSCI_JSON")
-        fi
-    fi
-
-    if check_file "$CAPSULE_UPDATE_LOG" && check_file "$CAPSULE_ON_DISK_LOG" && check_file "$CAPSULE_TEST_RESULTS_LOG"; then
+    if check_file "$CAPSULE_UPDATE_LOG" "M" && check_file "$CAPSULE_ON_DISK_LOG" "M" && check_file "$CAPSULE_TEST_RESULTS_LOG" "M"; then
         python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
             capsule_update \
             "$CAPSULE_UPDATE_LOG" \
@@ -363,6 +344,20 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             Standalone_JSONS+=("$CAPSULE_JSON")
         else
             echo "WARNING: Capsule Update JSON not created."
+        fi
+    fi
+
+    # 6) PSCI CHECK
+    PSCI_LOG="$LINUX_TOOLS_LOGS_PATH/psci/psci_kernel.log"
+    PSCI_JSON="$JSONS_DIR/psci.json"
+    if check_file "$PSCI_LOG"; then
+        echo "Parsing PSCI log..."
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" psci_check "$PSCI_LOG" "$PSCI_JSON"
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}ERROR: PSCI log parsing to json failed.${NC}"
+        else
+            # Important: add PSCI JSON to the same array that we pass to json_to_html!
+            Standalone_JSONS+=("$PSCI_JSON")
         fi
     fi
 
