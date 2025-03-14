@@ -110,9 +110,9 @@ fi
 check_file() {
     if [ ! -f "$1" ]; then
         if [ "${2:-}" = "M" ]; then
-            echo -e "${RED}ERROR: Log file '$(basename "$1")' is not present at the given directory.${NC}"
+            echo -e "${RED}ERROR: Log file "$1" is missing.${NC}"
         else
-            echo -e "${YELLOW}WARNING: Log file '$(basename "$1")' is not present at the given directory.${NC}"
+            echo -e "${YELLOW}WARNING: Log file "$1" is missing.${NC}"
         fi
 	return 1
     fi
@@ -229,16 +229,20 @@ if check_file "$FWTS_LOG" "M"; then
     fi
 fi
 
-# EDK2 Log Parsing: Process the edk2-test-parser.log
-python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json_edk2.py" "$LOGS_PATH/edk2-test-parser/edk2-test-parser.log" "$JSONS_DIR/edk2_test_parser.json"
-
 ################################################################################
 # SCT PARSING
 ################################################################################
 SCT_LOG="$LOGS_PATH/sct_results/Overall/Summary.log"
 SCT_JSON="$JSONS_DIR/sct.json"
+EDK2_PARSER_LOG="$LOGS_PATH/edk2-test-parser/edk2-test-parser.log"
+EDK2_PARSER_JSON="$JSONS_DIR/edk2_test_parser.json"
+
 if check_file "$SCT_LOG" "M"; then
     SCT_PROCESSED=1
+    # EDK2 Log Parsing: Process the edk2-test-parser.log
+    if check_file "$EDK2_PARSER_LOG"; then
+        python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json_edk2.py" "$EDK2_PARSER_LOG" "$EDK2_PARSER_JSON"
+    fi
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$SCT_LOG" "$SCT_JSON"
     if [ $? -ne 0 ]; then
         SCT_PROCESSED=0
@@ -351,7 +355,6 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     PSCI_LOG="$LINUX_TOOLS_LOGS_PATH/psci/psci_kernel.log"
     PSCI_JSON="$JSONS_DIR/psci.json"
     if check_file "$PSCI_LOG"; then
-        echo "Parsing PSCI log..."
         python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" psci_check "$PSCI_LOG" "$PSCI_JSON"
         if [ $? -ne 0 ]; then
             echo -e "${RED}ERROR: PSCI log parsing to json failed.${NC}"
@@ -408,12 +411,12 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
                         BOOT_SOURCES_PATHS+=("Unknown")
                     fi
                 else
-                    echo "WARNING: ethtool_test.log not found in $OS_DIR"
+                    echo "${RED}ERROR: ethtool_test.log not found in $OS_DIR"
                 fi
             fi
         done
     else
-        echo -e "${YELLOW}WARNING: os-logs directory not found at $OS_LOGS_PATH${NC}"
+        echo -e "${RED}ERROR: os-logs directory not found at $OS_LOGS_PATH${NC}"
     fi
 
     if [ ${#OS_JSONS[@]} -gt 0 ]; then
@@ -432,19 +435,19 @@ fi
 # UEFI version + Device Tree
 ################################################################################
 UEFI_VERSION_LOG="$LOGS_PATH/uefi_dump/uefi_version.log"
-DEVICE_TREE_DTS="$LOGS_PATH/linux_tools/device_tree.dts"
+#DEVICE_TREE_DTS="$LOGS_PATH/linux_tools/device_tree.dts"
 
 if [ ! -f "$UEFI_VERSION_LOG" ]; then
-    echo "WARNING: UEFI version log '$(basename "$UEFI_VERSION_LOG")' not found."
+    echo "INFO: UEFI version log '$(basename "$UEFI_VERSION_LOG")' not found."
     UEFI_VERSION_LOG=""
 fi
 
-if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
-    if [ ! -f "$DEVICE_TREE_DTS" ]; then
-        echo "WARNING: Device Tree DTS file '$(basename "$DEVICE_TREE_DTS")' not found."
-        DEVICE_TREE_DTS=""
-    fi
-fi
+#if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+#    if [ ! -f "$DEVICE_TREE_DTS" ]; then
+#        echo "WARNING: Device Tree DTS file '$(basename "$DEVICE_TREE_DTS")' not found."
+#        DEVICE_TREE_DTS=""
+#    fi
+#fi
 
 ################################################################################
 # Generate ACS Summary
@@ -605,7 +608,7 @@ if [ $CAPSULE_PROCESSED -eq 1 ]; then
     echo ""
 fi
 fi
-echo "ACS Summary    : $ACS_SUMMARY_HTML"
+echo "ACS Summary : $ACS_SUMMARY_HTML"
 echo ""
 
 # Merge JSON
@@ -667,26 +670,24 @@ fi
 # Standalone
 if [ $Standalone_PROCESSED -eq 1 ] && [ ${#Standalone_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${Standalone_JSONS[@]}")
-elif [ $Standalone_PROCESSED -eq 1 ]; then
+else
     echo -e "${YELLOW}WARNING: NO Standalone tests json files found. Skipping these files.${NC}"
 fi
 
 # OS Tests
 if [ $OS_TESTS_PROCESSED -eq 1 ] && [ ${#OS_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${OS_JSONS[@]}")
-elif [ $OS_TESTS_PROCESSED -eq 1 ]; then
+else
     echo -e "${YELLOW}WARNING: NO OS tests json files found. Skipping these files.${NC}"
 fi
 
-# (Capsule JSON is already part of Standalone_JSONS if it exists)
-
 # PSCI JSON
-PSCI_JSON="$JSONS_DIR/psci.json"
-if [ -f "$PSCI_JSON" ]; then
-    JSON_FILES+=("$PSCI_JSON")
-else
-    echo -e "${YELLOW}WARNING: NO psci tests json file found. Skipping this file.${NC}"
-fi
+#PSCI_JSON="$JSONS_DIR/psci.json"
+#if [ -f "$PSCI_JSON" ]; then
+#    JSON_FILES+=("$PSCI_JSON")
+#else
+#    echo -e "${YELLOW}WARNING: NO psci tests json file found. Skipping this file.${NC}"
+#fi
 
 if [ ${#JSON_FILES[@]} -gt 0 ]; then
     python3 "$SCRIPTS_PATH/merge_jsons.py" "$MERGED_JSON" "${JSON_FILES[@]}"
