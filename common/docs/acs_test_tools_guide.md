@@ -22,7 +22,7 @@ By following this guide, users can gain a clear understanding of the verificatio
 | BSA              | UEFI and Linux# | Automatic                    | acs_results/uefi/BsaResults.log  acs_results/linux_acs/BsaResultsKernel.log     |
 | SBSA             | UEFI and Linux# | Automatic (Conditional)*     | acs_results/uefi/SbsaResults.log  acs_results/linux_acs/SbsaResultsKernel.log        |
 | SCT              | UEFI            | Automatic                    | acs_results/sct_results/Overall/Summary.log       |
-| SCRT             | UEFI            | Automatic                    | `/path/to/results3`       |
+| SCRT             | UEFI            | Automatic                    |        |
 | FWTS             | Linux           | Automatic                    | acs_results/fwts/FWTSResults.log       |
 | BBSR-SCT         | UEFI            | Manual**                     | acs_results/BBSR/sct_results/Overall/Summary.log       |
 | BBSR-FWTS        | Linux           | Manual**                     | acs_results/BBSR/fwts/FWTSResults.log       |
@@ -31,7 +31,7 @@ By following this guide, users can gain a clear understanding of the verificatio
 
  - Automatic (Conditional)*: SBSA run is optional for SR band and can be control using the acs run config file. Please refer this guide for more details.
 
- - Manual**: The BBSR extension complaince is optional, and the run is controlled using the **"BBSR Complaince (Automation)"** grub menu
+ - Manual**: The BBSR extension complaince can be run manually by using the **"BBSR Complaince (Automation)"** grub menu
 
 ---
 
@@ -41,7 +41,7 @@ By following this guide, users can gain a clear understanding of the verificatio
 |------------------|-----------------|------------------------------|---------------------------|
 | BSA              | UEFI and Linux# | Automatic                    | acs_results_template/acs_results/uefi/BsaResults.log  acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log     |
 | SCT              | UEFI            | Automatic                    | acs_results_template/acs_results/sct_results/Overall/Summary.log       |
-| SCRT             | UEFI            | Automatic                    | `/path/to/results3`       |
+| SCRT             | UEFI            | Manual*                    |        |
 | FWTS             | Linux           | Automatic                    | acs_results_template/acs_results/fwts/FWTSResults.log       |
 | BBSR-SCT         | UEFI            | Manual**                     | acs_results_template/acs_results/BBSR/sct_results/Overall/Summary.log       |
 | BBSR-FWTS        | Linux           | Manual**                     | acs_results_template/acs_results/BBSR/fwts/FWTSResults.log       |
@@ -49,7 +49,7 @@ By following this guide, users can gain a clear understanding of the verificatio
 | DT validate      | Linux           | Automatic                    | acs_results_template/acs_results/linux_tools/dt-validate.log      |
 | Block Device test| Linux           | Automatic                    | acs_results_template/acs_results/linux_tools/read_write_check_blk_devices.log     |
 | Ethtool          | Linux           | Automatic                    | acs_results_template/acs_results/linux_tools/ethtool-test.log     |
-| DT Kernel kselftest  Linux         | Automatic                    | acs_results_template/acs_results/linux_tools/dt_kselftest.log     |
+| DT Kernel kselftest|  Linux         | Automatic                    | acs_results_template/acs_results/linux_tools/dt_kselftest.log     |
 
  - UEFI and Linux#: Complete coverage of BSA and SBSA test suite requires run of both the UEFI application of Linux application
 
