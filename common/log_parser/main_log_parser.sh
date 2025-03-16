@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#!/usr/bin/env bash
+
 # Define color codes
 YELLOW='\033[1;33m'  # Yellow for WARNING
 RED='\033[0;31m'     # Red for ERROR
@@ -114,7 +116,7 @@ check_file() {
         else
             echo -e "${YELLOW}WARNING: Log file "$1" is missing.${NC}"
         fi
-	return 1
+        return 1
     fi
     return 0
 }
@@ -450,168 +452,8 @@ fi
 #fi
 
 ################################################################################
-# Generate ACS Summary
+# MERGE JSON
 ################################################################################
-ACS_SUMMARY_HTML="$HTMLS_DIR/acs_summary.html"
-GENERATE_ACS_SUMMARY_CMD="python3 \"$SCRIPTS_PATH/generate_acs_summary.py\""
-
-# 1) BSA
-if [ $BSA_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bsa_summary.html\""
-else
-    GENERATE_ACS_SUMMARY_CMD+=" \"\""
-fi
-
-# 2) SBSA
-if [ $SBSA_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sbsa_summary.html\""
-else
-    GENERATE_ACS_SUMMARY_CMD+=" \"\""
-fi
-
-# 3) FWTS
-if [ $FWTS_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/fwts_summary.html\""
-else
-    GENERATE_ACS_SUMMARY_CMD+=" \"\""
-fi
-
-# 4) SCT
-if [ $SCT_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sct_summary.html\""
-else
-    GENERATE_ACS_SUMMARY_CMD+=" \"\""
-fi
-
-# 5) BBSR-FWTS
-if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bbsr_fwts_summary.html\""
-else
-    GENERATE_ACS_SUMMARY_CMD+=" \"\""
-fi
-
-# 6) BBSR-SCT
-if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bbsr_sct_summary.html\""
-else
-    GENERATE_ACS_SUMMARY_CMD+=" \"\""
-fi
-
-# 7) STANDALONE
-if [ $Standalone_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$Standalone_SUMMARY_HTML\""
-else
-    GENERATE_ACS_SUMMARY_CMD+=" \"\""
-fi
-
-# 8) OS TESTS
-if [ $OS_TESTS_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$OS_SUMMARY_HTML\""
-else
-    GENERATE_ACS_SUMMARY_CMD+=" \"\""
-fi
-
-# 9) CAPSULE UPDATE SUMMARY (provide an empty string if not generated separately)
-CAPSULE_SUMMARY_HTML=""
-GENERATE_ACS_SUMMARY_CMD+=" \"$CAPSULE_SUMMARY_HTML\""
-
-# Finally pass the output
-GENERATE_ACS_SUMMARY_CMD+=" \"$ACS_SUMMARY_HTML\""
-
-# Optional arguments
-if [ -n "$ACS_CONFIG_PATH" ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" --acs_config_path \"$ACS_CONFIG_PATH\""
-fi
-
-if [ -n "$SYSTEM_CONFIG_PATH" ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" --system_config_path \"$SYSTEM_CONFIG_PATH\""
-fi
-
-if [ -n "$UEFI_VERSION_LOG" ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" --uefi_version_log \"$UEFI_VERSION_LOG\""
-fi
-
-if [ -n "$DEVICE_TREE_DTS" ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" --device_tree_dts \"$DEVICE_TREE_DTS\""
-fi
-
-eval $GENERATE_ACS_SUMMARY_CMD
-
-print_path=0  # For debug only
-if [ $print_path -eq 1 ]; then
-# Always print BSA messages
-if [ $BSA_PROCESSED -eq 1 ]; then
-#    echo "BSA UEFI Log              : $BSA_LOG"
-    echo "BSA JSON                  : $BSA_JSON"
-    echo "BSA Detailed Summary      : $HTMLS_DIR/bsa_detailed.html"
-    echo "BSA Summary               : $HTMLS_DIR/bsa_summary.html"
-    echo ""
-fi
-# Print SBSA messages only if processed
-if [ $SBSA_PROCESSED -eq 1 ]; then
-#    echo "SBSA UEFI Log             : $SBSA_LOG"
-    echo "SBSA JSON                 : $SBSA_JSON"
-    echo "SBSA Detailed Summary     : $HTMLS_DIR/sbsa_detailed.html"
-    echo "SBSA Summary               : $HTMLS_DIR/sbsa_summary.html"
-    echo ""
-fi
-# Always print FWTS messages
-if [ $FWTS_PROCESSED -eq 1 ]; then
-#    echo "FWTS Log                  : $FWTS_LOG"
-    echo "FWTS JSON                 : $FWTS_JSON"
-    echo "FWTS Detailed Summary     : $HTMLS_DIR/fwts_detailed.html"
-    echo "FWTS Summary              : $HTMLS_DIR/fwts_summary.html"
-    echo ""
-fi
-# Always print SCT messages
-if [ $SCT_PROCESSED -eq 1 ]; then
-#    echo "SCT Log                   : $SCT_LOG"
-    echo "SCT JSON                  : $SCT_JSON"
-    echo "SCT Detailed Summary      : $HTMLS_DIR/sct_detailed.html"
-    echo "SCT Summary               : $HTMLS_DIR/sct_summary.html"
-    echo ""
-fi
-# Print BBSR FWTS messages
-if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
-#    echo "BBSR FWTS Log             : $BBSR_FWTS_LOG"
-    echo "BBSR FWTS JSON            : $BBSR_FWTS_JSON"
-    echo "BBSR FWTS Detailed Summary: $HTMLS_DIR/bbsr_fwts_detailed.html"
-    echo "BBSR FWTS Summary         : $HTMLS_DIR/bbsr_fwts_summary.html"
-    echo ""
-fi
-# Print BBSR SCT messages
-if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
-#    echo "BBSR SCT Log              : $BBSR_SCT_LOG"
-    echo "BBSR SCT JSON             : $BBSR_SCT_JSON"
-    echo "BBSR SCT Detailed Summary : $HTMLS_DIR/bbsr_sct_detailed.html"
-    echo "BBSR SCT Summary          : $HTMLS_DIR/bbsr_sct_summary.html"
-    echo ""
-fi
-# Print Standalone messages only if processed
-if [ $Standalone_PROCESSED -eq 1 ]; then
-    echo "Standalone tests Detailed Summary      : $Standalone_DETAILED_HTML"
-    echo "Standalone tests Summary               : $Standalone_SUMMARY_HTML"
-    echo ""
-fi
-# Print OS Tests messages only if processed
-if [ $OS_TESTS_PROCESSED -eq 1 ]; then
-    echo "OS tests Detailed Summary : $OS_DETAILED_HTML"
-    echo "OS tests Summary          : $OS_SUMMARY_HTML"
-    echo ""
-fi
-# Print Capsule Update messages only if processed
-if [ $CAPSULE_PROCESSED -eq 1 ]; then
- #   echo "Capsule Update Log              : $CAPSULE_LOG"
-    echo "Capsule Update JSON             : $CAPSULE_JSON"
-    echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
-    echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
-    echo ""
-fi
-fi
-echo "ACS Summary : $ACS_SUMMARY_HTML"
-echo ""
-
-# Merge JSON
 MERGED_JSON="$JSONS_DIR/merged_results.json"
 JSON_FILES=()
 
@@ -681,13 +523,13 @@ else
     echo -e "${YELLOW}WARNING: NO OS tests json files found. Skipping these files.${NC}"
 fi
 
-# PSCI JSON
-#PSCI_JSON="$JSONS_DIR/psci.json"
-#if [ -f "$PSCI_JSON" ]; then
-#    JSON_FILES+=("$PSCI_JSON")
-#else
-#    echo -e "${YELLOW}WARNING: NO psci tests json file found. Skipping this file.${NC}"
-#fi
+# PSCI JSON (Optional if you have it)
+# PSCI_JSON="$JSONS_DIR/psci.json"
+# if [ -f "$PSCI_JSON" ]; then
+#     JSON_FILES+=("$PSCI_JSON")
+# else
+#     echo -e "${YELLOW}WARNING: NO psci tests json file found. Skipping this file.${NC}"
+# fi
 
 if [ ${#JSON_FILES[@]} -gt 0 ]; then
     python3 "$SCRIPTS_PATH/merge_jsons.py" "$MERGED_JSON" "${JSON_FILES[@]}"
@@ -696,4 +538,158 @@ else
     echo "No JSON files to merge."
 fi
 
+echo ""
+
+################################################################################
+# NOW Generate ACS Summary (ONLY ONCE, at the very end)
+################################################################################
+ACS_SUMMARY_HTML="$HTMLS_DIR/acs_summary.html"
+GENERATE_ACS_SUMMARY_CMD="python3 \"$SCRIPTS_PATH/generate_acs_summary.py\""
+
+# 1) BSA
+if [ $BSA_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bsa_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 2) SBSA
+if [ $SBSA_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sbsa_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 3) FWTS
+if [ $FWTS_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/fwts_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 4) SCT
+if [ $SCT_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sct_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 5) BBSR-FWTS
+if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bbsr_fwts_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 6) BBSR-SCT
+if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bbsr_sct_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 7) STANDALONE
+if [ $Standalone_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$Standalone_SUMMARY_HTML\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 8) OS TESTS
+if [ $OS_TESTS_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$OS_SUMMARY_HTML\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 9) CAPSULE UPDATE SUMMARY
+CAPSULE_SUMMARY_HTML=""
+GENERATE_ACS_SUMMARY_CMD+=" \"$CAPSULE_SUMMARY_HTML\""
+
+# Then the final argument is the summary HTML
+GENERATE_ACS_SUMMARY_CMD+=" \"$ACS_SUMMARY_HTML\""
+
+# Optional arguments
+if [ -n "$ACS_CONFIG_PATH" ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" --acs_config_path \"$ACS_CONFIG_PATH\""
+fi
+
+if [ -n "$SYSTEM_CONFIG_PATH" ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" --system_config_path \"$SYSTEM_CONFIG_PATH\""
+fi
+
+if [ -n "$UEFI_VERSION_LOG" ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" --uefi_version_log \"$UEFI_VERSION_LOG\""
+fi
+
+if [ -n "$DEVICE_TREE_DTS" ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" --device_tree_dts \"$DEVICE_TREE_DTS\""
+fi
+
+# If merged_results.json was created, pass it along
+if [ -f "$MERGED_JSON" ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" --merged_json \"$MERGED_JSON\""
+fi
+
+# Finally, call generate_acs_summary.py exactly ONCE at the end
+eval "$GENERATE_ACS_SUMMARY_CMD"
+
+print_path=0  # For debug only
+if [ $print_path -eq 1 ]; then
+    # (All these "print" blocks remain unchanged for debugging)
+    if [ $BSA_PROCESSED -eq 1 ]; then
+        echo "BSA JSON                  : $BSA_JSON"
+        echo "BSA Detailed Summary      : $HTMLS_DIR/bsa_detailed.html"
+        echo "BSA Summary               : $HTMLS_DIR/bsa_summary.html"
+        echo ""
+    fi
+    if [ $SBSA_PROCESSED -eq 1 ]; then
+        echo "SBSA JSON                 : $SBSA_JSON"
+        echo "SBSA Detailed Summary     : $HTMLS_DIR/sbsa_detailed.html"
+        echo "SBSA Summary              : $HTMLS_DIR/sbsa_summary.html"
+        echo ""
+    fi
+    if [ $FWTS_PROCESSED -eq 1 ]; then
+        echo "FWTS JSON                 : $FWTS_JSON"
+        echo "FWTS Detailed Summary     : $HTMLS_DIR/fwts_detailed.html"
+        echo "FWTS Summary              : $HTMLS_DIR/fwts_summary.html"
+        echo ""
+    fi
+    if [ $SCT_PROCESSED -eq 1 ]; then
+        echo "SCT JSON                  : $SCT_JSON"
+        echo "SCT Detailed Summary      : $HTMLS_DIR/sct_detailed.html"
+        echo "SCT Summary               : $HTMLS_DIR/sct_summary.html"
+        echo ""
+    fi
+    if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
+        echo "BBSR FWTS JSON            : $BBSR_FWTS_JSON"
+        echo "BBSR FWTS Detailed Summary: $HTMLS_DIR/bbsr_fwts_detailed.html"
+        echo "BBSR FWTS Summary         : $HTMLS_DIR/bbsr_fwts_summary.html"
+        echo ""
+    fi
+    if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
+        echo "BBSR SCT JSON             : $BBSR_SCT_JSON"
+        echo "BBSR SCT Detailed Summary : $HTMLS_DIR/bbsr_sct_detailed.html"
+        echo "BBSR SCT Summary          : $HTMLS_DIR/bbsr_sct_summary.html"
+        echo ""
+    fi
+    if [ $Standalone_PROCESSED -eq 1 ]; then
+        echo "Standalone tests Detailed Summary      : $Standalone_DETAILED_HTML"
+        echo "Standalone tests Summary               : $Standalone_SUMMARY_HTML"
+        echo ""
+    fi
+    if [ $OS_TESTS_PROCESSED -eq 1 ]; then
+        echo "OS tests Detailed Summary : $OS_DETAILED_HTML"
+        echo "OS tests Summary          : $OS_SUMMARY_HTML"
+        echo ""
+    fi
+    if [ $CAPSULE_PROCESSED -eq 1 ]; then
+        echo "Capsule Update JSON             : $CAPSULE_JSON"
+        echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
+        echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
+        echo ""
+    fi
+fi
+
+echo "ACS Summary : $ACS_SUMMARY_HTML"
 echo ""

@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import argparse
 import os
 import subprocess
@@ -137,11 +138,20 @@ def adjust_detailed_summary_heading(file_path, suite_name):
         with open(file_path, 'w') as file:
             file.write(content)
 
+###############################################################################
+# get_failed_with_waiver_counts
+###############################################################################
 def get_failed_with_waiver_counts(content):
+    """
+    Simple parser for extracting the "Failed" and "Failed with Waiver" counts
+    from the summary HTML tables. Used only to print them for debugging/logging.
+    """
     failed = 0
     failed_with_waiver = 0
-    lines = content.splitlines()
+    if not content:
+        return failed, failed_with_waiver
 
+    lines = content.splitlines()
     i = 0
     while i < len(lines):
         line = lines[i].strip()
@@ -169,60 +179,32 @@ def get_failed_with_waiver_counts(content):
 
     return failed, failed_with_waiver
 
-def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts_summary_content, sct_summary_content,
-                                 bbsr_fwts_summary_content, bbsr_sct_summary_content,
-                                 standalone_summary_content, OS_tests_summary_content):
-    overall_compliance = 'Compliant'
-    summaries = {
-        'BSA': bsa_summary_content,
-        'SBSA': sbsa_summary_content,
-        'FWTS': fwts_summary_content,
-        'SCT': sct_summary_content,
-        'BBSR-FWTS': bbsr_fwts_summary_content,
-        'BBSR-SCT': bbsr_sct_summary_content,
-        'Standalone tests': standalone_summary_content,
-        'OS tests': OS_tests_summary_content
-    }
-
-    all_failed_zero = True
-    compliant_with_waivers = True
-    suite_counts = {}
-
-    for suite, content in summaries.items():
-        if content:
-            failed, failed_with_waiver = get_failed_with_waiver_counts(content)
-            suite_counts[suite] = {'Failed': failed, 'Failed with Waiver': failed_with_waiver}
-            # Check compliance
-            if failed != failed_with_waiver:
-                compliant_with_waivers = False
-            if failed != 0 or failed_with_waiver != 0:
-                all_failed_zero = False
-
-    if all_failed_zero:
-        overall_compliance = 'Compliant'
-    elif compliant_with_waivers:
-        any_failures = any(
-            (counts['Failed with Waiver'] > 0) for counts in suite_counts.values()
-        )
-        if any_failures:
-            overall_compliance = 'Compliant with Waivers'
-        else:
-            overall_compliance = 'Compliant'
-    else:
-        overall_compliance = 'Not compliant'
-
-    for suite, counts in suite_counts.items():
-        print(f"Suite: {suite}, Failed: {counts['Failed']}, Failed with Waiver: {counts['Failed with Waiver']}")
-    print(f"\nOverall Compliance: {overall_compliance}\n")
-
-    return overall_compliance
-
+###############################################################################
+# read_overall_compliance_from_merged_json
+###############################################################################
+def read_overall_compliance_from_merged_json(merged_json_path):
+    """
+    Opens the merged_results.json and retrieves the final
+    "Overall Compliance Result" from:
+      data["Suite_Name: acs_info"]["ACS Results Summary"]["Overall Compliance Result"]
+    """
+    overall_result = "Unknown"
+    try:
+        with open(merged_json_path, 'r') as jf:
+            data = json.load(jf)
+        acs_info_data = data.get("Suite_Name: acs_info", {})
+        acs_summary = acs_info_data.get("ACS Results Summary", {})
+        overall_result = acs_summary.get("Overall Compliance Result", "Unknown")
+    except Exception as e:
+        print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
+    return overall_result
 
 def generate_html(system_info, acs_results_summary,
                   bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
                   bbsr_fwts_summary_path, bbsr_sct_summary_path,
                   standalone_summary_path, OS_tests_summary_path,
                   output_html_path):
+    # Read the summary HTML content from each suite
     bsa_summary_content = read_html_content(bsa_summary_path)
     sbsa_summary_content = read_html_content(sbsa_summary_path)
     fwts_summary_content = read_html_content(fwts_summary_path)
@@ -232,14 +214,13 @@ def generate_html(system_info, acs_results_summary,
     standalone_summary_content = read_html_content(standalone_summary_path)
     OS_tests_summary_content = read_html_content(OS_tests_summary_path)
 
-    # Adjust headings where needed
+    # Adjust headings in BBSR/Standalone/OS summaries
     bbsr_fwts_summary_content = adjust_bbsr_headings(bbsr_fwts_summary_content, 'BBSR-FWTS')
     bbsr_sct_summary_content = adjust_bbsr_headings(bbsr_sct_summary_content, 'BBSR-SCT')
     OS_tests_summary_content = adjust_bbsr_headings(OS_tests_summary_content, 'OS')
     standalone_summary_content = adjust_bbsr_headings(standalone_summary_content, 'Standalone')
 
-    # We color-code "Overall Compliance Results" using inline styling based on the final value
-    # "Not compliant" → red, "Compliant" → green, "Compliant with Waivers" → amber (#FFBF00).
+    # Jinja2 template for the final HTML page
     html_template = '''
     <!DOCTYPE html>
     <html lang="en">
@@ -413,12 +394,12 @@ def generate_html(system_info, acs_results_summary,
                         <th>Overall Compliance Results</th>
                         <td style="
                             color: 
-                            {% if acs_results_summary.get('Overall Compliance Results') == 'Not compliant' %}
+                            {% if 'Not compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
                                 red
-                            {% elif acs_results_summary.get('Overall Compliance Results') == 'Compliant' %}
-                                green
-                            {% elif acs_results_summary.get('Overall Compliance Results') == 'Compliant with Waivers' %}
+                            {% elif 'Compliant with Waivers' in acs_results_summary.get('Overall Compliance Results', '') %}
                                 #FFBF00
+                            {% elif 'Compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
+                                green
                             {% else %}
                                 black
                             {% endif %}
@@ -546,7 +527,7 @@ def generate_html(system_info, acs_results_summary,
     with open(output_html_path, 'w') as html_file:
         html_file.write(html_output)
 
-    # Adjust headings in detailed summary pages
+    # Adjust headings in the *detailed* summary pages
     detailed_summaries = [
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_fwts_detailed.html'), 'BBSR-FWTS'),
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_sct_detailed.html'), 'BBSR-SCT'),
@@ -558,6 +539,7 @@ def generate_html(system_info, acs_results_summary,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate ACS Summary HTML page")
+    parser.add_argument("--merged_json", default="", help="Path to merged_results.json if you want to pull final compliance from there")
     parser.add_argument("bsa_summary_path", help="Path to the BSA summary HTML file")
     parser.add_argument("sbsa_summary_path", help="Path to the SBSA summary HTML file")
     parser.add_argument("fwts_summary_path", help="Path to the FWTS summary HTML file")
@@ -566,7 +548,7 @@ if __name__ == "__main__":
     parser.add_argument("bbsr_sct_summary_path", help="Path to the BBSR SCT summary HTML file")
     parser.add_argument("standalone_summary_path", help="Path to the Standalone tests summary HTML file")
     parser.add_argument("OS_tests_summary_path", help="Path to the OS Tests summary HTML file")
-    parser.add_argument("capsule_update_summary_path", help="Path to the Capsule Update summary HTML file") 
+    parser.add_argument("capsule_update_summary_path", help="Path to the Capsule Update summary HTML file")
     parser.add_argument("output_html_path", help="Path to the output ACS summary HTML file")
     parser.add_argument("--acs_config_path", default="", help="Path to the acs_config.txt file")
     parser.add_argument("--system_config_path", default="", help="Path to the system_config.txt file")
@@ -588,45 +570,53 @@ if __name__ == "__main__":
     uefi_version = get_uefi_version(args.uefi_version_log)
     system_info['UEFI Version'] = uefi_version
 
-    # 5) Extract summary date from system_info
+    # 4) Extract summary date from system_info
     summary_generated_date = system_info.pop('Summary Generated On Date/time', 'Unknown')
 
-    # 6) Read in the stand-alone & capsule summary, then combine them
+    # 5) Read in the stand-alone & capsule summary, then combine them
     standalone_summary_content = read_html_content(args.standalone_summary_path)
     capsule_update_summary_content = read_html_content(args.capsule_update_summary_path)
     if capsule_update_summary_content:
-        # Append capsule content to standalone
+        # Append capsule content to standalone if it exists
         if not standalone_summary_content:
             standalone_summary_content = capsule_update_summary_content
         else:
             standalone_summary_content += "<hr/>\n" + capsule_update_summary_content
 
-    # 7) Prepare to determine overall compliance
-    bsa_summary_content = read_html_content(args.bsa_summary_path)
-    sbsa_summary_content = read_html_content(args.sbsa_summary_path)
-    fwts_summary_content = read_html_content(args.fwts_summary_path)
-    sct_summary_content = read_html_content(args.sct_summary_path)
-    bbsr_fwts_summary_content = read_html_content(args.bbsr_fwts_summary_path)
-    bbsr_sct_summary_content = read_html_content(args.bbsr_sct_summary_path)
-    OS_tests_summary_content = read_html_content(args.OS_tests_summary_path)
+    # 6) Collect the summary contents for each suite so we can get the fail/waiver counts (purely for printing)
+    suite_content_map = {
+        "BSA": read_html_content(args.bsa_summary_path),
+        "SBSA": read_html_content(args.sbsa_summary_path),
+        "FWTS": read_html_content(args.fwts_summary_path),
+        "SCT": read_html_content(args.sct_summary_path),
+        "BBSR-FWTS": read_html_content(args.bbsr_fwts_summary_path),
+        "BBSR-SCT": read_html_content(args.bbsr_sct_summary_path),
+        "Standalone tests": standalone_summary_content,
+        "OS tests": read_html_content(args.OS_tests_summary_path)
+    }
 
-    overall_compliance = determine_overall_compliance(
-        bsa_summary_content,
-        sbsa_summary_content,
-        fwts_summary_content,
-        sct_summary_content,
-        bbsr_fwts_summary_content,
-        bbsr_sct_summary_content,
-        standalone_summary_content,
-        OS_tests_summary_content
-    )
+    # 7) Print the fail/waiver counts for each suite (for logging/debug display only)
+    for suite_name, content in suite_content_map.items():
+        failed, failed_with_waiver = get_failed_with_waiver_counts(content)
+        print(f"Suite: {suite_name}, Failed: {failed}, Failed with Waiver: {failed_with_waiver}")
 
+    # 8) Read overall compliance solely from merged JSON (if provided)
+    overall_compliance = "Unknown"
+    if args.merged_json and os.path.isfile(args.merged_json):
+        overall_compliance = read_overall_compliance_from_merged_json(args.merged_json)
+    else:
+        print("Warning: merged JSON not provided or does not exist => Overall compliance unknown")
+
+    print(f"\nOverall Compliance: {overall_compliance}\n")
+
+    # 9) Prepare the dictionary that will be used in the final HTML
     acs_results_summary = {
         'Band': acs_config_info.get('Band', 'Unknown'),
         'Date': summary_generated_date,
         'Overall Compliance Results': overall_compliance
     }
 
+    # 10) Finally, generate the consolidated HTML page
     generate_html(
         system_info,
         acs_results_summary,
@@ -640,4 +630,3 @@ if __name__ == "__main__":
         args.OS_tests_summary_path,
         args.output_html_path
     )
-    
