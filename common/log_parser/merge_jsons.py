@@ -18,10 +18,16 @@ import json
 import argparse
 import os
 
+# Define color codes
+RED = "\033[91m"
+YELLOW = "\033[93m"
+GREEN = "\033[32m"
+RESET = "\033[0m"
+
 ################################################################################
 # 1. Determine if we're in Device Tree (DT) mode or SR mode by checking yocto flag
 ################################################################################
-YOCTO_FLAG_PATH = "/mnt/yocto_image.flag"
+YOCTO_FLAG_PATH = "/mnt/c/Users/cherat01/ATEG/LOG_POST_SCRIPTS/yocto_image.flag"
 if os.path.isfile(YOCTO_FLAG_PATH):
     DT_OR_SR_MODE = "DT"
 else:
@@ -32,28 +38,30 @@ else:
 #    (Recommended suites are simply "not in this list"; they won't affect compliance.)
 ################################################################################
 
-# From your table for Device Tree (DT):
-#   BSA (R), SCT (M), FWTS (M), Capsule Update (M), BBSR SCT (R), BBSR FWTS (R),
-#   DT Validate (M), block device (M), Ethtool (M), DT kernel kselftest (R)
-MANDATORY_SUITE_KEYS_DT = {
-    "SCT",
-    "FWTS",
-    "Capsule Update",
-    "DT_VALIDATE",
-    "READ_WRITE_CHECK_BLK_DEVICES",
-    "ETHTOOL_TEST",
-}
+# DT SRS scope table
+DT_SRS_SCOPE_TABLE = [
+    ("SCT", "M"),
+    ("FWTS", "M"),
+    ("Capsule Update", "M"),
+    ("DT_VALIDATE", "M"),
+    ("READ_WRITE_CHECK_BLK_DEVICES", "M"),
+    ("ETHTOOL_TEST", "M"),
+    ("BSA", "R"),
+    ("BBSR-SCT", "R"),
+    ("BBSR-FWTS", "R"),
+    ("DT_KSELFTEST", "R"),
+    ("PSCI", "R"),
+]
 
-# From your table for SR:
-#   BSA (M), SBSA (M*) if present, SCT (M), FWTS (M), SCRT (M), BBSR SCT (R), BBSR FWTS (R)
-MANDATORY_SUITE_KEYS_SR = {
-    "BSA",
-    "SBSA",
-    "SCT",
-    "FWTS",
-    "SCRT",  # Only if your code actually uses "SCRT" as a key
-    # SBSA => mandatory only if present
-}
+# SR SRS scope table
+SR_SRS_SCOPE_TABLE = [
+    ("SCT", "M"),
+    ("FWTS", "M"),
+    ("BSA", "M"),
+    ("BBSR-SCT", "R"),
+    ("BBSR-FWTS", "R"),
+    ("SBSA", "R")
+]
 
 def reformat_json(json_file_path):
     """
@@ -112,68 +120,68 @@ def count_fails_in_json(data):
 ################################################################################
 # function for *single* suite compliance
 ################################################################################
-def determine_suite_compliance_alone(fails, fails_waived):
-    """
-    Decide compliance for ONE suite, ignoring whether other mandatory suites exist.
-
-    If no fails => "Compliant"
-    If all fails are waived => "Compliant with Waivers"
-    Otherwise => "Not compliant"
-    """
-    if (fails + fails_waived) == 0:
-        return "Compliant"
-    elif fails == fails_waived:
-        return "Compliant with Waivers"
-    else:
-        return "Not compliant"
+#def determine_suite_compliance_alone(fails, fails_waived):
+#    """
+#    Decide compliance for ONE suite, ignoring whether other mandatory suites exist.
+#
+#    If no fails => "Compliant"
+#    If all fails are waived => "Compliant with Waivers"
+#    Otherwise => "Not compliant"
+#    """
+#    if (fails + fails_waived) == 0:
+#        return "Compliant"
+#    elif fails == fails_waived:
+#        return "Compliant with Waivers"
+#    else:
+#        return "Not compliant"
 
 ################################################################################
 # "determine_overall_compliance" that includes REASONS
 ################################################################################
-def determine_overall_compliance(suite_fail_data):
-    """
-    Returns a string, possibly with reasons, e.g.:
-       "Compliant"
-       "Compliant with Waivers (waived fail(s) in suite(s): X, Y)"
-       "Not compliant (missing suite(s): X, Y; non-waived fails in suite(s): A, B)"
-    """
-
-    # Decide mandatory set
-    if DT_OR_SR_MODE == "DT":
-        mandatory_suites = set(MANDATORY_SUITE_KEYS_DT)
-    else:
-        mandatory_suites = set(MANDATORY_SUITE_KEYS_SR)
-        # If SBSA is present, treat it as mandatory
-        if "SBSA" in suite_fail_data:
-            mandatory_suites.add("SBSA")
-
-    # We'll track missing mandatory suites, non-waived fails, etc.
-    missing_suites = []
-    non_waived_fail_suites = []
-    waived_fail_suites = []
-
-    # 1) Check for missing mandatory suites
-    for m_suite in mandatory_suites:
-        if m_suite not in suite_fail_data:
-            missing_suites.append(m_suite)
-
-    # 2) Summarize fails in mandatory suites only
-    total_mandatory_fails = 0
-    for suite_key, info in suite_fail_data.items():
-        if suite_key not in mandatory_suites:
-            continue
-        f = info.get("Failed", 0)
-        fw = info.get("Failed_with_Waiver", 0)
-        total_mandatory_fails += (f + fw)
-
-        if (f + fw) > 0:
-            if f == fw:
-                # all fails are waived
-                waived_fail_suites.append(suite_key)
-            else:
-                # at least one fail is not waived
-                non_waived_fail_suites.append(suite_key)
-
+#def determine_overall_compliance(suite_fail_data):
+#    """
+#    Returns a string, possibly with reasons, e.g.:
+#       "Compliant"
+#       "Compliant with Waivers (waived fail(s) in suite(s): X, Y)"
+#       "Not compliant (missing suite(s): X, Y; non-waived fails in suite(s): A, B)"
+#    """
+#
+#    # Decide mandatory set
+#    if DT_OR_SR_MODE == "DT":
+#        mandatory_suites = set(MANDATORY_SUITE_KEYS_DT)
+#    else:
+#        mandatory_suites = set(MANDATORY_SUITE_KEYS_SR)
+#        # If SBSA is present, treat it as mandatory
+#        if "SBSA" in suite_fail_data:
+#            mandatory_suites = {("SBSA", "M") if suite[0] == "SBSA" else suite for suite in mandatory_suites}
+#
+#    # We'll track missing mandatory suites, non-waived fails, etc.
+#    missing_suites = []
+#    non_waived_fail_suites = []
+#    waived_fail_suites = []
+#
+#    # 1) Check for missing mandatory suites
+#    for m_suite, requirement in mandatory_suites:
+#        if m_suite not in suite_fail_data and requirement == "M":
+#            missing_suites.append(m_suite)
+#
+#    # 2) Summarize fails in mandatory suites only
+#    total_mandatory_fails = 0
+#    for suite_key, info in suite_fail_data.items():
+#        if suite_key not in mandatory_suites:
+#            continue
+#        f = info.get("Failed", 0)
+#        fw = info.get("Failed_with_Waiver", 0)
+#        total_mandatory_fails += (f + fw)
+#
+#        if (f + fw) > 0:
+#            if f == fw:
+#                # all fails are waived
+#                waived_fail_suites.append(suite_key)
+#            else:
+#                # at least one fail is not waived
+#                non_waived_fail_suites.append(suite_key)
+#
     ############################################################################
     # Build up a reason string
     ############################################################################
@@ -182,31 +190,35 @@ def determine_overall_compliance(suite_fail_data):
     # if none missing, none non-waived => either "Compliant" or "Compliant with Waivers"
 
     # If we have missing mandatory suites
-    if missing_suites:
+#    if missing_suites:
         # Possibly also have some non-waived fails
-        if non_waived_fail_suites:
-            return (f"Not compliant (missing suite(s): {', '.join(missing_suites)}; "
-                    f"non-waived fails in suite(s): {', '.join(non_waived_fail_suites)})")
-        else:
-            return (f"Not compliant (missing suite(s): {', '.join(missing_suites)})")
+#        if non_waived_fail_suites:
+#            return "Not Compliant"
+            #return (f"Not compliant (missing suite(s): {', '.join(missing_suites)}; "
+                    #f"non-waived fails in suite(s): {', '.join(non_waived_fail_suites)})")
+#        else:
+#            return "Not Compliant"
+            #return (f"Not compliant (missing suite(s): {', '.join(missing_suites)})")
 
     # If no suites are missing, do we have any total fails?
-    if total_mandatory_fails == 0:
-        return "Compliant"
+#    if total_mandatory_fails == 0:
+#        return "Complaint"
 
     # Are there unwaived fails?
-    if non_waived_fail_suites:
-        return (f"Not compliant (non-waived fails in suite(s): "
-                f"{', '.join(non_waived_fail_suites)})")
+#    if non_waived_fail_suites:
+#        return "Not Compliant"
+        #return (f"Not compliant (non-waived fails in suite(s): "
+                #f"{', '.join(non_waived_fail_suites)})")
 
     # If we get here => all fails in mandatory suites are waived
     # => "Compliant with Waivers" + note which suites
-    if waived_fail_suites:
-        return (f"Compliant with Waivers (waived fail(s) in suite(s): "
-                f"{', '.join(waived_fail_suites)})")
+#    if waived_fail_suites:
+#        return "Complaint with Waivers"
+        #return (f"Compliant with Waivers (waived fail(s) in suite(s): "
+                #f"{', '.join(waived_fail_suites)})")
 
     # Edge case fallback
-    return "Compliant"
+#    return "Complaint"
 
 def merge_json_files(json_files, output_file):
     merged_results = {}
@@ -299,6 +311,8 @@ def merge_json_files(json_files, output_file):
             base_name_no_ext = os.path.splitext(os.path.basename(json_path))[0]
             section_name = f"Suite_Name: OS Tests - {base_name_no_ext}"
             suite_key    = f"OS_{base_name_no_ext}"
+            global DT_SRS_SCOPE_TABLE
+            DT_SRS_SCOPE_TABLE += [(f"OS_{base_name_no_ext}","M")]
         elif "READ_WRITE_CHECK_BLK_DEVICES" in fn:
             section_name = "Suite_Name: Read Write Check Block Devices"
             suite_key    = "READ_WRITE_CHECK_BLK_DEVICES"
@@ -317,17 +331,57 @@ def merge_json_files(json_files, output_file):
             "Failed_with_Waiver": fw
         }
 
-    # Step 3) Compute *per-suite* compliance ignoring other suites' presence
-    for suite_key, fail_info in suite_fail_data.items():
-        f = fail_info["Failed"]
-        fw = fail_info["Failed_with_Waiver"]
-        single_suite_comp = determine_suite_compliance_alone(f, fw)
-        label = f"Suite_Name: {suite_key}_compliance"
-        acs_results_summary[label] = single_suite_comp
+    # Step 3) Compute *per-suite* and overall compliance
+    # Decide mandatory set
+    if DT_OR_SR_MODE == "DT":
+        mandatory_suites = set(DT_SRS_SCOPE_TABLE)
+    else:
+        mandatory_suites = set(SR_SRS_SCOPE_TABLE)
+        # If SBSA is present, treat it as mandatory
+        if "SBSA" in suite_fail_data:
+            mandatory_suites = {("SBSA", "M") if suite[0] == "SBSA" else suite for suite in mandatory_suites}
+
+    overall_comp="Compliant"
+    for suite_name, requirement in mandatory_suites:
+        if suite_name not in suite_fail_data:
+            label = f"Suite_Name: {suite_name}_compliance"
+            acs_results_summary[label] = "Not Compliant: not run"
+            if requirement == "M":
+                print(f"{RED}Suite: {suite_name}: {acs_results_summary[label]}{RESET}")
+                overall_comp="Not Compliant"
+            else:
+                print(f"Suite: {suite_name}: {acs_results_summary[label]}")
+        else:
+            fail_info = suite_fail_data.get(suite_name)
+            f = fail_info.get("Failed", 0)
+            fw = fail_info.get("Failed_with_Waiver", 0)
+            label = f"Suite_Name: {suite_key}_compliance"
+            if (f + fw) == 0:
+                acs_results_summary[label] = "Compliant"
+                print(f"Suite: {suite_name}: {acs_results_summary[label]}")
+            elif f == fw:
+                acs_results_summary[label] = "Compliant with waivers"
+                print(f"Suite: {suite_name}: {acs_results_summary[label]}")
+                if requirement == "M" and overall_compliance != "Not Compliant":
+                    overall_comp="Compliant with waivers"
+            else:
+                acs_results_summary[label] = f"Not Compliant: Failed {f}"
+                if requirement == "M":
+                    print(f"{RED}Suite: {suite_name}: {acs_results_summary[label]}{RESET}")
+                    overall_comp="Not Compliant"
+                else:
+                    print(f"Suite: {suite_name}: {acs_results_summary[label]}")
 
     # Step 4) Overall compliance using mandatory logic
-    overall_comp = determine_overall_compliance(suite_fail_data)
+    #overall_comp = determine_overall_compliance(suite_fail_data)
+
     acs_results_summary["Overall Compliance Result"] = overall_comp
+    if overall_comp == "Not Compliant":
+        print(f"\n{RED}SRS 3.0 Compliance result: {overall_comp}{RESET}\n")
+    elif overall_comp == "Compliant with waivers":
+        print(f"\n{YELLOW}SRS 3.0 Compliance result: {overall_comp}{RESET}\n")
+    else:
+        print(f"\n{GREEN}SRS 3.0 Compliance result: {overall_comp}{RESET}\n")
 
     if "Overall Compliance Results" in acs_results_summary:
         del acs_results_summary["Overall Compliance Results"]

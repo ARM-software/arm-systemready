@@ -34,7 +34,7 @@ if [ $# -lt 1 ]; then
 fi
 
 # Add the YOCTO_FLAG variable
-YOCTO_FLAG="/mnt/yocto_image.flag"
+YOCTO_FLAG="/mnt/c/Users/cherat01/ATEG/LOG_POST_SCRIPTS/yocto_image.flag"
 
 # Check if the YOCTO_FLAG exists
 if [ -f "$YOCTO_FLAG" ]; then
@@ -81,7 +81,7 @@ JSONS_DIR="$ACS_SUMMARY_DIR/acs_jsons"
 mkdir -p "$ACS_SUMMARY_DIR"
 mkdir -p "$JSONS_DIR"
 
-echo "Gathering ACS info into acs_info.txt and acs_info.json..."
+#echo "Gathering ACS info into acs_info.txt and acs_info.json..."
 python3 "$SCRIPTS_PATH/acs_info.py" \
     --acs_config_path "$ACS_CONFIG_PATH" \
     --system_config_path "$SYSTEM_CONFIG_PATH" \
@@ -119,6 +119,14 @@ check_file() {
         return 1
     fi
     return 0
+}
+
+# print missing json
+print_missing_json() {
+    local debug=0
+    if [ debug = 1 ]; then 	
+        echo -e "${YELLOW}WARNING: "$1" is missing.${NC}"
+    fi
 }
 
 # Function to apply waivers
@@ -434,22 +442,14 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
 fi
 
 ################################################################################
-# UEFI version + Device Tree
+# UEFI version
 ################################################################################
 UEFI_VERSION_LOG="$LOGS_PATH/uefi_dump/uefi_version.log"
-#DEVICE_TREE_DTS="$LOGS_PATH/linux_tools/device_tree.dts"
 
 if [ ! -f "$UEFI_VERSION_LOG" ]; then
     echo "INFO: UEFI version log '$(basename "$UEFI_VERSION_LOG")' not found."
     UEFI_VERSION_LOG=""
 fi
-
-#if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
-#    if [ ! -f "$DEVICE_TREE_DTS" ]; then
-#        echo "WARNING: Device Tree DTS file '$(basename "$DEVICE_TREE_DTS")' not found."
-#        DEVICE_TREE_DTS=""
-#    fi
-#fi
 
 ################################################################################
 # MERGE JSON
@@ -464,72 +464,64 @@ acs_info_json="$JSONS_DIR/acs_info.json"
 if [ -f "$acs_info_json" ]; then
     JSON_FILES+=("$acs_info_json")
 else
-    echo -e "${YELLOW}WARNING: acs_info.json not found. Skipping this file.${NC}"
+    print_missing_json "acs_info.json"
 fi
 
 # Add BSA
 if [ -f "$BSA_JSON" ]; then
     JSON_FILES+=("$BSA_JSON")
 else
-    echo -e "${YELLOW}WARNING: NO bsa tests json file found. Skipping this file.${NC}"
+    print_missing_json "bsa.json"
 fi
 
 # Add SBSA
 if [ $SBSA_PROCESSED -eq 1 ] && [ -f "$SBSA_JSON" ]; then
     JSON_FILES+=("$SBSA_JSON")
 elif [ $SBSA_PROCESSED -eq 1 ]; then
-    echo -e "${YELLOW}WARNING: NO sbsa tests json file found. Skipping this file.${NC}"
+    print_missing_json "sbsa.json"
 fi
 
 # FWTS
 if [ -f "$FWTS_JSON" ]; then
     JSON_FILES+=("$FWTS_JSON")
 else
-    echo -e "${YELLOW}WARNING: NO fwts tests json file found. Skipping this file.${NC}"
+    print_missing_json "fwts.json"
 fi
 
 # SCT
 if [ -f "$SCT_JSON" ]; then
     JSON_FILES+=("$SCT_JSON")
 else
-    echo -e "${YELLOW}WARNING: NO sct tests json file found. Skipping this file.${NC}"
+    print_missing_json "sct.json"
 fi
 
 # BBSR-FWTS
 if [ $BBSR_FWTS_PROCESSED -eq 1 ] && [ -f "$BBSR_FWTS_JSON" ]; then
     JSON_FILES+=("$BBSR_FWTS_JSON")
 else
-    echo -e "${YELLOW}WARNING: NO bbsr fwts tests json file found. Skipping this file.${NC}"
+    print_missing_json "bbsr_fwts.json"
 fi
 
 # BBSR-SCT
 if [ $BBSR_SCT_PROCESSED -eq 1 ] && [ -f "$BBSR_SCT_JSON" ]; then
     JSON_FILES+=("$BBSR_SCT_JSON")
 else
-    echo -e "${YELLOW}WARNING: NO bbsr sct tests json file found. Skipping this file.${NC}"
+    print_missing_json "bbsr_sct.json"
 fi
 
 # Standalone
 if [ $Standalone_PROCESSED -eq 1 ] && [ ${#Standalone_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${Standalone_JSONS[@]}")
 else
-    echo -e "${YELLOW}WARNING: NO Standalone tests json files found. Skipping these files.${NC}"
+    print_missing_json "standalone.json"
 fi
 
 # OS Tests
 if [ $OS_TESTS_PROCESSED -eq 1 ] && [ ${#OS_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${OS_JSONS[@]}")
 else
-    echo -e "${YELLOW}WARNING: NO OS tests json files found. Skipping these files.${NC}"
+    print_missing_json "os-tests"
 fi
-
-# PSCI JSON (Optional if you have it)
-# PSCI_JSON="$JSONS_DIR/psci.json"
-# if [ -f "$PSCI_JSON" ]; then
-#     JSON_FILES+=("$PSCI_JSON")
-# else
-#     echo -e "${YELLOW}WARNING: NO psci tests json file found. Skipping this file.${NC}"
-# fi
 
 if [ ${#JSON_FILES[@]} -gt 0 ]; then
     python3 "$SCRIPTS_PATH/merge_jsons.py" "$MERGED_JSON" "${JSON_FILES[@]}"

@@ -169,7 +169,7 @@ def main():
     with open(json_path, "w") as jf:
         json.dump(final_json, jf, indent=4)
 
-    print(f"acs_info.json created at: {json_path}")
+    #print(f"acs_info.json created at: {json_path}")
 
 if __name__ == "__main__":
     main()

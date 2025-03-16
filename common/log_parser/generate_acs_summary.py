@@ -141,43 +141,43 @@ def adjust_detailed_summary_heading(file_path, suite_name):
 ###############################################################################
 # get_failed_with_waiver_counts
 ###############################################################################
-def get_failed_with_waiver_counts(content):
-    """
-    Simple parser for extracting the "Failed" and "Failed with Waiver" counts
-    from the summary HTML tables. Used only to print them for debugging/logging.
-    """
-    failed = 0
-    failed_with_waiver = 0
-    if not content:
-        return failed, failed_with_waiver
-
-    lines = content.splitlines()
-    i = 0
-    while i < len(lines):
-        line = lines[i].strip()
-        if "Failed with Waiver" in line:
-            try:
-                count_line = lines[i + 1].strip()
-                start = count_line.find('>') + 1
-                end = count_line.find('</td>', start)
-                num_part = count_line[start:end].strip()
-                failed_with_waiver = int(num_part)
-                i += 1
-            except (IndexError, ValueError):
-                pass
-        elif "Failed" in line and "Failed with Waiver" not in line:
-            try:
-                count_line = lines[i + 1].strip()
-                start = count_line.find('>') + 1
-                end = count_line.find('</td>', start)
-                num_part = count_line[start:end].strip()
-                failed = int(num_part)
-                i += 1
-            except (IndexError, ValueError):
-                pass
-        i += 1
-
-    return failed, failed_with_waiver
+#def get_failed_with_waiver_counts(content):
+#    """
+#    Simple parser for extracting the "Failed" and "Failed with Waiver" counts
+#    from the summary HTML tables. Used only to print them for debugging/logging.
+#    """
+#    failed = 0
+#    failed_with_waiver = 0
+#    if not content:
+#        return failed, failed_with_waiver
+#
+#    lines = content.splitlines()
+#    i = 0
+#    while i < len(lines):
+#        line = lines[i].strip()
+#        if "Failed with Waiver" in line:
+#            try:
+#                count_line = lines[i + 1].strip()
+#                start = count_line.find('>') + 1
+#                end = count_line.find('</td>', start)
+#                num_part = count_line[start:end].strip()
+#                failed_with_waiver = int(num_part)
+#                i += 1
+#            except (IndexError, ValueError):
+#                pass
+#        elif "Failed" in line and "Failed with Waiver" not in line:
+#            try:
+#                count_line = lines[i + 1].strip()
+#                start = count_line.find('>') + 1
+#                end = count_line.find('</td>', start)
+#                num_part = count_line[start:end].strip()
+#                failed = int(num_part)
+#                i += 1
+#            except (IndexError, ValueError):
+#                pass
+#        i += 1
+#
+#    return failed, failed_with_waiver
 
 ###############################################################################
 # read_overall_compliance_from_merged_json
@@ -394,7 +394,7 @@ def generate_html(system_info, acs_results_summary,
                         <th>Overall Compliance Results</th>
                         <td style="
                             color: 
-                            {% if 'Not compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
+                            {% if 'Not Compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
                                 red
                             {% elif 'Compliant with Waivers' in acs_results_summary.get('Overall Compliance Results', '') %}
                                 #FFBF00
@@ -596,9 +596,9 @@ if __name__ == "__main__":
     }
 
     # 7) Print the fail/waiver counts for each suite (for logging/debug display only)
-    for suite_name, content in suite_content_map.items():
-        failed, failed_with_waiver = get_failed_with_waiver_counts(content)
-        print(f"Suite: {suite_name}, Failed: {failed}, Failed with Waiver: {failed_with_waiver}")
+    #for suite_name, content in suite_content_map.items():
+    #    failed, failed_with_waiver = get_failed_with_waiver_counts(content)
+    #    print(f"Suite: {suite_name}, Failed: {failed}, Failed with Waiver: {failed_with_waiver}")
 
     # 8) Read overall compliance solely from merged JSON (if provided)
     overall_compliance = "Unknown"
@@ -607,7 +607,7 @@ if __name__ == "__main__":
     else:
         print("Warning: merged JSON not provided or does not exist => Overall compliance unknown")
 
-    print(f"\nOverall Compliance: {overall_compliance}\n")
+    #print(f"\nOverall Compliance: {overall_compliance}\n")
 
     # 9) Prepare the dictionary that will be used in the final HTML
     acs_results_summary = {
