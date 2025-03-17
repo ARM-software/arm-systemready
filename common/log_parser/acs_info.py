@@ -149,12 +149,10 @@ def main():
     # 5) Build an "ACS Results Summary"
     band_val = acs_conf.get("Band", "Unknown")
     date_str = system_info.get('Summary Generated On', 'Unknown')
-    overall_compliance = "Unknown"  # or "Not compliant" if you want a default
 
     acs_results_summary = {
         "Band": band_val,
         "Date": date_str,
-        "Overall Compliance Results": overall_compliance
     }
 
     # 6) Prepare final JSON
