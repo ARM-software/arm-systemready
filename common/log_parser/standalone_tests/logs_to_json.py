@@ -476,9 +476,119 @@ def parse_read_write_check_blk_devices_log(log_data):
             while i < len(log_data) and log_data[i].strip() and not log_data[i].startswith("INFO"):
                 i += 1
             continue
+
         elif line.startswith("INFO: Block device :"):
             device_name = line.split(":")[-1].strip()
             i += 1
+
+            # raw device chcek
+            if i < len(log_data) and (
+                "treating as raw device." in log_data[i]
+                or "No valid partition table found for" in log_data[i]
+            ):
+                # Skip the "treating as raw device" line
+                i += 1
+
+                # Now parse lines related to the raw device until next "INFO: Block device :" or "********"
+                while i < len(log_data):
+                    raw_line = log_data[i].strip()
+                    # Stop if we've hit another device or end-of-section
+                    if raw_line.startswith("INFO: Block device :") or raw_line.startswith("****************************************************************"):
+                        break
+
+                    # Look for the read test lines: "Performing block read on /dev/XYZ"
+                    if "Performing block read on" in raw_line:
+                        # Next lines might say "Block read on /dev/XYZ successful" or "failed"
+                        i += 1
+                        read_status = "FAILED"
+                        read_reason = "Block read result not found"
+                        if i < len(log_data):
+                            possible_result = log_data[i].strip()
+                            if "Block read on" in possible_result:
+                                if "successful" in possible_result:
+                                    read_status = "PASSED"
+                                else:
+                                    read_status = "FAILED"
+                                read_reason = possible_result
+                                i += 1
+
+                        # Create a subtest for the raw read
+                        desc_read = f"Read check on Raw device {device_name}"
+                        sub_read = create_subtest(subtest_number, desc_read, read_status, reason=read_reason)
+                        current_test["subtests"].append(sub_read)
+                        update_suite_summary(current_test["test_suite_summary"], read_status)
+                        suite_summary[f"total_{read_status}"] += 1
+                        subtest_number += 1
+
+                        # Now see if we have a write check (passed/failed) or skip
+                        # e.g. "INFO: /dev/sda is mounted, skipping write test."
+                        # or "Do you want to perform a write check on /dev/sda? (yes/no): yes"
+                        if i < len(log_data) and "is mounted, skipping write test" in log_data[i]:
+                            write_reason = log_data[i].strip()
+                            write_status = "SKIPPED"
+                            i += 1
+                            desc_write = f"Write check on Raw device {device_name}"
+                            sub_write = create_subtest(subtest_number, desc_write, write_status, reason=write_reason)
+                            current_test["subtests"].append(sub_write)
+                            update_suite_summary(current_test["test_suite_summary"], write_status)
+                            suite_summary[f"total_{write_status}"] += 1
+                            subtest_number += 1
+
+                        elif i < len(log_data) and "Do you want to perform a write check on" in log_data[i]:
+                            
+                            # If user said yes/no
+                            prompt_line = log_data[i].strip()
+                            if "yes" in prompt_line.lower():
+                                i += 1
+                                ws = None
+                                wr = "No explicit write-check result found"
+                                while i < len(log_data):
+                                    w_line = log_data[i].strip()
+                                    if w_line.startswith("INFO: Block device :") or w_line.startswith("****************************************************************"):
+                                        break
+                                    if "INFO: write check passed on" in w_line:
+                                        ws = "PASSED"
+                                        wr = w_line
+                                        i += 1
+                                        break
+                                    if "INFO: write check failed on" in w_line:
+                                        ws = "FAILED"
+                                        wr = w_line
+                                        i += 1
+                                        break
+                                    i += 1
+
+                                if not ws:
+                                    ws = "FAILED"
+
+                                desc_write = f"Write check on Raw device {device_name}"
+                                sub_write = create_subtest(subtest_number, desc_write, ws, reason=wr)
+                                current_test["subtests"].append(sub_write)
+                                update_suite_summary(current_test["test_suite_summary"], ws)
+                                suite_summary[f"total_{ws}"] += 1
+                                subtest_number += 1
+                            else:
+                                # User said no or timed out
+                                write_status = "SKIPPED"
+                                write_reason = "Write check skipped due to user input or timeout"
+                                while i < len(log_data):
+                                    if (log_data[i].strip().startswith("INFO: Block device :")
+                                        or log_data[i].strip().startswith("****************************************************************")):
+                                        break
+                                    i += 1
+                                desc_write = f"Write check on Raw device {device_name}"
+                                sub_write = create_subtest(subtest_number, desc_write, write_status, reason=write_reason)
+                                current_test["subtests"].append(sub_write)
+                                update_suite_summary(current_test["test_suite_summary"], write_status)
+                                suite_summary[f"total_{write_status}"] += 1
+                                subtest_number += 1
+
+                    else:
+                        i += 1
+
+                # Done handling raw device lines; go to next device
+                continue
+
             if i < len(log_data) and "Invalid partition table or not found for" in log_data[i]:
                 status = "FAILED"
                 reason = log_data[i].strip()
@@ -490,6 +600,7 @@ def parse_read_write_check_blk_devices_log(log_data):
                 subtest_number += 1
                 i += 1
                 continue
+
             while i < len(log_data):
                 line = log_data[i].strip()
                 if line.startswith("INFO: Partition :"):
@@ -500,67 +611,118 @@ def parse_read_write_check_blk_devices_log(log_data):
                         partition_name = "Unknown"
 
                     i += 1
-                    partition_status = None
-                    partition_reason = ""
-
                     if i < len(log_data):
                         next_line = log_data[i].strip()
+                        # 1) PRECIOUS => single SKIPPED subtest
                         if "is PRECIOUS" in next_line:
-                            partition_status = "SKIPPED"
-                            partition_reason = next_line
+                            status = "SKIPPED"
+                            reason = next_line
+                            desc = f"Read/Write check on Partition {partition_name}"
+                            sub = create_subtest(subtest_number, desc, status, reason=reason)
+                            current_test["subtests"].append(sub)
+                            update_suite_summary(current_test["test_suite_summary"], status)
+                            suite_summary[f"total_{status}"] += 1
+                            subtest_number += 1
+
                             while i < len(log_data):
-                                if (log_data[i].strip().startswith("INFO: Partition :") or 
-                                   log_data[i].strip().startswith("INFO: Block device :") or 
-                                   log_data[i].strip().startswith("****************************************************************")):
+                                if (log_data[i].strip().startswith("INFO: Partition :")
+                                    or log_data[i].strip().startswith("INFO: Block device :")
+                                    or log_data[i].strip().startswith("****************************************************************")):
                                     break
                                 i += 1
+
+                        # 2) "Performing block read on"
                         elif "Performing block read on" in next_line:
                             i += 1
-                            if i < len(log_data):
-                                read_result_line = log_data[i].strip()
-                                if "Block read on" in read_result_line and "successful" in read_result_line:
-                                    read_status = "PASSED"
-                                    read_reason = read_result_line
-                                else:
-                                    read_status = "FAILED"
-                                    read_reason = read_result_line
+                            read_status = "FAILED"
+                            read_reason = "Block read result not found"
+                            while i < len(log_data):
+                                read_line = log_data[i].strip()
+                                if (read_line.startswith("INFO: Partition :") or
+                                    read_line.startswith("INFO: Block device :") or
+                                    read_line.startswith("****************************************************************")):
+                                    break
+                                if "Block read on" in read_line:
+                                    if "successful" in read_line:
+                                        read_status = "PASSED"
+                                    else:
+                                        read_status = "FAILED"
+                                    read_reason = read_line
+                                    i += 1
+                                    break
                                 i += 1
-                            else:
-                                read_status = "FAILED"
-                                read_reason = "Block read result not found"
 
+                            # Create subtest for READ
+                            read_desc = f"Read check on Partition {partition_name}"
+                            read_sub = create_subtest(subtest_number, read_desc, read_status, reason=read_reason)
+                            current_test["subtests"].append(read_sub)
+                            update_suite_summary(current_test["test_suite_summary"], read_status)
+                            suite_summary[f"total_{read_status}"] += 1
+                            subtest_number += 1
+
+                            # 3) check skip line or write prompt
                             write_status = None
                             write_reason = ""
-
-                            if i < len(log_data) and "Do you want to perform a write check on" in log_data[i]:
+                            if i < len(log_data) and "is mounted, skipping write test" in log_data[i]:
                                 write_status = "SKIPPED"
-                                write_reason = "Write check skipped due to user input or timeout"
-                                while i < len(log_data):
-                                    if (log_data[i].strip().startswith("INFO: Partition :") or 
-                                       log_data[i].strip().startswith("INFO: Block device :") or 
-                                       log_data[i].strip().startswith("****************************************************************")):
-                                        break
-                                    i += 1
+                                write_reason = log_data[i].strip()
+                                i += 1
 
-                            if read_status == "PASSED":
-                                partition_status = "PASSED"
-                                if write_status == "SKIPPED":
-                                    partition_reason = f"{read_reason}. {write_reason}"
+                                write_desc = f"Write check on Partition {partition_name}"
+                                write_sub = create_subtest(subtest_number, write_desc, write_status, reason=write_reason)
+                                current_test["subtests"].append(write_sub)
+                                update_suite_summary(current_test["test_suite_summary"], write_status)
+                                suite_summary[f"total_{write_status}"] += 1
+                                subtest_number += 1
+
+                            elif i < len(log_data) and "Do you want to perform a write check on" in log_data[i]:
+                                prompt_line = log_data[i].strip()
+                                if "yes" in prompt_line.lower():
+                                    i += 1
+                                    ws = None
+                                    wr = "No explicit write-check result found"
+                                    while i < len(log_data):
+                                        w_line = log_data[i].strip()
+                                        if (w_line.startswith("INFO: Partition :")
+                                            or w_line.startswith("INFO: Block device :")
+                                            or w_line.startswith("****************************************************************")):
+                                            break
+                                        if "INFO: write check passed on" in w_line:
+                                            ws = "PASSED"
+                                            wr = w_line
+                                            i += 1
+                                            break
+                                        if "INFO: write check failed on" in w_line:
+                                            ws = "FAILED"
+                                            wr = w_line
+                                            i += 1
+                                            break
+                                        i += 1
+
+                                    if not ws:
+                                        ws = "FAILED"
+                                    write_status = ws
+                                    write_reason = wr
                                 else:
-                                    partition_reason = read_reason
-                            else:
-                                partition_status = "FAILED"
-                                partition_reason = read_reason
+                                    write_status = "SKIPPED"
+                                    write_reason = "Write check skipped due to user input or timeout"
+                                    while i < len(log_data):
+                                        if (log_data[i].strip().startswith("INFO: Partition :")
+                                            or log_data[i].strip().startswith("INFO: Block device :")
+                                            or log_data[i].strip().startswith("****************************************************************")):
+                                            break
+                                        i += 1
+
+                                if write_status:
+                                    write_desc = f"Write check on Partition {partition_name}"
+                                    write_sub = create_subtest(subtest_number, write_desc, write_status, reason=write_reason)
+                                    current_test["subtests"].append(write_sub)
+                                    update_suite_summary(current_test["test_suite_summary"], write_status)
+                                    suite_summary[f"total_{write_status}"] += 1
+                                    subtest_number += 1
+
                         else:
                             i += 1
-
-                    if partition_status:
-                        desc = f"Read/Write check on Partition {partition_name}"
-                        sub = create_subtest(subtest_number, desc, partition_status, partition_reason)
-                        current_test["subtests"].append(sub)
-                        update_suite_summary(current_test["test_suite_summary"], partition_status)
-                        suite_summary[f"total_{partition_status}"] += 1
-                        subtest_number += 1
 
                 elif line.startswith("INFO: Block device :") or line.startswith("****************************************************************"):
                     break
@@ -573,15 +735,15 @@ def parse_read_write_check_blk_devices_log(log_data):
     # >>> REMOVE EMPTY REASON ARRAYS <<<
     for subtest in current_test["subtests"]:
         subres = subtest["sub_test_result"]
-        if not subres["pass_reasons"]:
+        if not subres.get("pass_reasons", []):
             del subres["pass_reasons"]
-        if not subres["fail_reasons"]:
+        if not subres.get("fail_reasons", []):
             del subres["fail_reasons"]
-        if not subres["abort_reasons"]:
+        if not subres.get("abort_reasons", []):
             del subres["abort_reasons"]
-        if not subres["skip_reasons"]:
+        if not subres.get("skip_reasons", []):
             del subres["skip_reasons"]
-        if not subres["warning_reasons"]:
+        if not subres.get("warning_reasons", []):
             del subres["warning_reasons"]
 
     return {
