@@ -481,7 +481,7 @@ def parse_read_write_check_blk_devices_log(log_data):
             device_name = line.split(":")[-1].strip()
             i += 1
 
-            # raw device chcek
+            # raw device check
             if i < len(log_data) and (
                 "treating as raw device." in log_data[i]
                 or "No valid partition table found for" in log_data[i]
@@ -558,8 +558,10 @@ def parse_read_write_check_blk_devices_log(log_data):
                                         break
                                     i += 1
 
+                                # no user input for yes/no for write check:
                                 if not ws:
-                                    ws = "FAILED"
+                                    ws = "SKIPPED"
+                                    wr = "User did not choose the prompt"
 
                                 desc_write = f"Write check on Raw device {device_name}"
                                 sub_write = create_subtest(subtest_number, desc_write, ws, reason=wr)
@@ -700,7 +702,8 @@ def parse_read_write_check_blk_devices_log(log_data):
                                         i += 1
 
                                     if not ws:
-                                        ws = "FAILED"
+                                        ws = "SKIPPED"
+                                        wr = "User did not choose the prompt"
                                     write_status = ws
                                     write_reason = wr
                                 else:

@@ -84,9 +84,12 @@ def count_fails_in_json(data):
 
     Expects a structure with top-level 'test_results' => [ {subtests: [...]} ]
     or a top-level list for subtests. If not recognized, returns (0,0).
+
+    *** Added a check so that if no subtests are found at all, we treat it as 1 fail. ***
     """
     total_failed = 0
     total_failed_with_waiver = 0
+    any_subtests_found = False
 
     if isinstance(data, dict) and "test_results" in data:
         test_results = data["test_results"]
@@ -100,6 +103,8 @@ def count_fails_in_json(data):
 
     for suite_entry in test_results:
         subtests = suite_entry.get("subtests", [])
+        if subtests:
+            any_subtests_found = True
         for sub in subtests:
             res = sub.get("sub_test_result")
             if isinstance(res, dict):
@@ -115,6 +120,9 @@ def count_fails_in_json(data):
                     if "(WITH WAIVER)" in res.upper():
                         total_failed_with_waiver += 1
 
+    # If we found zero subtests across the entire suite => treat that as a fail
+    if not any_subtests_found:
+        total_failed += 1
     return (total_failed, total_failed_with_waiver)
 
 def merge_json_files(json_files, output_file):
@@ -289,9 +297,7 @@ def merge_json_files(json_files, output_file):
             else:
                 acs_results_summary[label] = "Not compliant"
 
-    # Step 4) Overall compliance using mandatory logic
-    #overall_comp = determine_overall_compliance(suite_fail_data)
-    # Add reason in parentheses if we have missing or non-waived
+    # Step 4) Overall compliance
     if overall_comp == "Not Compliant":
         reason_parts = []
         if missing_list:
