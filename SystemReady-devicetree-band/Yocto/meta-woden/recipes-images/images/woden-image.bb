@@ -103,7 +103,7 @@ do_dir_deploy() {
     LINUX_BOOT_CMD_TEMP=`grep -Po 'Image\s+[a-zA-Z]+=.*' < grub.cfg`
     LINUX_BOOT_CMD=`echo $LINUX_BOOT_CMD_TEMP | head -1`
 
-    sed -i 's\ext4\ext4 video=efifb:off\g' grub.cfg
+    sed -i 's\ext4\ext4 video=efifb:off earlycon console=ttyS0,115200\g' grub.cfg
 
     if grep  -Eq "menuentry.*bbr/bsa"  grub.cfg
     then
