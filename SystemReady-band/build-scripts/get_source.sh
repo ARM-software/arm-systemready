@@ -170,7 +170,7 @@ get_bbr_acs_src()
     echo "Downloading Arm BBR source code."
     #git clone https://github.com/ARM-software/bbr-acs.git bbr-acs
     ##TODO revert back to main branch
-    git clone --branch 3.0_dev https://github.com/chetan-rathore/bbr-acs-1.git bbr-acs
+    git clone --branch 3.0_dev https://github.com/ARM-software/bbr-acs.git bbr-acs
     if [ -n "$ARM_BBR_TAG" ]; then
         # TAG provided.
         echo "Checking out Arm BBR TAG: $ARM_BBR_TAG"
