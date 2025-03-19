@@ -87,12 +87,10 @@ do_dir_deploy() {
     wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/acs_tests/bbsr-keys/*.esl
     wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/acs_tests/bbsr-keys/*.key
 
-    # create and copy empty acs_results directory to /results partition
-    mkdir -p acs_results
-    wic cp acs_results ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
-
     # create and copy empty acs_results_template directory to /results partition
-    mkdir -p acs_results_template
+    mkdir -p acs_results_template/acs_results
+    mkdir -p acs_results_template/os-logs
+    mkdir -p acs_results_template/fw
     wic cp acs_results_template ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
 
     #add bsa/bbr bootloder entry and set it has default boot
