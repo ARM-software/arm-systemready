@@ -18,9 +18,17 @@
 
 echo -off
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%i:\acs_results then
-        FS%i:
-        cd FS%i:\acs_results
+    if exist FS%i:\yocto_image.flag then
+        if exist FS%i:\acs_results_template\acs_results then
+            FS%i:
+            cd FS%i:\acs_results_template\acs_results
+	endif
+    else
+        if exist FS%i:\acs_results then
+            FS%i:
+            cd FS%i:\acs_results
+	endif
+    endif
         if not exist uefi then
             mkdir uefi
         endif
@@ -34,16 +42,16 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             echo "If no key is pressed then BSA will be run in normal mode"
             FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
             if %lasterror% == 0 then
-                if exist FS%i:\acs_results\uefi\BsaVerboseResults.log then
+                if exist BsaVerboseResults.log then
                     echo "BSA ACS in verbose mode is already run."
                     echo "Press any key to start BSA ACS in verbose mode execution from the beginning."
                     echo "WARNING: Ensure you have backed up the existing logs."
                     FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
                     if %lasterror% == 0 then
                         #Backup the existing logs
-                        rm -q FS%i:\acs_results\uefi\BsaVerboseResults_previous_run.log
-                        cp -r FS%i:\acs_results\uefi\BsaVerboseResults.log FS%i:\acs_results\uefi\BsaVerboseResults_previous_run.log
-                        rm -q FS%i:\acs_results\uefi\BsaVerboseResults.log
+                        rm -q BsaVerboseResults_previous_run.log
+                        cp -r BsaVerboseResults.log BsaVerboseResults_previous_run.log
+                        rm -q BsaVerboseResults.log
                         goto BsaVerboseRun
                     endif
                     goto BsaNormalRun
@@ -57,7 +65,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                    FS%i:\acs_tests\bsa\Bsa.efi -v 1 -skip 900 -f BsaVerboseTempResults.log
                 endif
                 stall 200000
-                if exist FS%i:\acs_results\uefi\BsaVerboseTempResults.log then
+                if exist BsaVerboseTempResults.log then
                     if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
                         echo " SystemReady devicetree band ACS v3.0.0-BETA0" > BsaVerboseResults.log
                     else
@@ -73,16 +81,16 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 endif
             endif
 :BsaNormalRun
-            if exist FS%i:\acs_results\uefi\BsaResults.log then
+            if exist BsaResults.log then
                 echo "BSA ACS is already run."
                 echo "Press any key to start BSA ACS execution from the beginning."
                 echo "WARNING: Ensure you have backed up the existing logs."
                 FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
                 if %lasterror% == 0 then
                     #Backup the existing logs
-                    rm -q FS%i:\acs_results\uefi\BsaResults_previous_run.log
-                    cp -r FS%i:\acs_results\uefi\BsaResults.log FS%i:\acs_results\uefi\BsaResults_previous_run.log
-                    rm -q FS%i:\acs_results\uefi\BsaResults.log
+                    rm -q BsaResults_previous_run.log
+                    cp -r BsaResults.log BsaResults_previous_run.log
+                    rm -q BsaResults.log
                     goto BsaRun
                 endif
                 goto Done
@@ -95,7 +103,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
             endif
             stall 200000
-            if exist FS%i:\acs_results\uefi\BsaTempResults.log then
+            if exist BsaTempResults.log then
                 if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
                     echo " SystemReady devicetree band ACS v3.0.0-BETA0" > BsaResults.log
                 else
