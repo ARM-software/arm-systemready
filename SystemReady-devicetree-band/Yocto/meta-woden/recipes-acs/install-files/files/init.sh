@@ -230,19 +230,19 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
 
 	fw_status="0x0"
-        echo "Testing ESRT FW version update" >> /mnt/acs_results_template/acs_results/app_output/capsule_test_results.log
-	echo "INFO: prev version: $prev_fw_ver,  current version: $cur_fw_ver, last attempted status: $last_attempted_status" >> /mnt/acs_results_template/acs_results/app_output/capsule_test_results.log
+        echo "Testing ESRT FW version update" >> /mnt/acs_results_template/fw/capsule_test_results.log
+	echo "INFO: prev version: $prev_fw_ver,  current version: $cur_fw_ver, last attempted status: $last_attempted_status" >> /mnt/acs_results_template/fw/capsule_test_results.log
 	if [ "$((cur_fw_ver))" -gt "$((prev_fw_ver))" ] && [ "$((last_attempted_status))" == "$((fw_status))" ]; then
-          echo "RESULTS: PASSED" >> /mnt/acs_results_template/acs_results/app_output/capsule_test_results.log
+          echo "RESULTS: PASSED" >> /mnt/acs_results_template/fw/capsule_test_results.log
 	  echo "Capsule update has passed"
         else
-	  echo "RESULTS: FAILED" >> /mnt/acs_results_template/acs_results/app_output/capsule_test_results.log
+	  echo "RESULTS: FAILED" >> /mnt/acs_results_template/fw/capsule_test_results.log
 	  echo "Capsule update has failed"
         fi
         rm /mnt/acs_tests/app/capsule_update_done.flag
       elif [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
 	echo "Capsule update has failed"
-        echo "Capsule update has failed ..." >> /mnt/acs_results_template/acs_results/app_output/capsule_test_results.log
+        echo "Capsule update has failed ..." >> /mnt/acs_results_template/fw/capsule_test_results.log
         rm /mnt/acs_tests/app/capsule_update_unsupport.flag
       else
         echo "Capsule update has ignored..."

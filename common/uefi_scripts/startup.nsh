@@ -58,12 +58,16 @@ for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             mkdir app_output
         endif
         cd app_output
-        if exist FS%e:\acs_tests\app\CapsuleApp.efi then
-            echo "Running CapsuleApp "
-            FS%e:\acs_tests\app\CapsuleApp.efi -P > CapsuleApp_FMP_protocol_info.log
-            FS%e:\acs_tests\app\CapsuleApp.efi -E > CapsuleApp_ESRT_table_info.log
-            goto DoneApp
-        endif
+	if exist CapsuleApp_FMP_protocol_info.log and exist CapsuleApp_ESRT_table_info.log then
+            echo "CapsuleApp already run"
+	else
+            if exist FS%e:\acs_tests\app\CapsuleApp.efi then
+                echo "Running CapsuleApp "
+                FS%e:\acs_tests\app\CapsuleApp.efi -P > CapsuleApp_FMP_protocol_info.log
+                FS%e:\acs_tests\app\CapsuleApp.efi -E > CapsuleApp_ESRT_table_info.log
+                goto DoneApp
+            endif
+	endif
     endif
 endfor
 :DoneApp
