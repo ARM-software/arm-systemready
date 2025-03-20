@@ -87,12 +87,10 @@ do_dir_deploy() {
     wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/acs_tests/bbsr-keys/*.esl
     wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/acs_tests/bbsr-keys/*.key
 
-    # create and copy empty acs_results directory to /results partition
-    mkdir -p acs_results
-    wic cp acs_results ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
-
     # create and copy empty acs_results_template directory to /results partition
-    mkdir -p acs_results_template
+    mkdir -p acs_results_template/acs_results
+    mkdir -p acs_results_template/os-logs
+    mkdir -p acs_results_template/fw
     wic cp acs_results_template ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
 
     #add bsa/bbr bootloder entry and set it has default boot
@@ -103,7 +101,7 @@ do_dir_deploy() {
     LINUX_BOOT_CMD_TEMP=`grep -Po 'Image\s+[a-zA-Z]+=.*' < grub.cfg`
     LINUX_BOOT_CMD=`echo $LINUX_BOOT_CMD_TEMP | head -1`
 
-    sed -i 's\ext4\ext4 video=efifb:off earlycon console=ttyS0,115200\g' grub.cfg
+    sed -i 's\ext4\ext4 earlycon video=efifb:off\g' grub.cfg
 
     if grep  -Eq "menuentry.*bbr/bsa"  grub.cfg
     then
@@ -138,8 +136,8 @@ do_dir_deploy() {
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/startup.nsh startup.nsh
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/bbsr_startup.nsh bbsr_startup.nsh
 
-    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} video=efifb:off"'/g' startup.nsh
-    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} video=efifb:off secureboot "'/g' bbsr_startup.nsh
+    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} earlycon video=efifb:off"'/g' startup.nsh
+    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} earlycon video=efifb:off secureboot "'/g' bbsr_startup.nsh
 
     wic cp startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/startup.nsh
     wic cp bbsr_startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/bbsr_startup.nsh

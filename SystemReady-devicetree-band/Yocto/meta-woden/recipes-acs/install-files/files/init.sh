@@ -75,7 +75,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       #LINUX DEBUG DUMP
 
       echo "Collecting Linux debug logs"
-      LINUX_DUMP_DIR="/mnt/acs_results/linux_dump"
+      LINUX_DUMP_DIR="/mnt/acs_results_template/acs_results/linux_dump"
       mkdir -p $LINUX_DUMP_DIR
       echo 1 > /proc/sys/kernel/printk
       timedatectl set-ntp true &> $LINUX_DUMP_DIR/set_ntp_time.log
@@ -101,12 +101,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo "Linux debug logs run - Completed"
       # FWTS EBBR run
 
-      mkdir -p /mnt/acs_results/fwts
+      mkdir -p /mnt/acs_results_template/acs_results/fwts
       echo "Executing FWTS for EBBR"
       test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
       echo "Test Executed are $test_list"
-      echo "SystemReady devicetree band ACS v3.0.0-BETA0" > /mnt/acs_results/fwts/FWTSResults.log
-      /usr/bin/fwts --ebbr `echo $test_list` -r stdout >> /mnt/acs_results/fwts/FWTSResults.log
+      echo "SystemReady devicetree band ACS v3.0.0-BETA0" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
+      /usr/bin/fwts --ebbr `echo $test_list` -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
       echo -e -n "\n"
       sync /mnt
       sleep 5
@@ -114,13 +114,13 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
  
       #LINUX BSA RUN
 
-      mkdir -p /mnt/acs_results/linux_acs/bsa_acs_app
+      mkdir -p /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app
       if [ -f /lib/modules/*/kernel/bsa_acs/bsa_acs.ko ]; then
         echo "Running Linux BSA tests"
         insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
-        echo "SystemReady devicetree band ACS v3.0.0-BETA0" > /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
-        bsa >> /mnt/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
-        dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
+        echo "SystemReady devicetree band ACS v3.0.0-BETA0" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+        bsa >> /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+        dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
 	sync /mnt
 	sleep 5
 	echo "Linux BSA test execution - Completed"
@@ -131,11 +131,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       # Device Driver Info script
 
       mkdir -p /home/root/fdt
-      mkdir -p /mnt/acs_results/linux_tools
+      mkdir -p /mnt/acs_results_template/acs_results/linux_tools
       pushd /usr/bin
       echo "running device_driver_info.sh device and driver info created"
       ./device_driver_info.sh
-      cp device_driver_info.log /mnt/acs_results/linux_tools
+      cp device_driver_info.log /mnt/acs_results_template/acs_results/linux_tools
       echo "device driver script run completed"
       popd
       sync /mnt
@@ -143,27 +143,27 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
       # DT VALIDATE RUN
 
-      # Generate the .dts file and move it to /mnt/acs_results/linux_tools
-      dtc -I fs -O dts -o /mnt/acs_results/linux_tools/device_tree.dts /sys/firmware/devicetree/base 2>/dev/null
+      # Generate the .dts file and move it to /mnt/acs_results_template/acs_results/linux_tools
+      dtc -I fs -O dts -o /mnt/acs_results_template/acs_results/linux_tools/device_tree.dts /sys/firmware/devicetree/base 2>/dev/null
       # Generate tree format of sys hierarchy and saving it into logs.
-      tree -d /sys > /mnt/acs_results/linux_dump/sys_hierarchy.log
+      tree -d /sys > /mnt/acs_results_template/acs_results/linux_dump/sys_hierarchy.log
       if [ -f /sys/firmware/fdt ]; then
         echo "copying fdt "
         cp /sys/firmware/fdt /home/root/fdt
         sync /mnt
 
         # Device Tree Validate script
-        if [ -f /results/acs_results/linux_tools/dt-validate.log ]; then
-          mv /results/acs_results/linux_tools/dt-validate.log /results/acs_results/linux_tools/dt-validate.log.old
+        if [ -f /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log ]; then
+          mv /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log.old
         fi
         echo "Running dt-validate tool "
-        dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results/linux_tools/dt-validate.log
-        sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.10 \ndtschema version: 2025.2 \n\n/' /mnt/acs_results/linux_tools/dt-validate.log
-        if [ ! -s /mnt/acs_results/linux_tools/dt-validate.log ]; then
-          echo "The FDT is compliant according to schema " >> /mnt/acs_results/linux_tools/dt-validate.log
+        dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
+        sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.10 \ndtschema version: 2025.2 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
+        if [ ! -s /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log ]; then
+          echo "The FDT is compliant according to schema " >> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         fi
       else
-        echo  "Error: The FDT devicetree file, fdt, does not exist at /sys/firmware/fdt. Cannot run dt-schema tool" | tee /mnt/acs_results/linux_tools/dt-validate.log
+        echo  "Error: The FDT devicetree file, fdt, does not exist at /sys/firmware/fdt. Cannot run dt-schema tool" | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
       fi
       sync /mnt
       sleep 5
@@ -171,10 +171,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       # Capturing System PSCI command output
 
       echo "Collecting psci command output"
-      mkdir -p /mnt/acs_results/linux_tools/psci
+      mkdir -p /mnt/acs_results_template/acs_results/linux_tools/psci
       mount -t debugfs none /sys/kernel/debug
-      cat /sys/kernel/debug/psci > /mnt/acs_results/linux_tools/psci/psci.log
-      dmesg | grep psci > /mnt/acs_results/linux_tools/psci/psci_kernel.log
+      cat /sys/kernel/debug/psci > /mnt/acs_results_template/acs_results/linux_tools/psci/psci.log
+      dmesg | grep psci > /mnt/acs_results_template/acs_results/linux_tools/psci/psci_kernel.log
       sync /mnt
       sleep 5
       echo "PSCI command output - Completed"
@@ -185,7 +185,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       pushd /usr/kernel-selftest
       chmod +x dt/test_unprobed_devices.sh
       chmod +x kselftest/ktap_helpers.sh
-      ./run_kselftest.sh -t dt:test_unprobed_devices.sh > /mnt/acs_results/linux_tools/dt_kselftest.log
+      ./run_kselftest.sh -t dt:test_unprobed_devices.sh > /mnt/acs_results_template/acs_results/linux_tools/dt_kselftest.log
       popd
       sync /mnt
       sleep 5
@@ -199,7 +199,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       # run ethtool-test.py, dump ethernet information, run self-tests if supported, and ping
       python3 /bin/ethtool-test.py | tee ethtool-test.log
       # remove color characters from log and save
-      awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results/linux_tools/ethtool-test.log
+      awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results_template/acs_results/linux_tools/ethtool-test.log
       sync /mnt
       sleep 5
       echo "Ethtool test run - Completed"
@@ -208,7 +208,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
       # RUN read_write_check_blk_devices.py, parse block devices, and perform read if partition doesn't belond in precious partitions
       echo "Running BLK devices read and write check"
-      python3 /bin/read_write_check_blk_devices.py | tee /mnt/acs_results/linux_tools/read_write_check_blk_devices.log
+      python3 /bin/read_write_check_blk_devices.py | tee /mnt/acs_results_template/acs_results/linux_tools/read_write_check_blk_devices.log
       sync /mnt
       sleep 5
       echo "BLK devices read and write check - Completed" 
@@ -230,19 +230,19 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
 
 	fw_status="0x0"
-        echo "Testing ESRT FW version update" >> /mnt/acs_results/app_output/capsule_test_results.log
-	echo "INFO: prev version: $prev_fw_ver,  current version: $cur_fw_ver, last attempted status: $last_attempted_status" >> /mnt/acs_results/app_output/capsule_test_results.log
+        echo "Testing ESRT FW version update" >> /mnt/acs_results_template/fw/capsule_test_results.log
+	echo "INFO: prev version: $prev_fw_ver,  current version: $cur_fw_ver, last attempted status: $last_attempted_status" >> /mnt/acs_results_template/fw/capsule_test_results.log
 	if [ "$((cur_fw_ver))" -gt "$((prev_fw_ver))" ] && [ "$((last_attempted_status))" == "$((fw_status))" ]; then
-          echo "RESULTS: PASSED" >> /mnt/acs_results/app_output/capsule_test_results.log
+          echo "RESULTS: PASSED" >> /mnt/acs_results_template/fw/capsule_test_results.log
 	  echo "Capsule update has passed"
         else
-	  echo "RESULTS: FAILED" >> /mnt/acs_results/app_output/capsule_test_results.log
+	  echo "RESULTS: FAILED" >> /mnt/acs_results_template/fw/capsule_test_results.log
 	  echo "Capsule update has failed"
         fi
         rm /mnt/acs_tests/app/capsule_update_done.flag
       elif [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
 	echo "Capsule update has failed"
-        echo "Capsule update has failed ..." >> /mnt/acs_results/app_output/capsule_test_results.log
+        echo "Capsule update has failed ..." >> /mnt/acs_results_template/fw/capsule_test_results.log
         rm /mnt/acs_tests/app/capsule_update_unsupport.flag
       else
         echo "Capsule update has ignored..."
@@ -251,11 +251,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
       # EDK2 Parser Tool run
 
-      if [ -d "/mnt/acs_results/sct_results" ]; then
+      if [ -d "/mnt/acs_results_template/acs_results/sct_results" ]; then
         echo "Running edk2-test-parser tool "
-        mkdir -p /mnt/acs_results/edk2-test-parser
+        mkdir -p /mnt/acs_results_template/acs_results/edk2-test-parser
         cd /usr/bin/edk2-test-parser
-        ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/EBBR.seq > /dev/null 2>&1
+        ./parser.py --md /mnt/acs_results_template/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results_template/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results_template/acs_results/sct_results/Sequence/EBBR.seq > /dev/null 2>&1
         echo "edk2-test-parser run completed"
       else
         echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
@@ -268,16 +268,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       if [ -d "/mnt/acs_results_template" ]; then
         echo "Running post scripts "
         cd /mnt/acs_results_template
-	if [ -d "/mnt/acs_results_template/acs_results" ]; then
-	  rm -r acs_results/
-	  sync /mnt
-	  sleep 5
-	fi
-	cp -r /mnt/acs_results /mnt_acs_results_template/
-	sync /mnt
-	sleep 5
-	mkdir -p /mnt/acs_results/post-script
-	/usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template > /mnt/acs_results/post-script/post-script.log 2>&1
+	mkdir -p /mnt/acs_results_template/acs_results/post-script
+	/usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template > /mnt/acs_results_template/acs_results/post-script/post-script.log 2>&1
 	cd -
       fi
       sync /mnt
@@ -286,11 +278,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       # ACS Log Parser run
 
       echo "Running acs log parser tool "
-      if [ -d "/mnt/acs_results" ]; then
-        if [ -d "/mnt/acs_results/acs_summary" ]; then
-          rm -r /mnt/acs_results/acs_summary 
+      if [ -d "/mnt/acs_results_template" ]; then
+        if [ -d "/mnt/acs_results_template/acs_results/acs_summary" ]; then
+          rm -r /mnt/acs_results_template/acs_results/acs_summary 
         fi
-      /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config_dt.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
+      /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results_template/acs_results /mnt/acs_tests/config/acs_config_dt.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
       fi
       sync /mnt
       sleep 5

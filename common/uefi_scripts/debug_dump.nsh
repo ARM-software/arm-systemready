@@ -15,10 +15,18 @@
 # limitations under the License.
 echo -off
 for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%m:\acs_results then
-        FS%m:
-        cd FS%m:\acs_results
-	goto DebugRun
+    if exist FS%m:\yocto_image.flag then
+        if exist FS%m:\acs_results_template\acs_results then
+            FS%m:
+            cd FS%m:\acs_results_template\acs_results
+	    goto DebugRun
+        endif
+    else
+        if exist FS%m:\acs_results then
+            FS%m:
+            cd FS%m:\acs_results
+	    goto DebugRun
+        endif
     endif
 endfor
 
