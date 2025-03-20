@@ -138,50 +138,6 @@ def adjust_detailed_summary_heading(file_path, suite_name):
         with open(file_path, 'w') as file:
             file.write(content)
 
-###############################################################################
-# get_failed_with_waiver_counts
-###############################################################################
-#def get_failed_with_waiver_counts(content):
-#    """
-#    Simple parser for extracting the "Failed" and "Failed with Waiver" counts
-#    from the summary HTML tables. Used only to print them for debugging/logging.
-#    """
-#    failed = 0
-#    failed_with_waiver = 0
-#    if not content:
-#        return failed, failed_with_waiver
-#
-#    lines = content.splitlines()
-#    i = 0
-#    while i < len(lines):
-#        line = lines[i].strip()
-#        if "Failed with Waiver" in line:
-#            try:
-#                count_line = lines[i + 1].strip()
-#                start = count_line.find('>') + 1
-#                end = count_line.find('</td>', start)
-#                num_part = count_line[start:end].strip()
-#                failed_with_waiver = int(num_part)
-#                i += 1
-#            except (IndexError, ValueError):
-#                pass
-#        elif "Failed" in line and "Failed with Waiver" not in line:
-#            try:
-#                count_line = lines[i + 1].strip()
-#                start = count_line.find('>') + 1
-#                end = count_line.find('</td>', start)
-#                num_part = count_line[start:end].strip()
-#                failed = int(num_part)
-#                i += 1
-#            except (IndexError, ValueError):
-#                pass
-#        i += 1
-#
-#    return failed, failed_with_waiver
-
-###############################################################################
-# read_overall_compliance_from_merged_json
-###############################################################################
 def read_overall_compliance_from_merged_json(merged_json_path):
     """
     Opens the merged_results.json and retrieves the final
@@ -202,8 +158,10 @@ def read_overall_compliance_from_merged_json(merged_json_path):
 def generate_html(system_info, acs_results_summary,
                   bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
                   bbsr_fwts_summary_path, bbsr_sct_summary_path,
+                  post_script_summary_path,
                   standalone_summary_path, OS_tests_summary_path,
                   output_html_path):
+
     # Read the summary HTML content from each suite
     bsa_summary_content = read_html_content(bsa_summary_path)
     sbsa_summary_content = read_html_content(sbsa_summary_path)
@@ -211,12 +169,14 @@ def generate_html(system_info, acs_results_summary,
     sct_summary_content = read_html_content(sct_summary_path)
     bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path)
+    post_script_summary_content = read_html_content(post_script_summary_path)
     standalone_summary_content = read_html_content(standalone_summary_path)
     OS_tests_summary_content = read_html_content(OS_tests_summary_path)
 
     # Adjust headings in BBSR/Standalone/OS summaries
     bbsr_fwts_summary_content = adjust_bbsr_headings(bbsr_fwts_summary_content, 'BBSR-FWTS')
     bbsr_sct_summary_content = adjust_bbsr_headings(bbsr_sct_summary_content, 'BBSR-SCT')
+    post_script_summary_content = adjust_bbsr_headings(post_script_summary_content, 'POST-SCRIPT')
     OS_tests_summary_content = adjust_bbsr_headings(OS_tests_summary_content, 'OS')
     standalone_summary_content = adjust_bbsr_headings(standalone_summary_content, 'Standalone')
 
@@ -424,6 +384,9 @@ def generate_html(system_info, acs_results_summary,
                     {% if sct_summary_content %}
                     <a href="#sct_summary">SCT Summary</a>
                     {% endif %}
+                    {% if post_script_summary_content %} 
+                    <a href="#post_script_summary">POST-SCRIPT Summary</a> 
+                    {% endif %} 
                     {% if standalone_summary_content %}
                     <a href="#standalone_summary">Standalone tests Summary</a>
                     {% endif %}
@@ -472,6 +435,14 @@ def generate_html(system_info, acs_results_summary,
                     </div>
                 </div>
                 {% endif %}
+                {% if post_script_summary_content %} 
+                <div class="summary" id="post_script_summary"> 
+                    {{ post_script_summary_content | safe }} 
+                    <div class="details-link"> 
+                        <a href="post_script_detailed.html" target="_blank">Click here to go to the detailed summary for POST-SCRIPT</a> 
+                    </div> 
+                </div> 
+                {% endif %} 
                 {% if standalone_summary_content %}
                 <div class="summary" id="standalone_summary">
                     {{ standalone_summary_content | safe }}
@@ -520,6 +491,7 @@ def generate_html(system_info, acs_results_summary,
         sct_summary_content=sct_summary_content,
         bbsr_fwts_summary_content=bbsr_fwts_summary_content,
         bbsr_sct_summary_content=bbsr_sct_summary_content,
+        post_script_summary_content=post_script_summary_content,
         standalone_summary_content=standalone_summary_content,
         OS_tests_summary_content=OS_tests_summary_content
     )
@@ -532,7 +504,8 @@ def generate_html(system_info, acs_results_summary,
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_fwts_detailed.html'), 'BBSR-FWTS'),
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_sct_detailed.html'), 'BBSR-SCT'),
         (os.path.join(os.path.dirname(output_html_path), 'os_tests_detailed.html'), 'OS'),
-        (os.path.join(os.path.dirname(output_html_path), 'standalone_tests_detailed.html'), 'Standalone')
+        (os.path.join(os.path.dirname(output_html_path), 'standalone_tests_detailed.html'), 'Standalone'),
+        (os.path.join(os.path.dirname(output_html_path), 'post_script_detailed.html'), 'POST-SCRIPT')
     ]
     for file_path, suite_name in detailed_summaries:
         adjust_detailed_summary_heading(file_path, suite_name)
@@ -546,6 +519,7 @@ if __name__ == "__main__":
     parser.add_argument("sct_summary_path", help="Path to the SCT summary HTML file")
     parser.add_argument("bbsr_fwts_summary_path", help="Path to the BBSR FWTS summary HTML file")
     parser.add_argument("bbsr_sct_summary_path", help="Path to the BBSR SCT summary HTML file")
+    parser.add_argument("post_script_summary_path", help="Path to the post-script summary HTML file")
     parser.add_argument("standalone_summary_path", help="Path to the Standalone tests summary HTML file")
     parser.add_argument("OS_tests_summary_path", help="Path to the OS Tests summary HTML file")
     parser.add_argument("capsule_update_summary_path", help="Path to the Capsule Update summary HTML file")
@@ -591,14 +565,10 @@ if __name__ == "__main__":
         "SCT": read_html_content(args.sct_summary_path),
         "BBSR-FWTS": read_html_content(args.bbsr_fwts_summary_path),
         "BBSR-SCT": read_html_content(args.bbsr_sct_summary_path),
+        "POST-SCRIPT": read_html_content(args.post_script_summary_path),
         "Standalone tests": standalone_summary_content,
         "OS tests": read_html_content(args.OS_tests_summary_path)
     }
-
-    # 7) Print the fail/waiver counts for each suite (for logging/debug display only)
-    #for suite_name, content in suite_content_map.items():
-    #    failed, failed_with_waiver = get_failed_with_waiver_counts(content)
-    #    print(f"Suite: {suite_name}, Failed: {failed}, Failed with Waiver: {failed_with_waiver}")
 
     # 8) Read overall compliance solely from merged JSON (if provided)
     overall_compliance = "Unknown"
@@ -606,8 +576,6 @@ if __name__ == "__main__":
         overall_compliance = read_overall_compliance_from_merged_json(args.merged_json)
     else:
         print("Warning: merged JSON not provided or does not exist => Overall compliance unknown")
-
-    #print(f"\nOverall Compliance: {overall_compliance}\n")
 
     # 9) Prepare the dictionary that will be used in the final HTML
     acs_results_summary = {
@@ -626,6 +594,7 @@ if __name__ == "__main__":
         args.sct_summary_path,
         args.bbsr_fwts_summary_path,
         args.bbsr_sct_summary_path,
+        args.post_script_summary_path,
         args.standalone_summary_path,
         args.OS_tests_summary_path,
         args.output_html_path

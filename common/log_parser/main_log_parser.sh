@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/usr/bin/env bash
-
 # Define color codes
 YELLOW='\033[1;33m'  # Yellow for WARNING
 RED='\033[0;31m'     # Red for ERROR
@@ -288,6 +286,31 @@ if check_file "$BBSR_SCT_LOG"; then
 fi
 
 ################################################################################
+# POST-SCRIPT LOG PARSING
+################################################################################
+POST_SCRIPT_LOG="/mnt/acs_results_template/acs_results/post-script/post-script.log"
+POST_SCRIPT_JSON="$JSONS_DIR/post_script.json"
+
+# Attempt to parse post-script.log if it exists
+if check_file "$POST_SCRIPT_LOG" "M"; then
+    POST_SCRIPT_PROCESSED=1
+    python3 "$SCRIPTS_PATH/post_script/logs_to_json.py" "$POST_SCRIPT_LOG" "$POST_SCRIPT_JSON"
+    if [ $? -ne 0 ]; then
+        POST_SCRIPT_PROCESSED=0
+        echo -e "${RED}ERROR: post-script logs parsing to json failed.${NC}"
+    else
+        # Optionally apply waivers if your apply_waivers.py is relevant
+        apply_waivers "POST_SCRIPT" "$POST_SCRIPT_JSON"
+
+        # Generate the HTML (detailed + summary)
+        python3 "$SCRIPTS_PATH/post_script/json_to_html.py" \
+            "$POST_SCRIPT_JSON" \
+            "$HTMLS_DIR/post_script_detailed.html" \
+            "$HTMLS_DIR/post_script_summary.html"
+    fi
+fi
+
+################################################################################
 # STANDALONE TESTS PARSING (including Capsule)
 ################################################################################
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
@@ -510,6 +533,13 @@ else
     print_missing_json "bbsr_sct.json"
 fi
 
+# POST-SCRIPT
+if [ $POST_SCRIPT_PROCESSED -eq 1 ] && [ -f "$POST_SCRIPT_JSON" ]; then
+    JSON_FILES+=("$POST_SCRIPT_JSON")
+else
+    print_missing_json "post_script.json"
+fi
+
 # Standalone
 if [ $Standalone_PROCESSED -eq 1 ] && [ ${#Standalone_JSONS[@]} -gt 0 ]; then
     JSON_FILES+=("${Standalone_JSONS[@]}")
@@ -581,21 +611,28 @@ else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 7) STANDALONE
+#7) POST-SCRIPT
+if [ $POST_SCRIPT_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/post_script_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi 
+
+# 8) STANDALONE
 if [ $Standalone_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$Standalone_SUMMARY_HTML\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 8) OS TESTS
+# 9) OS TESTS
 if [ $OS_TESTS_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$OS_SUMMARY_HTML\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 9) CAPSULE UPDATE SUMMARY
+# 10) CAPSULE UPDATE SUMMARY
 CAPSULE_SUMMARY_HTML=""
 GENERATE_ACS_SUMMARY_CMD+=" \"$CAPSULE_SUMMARY_HTML\""
 
@@ -666,6 +703,12 @@ if [ $print_path -eq 1 ]; then
         echo "BBSR SCT Summary          : $HTMLS_DIR/bbsr_sct_summary.html"
         echo ""
     fi
+    if [ $POST_SCRIPT_PROCESSED -eq 1 ]; then
+        echo "POST SCRIPTS JSON             : $POST_SCRIPT_JSON"
+        echo "POST SCRIPTS Detailed Summary : $HTMLS_DIR/post_script_detailed.html"
+        echo "POST SCRIPTS Summary          : $HTMLS_DIR/post_script_summary.html"
+        echo ""
+    fi 
     if [ $Standalone_PROCESSED -eq 1 ]; then
         echo "Standalone tests Detailed Summary      : $Standalone_DETAILED_HTML"
         echo "Standalone tests Summary               : $Standalone_SUMMARY_HTML"
