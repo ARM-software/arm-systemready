@@ -51,6 +51,7 @@ DT_SRS_SCOPE_TABLE = [
     ("BBSR-FWTS", "R"),
     ("DT_KSELFTEST", "R"),
     ("PSCI", "R"),
+    ("POST_SCRIPT", "R")
 ]
 
 # SR SRS scope table
@@ -224,6 +225,11 @@ def merge_json_files(json_files, output_file):
         elif "PSCI" in fn:
             section_name = "Suite_Name: PSCI"
             suite_key    = "PSCI"
+
+        elif "POST_SCRIPT" in fn:
+            section_name = "Suite_Name: POST_SCRIPT"
+            suite_key    = "POST_SCRIPT"
+
         else:
             section_name = "Suite_Name: Unknown"
             suite_key    = "Unknown"
