@@ -79,14 +79,12 @@ def parse_post_script_log(log_path):
         # Attach reasons arrays only if needed
         if severity == "ERROR":
             subtest["sub_test_result"]["FAILED"] = 1
-            subtest["sub_test_result"]["fail_reasons"] = [text_line.strip()]
+            subtest["sub_test_result"]["fail_reasons"] = ["N/A"]
         elif severity == "WARNING":
             subtest["sub_test_result"]["WARNINGS"] = 1
-            subtest["sub_test_result"]["warning_reasons"] = [text_line.strip()]
+            subtest["sub_test_result"]["warning_reasons"] = ["N/A"]
         elif severity == "INFO":
-            # We'll treat INFO lines as "passed" subtests for demonstration
-            subtest["sub_test_result"]["PASSED"] = 1
-            subtest["sub_test_result"]["pass_reasons"] = [text_line.strip()]
+            return None
         return subtest
 
     # Parse line by line
@@ -109,19 +107,17 @@ def parse_post_script_log(log_path):
         # Variation: you could also treat lines with no recognized prefix as "INFO"
         if line.startswith("ERROR"):
             subtest_counter += 1
-            test_suite["subtests"].append(
-                make_subtest(subtest_counter, "ERROR", line)
-            )
+            st = make_subtest(subtest_counter, "ERROR", line)
+            if st is not None:
+                test_suite["subtests"].append(st)
         elif line.startswith("WARNING"):
             subtest_counter += 1
-            test_suite["subtests"].append(
-                make_subtest(subtest_counter, "WARNING", line)
-            )
+            st = make_subtest(subtest_counter, "WARNING", line)
+            if st is not None:
+                test_suite["subtests"].append(st)
         elif line.startswith("INFO"):
-            subtest_counter += 1
-            test_suite["subtests"].append(
-                make_subtest(subtest_counter, "INFO", line)
-            )
+            subtest = make_subtest(subtest_counter+1, "INFO", line)  # calls make_subtest
+            # we do not increment subtest_counter or append if it returns None
         else:
             # parse lines that do not start with these tokens,skip them to keep the subtests clean
             pass
