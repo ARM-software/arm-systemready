@@ -23,7 +23,7 @@ kas shell kas/woden.yml --command "bitbake llvm-native && bitbake rust-native &&
 if [ $? -eq 0 ]; then
     if [ -f $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64/woden-image-genericarm64.rootfs.wic ]; then
       cd $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64
-      rm systemready-dt-acs_live_image.wic.xz 2> /dev/null
+      rm systemready-dt_acs_live_image.wic.xz 2> /dev/null
       cp woden-image-genericarm64.rootfs.wic systemready-dt_acs_live_image.wic
       xz -z systemready-dt_acs_live_image.wic
       echo "The built image is at $TOP_DIR/meta-woden/build/tmp/deploy/images/genericarm64/systemready-dt_acs_live_image.wic.xz"
