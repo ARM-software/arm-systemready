@@ -422,7 +422,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     OS_JSONS=()
     BOOT_SOURCES_PATHS=()
 
-    if [ -d "$OS_LOGS_PATH" ]; then
+    if [ -d "$OS_LOGS_PATH" ] && [ "$(ls -A "$OS_LOGS_PATH")" ]; then
         for OS_DIR in "$OS_LOGS_PATH"/linux*; do
             if [ -d "$OS_DIR" ]; then
                 OS_NAME=$(basename "$OS_DIR")
@@ -450,7 +450,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             fi
         done
     else
-        echo -e "${RED}ERROR: os-logs directory not found at $OS_LOGS_PATH${NC}"
+        echo -e "${RED}ERROR: No os-logs found in os-logs directory at $OS_LOGS_PATH${NC}"
     fi
 
     if [ ${#OS_JSONS[@]} -gt 0 ]; then

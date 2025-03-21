@@ -34,7 +34,7 @@ IMAGE_EFI_BOOT_FILES += "Bsa.efi;acs_tests/bsa/Bsa.efi \
                          yocto_image.flag \
                          debug_dump.nsh;acs_tests/debug/debug_dump.nsh \
                          startup.nsh;EFI/BOOT/startup.nsh \
-                         acs_config_dt.txt;acs_tests/config/acs_config_dt.txt \
+                         acs_config.txt;acs_tests/config/acs_config.txt \
                          system_config.txt;acs_tests/config/system_config.txt \
                          bbsr_startup.nsh;EFI/BOOT/bbsr_startup.nsh \
                          bbsr_SctStartup.nsh;acs_tests/bbr/bbsr_SctStartup.nsh \

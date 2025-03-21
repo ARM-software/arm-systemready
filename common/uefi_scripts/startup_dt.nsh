@@ -129,7 +129,7 @@ endfor
 :BootLinux
 echo "Booting Linux"
 for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%l:\Image then
+    if exist FS%l:\Image and exist FS%l:\yocto_image.flag then
         FS%l:
         cd FS%l:\
         Image LABEL=BOOT root=partuid
