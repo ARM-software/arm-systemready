@@ -33,7 +33,7 @@ do_deploy() {
    cp pingtest.nsh ${DEPLOYDIR}/
    cp capsule_update.nsh ${DEPLOYDIR}/
    cp bbsr_startup.nsh ${DEPLOYDIR}/
-   cp acs_config_dt.txt ${DEPLOYDIR}/
+   cp acs_config_dt.txt ${DEPLOYDIR}/acs_config.txt
    cp system_config.txt ${DEPLOYDIR}/
    cp ${S}/../../../armv8a-oe-linux/ebbr-sct/1.0/bbr-acs/bbsr/config/BBSRStartup.nsh  ${DEPLOYDIR}/bbsr_SctStartup.nsh
 
