@@ -151,6 +151,7 @@ BBSR_SCT_PROCESSED=0
 Standalone_PROCESSED=0
 OS_TESTS_PROCESSED=0
 CAPSULE_PROCESSED=0
+POST_SCRIPT_PROCESSED=0
 
 ################################################################################
 # BSA PARSING
