@@ -51,7 +51,8 @@ DT_SRS_SCOPE_TABLE = [
     ("BBSR-FWTS", "R"),
     ("DT_KSELFTEST", "R"),
     ("PSCI", "R"),
-    ("POST_SCRIPT", "R")
+    ("POST_SCRIPT", "R"),
+    ("OS_TEST", "M")
 ]
 
 # SR SRS scope table
@@ -163,6 +164,7 @@ def merge_json_files(json_files, output_file):
             "ACS Results Summary": acs_results_summary
         }
 
+    os_logs_found = 0
     # Step 2) Process each suite JSON
     for json_path in new_json_files:
         if not os.path.isfile(json_path):
@@ -219,6 +221,9 @@ def merge_json_files(json_files, output_file):
             suite_key    = f"OS_{base_name_no_ext}"
             global DT_SRS_SCOPE_TABLE
             DT_SRS_SCOPE_TABLE += [(f"OS_{base_name_no_ext}","M")]
+            os_logs_found += 1
+            if os_logs_found == 3:
+                DT_SRS_SCOPE_TABLE.remove(("OS_TEST","M"))
         elif "READ_WRITE_CHECK_BLK_DEVICES" in fn:
             section_name = "Suite_Name: Read Write Check Block Devices"
             suite_key    = "READ_WRITE_CHECK_BLK_DEVICES"
