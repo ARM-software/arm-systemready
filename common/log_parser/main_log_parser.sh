@@ -289,7 +289,7 @@ fi
 ################################################################################
 # POST-SCRIPT LOG PARSING
 ################################################################################
-POST_SCRIPT_LOG="/mnt/acs_results_template/acs_results/post-script/post-script.log"
+POST_SCRIPT_LOG="$LOGS_PATH/post-script/post-script.log"
 POST_SCRIPT_JSON="$JSONS_DIR/post_script.json"
 
 # Attempt to parse post-script.log if it exists
