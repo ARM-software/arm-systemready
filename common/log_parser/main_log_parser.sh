@@ -201,11 +201,21 @@ if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
     SBSA_JSON="$JSONS_DIR/sbsa.json"
     SBSA_LOGS=()
 
-    if check_file "$SBSA_LOG" "M"; then
-        SBSA_LOGS+=("$SBSA_LOG")
-    fi
-    if check_file "$SBSA_KERNEL_LOG" "M"; then
-        SBSA_LOGS+=("$SBSA_KERNEL_LOG")
+    SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/mnt/acs_tests/config/acs_run_config.ini" | cut -d'=' -f2 || echo "0")
+    if [ $SbsaRunEnabled -eq 1 ]; then
+        if check_file "$SBSA_LOG" "M"; then
+            SBSA_LOGS+=("$SBSA_LOG")
+        fi
+        if check_file "$SBSA_KERNEL_LOG" "M"; then
+            SBSA_LOGS+=("$SBSA_KERNEL_LOG")
+        fi
+    else
+        if check_file "$SBSA_LOG"; then
+            SBSA_LOGS+=("$SBSA_LOG")
+        fi
+        if check_file "$SBSA_KERNEL_LOG"; then
+            SBSA_LOGS+=("$SBSA_KERNEL_LOG")
+        fi
     fi
 
     if [ ${#SBSA_LOGS[@]} -gt 0 ]; then
@@ -289,28 +299,29 @@ fi
 ################################################################################
 # POST-SCRIPT LOG PARSING
 ################################################################################
-POST_SCRIPT_LOG="$LOGS_PATH/post-script/post-script.log"
-POST_SCRIPT_JSON="$JSONS_DIR/post_script.json"
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+    POST_SCRIPT_LOG="$LOGS_PATH/post-script/post-script.log"
+    POST_SCRIPT_JSON="$JSONS_DIR/post_script.json"
 
-# Attempt to parse post-script.log if it exists
-if check_file "$POST_SCRIPT_LOG" "M"; then
-    POST_SCRIPT_PROCESSED=1
-    python3 "$SCRIPTS_PATH/post_script/logs_to_json.py" "$POST_SCRIPT_LOG" "$POST_SCRIPT_JSON"
-    if [ $? -ne 0 ]; then
-        POST_SCRIPT_PROCESSED=0
-        echo -e "${RED}ERROR: post-script logs parsing to json failed.${NC}"
-    else
-        # Optionally apply waivers if your apply_waivers.py is relevant
-        apply_waivers "POST_SCRIPT" "$POST_SCRIPT_JSON"
+    # Attempt to parse post-script.log if it exists
+    if check_file "$POST_SCRIPT_LOG" "M"; then
+        POST_SCRIPT_PROCESSED=1
+        python3 "$SCRIPTS_PATH/post_script/logs_to_json.py" "$POST_SCRIPT_LOG" "$POST_SCRIPT_JSON"
+        if [ $? -ne 0 ]; then
+            POST_SCRIPT_PROCESSED=0
+            echo -e "${RED}ERROR: post-script logs parsing to json failed.${NC}"
+        else
+            # Optionally apply waivers if your apply_waivers.py is relevant
+            apply_waivers "POST_SCRIPT" "$POST_SCRIPT_JSON"
 
-        # Generate the HTML (detailed + summary)
-        python3 "$SCRIPTS_PATH/post_script/json_to_html.py" \
-            "$POST_SCRIPT_JSON" \
-            "$HTMLS_DIR/post_script_detailed.html" \
-            "$HTMLS_DIR/post_script_summary.html"
+            # Generate the HTML (detailed + summary)
+            python3 "$SCRIPTS_PATH/post_script/json_to_html.py" \
+                "$POST_SCRIPT_JSON" \
+                "$HTMLS_DIR/post_script_detailed.html" \
+                "$HTMLS_DIR/post_script_summary.html"
+        fi
     fi
 fi
-
 ################################################################################
 # STANDALONE TESTS PARSING (including Capsule)
 ################################################################################
