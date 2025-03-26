@@ -36,7 +36,8 @@ DEBUG_CONFIG_FILE=${TOP_DIR}/uefi_scripts/debug_dump.nsh
 ACS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_config.txt
 SYSTEM_CONFIG_FILE=${TOP_DIR}/build-scripts/config/system_config.txt
 ACS_RUN_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_run_config.ini
-CONFIG_PARSER_EFI=${TOP_DIR}/parser/Parser.efi
+CONFIG_PARSER_EFI=${TOP_DIR}/../common/parser/Parser.efi
+CONFIG_PARSER_FILE=${TOP_DIR}/uefi_scripts/parser.nsh
 BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
 GRUB_PATH=grub
@@ -97,6 +98,7 @@ create_fatpart ()
 
     mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/acs_tests/app
     mcopy -i $fatpart_name $CONFIG_PARSER_EFI  ::/acs_tests/parser
+    mcopy -i $fatpart_name $CONFIG_PARSER_FILE  ::/acs_tests/parser
 
     echo "FAT partition image created"
 }

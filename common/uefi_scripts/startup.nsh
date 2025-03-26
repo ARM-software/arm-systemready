@@ -27,24 +27,51 @@ for %b in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     endif
 endfor
 
-# Run the config parser
-for %a in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%a:\acs_tests\parser\Parser.efi  then
-        FS%a:\acs_tests\parser\Parser.efi
-    endif
+for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+        if exist FS%y:\acs_tests\parser\Parser.efi then
+            FS%y:
+            echo "Config File content"
+            echo " "
+            echo " "
+            type acs_tests\config\acs_run_config.ini
+            echo " "
+            echo " "
+            echo "Press any key to modify the Config file"
+            echo "If no key is pressed then default configurations"
+            FS%y:acs_tests\bbr\SCT\Stallforkey.efi 10
+			if %lasterror% == 0 then
+                acs_tests\parser\parser.nsh
+                acs_tests\Parser\Parser.efi -automation
+                goto DoneParserApp
+            else
+                FS%i:\acs_tests\Parser\Parser.efi -automation
+                goto DoneParserApp
+			endif
+        else
+            echo "Parser.efi not present"
+        endif
 endfor
+:DoneParserApp
+echo "done parser app"
+echo " "
 
-for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%i:\acs_tests\bbr\SctStartup.nsh then
-        FS%i:\acs_tests\bbr\SctStartup.nsh %1
-        goto DoneSCT
-    endif
-endfor
-:DoneSCT
+if %config_enabled_for_automation_run% == "true" then 
+    for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+        if exist FS%i:\acs_tests\bbr\SctStartup.nsh then
+            FS%i:\acs_tests\bbr\SctStartup.nsh %1 true
+        endif
+    endfor
+else
+    for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+        if exist FS%i:\acs_tests\bbr\SctStartup.nsh then
+            FS%i:\acs_tests\bbr\SctStartup.nsh %1 false
+        endif
+    endfor
+endif
 
-for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%k:\acs_tests\bbr\ScrtStartup.nsh then
-        FS%k:\acs_tests\bbr\ScrtStartup.nsh
+for %g in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%g:\acs_tests\bbr\ScrtStartup.nsh then
+        FS%g:\acs_tests\bbr\ScrtStartup.nsh
         goto Donebbr
     endif
 endfor
@@ -80,21 +107,41 @@ for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 :DoneDebug
 
-for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%j:\acs_tests\bsa\bsa.nsh then
-        FS%j:\acs_tests\bsa\bsa.nsh
-        goto Donebsa
-    endif
-endfor
-:Donebsa
+if %config_enabled_for_automation_run% == "true" then 
+    for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+        if exist FS%j:\acs_tests\bsa\bsa.nsh then
+            FS%j:\acs_tests\bsa\bsa.nsh true
+            goto DoneBsa
+		endif
+    endfor
+else
+    for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+        if exist FS%j:\acs_tests\bsa\bsa.nsh then
+            FS%j:\acs_tests\bsa\bsa.nsh false
+            goto DoneBsa
+        endif
+    endfor
+endif
+:DoneBsa
 
-for %z in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%z:\acs_tests\bsa\sbsa\sbsa.nsh then
-        FS%z:\acs_tests\bsa\sbsa\sbsa.nsh
-        goto Donesbsa
-    endif
-endfor
-:Donesbsa
+echo "running SBSA"
+echo "flag %config_enabled_for_automation_run%"
+if %config_enabled_for_automation_run% == "true" then
+    for %z in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+        if exist FS%z:\acs_tests\bsa\sbsa\sbsa.nsh then
+            FS%z:\acs_tests\bsa\sbsa\sbsa.nsh true
+            goto DoneSbsa         
+		endif
+    endfor
+else
+    for %z in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+        if exist FS%z:\acs_tests\bsa\sbsa\sbsa.nsh then
+            FS%z:\acs_tests\bsa\sbsa\sbsa.nsh false
+            goto DoneSbsa
+        endif
+    endfor
+endif
+:DoneSbsa
 
 :BootLinux
 echo "Booting Linux"
