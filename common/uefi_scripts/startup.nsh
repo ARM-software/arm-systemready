@@ -41,10 +41,10 @@ for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%y:acs_tests\bbr\SCT\Stallforkey.efi 10
 			if %lasterror% == 0 then
                 acs_tests\parser\parser.nsh
-                acs_tests\Parser\Parser.efi -automation
+                acs_tests\parser\Parser.efi -automation
                 goto DoneParserApp
             else
-                FS%i:\acs_tests\Parser\Parser.efi -automation
+                FS%i:\acs_tests\parser\Parser.efi -automation
                 goto DoneParserApp
 			endif
         else
