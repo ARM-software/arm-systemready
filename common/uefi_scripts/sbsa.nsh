@@ -19,6 +19,13 @@
 echo -off
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_results then
+        if %1 == "true" then
+            FS%i:\acs_tests\parser\Parser.efi -sbsa
+            if %automation_sbsa_run% == "false" then
+                echo "************ SBSA is disabled in config file(acs_run_config.ini) ************"
+                goto Done           
+            endif
+        endif
         FS%i:
         cd FS%i:\acs_results
         if not exist uefi then
@@ -29,9 +36,6 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             mkdir temp
         endif
         if exist FS%i:\acs_tests\bsa\sbsa\Sbsa.efi then
-	    if not exist FS%i:\acs_tests\parser\SbsaRunEnabled.flag then
-	        goto Done
-	    endif
             echo "Press any key to start SBSA in verbose mode."
             echo "If no key is pressed then SBSA will be run in normal mode"
             FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
@@ -82,7 +86,21 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 goto Done
             endif
 :SbsaNormalRun
-            FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
+            if "%1" == "false" then
+                echo "SBSA Command : "
+                echo "FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log"
+                FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
+            else   
+                FS%i:\acs_tests\parser\Parser.efi -sbsa
+                if %automation_sbsa_run% == "true" then
+                   echo "SBSA Command : "
+                   echo "FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -f SbsaTempResults.log" 
+                   FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -f SbsaTempResults.log        
+                else
+                    echo "************ SBSA is disabled in config file(acs_run_config.ini) ************"
+                    goto Done           
+                endif
+            endif
             stall 200000
             if exist FS%i:\acs_results\uefi\SbsaTempResults.log then
                 echo " SystemReady band ACS v3.0.0-BETA0" > SbsaResults.log
