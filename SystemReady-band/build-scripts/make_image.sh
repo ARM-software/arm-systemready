@@ -28,6 +28,7 @@ PLATDIR=${TOP_DIR}/output
 OUTDIR=${PLATDIR}
 GRUB_BUILDROOT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub-buildroot.cfg
 EFI_CONFIG_FILE=${TOP_DIR}/uefi_scripts/startup.nsh
+EE_EFI_CONFIG_FILE=${TOP_DIR}/uefi_scripts/startup_ee.nsh
 BBSR_STARTUP_FILE=${TOP_DIR}/uefi_scripts/bbsr_startup.nsh
 BSA_CONFIG_FILE=${TOP_DIR}/uefi_scripts/bsa.nsh
 SBSA_CONFIG_FILE=${TOP_DIR}/uefi_scripts/sbsa.nsh
@@ -52,6 +53,7 @@ create_cfgfiles ()
     mcopy -i  $fatpart_name -o ${GRUB_BUILDROOT_CONFIG_FILE} ::/EFI/BOOT/grub.cfg
     mcopy -i  $fatpart_name -o ${BBSR_STARTUP_FILE}   ::/EFI/BOOT/
     mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/
+    mcopy -i  $fatpart_name -o ${EE_EFI_CONFIG_FILE}  ::/EFI/BOOT/
     mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}     ::/acs_tests/bsa/
     mcopy -i  $fatpart_name -o ${SBSA_CONFIG_FILE}    ::/acs_tests/bsa/sbsa
     mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}   ::/acs_tests/debug/
