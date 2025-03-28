@@ -193,8 +193,73 @@ $QEMU \
 "BBSR Compliance (Automation)" for BBSR SCT tests, Secure Linux boot, BBSR FWTS and TPM2 logs.
 ```
 
-Note: SystemReady-devicetree-band Yocto ACS supports automatic enrollment of secure boot keys, still if the system fails to enter SecureBoot mode, Please refer to "Enrolling keys in U-boot" section of [BBSR ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll manually. <br>
-Note: The SecureBoot keys are present in \<bootfs>\acs_tests\bbsr-keys
+**Note:**
+ - SystemReady-devicetree-band Yocto ACS supports automatic enrollment of secure boot keys, still if the system fails to enter SecureBoot mode, Please refer to "Enrolling keys in U-boot" section of [BBSR ACS Users Guide](https://developer.arm.com/documentation/102872/latest) for instructions to enroll manually. <br>
+ - The SecureBoot keys are present in \<bootfs>\acs_tests\bbsr-keys.
+
+## Disabling Secure Boot and rolling back to Setup Mode
+This section outlines the steps required to disable Secure Boot on systems utilizing either U-Boot or UEFI firmware by leveraging the SystemReady ACS test keys. It is intended for scenarios where the system was previously configured with Secure Boot enabled using these same ACS test keys by BBSR ACS.
+
+### Disabling Secure Boot in systems with U-boot firmware
+1. **Enter U-Boot Shell**
+   - Reset the system.
+   - Press `Esc` immediately during boot to enter the U-Boot shell.
+
+2. **Initialize the Appropriate Storage Device**
+   - Depending on where the SystemReady ACS keys are stored, you must initialize the correct storage subsystem.
+
+   * Example: Initialize USB Subsystem
+
+      ```bash
+      => usb start
+      ```
+
+   * Example: Initialize MMC Device 1
+
+      ```bash
+      => mmc dev 1
+      ```
+
+   * **Note:** Refer to the U-Boot documentation for the correct commands related to your specific storage device.
+
+3. **Clear Platform Key (PK) to Disable Secure Boot**
+   - Use the following command to load and delete the Platform Key (PK) using a `NullPK.auth` file, which is a null update signed with the current PK.
+
+   -  Example: Load and Delete PK from USB Device 0
+
+      ```bash
+      => load usb 0 ${loadaddr} acs_tests/bbsr-keys/NullPK.auth && setenv -e -nv -bs -rt -at -i ${loadaddr}:$filesize PK
+      ```
+   - After deleting the PK, reset the system to complete the process.
+
+### Disabling Secure Boot in systems with UEFI firmware
+
+1. **Reboot Your System**.
+
+2. **Enter Firmware Setup Utility**
+   - During the boot process, press the appropriate key to enter setup (usually `Esc`, `Del`, `F2`, or similar).
+
+3. **Navigate to the Security or Boot Menu**
+   - Use arrow keys to navigate.
+   - Look for tabs such as `Boot`, `Security`, or `Advanced`.
+
+4. **Find the Secure Boot Option**
+   - Locate `Secure Boot` under the appropriate menu.
+   - It may be under `Boot Configuration` or a dedicated `Secure Boot` tab.
+
+5. **Disable Secure Boot**
+   - Highlight the `Secure Boot` option.
+   - Change its value from `Enabled` to `Disabled` using the `Enter` key or `+/-` keys.
+
+6. **Clear Platform Key (PK)**
+   - Navigate to the option to manage Secure Boot keys.
+   - Select the option to clear the Platform Key (PK).
+   - This action puts the system into `Setup Mode`.
+
+7. **Save and Exit**
+   - Press `F10` (or follow the on-screen instruction to save and exit).
+   - Confirm changes if prompted.
+   - Reboot the System
 
 --------------
-*Copyright (c) 2023-24, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2023-25, Arm Limited and Contributors. All rights reserved.*
