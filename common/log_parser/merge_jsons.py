@@ -267,11 +267,11 @@ def merge_json_files(json_files, output_file):
             label = f"Suite_Name: {suite_name}_compliance"
             acs_results_summary[label] = "Not Compliant: not run"
             if requirement == "M":
-                print(f"{RED}Suite: {suite_name}: {acs_results_summary[label]}{RESET}")
+                print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
                 overall_comp = "Not Compliant"
                 missing_list.append(suite_name)
             else:
-                print(f"Suite: {suite_name}: {acs_results_summary[label]}")
+                print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
         else:
             fail_info = suite_fail_data.get(suite_name)
             f = fail_info.get("Failed", 0)
@@ -279,20 +279,26 @@ def merge_json_files(json_files, output_file):
             label = f"Suite_Name: {suite_key}_compliance"
             if (f + fw) == 0:
                 acs_results_summary[label] = "Compliant"
-                print(f"Suite: {suite_name}: {acs_results_summary[label]}")
+                if requirement == "M":
+                    print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                else:
+                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
             elif f == fw:
                 acs_results_summary[label] = "Compliant with waivers"
-                print(f"Suite: {suite_name}: {acs_results_summary[label]}")
+                if requirement == "M":
+                    print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                else:
+                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
                 if requirement == "M" and overall_comp != "Not Compliant":
                     overall_comp="Compliant with waivers"
             else:
                 acs_results_summary[label] = f"Not Compliant: Failed {f}"
                 if requirement == "M":
-                    print(f"{RED}Suite: {suite_name}: {acs_results_summary[label]}{RESET}")
+                    print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
                     overall_comp="Not Compliant"
                     non_waived_list.append(suite_name)
                 else:
-                    print(f"Suite: {suite_name}: {acs_results_summary[label]}")
+                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
 
     #Ensure suite-wise compliance lines for *all* discovered suites (including recommended)
     for skey, info in suite_fail_data.items():
