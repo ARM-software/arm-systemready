@@ -44,7 +44,7 @@ else
     mkdir uefi_dump
 :DEBUG_DUMP
     cd uefi_dump
-    echo "Starting UEFI Debug dump"
+    #echo "Starting UEFI Debug dump"
     connect -r
     pci > pci.log
     drivers > drivers.log
