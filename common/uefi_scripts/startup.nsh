@@ -42,6 +42,8 @@ endfor
 # Run the SCT test
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_tests\bbr\SctStartup.nsh then
+        echo " "
+        echo "Running SCT test"
         FS%i:\acs_tests\bbr\SctStartup.nsh
         goto DoneSCT
     endif
@@ -59,7 +61,7 @@ for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 :DoneScrt
 
-# Run the CapsuleApp test
+# Run the Capsule dump
 for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%e:\acs_results then
         FS%e:
@@ -68,23 +70,23 @@ for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             mkdir app_output
         endif
         cd app_output
-	if exist CapsuleApp_FMP_protocol_info.log and exist CapsuleApp_ESRT_table_info.log then
+        if exist CapsuleApp_FMP_protocol_info.log and exist CapsuleApp_ESRT_table_info.log then
             echo " "
             echo "CapsuleApp already run"
-	else
+        else
             if exist FS%e:\acs_tests\app\CapsuleApp.efi then
                 echo " "
-                echo "Running CapsuleApp"
+                echo "Running capsule app dump"
                 FS%e:\acs_tests\app\CapsuleApp.efi -P > CapsuleApp_FMP_protocol_info.log
                 FS%e:\acs_tests\app\CapsuleApp.efi -E > CapsuleApp_ESRT_table_info.log
                 goto DoneApp
             endif
-	endif
+        endif
     endif
 endfor
 :DoneApp
 
-# Run the DebugDump test
+# Run the DebugDump
 for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%p:\acs_tests\debug\debug_dump.nsh then
         echo " "
@@ -99,7 +101,7 @@ endfor
 for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%j:\acs_tests\bsa\bsa.nsh then
         echo " "
-        echo "Running Bsa app"
+        echo "Running BSA test"
         FS%j:\acs_tests\bsa\bsa.nsh
         goto Donebsa
     endif
@@ -110,7 +112,7 @@ endfor
 for %z in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%z:\acs_tests\bsa\sbsa\sbsa.nsh then
         echo " "
-        echo "Running Sbsa app"
+        echo "Running SBSA test"
         FS%z:\acs_tests\bsa\sbsa\sbsa.nsh
         goto Donesbsa
     endif

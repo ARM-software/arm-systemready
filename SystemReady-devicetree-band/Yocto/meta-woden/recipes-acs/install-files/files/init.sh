@@ -105,7 +105,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo "Executing FWTS for EBBR"
       test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
       echo "Test Executed are $test_list"
-      echo "SystemReady devicetree band ACS v3.0.0-BETA0" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
+      echo "SystemReady devicetree band ACS v3.0.0" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
       /usr/bin/fwts --ebbr `echo $test_list` -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
       echo -e -n "\n"
       sync /mnt
@@ -118,7 +118,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       if [ -f /lib/modules/*/kernel/bsa_acs/bsa_acs.ko ]; then
         echo "Running Linux BSA tests"
         insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
-        echo "SystemReady devicetree band ACS v3.0.0-BETA0" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+        echo "SystemReady devicetree band ACS v3.0.0" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
         bsa >> /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
 	sync /mnt

@@ -61,9 +61,9 @@ if [ -f  /bin/bbsr_fwts_tests.ini ]; then
   test_list=`cat /bin/bbsr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
   echo "Test Executed are $test_list"
   if [ -f "$YOCTO_FLAG" ]; then
-    echo "SystemReady devicetree band ACS v3.0.0-BETA0" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
+    echo "SystemReady devicetree band ACS v3.0.0" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
   else
-    echo "SystemReady band ACS v3.0.0-BETA0" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
+    echo "SystemReady band ACS v3.0.0" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
   fi  
   fwts `echo $test_list` -f -r stdout >> $RESULTS_DIR/bbsr/fwts/FWTSResults.log
   sync /mnt
