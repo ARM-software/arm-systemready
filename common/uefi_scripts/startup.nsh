@@ -43,7 +43,7 @@ endfor
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_tests\bbr\SctStartup.nsh then
         echo " "
-	echo "Running SCT test"
+        echo "Running SCT test"
         FS%i:\acs_tests\bbr\SctStartup.nsh
         goto DoneSCT
     endif
@@ -61,7 +61,7 @@ for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 :DoneScrt
 
-# Run the CapsuleApp test
+# Run the Capsule dump
 for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%e:\acs_results then
         FS%e:
@@ -70,10 +70,10 @@ for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             mkdir app_output
         endif
         cd app_output
-	if exist CapsuleApp_FMP_protocol_info.log and exist CapsuleApp_ESRT_table_info.log then
+        if exist CapsuleApp_FMP_protocol_info.log and exist CapsuleApp_ESRT_table_info.log then
             echo " "
             echo "CapsuleApp already run"
-	else
+        else
             if exist FS%e:\acs_tests\app\CapsuleApp.efi then
                 echo " "
                 echo "Running capsule app dump"
@@ -81,12 +81,12 @@ for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 FS%e:\acs_tests\app\CapsuleApp.efi -E > CapsuleApp_ESRT_table_info.log
                 goto DoneApp
             endif
-	endif
+        endif
     endif
 endfor
 :DoneApp
 
-# Run the DebugDump test
+# Run the DebugDump
 for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%p:\acs_tests\debug\debug_dump.nsh then
         echo " "
