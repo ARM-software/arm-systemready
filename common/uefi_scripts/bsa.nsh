@@ -35,7 +35,8 @@ endfor
 
 :RunBsa
 if %1 == "true" then
-    FS%i:\acs_tests\parser\Parser.efi -bsa
+    FS%i:
+    acs_tests\parser\Parser.efi -bsa
     if %automation_bsa_run% == "false" then
         echo "************ BSA is disabled in config file(acs_run_config.ini) ************"
         goto Done

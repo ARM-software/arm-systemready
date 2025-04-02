@@ -20,7 +20,8 @@ echo -off
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_results then
         if %1 == "true" then
-            FS%i:\acs_tests\parser\Parser.efi -sbsa
+            FS%i:
+            acs_tests\parser\Parser.efi -sbsa
             if %automation_sbsa_run% == "false" then
                 echo "************ SBSA is disabled in config file(acs_run_config.ini) ************"
                 goto Done
