@@ -127,6 +127,47 @@ def count_fails_in_json(data):
         total_failed += 1
     return (total_failed, total_failed_with_waiver)
 
+################################################################################
+# We will load the test_categoryDT.json data here, so we can enrich the
+#        merged JSON with "Waivable", "SRS scope", and
+#        "Main Readiness Grouping" fields for each test suite.
+################################################################################
+
+TEST_CATEGORY_DT_PATH = "/data_sda/ashsha06/forkIR/arm-systemready/common/log_parser/test_categoryDT.json"
+
+try:
+    with open(TEST_CATEGORY_DT_PATH, "r") as catf:
+        test_category_dt_data = json.load(catf)
+except Exception:
+    test_category_dt_data = {}
+
+def build_testcategory_dict(category_data):
+    """
+    Build a helper dictionary:
+      result[suite_name_lower][test_suite_name_lower] -> row dictionary
+    so we can easily retrieve waivable / scope / readiness grouping etc.
+    """
+    result = {}
+    if not isinstance(category_data, dict):
+        return result
+
+    for cat_id, rows in category_data.items():
+        if isinstance(rows, list):
+            for row in rows:
+                suite_str = row.get("Suite", "").strip()
+                testsuite_str = row.get("Test Suite", "").strip()
+                if not suite_str or not testsuite_str:
+                    continue
+                # Convert to lowercase for easy matching
+                s_lower = suite_str.lower()
+                ts_lower = testsuite_str.lower()
+                if s_lower not in result:
+                    result[s_lower] = {}
+                result[s_lower][ts_lower] = row
+    return result
+
+test_cat_dict = build_testcategory_dict(test_category_dt_data)
+
 def merge_json_files(json_files, output_file):
     merged_results = {}
     suite_fail_data = {}
@@ -241,6 +282,57 @@ def merge_json_files(json_files, output_file):
 
         merged_results[section_name] = data
 
+        # If 'data' is a dict with 'test_results' list, unify it
+        if isinstance(data, dict) and "test_results" in data and isinstance(data["test_results"], list):
+            data_list = data["test_results"]
+            # Overwrite the merged_results entry so it's always a list
+            merged_results[section_name] = data_list
+        else:
+            data_list = data
+
+
+        ########################################################################
+        # Enrich each test_suite dict with matching fields from test_cat_dict
+        ########################################################################
+        # suite_key is e.g. "BSA", so we'll look up suite_key.lower() in test_cat_dict
+        # data might be a list of test_suite dicts (like BSA suite).
+        # If there's a match on "Test_suite" => "Test Suite", copy fields.
+        if suite_key.lower() in test_cat_dict:
+            # Now use 'data_list' instead of 'data'
+            if isinstance(data_list, list):
+                for ts_dict in data_list:
+                    if not isinstance(ts_dict, dict):
+                        continue
+
+                    # EXACT code as before for copying fields, reorder keys, etc.
+                    ts_name_merged = ts_dict.get("Test_suite", "").strip().lower()
+                    if ts_name_merged in test_cat_dict[suite_key.lower()]:
+                        row_vals = test_cat_dict[suite_key.lower()][ts_name_merged]
+                        if "Waivable" in row_vals:
+                            ts_dict["Waivable"] = row_vals["Waivable"]
+                        if "SRS scope" in row_vals:
+                            ts_dict["SRS scope"] = row_vals["SRS scope"]
+                        if "Main Readiness Grouping" in row_vals:
+                            ts_dict["Main Readiness Grouping"] = row_vals["Main Readiness Grouping"]
+
+                        desired_order = [
+                            "Test_suite",
+                            "Waivable",
+                            "SRS scope",
+                            "Main Readiness Grouping",
+                            "subtests",
+                            "test_suite_summary"
+                        ]
+                        temp = {}
+                        for key in desired_order:
+                            if key in ts_dict:
+                                temp[key] = ts_dict[key]
+                        for key, val in ts_dict.items():
+                            if key not in temp:
+                                temp[key] = val
+                        ts_dict.clear()
+                        ts_dict.update(temp)
+
         f, fw = count_fails_in_json(data)
         suite_fail_data[suite_key] = {
             "Failed": f,
@@ -262,6 +354,11 @@ def merge_json_files(json_files, output_file):
     missing_list = []
     non_waived_list = []
 
+    if acs_info_data and isinstance(acs_info_data, dict):
+        acs_results_summary = acs_info_data.get("ACS Results Summary", {})
+    else:
+        acs_results_summary = merged_results["Suite_Name: acs_info"].get("ACS Results Summary", {})
+
     for suite_name, requirement in mandatory_suites:
         if suite_name not in suite_fail_data:
             label = f"Suite_Name: {suite_name}_compliance"
@@ -276,7 +373,7 @@ def merge_json_files(json_files, output_file):
             fail_info = suite_fail_data.get(suite_name)
             f = fail_info.get("Failed", 0)
             fw = fail_info.get("Failed_with_Waiver", 0)
-            label = f"Suite_Name: {suite_key}_compliance"
+            label = f"Suite_Name: {suite_name}_compliance"
             if (f + fw) == 0:
                 acs_results_summary[label] = "Compliant"
                 if requirement == "M":

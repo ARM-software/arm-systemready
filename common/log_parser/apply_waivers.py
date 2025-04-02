@@ -413,17 +413,12 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
             # Check if the test suite is waivable according to test_category.json
             waivable = False
             for catID, catData in output_json_data.items():
-                for suiteID, suiteData in catData.items():
-                    for sname_key, sname_value in suiteData.items():
-                        if sname_key.startswith('SName:') and sname_key == f'SName: {suite_name}':
-                            ts_list = sname_value  # This is a list
-                            for ts_entry in ts_list:
-                                if ts_entry.get('TSName').lower() == test_suite_name.lower():
-                                    if ts_entry.get('Waivable', '').lower() == 'yes':
-                                        waivable = True
-                                        break  # Found a waivable test suite, exit the loops
-                            if waivable:
-                                break
+                # catData is a list
+                for row in catData:
+                    if row.get("Suite", "").lower() == suite_name.lower() and row.get("Test Suite", "").lower() == test_suite_name.lower():
+                        if row.get("Waivable", "").lower() == "yes":
+                            waivable = True
+                            break  # Found a waivable test suite, exit the loops
                 if waivable:
                     break
 
