@@ -256,17 +256,17 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                     <tr>
                         <td>{{ subtest.sub_Test_Number }}</td>
                         <td>{{ subtest.sub_Test_Description }}</td>
-                        <td class="{% if s.PASSED > 0 %}pass
-                                    {% elif s.FAILED > 0 %}fail
+                        <td class="{% if s.FAILED > 0 %}fail
+                                    {% elif s.PASSED > 0 %}pass
                                     {% elif s.FAILED_WITH_WAIVER|default(0) > 0 %}fail-waiver
                                     {% elif s.ABORTED > 0 %}aborted
                                     {% elif s.SKIPPED > 0 %}skipped
                                     {% elif s.WARNINGS > 0 %}warning
                                     {% endif %}">
-                            {% if s.PASSED > 0 %}
-                                PASSED
-                            {% elif s.FAILED > 0 %}
+                            {% if s.FAILED > 0 %}
                                 FAILED
+                            {% elif s.PASSED > 0 %}
+                                PASSED
                             {% elif s.FAILED_WITH_WAIVER|default(0) > 0 %}
                                 FAILED WITH WAIVER
                             {% elif s.ABORTED > 0 %}
@@ -286,7 +286,7 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                         {% if s.abort_reasons %}{% for reason in s.abort_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
                         {% if s.skip_reasons %}{% for reason in s.skip_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
                         {% if s.warning_reasons %}{% for reason in s.warning_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
-                        <td>{{ all_reasons|join("; ") if all_reasons else "N/A" }}</td>
+                        <td>{{ all_reasons|join("<br>") if all_reasons else "N/A" }}</td>
 
                         <td class="waiver-reason">
                             {% if s.FAILED_WITH_WAIVER|default(0) > 0 %}

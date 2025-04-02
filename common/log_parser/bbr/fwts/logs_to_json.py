@@ -49,7 +49,7 @@ def parse_fwts_log(log_path):
             break
 
     # Process the log data
-    for line in log_data:
+    for i, line in enumerate(log_data):
         # Detect the start of a new main test
         for main_test in main_tests:
             if line.startswith(main_test + ":"):
@@ -139,9 +139,17 @@ def parse_fwts_log(log_path):
                     current_subtest["sub_test_result"]["pass_reasons"].append(reason_text)
             elif "FAILED" in line:
                 current_subtest["sub_test_result"]["FAILED"] += 1
-                if "FAILED:" in line:
-                    reason_text = line.split("FAILED:")[1].strip()
-                    current_subtest["sub_test_result"]["fail_reasons"].append(reason_text)
+                # 1) Capture everything after the first colon, if present:
+                if ":" in line:
+                    reason_text = line.split(":", 1)[1].strip()
+                else:
+                    reason_text = line.replace("FAILED", "").strip()
+                # 2) Append the next line if it's not empty
+                if i + 1 < len(log_data):
+                    next_line = log_data[i + 1].strip()
+                    if next_line:
+                        reason_text += " " + next_line
+                current_subtest["sub_test_result"]["fail_reasons"].append(reason_text) 
             elif "SKIPPED" in line:
                 current_subtest["sub_test_result"]["SKIPPED"] += 1
                 if "SKIPPED:" in line:
@@ -154,6 +162,31 @@ def parse_fwts_log(log_path):
                     current_subtest["sub_test_result"]["warning_reasons"].append(reason_text)
         else:
             # Handle SKIPPED when no current_subtest exists
+            # detect lines like "ACPI XXX table does not exist, skipping test"
+            skip_acpi_match = re.search(r"ACPI\s+(\S+)\s+table does not exist, skipping test", line)
+            if skip_acpi_match and current_test:
+                # Create a new subtest to record the skip
+                sub_desc = current_test.get("Test_suite_Description")
+
+                skip_subtest = {
+                    "sub_Test_Number": "Test 1 of 1",
+                    "sub_Test_Description": sub_desc,
+                    "sub_test_result": {
+                        "PASSED": 0,
+                        "FAILED": 0,
+                        "ABORTED": 0,
+                        "SKIPPED": 1,
+                        "WARNINGS": 0,
+                        "pass_reasons": [],
+                        "fail_reasons": [],
+                        "abort_reasons": [],
+                        "skip_reasons": [line.strip()],
+                        "warning_reasons": []
+                    }
+                }
+                current_test["subtests"].append(skip_subtest)
+                # do not continue here because we want to also catch normal "SKIPPED" if present
+
             if "SKIPPED" in line:
                 current_subtest = {
                     "sub_Test_Number": "Test 1 of 1",
