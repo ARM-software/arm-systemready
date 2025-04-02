@@ -285,7 +285,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results_template/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
       fi
       sync /mnt
-      sleep 5
+      sleep 20
 
       echo "ACS automated test suites run is completed."
       echo "Please reboot to run BBSR tests if not done"

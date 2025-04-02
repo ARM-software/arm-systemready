@@ -38,9 +38,18 @@ def get_system_info():
     # Get SoC Family using 'sudo dmidecode -t system | grep -i "Family"'
     try:
         soc_family_output = subprocess.check_output(
-            "sudo dmidecode -t system | grep -i 'Family'", shell=True, universal_newlines=True, stderr=subprocess.DEVNULL)
+            "sudo dmidecode -t system | grep -i 'Family'",
+            shell=True,
+            universal_newlines=True,
+            stderr=subprocess.DEVNULL
+        ).strip()
         if 'Family:' in soc_family_output:
-            system_info['SoC Family'] = soc_family_output.split('Family:')[1].strip()
+            # In case dmidecode returns multiple lines, find the specific line with 'Family:'
+            lines = soc_family_output.splitlines()
+            for l in lines:
+                if 'Family:' in l:
+                    system_info['SoC Family'] = l.split('Family:', 1)[1].strip()
+                    break
         else:
             system_info['SoC Family'] = 'Unknown'
     except Exception:
