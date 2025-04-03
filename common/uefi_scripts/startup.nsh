@@ -46,7 +46,7 @@ for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 acs_tests\parser\Parser.efi -automation
                 goto DoneParser
             else
-                FS%i:\acs_tests\parser\Parser.efi -automation
+                acs_tests\parser\Parser.efi -automation
                 goto DoneParser
             endif
         else
