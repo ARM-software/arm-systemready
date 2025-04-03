@@ -43,14 +43,15 @@ def get_system_info():
     # SoC Family
     try:
         soc_family_output = subprocess.check_output(
-            "sudo dmidecode -t system | grep -i 'Family'",
-            shell=True,
-            universal_newlines=True,
-            stderr=subprocess.DEVNULL
+            ["dmidecode", "-t", "system"], universal_newlines=True, stderr=subprocess.DEVNULL
         )
-        if 'Family:' in soc_family_output:
-            system_info['SoC Family'] = soc_family_output.split('Family:')[1].strip()
+        # Iterate each line looking for "Family:"
+        for line in soc_family_output.split('\n'):
+            if 'Family:' in line:
+                system_info['SoC Family'] = line.split('Family:', 1)[1].strip()
+                break
         else:
+            # If we didn't find 'Family:'
             system_info['SoC Family'] = 'Unknown'
     except Exception:
         system_info['SoC Family'] = 'Unknown'
@@ -64,6 +65,9 @@ def get_system_info():
             if 'Product Name:' in line:
                 system_info['System Name'] = line.split('Product Name:')[1].strip()
                 break
+        else:
+            # If we didn't find 'Product Name:'
+            system_info['System Name'] = 'Unknown'
     except Exception:
         system_info['System Name'] = 'Unknown'
 
