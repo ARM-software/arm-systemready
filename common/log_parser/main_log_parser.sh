@@ -148,6 +148,7 @@ FWTS_PROCESSED=0
 SCT_PROCESSED=0
 BBSR_FWTS_PROCESSED=0
 BBSR_SCT_PROCESSED=0
+BBSR_TPM_PROCESSED=0
 Standalone_PROCESSED=0
 OS_TESTS_PROCESSED=0
 CAPSULE_PROCESSED=0
@@ -201,8 +202,9 @@ if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
     SBSA_JSON="$JSONS_DIR/sbsa.json"
     SBSA_LOGS=()
 
-    SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/mnt/acs_tests/config/acs_run_config.ini" | cut -d'=' -f2 || echo "0")
-    if [ $SbsaRunEnabled -eq 1 ]; then
+    SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/mnt/acs_tests/config/acs_run_config.ini" 2>/dev/null | cut -d'=' -f2)
+    SbsaRunEnabled=${SbsaRunEnabled:-0}  # Default to 0 if empty
+    if [ "$SbsaRunEnabled" -eq 1 ]; then
         if check_file "$SBSA_LOG" "M"; then
             SBSA_LOGS+=("$SBSA_LOG")
         fi
@@ -275,7 +277,7 @@ fi
 ################################################################################
 # BBSR FWTS PARSING
 ################################################################################
-BBSR_FWTS_LOG="$LOGS_PATH/BBSR/fwts/FWTSResults.log"
+BBSR_FWTS_LOG="$LOGS_PATH/bbsr/fwts/FWTSResults.log"
 BBSR_FWTS_JSON="$JSONS_DIR/bbsr_fwts.json"
 if check_file "$BBSR_FWTS_LOG"; then
     BBSR_FWTS_PROCESSED=1
@@ -287,13 +289,25 @@ fi
 ################################################################################
 # BBSR SCT PARSING
 ################################################################################
-BBSR_SCT_LOG="$LOGS_PATH/BBSR/sct_results/Overall/Summary.log"
+BBSR_SCT_LOG="$LOGS_PATH/bbsr/sct_results/Overall/Summary.log"
 BBSR_SCT_JSON="$JSONS_DIR/bbsr_sct.json"
 if check_file "$BBSR_SCT_LOG"; then
     BBSR_SCT_PROCESSED=1
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$BBSR_SCT_LOG" "$BBSR_SCT_JSON"
     apply_waivers "BBSR-SCT" "$BBSR_SCT_JSON"
     python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$BBSR_SCT_JSON" "$HTMLS_DIR/bbsr_sct_detailed.html" "$HTMLS_DIR/bbsr_sct_summary.html"
+fi
+
+################################################################################
+# BBSR TPM PARSING
+################################################################################
+BBSR_TPM_LOG="$LOGS_PATH/bbsr/tpm2/verify_tpm_measurements.log"
+BBSR_TPM_JSON="$JSONS_DIR/bbsr_tpm.json"
+if check_file "$BBSR_TPM_LOG"; then
+    BBSR_TPM_PROCESSED=1
+    python3 "$SCRIPTS_PATH/bbr/tpm/logs_to_json.py" "$BBSR_TPM_LOG" "$BBSR_TPM_JSON"
+    apply_waivers "BBSR-TPM" "$BBSR_TPM_JSON"
+    python3 "$SCRIPTS_PATH/bbr/tpm/json_to_html.py" "$BBSR_TPM_JSON" "$HTMLS_DIR/bbsr_tpm_detailed.html" "$HTMLS_DIR/bbsr_tpm_summary.html"
 fi
 
 ################################################################################
@@ -545,6 +559,13 @@ else
     print_missing_json "bbsr_sct.json"
 fi
 
+# BBSR-TPM
+if [ $BBSR_TPM_PROCESSED -eq 1 ] && [ -f "$BBSR_TPM_JSON" ]; then
+    JSON_FILES+=("$BBSR_TPM_JSON")
+else
+    print_missing_json "bbsr_tpm.json"
+fi
+
 # POST-SCRIPT
 if [ $POST_SCRIPT_PROCESSED -eq 1 ] && [ -f "$POST_SCRIPT_JSON" ]; then
     JSON_FILES+=("$POST_SCRIPT_JSON")
@@ -623,28 +644,35 @@ else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-#7) POST-SCRIPT
+# 7) BBSR-TPM
+if [ $BBSR_TPM_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bbsr_tpm_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 8) POST-SCRIPT
 if [ $POST_SCRIPT_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/post_script_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi 
 
-# 8) STANDALONE
+# 9) STANDALONE
 if [ $Standalone_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$Standalone_SUMMARY_HTML\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 9) OS TESTS
+# 10) OS TESTS
 if [ $OS_TESTS_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$OS_SUMMARY_HTML\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 10) CAPSULE UPDATE SUMMARY
+# 11) CAPSULE UPDATE SUMMARY
 CAPSULE_SUMMARY_HTML=""
 GENERATE_ACS_SUMMARY_CMD+=" \"$CAPSULE_SUMMARY_HTML\""
 
@@ -713,6 +741,12 @@ if [ $print_path -eq 1 ]; then
         echo "BBSR SCT JSON             : $BBSR_SCT_JSON"
         echo "BBSR SCT Detailed Summary : $HTMLS_DIR/bbsr_sct_detailed.html"
         echo "BBSR SCT Summary          : $HTMLS_DIR/bbsr_sct_summary.html"
+        echo ""
+    fi
+    if [ $BBSR_TPM_PROCESSED -eq 1 ]; then
+        echo "BBSR TPM JSON             : $BBSR_TPM_JSON"
+        echo "BBSR TPM Detailed Summary : $HTMLS_DIR/bbsr_tpm_detailed.html"
+        echo "BBSR TPM Summary          : $HTMLS_DIR/bbsr_tpm_summary.html"
         echo ""
     fi
     if [ $POST_SCRIPT_PROCESSED -eq 1 ]; then

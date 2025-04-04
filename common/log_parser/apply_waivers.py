@@ -63,7 +63,7 @@ def load_waivers(waiver_data, suite_name):
 
                 # Include 'BBSR-SCT' and 'BBSR-FWTS' suites
                 # Only load SubSuite and Test_case waivers if the suite is 'SCT', 'Standalone', 'BBSR-SCT', or 'BBSR-FWTS'
-                if suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS']:
+                if suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS', 'BBSR-TPM']:
                     # Check for SubSuite-level waiver
                     if 'SubSuite' in test_suite:
                         subsuite = test_suite['SubSuite']
@@ -129,7 +129,7 @@ def apply_suite_level_waivers(test_suite_entry, suite_waivers):
                     if verbose:
                         print(f"Suite-level waiver applied to subtest '{subtest.get('sub_Test_Description')}' with reason: {reason}")
             elif isinstance(sub_test_result, str):
-                if 'FAILED' in sub_test_result.upper() or 'FAILURE' in sub_test_result.upper():
+                if 'FAILED' in sub_test_result.upper() or 'FAILURE' in sub_test_result.upper() or 'FAIL' in sub_test_result.upper():
                     if '(WITH WAIVER)' not in sub_test_result.upper():
                         subtest['sub_test_result'] += ' (WITH WAIVER)'
                         subtest['waiver_reason'] = reason
@@ -436,7 +436,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
 
         # Include 'BBSR-SCT' and 'BBSR-FWTS' suites
         # Only apply SubSuite and Test_case level waivers if the suite is 'SCT', 'Standalone', 'BBSR-SCT', or 'BBSR-FWTS'
-        if suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS']:
+        if suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS', 'BBSR-TPM']:
             # Apply SubSuite-level waivers if any
             if subsuite_level_waivers:
                 apply_subsuite_level_waivers(test_suite_entry, subsuite_level_waivers)
@@ -451,7 +451,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
 
         # Update test suite summary
         # Determine the summary field based on suite name
-        if suite_name.upper() in ['SCT', 'BBSR-SCT']:
+        if suite_name.upper() in ['SCT', 'BBSR-SCT', 'BBSR-TPM']:
             summary_field = 'test_case_summary'
         elif suite_name.upper() == 'Standalone_tests':
             summary_field = 'test_suite_summary'
@@ -482,7 +482,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                     # For other JSON structures like BSA/SBSA
                     if 'PASS' in sub_test_result.upper():
                         total_passed += 1
-                    if 'FAILED' in sub_test_result.upper() or 'FAILURE' in sub_test_result.upper():
+                    if 'FAIL' in sub_test_result.upper():  # <-- ADDED condition
                         total_failed += 1
                         if '(WITH WAIVER)' in sub_test_result.upper():
                             total_failed_with_waiver += 1
@@ -501,6 +501,39 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                 'total_skipped': total_skipped,
                 'total_warnings': total_warnings
             }
+    if "suite_summary" in json_data and isinstance(json_data["suite_summary"], dict):
+        total_passed_top = 0
+        total_failed_top = 0
+        total_failed_with_waiver_top = 0
+        total_aborted_top = 0
+        total_skipped_top = 0
+        total_warnings_top = 0
+        total_ignored_top = 0  # if needed
+
+        if "test_results" in json_data and isinstance(json_data["test_results"], list):
+            for suite_obj in json_data["test_results"]:
+                # Use test_case_summary if available, else test_suite_summary
+                if "test_case_summary" in suite_obj and isinstance(suite_obj["test_case_summary"], dict):
+                    summary = suite_obj["test_case_summary"]
+                elif "test_suite_summary" in suite_obj and isinstance(suite_obj["test_suite_summary"], dict):
+                    summary = suite_obj["test_suite_summary"]
+                else:
+                    summary = {}
+                total_passed_top += summary.get("total_passed", 0)
+                total_failed_top += summary.get("total_failed", 0)
+                total_failed_with_waiver_top += summary.get("total_failed_with_waiver", 0)
+                total_aborted_top += summary.get("total_aborted", 0)
+                total_skipped_top += summary.get("total_skipped", 0)
+                total_warnings_top += summary.get("total_warnings", 0)
+                total_ignored_top += summary.get("total_ignored", 0)
+
+        json_data["suite_summary"]["total_passed"] = total_passed_top
+        json_data["suite_summary"]["total_failed"] = total_failed_top
+        json_data["suite_summary"]["total_failed_with_waiver"] = total_failed_with_waiver_top
+        json_data["suite_summary"]["total_aborted"] = total_aborted_top
+        json_data["suite_summary"]["total_skipped"] = total_skipped_top
+        json_data["suite_summary"]["total_warnings"] = total_warnings_top
+        json_data["suite_summary"]["total_ignored"] = total_ignored_top        
 
     # Write the updated JSON data back to the file
     try:
