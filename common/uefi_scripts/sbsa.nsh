@@ -22,10 +22,10 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         if %1 == "true" then
             FS%i:
             acs_tests\parser\Parser.efi -sbsa
-            if %automation_sbsa_run% == "" then
+            if "%automation_sbsa_run%" == "" then
                 echo "automation_sbsa_run variable does not exist"
             else
-                if %automation_sbsa_run% == "false" then
+                if "%automation_sbsa_run%" == "false" then
                     echo "************ SBSA is disabled in config file(acs_run_config.ini) ************"
                     goto Done
                 endif
@@ -95,11 +95,11 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 echo "SBSA Command: Sbsa.efi -skip 900 -f SbsaTempResults.log"
                 FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
             else
-                if %automation_sbsa_run% == "" then
+                if "%automation_sbsa_run%" == "" then
                     echo "automation_sbsa_run variable does not exist"
                 else
-                    if %automation_sbsa_run% == "true" then
-                        if %SbsaCommand% == "" then
+                    if "%automation_sbsa_run%" == "true" then
+                        if "%SbsaCommand%" == "" then
                             echo "SbsaCommand variable does not exist"
                         else
                             echo "SBSA Command: %SbsaCommand% -f SbsaTempResults.log"

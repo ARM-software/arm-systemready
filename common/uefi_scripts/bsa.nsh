@@ -37,10 +37,10 @@ endfor
 if %1 == "true" then
     FS%i:
     acs_tests\parser\Parser.efi -bsa
-    if %automation_bsa_run% ==  "" then
+    if "%automation_bsa_run%" ==  "" then
         echo "automation_bsa_run variable does not exist"
     else
-        if %automation_bsa_run% == "false" then
+        if "%automation_bsa_run%" == "false" then
             echo "************ BSA is disabled in config file(acs_run_config.ini) ************"
             goto Done
         endif
@@ -122,11 +122,11 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
             echo "BSA Command: Bsa.efi -skip 900 -f BsaTempResults.log"
             FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
         else
-            if %automation_bsa_run% == "" then
+            if "%automation_bsa_run%" == "" then
                 echo "automation_bsa_run variable does not exist"
             else
-                if %automation_bsa_run% == "true" then
-                   if %BsaCommand% == "" then
+                if "%automation_bsa_run%" == "true" then
+                   if "%BsaCommand%" == "" then
                        echo "BsaCommand variable does not exist"
                     else
                         echo "BSA Command: %BsaCommand% -f BsaTempResults.log"
