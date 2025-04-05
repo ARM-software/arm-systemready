@@ -64,7 +64,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -v 1 -skip 900 -f SbsaVerboseTempResults.log
                 stall 200000
                 if exist FS%i:\acs_results\uefi\SbsaVerboseTempResults.log then
-                    echo " SystemReady band ACS v3.0.0" > SbsaVerboseResults.log
+                    echo " SystemReady band ACS v3.0.1" > SbsaVerboseResults.log
                     stall 200000
                     type SbsaVerboseTempResults.log >> SbsaVerboseResults.log
                     cp SbsaVerboseTempResults.log temp/
@@ -113,7 +113,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             endif
             stall 200000
             if exist FS%i:\acs_results\uefi\SbsaTempResults.log then
-                echo " SystemReady band ACS v3.0.0" > SbsaResults.log
+                echo " SystemReady band ACS v3.0.1" > SbsaResults.log
                 stall 200000
                 type SbsaTempResults.log >> SbsaResults.log
                 cp SbsaTempResults.log temp/

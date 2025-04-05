@@ -48,6 +48,7 @@ DT_SRS_SCOPE_TABLE = [
     ("ETHTOOL_TEST", "M"),
     ("BSA", "R"),
     ("BBSR-SCT", "R"),
+    ("BBSR-TPM", "R"),
     ("BBSR-FWTS", "R"),
     ("DT_KSELFTEST", "R"),
     ("PSCI", "R"),
@@ -62,6 +63,7 @@ SR_SRS_SCOPE_TABLE = [
     ("BSA", "M"),
     ("BBSR-SCT", "R"),
     ("BBSR-FWTS", "R"),
+    ("BBSR-TPM", "R"),
     ("SBSA", "R")
 ]
 
@@ -117,7 +119,7 @@ def count_fails_in_json(data):
                 total_failed_with_waiver += fw
             elif isinstance(res, str):
                 # e.g. "FAILED (WITH WAIVER)"
-                if "FAILED" in res.upper() or "FAILURE" in res.upper():
+                if "FAILED" in res.upper() or "FAILURE" in res.upper() or "FAIL" in res.upper():
                     total_failed += 1
                     if "(WITH WAIVER)" in res.upper():
                         total_failed_with_waiver += 1
@@ -241,6 +243,9 @@ def merge_json_files(json_files, output_file):
         elif "BBSR" in fn and "SCT" in fn:
             section_name = "Suite_Name: BBSR-SCT"
             suite_key    = "BBSR-SCT"
+        elif "BBSR" in fn and "TPM" in fn:
+            section_name = "Suite_Name: BBSR-TPM"
+            suite_key    = "BBSR-TPM"    
         elif "SCT" in fn:
             section_name = "Suite_Name: SCT"
             suite_key    = "SCT"
@@ -317,11 +322,19 @@ def merge_json_files(json_files, output_file):
 
                         desired_order = [
                             "Test_suite",
+                            "Test_suite_Description",
                             "Waivable",
                             "SRS scope",
                             "Main Readiness Grouping",
+                            "Sub_test_suite",
+                            "Test_case",
+                            "Test_case_description",
+                            "Test Entry Point GUID",
+                            "Returned Status Code",
+                            "test_result",
+                            "reason",
                             "subtests",
-                            "test_suite_summary"
+                            "test_case_summary"
                         ]
                         temp = {}
                         for key in desired_order:

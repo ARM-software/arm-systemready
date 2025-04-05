@@ -35,13 +35,18 @@ def get_system_info():
     except Exception:
         system_info['Firmware Version'] = 'Unknown'
 
-    # Get SoC Family using 'sudo dmidecode -t system | grep -i "Family"'
+    # SoC Family
     try:
         soc_family_output = subprocess.check_output(
-            "sudo dmidecode -t system | grep -i 'Family'", shell=True, universal_newlines=True, stderr=subprocess.DEVNULL)
-        if 'Family:' in soc_family_output:
-            system_info['SoC Family'] = soc_family_output.split('Family:')[1].strip()
+            ["dmidecode", "-t", "system"], universal_newlines=True, stderr=subprocess.DEVNULL
+        )
+        # Iterate each line looking for "Family:"
+        for line in soc_family_output.split('\n'):
+            if 'Family:' in line:
+                system_info['SoC Family'] = line.split('Family:', 1)[1].strip()
+                break
         else:
+            # #If we didn't find 'Family:'
             system_info['SoC Family'] = 'Unknown'
     except Exception:
         system_info['SoC Family'] = 'Unknown'
@@ -54,6 +59,9 @@ def get_system_info():
             if 'Product Name:' in line:
                 system_info['System Name'] = line.split('Product Name:')[1].strip()
                 break
+        else:
+            # If we didn't find 'Product Name:'
+            system_info['System Name'] = 'Unknown'    
     except Exception:
         system_info['System Name'] = 'Unknown'
 
@@ -157,7 +165,7 @@ def read_overall_compliance_from_merged_json(merged_json_path):
 
 def generate_html(system_info, acs_results_summary,
                   bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
-                  bbsr_fwts_summary_path, bbsr_sct_summary_path,
+                  bbsr_fwts_summary_path, bbsr_sct_summary_path,bbsr_tpm_summary_path,
                   post_script_summary_path,
                   standalone_summary_path, OS_tests_summary_path,
                   output_html_path):
@@ -169,6 +177,7 @@ def generate_html(system_info, acs_results_summary,
     sct_summary_content = read_html_content(sct_summary_path)
     bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path)
+    bbsr_tpm_summary_content = read_html_content(bbsr_tpm_summary_path) 
     post_script_summary_content = read_html_content(post_script_summary_path)
     standalone_summary_content = read_html_content(standalone_summary_path)
     OS_tests_summary_content = read_html_content(OS_tests_summary_path)
@@ -176,6 +185,7 @@ def generate_html(system_info, acs_results_summary,
     # Adjust headings in BBSR/Standalone/OS summaries
     bbsr_fwts_summary_content = adjust_bbsr_headings(bbsr_fwts_summary_content, 'BBSR-FWTS')
     bbsr_sct_summary_content = adjust_bbsr_headings(bbsr_sct_summary_content, 'BBSR-SCT')
+    bbsr_tpm_summary_content = adjust_bbsr_headings(bbsr_tpm_summary_content, 'BBSR-TPM')
     post_script_summary_content = adjust_bbsr_headings(post_script_summary_content, 'POST-SCRIPT')
     OS_tests_summary_content = adjust_bbsr_headings(OS_tests_summary_content, 'OS')
     standalone_summary_content = adjust_bbsr_headings(standalone_summary_content, 'Standalone')
@@ -395,6 +405,9 @@ def generate_html(system_info, acs_results_summary,
                     {% endif %}
                     {% if bbsr_sct_summary_content %}
                     <a href="#bbsr_sct_summary">BBSR-SCT Summary</a>
+                    {% endif %} 
+                    {% if bbsr_tpm_summary_content %}
+                    <a href="#bbsr_tpm_summary">BBSR-TPM Summary</a>
                     {% endif %}
                     {% if OS_tests_summary_content %}
                     <a href="#OS_tests_summary">OS tests Summary</a>
@@ -467,6 +480,14 @@ def generate_html(system_info, acs_results_summary,
                     </div>
                 </div>
                 {% endif %}
+                {% if bbsr_tpm_summary_content %}
+                <div class="summary" id="bbsr_tpm_summary">
+                    {{ bbsr_tpm_summary_content | safe }}
+                    <div class="details-link">
+                        <a href="bbsr_tpm_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-TPM</a>
+                    </div>
+                </div>
+                {% endif %}
                 {% if OS_tests_summary_content %}
                 <div class="summary" id="OS_tests_summary">
                     {{ OS_tests_summary_content | safe }}
@@ -491,6 +512,7 @@ def generate_html(system_info, acs_results_summary,
         sct_summary_content=sct_summary_content,
         bbsr_fwts_summary_content=bbsr_fwts_summary_content,
         bbsr_sct_summary_content=bbsr_sct_summary_content,
+        bbsr_tpm_summary_content=bbsr_tpm_summary_content,
         post_script_summary_content=post_script_summary_content,
         standalone_summary_content=standalone_summary_content,
         OS_tests_summary_content=OS_tests_summary_content
@@ -503,6 +525,7 @@ def generate_html(system_info, acs_results_summary,
     detailed_summaries = [
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_fwts_detailed.html'), 'BBSR-FWTS'),
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_sct_detailed.html'), 'BBSR-SCT'),
+        (os.path.join(os.path.dirname(output_html_path), 'bbsr_tpm_detailed.html'), 'BBSR-TPM'), 
         (os.path.join(os.path.dirname(output_html_path), 'os_tests_detailed.html'), 'OS'),
         (os.path.join(os.path.dirname(output_html_path), 'standalone_tests_detailed.html'), 'Standalone'),
         (os.path.join(os.path.dirname(output_html_path), 'post_script_detailed.html'), 'POST-SCRIPT')
@@ -519,6 +542,7 @@ if __name__ == "__main__":
     parser.add_argument("sct_summary_path", help="Path to the SCT summary HTML file")
     parser.add_argument("bbsr_fwts_summary_path", help="Path to the BBSR FWTS summary HTML file")
     parser.add_argument("bbsr_sct_summary_path", help="Path to the BBSR SCT summary HTML file")
+    parser.add_argument("bbsr_tpm_summary_path", help="Path to the BBSR TPM summary HTML file") 
     parser.add_argument("post_script_summary_path", help="Path to the post-script summary HTML file")
     parser.add_argument("standalone_summary_path", help="Path to the Standalone tests summary HTML file")
     parser.add_argument("OS_tests_summary_path", help="Path to the OS Tests summary HTML file")
@@ -565,6 +589,7 @@ if __name__ == "__main__":
         "SCT": read_html_content(args.sct_summary_path),
         "BBSR-FWTS": read_html_content(args.bbsr_fwts_summary_path),
         "BBSR-SCT": read_html_content(args.bbsr_sct_summary_path),
+        "BBSR-TPM": read_html_content(args.bbsr_tpm_summary_path),
         "POST-SCRIPT": read_html_content(args.post_script_summary_path),
         "Standalone tests": standalone_summary_content,
         "OS tests": read_html_content(args.OS_tests_summary_path)
@@ -594,6 +619,7 @@ if __name__ == "__main__":
         args.sct_summary_path,
         args.bbsr_fwts_summary_path,
         args.bbsr_sct_summary_path,
+        args.bbsr_tpm_summary_path, 
         args.post_script_summary_path,
         args.standalone_summary_path,
         args.OS_tests_summary_path,
