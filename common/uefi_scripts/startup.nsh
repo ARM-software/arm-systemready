@@ -31,7 +31,7 @@ endfor
 # Run the config parser
 for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         if exist FS%y:\acs_tests\parser\Parser.efi then
-          if exist FS%y:acs_tests\config\acs_run_config.ini then
+          if exist FS%y:\acs_tests\config\acs_run_config.ini then
             FS%y:
             echo "Config File content"
             echo " "
@@ -54,7 +54,7 @@ for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             echo "Config file not found at acs_tests/config/acs_run_config.ini"
           endif
         else
-            echo "Parser.efi not present"
+            echo "Parser.efi not present at acs_tests/parser/Parser.efi"
         endif
 endfor
 :DoneParser
@@ -65,7 +65,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         echo " "
         echo "Running SCT test"
         if "%config_enabled_for_automation_run%" == "" then
-            echo "config_enabled_for_automation_run flag is NULL"
+            echo "config_enabled_for_automation_run variable does not exist"
             FS%i:\acs_tests\bbr\SctStartup.nsh false
             goto DoneSCT
         endif
@@ -86,7 +86,7 @@ for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         echo " "
         echo "Running SCRT test"
         if "%config_enabled_for_automation_run%" == "" then
-            echo "config_enabled_for_automation_run flag is NULL"
+            echo "config_enabled_for_automation_run variable does not exist"
             FS%i:\acs_tests\bbr\ScrtStartup.nsh false
             goto DoneScrt
         endif
@@ -142,7 +142,7 @@ for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         echo " "
         echo "Running BSA test"
         if "%config_enabled_for_automation_run%" == "" then
-            echo "config_enabled_for_automation_run flag is NULL"
+            echo "config_enabled_for_automation_run variable does not exist"
             FS%j:\acs_tests\bsa\bsa.nsh false
             goto Donebsa
         endif
@@ -162,7 +162,7 @@ for %z in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         echo " "
         echo "Running SBSA test"
         if "%config_enabled_for_automation_run%" == "" then
-            echo "config_enabled_for_automation_run flag is NULL"
+            echo "config_enabled_for_automation_run variable does not exist"
             FS%z:\acs_tests\bsa\sbsa\sbsa.nsh false
             goto Donesbsa
         endif
