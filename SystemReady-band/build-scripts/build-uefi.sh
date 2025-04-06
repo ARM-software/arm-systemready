@@ -45,6 +45,7 @@ UEFI_BUILD_MODE=RELEASE
 PATCH_DIR=$TOP_DIR/../patches
 KEYS_DIR=$TOP_DIR/bbsr-keys
 UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64
+CONFIG_PARSER_EFI=${TOP_DIR}/../common/parser/Parser.efi
 
  if [[ $arch != "aarch64" ]]; then
     CROSS_COMPILE=$TOP_DIR/$GCC
@@ -100,6 +101,8 @@ do_package ()
     pushd $TOP_DIR
     # sign Shell.efi with db key
     sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi --output $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi
+    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $CONFIG_PARSER_EFI --output $TOP_DIR/output/Parser.efi
+
     popd
 
 }
