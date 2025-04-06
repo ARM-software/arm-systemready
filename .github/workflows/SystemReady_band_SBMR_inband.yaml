@@ -32,6 +32,10 @@ jobs:
       with:
         fetch-depth: 1
         ref: server-base-manageability-requirements-acs
+    - name: Install gnu-efi dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y gnu-efi
     - name: Start building
       run:
         sudo -s;
