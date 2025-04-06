@@ -30,8 +30,8 @@ endfor
 
 # Run the config parser
 for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-        if exist FS%y:\acs_tests\parser\Parser.efi then
-          if exist FS%y:\acs_tests\config\acs_run_config.ini then
+    if exist FS%y:\acs_tests\parser\Parser.efi then
+        if exist FS%y:\acs_tests\config\acs_run_config.ini then
             FS%y:
             echo "Config File content"
             echo " "
@@ -50,12 +50,12 @@ for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 acs_tests\parser\Parser.efi -automation
                 goto DoneParser
             endif
-          else
-            echo "Config file not found at acs_tests/config/acs_run_config.ini"
-          endif
         else
-            echo "Parser.efi not present at acs_tests/parser/Parser.efi"
+              echo "Config file not found at acs_tests/config/acs_run_config.ini"
         endif
+    else
+            echo "Parser.efi not present at acs_tests/parser/Parser.efi"
+    endif
 endfor
 :DoneParser
 
@@ -69,7 +69,6 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%i:\acs_tests\bbr\SctStartup.nsh false
             goto DoneSCT
         endif
-
         if "%config_enabled_for_automation_run%" == "true" then
             FS%i:\acs_tests\bbr\SctStartup.nsh true
         else
