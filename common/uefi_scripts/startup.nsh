@@ -70,7 +70,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             goto DoneSCT
         endif
 
-        if %config_enabled_for_automation_run% == "true" then
+        if "%config_enabled_for_automation_run%" == "true" then
             FS%i:\acs_tests\bbr\SctStartup.nsh true
         else
             FS%i:\acs_tests\bbr\SctStartup.nsh false
@@ -90,7 +90,7 @@ for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%i:\acs_tests\bbr\ScrtStartup.nsh false
             goto DoneScrt
         endif
-        if %config_enabled_for_automation_run% == "true" then
+        if "%config_enabled_for_automation_run%" == "true" then
             FS%k:\acs_tests\bbr\ScrtStartup.nsh true
         else
             FS%k:\acs_tests\bbr\ScrtStartup.nsh false
@@ -146,7 +146,7 @@ for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%j:\acs_tests\bsa\bsa.nsh false
             goto Donebsa
         endif
-        if %config_enabled_for_automation_run% == "true" then
+        if "%config_enabled_for_automation_run%" == "true" then
             FS%j:\acs_tests\bsa\bsa.nsh true
         else
             FS%j:\acs_tests\bsa\bsa.nsh false
@@ -166,7 +166,7 @@ for %z in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%z:\acs_tests\bsa\sbsa\sbsa.nsh false
             goto Donesbsa
         endif
-        if %config_enabled_for_automation_run% == "true" then
+        if "%config_enabled_for_automation_run%" == "true" then
             FS%z:\acs_tests\bsa\sbsa\sbsa.nsh true
         else
             FS%z:\acs_tests\bsa\sbsa\sbsa.nsh false
