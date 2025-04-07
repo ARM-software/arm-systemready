@@ -57,6 +57,20 @@ sleep 5
 ADDITIONAL_CMD_OPTION="";
 ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
+
+# Parse config file
+automation_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation`"
+if [ "$automation_enabled" == "True" ]; then
+  fwts_command = "`python3 /mnt/acs_tests/parser/Parser.py -fwts`"
+  fwts_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation_fwts_run`"
+
+  bsa_command = "`python3 /mnt/acs_tests/parser/Parser.py -bsa`"
+  bsa_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation_bsa_run`"
+
+  sbsa_command = "`python3 /mnt/acs_tests/parser/Parser.py -sbsa`"
+  sbsa_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation_sbsa_run`"
+fi
+
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   #mount result partition
@@ -141,50 +155,67 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   sleep 5
   echo "Linux Debug Dump - Completed"
 
+
   # FWTS (SBBR) Execution
-
-  mkdir -p /mnt/acs_results/fwts
   echo "Executing FWTS for SBBR"
-  echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/fwts/FWTSResults.log
-  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
-  sync /mnt
-  sleep 5
-  echo "FWTS Execution - Completed"
-
-  # Linux BSA Execution
-
-  mkdir -p /mnt/acs_results/linux
-  if [ -f  /lib/modules/bsa_acs.ko ]; then
-    echo "Running Linux BSA tests"
-    insmod /lib/modules/bsa_acs.ko
-    echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/BsaResultsApp.log
-    /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
-    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
+  if [ "$automation_enabled" == "True" ]; &&  ["$fwts_enabled" == "False"]; then
+    echo "********* FWTS is disabled in config file**************"
+  else
+    mkdir -p /mnt/acs_results/fwts
+    echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/fwts/FWTSResults.log
+    if [ "$automation_enabled" == "False" ];
+      fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
+    else
+      $fwts_command >> /mnt/acs_results/fwts/FWTSResults.log
+    fi
     sync /mnt
     sleep 5
-    echo "Linux BSA test Execution - Completed"
+    echo "FWTS Execution - Completed"
+  fi
+
+
+  # Linux BSA Execution
+  echo "Running Linux BSA tests"
+  if [ "$automation_enabled" == "True" ]; &&  ["$bsa_enabled" == "False"]; then
+    echo "********* BSA is disabled in config file**************"
   else
-    echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run."
+    mkdir -p /mnt/acs_results/linux
+    if [ -f  /lib/modules/bsa_acs.ko ]; then
+      insmod /lib/modules/bsa_acs.ko
+      echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/BsaResultsApp.log
+      if [ "$automation_enabled" == "False" ];
+        /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
+      else
+        $bsa_command >> /mnt/acs_results/linux/BsaResultsApp.log
+      fi
+      dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
+      sync /mnt
+      sleep 5
+      echo "Linux BSA test Execution - Completed"
+    else
+      echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run."
+    fi
   fi
 
   # Linux SBSA Execution
-
-  # Read the value of SbsaRunEnabled
-  if [ -f  /mnt/acs_tests/config/acs_run_config.ini ]; then
-    SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/mnt/acs_tests/config/acs_run_config.ini" | cut -d'=' -f2 || echo "0")
-    if [ "$SbsaRunEnabled" == "1" ]; then
-      if [ -f  /lib/modules/sbsa_acs.ko ]; then
-        echo "Running Linux SBSA tests"
-      	insmod /lib/modules/sbsa_acs.ko
-        echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
+  echo "Running Linux SBSA tests"
+  if [ "$automation_enabled" == "True" ]; &&  ["$sbsa_enabled" == "False"]; then
+    echo "********* SBSA is disabled in config file**************"
+  else
+    if [ -f  /lib/modules/sbsa_acs.ko ]; then
+      insmod /lib/modules/sbsa_acs.ko
+      echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
+      if [ "$automation_enabled" == "False" ];
         /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
-        dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
-	sync /mnt
-	sleep 5
-        echo "Linux SBSA test Execution - Completed"
       else
-        echo "Error: SBSA kernel Driver is not found. Linux SBSA tests cannot be run."
+        $sbsa_command >> /mnt/acs_results/linux/SbsaResultsApp.log
       fi
+      dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
+      sync /mnt
+      sleep 5
+      echo "Linux SBSA test Execution - Completed"
+    else
+      echo "Error: SBSA kernel Driver is not found. Linux SBSA tests cannot be run."
     fi
   fi
 
