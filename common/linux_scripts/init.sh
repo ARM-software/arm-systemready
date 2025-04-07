@@ -57,6 +57,20 @@ sleep 5
 ADDITIONAL_CMD_OPTION="";
 ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
+
+# Parse config file
+automation_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation`"
+if [ "$automation_enabled" == "True" ]; then
+  fwts_command = "`python3 /mnt/acs_tests/parser/Parser.py -fwts`"
+  fwts_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation_fwts_run`"
+
+  bsa_command = "`python3 /mnt/acs_tests/parser/Parser.py -bsa`"
+  bsa_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation_bsa_run`"
+
+  sbsa_command = "`python3 /mnt/acs_tests/parser/Parser.py -sbsa`"
+  sbsa_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation_sbsa_run`"
+fi
+
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   #mount result partition
@@ -142,14 +156,21 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Linux Debug Dump - Completed"
 
   # FWTS (SBBR) Execution
-
-  mkdir -p /mnt/acs_results/fwts
   echo "Executing FWTS for SBBR"
-  echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/fwts/FWTSResults.log
-  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
-  sync /mnt
-  sleep 5
-  echo "FWTS Execution - Completed"
+  if [ "$automation_enabled" == "True" ]; &&  ["$fwts_enabled" == "False"]; then
+    echo "********* FWTS is disabled in config file**************"
+  else
+    mkdir -p /mnt/acs_results/fwts
+    echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/fwts/FWTSResults.log
+    if [ "$automation_enabled" == "False" ];
+      fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
+    else
+      $fwts_command >> /mnt/acs_results/fwts/FWTSResults.log
+    fi
+    sync /mnt
+    sleep 5
+    echo "FWTS Execution - Completed"
+  fi
 
   # Linux BSA Execution
 
