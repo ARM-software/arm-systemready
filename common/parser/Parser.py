@@ -130,7 +130,7 @@ def main():
     parser.add_argument('-automation_sbsa_run', action='store_true', help='Check if SBSA is enabled')
     parser.add_argument('-automation_fwts_run', action='store_true', help='Check if FWTS is enabled')
     parser.add_argument('-automation_bbsr_fwts_run', action='store_true', help='Check if FWTS is enabled')
-    parser.add_argument('--config', default='/data_sda/6apr/new/arm-systemready/common/config/acs_run_config.ini', help='Path to the config file')
+    parser.add_argument('--config', default='/mnt/acs_tests/config/acs_run_config.ini', help='Path to the config file')
 
     args = parser.parse_args()
 

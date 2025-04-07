@@ -38,6 +38,7 @@ ACS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_config.txt
 SYSTEM_CONFIG_FILE=${TOP_DIR}/build-scripts/config/system_config.txt
 ACS_RUN_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_run_config.ini
 CONFIG_PARSER_FILE=${TOP_DIR}/uefi_scripts/parser.nsh
+CONFIG_PARSER_PYTHON_FILE=${TOP_DIR}/../common/parser/Parser.py
 BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
 GRUB_PATH=grub
@@ -100,6 +101,7 @@ create_fatpart ()
     mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/acs_tests/app
     mcopy -i $fatpart_name $OUTDIR/Parser.efi  ::/acs_tests/parser
     mcopy -i $fatpart_name $CONFIG_PARSER_FILE  ::/acs_tests/parser
+    mcopy -i $fatpart_name $CONFIG_PARSER_PYTHON_FILE  ::/acs_tests/parser
 
     echo "FAT partition image created"
 }
