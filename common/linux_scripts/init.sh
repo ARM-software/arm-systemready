@@ -57,6 +57,14 @@ sleep 5
 ADDITIONAL_CMD_OPTION="";
 ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
+#mount result partition
+BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1)
+if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
+  mount -o rw $BLOCK_DEVICE_NAME /mnt
+  echo "Mounted the results partition on device $BLOCK_DEVICE_NAME"
+else
+  echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
+fi
 
 # Parse config file
 automation_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation`"
@@ -72,17 +80,6 @@ if [ "$automation_enabled" == "True" ]; then
 fi
 
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
-
-  #mount result partition
-  BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1)
-
-  if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
-    mount -o rw $BLOCK_DEVICE_NAME /mnt
-    echo "Mounted the results partition on device $BLOCK_DEVICE_NAME"
-  else
-    echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
-  fi
-
   if [ $ADDITIONAL_CMD_OPTION == "secureboot" ]; then
     echo "Call BBSR ACS"
     /usr/bin/secure_init.sh
@@ -107,7 +104,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
 
   #Linux debug dump
-
   echo "Collecting Linux Debug Dump"
   mkdir -p /mnt/acs_results/linux_dump
   dmesg > /mnt/acs_results/linux_dump/dmesg.log
@@ -197,6 +193,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     fi
   fi
 
+
   # Linux SBSA Execution
   echo "Running Linux SBSA tests"
   if [ "$automation_enabled" == "True" ]; &&  ["$sbsa_enabled" == "False"]; then
@@ -219,8 +216,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     fi
   fi
 
-  # EDK2 test parser
 
+  # EDK2 test parser
   if [ -d "/mnt/acs_results/sct_results" ]; then
     echo "Running edk2-test-parser tool "
     mkdir -p /mnt/acs_results/edk2-test-parser
@@ -234,8 +231,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
   fi
 
-  # Device Driver script run
 
+  # Device Driver script run
   if [ -f "/mnt/acs_results/uefi_dump/devices.log" ] && [ -f "/mnt/acs_results/uefi_dump/drivers.log" ] && [ -f "/mnt/acs_results/uefi_dump/dh.log" ]; then
     echo "Running Device Driver Matching Script"
     cd /usr/bin/
@@ -248,8 +245,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "Devices/Driver/dh log does not exist, cannot run the script"
   fi
 
-  # ACS log parser run
 
+  # ACS log parser run
   echo "Running acs log parser tool "
   if [ -d "/mnt/acs_results" ]; then
     if [ -d "/mnt/acs_results/acs_summary" ]; then
