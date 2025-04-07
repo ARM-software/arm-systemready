@@ -44,7 +44,7 @@ def process_bsa(config):
     if skip:
         cmd.append(f'-skip {skip}')
     if verbose:
-        cmd.append(f' -v ')
+        cmd.append(f' -v{verbose}')
 
     return cmd
 

@@ -67,16 +67,16 @@ else
 fi
 
 # Parse config file
-automation_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation`"
+automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
 if [ "$automation_enabled" == "True" ]; then
-  fwts_command = "`python3 /mnt/acs_tests/parser/Parser.py -fwts`"
-  fwts_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation_fwts_run`"
+  fwts_command="`python3 /mnt/acs_tests/parser/Parser.py -fwts`"
+  fwts_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_fwts_run`"
 
-  bsa_command = "`python3 /mnt/acs_tests/parser/Parser.py -bsa`"
-  bsa_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation_bsa_run`"
+  bsa_command="`python3 /mnt/acs_tests/parser/Parser.py -bsa`"
+  bsa_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_bsa_run`"
 
-  sbsa_command = "`python3 /mnt/acs_tests/parser/Parser.py -sbsa`"
-  sbsa_enabled = "`python3 /mnt/acs_tests/parser/Parser.py -automation_sbsa_run`"
+  sbsa_command="`python3 /mnt/acs_tests/parser/Parser.py -sbsa`"
+  sbsa_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_sbsa_run`"
 fi
 
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
@@ -154,12 +154,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   # FWTS (SBBR) Execution
   echo "Executing FWTS for SBBR"
-  if [ "$automation_enabled" == "True" ]; &&  ["$fwts_enabled" == "False"]; then
+  if [ "$automation_enabled" == "True" ] &&  [ "$fwts_enabled" == "False" ]; then
     echo "********* FWTS is disabled in config file**************"
   else
     mkdir -p /mnt/acs_results/fwts
     echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/fwts/FWTSResults.log
-    if [ "$automation_enabled" == "False" ];
+    if [ "$automation_enabled" == "False" ]; then
       fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
     else
       $fwts_command >> /mnt/acs_results/fwts/FWTSResults.log
@@ -172,14 +172,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   # Linux BSA Execution
   echo "Running Linux BSA tests"
-  if [ "$automation_enabled" == "True" ]; &&  ["$bsa_enabled" == "False"]; then
+  if [ "$automation_enabled" == "True" ] &&  [ "$bsa_enabled" == "False" ]; then
     echo "********* BSA is disabled in config file**************"
   else
     mkdir -p /mnt/acs_results/linux
     if [ -f  /lib/modules/bsa_acs.ko ]; then
       insmod /lib/modules/bsa_acs.ko
       echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/BsaResultsApp.log
-      if [ "$automation_enabled" == "False" ];
+      if [ "$automation_enabled" == "False" ]; then
         /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
       else
         $bsa_command >> /mnt/acs_results/linux/BsaResultsApp.log
@@ -196,13 +196,13 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   # Linux SBSA Execution
   echo "Running Linux SBSA tests"
-  if [ "$automation_enabled" == "True" ]; &&  ["$sbsa_enabled" == "False"]; then
+  if [ "$automation_enabled" == "True" ] &&  [ "$sbsa_enabled" == "False" ]; then
     echo "********* SBSA is disabled in config file**************"
   else
     if [ -f  /lib/modules/sbsa_acs.ko ]; then
       insmod /lib/modules/sbsa_acs.ko
       echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
-      if [ "$automation_enabled" == "False" ];
+      if [ "$automation_enabled" == "False" ]; then
         /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
       else
         $sbsa_command >> /mnt/acs_results/linux/SbsaResultsApp.log
