@@ -257,11 +257,26 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     sleep 5
   fi
 
+  echo "Please wait acs results are syncing on storage medium."
+  sync /mnt
+  sleep 60
+
   echo "ACS automated test suites run is completed."
   echo "Please reboot to run BBSR tests if not done"
 else
   echo ""
-  echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
+  echo "Linux Execution Enviroment can be used to run an acs test suite manually with desired options"
+  echo "The supported test suites for Linux enviroment are"
+  echo "  BSA"
+  echo "  SBSA"
+  echo "  FWTS"
+  echo " "
+  echo " To view or modify the supported command line parameters for a test suite"
+  echo " Edit the /mnt/acs_tests/config/acs_run_config.ini"
+  echo " "
+  echo " To run BSA test suite, execute /usr/bin/bsa.sh"
+  echo " To run SBSA test suite, execute /usr/bin/sbsa.sh"
+  echo " To run SCT test suite, execute /usr/bin/fwts.sh"
   echo ""
 fi
 
