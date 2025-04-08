@@ -26,6 +26,12 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+YOCTO_FLAG_PATH = "/mnt/yocto_image.flag"
+if os.path.isfile(YOCTO_FLAG_PATH):
+    GENERATE_VIEW_PAGES = True
+else:
+    GENERATE_VIEW_PAGES = False
+
 def get_system_info():
     system_info = {}
 
@@ -257,7 +263,9 @@ def generate_view_html_page(view_name, test_items, output_html_path):
                 'total_failed_with_waiver': 0,
                 'total_ABORTED': 0,
                 'total_SKIPPED': 0,
-                'total_WARNINGS': 0
+                'total_WARNINGS': 0,
+                'total_IGNORED': 0,
+                'total_UNKNOWN': 0
             }
 
         subtests = titem.get("subtests", [])
@@ -271,6 +279,8 @@ def generate_view_html_page(view_name, test_items, output_html_path):
                 aborted  = res_dict.get('ABORTED', 0)
                 skipped  = res_dict.get('SKIPPED', 0)
                 warnings = res_dict.get('WARNINGS', 0)
+                ignored  = res_dict.get('IGNORED', 0)
+                unknown  = res_dict.get('UNKNOWN', 0)
 
                 if failed > 0:
                     if sub.get("waiver_reason"):
@@ -285,6 +295,10 @@ def generate_view_html_page(view_name, test_items, output_html_path):
                     result_text = "SKIPPED"
                 elif warnings > 0:
                     result_text = "WARNING"
+                elif ignored > 0:
+                    result_text = "IGNORED"
+                elif unknown > 0:
+                    result_text = "UNKNOWN"
             elif isinstance(res_dict, str):
                 result_text = res_dict.upper()
 
@@ -304,18 +318,32 @@ def generate_view_html_page(view_name, test_items, output_html_path):
                 suite_to_counts[suite_key]['total_SKIPPED'] += 1
             elif "warn" in result_lower:
                 suite_to_counts[suite_key]['total_WARNINGS'] += 1
+            elif "ignored" in result_lower:
+                suite_to_counts[suite_key]['total_IGNORED'] += 1
+            elif "unknown" in result_lower:
+                suite_to_counts[suite_key]['total_UNKNOWN'] += 1
 
-        #iterate over every subtest and count its result
+            else:
+                suite_name_lower = (parent_suite + child_suite).lower()
+                if "sct" in suite_name_lower:
+                    suite_to_counts[suite_key]['total_IGNORED'] += 1
+
+    # Now build the overall summary
     suite_summary = {
         'total_PASSED': 0,
         'total_FAILED': 0,
         'total_failed_with_waiver': 0,
         'total_ABORTED': 0,
         'total_SKIPPED': 0,
-        'total_WARNINGS': 0
+        'total_WARNINGS': 0,
+        'total_IGNORED': 0,
+        'total_UNKNOWN': 0
     }
 
     for item in test_items:
+        parent_suite = item.get("Parent_Suite_Name", "UnknownParent")
+        child_suite  = item.get("Test_suite",       "UnknownChild")
+        suite_name_lower = (parent_suite + child_suite).lower()
         subtests = item.get("subtests", [])
         for sub in subtests:
             result_text = ""
@@ -334,6 +362,10 @@ def generate_view_html_page(view_name, test_items, output_html_path):
                     result_text = "skipped"
                 elif res_dict.get('WARNINGS', 0) > 0:
                     result_text = "warning"
+                elif res_dict.get('IGNORED', 0) > 0:
+                    result_text = "ignored"
+                elif res_dict.get('UNKNOWN', 0) > 0:
+                    result_text = "unknown"
             elif isinstance(res_dict, str):
                 result_text = res_dict.lower()
 
@@ -351,8 +383,13 @@ def generate_view_html_page(view_name, test_items, output_html_path):
                 suite_summary['total_SKIPPED'] += 1
             elif "warn" in result_text:
                 suite_summary['total_WARNINGS'] += 1
-            # else, do nothing for unknown
-
+            elif "ignored" in result_text:
+                suite_summary['total_IGNORED'] += 1
+            elif "unknown" in result_text:
+                suite_summary['total_UNKNOWN'] += 1
+            else:
+                if "sct" in suite_name_lower:
+                    suite_summary['total_IGNORED'] += 1
 
     chart_data = generate_bar_chart(suite_summary)
 
@@ -444,7 +481,8 @@ def generate_view_html_page(view_name, test_items, output_html_path):
                 <td>Total Tests</td>
                 <td>{{ suite_summary.total_PASSED + suite_summary.total_FAILED
                        + suite_summary.total_failed_with_waiver + suite_summary.total_ABORTED
-                       + suite_summary.total_SKIPPED + suite_summary.total_WARNINGS }}</td>
+                       + suite_summary.total_SKIPPED + suite_summary.total_WARNINGS
+                       + suite_summary.total_IGNORED + suite_summary.total_UNKNOWN }}</td>
             </tr>
             <tr>
                 <td>Passed</td>
@@ -469,6 +507,14 @@ def generate_view_html_page(view_name, test_items, output_html_path):
             <tr>
                 <td>Warnings</td>
                 <td class="warning">{{ suite_summary.total_WARNINGS }}</td>
+            </tr>
+            <tr>
+                <td>Ignored</td>
+                <td>{{ suite_summary.total_IGNORED }}</td>
+            </tr>
+            <tr>
+                <td>Unknown</td>
+                <td>{{ suite_summary.total_UNKNOWN }}</td>
             </tr>
         </tbody>
     </table>
@@ -547,7 +593,7 @@ def generate_view_html_page(view_name, test_items, output_html_path):
             {% endif %}
 
             <tr>
-                <td>{{ sub.sub_Test_Number }}</td>
+                <td>{% if "sct" in test.Parent_Suite_Name|lower or "sct" in test.Test_suite|lower %}{{ sub.sub_Test_GUID }}{% else %}{{ sub.sub_Test_Number }}{% endif %}</td>
                 <td>{{ sub.sub_Test_Description }}</td>
                 <td class="{{ result_class }}">{{ result_text }}</td>
 
@@ -918,6 +964,7 @@ def generate_html(system_info, acs_results_summary,
                 </div>
             </div>
 
+            {% if view_links|length > 0 %}
             <div class="dropdown">
                 <button>Go to Views</button>
                 <div id="views-dropdown-content" class="dropdown-content">
@@ -927,6 +974,7 @@ def generate_html(system_info, acs_results_summary,
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
 
             <div class="summary-section">
                 <h2>Test Summaries</h2>
@@ -1031,17 +1079,10 @@ def generate_html(system_info, acs_results_summary,
         post_script_summary_content=post_script_summary_content,
         standalone_summary_content=standalone_summary_content,
         OS_tests_summary_content=OS_tests_summary_content,
-        view_links=[]
+        view_links=view_links 
     )
 
-    readiness_link_html = """
-    <div style="text-align:center; margin-top:20px;">
-        <a href="readiness_view.html" target="_blank" style="color: #3498db; text-decoration: none; font-weight: bold; padding: 10px 20px; border: 2px solid #3498db; border-radius: 5px; transition: background-color 0.3s, color 0.3s;">
-            Go to Readiness View Page
-        </a>
-    </div>
-    """
-    final_html = rendered_html.replace('</div>\n    </body>', readiness_link_html + '\n</div>\n    </body>')
+    final_html = rendered_html
 
     with open(output_html_path, 'w') as html_file:
         html_file.write(final_html)
@@ -1136,9 +1177,9 @@ if __name__ == "__main__":
 
     summary_dir = os.path.dirname(args.output_html_path)
     view_links = []
-    if args.merged_json and os.path.isfile(args.merged_json):
+    if GENERATE_VIEW_PAGES and args.merged_json and os.path.isfile(args.merged_json):
         view_links = generate_multi_view_pages(args.merged_json, summary_dir)
-
+        
     generate_html(
         system_info,
         acs_results_summary,
