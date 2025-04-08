@@ -135,31 +135,63 @@ def parse_fwts_log(log_path):
             if "PASSED" in line:
                 current_subtest["sub_test_result"]["PASSED"] += 1
                 if "PASSED:" in line:
-                    reason_text = line.split("PASSED:")[1].strip()
-                    current_subtest["sub_test_result"]["pass_reasons"].append(reason_text)
+                    reason_text = line.split("PASSED:", 1)[1].strip()
+                else:
+                    reason_text = line.replace("PASSED", "").strip()
+                j = i + 1
+                while j < len(log_data):
+                    next_line = log_data[j].strip()
+                    # Break if next_line is empty or looks like the start of a new test/subtest entry
+                    if not next_line or re.match(r"^(Test \d+ of \d+:|\w+:)", next_line):
+                        break
+                    reason_text += " " + next_line
+                    j += 1
+                current_subtest["sub_test_result"]["pass_reasons"].append(reason_text)
             elif "FAILED" in line:
                 current_subtest["sub_test_result"]["FAILED"] += 1
-                # 1) Capture everything after the first colon, if present:
+                # Capture everything after the first colon if present, otherwise the rest of the line.
                 if ":" in line:
                     reason_text = line.split(":", 1)[1].strip()
                 else:
                     reason_text = line.replace("FAILED", "").strip()
-                # 2) Append the next line if it's not empty
-                if i + 1 < len(log_data):
-                    next_line = log_data[i + 1].strip()
-                    if next_line:
-                        reason_text += " " + next_line
-                current_subtest["sub_test_result"]["fail_reasons"].append(reason_text) 
+                # Append subsequent lines that seem to be part of the reason.
+                j = i + 1
+                while j < len(log_data):
+                    next_line = log_data[j].strip()
+                    # Stop if next_line is empty or looks like the start of a new test/subtest
+                    if not next_line or re.match(r"^(Test \d+ of \d+:|\w+:)", next_line):
+                        break
+                    reason_text += " " + next_line
+                    j += 1
+                current_subtest["sub_test_result"]["fail_reasons"].append(reason_text)
             elif "SKIPPED" in line:
                 current_subtest["sub_test_result"]["SKIPPED"] += 1
                 if "SKIPPED:" in line:
-                    reason_text = line.split("SKIPPED:")[1].strip()
+                    reason_text = line.split("SKIPPED:", 1)[1].strip()
+                    j = i + 1
+                    while j < len(log_data):
+                        next_line = log_data[j].strip()
+                        # Break if next_line is empty or looks like the start of a new test/subtest
+                        if not next_line or re.match(r"^(Test \d+ of \d+:|\w+:)", next_line):
+                            break
+                        reason_text += " " + next_line
+                        j += 1
                     current_subtest["sub_test_result"]["skip_reasons"].append(reason_text)
             elif "WARNING" in line:
                 current_subtest["sub_test_result"]["WARNINGS"] += 1
                 if "WARNING:" in line:
-                    reason_text = line.split("WARNING:")[1].strip()
-                    current_subtest["sub_test_result"]["warning_reasons"].append(reason_text)
+                    reason_text = line.split("WARNING:", 1)[1].strip()
+                else:
+                    reason_text = line.replace("WARNING", "").strip()
+                j = i + 1
+                while j < len(log_data):
+                    next_line = log_data[j].strip()
+                    # Break if next_line is empty or looks like the start of a new test/subtest entry
+                    if not next_line or re.match(r"^(Test \d+ of \d+:|\w+:)", next_line):
+                        break
+                    reason_text += " " + next_line
+                    j += 1
+                current_subtest["sub_test_result"]["warning_reasons"].append(reason_text)
         else:
             # Handle SKIPPED when no current_subtest exists
             # detect lines like "ACPI XXX table does not exist, skipping test"

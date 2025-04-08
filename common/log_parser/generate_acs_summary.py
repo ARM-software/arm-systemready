@@ -20,6 +20,11 @@ import os
 import subprocess
 import re
 from jinja2 import Template
+import base64
+from io import BytesIO
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 def get_system_info():
     system_info = {}
@@ -162,6 +167,504 @@ def read_overall_compliance_from_merged_json(merged_json_path):
     except Exception as e:
         print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
     return overall_result
+
+##############################################################################
+# VIEW PAGE
+##############################################################################
+
+def get_case_insensitive(d, key, default=0):
+    """Helper to retrieve dictionary values ignoring case."""
+    for k, v in d.items():
+        if k.lower() == key.lower():
+            return v
+    return default
+
+def generate_bar_chart(suite_summary):
+    """Generate a bar chart (base64-encoded PNG) for the pass/fail distribution."""
+    labels = [
+        'Passed',
+        'Failed',
+        'Failed with Waiver',
+        'Aborted',
+        'Skipped',
+        'Warnings'
+    ]
+    sizes = [
+        suite_summary.get('total_PASSED', 0),
+        suite_summary.get('total_FAILED', 0),
+        suite_summary.get('total_failed_with_waiver', 0),
+        suite_summary.get('total_ABORTED', 0),
+        suite_summary.get('total_SKIPPED', 0),
+        suite_summary.get('total_WARNINGS', 0)
+    ]
+    colors = ['#66bb6a','#ef5350','#f39c12','#9e9e9e','#ffc107','#ffeb3b']
+
+    plt.figure(figsize=(10, 6))
+    plt.gcf().subplots_adjust(top=0.90, bottom=0.30)
+
+    bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
+    total_tests = sum(sizes)
+
+    # Add percentage labels on top of each bar
+    for bar, size in zip(bars, sizes):
+        height = bar.get_height()
+        pct = (size / total_tests)*100 if total_tests else 0
+        plt.text(
+            bar.get_x() + bar.get_width()/2,
+            height + 0.3,
+            f"{pct:.1f}%",
+            ha='center'
+        )
+
+    plt.title('Test Results Distribution')
+    plt.ylabel('Count')
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    plt.close()
+    buffer.seek(0)
+    return base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+def generate_view_html_page(view_name, test_items, output_html_path):
+
+    # Check if sub_test_suite or test_case exist anywhere (unchanged logic)
+    sub_test_suite_exists = False
+    test_case_exists = False
+    for titem in test_items:
+        if "Sub_test_suite" in titem and titem["Sub_test_suite"]:
+            sub_test_suite_exists = True
+        if "Test_case" in titem and titem["Test_case"]:
+            test_case_exists = True
+
+        subtests = titem.get("subtests", [])
+        for s in subtests:
+            if "Sub_test_suite" in s and s["Sub_test_suite"]:
+                sub_test_suite_exists = True
+            if "Test_case" in s and s["Test_case"]:
+                test_case_exists = True
+
+    # We collect results in a dictionary keyed by (Parent_Suite_Name, Test_suite)
+    suite_to_counts = {}
+
+    for titem in test_items:
+        parent_suite = titem.get("Parent_Suite_Name", "UnknownParent")
+        child_suite  = titem.get("Test_suite",       "UnknownChild")
+        suite_key = (parent_suite, child_suite)
+
+        if suite_key not in suite_to_counts:
+            suite_to_counts[suite_key] = {
+                'total_PASSED': 0,
+                'total_FAILED': 0,
+                'total_failed_with_waiver': 0,
+                'total_ABORTED': 0,
+                'total_SKIPPED': 0,
+                'total_WARNINGS': 0
+            }
+
+        subtests = titem.get("subtests", [])
+        for sub in subtests:
+            result_text = "UNKNOWN"
+            res_dict = sub.get("sub_test_result")
+
+            if isinstance(res_dict, dict):
+                passed   = res_dict.get('PASSED', 0)
+                failed   = res_dict.get('FAILED', 0)
+                aborted  = res_dict.get('ABORTED', 0)
+                skipped  = res_dict.get('SKIPPED', 0)
+                warnings = res_dict.get('WARNINGS', 0)
+
+                if failed > 0:
+                    if sub.get("waiver_reason"):
+                        result_text = "FAILED (WITH WAIVER)"
+                    else:
+                        result_text = "FAILED"
+                elif passed > 0:
+                    result_text = "PASSED"
+                elif aborted > 0:
+                    result_text = "ABORTED"
+                elif skipped > 0:
+                    result_text = "SKIPPED"
+                elif warnings > 0:
+                    result_text = "WARNING"
+            elif isinstance(res_dict, str):
+                result_text = res_dict.upper()
+
+            # HERE is where we do the snippet to handle "fail"/"waiver"/"abort" etc:
+            result_lower = (result_text or "").lower()
+
+            if "fail" in result_lower:
+                if "waiver" in result_lower:
+                    suite_to_counts[suite_key]['total_failed_with_waiver'] += 1
+                else:
+                    suite_to_counts[suite_key]['total_FAILED'] += 1
+            elif "pass" in result_lower:
+                suite_to_counts[suite_key]['total_PASSED'] += 1
+            elif "abort" in result_lower:
+                suite_to_counts[suite_key]['total_ABORTED'] += 1
+            elif "skip" in result_lower:
+                suite_to_counts[suite_key]['total_SKIPPED'] += 1
+            elif "warn" in result_lower:
+                suite_to_counts[suite_key]['total_WARNINGS'] += 1
+
+        #iterate over every subtest and count its result
+    suite_summary = {
+        'total_PASSED': 0,
+        'total_FAILED': 0,
+        'total_failed_with_waiver': 0,
+        'total_ABORTED': 0,
+        'total_SKIPPED': 0,
+        'total_WARNINGS': 0
+    }
+
+    for item in test_items:
+        subtests = item.get("subtests", [])
+        for sub in subtests:
+            result_text = ""
+            res_dict = sub.get("sub_test_result")
+            if isinstance(res_dict, dict):
+                # We determine result_text from the dictionary values
+                if res_dict.get('FAILED_WITH_WAIVER', 0) > 0:
+                    result_text = "failed (with waiver)"
+                if res_dict.get('FAILED', 0) > 0:
+                    result_text = "failed"
+                elif res_dict.get('PASSED', 0) > 0:
+                    result_text = "passed"
+                elif res_dict.get('ABORTED', 0) > 0:
+                    result_text = "aborted"
+                elif res_dict.get('SKIPPED', 0) > 0:
+                    result_text = "skipped"
+                elif res_dict.get('WARNINGS', 0) > 0:
+                    result_text = "warning"
+            elif isinstance(res_dict, str):
+                result_text = res_dict.lower()
+
+            # any "fail" counts as failed; if "waiver" is present, count both.
+            result_text = (result_text or "").lower()
+            if "fail" in result_text:
+                suite_summary['total_FAILED'] += 1
+                if "waiver" in result_text:
+                    suite_summary['total_failed_with_waiver'] += 1
+            elif "pass" in result_text:
+                suite_summary['total_PASSED'] += 1
+            elif "abort" in result_text:
+                suite_summary['total_ABORTED'] += 1
+            elif "skip" in result_text:
+                suite_summary['total_SKIPPED'] += 1
+            elif "warn" in result_text:
+                suite_summary['total_WARNINGS'] += 1
+            # else, do nothing for unknown
+
+
+    chart_data = generate_bar_chart(suite_summary)
+
+    html_template = Template(r"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ view_name }} View</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            background-color: #fff;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            text-align: center; /* center text by default */
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        .pass {
+            background-color: #d4edda;
+            font-weight: bold;
+        }
+        .fail {
+            background-color: #f8d7da;
+            font-weight: bold;
+        }
+        .fail-waiver {
+            background-color: #f39c12;
+            font-weight: bold;
+        }
+        .warning {
+            background-color: #fff3cd;
+            font-weight: bold;
+        }
+        .aborted {
+            background-color: #9e9e9e;
+            font-weight: bold;
+        }
+        .skipped {
+            background-color: #ffe0b2;
+            font-weight: bold;
+        }
+        .summary-table {
+            margin: 0 auto;
+            width: 70%;
+        }
+        .summary-table td {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ view_name }} View</h1>
+    <div class="chart-container">
+        <img src="data:image/png;base64,{{ chart_data }}" alt="Bar Chart">
+    </div>
+    <h2>Result Summary</h2>
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Total Tests</td>
+                <td>{{ suite_summary.total_PASSED + suite_summary.total_FAILED
+                       + suite_summary.total_failed_with_waiver + suite_summary.total_ABORTED
+                       + suite_summary.total_SKIPPED + suite_summary.total_WARNINGS }}</td>
+            </tr>
+            <tr>
+                <td>Passed</td>
+                <td class="pass">{{ suite_summary.total_PASSED }}</td>
+            </tr>
+            <tr>
+                <td>Failed</td>
+                <td class="fail">{{ suite_summary.total_FAILED }}</td>
+            </tr>
+            <tr>
+                <td>Failed with Waiver</td>
+                <td class="fail-waiver">{{ suite_summary.total_failed_with_waiver }}</td>
+            </tr>
+            <tr>
+                <td>Aborted</td>
+                <td class="aborted">{{ suite_summary.total_ABORTED }}</td>
+            </tr>
+            <tr>
+                <td>Skipped</td>
+                <td class="skipped">{{ suite_summary.total_SKIPPED }}</td>
+            </tr>
+            <tr>
+                <td>Warnings</td>
+                <td class="warning">{{ suite_summary.total_WARNINGS }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Detailed Results</h2>
+    {% for test in test_items %}
+    <table>
+        <thead>
+            <tr>
+                <th colspan="100">Suite: {{ test.Parent_Suite_Name }} ({{ test.Test_suite }})</th>
+            </tr>
+            <tr>
+                <th>Sub Test #</th>
+                <th>Sub Test Description</th>
+                <th>Result</th>
+
+                {% if sub_test_suite_exists %}
+                <th>Sub Test Suite</th>
+                {% endif %}
+
+                {% if test_case_exists %}
+                <th>Test Case</th>
+                {% endif %}
+
+                <th>Reason</th>
+                <th>Waiver Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sub in test.subtests %}
+            {% set result_text = "" %}
+            {% if sub.sub_test_result is string %}
+                {% set result_text = sub.sub_test_result %}
+            {% elif sub.sub_test_result is mapping %}
+                {% set passed = sub.sub_test_result.get('PASSED', 0) %}
+                {% set failed = sub.sub_test_result.get('FAILED', 0) %}
+                {% set failed_with_waiver = sub.sub_test_result.get('FAILED_WITH_WAIVER', 0) %}
+                {% set aborted = sub.sub_test_result.get('ABORTED', 0) %}
+                {% set skipped = sub.sub_test_result.get('SKIPPED', 0) %}
+                {% set warnings = sub.sub_test_result.get('WARNINGS', 0) %}
+
+                {% if failed_with_waiver > 0 %}
+                    {% set result_text = "FAILED (WITH WAIVER)" %}
+                {% elif failed > 0 %}
+                    {% set result_text = "FAILED" %}
+                {% elif passed > 0 %}
+                    {% set result_text = "PASSED" %}
+                {% elif aborted > 0 %}
+                    {% set result_text = "ABORTED" %}
+                {% elif skipped > 0 %}
+                    {% set result_text = "SKIPPED" %}
+                {% elif warnings > 0 %}
+                    {% set result_text = "WARNING" %}
+                {% else %}
+                    {% set result_text = "UNKNOWN" %}
+                {% endif %}
+            {% else %}
+                {% set result_text = "UNKNOWN" %}
+            {% endif %}
+
+
+            {% set result_class = "" %}
+            {% set upper_txt = result_text.upper() %}
+            {% if "FAILED" in upper_txt and "WAIVER" in upper_txt %}
+                {% set result_class = "fail-waiver" %}
+            {% elif "FAIL" in upper_txt %}
+                {% set result_class = "fail" %}
+            {% elif "PASS" in upper_txt %}
+                {% set result_class = "pass" %}
+            {% elif "ABORT" in upper_txt %}
+                {% set result_class = "aborted" %}
+            {% elif "SKIP" in upper_txt %}
+                {% set result_class = "skipped" %}
+            {% elif "WARN" in upper_txt %}
+                {% set result_class = "warning" %}
+            {% endif %}
+
+            <tr>
+                <td>{{ sub.sub_Test_Number }}</td>
+                <td>{{ sub.sub_Test_Description }}</td>
+                <td class="{{ result_class }}">{{ result_text }}</td>
+
+                {% if sub_test_suite_exists %}
+                <td>{{ sub.Sub_test_suite if sub.Sub_test_suite else "N/A" }}</td>
+                {% endif %}
+
+                {% if test_case_exists %}
+                <td>{{ sub.Test_case if sub.Test_case else "N/A" }}</td>
+                {% endif %}
+
+                <td>
+                    {# Check top-level sub.reason if present #}
+                    {% if sub.reason is defined and sub.reason %}
+                        {{ sub.reason }}
+
+                    {# Otherwise, check sub_test_result for pass_reasons #}
+                    {% elif sub.sub_test_result is defined 
+                        and sub.sub_test_result.pass_reasons is defined
+                        and sub.sub_test_result.pass_reasons %}
+                        {{ sub.sub_test_result.pass_reasons | join('<br>') | safe }}
+
+                    {# Then check skip_reasons, if any #}
+                    {% elif sub.sub_test_result is defined
+                        and sub.sub_test_result.skip_reasons is defined
+                        and sub.sub_test_result.skip_reasons %}
+                        {{ sub.sub_test_result.skip_reasons | join('<br>') | safe }}
+
+                    {# Then fail_reasons #}
+                    {% elif sub.sub_test_result is defined
+                        and sub.sub_test_result.fail_reasons is defined
+                        and sub.sub_test_result.fail_reasons %}
+                        {{ sub.sub_test_result.fail_reasons | join('<br>') | safe }}
+
+                    {# Then fallback to any old "RULES FAILED"/"RULES SKIPPED" logic #}
+                    {% elif 'RULES FAILED' in sub %}
+                        {{ sub['RULES FAILED'] }}
+                    {% elif 'RULES SKIPPED' in sub %}
+                        {{ sub['RULES SKIPPED'] }}
+
+                    {# Finally, if nothing is found, display "N/A" #}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if 'WAIVER' in upper_txt and sub.waiver_reason %}
+                        {{ sub.waiver_reason }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+</body>
+</html>
+""")
+
+    rendered_html = html_template.render(
+        view_name=view_name,
+        test_items=test_items,
+        suite_summary=suite_summary,
+        chart_data=chart_data,
+        sub_test_suite_exists=sub_test_suite_exists,
+        test_case_exists=test_case_exists
+    )
+
+    with open(output_html_path, 'w') as f:
+        f.write(rendered_html)
+
+def generate_multi_view_pages(merged_json_path, summary_output_dir):
+
+    if not os.path.isfile(merged_json_path):
+        print(f"No merged_results.json found at: {merged_json_path}")
+        return []
+
+    with open(merged_json_path, 'r') as jf:
+        merged_data = json.load(jf)
+
+    grouping_dict = {}
+    for key, val in merged_data.items():
+        if not key.startswith("Suite_Name:"):
+            continue
+
+        parent_suite_name = key.replace("Suite_Name:", "").strip()
+
+        if not isinstance(val, list):
+            continue
+        for test_dict in val:
+            if not isinstance(test_dict, dict):
+                continue
+
+            test_dict["Parent_Suite_Name"] = parent_suite_name
+
+            readiness = test_dict.get("Main Readiness Grouping", "").strip()
+            if not readiness:
+                readiness = "UNKNOWN_GROUPING"
+            grouping_dict.setdefault(readiness, []).append(test_dict)
+
+    view_links = []
+    for grouping_name, test_items in grouping_dict.items():
+        safe_name = re.sub(r"\s+", "_", grouping_name.lower())
+        view_filename = f"{safe_name}_view.html"
+        view_path = os.path.join(summary_output_dir, view_filename)
+        generate_view_html_page(grouping_name, test_items, view_path)
+
+        view_links.append({
+            "name": grouping_name,
+            "href": view_filename
+        })
+
+    return view_links
 
 def generate_html(system_info, acs_results_summary,
                   bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
@@ -414,6 +917,17 @@ def generate_html(system_info, acs_results_summary,
                     {% endif %}
                 </div>
             </div>
+
+            <div class="dropdown">
+                <button>Go to Views</button>
+                <div id="views-dropdown-content" class="dropdown-content">
+                <div class="dropdown-content">
+                    {% for view_link in view_links %}
+                    <a href="{{ view_link.href }}" target="_blank">{{ view_link.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+
             <div class="summary-section">
                 <h2>Test Summaries</h2>
                 {% if bsa_summary_content %}
@@ -502,8 +1016,9 @@ def generate_html(system_info, acs_results_summary,
     </html>
     '''
 
-    template = Template(html_template)
-    html_output = template.render(
+    main_template_str = html_template
+    T = Template(main_template_str)
+    rendered_html = T.render(
         system_info=system_info,
         acs_results_summary=acs_results_summary,
         bsa_summary_content=bsa_summary_content,
@@ -515,11 +1030,21 @@ def generate_html(system_info, acs_results_summary,
         bbsr_tpm_summary_content=bbsr_tpm_summary_content,
         post_script_summary_content=post_script_summary_content,
         standalone_summary_content=standalone_summary_content,
-        OS_tests_summary_content=OS_tests_summary_content
+        OS_tests_summary_content=OS_tests_summary_content,
+        view_links=[]
     )
 
+    readiness_link_html = """
+    <div style="text-align:center; margin-top:20px;">
+        <a href="readiness_view.html" target="_blank" style="color: #3498db; text-decoration: none; font-weight: bold; padding: 10px 20px; border: 2px solid #3498db; border-radius: 5px; transition: background-color 0.3s, color 0.3s;">
+            Go to Readiness View Page
+        </a>
+    </div>
+    """
+    final_html = rendered_html.replace('</div>\n    </body>', readiness_link_html + '\n</div>\n    </body>')
+
     with open(output_html_path, 'w') as html_file:
-        html_file.write(html_output)
+        html_file.write(final_html)
 
     # Adjust headings in the *detailed* summary pages
     detailed_summaries = [
@@ -609,7 +1134,11 @@ if __name__ == "__main__":
         'Overall Compliance Results': overall_compliance
     }
 
-    # 10) Finally, generate the consolidated HTML page
+    summary_dir = os.path.dirname(args.output_html_path)
+    view_links = []
+    if args.merged_json and os.path.isfile(args.merged_json):
+        view_links = generate_multi_view_pages(args.merged_json, summary_dir)
+
     generate_html(
         system_info,
         acs_results_summary,
@@ -625,3 +1154,21 @@ if __name__ == "__main__":
         args.OS_tests_summary_path,
         args.output_html_path
     )
+
+    with open(args.output_html_path, 'r') as f:
+        main_html_contents = f.read()
+
+    link_html = ""
+    for link in view_links:
+        link_html += f'<a href="{link["href"]}" target="_blank">{link["name"]}</a>\n'
+
+    placeholder_pattern = r'(<div id="views-dropdown-content"[^>]*>\s*)(.*?)\s*(</div>)'
+    replaced_html = re.sub(
+        placeholder_pattern,
+        rf'\1{link_html}\3',
+        main_html_contents,
+        flags=re.DOTALL
+    )
+
+    with open(args.output_html_path, 'w') as f:
+        f.write(replaced_html)
