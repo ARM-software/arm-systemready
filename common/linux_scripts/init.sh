@@ -199,6 +199,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   if [ "$automation_enabled" == "True" ] &&  [ "$sbsa_enabled" == "False" ]; then
     echo "********* SBSA is disabled in config file**************"
   else
+    mkdir -p /mnt/acs_results/linux
     if [ -f  /lib/modules/sbsa_acs.ko ]; then
       insmod /lib/modules/sbsa_acs.ko
       echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
