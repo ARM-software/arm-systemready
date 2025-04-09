@@ -86,26 +86,6 @@ def process_fwts(config):
 
     return cmd
 
-def process_bbsr_fwts(config):
-    if not config.getboolean('BBSR_FWTS', 'automation_bbsr_fwts_run', fallback=False):
-        print("FWTS section is disabled or missing.")
-        return []
-
-    cmd = ['fwts']
-
-    module = config.get('BBSR_FWTS', 'bbsr_fwts_module', fallback=None)
-    if module:
-        cmd.append(f'{module}')
-
-    return cmd
-
-def process_automation(config):
-    if not config.getboolean('AUTOMATION', 'config_enabled_for_automation_run', fallback=False):
-        print("Automation section is disabled or missing.")
-        return []
-
-
-
 def check_section_enable(config, section, enabled_key):
     if not config:
         print("Configuration not loaded properly.")
@@ -123,13 +103,13 @@ def main():
     parser.add_argument('-bsa', action='store_true', help='Process BSA section')
     parser.add_argument('-sbsa', action='store_true', help='Process SBSA section')
     parser.add_argument('-fwts', action='store_true', help='Process FWTS section')
-    parser.add_argument('-bbsr_fwts', action='store_true', help='Process BBSR FWTS section')
     parser.add_argument('-automation', action='store_true', help='Process generic section')
 
     parser.add_argument('-automation_bsa_run', action='store_true', help='Check if BSA is enabled')
     parser.add_argument('-automation_sbsa_run', action='store_true', help='Check if SBSA is enabled')
     parser.add_argument('-automation_fwts_run', action='store_true', help='Check if FWTS is enabled')
-    parser.add_argument('-automation_bbsr_fwts_run', action='store_true', help='Check if FWTS is enabled')
+    parser.add_argument('-automation_bbsr_fwts_run', action='store_true', help='Check if BBSR FWTS is enabled')
+    parser.add_argument('-automation_bbsr_tpm_run', action='store_true', help='Check if BBSR TPM is enabled')
     parser.add_argument('--config', default='/mnt/acs_tests/config/acs_run_config.ini', help='Path to the config file')
 
     args = parser.parse_args()
@@ -150,10 +130,6 @@ def main():
         cmd = process_fwts(config)
         if cmd:
             print(' '.join(cmd))
-    elif args.bbsr_fwts:
-        cmd = process_bbsr_fwts(config)
-        if cmd:
-            print(' '.join(cmd))
     elif args.automation:
         enabled = check_section_enable(config, 'AUTOMATION', 'config_enabled_for_automation_run')
         print(enabled)
@@ -168,6 +144,9 @@ def main():
         print(enabled)
     elif args.automation_bbsr_fwts_run:
         enabled = check_section_enable(config, 'BBSR_FWTS', 'automation_bbsr_fwts_run')
+        print(enabled)
+    elif args.automation_bbsr_tpm_run:
+        enabled = check_section_enable(config, 'BBSR_TPM', 'automation_bbsr_tpm_run')
         print(enabled)
     else:
         print("Please specify a valid command or use --help for more information.")

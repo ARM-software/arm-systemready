@@ -102,14 +102,18 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         # flag BBSR compliance testing is in progress
         echo "" > FS%i:\acs_tests\bbr\bbsr_inprogress.flag 
         echo "Running SCT test"
-        if "%config_enabled_for_automation_run%" == "" then
-            echo "config_enabled_for_automation_run variable does not exist"
-            FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh false
+        if exist FS%i:\yocto_image.flag then
+            FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh
         else
-            if "%config_enabled_for_automation_run%" == "true" then
-                FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh true
-            else
+            if "%config_enabled_for_automation_run%" == "" then
+                echo "config_enabled_for_automation_run variable does not exist"
                 FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh false
+            else
+                if "%config_enabled_for_automation_run%" == "true" then
+                    FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh true
+                else
+                    FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh false
+                endif
             endif
         endif
         # remove bbsr_inprogress.flag file to mark BBSR compliance testing,
