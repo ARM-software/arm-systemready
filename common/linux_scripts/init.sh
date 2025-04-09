@@ -162,7 +162,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     if [ "$automation_enabled" == "False" ]; then
       fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
     else
-      $fwts_command >> /mnt/acs_results/fwts/FWTSResults.log
+      $fwts_command -r stdout -q >> /mnt/acs_results/fwts/FWTSResults.log
     fi
     sync /mnt
     sleep 5
