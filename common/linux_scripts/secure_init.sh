@@ -74,7 +74,7 @@ if [ -f  /bin/bbsr_fwts_tests.ini ]; then
       echo "**************BBSR FWTS disabled in config file*******************"
     else
         echo "SystemReady band ACS v3.0.1" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
-        fwts echo $test_list` -f -r stdout >> $RESULTS_DIR/bbsr/fwts/FWTSResults.log
+        fwts `echo $test_list` -f -r stdout >> $RESULTS_DIR/bbsr/fwts/FWTSResults.log
     fi
   fi  
   
