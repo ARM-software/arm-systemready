@@ -117,8 +117,9 @@ if [ -d "$RESULTS_DIR" ]; then
       rm -r $RESULTS_DIR/acs_summary
   fi
   /usr/bin/log_parser/main_log_parser.sh $RESULTS_DIR /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
+  echo "Please wait acs results are syncing on storage medium."
   sync /mnt
-  sleep 5
+  sleep 60
 fi
 
 echo "ACS test run completed"
