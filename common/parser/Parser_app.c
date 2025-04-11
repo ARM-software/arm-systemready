@@ -419,7 +419,7 @@
              CommandStringLength += StrLen(L" -skip ") + StrLen(BsaConfig->BsaSkip);
          }
          if (BsaConfig->BsaVerbose != NULL && *BsaConfig->BsaVerbose != L'\0') {
-             CommandStringLength += StrLen(L" -v ");
+             CommandStringLength += StrLen(L" -v ") + StrLen(BsaConfig->BsaVerbose);
          }
  
          CommandString = AllocatePool(CommandStringLength * sizeof(CHAR16));
@@ -445,6 +445,7 @@
          }
          if (BsaConfig->BsaVerbose != NULL && *BsaConfig->BsaVerbose != L'\0') {
              StrCatS(CommandString, CommandStringLength, L" -v ");
+             StrCatS(CommandString, CommandStringLength, BsaConfig->BsaVerbose);
          }
      } else {
          CommandString = L"Bsa is disabled";
