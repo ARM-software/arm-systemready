@@ -65,7 +65,8 @@
  typedef struct
  {
      BOOLEAN BbsrSctEnabled;
- } BBSR_CONFIG;
+     CHAR16 *SequenceFile;
+ } BBSR_SCT_CONFIG;
  
  typedef struct
  {
@@ -93,6 +94,9 @@
  SCRT_CONFIG *ParseScrtConfig(CHAR16 *ConfigFileContent);
  CHAR16 *GenerateScrtCommandString(SCRT_CONFIG *ScrtConfig);
  INTN EFIAPI run_scrt_logic(UINTN Argc, IN CHAR16 **Argv);
+ BBSR_SCT_CONFIG *ParseBbsrSctConfig(CHAR16 *ConfigFileContent);
+CHAR16 *GenerateBbsrSctCommandString(BBSR_SCT_CONFIG *BbsrSctConfig);
+INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
  EFI_STATUS LocateConfigFile(EFI_FILE_HANDLE *Root, EFI_FILE_HANDLE *File);
  
  EFI_STATUS ReadFileContent(IN EFI_FILE_PROTOCOL *File, OUT CHAR8 **Content, OUT UINTN *ContentSize)
@@ -1698,21 +1702,22 @@
  }
 
 
- BBSR_CONFIG *ParseBbsrConfig(CHAR16 *ConfigFileContent){
-    BBSR_CONFIG *BbsrConfig = NULL;
+ BBSR_SCT_CONFIG *ParseBbsrSctConfig(CHAR16 *ConfigFileContent){
+    BBSR_SCT_CONFIG *BbsrSctConfig = NULL;
     CHAR16 *Line = ConfigFileContent;
-    BOOLEAN bbsrSection = FALSE;
+    BOOLEAN bbsrsctSection = FALSE;
 
-    // Allocate memory for SCT config
-    BbsrConfig = AllocateZeroPool(sizeof(GENERIC_CONFIG));
-    if (BbsrConfig == NULL)
+    // Allocate memory for BBSR_SCT config
+    BbsrSctConfig = AllocateZeroPool(sizeof(BBSR_SCT_CONFIG));
+    if (BbsrSctConfig == NULL)
     {
-        Print(L"Error: Unable to allocate memory for SCT config\n");
+        Print(L"Error: Unable to allocate memory for BBSR_SCT config\n");
         return NULL;
     }
 
-    // Initialize SCT config
-    BbsrConfig->BbsrSctEnabled = FALSE;
+    // Initialize BBSR_SCT config
+    BbsrSctConfig->BbsrSctEnabled = FALSE;
+    BbsrSctConfig->SequenceFile = NULL;
 
     // Split config file content into lines
     while (*Line != L'\0')
@@ -1735,13 +1740,13 @@
         StrnCpyS(TempLine, (LineLength + 1), Line, LineLength);
         TempLine[LineLength] = L'\0'; // Ensure null-termination
 
-        // Check if line starts with [GENERIC]
+        // Check if line starts with [BBSR_SCT]
         if (StrnCmp(TempLine, L"[BBSR_SCT]", 5) == 0)
         {
-            bbsrSection = TRUE;
+            bbsrsctSection = TRUE;
         }
 
-        if (bbsrSection)
+        if (bbsrsctSection)
         {
             // Remove leading and trailing whitespaces
             CHAR16 *StartOfLine = TempLine;
@@ -1828,11 +1833,19 @@
                     {
                         if (StrnCmp(Value, L"true", 4) == 0)
                         {
-                            BbsrConfig->BbsrSctEnabled = TRUE;
+                            BbsrSctConfig->BbsrSctEnabled = TRUE;
                         }
                         else
                         {
-                            BbsrConfig->BbsrSctEnabled = FALSE;
+                            BbsrSctConfig->BbsrSctEnabled = FALSE;
+                        }
+                    }
+                    else if (StrnCmp(Key, L"bbsr_sct_sequence_file", 22) == 0)
+                    {
+                        BbsrSctConfig->SequenceFile = AllocatePool((StrLen(Value) + 1) * sizeof(CHAR16));
+                        if (BbsrSctConfig->SequenceFile != NULL)
+                        {
+                            StrCpyS(BbsrSctConfig->SequenceFile, (StrLen(Value) + 1), Value);
                         }
                     }
                 }
@@ -1856,10 +1869,28 @@
             break;
         }
     }
-    return BbsrConfig;
+    return BbsrSctConfig;
 }
 
-INTN EFIAPI run_bbsr_logic(UINTN Argc, IN CHAR16 **Argv){
+CHAR16 *GenerateBbsrSctCommandString(BBSR_SCT_CONFIG *BbsrSctConfig){
+    CHAR16 *CommandString = NULL;
+    UINTN CommandStringLength = 0;
+
+    if (BbsrSctConfig->BbsrSctEnabled)
+    {
+        CommandStringLength = StrLen(L"sct -s ") + StrLen(BbsrSctConfig->SequenceFile) + 1;
+        CommandString = AllocatePool(CommandStringLength * sizeof(CHAR16));
+        StrCpyS(CommandString, CommandStringLength, L"sct -s ");
+        StrCatS(CommandString, CommandStringLength, BbsrSctConfig->SequenceFile);
+    }
+    else
+    {
+        CommandString = L"BBSR_SCT is disabled";
+    }
+    return CommandString;
+}
+
+INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv){
     EFI_STATUS Status;
     EFI_FILE_HANDLE Root = NULL, File = NULL;
     EFI_HANDLE *Handles = NULL;
@@ -1874,6 +1905,7 @@ INTN EFIAPI run_bbsr_logic(UINTN Argc, IN CHAR16 **Argv){
        Print(L"Failed to locate config file: %r\n", Status);
        return Status;
    }
+
     // Read the file content
     Status = ReadFileContent(File, &Content, &ContentSize);
     if (EFI_ERROR(Status))
@@ -1889,11 +1921,11 @@ INTN EFIAPI run_bbsr_logic(UINTN Argc, IN CHAR16 **Argv){
     ConfigFileContent = AllocateZeroPool((AsciiStrLen(Content) + 1) * sizeof(CHAR16));
     AsciiStrToUnicodeStrS(Content, ConfigFileContent, AsciiStrLen(Content) + 1);
 
-    // Parse SCT configuration
-    BBSR_CONFIG *BbsrConfig = ParseBbsrConfig(ConfigFileContent);
-    if (BbsrConfig == NULL)
+    // Parse BBSR_SCT configuration
+    BBSR_SCT_CONFIG *BbsrSctConfig = ParseBbsrSctConfig(ConfigFileContent);
+    if (BbsrSctConfig == NULL)
     {
-        Print(L"Failed to parse SCT configuration\n");
+        Print(L"Failed to parse BBSR_SCT configuration\n");
         FreePool(ConfigFileContent);
         FreePool(Content);
         File->Close(File);
@@ -1902,17 +1934,44 @@ INTN EFIAPI run_bbsr_logic(UINTN Argc, IN CHAR16 **Argv){
         return EFI_OUT_OF_RESOURCES;
     }
 
-    // Set SctEnableDisable environment variable
-    if (BbsrConfig->BbsrSctEnabled)
+    // Generate BBSR_SCT command string
+    CHAR16 *BbsrSctCommandString = GenerateBbsrSctCommandString(BbsrSctConfig);
+    if (BbsrSctCommandString == NULL)
+    {
+        Print(L"Failed to generate BBSR_SCT command string\n");
+        FreePool(BbsrSctConfig->SequenceFile);
+        FreePool(BbsrSctConfig);
+        FreePool(ConfigFileContent);
+        FreePool(Content);
+        File->Close(File);
+        Root->Close(Root);
+        FreePool(Handles);
+        return EFI_OUT_OF_RESOURCES;
+    }
+
+    // Print the generated BBSR_SCT command string
+    Print(L"BBSR_SCT Command String: %s\n", BbsrSctCommandString);
+
+    // Set BbsrSctEnableDisable environment variable
+    if (BbsrSctConfig->BbsrSctEnabled)
     {
         ShellSetEnvironmentVariable(L"automation_bbsr_sct_run", L"true", TRUE);
     }
     else
     {
         ShellSetEnvironmentVariable(L"automation_bbsr_sct_run", L"false", TRUE);
-    } return (INTN)Status;
-    
-    FreePool(BbsrConfig);
+    }
+   // Set the command string as an environment variable
+    Status = ShellSetEnvironmentVariable(L"BbsrSctCommand", BbsrSctCommandString, TRUE);
+    if (EFI_ERROR(Status))
+    {
+        Print(L"Failed to set environment variable: %r\n", Status);
+        return (INTN)Status;
+    }
+    // Clean up
+    //FreePool(BbsrSctCommandString);
+    FreePool(BbsrSctConfig->SequenceFile);
+    FreePool(BbsrSctConfig);
     FreePool(ConfigFileContent);
     FreePool(Content);
     File->Close(File);
@@ -2099,7 +2158,7 @@ INTN EFIAPI run_bbsr_logic(UINTN Argc, IN CHAR16 **Argv){
      }
      else if (StrCmp(Argv[1], L"-bbsr_sct") == 0)
      {
-         return run_bbsr_logic(Argc, Argv);
+         return run_bbsr_sct_logic(Argc, Argv);
      }
      else
      {
@@ -2109,7 +2168,7 @@ INTN EFIAPI run_bbsr_logic(UINTN Argc, IN CHAR16 **Argv){
          Print(L"  -sct   Run SCT-specific logic\n");
          Print(L"  -sbsa  Run SBSA-specific logic\n");
          Print(L"  -scrt   Run SCRT-specific logic\n");
-         Print(L"  -bbsr_sct   Run SCRT-specific logic\n");
+         Print(L"  -bbsr_sct   Run BBSR-SCT logic\n");
          Print(L"  -automation  Run automation-specific logic\n");
      }
  
