@@ -162,13 +162,12 @@ for %z in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         echo "Running SBSA test"
         if "%config_enabled_for_automation_run%" == "" then
             echo "config_enabled_for_automation_run variable does not exist"
-            FS%z:\acs_tests\bsa\sbsa\sbsa.nsh false
             goto Donesbsa
         endif
         if "%config_enabled_for_automation_run%" == "true" then
             FS%z:\acs_tests\bsa\sbsa\sbsa.nsh true
         else
-            FS%z:\acs_tests\bsa\sbsa\sbsa.nsh false
+            echo "****** SBSA is disabled by default please enable in acs_tests\config\acs_run_config.ini ********"
         endif
         goto Donesbsa
     endif
