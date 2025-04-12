@@ -409,8 +409,9 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
  CHAR16* GenerateBsaCommandString(BSA_CONFIG* BsaConfig) {
      CHAR16* CommandString = NULL;
      UINTN CommandStringLength = 0;
- 
-     if (BsaConfig->BsaEnabled) {
+
+     // Always generate commands if the command flag is passed to parser.efi
+     if (1) {
          CommandStringLength = StrLen(L"bsa.efi") + 1; // Base command + null terminator
  
          if (BsaConfig->BsaModules != NULL && *BsaConfig->BsaModules != L'\0') {
@@ -451,8 +452,6 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
              StrCatS(CommandString, CommandStringLength, L" -v ");
              StrCatS(CommandString, CommandStringLength, BsaConfig->BsaVerbose);
          }
-     } else {
-         CommandString = L"Bsa is disabled";
      }
  
      return CommandString;
