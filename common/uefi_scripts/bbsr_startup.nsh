@@ -100,7 +100,7 @@ endfor
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh then
         # flag BBSR compliance testing is in progress
-        echo "" > FS%i:\acs_tests\bbr\bbsr_inprogress.flag 
+        echo "" > FS%i:\acs_tests\bbr\bbsr_inprogress.flag
         echo "Running SCT test"
         if exist FS%i:\yocto_image.flag then
             FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh

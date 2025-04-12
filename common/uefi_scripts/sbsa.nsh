@@ -19,7 +19,7 @@
 echo -off
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_results then
-        if %1 == "true" then
+        if "%1" == "true" then
             FS%i:
             acs_tests\parser\Parser.efi -sbsa
             if "%automation_sbsa_run%" == "" then
@@ -39,6 +39,15 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         cd uefi
         if not exist temp then
             mkdir temp
+        endif
+
+        # We are here means bsa.nsh is invoked from UEFI EE
+        if "%1" == "" then
+            FS%i:
+            acs_tests\parser\Parser.efi -sbsa
+            echo "UEFI EE SBSA Command: "%SbsaCommand%""
+            FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -f SbsaTempResults.log
+            goto SbsaEE
         endif
         if exist FS%i:\acs_tests\bsa\sbsa\Sbsa.efi then
             echo "Press any key to start SBSA in verbose mode."
@@ -92,26 +101,19 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             endif
 :SbsaNormalRun
             if "%1" == "false" then
-                echo "SBSA Command: Sbsa.efi -skip 900 -f SbsaTempResults.log"
+                echo "SBSA Command: Sbsa.efi -skip 900"
                 FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
             else
-                if "%automation_sbsa_run%" == "" then
-                    echo "automation_sbsa_run variable does not exist"
+                if "%SbsaCommand%" == "" then
+                    echo "SbsaCommand variable does not exist, running default command Sbsa.efi -skip 900"
+                    FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
                 else
-                    if "%automation_sbsa_run%" == "true" then
-                        if "%SbsaCommand%" == "" then
-                            echo "SbsaCommand variable does not exist"
-                        else
-                            echo "SBSA Command: %SbsaCommand% -f SbsaTempResults.log"
-                            FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -f SbsaTempResults.log
-                        endif
-                    else
-                        echo "************ SBSA is disabled in config file(acs_run_config.ini) ************"
-                        goto Done
-                    endif
+                    echo "SBSA Command: %SbsaCommand%"
+                    FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -f SbsaTempResults.log
                 endif
             endif
             stall 200000
+:SbsaEE
             if exist FS%i:\acs_results\uefi\SbsaTempResults.log then
                 echo " SystemReady band ACS v3.0.1" > SbsaResults.log
                 stall 200000
