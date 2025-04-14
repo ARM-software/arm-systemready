@@ -58,7 +58,7 @@ endif
 if "%1" == "" then
     FS%i:
     acs_tests\parser\Parser.efi -bsa
-    echo "UEFI EE BSA Command: "%BsaCommand%""
+    echo "UEFI EE BSA Command: %BsaCommand%"
     FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
     goto BsaEE
 endif
@@ -135,7 +135,7 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
                 echo "BsaCommand variable does not exist, running default command Bsa.efi -skip 900"
                 FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
             else
-                echo "BSA Command: "%BsaCommand%""
+                echo "BSA Command: %BsaCommand%"
                 FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
             endif
         endif
