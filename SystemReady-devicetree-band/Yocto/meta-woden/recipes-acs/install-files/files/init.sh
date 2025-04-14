@@ -27,34 +27,34 @@ fi
 
 sleep 5
 
+echo "Attempting to mount the results partition ..."
+#mount result partition
+BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1 )
+
+if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
+  mount -o rw $BLOCK_DEVICE_NAME /mnt
+  echo "Mounted the results partition on device $BLOCK_DEVICE_NAME"
+else
+  echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
+fi
+sleep 3
+
 #Skip running of ACS Tests if the grub option is added
 ADDITIONAL_CMD_OPTION="";
 ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
-  echo "Attempting to mount the results partition ..." 
-  #mount result partition
-  BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1 )
+    SECURE_BOOT="";
+    SECURE_BOOT=`cat /proc/cmdline | awk '{ print $NF}'`
 
-  if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
-    mount -o rw $BLOCK_DEVICE_NAME /mnt
-    echo "Mounted the results partition on device $BLOCK_DEVICE_NAME"
-  else
-    echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
-  fi
-  sleep 3
- 
-  SECURE_BOOT="";
-  SECURE_BOOT=`cat /proc/cmdline | awk '{ print $NF}'`
- 
-  if [ $SECURE_BOOT = "secureboot" ]; then
-    echo "Call BBSR ACS in Linux"
-    /usr/bin/secure_init.sh
-    echo "BBSR ACS run is completed\n"
-    echo "Please press <Enter> to continue ..."
-    echo -e -n "\n"
-    exit 0
-  fi
+    if [ $SECURE_BOOT = "secureboot" ]; then
+      echo "Call BBSR ACS in Linux"
+      /usr/bin/secure_init.sh
+      echo "BBSR ACS run is completed\n"
+      echo "Please press <Enter> to continue ..."
+      echo -e -n "\n"
+      exit 0
+    fi
 
     check_flag=0
     if [ -f /mnt/acs_tests/app/capsule_update_done.flag ] || [ -f /mnt/acs_tests/app/capsule_update_ignore.flag ] || [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ] || [ -f /mnt/acs_tests/app/linux_run_complete.flag ]; then
@@ -72,8 +72,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fi
       touch /mnt/acs_tests/app/linux_run_complete.flag
 
-      #LINUX DEBUG DUMP
 
+      #LINUX DEBUG DUMP
       echo "Collecting Linux debug logs"
       LINUX_DUMP_DIR="/mnt/acs_results_template/acs_results/linux_dump"
       mkdir -p $LINUX_DUMP_DIR
@@ -99,8 +99,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt
       sleep 5
       echo "Linux debug logs run - Completed"
-      # FWTS EBBR run
 
+
+      # FWTS EBBR run
       mkdir -p /mnt/acs_results_template/acs_results/fwts
       echo "Executing FWTS for EBBR"
       test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
@@ -111,9 +112,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt
       sleep 5
       echo "FWTS test execution - Completed"
- 
-      #LINUX BSA RUN
 
+
+      #LINUX BSA RUN
       mkdir -p /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app
       if [ -f /lib/modules/*/kernel/bsa_acs/bsa_acs.ko ]; then
         echo "Running Linux BSA tests"
@@ -121,15 +122,15 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "SystemReady devicetree band ACS v3.0.1" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
         bsa >> /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
-	sync /mnt
-	sleep 5
-	echo "Linux BSA test execution - Completed"
+        sync /mnt
+        sleep 5
+        echo "Linux BSA test execution - Completed"
       else
-	echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run"
+        echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run"
       fi
- 
-      # Device Driver Info script
 
+
+      # Device Driver Info script
       mkdir -p /home/root/fdt
       mkdir -p /mnt/acs_results_template/acs_results/linux_tools
       pushd /usr/bin
@@ -141,8 +142,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt
       sleep 5
 
-      # DT VALIDATE RUN
 
+      # DT VALIDATE RUN
       # Generate the .dts file and move it to /mnt/acs_results_template/acs_results/linux_tools
       dtc -I fs -O dts -o /mnt/acs_results_template/acs_results/linux_tools/device_tree.dts /sys/firmware/devicetree/base 2>/dev/null
       # Generate tree format of sys hierarchy and saving it into logs.
@@ -168,8 +169,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt
       sleep 5
 
-      # Capturing System PSCI command output
 
+      # Capturing System PSCI command output
       echo "Collecting psci command output"
       mkdir -p /mnt/acs_results_template/acs_results/linux_tools/psci
       mount -t debugfs none /sys/kernel/debug
@@ -179,8 +180,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sleep 5
       echo "PSCI command output - Completed"
 
-      # DT Kernel Self test run
 
+      # DT Kernel Self test run
       echo "Running DT Kernel Self Test"
       pushd /usr/kernel-selftest
       chmod +x dt/test_unprobed_devices.sh
@@ -191,8 +192,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sleep 5
       echo "DT Kernel Self test run - Completed"
 
-      # ETHTOOL test run
 
+      # ETHTOOL test run
       echo "Running Ethtool test"
       # update resolv.conf with 8.8.8.8 DNS server
       echo "nameserver 8.8.8.8" >> /etc/resolv.conf
@@ -204,14 +205,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sleep 5
       echo "Ethtool test run - Completed"
 
-      # READ_WRITE_BLOCK_DEVICE run
 
+      # READ_WRITE_BLOCK_DEVICE run
       # RUN read_write_check_blk_devices.py, parse block devices, and perform read if partition doesn't belond in precious partitions
       echo "Running BLK devices read and write check"
       python3 /bin/read_write_check_blk_devices.py | tee /mnt/acs_results_template/acs_results/linux_tools/read_write_check_blk_devices.log
       sync /mnt
       sleep 5
-      echo "BLK devices read and write check - Completed" 
+      echo "BLK devices read and write check - Completed"
 
       if [ $capsule_update_check -eq 1 ]; then
         umount /mnt
@@ -229,19 +230,19 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         last_attempted_status=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_status_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log)
 
 
-	fw_status="0x0"
+        fw_status="0x0"
         echo "Testing ESRT FW version update" >> /mnt/acs_results_template/fw/capsule_test_results.log
-	echo "INFO: prev version: $prev_fw_ver,  current version: $cur_fw_ver, last attempted status: $last_attempted_status" >> /mnt/acs_results_template/fw/capsule_test_results.log
-	if [ "$((cur_fw_ver))" -gt "$((prev_fw_ver))" ] && [ "$((last_attempted_status))" == "$((fw_status))" ]; then
+        echo "INFO: prev version: $prev_fw_ver,  current version: $cur_fw_ver, last attempted status: $last_attempted_status" >> /mnt/acs_results_template/fw/capsule_test_results.log
+        if [ "$((cur_fw_ver))" -gt "$((prev_fw_ver))" ] && [ "$((last_attempted_status))" == "$((fw_status))" ]; then
           echo "RESULTS: PASSED" >> /mnt/acs_results_template/fw/capsule_test_results.log
-	  echo "Capsule update has passed"
+          echo "Capsule update has passed"
         else
-	  echo "RESULTS: FAILED" >> /mnt/acs_results_template/fw/capsule_test_results.log
-	  echo "Capsule update has failed"
+          echo "RESULTS: FAILED" >> /mnt/acs_results_template/fw/capsule_test_results.log
+          echo "Capsule update has failed"
         fi
         rm /mnt/acs_tests/app/capsule_update_done.flag
       elif [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
-	echo "Capsule update has failed"
+        echo "Capsule update has failed"
         echo "Capsule update has failed ..." >> /mnt/acs_results_template/fw/capsule_test_results.log
         rm /mnt/acs_tests/app/capsule_update_unsupport.flag
       else
@@ -249,8 +250,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         rm /mnt/acs_tests/app/capsule_update_ignore.flag
       fi
 
-      # EDK2 Parser Tool run
 
+      # EDK2 Parser Tool run
       if [ -d "/mnt/acs_results_template/acs_results/sct_results" ]; then
         echo "Running edk2-test-parser tool "
         mkdir -p /mnt/acs_results_template/acs_results/edk2-test-parser
@@ -263,29 +264,30 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sync /mnt
       sleep 5
 
-      # systemready-scripts running
 
+      # systemready-scripts running
       if [ -d "/mnt/acs_results_template" ]; then
         echo "Running post scripts "
         cd /mnt/acs_results_template
-	mkdir -p /mnt/acs_results_template/acs_results/post-script
-	/usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template > /mnt/acs_results_template/acs_results/post-script/post-script.log 2>&1
-	cd -
+        mkdir -p /mnt/acs_results_template/acs_results/post-script
+        /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template > /mnt/acs_results_template/acs_results/post-script/post-script.log 2>&1
+        cd -
       fi
       sync /mnt
       sleep 5
 
-      # ACS Log Parser run
 
+      # ACS Log Parser run
       echo "Running acs log parser tool "
       if [ -d "/mnt/acs_results_template" ]; then
         if [ -d "/mnt/acs_results_template/acs_results/acs_summary" ]; then
-          rm -r /mnt/acs_results_template/acs_results/acs_summary 
+          rm -r /mnt/acs_results_template/acs_results/acs_summary
         fi
       /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results_template/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
       fi
+      echo "Please wait acs results are syncing on storage medium."
       sync /mnt
-      sleep 20
+      sleep 60
 
       echo "ACS automated test suites run is completed."
       echo "Please reboot to run BBSR tests if not done"

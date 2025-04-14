@@ -22,18 +22,31 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         if exist FS%i:\acs_results_template\acs_results then
             FS%i:
             cd FS%i:\acs_results_template\acs_results
-	    goto RunBsa
-	endif
+            goto RunBsa
+        endif
     else
         if exist FS%i:\acs_results then
             FS%i:
             cd FS%i:\acs_results
-	    goto RunBsa
-	endif
+            goto RunBsa
+        endif
     endif
 endfor
 
 :RunBsa
+# We are here means bsa.nsh is invoked from SystemReady Automation
+if "%1" == "true" then
+    FS%i:
+    acs_tests\parser\Parser.efi -bsa
+    if "%automation_bsa_run%" ==  "" then
+        echo "automation_bsa_run variable does not exist"
+    else
+        if "%automation_bsa_run%" == "false" then
+            echo "************ BSA is disabled in config file(acs_run_config.ini) ************"
+            goto Done
+        endif
+    endif
+endif
 if not exist uefi then
     mkdir uefi
 endif
@@ -41,6 +54,15 @@ cd uefi
 if not exist temp then
     mkdir temp
 endif
+# We are here means bsa.nsh is invoked from UEFI EE
+if "%1" == "" then
+    FS%i:
+    acs_tests\parser\Parser.efi -bsa
+    echo "UEFI EE BSA Command: %BsaCommand%"
+    FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
+    goto BsaEE
+endif
+
 #BSA_VERSION_PRINT_PLACEHOLDER
 if exist FS%i:\acs_tests\bsa\Bsa.efi then
     echo "Press any key to start BSA in verbose mode."
@@ -105,9 +127,21 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
        #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
        FS%i:\acs_tests\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaTempResults.log
     else
-       FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
+        if "%1" == "false" then
+            echo "BSA Command: Bsa.efi -skip 900"
+            FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
+        else
+            if "%BsaCommand%" == "" then
+                echo "BsaCommand variable does not exist, running default command Bsa.efi -skip 900"
+                FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
+            else
+                echo "BSA Command: %BsaCommand%"
+                FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
+            endif
+        endif
     endif
     stall 200000
+:BsaEE
     if exist BsaTempResults.log then
         if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
             echo " SystemReady devicetree band ACS v3.0.1" > BsaResults.log

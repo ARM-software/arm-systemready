@@ -29,12 +29,32 @@ for %b in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 
 # Run the config parser
-for %a in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%a:\acs_tests\parser\Parser.efi  then
-        echo " "
-        echo "Running parser app"
-        FS%a:\acs_tests\parser\Parser.efi
-        goto DoneParser
+for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%y:\acs_tests\parser\Parser.efi then
+        if exist FS%y:\acs_tests\config\acs_run_config.ini then
+            FS%y:
+            echo "Config File content"
+            echo " "
+            echo " "
+            type acs_tests\config\acs_run_config.ini
+            echo " "
+            echo " "
+            echo "Press any key to modify the Config file"
+            echo "If no key is pressed then default configurations"
+            FS%y:acs_tests\bbr\SCT\Stallforkey.efi 10
+            if %lasterror% == 0 then
+                acs_tests\parser\parser.nsh
+                acs_tests\parser\Parser.efi -automation
+                goto DoneParser
+            else
+                acs_tests\parser\Parser.efi -automation
+                goto DoneParser
+            endif
+        else
+              echo "Config file not found at acs_tests/config/acs_run_config.ini"
+        endif
+    else
+            echo "Parser.efi not present at acs_tests/parser/Parser.efi"
     endif
 endfor
 :DoneParser
@@ -44,7 +64,16 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_tests\bbr\SctStartup.nsh then
         echo " "
         echo "Running SCT test"
-        FS%i:\acs_tests\bbr\SctStartup.nsh
+        if "%config_enabled_for_automation_run%" == "" then
+            echo "config_enabled_for_automation_run variable does not exist"
+            FS%i:\acs_tests\bbr\SctStartup.nsh false
+            goto DoneSCT
+        endif
+        if "%config_enabled_for_automation_run%" == "true" then
+            FS%i:\acs_tests\bbr\SctStartup.nsh true
+        else
+            FS%i:\acs_tests\bbr\SctStartup.nsh false
+        endif
         goto DoneSCT
     endif
 endfor
@@ -55,7 +84,16 @@ for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%k:\acs_tests\bbr\ScrtStartup.nsh then
         echo " "
         echo "Running SCRT test"
-        FS%k:\acs_tests\bbr\ScrtStartup.nsh
+        if "%config_enabled_for_automation_run%" == "" then
+            echo "config_enabled_for_automation_run variable does not exist"
+            FS%i:\acs_tests\bbr\ScrtStartup.nsh false
+            goto DoneScrt
+        endif
+        if "%config_enabled_for_automation_run%" == "true" then
+            FS%k:\acs_tests\bbr\ScrtStartup.nsh true
+        else
+            FS%k:\acs_tests\bbr\ScrtStartup.nsh false
+        endif
         goto DoneScrt
     endif
 endfor
@@ -102,7 +140,16 @@ for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%j:\acs_tests\bsa\bsa.nsh then
         echo " "
         echo "Running BSA test"
-        FS%j:\acs_tests\bsa\bsa.nsh
+        if "%config_enabled_for_automation_run%" == "" then
+            echo "config_enabled_for_automation_run variable does not exist"
+            FS%j:\acs_tests\bsa\bsa.nsh false
+            goto Donebsa
+        endif
+        if "%config_enabled_for_automation_run%" == "true" then
+            FS%j:\acs_tests\bsa\bsa.nsh true
+        else
+            FS%j:\acs_tests\bsa\bsa.nsh false
+        endif
         goto Donebsa
     endif
 endfor
@@ -113,7 +160,15 @@ for %z in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%z:\acs_tests\bsa\sbsa\sbsa.nsh then
         echo " "
         echo "Running SBSA test"
-        FS%z:\acs_tests\bsa\sbsa\sbsa.nsh
+        if "%config_enabled_for_automation_run%" == "" then
+            echo "config_enabled_for_automation_run variable does not exist"
+            goto Donesbsa
+        endif
+        if "%config_enabled_for_automation_run%" == "true" then
+            FS%z:\acs_tests\bsa\sbsa\sbsa.nsh true
+        else
+            echo "****** SBSA is disabled by default please enable in acs_tests\config\acs_run_config.ini ********"
+        endif
         goto Donesbsa
     endif
 endfor
