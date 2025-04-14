@@ -409,8 +409,9 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
  CHAR16* GenerateBsaCommandString(BSA_CONFIG* BsaConfig) {
      CHAR16* CommandString = NULL;
      UINTN CommandStringLength = 0;
- 
-     if (BsaConfig->BsaEnabled) {
+
+     // Always generate commands if the command flag is passed to parser.efi
+     if (1) {
          CommandStringLength = StrLen(L"bsa.efi") + 1; // Base command + null terminator
  
          if (BsaConfig->BsaModules != NULL && *BsaConfig->BsaModules != L'\0') {
@@ -451,8 +452,6 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
              StrCatS(CommandString, CommandStringLength, L" -v ");
              StrCatS(CommandString, CommandStringLength, BsaConfig->BsaVerbose);
          }
-     } else {
-         CommandString = L"Bsa is disabled";
      }
  
      return CommandString;
@@ -889,7 +888,8 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
      CHAR16 *CommandString = NULL;
      UINTN CommandStringLength = 0;
  
-     if (SbsaConfig->SbsaEnabled)
+     /* generate sbsa command always when -sbsa option is passed */
+     if (1)
      {
  
          CommandStringLength = StrLen(L"sbsa.efi") + 1;
@@ -941,10 +941,6 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
          StrCatS(CommandString, CommandStringLength, L" -v ");
          StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaVerboseMode);
          }
-     }
-     else
-     {
-         CommandString = L"SBSA is disabled";
      }
  
      return CommandString;
@@ -1135,11 +1131,10 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
  CHAR16 *GenerateSctCommandString(SCT_CONFIG *SctConfig){
      CHAR16 *CommandString = NULL;
      UINTN CommandStringLength = 0;
- 
-     if (SctConfig->Enabled)
-     {
-         //ShellSetEnvironmentVariable(L"SctEnableDisable", L"true", TRUE);
- 
+
+     /* Always generate sct command when -sct flag is passed */
+     if (1)
+     { 
          if (SctConfig->SctUiMode)
          {
              CommandStringLength = StrLen(L"sct -u") + 1;
@@ -1154,10 +1149,7 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
              StrCatS(CommandString, CommandStringLength, SctConfig->SequenceFile);
          }
      }
-     else
-     {
-         CommandString = L"SCT is disabled";
-     }
+
      return CommandString;
  }
  
@@ -1876,17 +1868,11 @@ CHAR16 *GenerateBbsrSctCommandString(BBSR_SCT_CONFIG *BbsrSctConfig){
     CHAR16 *CommandString = NULL;
     UINTN CommandStringLength = 0;
 
-    if (BbsrSctConfig->BbsrSctEnabled)
-    {
-        CommandStringLength = StrLen(L"sct -s ") + StrLen(BbsrSctConfig->SequenceFile) + 1;
-        CommandString = AllocatePool(CommandStringLength * sizeof(CHAR16));
-        StrCpyS(CommandString, CommandStringLength, L"sct -s ");
-        StrCatS(CommandString, CommandStringLength, BbsrSctConfig->SequenceFile);
-    }
-    else
-    {
-        CommandString = L"BBSR_SCT is disabled";
-    }
+    CommandStringLength = StrLen(L"sct -s ") + StrLen(BbsrSctConfig->SequenceFile) + 1;
+    CommandString = AllocatePool(CommandStringLength * sizeof(CHAR16));
+    StrCpyS(CommandString, CommandStringLength, L"sct -s ");
+    StrCatS(CommandString, CommandStringLength, BbsrSctConfig->SequenceFile);
+
     return CommandString;
 }
 

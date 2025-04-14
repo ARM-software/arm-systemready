@@ -32,17 +32,17 @@ def process_bsa(config):
         return []
 
     cmd = ['/bin/bsa']
-    modules = config.get('BSA', 'bsa_modules', fallback=None)
-    tests = config.get('BSA', 'bsa_tests', fallback=None)
+  #  modules = config.get('BSA', 'bsa_modules', fallback=None)
+  #  tests = config.get('BSA', 'bsa_tests', fallback=None)
     skip = config.get('BSA', 'bsa_skip', fallback=None)
     verbose = config.get('BSA', 'bsa_verbose', fallback=None)
 
-    if modules:
-        cmd.append(f'-m {modules}')
-    if tests:
-        cmd.append(f'-t {",".join(tests.split(","))}')
+    #if modules:
+    #    cmd.append(f'-m {modules}')
+    #if tests:
+    #    cmd.append(f'-t {",".join(tests.split(","))}')
     if skip:
-        cmd.append(f'-skip {skip}')
+        cmd.append(f'--skip {skip}')
     if verbose:
         cmd.append(f' -v{verbose}')
 
@@ -54,20 +54,20 @@ def process_sbsa(config):
         return []
 
     cmd = ['/bin/sbsa']
-    modules = config.get('SBSA', 'sbsa_modules', fallback=None)
+  #  modules = config.get('SBSA', 'sbsa_modules', fallback=None)
     level = config.get('SBSA', 'sbsa_level', fallback=None)
-    tests = config.get('SBSA', 'sbsa_tests', fallback=None)
+  #  tests = config.get('SBSA', 'sbsa_tests', fallback=None)
     skip = config.get('SBSA', 'sbsa_skip', fallback=None)
     verbose = config.get('SBSA', 'sbsa_verbose', fallback=None)
 
-    if modules:
-        cmd.append(f'-m {modules}')
+   # if modules:
+   #     cmd.append(f'-m {modules}')
     if level:
         cmd.append(f'-l {level}')
-    if tests:
-        cmd.append(f'-t {",".join(tests.split(","))}')
+   # if tests:
+   #     cmd.append(f'-t {",".join(tests.split(","))}')
     if skip:
-        cmd.append(f'-skip {skip}')
+        cmd.append(f'--skip {skip}')
     if verbose:
         cmd.append(f' -v {verbose}')
 

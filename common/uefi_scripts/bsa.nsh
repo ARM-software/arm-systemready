@@ -34,7 +34,8 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 
 :RunBsa
-if %1 == "true" then
+# We are here means bsa.nsh is invoked from SystemReady Automation
+if "%1" == "true" then
     FS%i:
     acs_tests\parser\Parser.efi -bsa
     if "%automation_bsa_run%" ==  "" then
@@ -46,7 +47,6 @@ if %1 == "true" then
         endif
     endif
 endif
-
 if not exist uefi then
     mkdir uefi
 endif
@@ -54,6 +54,15 @@ cd uefi
 if not exist temp then
     mkdir temp
 endif
+# We are here means bsa.nsh is invoked from UEFI EE
+if "%1" == "" then
+    FS%i:
+    acs_tests\parser\Parser.efi -bsa
+    echo "UEFI EE BSA Command: %BsaCommand%"
+    FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
+    goto BsaEE
+endif
+
 #BSA_VERSION_PRINT_PLACEHOLDER
 if exist FS%i:\acs_tests\bsa\Bsa.efi then
     echo "Press any key to start BSA in verbose mode."
@@ -119,27 +128,20 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
        FS%i:\acs_tests\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaTempResults.log
     else
         if "%1" == "false" then
-            echo "BSA Command: Bsa.efi -skip 900 -f BsaTempResults.log"
+            echo "BSA Command: Bsa.efi -skip 900"
             FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
         else
-            if "%automation_bsa_run%" == "" then
-                echo "automation_bsa_run variable does not exist"
+            if "%BsaCommand%" == "" then
+                echo "BsaCommand variable does not exist, running default command Bsa.efi -skip 900"
+                FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
             else
-                if "%automation_bsa_run%" == "true" then
-                   if "%BsaCommand%" == "" then
-                       echo "BsaCommand variable does not exist"
-                    else
-                        echo "BSA Command: %BsaCommand% -f BsaTempResults.log"
-                        FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
-                    endif
-                else
-                    echo "************ BSA is disabled in config file(acs_run_config.ini) ************"
-                    goto Done
-                endif
+                echo "BSA Command: %BsaCommand%"
+                FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
             endif
         endif
     endif
     stall 200000
+:BsaEE
     if exist BsaTempResults.log then
         if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
             echo " SystemReady devicetree band ACS v3.0.1" > BsaResults.log

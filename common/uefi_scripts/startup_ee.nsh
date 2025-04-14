@@ -21,7 +21,7 @@ connect -r
 
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_tests\parser\Parser.efi then
-        FS%i
+        FS%i:
         echo "UEFI Execution Enviroment can be used to run an acs test suite manually with desired options"
         echo "The supported test suites for UEFI enviroment are"
         echo "  BSA"
