@@ -69,6 +69,12 @@ do_build ()
     chmod +x root_fs_overlay/usr/bin/secure_init.sh
     cp  $TOP_DIR/ramdisk/device_driver.sh root_fs_overlay/usr/bin/
     chmod +x root_fs_overlay/usr/bin/device_driver.sh
+    cp  $TOP_DIR/ramdisk/bsa.sh root_fs_overlay/bin/
+    chmod +x root_fs_overlay/bin/bsa.sh
+    cp  $TOP_DIR/ramdisk/sbsa.sh root_fs_overlay/bin/
+    chmod +x root_fs_overlay/bin/sbsa.sh
+    cp  $TOP_DIR/ramdisk/fwts.sh root_fs_overlay/bin/
+    chmod +x root_fs_overlay/bin/fwts.sh
     cp  $TOP_DIR/bbr-acs/bbsr/config/bbsr_fwts_tests.ini root_fs_overlay/bin/
     cp  $TOP_DIR/ramdisk/verify_tpm_measurements.py root_fs_overlay/bin/
 
