@@ -198,7 +198,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Running Linux SBSA tests"
   if [ "$automation_enabled" == "True" ] &&  [ "$sbsa_enabled" == "False" ]; then
     echo "********* SBSA is disabled in config file**************"
-  else if [ "$automation_enabled" == "True" ]
+  else if [ "$automation_enabled" == "True" ]; then
     mkdir -p /mnt/acs_results/linux
     if [ -f  /lib/modules/sbsa_acs.ko ]; then
       insmod /lib/modules/sbsa_acs.ko
