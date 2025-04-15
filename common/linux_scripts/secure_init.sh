@@ -31,12 +31,18 @@ if ! grep -qi "yocto" /proc/version ; then
   insmod /lib/modules/spi-tegra210-quad.ko
 fi
 
-# Parse config file
-automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
-if [ "$automation_enabled" == "True" ]; then
+# Add the YOCTO_FLAG variable
+YOCTO_FLAG="/mnt/yocto_image.flag"
+
+if [ -f "$YOCTO_FLAG" ]; then
+  # Parse config file
+  automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
+  if [ "$automation_enabled" == "True" ]; then
     bbsr_fwts_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_bbsr_fwts_run`"
     bbsr_tpm_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_bbsr_tpm_run`"
+  fi
 fi
+
 # give linux time to finish initializing disks
 sleep 5
 
@@ -76,8 +82,8 @@ if [ -f  /bin/bbsr_fwts_tests.ini ]; then
         echo "SystemReady band ACS v3.0.1" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
         fwts `echo $test_list` -f -r stdout >> $RESULTS_DIR/bbsr/fwts/FWTSResults.log
     fi
-  fi  
-  
+  fi
+
   sync /mnt
   sleep 5
 fi
