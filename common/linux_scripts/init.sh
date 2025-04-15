@@ -196,23 +196,26 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   # Linux SBSA Execution
   echo "Running Linux SBSA tests"
-  if [ "$automation_enabled" == "True" ] &&  [ "$sbsa_enabled" == "False" ]; then
-    echo "********* SBSA is disabled in config file**************"
-  else if [ "$automation_enabled" == "True" ]
-    mkdir -p /mnt/acs_results/linux
-    if [ -f  /lib/modules/sbsa_acs.ko ]; then
-      insmod /lib/modules/sbsa_acs.ko
-      echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
-      $sbsa_command >> /mnt/acs_results/linux/SbsaResultsApp.log
-      dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
-      sync /mnt
-      sleep 5
-      echo "Linux SBSA test Execution - Completed"
+  if [ "$automation_enabled" == "True" ]; then
+    if [ "$sbsa_enabled" == "False" ]; then
+      echo "********* SBSA is disabled in config file**************"
     else
-      echo "Error: SBSA kernel Driver is not found. Linux SBSA tests cannot be run."
+      mkdir -p /mnt/acs_results/linux
+      if [ -f  /lib/modules/sbsa_acs.ko ]; then
+        insmod /lib/modules/sbsa_acs.ko
+        echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
+        $sbsa_command >> /mnt/acs_results/linux/SbsaResultsApp.log
+        dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
+        sync /mnt
+        sleep 5
+        echo "Linux SBSA test Execution - Completed"
+      else
+        echo "Error: SBSA kernel Driver is not found. Linux SBSA tests cannot be run."
+      fi
     fi
+  else
+    echo "SBSA test is disabled by default, please enable in config file to run Sbsa"
   fi
-
 
   # EDK2 test parser
   if [ -d "/mnt/acs_results/sct_results" ]; then
