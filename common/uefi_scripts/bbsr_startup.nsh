@@ -68,10 +68,10 @@ endfor
 
 :StartTest
 # Run the config parser
-for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%y:\acs_tests\parser\Parser.efi then
-        if exist FS%y:\acs_tests\config\acs_run_config.ini then
-            FS%y:
+if not exist FS%q:\yocto_image.flag then
+    if exist FS%q:\acs_tests\parser\Parser.efi then
+        if exist FS%q:\acs_tests\config\acs_run_config.ini then
+            FS%q:
             echo "Config File content"
             echo " "
             echo " "
@@ -80,7 +80,7 @@ for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             echo " "
             echo "Press any key to modify the Config file"
             echo "If no key is pressed then default configurations"
-            FS%y:acs_tests\bbr\SCT\Stallforkey.efi 10
+            FS%q:acs_tests\bbr\SCT\Stallforkey.efi 10
             if %lasterror% == 0 then
                 acs_tests\parser\parser.nsh
                 acs_tests\parser\Parser.efi -automation
@@ -95,7 +95,7 @@ for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     else
         echo "Parser.efi not present at acs_tests/parser/Parser.efi"
     endif
-endfor
+endif
 :DoneParser
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh then
