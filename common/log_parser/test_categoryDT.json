@@ -1,397 +1,518 @@
 {
-    "catID: 1": [
-      {
-        "Suite": "BSA",
-        "Test Suite": "PE",
-        "specName": "BSA",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 9,
-        "Main Readiness Grouping": "Physical readiness"
-      }
-    ],
-    "catID: 2": [
-      {
-        "Suite": "BSA",
-        "Test Suite": "GIC",
-        "specName": "BSA",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 9,
-        "Main Readiness Grouping": "Physical readiness"
-      }
-    ],
-    "catID: 3": [
-      {
-        "Suite": "BSA",
-        "Test Suite": "SMMU",
-        "specName": "BSA",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 9,
-        "Main Readiness Grouping": "Physical readiness"
-      }
-    ],
-    "catID: 4": [
-      {
-        "Suite": "BSA",
-        "Test Suite": "PCIe",
-        "specName": "BSA",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 9,
-        "Main Readiness Grouping": "Physical readiness"
-      }
-    ],
-    "catID: 5": [
-      {
-        "Suite": "BSA",
-        "Test Suite": "Timer",
-        "specName": "BSA",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 9,
-        "Main Readiness Grouping": "Physical readiness"
-      }
-    ],
-    "catID: 6": [
-      {
-        "Suite": "BSA",
-        "Test Suite": "Peripherals",
-        "specName": "BSA",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 9,
-        "Main Readiness Grouping": "Physical readiness"
-      }
-    ],
-    "catID: 7": [
-      {
-        "Suite": "BSA",
-        "Test Suite": "Watchdog",
-        "specName": "BSA",
-        "rel Import. to main readiness": "",
-        "Waivable": "",
-        "SRS scope": "",
-        "FunctionID": "",
-        "Main Readiness Grouping": ""
-      }
-    ],
-    "catID: 8": [
-      {
-        "Suite": "BSA",
-        "Test Suite": "Memory Map",
-        "specName": "BSA",
-        "rel Import. to main readiness": "",
-        "Waivable": "yes",
-        "SRS scope": "",
-        "FunctionID": "",
-        "Main Readiness Grouping": ""
-      }
-    ],
-    "catID: 9": [
-      {
-        "Suite": "FWTS",
-        "Test Suite": "uefivar",
-        "specName": "EBBR",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 2,
-        "Main Readiness Grouping": "maintenance readiness"
-      }
-    ],
-    "catID: 10": [
-      {
-        "Suite": "FWTS",
-        "Test Suite": "uefimisc",
-        "specName": "EBBR",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 6,
-        "Main Readiness Grouping": "Misc readiness"
-      }
-    ],
-    "catID: 11": [
-      {
-        "Suite": "FWTS",
-        "Test Suite": "dmicheck",
-        "specName": "EBBR",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 2,
-        "Main Readiness Grouping": "maintenance readiness"
-      }
-    ],
-    "catID: 12": [
-      {
-        "Suite": "FWTS",
-        "Test Suite": "esrt",
-        "specName": "EBBR",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 2,
-        "Main Readiness Grouping": "maintenance readiness"
-      },
-      {
-        "Suite": "FWTS",
-        "Test Suite": "bootservices",
-        "specName": "EBBR",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 1,
-        "Main Readiness Grouping": "boot readiness"
-      }
-    ],
-    "catID: 13": [
-      {
-        "Suite": "FWTS",
-        "Test Suite": "rtservices",
-        "specName": "EBBR",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 4,
-        "Main Readiness Grouping": "runtime readiness"
-      }
-    ],
-    "catID: 14": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "genericTest",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 6,
-        "Main Readiness Grouping": "Misc readiness"
-      }
-    ],
-    "catID: 15": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "BootServicesTest",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 1,
-        "Main Readiness Grouping": "boot readiness"
-      }
-    ],
-    "catID: 16": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "RuntimeServicesTest",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 4,
-        "Main Readiness Grouping": "runtime readiness"
-      }
-    ],
-    "catID: 17": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "LoadImage",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 1,
-        "Main Readiness Grouping": "boot readiness"
-      }
-    ],
-    "catID: 18": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "DevicePath",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 1,
-        "Main Readiness Grouping": "boot readiness"
-      }
-    ],
-    "catID: 19": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "HII",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 1,
-        "Main Readiness Grouping": "boot readiness"
-      }
-    ],
-    "catID: 20": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "Network",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 1,
-        "Main Readiness Grouping": "boot readiness"
-      }
-    ],
-    "catID: 21": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "Security",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 3,
-        "Main Readiness Grouping": "security readiness"
-      }
-    ],
-    "catID: 22": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "Capsule",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 2,
-        "Main Readiness Grouping": "maintenance readiness"
-      }
-    ],
-    "catID: 23": [
-      {
-        "Suite": "SCT",
-        "Test Suite": "SMBIOS",
-        "specName": "UEFI",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 2,
-        "Main Readiness Grouping": "maintenance readiness"
-      }
-    ],
-    "catID: 24": [
-      {
-        "Suite": "Standalone",
-        "Test Suite": "Network",
-        "specName": "SRS",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Required",
-        "FunctionID": 4,
-        "Main Readiness Grouping": "runtime readiness"
-      }
-    ],
-    "catID: 25": [
-      {
-        "Suite": "Standalone",
-        "Test Suite": "Peripherals",
-        "specName": "SRS",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 4,
-        "Main Readiness Grouping": "runtime readiness"
-      }
-    ],
-    "catID: 26": [
-      {
-        "Suite": "Standalone",
-        "Test Suite": "PSCI",
-        "specName": "PSCI",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 3,
-        "Main Readiness Grouping": "security readiness"
-      }
-    ],
-    "catID: 27": [
-      {
-        "Suite": "Standalone",
-        "Test Suite": "A/B support",
-        "specName": "SRS",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Recommended",
-        "FunctionID": 2,
-        "Main Readiness Grouping": "maintenance readiness"
-      }
-    ],
-    "catID: 28": [
-      {
-        "Suite": "Standalone",
-        "Test Suite": "LinuxInstall",
-        "specName": "SRS",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 6,
-        "Main Readiness Grouping": "Misc readiness"
-      }
-    ],
-    "catID: 29": [
-      {
-        "Suite": "Standalone",
-        "Test Suite": "CapsuleAutherntication",
-        "specName": "SRS",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "no",
-        "SRS scope": "Required",
-        "FunctionID": 2,
-        "Main Readiness Grouping": "maintenance readiness"
-      }
-    ],
-    "catID: 30": [
-      {
-        "Suite": "Standalone",
-        "Test Suite": "DTValidation",
-        "specName": "DT",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Required",
-        "FunctionID": 1,
-        "Main Readiness Grouping": "boot readiness"
-      }
-    ],
-    "catID: 31": [
-      {
-        "Suite": "Standalone",
-        "Test Suite": "Boot sources",
-        "specName": "SRS",
-        "rel Import. to main readiness": "Minor",
-        "Waivable": "yes",
-        "SRS scope": "Required",
-        "FunctionID": 1,
-        "Main Readiness Grouping": "boot readiness"
-      }
-    ],
-    "catID: 32": [
-      {
-        "Suite": "BBSR",
-        "Test Suite": "BBSR",
-        "specName": "BBSR",
-        "rel Import. to main readiness": "Critical",
-        "Waivable": "no",
-        "SRS scope": "Recommended",
-        "FunctionID": 3,
-        "Main Readiness Grouping": "security readiness"
-      }
-    ]
-  }
-  
+  "catID: 1": [
+    {
+      "Suite": "BSA",
+      "Test Suite": "PE",
+      "specName": "BSA",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 9,
+      "Main Readiness Grouping": "Physical readiness"
+    }
+  ],
+  "catID: 2": [
+    {
+      "Suite": "BSA",
+      "Test Suite": "GIC",
+      "specName": "BSA",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 9,
+      "Main Readiness Grouping": "Physical readiness"
+    }
+  ],
+  "catID: 3": [
+    {
+      "Suite": "BSA",
+      "Test Suite": "SMMU",
+      "specName": "BSA",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 9,
+      "Main Readiness Grouping": "Physical readiness"
+    }
+  ],
+  "catID: 4": [
+    {
+      "Suite": "BSA",
+      "Test Suite": "PCIe",
+      "specName": "BSA",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 9,
+      "Main Readiness Grouping": "Physical readiness"
+    }
+  ],
+  "catID: 5": [
+    {
+      "Suite": "BSA",
+      "Test Suite": "Timer",
+      "specName": "BSA",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 9,
+      "Main Readiness Grouping": "Physical readiness"
+    }
+  ],
+  "catID: 6": [
+    {
+      "Suite": "BSA",
+      "Test Suite": "Peripheral",
+      "specName": "BSA",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 9,
+      "Main Readiness Grouping": "Physical readiness"
+    }
+  ],
+  "catID: 7": [
+    {
+      "Suite": "BSA",
+      "Test Suite": "Watchdog",
+      "specName": "BSA",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 9,
+      "Main Readiness Grouping": "Physical readiness"
+    }
+  ],
+  "catID: 8": [
+    {
+      "Suite": "BSA",
+      "Test Suite": "Wakeup semantic",
+      "specName": "BSA",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 9,
+      "Main Readiness Grouping": "Physical readiness"
+    }
+  ],
+  "catID: 9": [
+    {
+      "Suite": "BSA",
+      "Test Suite": "Memory Map",
+      "specName": "BSA",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 9,
+      "Main Readiness Grouping": "Physical readiness"
+    }
+  ],
+  "catID: 10": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "uefivarinfo",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 2,
+      "Main Readiness Grouping": "maintenance readiness"
+    }
+  ],
+  "catID: 11": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "uefimisc",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 6,
+      "Main Readiness Grouping": "Misc readiness"
+    }
+  ],
+  "catID: 12": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "dmicheck",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 2,
+      "Main Readiness Grouping": "maintenance readiness"
+    }
+  ],
+  "catID: 13": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "esrt",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 2,
+      "Main Readiness Grouping": "maintenance readiness"
+    }
+  ],
+  "catID: 14": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "uefirtvariable",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
+  ],
+  "catID: 15": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "uefirttime",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
+  ],
+  "catID: 16": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "uefirtmisc",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
+  ],
+  "catID: 17": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "rtservices",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
+  ],
+  "catID: 18": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "uefibootpath",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
+  ],
+  "catID: 19": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "dt_base",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
+  ],
+  "catID: 20": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "bootservices",
+      "specName": "EBBR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
+    }
+  ],
+  "catID: 21": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "genericTest",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 6,
+      "Main Readiness Grouping": "Misc readiness"
+    }
+  ],
+  "catID: 22": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "BootServicesTest",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
+    }
+  ],
+  "catID: 23": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "RuntimeServicesTest",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
+  ],
+  "catID: 24": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "LoadedImageProtocolTest",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
+    }
+  ],
+  "catID: 25": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "DevicePathProcotols",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
+    }
+  ],
+  "catID: 26": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "HIITest",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
+    }
+  ],
+  "catID: 27": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "NetworkSupportTest",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
+    }
+  ],
+  "catID: 28": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "SecureTechTest",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 3,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 29": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "ConsoleSupportTest",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 3,
+      "Main Readiness Grouping": "Misc readiness"
+    }
+  ],
+  "catID: 30": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "Capsule",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 2,
+      "Main Readiness Grouping": "maintenance readiness"
+    }
+  ],
+  "catID: 31": [
+    {
+      "Suite": "SCT",
+      "Test Suite": "SMBIOS",
+      "specName": "UEFI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 2,
+      "Main Readiness Grouping": "maintenance readiness"
+    }
+  ],
+  "catID: 32": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "Network",
+      "specName": "SRS",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
+  ],
+  "catID: 33": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "Peripherals",
+      "specName": "SRS",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
+  ],
+  "catID: 34": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "PSCI",
+      "specName": "PSCI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 3,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 35": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "A/B support",
+      "specName": "SRS",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 2,
+      "Main Readiness Grouping": "maintenance readiness"
+    }
+  ],
+  "catID: 36": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "LinuxInstall",
+      "specName": "SRS",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 6,
+      "Main Readiness Grouping": "Misc readiness"
+    }
+  ],
+  "catID: 37": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "CapsuleAutherntication",
+      "specName": "SRS",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 2,
+      "Main Readiness Grouping": "maintenance readiness"
+    }
+  ],
+  "catID: 38": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "DTValidation",
+      "specName": "DT",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Required",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
+    }
+  ],
+  "catID: 39": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "Boot sources",
+      "specName": "SRS",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Required",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
+    }
+  ],
+  "catID: 40": [
+    {
+      "Suite": "BBSR-FWTS",
+      "Test Suite": "uefirtauthvar",
+      "specName": "BBSR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Recommended",
+      "FunctionID": 3,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 41": [
+    {
+      "Suite": "BBSR-FWTS",
+      "Test Suite": "tpm2",
+      "specName": "BBSR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Recommended",
+      "FunctionID": 3,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 42": [
+    {
+      "Suite": "BBSR-SCT",
+      "Test Suite": "RuntimeServicesTest",
+      "specName": "BBSR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Recommended",
+      "FunctionID": 3,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 43": [
+    {
+      "Suite": "BBSR-SCT",
+      "Test Suite": "PlatformResetAttackMitigationPsciTest",
+      "specName": "BBSR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Recommended",
+      "FunctionID": 3,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ]
+}

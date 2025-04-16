@@ -447,6 +447,79 @@ def merge_json_files(json_files, output_file):
     if "Overall Compliance Results" in acs_results_summary:
         del acs_results_summary["Overall Compliance Results"]
 
+    bbsr_tpm = acs_results_summary.get("Suite_Name: BBSR-TPM_compliance", "")
+    bbsr_fwts = acs_results_summary.get("Suite_Name: BBSR-FWTS_compliance", "")
+    bbsr_sct = acs_results_summary.get("Suite_Name: BBSR-SCT_compliance", "")
+    overall_str = acs_results_summary.get("Overall Compliance Result", "")
+
+    all_compliant = (
+        bbsr_tpm == "Compliant"
+        and bbsr_fwts == "Compliant"
+        and bbsr_sct == "Compliant"
+    )
+
+    any_waiver = (
+        "waiver" in bbsr_tpm.lower()
+        or "waiver" in bbsr_fwts.lower()
+        or "waiver" in bbsr_sct.lower()
+        or "waiver" in overall_str.lower()
+    )
+
+    if all_compliant:
+        # Condition 1: all three strictly "Compliant"
+        acs_results_summary["BBSR Compliance"] = "Compliant"
+
+    elif any_waiver:
+        # Condition 2: at least one suite or overall has waivers
+        acs_results_summary["BBSR Compliance"] = "Compliant with waivers"
+
+    else:
+        # Condition 3: Not Compliant; show which suite(s) are failing
+        reasons = []
+        for label, compliance_str in [
+            ("BBSR-TPM", bbsr_tpm),
+            ("BBSR-FWTS", bbsr_fwts),
+            ("BBSR-SCT", bbsr_sct),
+        ]:
+            # If suite is “Not Compliant...” we capture its reason
+            if compliance_str.lower().startswith("not compliant"):
+                # Typically: "Not Compliant: not run"
+                # Grab everything after "Not Compliant:"
+                idx = compliance_str.lower().find("not compliant")
+                reason_part = compliance_str[idx + len("not compliant") :].strip(": ").strip()
+                # Example => "not run", "Failed 10", etc.
+                if reason_part:
+                    reasons.append(f"{label}: {reason_part}")
+                else:
+                    reasons.append(f"{label}: Not Compliant")
+
+        if reasons:
+            joined = ", ".join(reasons)
+            acs_results_summary["BBSR Compliance"] = f"Not Compliant ({joined})"
+        else:
+            # If no explicit text was found, just mark not compliant
+            acs_results_summary["BBSR Compliance"] = "Not Compliant"  
+
+    RENAME_SUITES_TO_STANDALONE = {
+        "Suite_Name: DT Kselftest": "Suite_Name: Standalone",
+        "Suite_Name: CAPSULE_UPDATE": "Suite_Name: Standalone",
+        "Suite_Name: DT Validate": "Suite_Name: Standalone",
+        "Suite_Name: Ethtool Test": "Suite_Name: Standalone",
+        "Suite_Name: Read Write Check Block Devices": "Suite_Name: Standalone",
+        "Suite_Name: PSCI": "Suite_Name: Standalone"
+    }
+
+    # Right after final compliance logic, before writing out merged_results:
+    for old_key, new_key in RENAME_SUITES_TO_STANDALONE.items():
+        if old_key in merged_results:
+            old_data = merged_results.pop(old_key)  # old_data is a list
+            if new_key in merged_results:
+                # If "Suite_Name: Standalone" already exists, extend the list
+                merged_results[new_key].extend(old_data)
+            else:
+                # Otherwise, just rename
+                merged_results[new_key] = old_data
+
     with open(output_file, 'w') as outj:
         json.dump(merged_results, outj, indent=4)
 

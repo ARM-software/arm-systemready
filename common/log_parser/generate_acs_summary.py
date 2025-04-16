@@ -158,21 +158,25 @@ def adjust_detailed_summary_heading(file_path, suite_name):
             file.write(content)
 
 def read_overall_compliance_from_merged_json(merged_json_path):
-    """
-    Opens the merged_results.json and retrieves the final
-    "Overall Compliance Result" from:
-      data["Suite_Name: acs_info"]["ACS Results Summary"]["Overall Compliance Result"]
-    """
     overall_result = "Unknown"
+    bbsr_result = "Unknown"
     try:
         with open(merged_json_path, 'r') as jf:
             data = json.load(jf)
         acs_info_data = data.get("Suite_Name: acs_info", {})
         acs_summary = acs_info_data.get("ACS Results Summary", {})
+        
         overall_result = acs_summary.get("Overall Compliance Result", "Unknown")
+        # If not found in ACS Results Summary, try at top level of acs_info_data
+        if "BBSR Compliance" in acs_info_data:
+            bbsr_result = acs_info_data.get("BBSR Compliance", "Unknown")
+        else:
+            bbsr_result = acs_summary.get("BBSR Compliance", "Unknown")
+
     except Exception as e:
-        print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
-    return overall_result
+        print(f"Warning: Could not read merged JSON or find compliance results: {e}")
+    return overall_result, bbsr_result
+
 
 ##############################################################################
 # VIEW PAGE
@@ -253,7 +257,7 @@ def generate_view_html_page(view_name, test_items, output_html_path):
 
     for titem in test_items:
         parent_suite = titem.get("Parent_Suite_Name", "UnknownParent")
-        child_suite  = titem.get("Test_suite",       "UnknownChild")
+        child_suite = titem.get("Test_suite") or titem.get("Test_suite_name", "UnknownChild")
         suite_key = (parent_suite, child_suite)
 
         if suite_key not in suite_to_counts:
@@ -526,7 +530,7 @@ def generate_view_html_page(view_name, test_items, output_html_path):
             <tr>
                 <td colspan="100" style="background-color: #3498db; color: white; text-align: left; padding: 10px; font-size: 17px; border: none; border-radius: 4px;">
                     <div><strong>Suite_name:</strong> {{ test.Parent_Suite_Name }}</div>
-                    <div><strong>Test_suite:</strong> {{ test.Test_suite }}</div>
+                    <div><strong>Test_suite:</strong> {{ test.Test_suite if test.Test_suite else test.Test_suite_name }}</div>
                     <div><strong>Sub_test_suite:</strong> {% if test.Sub_test_suite is defined and test.Sub_test_suite %}{{ test.Sub_test_suite }}{% else %}N/A{% endif %}</div>
                     <div><strong>Test_case:</strong> {% if test.Test_case is defined and test.Test_case %}{{ test.Test_case }}{% else %}N/A{% endif %}</div>
                     <div><strong>Test_case_description:</strong> {% if test.Test_case_description is defined and test.Test_case_description %}{{ test.Test_case_description }}{% else %}N/A{% endif %}</div>
@@ -701,12 +705,17 @@ def generate_multi_view_pages(merged_json_path, summary_output_dir):
         for test_dict in val:
             if not isinstance(test_dict, dict):
                 continue
-
+            if "Suite_summary" in test_dict:
+                continue
             test_dict["Parent_Suite_Name"] = parent_suite_name
 
             readiness = test_dict.get("Main Readiness Grouping", "").strip()
             if not readiness:
                 readiness = "UNKNOWN_GROUPING"
+            # --- FILTER OUT "POST_SCRIPT" from UNKNOWN_GROUPING ---
+            if readiness == "UNKNOWN_GROUPING" and parent_suite_name.upper() == "POST_SCRIPT":
+                # Skip adding it to the "UNKNOWN_GROUPING" view
+                continue    
             grouping_dict.setdefault(readiness, []).append(test_dict)
 
     view_links = []
@@ -935,6 +944,23 @@ def generate_html(system_info, acs_results_summary,
                             {% endif %}
                         ">
                             {{ acs_results_summary.get('Overall Compliance Results', 'Unknown') }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>BBSR Compliance</th>
+                        <td style="
+                            color: 
+                            {% if 'Not Compliant' in acs_results_summary.get('BBSR Compliance', '') %}
+                                red
+                            {% elif 'Compliant with waivers' in acs_results_summary.get('BBSR Compliance', '')|lower %}
+                                #FFBF00
+                            {% elif 'Compliant' in acs_results_summary.get('BBSR Compliance', '') %}
+                                green
+                            {% else %}
+                                black
+                            {% endif %}
+                        ">
+                            {{ acs_results_summary.get('BBSR Compliance', 'Unknown') }}
                         </td>
                     </tr>
                 </table>
@@ -1173,17 +1199,18 @@ if __name__ == "__main__":
     }
 
     # 8) Read overall compliance solely from merged JSON (if provided)
-    overall_compliance = "Unknown"
     if args.merged_json and os.path.isfile(args.merged_json):
-        overall_compliance = read_overall_compliance_from_merged_json(args.merged_json)
+        overall_compliance, bbsr_compliance = read_overall_compliance_from_merged_json(args.merged_json)
     else:
         print("Warning: merged JSON not provided or does not exist => Overall compliance unknown")
+        overall_compliance, bbsr_compliance = "Unknown", "Unknown"
 
     # 9) Prepare the dictionary that will be used in the final HTML
     acs_results_summary = {
         'Band': acs_config_info.get('Band', 'Unknown'),
         'Date': summary_generated_date,
-        'Overall Compliance Results': overall_compliance
+        'Overall Compliance Results': overall_compliance,
+        'BBSR Compliance': bbsr_compliance,
     }
 
     summary_dir = os.path.dirname(args.output_html_path)

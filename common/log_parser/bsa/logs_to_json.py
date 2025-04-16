@@ -67,6 +67,8 @@ def main(input_files, output_file):
                         suite_name = suite_name_match.group(1).strip()
                     else:
                         suite_name = line.strip().split("*** Starting")[1].split("tests")[0].strip()
+                    if suite_name == "GICv2m":
+                        suite_name = "GIC"
                     processing = True
                     in_test = False
                     i += 1
