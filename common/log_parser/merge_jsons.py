@@ -465,40 +465,54 @@ def merge_json_files(json_files, output_file):
         or "waiver" in overall_str.lower()
     )
 
-    if all_compliant:
-        # Condition 1: all three strictly "Compliant"
+    if all_compliant and overall_str.lower().startswith("compliant with waivers"):
+        # Condition 1: All BBSR sub-suites are “Compliant,” but overall is “Compliant with waivers”
+        acs_results_summary["BBSR Compliance"] = "Compliant with waivers"
+
+    elif all_compliant:
+        # Condition 2: All BBSR sub-suites are strictly “Compliant,” and overall is not “Compliant with waivers”
         acs_results_summary["BBSR Compliance"] = "Compliant"
 
     elif any_waiver:
-        # Condition 2: at least one suite or overall has waivers
+        # Condition 3: At least one BBSR sub-suite or the overall compliance indicates a waiver
         acs_results_summary["BBSR Compliance"] = "Compliant with waivers"
 
     else:
-        # Condition 3: Not Compliant; show which suite(s) are failing
-        reasons = []
+        # Condition 4: Not Compliant. List missing vs. non-waived fails in the same style as “Overall Compliance.”
+        missing_list_bbsr = []
+        non_waived_list_bbsr = []
+
+        # Identify which BBSR suite(s) are missing or have non-waived fails
         for label, compliance_str in [
             ("BBSR-TPM", bbsr_tpm),
             ("BBSR-FWTS", bbsr_fwts),
             ("BBSR-SCT", bbsr_sct),
         ]:
-            # If suite is “Not Compliant...” we capture its reason
-            if compliance_str.lower().startswith("not compliant"):
-                # Typically: "Not Compliant: not run"
-                # Grab everything after "Not Compliant:"
-                idx = compliance_str.lower().find("not compliant")
-                reason_part = compliance_str[idx + len("not compliant") :].strip(": ").strip()
-                # Example => "not run", "Failed 10", etc.
-                if reason_part:
-                    reasons.append(f"{label}: {reason_part}")
-                else:
-                    reasons.append(f"{label}: Not Compliant")
+            if compliance_str.lower().startswith("not compliant: not run"):
+                missing_list_bbsr.append(label)
+            elif compliance_str.lower().startswith("not compliant: failed"):
+                non_waived_list_bbsr.append(label)
 
-        if reasons:
-            joined = ", ".join(reasons)
-            acs_results_summary["BBSR Compliance"] = f"Not Compliant ({joined})"
+        if not missing_list_bbsr and not non_waived_list_bbsr:
+            acs_results_summary["BBSR Compliance"] = "Not Compliant"
         else:
-            # If no explicit text was found, just mark not compliant
-            acs_results_summary["BBSR Compliance"] = "Not Compliant"  
+            reason_parts = []
+            if missing_list_bbsr:
+                reason_parts.append(f"missing suite(s): {', '.join(missing_list_bbsr)}")
+            if non_waived_list_bbsr:
+                reason_parts.append(f"non-waived fails in suite(s): {', '.join(non_waived_list_bbsr)}")
+            combined_reason = "; ".join(reason_parts)
+            acs_results_summary["BBSR Compliance"] = f"Not Compliant ({combined_reason})"
+
+    bbsr_comp_str = acs_results_summary.get("BBSR Compliance", "")
+    if bbsr_comp_str.lower().startswith("compliant with waivers"):
+        print(f"{YELLOW}BBSR compliance: {bbsr_comp_str}{RESET}")
+    elif bbsr_comp_str.lower().startswith("compliant"):
+        print(f"{GREEN}BBSR compliance: {bbsr_comp_str}{RESET}")
+    elif bbsr_comp_str.lower().startswith("not compliant"):
+        print(f"{RED}BBSR compliance: {bbsr_comp_str}{RESET}")
+    else:
+        print(f"BBSR compliance: {bbsr_comp_str}")
 
     RENAME_SUITES_TO_STANDALONE = {
         "Suite_Name: DT Kselftest": "Suite_Name: Standalone",

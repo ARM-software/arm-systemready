@@ -930,7 +930,7 @@ def generate_html(system_info, acs_results_summary,
                         <td>{{ acs_results_summary.get('Date', 'Unknown') }}</td>
                     </tr>
                     <tr>
-                        <th>Overall Compliance Results</th>
+                        <th>Base Overall Compliance Results</th>
                         <td style="
                             color: 
                             {% if 'Not Compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
