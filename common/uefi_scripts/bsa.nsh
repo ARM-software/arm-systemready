@@ -55,7 +55,7 @@ if not exist temp then
     mkdir temp
 endif
 
-if not exist FS%i:\acs_tests\bsa\bsa_dt.flag then
+if not exist FS%i:\yocto_image.flag then
     # We are here means bsa.nsh is invoked from UEFI EE
     if "%1" == "" then
         FS%i:
