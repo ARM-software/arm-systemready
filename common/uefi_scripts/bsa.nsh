@@ -54,13 +54,16 @@ cd uefi
 if not exist temp then
     mkdir temp
 endif
-# We are here means bsa.nsh is invoked from UEFI EE
-if "%1" == "" then
-    FS%i:
-    acs_tests\parser\Parser.efi -bsa
-    echo "UEFI EE BSA Command: %BsaCommand%"
-    FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
-    goto BsaEE
+
+if not exist FS%i:\acs_tests\bsa\bsa_dt.flag then
+    # We are here means bsa.nsh is invoked from UEFI EE
+    if "%1" == "" then
+        FS%i:
+        acs_tests\parser\Parser.efi -bsa
+        echo "UEFI EE BSA Command: %BsaCommand%"
+        FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
+        goto BsaEE
+    endif
 endif
 
 #BSA_VERSION_PRINT_PLACEHOLDER
