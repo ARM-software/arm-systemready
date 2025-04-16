@@ -524,7 +524,18 @@ def generate_view_html_page(view_name, test_items, output_html_path):
     <table>
         <thead>
             <tr>
-                <th colspan="100">Suite: {{ test.Parent_Suite_Name }} ({{ test.Test_suite }})</th>
+                <td colspan="100" style="background-color: #3498db; color: white; text-align: left; padding: 10px; font-size: 17px; border: none; border-radius: 4px;">
+                    <div><strong>Suite_name:</strong> {{ test.Parent_Suite_Name }}</div>
+                    <div><strong>Test_suite:</strong> {{ test.Test_suite }}</div>
+                    <div><strong>Sub_test_suite:</strong> {% if test.Sub_test_suite is defined and test.Sub_test_suite %}{{ test.Sub_test_suite }}{% else %}N/A{% endif %}</div>
+                    <div><strong>Test_case:</strong> {% if test.Test_case is defined and test.Test_case %}{{ test.Test_case }}{% else %}N/A{% endif %}</div>
+                    <div><strong>Test_case_description:</strong> {% if test.Test_case_description is defined and test.Test_case_description %}{{ test.Test_case_description }}{% else %}N/A{% endif %}</div>
+                    <div><strong>Test Entry Point GUID:</strong> {% if test['Test Entry Point GUID'] is defined and test['Test Entry Point GUID'] %}{{ test['Test Entry Point GUID'] }}{% else %}N/A{% endif %}</div>
+                    <div><strong>Returned Status Code:</strong> {% if test['Returned Status Code'] is defined and test['Returned Status Code'] %}{{ test['Returned Status Code'] }}{% else %}N/A{% endif %}</div>
+                    <div><strong>test_result:</strong> {% if test.test_result is defined and test.test_result %}{{ test.test_result }}{% else %}N/A{% endif %}</div>
+                    <div><strong>reason:</strong> {% if test.reason is defined and test.reason %}{{ test.reason }}{% else %}N/A{% endif %}</div>
+                    <br>
+                </td>
             </tr>
             <tr>
                 <th>Sub Test #</th>
