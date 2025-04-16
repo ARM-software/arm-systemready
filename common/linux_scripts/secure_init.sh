@@ -34,7 +34,7 @@ fi
 # Add the YOCTO_FLAG variable
 YOCTO_FLAG="/mnt/yocto_image.flag"
 
-if [ -f "$YOCTO_FLAG" ]; then
+if [ ! -f "$YOCTO_FLAG" ]; then
   # Parse config file
   automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
   if [ "$automation_enabled" == "True" ]; then
