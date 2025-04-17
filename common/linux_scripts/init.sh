@@ -214,7 +214,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fi
     fi
   else
-    echo "SBSA test is disabled by default, please enable in config file to run Sbsa"    
+    echo "SBSA test is disabled by default, please enable in config file to run Sbsa"
   fi
 
   # EDK2 test parser
