@@ -600,6 +600,7 @@ echo ""
 # NOW Generate ACS Summary (ONLY ONCE, at the very end)
 ################################################################################
 ACS_SUMMARY_HTML="$HTMLS_DIR/acs_summary.html"
+ACS_SUMMARY_PDF="$ACS_SUMMARY_DIR/acs_summary.pdf"
 GENERATE_ACS_SUMMARY_CMD="python3 \"$SCRIPTS_PATH/generate_acs_summary.py\""
 
 # 1) BSA
@@ -773,5 +774,11 @@ if [ $print_path -eq 1 ]; then
     fi
 fi
 
+# Convert ACS Summary HTML to PDF
+if [ -f "$ACS_SUMMARY_HTML" ]; then
+    python3 -c "from weasyprint import HTML, CSS; HTML('$ACS_SUMMARY_HTML').write_pdf('$ACS_SUMMARY_PDF', stylesheets=[CSS(string='@page { margin: 0; }')])"
+fi
+
 echo "ACS Summary : $ACS_SUMMARY_HTML"
+echo "ACS Summary : $ACS_SUMMARY_PDF"
 echo ""
