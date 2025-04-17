@@ -447,6 +447,90 @@ def merge_json_files(json_files, output_file):
     if "Overall Compliance Results" in acs_results_summary:
         del acs_results_summary["Overall Compliance Results"]
 
+    bbsr_tpm = acs_results_summary.get("Suite_Name: BBSR-TPM_compliance", "")
+    bbsr_fwts = acs_results_summary.get("Suite_Name: BBSR-FWTS_compliance", "")
+    bbsr_sct = acs_results_summary.get("Suite_Name: BBSR-SCT_compliance", "")
+    overall_str = acs_results_summary.get("Overall Compliance Result", "")
+
+        # Determine if every BBSR sub‑suite passed with no failures
+    all_bbsr_compliant = (
+        bbsr_tpm  == "Compliant"
+        and bbsr_fwts == "Compliant"
+        and bbsr_sct  == "Compliant"
+    )
+
+    # Check if any suite or the overall result used a waiver
+    any_waiver = (
+        "waiver" in bbsr_tpm.lower()
+        or "waiver" in bbsr_fwts.lower()
+        or "waiver" in bbsr_sct.lower()
+        or "waiver" in overall_str.lower()
+    )
+
+    # Case A: All sub‑suites passed cleanly
+    if all_bbsr_compliant:
+        # 1) If the *overall* compliance is a hard failure, override and mark BBSR as Not Compliant
+        if overall_str.startswith("Not Compliant"):
+            acs_results_summary["BBSR extension compliance results"] = "Not Compliant"
+
+        # 2) If the overall result is “Compliant with waivers,” reflect that here
+        elif overall_str.lower().startswith("compliant with waivers"):
+            acs_results_summary["BBSR extension compliance results"] = "Compliant with waivers"
+
+        # 3) Otherwise (overall is strictly Compliant), BBSR is Compliant
+        else:
+            acs_results_summary["BBSR extension compliance results"] = "Compliant"
+
+    # Case B: At least one suite or the overall result involved a waiver
+    elif any_waiver:
+        # 1) Still respect a hard overall failure as Not Compliant
+        if overall_str.startswith("Not Compliant"):
+            acs_results_summary["BBSR extension compliance results"] = "Not Compliant"
+        # 2) Otherwise, we have a waiver situation
+        else:
+            acs_results_summary["BBSR extension compliance results"] = "Compliant with waivers"
+
+    # Case C: Some sub‑suite(s) failed outright without waivers
+    else:
+        # Gather which suites didn’t run vs. which failed non‑waived
+        missing_list_bbsr = []
+        non_waived_list_bbsr = []
+
+        for label, comp_str in [
+            ("BBSR-TPM", bbsr_tpm),
+            ("BBSR-FWTS", bbsr_fwts),
+            ("BBSR-SCT", bbsr_sct),
+        ]:
+            # “not run” indicates missing entirely
+            if comp_str.lower().startswith("not compliant: not run"):
+                missing_list_bbsr.append(label)
+            # “failed” indicates an explicit non‑waived failure
+            elif comp_str.lower().startswith("not compliant: failed"):
+                non_waived_list_bbsr.append(label)
+
+        # If no specific details, at least flag as generic Not Compliant
+        if not missing_list_bbsr and not non_waived_list_bbsr:
+            acs_results_summary["BBSR extension compliance results"] = "Not Compliant"
+        else:
+            # Build a human‑readable reason with missing vs. non‑waived lists
+            parts = []
+            if missing_list_bbsr:
+                parts.append(f"missing suite(s): {', '.join(missing_list_bbsr)}")
+            if non_waived_list_bbsr:
+                parts.append(f"non‑waived fails in suite(s): {', '.join(non_waived_list_bbsr)}")
+            acs_results_summary["BBSR extension compliance results"] = (
+                f"Not Compliant ({'; '.join(parts)})"
+            )
+
+    # Finally, print out the BBSR extension result with color coding
+    bbsr_comp_str = acs_results_summary["BBSR extension compliance results"]
+    if bbsr_comp_str.lower().startswith("compliant with waivers"):
+        print(f"{YELLOW}BBSR extension compliance results: {bbsr_comp_str}{RESET}\n")
+    elif bbsr_comp_str.lower().startswith("compliant"):
+        print(f"{GREEN}BBSR extension compliance results: {bbsr_comp_str}{RESET}\n")
+    else:
+        print(f"{RED}BBSR extension compliance results: {bbsr_comp_str}{RESET}\n")
+
     with open(output_file, 'w') as outj:
         json.dump(merged_results, outj, indent=4)
 

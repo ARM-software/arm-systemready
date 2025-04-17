@@ -153,15 +153,21 @@ def read_overall_compliance_from_merged_json(merged_json_path):
       data["Suite_Name: acs_info"]["ACS Results Summary"]["Overall Compliance Result"]
     """
     overall_result = "Unknown"
+    bbsr_result = "Unknown"
     try:
         with open(merged_json_path, 'r') as jf:
             data = json.load(jf)
         acs_info_data = data.get("Suite_Name: acs_info", {})
         acs_summary = acs_info_data.get("ACS Results Summary", {})
         overall_result = acs_summary.get("Overall Compliance Result", "Unknown")
+        # If not found in ACS Results Summary, try at top level of acs_info_data
+        if "BBSR extension compliance results" in acs_info_data:
+            bbsr_result = acs_info_data.get("BBSR extension compliance results", "Unknown")
+        else:
+            bbsr_result = acs_summary.get("BBSR extension compliance results", "Unknown")
     except Exception as e:
         print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
-    return overall_result
+    return overall_result, bbsr_result
 
 def generate_html(system_info, acs_results_summary,
                   bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
@@ -361,7 +367,7 @@ def generate_html(system_info, acs_results_summary,
                         <td>{{ acs_results_summary.get('Date', 'Unknown') }}</td>
                     </tr>
                     <tr>
-                        <th>Overall Compliance Results</th>
+                        <th>SRS requirements compliance results</th>
                         <td style="
                             color: 
                             {% if 'Not Compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
@@ -377,6 +383,23 @@ def generate_html(system_info, acs_results_summary,
                             {{ acs_results_summary.get('Overall Compliance Results', 'Unknown') }}
                         </td>
                     </tr>
+                    <tr>
+                         <th>BBSR extension compliance results</th>
+                         <td style="
+                             color: 
+                             {% if 'Not Compliant' in acs_results_summary.get('BBSR extension compliance results', '') %}
+                                 red
+                             {% elif 'Compliant with waivers' in acs_results_summary.get('BBSR extension compliance results', '')|lower %}
+                                 #FFBF00
+                             {% elif 'Compliant' in acs_results_summary.get('BBSR extension compliance results', '') %}
+                                 green
+                             {% else %}
+                                 black
+                             {% endif %}
+                         ">
+                             {{ acs_results_summary.get('BBSR extension compliance results', 'Unknown') }}
+                         </td>
+                     </tr>
                 </table>
             </div>
             <div class="dropdown">
@@ -598,15 +621,17 @@ if __name__ == "__main__":
     # 8) Read overall compliance solely from merged JSON (if provided)
     overall_compliance = "Unknown"
     if args.merged_json and os.path.isfile(args.merged_json):
-        overall_compliance = read_overall_compliance_from_merged_json(args.merged_json)
+        overall_compliance, bbsr_compliance = read_overall_compliance_from_merged_json(args.merged_json)
     else:
         print("Warning: merged JSON not provided or does not exist => Overall compliance unknown")
+        overall_compliance, bbsr_compliance = "Unknown", "Unknown"
 
     # 9) Prepare the dictionary that will be used in the final HTML
     acs_results_summary = {
         'Band': acs_config_info.get('Band', 'Unknown'),
         'Date': summary_generated_date,
-        'Overall Compliance Results': overall_compliance
+        'Overall Compliance Results': overall_compliance,
+        'BBSR extension compliance results': bbsr_compliance
     }
 
     # 10) Finally, generate the consolidated HTML page
