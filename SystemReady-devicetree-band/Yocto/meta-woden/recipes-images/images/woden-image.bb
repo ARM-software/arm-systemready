@@ -169,19 +169,22 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         fwupd \
                         fwupd-efi \
                         udisks2 \
+                        pango \
+                        cairo \
+                        gdk-pixbuf \
                         python3-matplotlib \
                         python3-chardet \
                         python3-jinja2 \
                         systemready-scripts \
-			dejavu-fonts \
-			python3-cssselect2 \
-			python3-fonttools \
-			python3-pydyf \
-			python3-pyphen \
-			python3-tinycss2 \
-			python3-tinyhtml5 \
-			python3-weasyprint \
-			python3-webencodings \
+                        dejavu-fonts \
+                        python3-cssselect2 \
+                        python3-fonttools \
+                        python3-pydyf \
+                        python3-pyphen \
+                        python3-tinycss2 \
+                        python3-tinyhtml5 \
+                        python3-weasyprint \
+                        python3-webencodings \
                         tar \
 "
 

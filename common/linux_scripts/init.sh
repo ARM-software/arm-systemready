@@ -263,6 +263,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   echo "ACS automated test suites run is completed."
   echo "Please reboot to run BBSR tests if not done"
+  echo "Please press <Enter> to continue ..."
 else
   echo ""
   echo "Linux Execution Enviroment can be used to run an acs test suite manually with desired options"

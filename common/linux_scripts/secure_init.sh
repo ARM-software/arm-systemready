@@ -128,5 +128,6 @@ if [ -d "$RESULTS_DIR" ]; then
   sleep 60
 fi
 
-echo "ACS test run completed"
+#init.sh will print BBSR run completed.
+#echo "ACS test run completed"  
 exit 0
