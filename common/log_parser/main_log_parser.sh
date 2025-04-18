@@ -774,11 +774,15 @@ if [ $print_path -eq 1 ]; then
     fi
 fi
 
-# Convert ACS Summary HTML to PDF
-if [ -f "$ACS_SUMMARY_HTML" ]; then
-    python3 -c "from weasyprint import HTML, CSS; HTML('$ACS_SUMMARY_HTML').write_pdf('$ACS_SUMMARY_PDF', stylesheets=[CSS(string='@page { margin: 0; }')])"
-fi
+echo "ACS HTML Summary : $ACS_SUMMARY_HTML"
 
-echo "ACS Summary : $ACS_SUMMARY_HTML"
-echo "ACS Summary : $ACS_SUMMARY_PDF"
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+    ehco " Converting ACS HTML Summary to PDF"
+    # Convert ACS Summary HTML to PDF
+    if [ -f "$ACS_SUMMARY_HTML" ]; then
+        python3 -c "from weasyprint import HTML, CSS; HTML('$ACS_SUMMARY_HTML').write_pdf('$ACS_SUMMARY_PDF', stylesheets=[CSS(string='@page { margin: 0; }')])"
+    fi
+fi
+echo "ACS PDF Summary : $ACS_SUMMARY_PDF"
+
 echo ""
