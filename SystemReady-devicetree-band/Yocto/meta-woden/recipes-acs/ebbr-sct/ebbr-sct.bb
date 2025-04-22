@@ -15,7 +15,7 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://bbr-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13"
 
 # TODO 
-SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=https;branch=main;name=bbr-acs \
+SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=https;branch=3.0_dev;name=bbr-acs \
             git://github.com/tianocore/edk2-test;destsuffix=edk2-test;protocol=https;nobranch=1;name=edk2-test \
             gitsm://github.com/tianocore/edk2.git;destsuffix=edk2-test/edk2;protocol=https;nobranch=1;name=edk2 \
             file://sctversion.patch;patch=1;patchdir=edk2-test \
@@ -24,8 +24,8 @@ SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=ht
 S = "${WORKDIR}"
 
 SRCREV_FORMAT    = "edk2-test_edk2_bbr-acs"
-SRCREV_edk2 = "f80f052277c88a67c55e107b550f504eeea947d3"
-SRCREV_edk2-test = "0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4"
+SRCREV_edk2 = "${AUTOREV}"
+SRCREV_edk2-test = "${AUTOREV}"
 SRCREV_bbr-acs   = "${AUTOREV}"
 
 # set variables as required by edk2 based build
@@ -35,6 +35,16 @@ EDK2_ARCH             = "AARCH64"
 UEFI_TOOLCHAIN        = "GCC5"
 export PYTHON_COMMAND = "python3"
 
+# These variables were changed in edk2 commit
+# 206168e83f0901cbc1815ef5df4ac6598ad9721b, which was part of edk2-202305
+export CC = "${BUILD_CC}"
+export CXX = "${BUILD_CXX}"
+export AS = "${BUILD_AS}"
+export AR = "${BUILD_AR}"
+export LD = "${BUILD_LD}"
+export CFLAGS = "${BUILD_CFLAGS}"
+export CPPFLAGS = "${BUILD_CPPFLAGS}"
+export LDFLAGS = "${BUILD_LFLAGS}"
 
 do_configure() {
     cd ${S}/edk2-test
@@ -46,7 +56,6 @@ do_configure() {
     # Copy sbbr-test cases from bbr-acs to uefi-sct
     cp -r ${SBBR_TEST_DIR}/SbbrBootServices uefi-sct/SctPkg/TestCase/UEFI/EFI/BootServices/
     cp -r ${SBBR_TEST_DIR}/SbbrEfiSpecVerLvl ${SBBR_TEST_DIR}/SbbrRequiredUefiProtocols ${SBBR_TEST_DIR}/SbbrSysEnvConfig uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
-    cp -r ${SBBR_TEST_DIR}/SBBRRuntimeServices uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices/
     cp ${SBBR_TEST_DIR}/BBR_SCT.dsc uefi-sct/SctPkg/UEFI/
     cp ${SBBR_TEST_DIR}/build_bbr.sh uefi-sct/SctPkg/
     cp ${S}/bbr-acs/ebbr/config/EfiCompliant_EBBR.ini uefi-sct/SctPkg/UEFI/
@@ -152,6 +161,7 @@ do_install() {
     cp ${S}/bbr-acs/ebbr/config/EBBR.seq ${D}/bbr/SCT/Sequence/EBBR.seq
     cp SctPkg/UEFI/EfiCompliant_EBBR.ini ${D}/bbr/SCT/Dependency/EfiCompliantBBTest/EfiCompliant.ini
     cp ${S}/bbr-acs/bbsr/config/BBSR.seq ${D}/bbr/SCT/Sequence/BBSR.seq
+    cp ${S}/bbr-acs/common/config/ScrtStartup.nsh ${D}/bbr/ScrtStartup.nsh
 
     echo "Install done..."
 

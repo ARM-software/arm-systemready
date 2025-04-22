@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,17 +31,21 @@ get_linux_src()
 {
     echo "Downloading Linux source code. Version : $LINUX_KERNEL_VERSION"
     git clone --depth 1 --branch v$LINUX_KERNEL_VERSION https://github.com/torvalds/linux.git linux-${LINUX_KERNEL_VERSION}
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to download Linux source code"
+        exit 1
+    fi
 }
 
 get_uefi_src()
 {
     echo "Downloading EDK2 source code. TAG : $EDK2_SRC_VERSION"
-    git clone --depth 1 --single-branch \
-    --branch $EDK2_SRC_VERSION https://github.com/tianocore/edk2.git
+    git clone --depth 1 --single-branch --branch $EDK2_SRC_VERSION https://github.com/tianocore/edk2.git
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to download edk2 source code"
+        exit 1
+    fi
     pushd $TOP_DIR/edk2
-    git apply $TOP_DIR/../common/patches/edk2_subhook_patch
-    git add .gitmodules
-    git rm --cached UnitTestFrameworkPkg/Library/SubhookLib/subhook
     git submodule update --init
     popd
 }
@@ -50,6 +54,11 @@ get_bsa_src()
 {
     pushd $TOP_DIR/edk2
     git clone https://github.com/tianocore/edk2-libc
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to download edk2 libc source code"
+        exit 1
+    fi
+
     if [ -z $ARM_BSA_TAG ]; then
         #No TAG is provided. Download the latest code
         echo "Downloading Arm BSA source code."
@@ -94,6 +103,10 @@ get_cross_compiler()
         mkdir -p tools
         pushd $TOP_DIR/tools
         wget $CROSS_COMPILER_URL --no-check-certificate
+	if [ $? -ne 0 ]; then
+            echo "Error: Failed to dowload toolchain"
+            exit 1
+        fi
         tar -xf arm-gnu-toolchain-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
 	mv arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu
         rm arm-gnu-toolchain-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
@@ -105,17 +118,11 @@ get_grub_src()
 {
     echo "Downloading grub source code,Version: ${GRUB_SRC_TAG}"
     git clone -b $GRUB_SRC_TAG https://github.com/rhboot/grub2.git grub
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to download Grub source code"
+        exit 1
+    fi
     pushd $TOP_DIR/grub
-    git submodule update --init
-    popd
-}
-
-get_fwts_src()
-{
-    echo "Downloading FWTS source code. TAG : ${FWTS_SRC_TAG}"
-    git clone --single-branch git://kernel.ubuntu.com/hwe/fwts.git
-    pushd $TOP_DIR/fwts
-    git checkout $FWTS_SRC_TAG
     git submodule update --init
     popd
 }
@@ -124,6 +131,10 @@ get_sct_src()
 {
     echo "Downloading SCT (edk2-test) source code. TAG : ${SCT_SRC_TAG}"
     git clone --single-branch https://github.com/tianocore/edk2-test
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to download sct source code"
+        exit 1
+    fi
     pushd $TOP_DIR/edk2-test
     git checkout $SCT_SRC_TAG
     popd
@@ -157,7 +168,9 @@ get_linux-acs_src()
 get_bbr_acs_src()
 {
     echo "Downloading Arm BBR source code."
-    git clone https://github.com/ARM-software/bbr-acs.git bbr-acs
+    #git clone https://github.com/ARM-software/bbr-acs.git bbr-acs
+    ##TODO revert back to main branch
+    git clone --branch SR_execution_enviroment https://github.com/ARM-software/bbr-acs.git bbr-acs
     if [ -n "$ARM_BBR_TAG" ]; then
         # TAG provided.
         echo "Checking out Arm BBR TAG: $ARM_BBR_TAG"
@@ -168,13 +181,17 @@ get_bbr_acs_src()
 get_buildroot_src()
 {
     echo "Downloading Buildroot source code. TAG : $BUILDROOT_SRC_VERSION"
-    git clone -b $BUILDROOT_SRC_VERSION https://git.busybox.net/buildroot/
+    #git clone -b $BUILDROOT_SRC_VERSION https://git.busybox.net/buildroot/
+    #TODO  git clone was failing with busybox url, try gitlab
+    git clone -b $BUILDROOT_SRC_VERSION https://gitlab.com/buildroot.org/buildroot.git
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to download buildroot source code"
+        exit 1
+    fi
     pushd $TOP_DIR/buildroot/package/fwts
         echo "Applying Buildroot FWTS patch..."
         # patch buildroot config
-        git apply $TOP_DIR/../common/patches/build_fwts_version_24.09.00.patch
-        # copy patches for fwts source
-        cp $TOP_DIR/../common/patches/0008-acpi-iort-memory-access-flag-update.patch .
+        git apply $TOP_DIR/../common/patches/build_fwts_version_25.01.00.patch
     popd
 }
 

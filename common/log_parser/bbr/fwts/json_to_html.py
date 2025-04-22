@@ -28,35 +28,44 @@ def get_case_insensitive(d, key, default=0):
             return v
     return default
 
+def detect_columns_used(subtests):
+    show_waiver = False
+    for subtest in subtests:
+        r = subtest.get("sub_test_result", {})
+        if r.get("FAILED_WITH_WAIVER", 0) > 0:
+            show_waiver = True
+            break
+    return {
+        "show_waiver": show_waiver
+    }
+
 # Function to generate bar chart for FWTS results
 def generate_bar_chart_fwts(suite_summary):
-    # Updated labels to include 'Failed with Waiver'
     labels = ['Passed', 'Failed', 'Failed with Waiver', 'Aborted', 'Skipped', 'Warnings']
     sizes = [
         suite_summary['total_PASSED'],
         suite_summary['total_FAILED'],
-        suite_summary.get('total_failed_with_waiver', 0),  # Safely get the value with default 0
+        suite_summary.get('total_failed_with_waiver', 0),
         suite_summary['total_ABORTED'],
         suite_summary['total_SKIPPED'],
         suite_summary['total_WARNINGS']
     ]
-    # Updated colors to include a color for 'Failed with Waiver'
-    colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']  # Added color for Failed with Waiver
+    colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']
 
     plt.figure(figsize=(12, 7))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
 
-    # Add percentage labels on top of the bars
     total_tests = sum(sizes)
+    max_size = max(sizes) if sizes else 0
     for bar, size in zip(bars, sizes):
         yval = bar.get_height()
         percentage = (size / total_tests) * 100 if total_tests > 0 else 0
         plt.text(
-            bar.get_x() + bar.get_width()/2, 
-            yval + max(sizes)*0.01, 
-            f'{percentage:.2f}%', 
-            ha='center', 
-            va='bottom', 
+            bar.get_x() + bar.get_width()/2,
+            yval + (0.01 * max_size if max_size > 0 else 0.05),
+            f'{percentage:.2f}%',
+            ha='center',
+            va='bottom',
             fontsize=12
         )
 
@@ -66,7 +75,6 @@ def generate_bar_chart_fwts(suite_summary):
     plt.yticks(fontsize=12)
     plt.tight_layout()
 
-    # Save the figure to a buffer
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
     plt.close()
@@ -75,8 +83,8 @@ def generate_bar_chart_fwts(suite_summary):
 
 # Function to generate HTML content for both summary and detailed pages
 def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path, is_summary_page=True):
-    # Template for both summary and detailed pages
-    template = Template("""
+    # Jinja2 template with ONE "Reason" column + a fixed "Waiver Reason" column
+    template = Template(r"""
     <!DOCTYPE html>
     <html>
     <head>
@@ -115,7 +123,7 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                 background-color: #f8d7da;
                 font-weight: bold;
             }
-            .fail-waiver {  /* Added CSS class for Failed with Waiver */
+            .fail-waiver {
                 background-color: #f39c12;
                 font-weight: bold;
             }
@@ -135,7 +143,6 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                 margin: 0 auto;
                 width: 80%;
             }
-            /* Center the Total Tests value */
             .summary-table td.total-tests {
                 text-align: center;
             }
@@ -170,7 +177,6 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                 text-align: center;
                 font-weight: bold;
             }
-            /* New CSS class for Waiver Reason */
             td.waiver-reason {
                 text-align: center;
                 font-weight: normal;
@@ -209,7 +215,7 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                         <td class="fail">{{ total_FAILED }}</td>
                     </tr>
                     <tr>
-                        <td>Failed with Waiver</td>  <!-- Added row for Failed with Waiver -->
+                        <td>Failed with Waiver</td>
                         <td class="fail-waiver">{{ total_failed_with_waiver }}</td>
                     </tr>
                     <tr>
@@ -233,54 +239,62 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
             {% for test in test_results %}
             <div class="test-suite-header">Test Suite: {{ test.Test_suite }}</div>
             <div class="test-suite-description">Description: {{ test.Test_suite_Description }}</div>
+
             <table>
                 <thead>
                     <tr>
                         <th>Sub Test Number</th>
                         <th>Sub Test Description</th>
                         <th>Sub Test Result</th>
-                        <th>Pass Reasons</th>
-                        <th>Fail Reasons</th>
-                        <th>Abort Reasons</th>
-                        <th>Skip Reasons</th>
-                        <th>Warning Reasons</th>
-                        <th>Waiver Reason</th>  <!-- New Column Header -->
+                        <th>Reason</th>
+                        <th>Waiver Reason</th>  <!-- Fixed column for Waiver Reason -->
                     </tr>
                 </thead>
                 <tbody>
                     {% for subtest in test.subtests %}
+                    {% set s = subtest.sub_test_result %}
                     <tr>
                         <td>{{ subtest.sub_Test_Number }}</td>
                         <td>{{ subtest.sub_Test_Description }}</td>
-                        <td class="{% if subtest.sub_test_result.PASSED > 0 %}pass{% elif subtest.sub_test_result.FAILED > 0 %}fail{% elif subtest.sub_test_result.FAILED_WITH_WAIVER|default(0) > 0 %}fail-waiver{% elif subtest.sub_test_result.ABORTED > 0 %}aborted{% elif subtest.sub_test_result.SKIPPED > 0 %}skipped{% elif subtest.sub_test_result.WARNINGS > 0 %}warning{% endif %}">
-                            {% if subtest.sub_test_result.PASSED > 0 %}
-                                PASSED
-                            {% elif subtest.sub_test_result.FAILED > 0 %}
+                        <td class="{% if s.FAILED > 0 %}fail
+                                    {% elif s.PASSED > 0 %}pass
+                                    {% elif s.FAILED_WITH_WAIVER|default(0) > 0 %}fail-waiver
+                                    {% elif s.ABORTED > 0 %}aborted
+                                    {% elif s.SKIPPED > 0 %}skipped
+                                    {% elif s.WARNINGS > 0 %}warning
+                                    {% endif %}">
+                            {% if s.FAILED > 0 %}
                                 FAILED
-                            {% elif subtest.sub_test_result.FAILED_WITH_WAIVER|default(0) > 0 %}
+                            {% elif s.PASSED > 0 %}
+                                PASSED
+                            {% elif s.FAILED_WITH_WAIVER|default(0) > 0 %}
                                 FAILED WITH WAIVER
-                            {% elif subtest.sub_test_result.ABORTED > 0 %}
+                            {% elif s.ABORTED > 0 %}
                                 ABORTED
-                            {% elif subtest.sub_test_result.SKIPPED > 0 %}
+                            {% elif s.SKIPPED > 0 %}
                                 SKIPPED
-                            {% elif subtest.sub_test_result.WARNINGS > 0 %}
+                            {% elif s.WARNINGS > 0 %}
                                 WARNINGS
                             {% else %}
                                 UNKNOWN
                             {% endif %}
                         </td>
-                        <td>{{ subtest.sub_test_result.pass_reasons | join(', ') }}</td>
-                        <td>{{ subtest.sub_test_result.fail_reasons | join(', ') }}</td>
-                        <td>{{ subtest.sub_test_result.abort_reasons | join(', ') }}</td>
-                        <td>{{ subtest.sub_test_result.skip_reasons | join(', ') }}</td>
-                        <td>{{ subtest.sub_test_result.warning_reasons | join(', ') }}</td>
+                        {# Consolidate all reasons into one block #}
+                        {% set all_reasons = [] %}
+                        {% if s.pass_reasons %}{% for reason in s.pass_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                        {% if s.fail_reasons %}{% for reason in s.fail_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                        {% if s.abort_reasons %}{% for reason in s.abort_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                        {% if s.skip_reasons %}{% for reason in s.skip_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                        {% if s.warning_reasons %}{% for reason in s.warning_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                        <td>{{ all_reasons|join("<br>") if all_reasons else "N/A" }}</td>
+
                         <td class="waiver-reason">
-                            {% if subtest.sub_test_result.FAILED_WITH_WAIVER|default(0) > 0 %}
-                                {{ subtest.sub_test_result.waiver_reason | default("N/A") }}
+                            {% if s.FAILED_WITH_WAIVER|default(0) > 0 %}
+                                {{ s.waiver_reason|default("N/A") }}
                             {% else %}
                                 N/A
                             {% endif %}
-                        </td>  <!-- New Data Cell -->
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -292,7 +306,6 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
     </html>
     """)
 
-    # Calculate total tests
     total_tests = (
         suite_summary["total_PASSED"]
         + suite_summary["total_FAILED"]
@@ -300,14 +313,13 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
         + suite_summary["total_SKIPPED"]
         + suite_summary["total_WARNINGS"]
     )
-    
-    # Render the HTML content
+
     html_content = template.render(
         chart_data=chart_data,
         total_tests=total_tests,
         total_PASSED=suite_summary["total_PASSED"],
         total_FAILED=suite_summary["total_FAILED"],
-        total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),  # Safely get the value with default 0
+        total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),
         total_ABORTED=suite_summary["total_ABORTED"],
         total_SKIPPED=suite_summary["total_SKIPPED"],
         total_WARNINGS=suite_summary["total_WARNINGS"],
@@ -315,20 +327,16 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
         is_summary_page=is_summary_page
     )
 
-    # Save to HTML file
     with open(output_html_path, "w") as file:
         file.write(html_content)
 
-# Main function to process the JSON file and generate the HTML report
 def main(input_json_file, detailed_html_file, summary_html_file):
-    # Load JSON data
     with open(input_json_file, 'r') as json_file:
         data = json.load(json_file)
 
-    # Extract the suite summary and test results
     suite_summary = {
         'total_PASSED': 0,
-        'total_FAILED': 0,  # Only counts FAILED without waiver
+        'total_FAILED': 0,
         'total_failed_with_waiver': 0,
         'total_ABORTED': 0,
         'total_SKIPPED': 0,
@@ -337,9 +345,9 @@ def main(input_json_file, detailed_html_file, summary_html_file):
 
     test_results = data["test_results"]
 
+    # Aggregate totals & detect columns for each suite
     for test_suite in test_results:
         ts_summary = test_suite.get('test_suite_summary', {})
-        # Handle different cases for keys
         suite_summary['total_PASSED'] += get_case_insensitive(ts_summary, 'total_passed', ts_summary.get('total_PASSED', 0))
         suite_summary['total_FAILED'] += get_case_insensitive(ts_summary, 'total_failed', ts_summary.get('total_FAILED', 0))
         suite_summary['total_failed_with_waiver'] += get_case_insensitive(ts_summary, 'total_failed_with_waiver', ts_summary.get('total_failed_with_waiver', 0))
@@ -347,13 +355,17 @@ def main(input_json_file, detailed_html_file, summary_html_file):
         suite_summary['total_SKIPPED'] += get_case_insensitive(ts_summary, 'total_skipped', ts_summary.get('total_SKIPPED', 0))
         suite_summary['total_WARNINGS'] += get_case_insensitive(ts_summary, 'total_warnings', ts_summary.get('total_WARNINGS', 0))
 
-    # Generate bar chart as base64 encoded image
+        # Retain column detection for minimal code changes (but we always show Waiver anyway)
+        subtests = test_suite.get("subtests", [])
+        test_suite["columns_used"] = detect_columns_used(subtests)
+
+    # Generate bar chart
     chart_data = generate_bar_chart_fwts(suite_summary)
 
     # Generate the detailed summary page
     generate_html_fwts(suite_summary, test_results, chart_data, detailed_html_file, is_summary_page=False)
 
-    # Generate the summary page with the bar chart
+    # Generate the summary page
     generate_html_fwts(suite_summary, test_results, chart_data, summary_html_file, is_summary_page=True)
 
 if __name__ == "__main__":
@@ -363,7 +375,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     input_json_file = sys.argv[1]
-    detailed_html_file = sys.argv[2]  # This will be the detailed HTML report
-    summary_html_file = sys.argv[3]  # This will be the summary HTML report
+    detailed_html_file = sys.argv[2]
+    summary_html_file = sys.argv[3]
 
     main(input_json_file, detailed_html_file, summary_html_file)

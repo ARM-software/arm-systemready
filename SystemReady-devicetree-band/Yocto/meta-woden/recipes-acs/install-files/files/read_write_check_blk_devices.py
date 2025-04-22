@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script parses for block devices and perform block read operation if the partition
-# doesn't belong precious partitions set.
+# This script parses for block devices and perform block read and write operation if the partition doesn't belong precious partitions set.
 
 import subprocess
 import re
@@ -58,7 +57,6 @@ def calculate_sha256(file_path):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
-
 def get_partition_space(partition_path): #to calculate used blocks and available blocks
     command = f"df -B 512 {partition_path} --output=used,avail"
     result = subprocess.run(command, shell=True, text=True, check=True, capture_output=True)
@@ -72,7 +70,22 @@ def get_partition_space(partition_path): #to calculate used blocks and available
         print(f"WARNING: Unable to parse partition space for {partition_path}.")
         return 0, 0  # Default to 0 if parsing fails
 
+def is_mounted(device):
+    command = f"findmnt -n {device}"
+    result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
+    return result.returncode == 0
+
+def is_mtd_block_device(device):
+    return device.startswith('mtdblock')
+
+def is_ram_disk(device):
+    return device.startswith('ram')
+
 def perform_write_check(partition_label, partition_id, precious_parts):
+
+    if is_mounted(f"/dev/{partition_label}"):
+        print(f"INFO: /dev/{partition_label} is mounted, skipping write test.")
+        return
 
     # Check if partition is precious
     user_input = 'no' if partition_id in precious_parts.values() else input_with_timeout(
@@ -96,7 +109,7 @@ def perform_write_check(partition_label, partition_id, precious_parts):
             subprocess.run(backup_command, shell=True, check=True)
 
             # Write padded hello.txt to the device
-            print("INFO: Writing test data to the device for write check...") 
+            print("INFO: Writing test data to the device for write check...")
             write_command = f"dd if=hello.txt of=/dev/{partition_label} bs=512 count=1 seek={used_blocks}"
             subprocess.run(write_command, shell=True, check=True)
 
@@ -131,6 +144,14 @@ def perform_write_check(partition_label, partition_id, precious_parts):
         else:
             print(f"WARNING: No available space for write check on /dev/{partition_label}. Skipping write check.")
 
+def get_partition_labels(disk):
+    """
+    Return a list of partition labels from lsblk *without* relying on box/Unicode characters.
+    """
+    command = f"lsblk -rn -o NAME,TYPE /dev/{disk} | awk '/part/ {{print $1}}'"
+    result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
+    labels = result.stdout.strip().split()
+    return labels
 
 if __name__ == "__main__":
     try:
@@ -150,6 +171,16 @@ if __name__ == "__main__":
         print("\n********************************************************************************************************************************\n")
 
         for disk in disks:
+            # Skip MTD block devices
+            if is_mtd_block_device(disk):
+                print(f"INFO: Skipping MTD block device /dev/{disk}")
+                continue
+
+            # Skip RAM disks
+            if is_ram_disk(disk):
+                print(f"INFO: Skipping RAM disk /dev/{disk}")
+                continue
+
             print(f"INFO: Block device : /dev/{disk}")
 
             # check whether disk uses MBR or GPT partition table
@@ -161,30 +192,49 @@ if __name__ == "__main__":
             elif "GPT: present" in result.stdout:
                 part_table = "GPT"
             else:
-                print(f"INFO: Invalid partition table or not found for {disk}")
-                continue
+                print(f"INFO: No valid partition table found for {disk}, treating as raw device.")
+                part_table = "RAW"
 
             print(f"INFO: Partition table type : {part_table}\n")
 
             # get number of partitions available for given disk
-            command = f"lsblk /dev/{disk} | grep -c part"
+            command = f"lsblk -rn -o NAME,TYPE /dev/{disk} | grep -c part"
             result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
-            num_parts = 0
-            num_parts = int(result.stdout)
+            num_parts_str = result.stdout.strip()
+            num_parts = int(num_parts_str) if num_parts_str else 0
 
-            # skip if no partitions
-            if num_parts == 0:
-                print(f"INFO: No partitions detected for {disk}, skipping block read/write...")
-                continue
+            if part_table == "RAW" or num_parts == 0:
+                print(f"INFO: No partitions detected for {disk}, treating as raw device.")
+                part_lables = [disk]  # Treat the whole disk as a 'partition'
 
-            # get partition labels
-            command = f"lsblk /dev/{disk}  | grep part"
-            result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
-            part_lables = re.findall(r'[├└]─(\S+)', result.stdout)
+                # Process the raw disk
+                for part_label in part_lables:
+                    print(f"INFO: Performing block read on /dev/{part_label}")
+                    command = f"dd if=/dev/{part_label} bs=1M count=1 > /dev/null"
+                    result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
+                    if result.returncode == 0:
+                        print(f"INFO: Block read on /dev/{part_label} successful")
+                        # Since we don't have partition IDs, pass empty string to perform_write_check
+                        perform_write_check(part_label, '', {})
+                    else:
+                        print(f"INFO: Block read on /dev/{part_label} failed")
 
-            # if disk follows MBR
+                print("\n********************************************************************************************************************************\n")
+                continue  # Continue to next disk
+
+            # get partition labels with the safer method
+            part_lables = get_partition_labels(disk)
+
+            # If there's a mismatch, just warn. We do not skip any existing partitions.
+            if len(part_lables) < num_parts:
+                print(f"WARNING: Mismatch in partition count. Found {len(part_lables)} partition labels, "
+                      f"but lsblk reported {num_parts} partitions for {disk}. Proceeding with the ones we have...")
+
+            # -----------------------------------
+            # MBR scheme
+            # -----------------------------------
             if part_table == "MBR":
-                table_header_row = ["Device", "Boot Start", "End Sectors", "Size", "Id", "Type"]
+                table_header_row = ["Device", "Boot", "Start", "End", "Sectors", "Size", "Id", "Type"]
                 command = f"fdisk -l /dev/{disk}"
                 result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
 
@@ -197,71 +247,68 @@ if __name__ == "__main__":
                     if collect_lines:
                         columns = line.split()
                         if len(columns) >= 6:
-                            mbr_part_ids.append("0x" + columns[5].upper())
+                            # Because "Boot" might be an extra column, handle if columns[1] == '*'
+                            if columns[1] == '*' and len(columns) >= 7:
+                                # Then columns[6] is the "Id" (typical fdisk layout)
+                                mbr_part_ids.append("0x" + columns[6].upper())
+                            else:
+                                # columns[5] is the "Id" in normal case
+                                mbr_part_ids.append("0x" + columns[5].upper())
                     elif all(substring in line for substring in table_header_row):
                         collect_lines = True
 
-                if not(len(part_lables) == len(mbr_part_ids) == num_parts):
-                    print(f"INFO: Error parsing MBR partition Ids/partition labels/number of partition(s) for {disk} ")
+                if len(mbr_part_ids) < num_parts:
+                    print(f"WARNING: Could not parse enough MBR partition IDs. Found {len(mbr_part_ids)}, expected {num_parts}.")
 
-                for index in range(0, num_parts):
+                # Process up to min of (parsed labels, parsed IDs, num_parts)
+                process_count = min(len(part_lables), len(mbr_part_ids), num_parts)
+
+                for index in range(process_count):
                     print(f"\nINFO: Partition : /dev/{part_lables[index]} Partition type : {mbr_part_ids[index]}")
 
                     if mbr_part_ids[index] in precious_parts_mbr.values():
+                        # skip read/write for precious
                         for key, value in precious_parts_mbr.items():
                             if value == mbr_part_ids[index]:
                                 print(f"INFO: {part_lables[index]} partition is PRECIOUS")
-                                used_blocks = get_partition_space(f"/dev/{part_lables[index]}")
+                                used_blocks, _ = get_partition_space(f"/dev/{part_lables[index]}")
                                 print(f"INFO: Number of 512B blocks used on /dev/{part_lables[index]}: {used_blocks}")
                                 print(f"      {key} : {value}")
                                 print("      Skipping block read/write...")
-                                continue
+                                break
                     else:
                         command = f"dd if=/dev/{part_lables[index]} bs=1M count=1 > /dev/null"
                         print(f"INFO: Performing block read on /dev/{part_lables[index]} mbr_part_id = {mbr_part_ids[index]}")
                         result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
                         if result.returncode == 0:
                             print(f"INFO: Block read on /dev/{part_lables[index]} mbr_part_id = {mbr_part_ids[index]} successful")
-                            # Call the perform_write_check function for the partition
-                            perform_write_check(part_lables[index], partition_guid_code, precious_parts_gpt)
+                            perform_write_check(part_lables[index], mbr_part_ids[index], precious_parts_mbr)
                         else:
                             print(f"INFO: Block read on /dev/{part_lables[index]} mbr_part_id = {mbr_part_ids[index]} failed")
                 print("\n********************************************************************************************************************************\n")
 
             # if disk follows GPT scheme
             elif part_table == "GPT":
-                gpt_part_guids = []
-                platform_required_bit = []
-
-                # check if parsing went well for GPT
-                if not(len(part_lables) == num_parts):
-                    print(f"INFO: Error parsing GPT partition Ids/partition labels/number of partition(s) for {disk} ")
-
-                for index in range(0, num_parts):
+                # We'll parse partition GUID code + attribute flags with sgdisk
+                process_count = min(len(part_lables), num_parts)
+                for index in range(process_count):
                     command = f"sgdisk -i={index+1} /dev/{disk}"
                     result = subprocess.run(command, shell=True, text=True, check=False, capture_output=True)
 
-                    # regex to match part GUIDs and Attribute flags
-                    guid_regex = r"Partition GUID code: ([\w-]+) \(.*\)"
+                    # regex to match part GUIDs and attribute flags
+                    guid_regex = r"Partition GUID code: ([\w-]+) \("
                     attr_flag_regex = r"Attribute flags: ([0-9A-Fa-f]+)"
                     guid_code_match = re.search(guid_regex, result.stdout)
                     attribute_flags_match = re.search(attr_flag_regex, result.stdout)
 
-                    # Extract Attribute flags
-                    if attribute_flags_match:
-                        attribute_flags_hex = attribute_flags_match.group(1)
-                        attribute_flags_int = int(attribute_flags_hex, 16)  # convert hexadecimal to integer
-                        lsb = attribute_flags_int & 1  # mask and get LSB (bit 0)
-                    else:
-                        print(f"INFO: Unable to parse Attribute flags for {part_lables[index]} partition")
+                    if not guid_code_match or not attribute_flags_match:
+                        print(f"INFO: Unable to parse sgdisk info for {part_lables[index]}. Skipping.")
                         continue
 
-                    # Extract and print the matched values
-                    if guid_code_match:
-                        partition_guid_code = guid_code_match.group(1)
-                    else:
-                        print(f"INFO: Unable to parse Partition GUID code for {part_lables[index]} partition")
-                        continue
+                    partition_guid_code = guid_code_match.group(1)
+                    attribute_flags_hex = attribute_flags_match.group(1)
+                    attribute_flags_int = int(attribute_flags_hex, 16)
+                    lsb = attribute_flags_int & 1  # "Platform required" bit
 
                     print(f"\nINFO: Partition : /dev/{part_lables[index]} Partition type GUID : {partition_guid_code} \"Platform required bit\" : {lsb}")
 
@@ -271,17 +318,14 @@ if __name__ == "__main__":
                         continue
                     # check if the partition is precious
                     if partition_guid_code in precious_parts_gpt.values():
-
-                        used_blocks = get_partition_space(f"/dev/{part_lables[index]}")
-
+                        used_blocks, _ = get_partition_space(f"/dev/{part_lables[index]}")
                         for key, value in precious_parts_gpt.items():
                             if value == partition_guid_code:
                                 print(f"INFO: {part_lables[index]} partition is PRECIOUS.")
                                 print(f"INFO: Number of 512B blocks used on /dev/{part_lables[index]}: {used_blocks}")
                                 print(f"      {key} : {value}")
                                 print("      Skipping block read/write...")
-                                continue
-                    # perform block read of 1 block (1MB)
+                                break
                     else:
                         command = f"dd if=/dev/{part_lables[index]} bs=1M count=1 > /dev/null"
                         print(f"INFO: Performing block read on /dev/{part_lables[index]} part_guid = {partition_guid_code}")
@@ -289,7 +333,6 @@ if __name__ == "__main__":
 
                         if result.returncode == 0:
                             print(f"INFO: Block read on /dev/{part_lables[index]} part_guid = {partition_guid_code} successful")
-                            # Call the perform_write_check function for the partition
                             perform_write_check(part_lables[index], partition_guid_code, precious_parts_gpt)
                         else:
                             print(f"INFO: Block read on /dev/{part_lables[index]} part_guid = {partition_guid_code} failed")

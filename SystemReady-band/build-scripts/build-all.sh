@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,7 @@ PACKAGE=$2
 
 source ./build-scripts/build-efitools.sh
 source ./build-scripts/build-bbsr-keys.sh
+source ./build-scripts/build-parser-app.sh
 source ./build-scripts/build-uefi.sh $@
 source ./build-scripts/build-bsaefi.sh $@
 source ./build-scripts/build-sbsaefi.sh $@

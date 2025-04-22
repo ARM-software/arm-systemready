@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,8 +62,8 @@ def load_waivers(waiver_data, suite_name):
                             print(f"ERROR: Waiver for TestSuite '{test_suite_name}' is missing 'Reason'. Skipping TestSuite-level waiver.")
 
                 # Include 'BBSR-SCT' and 'BBSR-FWTS' suites
-                # Only load SubSuite and Test_case waivers if the suite is 'SCT', 'MVP', 'BBSR-SCT', or 'BBSR-FWTS'
-                if suite_name.upper() in ['SCT', 'MVP', 'BBSR-SCT', 'BBSR-FWTS']:
+                # Only load SubSuite and Test_case waivers if the suite is 'SCT', 'Standalone', 'BBSR-SCT', or 'BBSR-FWTS'
+                if suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS', 'BBSR-TPM']:
                     # Check for SubSuite-level waiver
                     if 'SubSuite' in test_suite:
                         subsuite = test_suite['SubSuite']
@@ -129,7 +129,7 @@ def apply_suite_level_waivers(test_suite_entry, suite_waivers):
                     if verbose:
                         print(f"Suite-level waiver applied to subtest '{subtest.get('sub_Test_Description')}' with reason: {reason}")
             elif isinstance(sub_test_result, str):
-                if 'FAILED' in sub_test_result.upper() or 'FAILURE' in sub_test_result.upper():
+                if 'FAILED' in sub_test_result.upper() or 'FAILURE' in sub_test_result.upper() or 'FAIL' in sub_test_result.upper():
                     if '(WITH WAIVER)' not in sub_test_result.upper():
                         subtest['sub_test_result'] += ' (WITH WAIVER)'
                         subtest['waiver_reason'] = reason
@@ -231,18 +231,18 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
         sub_test_result = subtest.get('sub_test_result')
 
         if isinstance(sub_test_result, dict):
-            # For FWTSResults.json and MVP JSONs where sub_test_result is a dict with result counts
+            # For FWTSResults.json and Standalone JSONs where sub_test_result is a dict with result counts
             subtest_description = subtest.get('sub_Test_Description')
             subtest_number = subtest.get('sub_Test_Number')
 
             for waiver in subtest_waivers:
                 waiver_desc = waiver.get('sub_Test_Description')
-                # For FWTS and MVP, use descriptions
+                # For FWTS and Standalone, use descriptions
                 if waiver_desc:
                     cleaned_waiver_desc = clean_description(waiver_desc)
                     cleaned_subtest_desc = clean_description(subtest_description)
-                    # Special handling for MVP's "Boot sources" TestSuite
-                    if suite_name.upper() == 'MVP':
+                    # Special handling for "Boot sources" TestSuite
+                    if suite_name.upper() == 'Standalone_tests':
                         # If TestSuite-level waiver is applied, all subtests should have waivers already
                         # Otherwise, handle individual subtest waivers
                         if cleaned_waiver_desc in cleaned_subtest_desc:
@@ -301,8 +301,8 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
             for waiver in subtest_waivers:
                 waiver_desc = waiver.get('sub_Test_Description')
                 waiver_id = waiver.get('SubTestID')
-                if suite_name.upper() in ['FWTS', 'MVP', 'BBSR-FWTS']:
-                    # For FWTS, MVP, and BBSR-FWTS, use descriptions
+                if suite_name.upper() in ['FWTS', 'Standalone_tests', 'BBSR-FWTS']:
+                    # For FWTS, Standalone, and BBSR-FWTS, use descriptions
                     if waiver_desc:
                         cleaned_waiver_desc = clean_description(waiver_desc)
                         cleaned_subtest_desc = clean_description(subtest_description)
@@ -380,14 +380,14 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
     # Get waivers for the suite, categorized by their scope
     suite_level_waivers, testsuite_level_waivers, subsuite_level_waivers, testcase_level_waivers, subtest_level_waivers = load_waivers(waiver_data, suite_name)
 
-    if not (suite_level_waivers or testsuite_level_waivers or (suite_name.upper() in ['SCT', 'MVP', 'BBSR-SCT', 'BBSR-FWTS'] and (subsuite_level_waivers or testcase_level_waivers)) or subtest_level_waivers):
+    if not (suite_level_waivers or testsuite_level_waivers or (suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS'] and (subsuite_level_waivers or testcase_level_waivers)) or subtest_level_waivers):
         if verbose:
             print(f"No valid waivers found for suite '{suite_name}'. No changes applied.")
         return
 
     # Handle different json_data structures
     if 'test_results' in json_data:
-        # For FWTSResults.json, SCTResults.json, and MVP JSONs
+        # For fwts.json, sct.json, and Standalone JSONs
         test_suite_entries = json_data['test_results']
     elif isinstance(json_data, list):
         # For BSA/SBSA json
@@ -413,17 +413,12 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
             # Check if the test suite is waivable according to test_category.json
             waivable = False
             for catID, catData in output_json_data.items():
-                for suiteID, suiteData in catData.items():
-                    for sname_key, sname_value in suiteData.items():
-                        if sname_key.startswith('SName:') and sname_key == f'SName: {suite_name}':
-                            ts_list = sname_value  # This is a list
-                            for ts_entry in ts_list:
-                                if ts_entry.get('TSName').lower() == test_suite_name.lower():
-                                    if ts_entry.get('Waivable', '').lower() == 'yes':
-                                        waivable = True
-                                        break  # Found a waivable test suite, exit the loops
-                            if waivable:
-                                break
+                # catData is a list
+                for row in catData:
+                    if row.get("Suite", "").lower() == suite_name.lower() and row.get("Test Suite", "").lower() == test_suite_name.lower():
+                        if row.get("Waivable", "").lower() == "yes":
+                            waivable = True
+                            break  # Found a waivable test suite, exit the loops
                 if waivable:
                     break
 
@@ -440,8 +435,8 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
             apply_testsuite_level_waivers(test_suite_entry, testsuite_level_waivers)
 
         # Include 'BBSR-SCT' and 'BBSR-FWTS' suites
-        # Only apply SubSuite and Test_case level waivers if the suite is 'SCT', 'MVP', 'BBSR-SCT', or 'BBSR-FWTS'
-        if suite_name.upper() in ['SCT', 'MVP', 'BBSR-SCT', 'BBSR-FWTS']:
+        # Only apply SubSuite and Test_case level waivers if the suite is 'SCT', 'Standalone', 'BBSR-SCT', or 'BBSR-FWTS'
+        if suite_name.upper() in ['SCT', 'Standalone_tests', 'BBSR-SCT', 'BBSR-FWTS', 'BBSR-TPM']:
             # Apply SubSuite-level waivers if any
             if subsuite_level_waivers:
                 apply_subsuite_level_waivers(test_suite_entry, subsuite_level_waivers)
@@ -456,10 +451,10 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
 
         # Update test suite summary
         # Determine the summary field based on suite name
-        if suite_name.upper() in ['SCT', 'BBSR-SCT']:
+        if suite_name.upper() in ['SCT', 'BBSR-SCT', 'BBSR-TPM']:
             summary_field = 'test_case_summary'
-        elif suite_name.upper() == 'MVP':
-            summary_field = 'test_suite_summary'  # Adjust based on MVP JSON structure
+        elif suite_name.upper() == 'Standalone_tests':
+            summary_field = 'test_suite_summary'
         else:
             summary_field = 'test_suite_summary'
 
@@ -476,7 +471,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                 sub_test_result = subtest.get('sub_test_result')
 
                 if isinstance(sub_test_result, dict):
-                    # For FWTSResults.json, SCTResults.json, and MVP JSONs
+                    # For fwts.json, sct.json, and Standalone JSONs
                     total_passed += sub_test_result.get('PASSED', 0)
                     total_failed += sub_test_result.get('FAILED', 0) + sub_test_result.get('FAILED_WITH_WAIVER', 0)
                     total_failed_with_waiver += sub_test_result.get('FAILED_WITH_WAIVER', 0)
@@ -487,7 +482,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                     # For other JSON structures like BSA/SBSA
                     if 'PASS' in sub_test_result.upper():
                         total_passed += 1
-                    if 'FAILED' in sub_test_result.upper() or 'FAILURE' in sub_test_result.upper():
+                    if 'FAIL' in sub_test_result.upper():  # <-- ADDED condition
                         total_failed += 1
                         if '(WITH WAIVER)' in sub_test_result.upper():
                             total_failed_with_waiver += 1
@@ -506,6 +501,39 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                 'total_skipped': total_skipped,
                 'total_warnings': total_warnings
             }
+    if "suite_summary" in json_data and isinstance(json_data["suite_summary"], dict):
+        total_passed_top = 0
+        total_failed_top = 0
+        total_failed_with_waiver_top = 0
+        total_aborted_top = 0
+        total_skipped_top = 0
+        total_warnings_top = 0
+        total_ignored_top = 0  # if needed
+
+        if "test_results" in json_data and isinstance(json_data["test_results"], list):
+            for suite_obj in json_data["test_results"]:
+                # Use test_case_summary if available, else test_suite_summary
+                if "test_case_summary" in suite_obj and isinstance(suite_obj["test_case_summary"], dict):
+                    summary = suite_obj["test_case_summary"]
+                elif "test_suite_summary" in suite_obj and isinstance(suite_obj["test_suite_summary"], dict):
+                    summary = suite_obj["test_suite_summary"]
+                else:
+                    summary = {}
+                total_passed_top += summary.get("total_passed", 0)
+                total_failed_top += summary.get("total_failed", 0)
+                total_failed_with_waiver_top += summary.get("total_failed_with_waiver", 0)
+                total_aborted_top += summary.get("total_aborted", 0)
+                total_skipped_top += summary.get("total_skipped", 0)
+                total_warnings_top += summary.get("total_warnings", 0)
+                total_ignored_top += summary.get("total_ignored", 0)
+
+        json_data["suite_summary"]["total_passed"] = total_passed_top
+        json_data["suite_summary"]["total_failed"] = total_failed_top
+        json_data["suite_summary"]["total_failed_with_waiver"] = total_failed_with_waiver_top
+        json_data["suite_summary"]["total_aborted"] = total_aborted_top
+        json_data["suite_summary"]["total_skipped"] = total_skipped_top
+        json_data["suite_summary"]["total_warnings"] = total_warnings_top
+        json_data["suite_summary"]["total_ignored"] = total_ignored_top        
 
     # Write the updated JSON data back to the file
     try:

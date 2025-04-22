@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import argparse
 import os
 import subprocess
@@ -31,18 +32,23 @@ def get_system_info():
             if 'Version:' in line:
                 system_info['Firmware Version'] = line.split('Version:')[1].strip()
                 break
-    except Exception as e:
+    except Exception:
         system_info['Firmware Version'] = 'Unknown'
 
-    # Get SoC Family using 'sudo dmidecode -t system | grep -i "Family"'
+    # SoC Family
     try:
         soc_family_output = subprocess.check_output(
-            "sudo dmidecode -t system | grep -i 'Family'", shell=True, universal_newlines=True, stderr=subprocess.DEVNULL)
-        if 'Family:' in soc_family_output:
-            system_info['SoC Family'] = soc_family_output.split('Family:')[1].strip()
+            ["dmidecode", "-t", "system"], universal_newlines=True, stderr=subprocess.DEVNULL
+        )
+        # Iterate each line looking for "Family:"
+        for line in soc_family_output.split('\n'):
+            if 'Family:' in line:
+                system_info['SoC Family'] = line.split('Family:', 1)[1].strip()
+                break
         else:
+            # #If we didn't find 'Family:'
             system_info['SoC Family'] = 'Unknown'
-    except Exception as e:
+    except Exception:
         system_info['SoC Family'] = 'Unknown'
 
     # Get System Name
@@ -53,7 +59,10 @@ def get_system_info():
             if 'Product Name:' in line:
                 system_info['System Name'] = line.split('Product Name:')[1].strip()
                 break
-    except Exception as e:
+        else:
+            # If we didn't find 'Product Name:'
+            system_info['System Name'] = 'Unknown'    
+    except Exception:
         system_info['System Name'] = 'Unknown'
 
     # Get Vendor
@@ -64,14 +73,14 @@ def get_system_info():
             if 'Manufacturer:' in line:
                 system_info['Vendor'] = line.split('Manufacturer:')[1].strip()
                 break
-    except Exception as e:
+    except Exception:
         system_info['Vendor'] = 'Unknown'
 
     # Add date when the summary was generated
     try:
         system_info['Summary Generated On Date/time'] = subprocess.check_output(
             ["date", "+%Y-%m-%d %H:%M:%S"], universal_newlines=True).strip()
-    except Exception as e:
+    except Exception:
         system_info['Summary Generated On Date/time'] = 'Unknown'
 
     return system_info
@@ -123,10 +132,7 @@ def read_html_content(file_path):
         return None
 
 def adjust_bbsr_headings(content, suite_name):
-    # Adjust the main heading in the content to include the suite name
     if content:
-        # Replace the first occurrence of "<h1>FWTS Test Summary</h1>" with "<h1>{suite_name} Test Summary</h1>"
-        # Similarly for SCT and other suites
         pattern = r'(<h[1-6][^>]*>)(.*? Test Summary)(</h[1-6]>)'
         replacement = r'\1' + suite_name + r' Test Summary\3'
         content = re.sub(pattern, replacement, content, count=1, flags=re.IGNORECASE)
@@ -136,143 +142,68 @@ def adjust_detailed_summary_heading(file_path, suite_name):
     if file_path and os.path.exists(file_path):
         with open(file_path, 'r') as file:
             content = file.read()
-        # Adjust the heading
         content = adjust_bbsr_headings(content, suite_name)
-        # Write back the adjusted content
         with open(file_path, 'w') as file:
             file.write(content)
 
-def get_failed_with_waiver_counts(content):
+def read_overall_compliance_from_merged_json(merged_json_path):
     """
-    Parses the summary HTML content to extract the number of Failed and Failed with Waiver tests.
-    Returns a tuple (failed, failed_with_waiver). If parsing fails, returns (0, 0).
+    Opens the merged_results.json and retrieves the final
+    "Overall Compliance Result" from:
+      data["Suite_Name: acs_info"]["ACS Results Summary"]["Overall Compliance Result"]
     """
-    failed = 0
-    failed_with_waiver = 0
-
-    # Split the content into lines for easier processing
-    lines = content.splitlines()
-
-    # Initialize index
-    i = 0
-    while i < len(lines):
-        line = lines[i].strip()
-        # Search for "Failed with Waiver"
-        if "Failed with Waiver" in line:
-            try:
-                # Next line should have the count
-                count_line = lines[i + 1].strip()
-                # Extract number between '>' and '</td>'
-                start = count_line.find('>') + 1
-                end = count_line.find('</td>', start)
-                num_part = count_line[start:end].strip()
-                failed_with_waiver = int(num_part)
-                i += 1  # Skip the next line as it's processed
-            except (IndexError, ValueError):
-                pass
-        # Search for "Failed" but exclude lines containing "Failed with Waiver"
-        elif "Failed" in line and "Failed with Waiver" not in line:
-            try:
-                # Next line should have the count
-                count_line = lines[i + 1].strip()
-                # Extract number between '>' and '</td>'
-                start = count_line.find('>') + 1
-                end = count_line.find('</td>', start)
-                num_part = count_line[start:end].strip()
-                failed = int(num_part)
-                i += 1  # Skip the next line as it's processed
-            except (IndexError, ValueError):
-                pass
-        i += 1
-
-    return failed, failed_with_waiver
-
-def determine_overall_compliance(bsa_summary_content, sbsa_summary_content, fwts_summary_content, sct_summary_content,
-                                 mvp_summary_content, bbsr_fwts_summary_content, bbsr_sct_summary_content,
-                                 manual_tests_summary_content, capsule_update_summary_content):
-    # Initialize compliance status
-    overall_compliance = 'Compliant'
-
-    # List of all summary contents
-    summaries = {
-        'BSA': bsa_summary_content,
-        'SBSA': sbsa_summary_content,
-        'FWTS': fwts_summary_content,
-        'SCT': sct_summary_content,
-        'MVP': mvp_summary_content,
-        'BBSR-FWTS': bbsr_fwts_summary_content,
-        'BBSR-SCT': bbsr_sct_summary_content,
-        'Manual Tests': manual_tests_summary_content,
-        'Capsule Update': capsule_update_summary_content  # Added Capsule Update
-    }
-
-    # Flags to track compliance with waivers and overall compliance
-    all_failed_zero = True
-    compliant_with_waivers = True
-
-    # Dictionary to store counts for debugging
-    suite_counts = {}
-
-    for suite, content in summaries.items():
-        if content:
-            failed, failed_with_waiver = get_failed_with_waiver_counts(content)
-            suite_counts[suite] = {'Failed': failed, 'Failed with Waiver': failed_with_waiver}
-            print(f"Suite: {suite}, Failed: {failed}, Failed with Waiver: {failed_with_waiver}")  # Debug Statement
-            if failed != failed_with_waiver:
-                compliant_with_waivers = False
-            if failed != 0 or failed_with_waiver != 0:
-                all_failed_zero = False
+    overall_result = "Unknown"
+    bbsr_result = "Unknown"
+    try:
+        with open(merged_json_path, 'r') as jf:
+            data = json.load(jf)
+        acs_info_data = data.get("Suite_Name: acs_info", {})
+        acs_summary = acs_info_data.get("ACS Results Summary", {})
+        overall_result = acs_summary.get("Overall Compliance Result", "Unknown")
+        # If not found in ACS Results Summary, try at top level of acs_info_data
+        if "BBSR extension compliance results" in acs_info_data:
+            bbsr_result = acs_info_data.get("BBSR extension compliance results", "Unknown")
         else:
-            print(f"Suite: {suite} summary not provided or empty. Skipping.")
+            bbsr_result = acs_summary.get("BBSR extension compliance results", "Unknown")
+    except Exception as e:
+        print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
+    return overall_result, bbsr_result
 
-    if all_failed_zero:
-        overall_compliance = 'Compliant'
-    elif compliant_with_waivers:
-        # Ensure that there is at least one failed test that is waived
-        any_failures = False
-        for suite, counts in suite_counts.items():
-            if counts['Failed with Waiver'] > 0:
-                any_failures = True
-                break
-        if any_failures:
-            overall_compliance = 'Compliant with Waivers'
-        else:
-            overall_compliance = 'Compliant'
-    else:
-        overall_compliance = 'Not compliant'
+def generate_html(system_info, acs_results_summary,
+                  bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
+                  bbsr_fwts_summary_path, bbsr_sct_summary_path,bbsr_tpm_summary_path,
+                  post_script_summary_path,
+                  standalone_summary_path, OS_tests_summary_path,
+                  output_html_path):
 
-    print(f"Overall Compliance: {overall_compliance}")  # Debug Statement
-    return overall_compliance
-
-def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
-                  mvp_summary_path, bbsr_fwts_summary_path, bbsr_sct_summary_path, manual_tests_summary_path, capsule_update_summary_path, output_html_path):
-    # Read summary contents
+    # Read the summary HTML content from each suite
     bsa_summary_content = read_html_content(bsa_summary_path)
     sbsa_summary_content = read_html_content(sbsa_summary_path)
     fwts_summary_content = read_html_content(fwts_summary_path)
     sct_summary_content = read_html_content(sct_summary_path)
-    mvp_summary_content = read_html_content(mvp_summary_path)
     bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path)
-    manual_tests_summary_content = read_html_content(manual_tests_summary_path)
-    capsule_update_summary_content = read_html_content(capsule_update_summary_path)  # Added this line
+    bbsr_tpm_summary_content = read_html_content(bbsr_tpm_summary_path) 
+    post_script_summary_content = read_html_content(post_script_summary_path)
+    standalone_summary_content = read_html_content(standalone_summary_path)
+    OS_tests_summary_content = read_html_content(OS_tests_summary_path)
 
-    # Adjust headings for BBSR-FWTS, BBSR-SCT, Manual Tests, and Capsule Update summaries
+    # Adjust headings in BBSR/Standalone/OS summaries
     bbsr_fwts_summary_content = adjust_bbsr_headings(bbsr_fwts_summary_content, 'BBSR-FWTS')
     bbsr_sct_summary_content = adjust_bbsr_headings(bbsr_sct_summary_content, 'BBSR-SCT')
-    manual_tests_summary_content = adjust_bbsr_headings(manual_tests_summary_content, 'OS Tests')  # Changed to 'OS Tests'
-    capsule_update_summary_content = adjust_bbsr_headings(capsule_update_summary_content, 'Capsule Update')  # Added this line
+    bbsr_tpm_summary_content = adjust_bbsr_headings(bbsr_tpm_summary_content, 'BBSR-TPM')
+    post_script_summary_content = adjust_bbsr_headings(post_script_summary_content, 'POST-SCRIPT')
+    OS_tests_summary_content = adjust_bbsr_headings(OS_tests_summary_content, 'OS')
+    standalone_summary_content = adjust_bbsr_headings(standalone_summary_content, 'Standalone')
 
+    # Jinja2 template for the final HTML page
     html_template = '''
     <!DOCTYPE html>
     <html lang="en">
     <head>
-        <!-- Head content -->
         <meta charset="UTF-8">
         <title>ACS Summary</title>
-        <!-- Include styles here -->
         <style>
-            /* Styles as provided earlier */
             body {
                 font-family: 'Arial', sans-serif;
                 background-color: #f5f5f5;
@@ -299,23 +230,13 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 color: #2c3e50;
                 text-align: left;
             }
-            .system-info {
+            .system-info, .acs-results-summary {
                 margin-bottom: 40px;
                 padding: 20px;
                 border-bottom: 1px solid #ddd;
                 text-align: left;
             }
-            .system-info h2 {
-                text-align: left;
-                color: #2c3e50;
-            }
-            .acs-results-summary {
-                margin-bottom: 40px;
-                padding: 20px;
-                border-bottom: 1px solid #ddd;
-                text-align: left;
-            }
-            .acs-results-summary h2 {
+            .system-info h2, .acs-results-summary h2 {
                 text-align: left;
                 color: #2c3e50;
             }
@@ -446,9 +367,39 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                         <td>{{ acs_results_summary.get('Date', 'Unknown') }}</td>
                     </tr>
                     <tr>
-                        <th>Overall Compliance Results</th>
-                        <td>{{ acs_results_summary.get('Overall Compliance Results', 'Unknown') }}</td>
+                        <th>SRS requirements compliance results</th>
+                        <td style="
+                            color: 
+                            {% if 'Not Compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
+                                red
+                            {% elif 'Compliant with Waivers' in acs_results_summary.get('Overall Compliance Results', '') %}
+                                #FFBF00
+                            {% elif 'Compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
+                                green
+                            {% else %}
+                                black
+                            {% endif %}
+                        ">
+                            {{ acs_results_summary.get('Overall Compliance Results', 'Unknown') }}
+                        </td>
                     </tr>
+                    <tr>
+                         <th>BBSR extension compliance results</th>
+                         <td style="
+                             color: 
+                             {% if 'Not Compliant' in acs_results_summary.get('BBSR extension compliance results', '') %}
+                                 red
+                             {% elif 'Compliant with waivers' in acs_results_summary.get('BBSR extension compliance results', '')|lower %}
+                                 #FFBF00
+                             {% elif 'Compliant' in acs_results_summary.get('BBSR extension compliance results', '') %}
+                                 green
+                             {% else %}
+                                 black
+                             {% endif %}
+                         ">
+                             {{ acs_results_summary.get('BBSR extension compliance results', 'Unknown') }}
+                         </td>
+                     </tr>
                 </table>
             </div>
             <div class="dropdown">
@@ -466,20 +417,23 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                     {% if sct_summary_content %}
                     <a href="#sct_summary">SCT Summary</a>
                     {% endif %}
-                    {% if mvp_summary_content %}
-                    <a href="#mvp_summary">MVP Summary</a>
+                    {% if post_script_summary_content %} 
+                    <a href="#post_script_summary">POST-SCRIPT Summary</a> 
+                    {% endif %} 
+                    {% if standalone_summary_content %}
+                    <a href="#standalone_summary">Standalone tests Summary</a>
                     {% endif %}
                     {% if bbsr_fwts_summary_content %}
                     <a href="#bbsr_fwts_summary">BBSR-FWTS Summary</a>
                     {% endif %}
                     {% if bbsr_sct_summary_content %}
                     <a href="#bbsr_sct_summary">BBSR-SCT Summary</a>
+                    {% endif %} 
+                    {% if bbsr_tpm_summary_content %}
+                    <a href="#bbsr_tpm_summary">BBSR-TPM Summary</a>
                     {% endif %}
-                    {% if manual_tests_summary_content %}
-                    <a href="#manual_tests_summary">OS Tests Summary</a>  <!-- Changed to 'OS Tests Summary' -->
-                    {% endif %}
-                    {% if capsule_update_summary_content %}
-                    <a href="#capsule_update_summary">Capsule Update Summary</a>
+                    {% if OS_tests_summary_content %}
+                    <a href="#OS_tests_summary">OS tests Summary</a>
                     {% endif %}
                 </div>
             </div>
@@ -489,7 +443,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="bsa_summary">
                     {{ bsa_summary_content | safe }}
                     <div class="details-link">
-                        <a href="BSA_detailed.html" target="_blank">Click here to go to the detailed summary for BSA</a>
+                        <a href="bsa_detailed.html" target="_blank">Click here to go to the detailed summary for BSA</a>
                     </div>
                 </div>
                 {% endif %}
@@ -497,7 +451,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="sbsa_summary">
                     {{ sbsa_summary_content | safe }}
                     <div class="details-link">
-                        <a href="SBSA_detailed.html" target="_blank">Click here to go to the detailed summary for SBSA</a>
+                        <a href="sbsa_detailed.html" target="_blank">Click here to go to the detailed summary for SBSA</a>
                     </div>
                 </div>
                 {% endif %}
@@ -513,15 +467,23 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="sct_summary">
                     {{ sct_summary_content | safe }}
                     <div class="details-link">
-                        <a href="SCT_detailed.html" target="_blank">Click here to go to the detailed summary for SCT</a>
+                        <a href="sct_detailed.html" target="_blank">Click here to go to the detailed summary for SCT</a>
                     </div>
                 </div>
                 {% endif %}
-                {% if mvp_summary_content %}
-                <div class="summary" id="mvp_summary">
-                    {{ mvp_summary_content | safe }}
+                {% if post_script_summary_content %} 
+                <div class="summary" id="post_script_summary"> 
+                    {{ post_script_summary_content | safe }} 
+                    <div class="details-link"> 
+                        <a href="post_script_detailed.html" target="_blank">Click here to go to the detailed summary for POST-SCRIPT</a> 
+                    </div> 
+                </div> 
+                {% endif %} 
+                {% if standalone_summary_content %}
+                <div class="summary" id="standalone_summary">
+                    {{ standalone_summary_content | safe }}
                     <div class="details-link">
-                        <a href="MVP_detailed.html" target="_blank">Click here to go to the detailed summary for MVP</a>
+                        <a href="standalone_tests_detailed.html" target="_blank">Click here to go to the detailed summary for Standalone tests</a>
                     </div>
                 </div>
                 {% endif %}
@@ -529,7 +491,7 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="bbsr_fwts_summary">
                     {{ bbsr_fwts_summary_content | safe }}
                     <div class="details-link">
-                        <a href="bbsr-fwts_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-FWTS</a>
+                        <a href="bbsr_fwts_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-FWTS</a>
                     </div>
                 </div>
                 {% endif %}
@@ -537,23 +499,23 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
                 <div class="summary" id="bbsr_sct_summary">
                     {{ bbsr_sct_summary_content | safe }}
                     <div class="details-link">
-                        <a href="bbsr-sct_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-SCT</a>
+                        <a href="bbsr_sct_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-SCT</a>
                     </div>
                 </div>
                 {% endif %}
-                {% if manual_tests_summary_content %}
-                <div class="summary" id="manual_tests_summary">
-                    {{ manual_tests_summary_content | safe }}
+                {% if bbsr_tpm_summary_content %}
+                <div class="summary" id="bbsr_tpm_summary">
+                    {{ bbsr_tpm_summary_content | safe }}
                     <div class="details-link">
-                        <a href="manual_tests_detailed.html" target="_blank">Click here to go to the detailed summary for OS Tests</a>  <!-- Changed to 'OS Tests' -->
+                        <a href="bbsr_tpm_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-TPM</a>
                     </div>
                 </div>
                 {% endif %}
-                {% if capsule_update_summary_content %}
-                <div class="summary" id="capsule_update_summary">
-                    {{ capsule_update_summary_content | safe }}
+                {% if OS_tests_summary_content %}
+                <div class="summary" id="OS_tests_summary">
+                    {{ OS_tests_summary_content | safe }}
                     <div class="details-link">
-                        <a href="capsule_update_detailed.html" target="_blank">Click here to go to the detailed summary for Capsule Update</a>
+                        <a href="os_tests_detailed.html" target="_blank">Click here to go to the detailed summary for OS Tests</a>
                     </div>
                 </div>
                 {% endif %}
@@ -571,36 +533,43 @@ def generate_html(system_info, acs_results_summary, bsa_summary_path, sbsa_summa
         sbsa_summary_content=sbsa_summary_content,
         fwts_summary_content=fwts_summary_content,
         sct_summary_content=sct_summary_content,
-        mvp_summary_content=mvp_summary_content,
         bbsr_fwts_summary_content=bbsr_fwts_summary_content,
         bbsr_sct_summary_content=bbsr_sct_summary_content,
-        manual_tests_summary_content=manual_tests_summary_content,
-        capsule_update_summary_content=capsule_update_summary_content  # Added this line
+        bbsr_tpm_summary_content=bbsr_tpm_summary_content,
+        post_script_summary_content=post_script_summary_content,
+        standalone_summary_content=standalone_summary_content,
+        OS_tests_summary_content=OS_tests_summary_content
     )
 
     with open(output_html_path, 'w') as html_file:
         html_file.write(html_output)
 
-    # Adjust headings in detailed summary pages for BBSR-FWTS, BBSR-SCT, OS Tests, and Capsule Update
+    # Adjust headings in the *detailed* summary pages
     detailed_summaries = [
-        (os.path.join(os.path.dirname(output_html_path), 'bbsr-fwts_detailed.html'), 'BBSR-FWTS'),
-        (os.path.join(os.path.dirname(output_html_path), 'bbsr-sct_detailed.html'), 'BBSR-SCT'),
-        (os.path.join(os.path.dirname(output_html_path), 'manual_tests_detailed.html'), 'OS Tests'),  # Changed to 'OS Tests'
-        (os.path.join(os.path.dirname(output_html_path), 'capsule_update_detailed.html'), 'Capsule Update')  # Added this line
+        (os.path.join(os.path.dirname(output_html_path), 'bbsr_fwts_detailed.html'), 'BBSR-FWTS'),
+        (os.path.join(os.path.dirname(output_html_path), 'bbsr_sct_detailed.html'), 'BBSR-SCT'),
+        (os.path.join(os.path.dirname(output_html_path), 'bbsr_tpm_detailed.html'), 'BBSR-TPM'), 
+        (os.path.join(os.path.dirname(output_html_path), 'os_tests_detailed.html'), 'OS'),
+        (os.path.join(os.path.dirname(output_html_path), 'standalone_tests_detailed.html'), 'Standalone'),
+        (os.path.join(os.path.dirname(output_html_path), 'post_script_detailed.html'), 'POST-SCRIPT')
     ]
-
     for file_path, suite_name in detailed_summaries:
         adjust_detailed_summary_heading(file_path, suite_name)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate ACS Summary HTML page")
+    parser.add_argument("--merged_json", default="", help="Path to merged_results.json if you want to pull final compliance from there")
     parser.add_argument("bsa_summary_path", help="Path to the BSA summary HTML file")
     parser.add_argument("sbsa_summary_path", help="Path to the SBSA summary HTML file")
     parser.add_argument("fwts_summary_path", help="Path to the FWTS summary HTML file")
     parser.add_argument("sct_summary_path", help="Path to the SCT summary HTML file")
-    parser.add_argument("mvp_summary_path", help="Path to the MVP summary HTML file")
-    parser.add_argument("manual_tests_summary_path", help="Path to the OS Tests summary HTML file")  # Changed this line
-    parser.add_argument("capsule_update_summary_path", help="Path to the Capsule Update summary HTML file")  # Added this line
+    parser.add_argument("bbsr_fwts_summary_path", help="Path to the BBSR FWTS summary HTML file")
+    parser.add_argument("bbsr_sct_summary_path", help="Path to the BBSR SCT summary HTML file")
+    parser.add_argument("bbsr_tpm_summary_path", help="Path to the BBSR TPM summary HTML file") 
+    parser.add_argument("post_script_summary_path", help="Path to the post-script summary HTML file")
+    parser.add_argument("standalone_summary_path", help="Path to the Standalone tests summary HTML file")
+    parser.add_argument("OS_tests_summary_path", help="Path to the OS Tests summary HTML file")
+    parser.add_argument("capsule_update_summary_path", help="Path to the Capsule Update summary HTML file")
     parser.add_argument("output_html_path", help="Path to the output ACS summary HTML file")
     parser.add_argument("--acs_config_path", default="", help="Path to the acs_config.txt file")
     parser.add_argument("--system_config_path", default="", help="Path to the system_config.txt file")
@@ -609,60 +578,63 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # 1) Basic system info
     system_info = get_system_info()
+
+    # 2) Merge data from ACS config & system config
     acs_config_info = parse_config(args.acs_config_path)
     system_config_info = parse_config(args.system_config_path)
-
-    # Merge configurations into system_info
     system_info.update(acs_config_info)
-    uefi_version = get_uefi_version(args.uefi_version_log)
-
-    # Add UEFI and Device Tree versions to system_info
-    system_info['UEFI Version'] = uefi_version
-
     system_info.update(system_config_info)
 
-    # Extract and remove date from system_info to place it in acs_results_summary
+    # 3) UEFI version
+    uefi_version = get_uefi_version(args.uefi_version_log)
+    system_info['UEFI Version'] = uefi_version
+
+    # 4) Extract summary date from system_info
     summary_generated_date = system_info.pop('Summary Generated On Date/time', 'Unknown')
 
-    # Read summary contents
-    bsa_summary_content = read_html_content(args.bsa_summary_path)
-    sbsa_summary_content = read_html_content(args.sbsa_summary_path)
-    fwts_summary_content = read_html_content(args.fwts_summary_path)
-    sct_summary_content = read_html_content(args.sct_summary_path)
-    mvp_summary_content = read_html_content(args.mvp_summary_path)
-    manual_tests_summary_content = read_html_content(args.manual_tests_summary_path)
-    capsule_update_summary_content = read_html_content(args.capsule_update_summary_path)  # Added this line
+    # 5) Read in the stand-alone & capsule summary, then combine them
+    standalone_summary_content = read_html_content(args.standalone_summary_path)
+    capsule_update_summary_content = read_html_content(args.capsule_update_summary_path)
+    if capsule_update_summary_content:
+        # Append capsule content to standalone if it exists
+        if not standalone_summary_content:
+            standalone_summary_content = capsule_update_summary_content
+        else:
+            standalone_summary_content += "<hr/>\n" + capsule_update_summary_content
 
-    # Paths to bbsr-fwts and bbsr-sct summary files (assumed to be in the same directory as output_html_path)
-    summary_dir = os.path.dirname(args.output_html_path)
-    bbsr_fwts_summary_path = os.path.join(summary_dir, 'bbsr-fwts_summary.html')
-    bbsr_sct_summary_path = os.path.join(summary_dir, 'bbsr-sct_summary.html')
-
-    # Read bbsr-fwts and bbsr-sct summaries if they exist
-    bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path) if os.path.exists(bbsr_fwts_summary_path) else None
-    bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path) if os.path.exists(bbsr_sct_summary_path) else None
-
-    # Determine Overall Compliance Results
-    overall_compliance = determine_overall_compliance(
-        bsa_summary_content,
-        sbsa_summary_content,
-        fwts_summary_content,
-        sct_summary_content,
-        mvp_summary_content,
-        bbsr_fwts_summary_content,
-        bbsr_sct_summary_content,
-        manual_tests_summary_content,
-        capsule_update_summary_content  # Added this line
-    )
-
-    # Prepare ACS Results Summary
-    acs_results_summary = {
-        'Band': acs_config_info.get('Band', 'Unknown'),  # Extract 'Band' from acs_config_info
-        'Date': summary_generated_date,
-        'Overall Compliance Results': overall_compliance
+    # 6) Collect the summary contents for each suite so we can get the fail/waiver counts (purely for printing)
+    suite_content_map = {
+        "BSA": read_html_content(args.bsa_summary_path),
+        "SBSA": read_html_content(args.sbsa_summary_path),
+        "FWTS": read_html_content(args.fwts_summary_path),
+        "SCT": read_html_content(args.sct_summary_path),
+        "BBSR-FWTS": read_html_content(args.bbsr_fwts_summary_path),
+        "BBSR-SCT": read_html_content(args.bbsr_sct_summary_path),
+        "BBSR-TPM": read_html_content(args.bbsr_tpm_summary_path),
+        "POST-SCRIPT": read_html_content(args.post_script_summary_path),
+        "Standalone tests": standalone_summary_content,
+        "OS tests": read_html_content(args.OS_tests_summary_path)
     }
 
+    # 8) Read overall compliance solely from merged JSON (if provided)
+    overall_compliance = "Unknown"
+    if args.merged_json and os.path.isfile(args.merged_json):
+        overall_compliance, bbsr_compliance = read_overall_compliance_from_merged_json(args.merged_json)
+    else:
+        print("Warning: merged JSON not provided or does not exist => Overall compliance unknown")
+        overall_compliance, bbsr_compliance = "Unknown", "Unknown"
+
+    # 9) Prepare the dictionary that will be used in the final HTML
+    acs_results_summary = {
+        'Band': acs_config_info.get('Band', 'Unknown'),
+        'Date': summary_generated_date,
+        'Overall Compliance Results': overall_compliance,
+        'BBSR extension compliance results': bbsr_compliance
+    }
+
+    # 10) Finally, generate the consolidated HTML page
     generate_html(
         system_info,
         acs_results_summary,
@@ -670,10 +642,11 @@ if __name__ == "__main__":
         args.sbsa_summary_path,
         args.fwts_summary_path,
         args.sct_summary_path,
-        args.mvp_summary_path,
-        bbsr_fwts_summary_path if os.path.exists(bbsr_fwts_summary_path) else "",
-        bbsr_sct_summary_path if os.path.exists(bbsr_sct_summary_path) else "",
-        args.manual_tests_summary_path,
-        args.capsule_update_summary_path,  # Added this line
+        args.bbsr_fwts_summary_path,
+        args.bbsr_sct_summary_path,
+        args.bbsr_tpm_summary_path, 
+        args.post_script_summary_path,
+        args.standalone_summary_path,
+        args.OS_tests_summary_path,
         args.output_html_path
     )

@@ -31,6 +31,18 @@ if ! grep -qi "yocto" /proc/version ; then
   insmod /lib/modules/spi-tegra210-quad.ko
 fi
 
+# Add the YOCTO_FLAG variable
+YOCTO_FLAG="/mnt/yocto_image.flag"
+
+if [ ! -f "$YOCTO_FLAG" ]; then
+  # Parse config file
+  automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
+  if [ "$automation_enabled" == "True" ]; then
+    bbsr_fwts_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_bbsr_fwts_run`"
+    bbsr_tpm_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_bbsr_tpm_run`"
+  fi
+fi
+
 # give linux time to finish initializing disks
 sleep 5
 
@@ -44,10 +56,16 @@ if [ "$(which mokutil)" != "" ]; then
   fi
 fi
 
-mkdir -p /mnt/acs_results/BBSR/fwts
-
 # Add the YOCTO_FLAG variable
 YOCTO_FLAG="/mnt/yocto_image.flag"
+
+if [ -f "$YOCTO_FLAG" ]; then
+    RESULTS_DIR="/mnt/acs_results_template/acs_results"
+else
+    RESULTS_DIR="/mnt/acs_results"
+fi
+
+mkdir -p $RESULTS_DIR/bbsr/fwts
 
 # FWTS test execution
 
@@ -55,50 +73,61 @@ if [ -f  /bin/bbsr_fwts_tests.ini ]; then
   test_list=`cat /bin/bbsr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
   echo "Test Executed are $test_list"
   if [ -f "$YOCTO_FLAG" ]; then
-    echo "SystemReady devicetree band ACS v3.0.0-BETA0" > /mnt/acs_results/BBSR/fwts/FWTSResults.log
+    echo "SystemReady devicetree band ACS v3.0.1" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
+    fwts `echo $test_list` -f -r stdout >> $RESULTS_DIR/bbsr/fwts/FWTSResults.log
   else
-    echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/BBSR/fwts/FWTSResults.log
-  fi  
-  fwts `echo $test_list` -f -r stdout >> /mnt/acs_results/BBSR/fwts/FWTSResults.log
+    if [ "$automation_enabled" == "True" ] && [ "$bbsr_fwts_enabled" == "False" ]; then
+      echo "**************BBSR FWTS disabled in config file*******************"
+    else
+        echo "SystemReady band ACS v3.0.1" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
+        fwts `echo $test_list` -f -r stdout >> $RESULTS_DIR/bbsr/fwts/FWTSResults.log
+    fi
+  fi
+
   sync /mnt
   sleep 5
 fi
 
 # TPM2 tests execution
-
-mkdir -p /mnt/acs_results/BBSR/tpm2
-if [ -f /sys/kernel/security/tpm0/binary_bios_measurements ]; then
-  echo "TPM2: dumping PCRs and event log"
-  cp /sys/kernel/security/tpm0/binary_bios_measurements /tmp
-  tpm2_eventlog /tmp/binary_bios_measurements > /mnt/acs_results/BBSR/tpm2/eventlog.log
-  echo "  Event log: /mnt/acs_results/BBSR/tpm2/eventlog.log"
-  tpm2_pcrread > /mnt/acs_results/BBSR/tpm2/pcr.log
-  echo "  PCRs: /mnt/acs_results/BBSR/tpm2/pcr.log"
-  rm /tmp/binary_bios_measurements
-  if grep -q "pcrs:" "/mnt/acs_results/BBSR/tpm2/eventlog.log"; then
-      echo "PCR reg entry found at the end of eventlog, comparing eventlog vs pcr "
-      #TPM2 logs event log v/s tpm.log check
-      python3 /bin/verify_tpm_measurements.py /mnt/acs_results/BBSR/tpm2/pcr.log /mnt/acs_results/BBSR/tpm2/eventlog.log | tee /mnt/acs_results/BBSR/tpm2/verify_tpm_measurements.log
+if [ -f "$YOCTO_FLAG" ] || [ "$automation_enabled" == "False" ] || { [ "$automation_enabled" == "True" ] && [ "$bbsr_tpm_enabled" == "True" ]; }; then
+  mkdir -p $RESULTS_DIR/bbsr/tpm2
+  if [ -f /sys/kernel/security/tpm0/binary_bios_measurements ]; then
+    echo "TPM2: dumping PCRs and event log"
+    cp /sys/kernel/security/tpm0/binary_bios_measurements /tmp
+    tpm2_eventlog /tmp/binary_bios_measurements > $RESULTS_DIR/bbsr/tpm2/eventlog.log
+    echo "  Event log: $RESULTS_DIR/bbsr/tpm2/eventlog.log"
+    tpm2_pcrread > $RESULTS_DIR/bbsr/tpm2/pcr.log
+    echo "  PCRs: $RESULTS_DIR/bbsr/tpm2/pcr.log"
+    rm /tmp/binary_bios_measurements
+    if grep -q "pcrs:" "$RESULTS_DIR/bbsr/tpm2/eventlog.log"; then
+        echo "PCR reg entry found at the end of eventlog, comparing eventlog vs pcr "
+        #TPM2 logs event log v/s tpm.log check
+        python3 /bin/verify_tpm_measurements.py $RESULTS_DIR/bbsr/tpm2/pcr.log $RESULTS_DIR/bbsr/tpm2/eventlog.log | tee $RESULTS_DIR/bbsr/tpm2/verify_tpm_measurements.log
+    else
+        echo "PCR reg entry not found at the end of event log, eventlog vs pcr comparision not possible "
+    fi
+    sync /mnt
+    sleep 5
   else
-      echo "PCR reg entry not found at the end of event log, eventlog vs pcr comparision not possible "
+     echo "TPM event log not found at /sys/kernel/security/tpm0/binary_bios_measurements"
   fi
-  sync /mnt
-  sleep 5
 else
-   echo "TPM event log not found at /sys/kernel/security/tpm0/binary_bios_measurements"
+  echo "***************** BBSR TPM is disabled in config file************************"
 fi
 
 # ACS log parser run
 
 echo "Running acs log parser tool "
-if [ -d "/mnt/acs_results" ]; then
-  if [ -d "/mnt/acs_results/acs_summary" ]; then
-      rm -r /mnt/acs_results/acs_summary
+if [ -d "$RESULTS_DIR" ]; then
+  if [ -d "$RESULTS_DIR/acs_summary" ]; then
+      rm -r $RESULTS_DIR/acs_summary
   fi
-  /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_results/config/acs_waiver.json
+  /usr/bin/log_parser/main_log_parser.sh $RESULTS_DIR /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
+  echo "Please wait acs results are syncing on storage medium."
   sync /mnt
-  sleep 5
+  sleep 60
 fi
 
-echo "ACS test run completed"
+#init.sh will print BBSR run completed.
+#echo "ACS test run completed"  
 exit 0

@@ -18,6 +18,7 @@ import json
 import argparse
 import re
 import chardet
+import os
 
 # JSON mapping of Test Suites, Sub Test Suites, and Test Cases
 test_mapping = {
@@ -157,34 +158,34 @@ test_mapping = {
             "Non-volatile Variable Reset Test",
             "Runtime Services Test"
         ],
-        "SecureBootTest":[
+        "SecureBootTest": [
             "ImageLoading",
             "VariableAttributes",
             "VariableUpdates"
         ],
-        "BBSRVariableSizeTest":[
+        "BBSRVariableSizeTest": [
             "BBSRVariableSizeTest_func"
         ],
-        "TCGMemoryOverwriteRequestTest":[
+        "TCGMemoryOverwriteRequestTest": [
             "Test MOR and MORLOCK"
         ]
     },
-    "TCG2ProtocolTest":{
-        "GetActivePcrBanks_Conf":[
+    "TCG2ProtocolTest": {
+        "GetActivePcrBanks_Conf": [
             "GetActivePcrBanks_Conf"
         ],
-        "GetCapability_Conf":[
+        "GetCapability_Conf": [
             "GetCapability_Conf"
         ],
-        "HashLogExtendEvent_Conf":[
+        "HashLogExtendEvent_Conf": [
             "HashLogExtendEvent_Conf"
         ],
-        "SubmitCommand_Conf":[
+        "SubmitCommand_Conf": [
             "SubmitCommand_Conf"
         ]
     },
-    "PlatformResetAttackMitigationPsciTest":{
-        "PlatformResetAttackMitigationPsciTest_func":[
+    "PlatformResetAttackMitigationPsciTest": {
+        "PlatformResetAttackMitigationPsciTest_func": [
             "PlatformResetAttackMitigationPsciTest_func"
         ]
     },
@@ -306,42 +307,36 @@ def detect_file_encoding(file_path):
         return result['encoding']
 
 def clean_test_description(description):
-    """
-    Cleans the test description by removing any file paths at the start.
-    This is specific to cases where the description begins with '/home/...'.
-    """
-    # Check if the description starts with a path and extract only the relevant part
     if description.startswith("/"):
-        # Extract the last part after the last comma or space to get the relevant test description
         cleaned_desc = re.split(r"[,.]", description)[-1].strip()
         return cleaned_desc
     return description
 
 def find_test_suite_and_subsuite(test_case_name):
-    """
-    Finds the Test Suite and Sub Test Suite for a given Test Case name from the mapping.
-    """
     for test_suite, sub_suites in test_mapping.items():
         for sub_suite, test_cases in sub_suites.items():
             if test_case_name in test_cases:
                 return test_suite, sub_suite
-    return None, None  # If not found
+    return None, None
 
 def main(input_file, output_file):
     file_encoding = detect_file_encoding(input_file)
-    
     results = []
-    test_entry = None  # To handle main test entries
+    test_entry = None
     sub_test_number = 0
     capture_description = False
 
-    # Initialize overall suite summary variables
+    # We'll fill "suite_summary" after final classification
     suite_summary = {
         "total_passed": 0,
         "total_failed": 0,
+        "total_failed_with_waiver": 0,
         "total_aborted": 0,
         "total_skipped": 0,
-        "total_warnings": 0
+        "total_warnings": 0,
+        # NEW - Not used until final classification,
+        # but we show how to handle if we want total_ignored here
+        # We won't add it unless specifically needed
     }
 
     with open(input_file, "r", encoding=file_encoding, errors="ignore") as file:
@@ -350,105 +345,220 @@ def main(input_file, output_file):
         for i, line in enumerate(lines):
             line = line.strip()
 
-            # Detect the start of the Test_case after the "BBR ACS" line
+            # Start of a new test entry
             if "BBR ACS" in line:
                 if test_entry:
-                    # Add the previous test entry to results before starting a new one
                     results.append(test_entry)
                 test_entry = {
-                    "Test_suite": "",          # New field
-                    "Sub_test_suite": "",      # New field
-                    "Test_case": "",           # Renamed from Test_suite
-                    "Test_case_description": "",  # Renamed from Test_suite_Description
+                    "Test_suite": "",
+                    "Sub_test_suite": "",
+                    "Test_case": "",
+                    "Test_case_description": "",
                     "Test Entry Point GUID": "",
                     "Returned Status Code": "",
                     "subtests": [],
-                    "test_case_summary": {     # Renamed from test_suite_summary
+                    "test_case_summary": {
                         "total_passed": 0,
                         "total_failed": 0,
+                        "total_failed_with_waiver": 0,
                         "total_aborted": 0,
                         "total_skipped": 0,
-                        "total_warnings": 0
+                        "total_warnings": 0,
+                        "total_ignored": 0  # <--- NEW field in each test
                     }
                 }
-                # Capture the next line for the Test_case name
-                test_entry["Test_case"] = lines[i + 1].strip()
-                sub_test_number = 0
+                # Next line is the test name
+                if i + 1 < len(lines):
+                    test_entry["Test_case"] = lines[i+1].strip()
 
-                # Find the Test_suite and Sub_test_suite from the mapping
+                sub_test_number = 0
+                # Attempt to find the test suite/subsuite
                 test_suite, sub_test_suite = find_test_suite_and_subsuite(test_entry["Test_case"])
                 test_entry["Test_suite"] = test_suite if test_suite else "Unknown"
                 test_entry["Sub_test_suite"] = sub_test_suite if sub_test_suite else "Unknown"
 
-            # Start capturing the description after "Test Configuration #0"
             if "Test Configuration #0" in line:
                 capture_description = True
-                continue  # Skip to the next line for description
+                continue
 
-            # Capture the Test_case_description
             if capture_description and line and not re.match(r'-+', line):
                 test_entry["Test_case_description"] = line
                 capture_description = False
 
-            # Capture the Test Entry Point GUID
             if "Test Entry Point GUID" in line:
                 test_entry["Test Entry Point GUID"] = line.split(':', 1)[1].strip()
 
-            # Capture Returned Status Code
             if "Returned Status Code" in line:
                 test_entry["Returned Status Code"] = line.split(':', 1)[1].strip()
+                # Attempt to parse next lines for "XYZ: [RESULT]"
+                j = i + 1
+                while j < len(lines):
+                    candidate = lines[j].strip()
+                    j += 1
+                    if not candidate:
+                        continue
+                    m = re.search(r'^([^:]+):\s*\[(.*?)\]', candidate)
+                    if m:
+                        test_entry["test_result"] = m.group(2).upper()
+                        test_entry["reason"] = ""
+                    break
 
-            # Capture sub-test descriptions and results (PASS, FAIL, etc.)
+            # Sub-test detection from lines like "FooTest -- PASS"
             if re.search(r'--\s*(PASS|FAIL|FAILURE|WARNING|NOT SUPPORTED)', line, re.IGNORECASE):
                 parts = line.rsplit(' -- ', 1)
-                test_desc = parts[0]
-                result = parts[1]
+                test_desc = clean_test_description(parts[0])
+                result_str = parts[1].upper()
 
-                # Clean the test description by removing any file paths
-                test_desc = clean_test_description(test_desc)
-
-                # Increment summary counts
-                if "PASS" in result.upper():
+                # Tally in test_case_summary *before* overrides
+                if "PASS" in result_str:
                     test_entry["test_case_summary"]["total_passed"] += 1
-                    suite_summary["total_passed"] += 1
-                elif "FAIL" in result.upper():
+                elif "FAIL" in result_str:
                     test_entry["test_case_summary"]["total_failed"] += 1
-                    suite_summary["total_failed"] += 1
-                elif "ABORTED" in result.upper():
+                elif "ABORTED" in result_str:
                     test_entry["test_case_summary"]["total_aborted"] += 1
-                    suite_summary["total_aborted"] += 1
-                elif "SKIPPED" in result.upper():
+                elif "SKIPPED" in result_str:
                     test_entry["test_case_summary"]["total_skipped"] += 1
-                    suite_summary["total_skipped"] += 1
-                elif "WARNING" in result.upper():
+                elif "WARNING" in result_str:
                     test_entry["test_case_summary"]["total_warnings"] += 1
-                    suite_summary["total_warnings"] += 1
+                # "NOT SUPPORTED" etc. is not specially counted, you can add if needed.
 
-                # Capture the Test GUID and file path on subsequent lines
-                test_guid = lines[i + 1].strip() if i + 1 < len(lines) else ""
-                file_path = lines[i + 2].strip() if i + 2 < len(lines) else ""
+                test_guid = lines[i+1].strip() if i+1 < len(lines) else ""
+                file_path = lines[i+2].strip() if i+2 < len(lines) else ""
 
                 sub_test_number += 1
+
+                reason = ""
+                if ":" in file_path:
+                    reason_split = file_path.rsplit(":", 1)
+                    if len(reason_split) > 1:
+                        reason = reason_split[1].strip()
+
                 sub_test = {
                     "sub_Test_Number": str(sub_test_number),
                     "sub_Test_Description": test_desc,
                     "sub_Test_GUID": test_guid,
-                    "sub_test_result": result,
-                    "sub_Test_Path": file_path
+                    "sub_test_result": result_str,
+                    "sub_Test_Path": file_path,
+                    "reason": reason
                 }
-
                 test_entry["subtests"].append(sub_test)
 
-        # Add the last test entry if it exists
+        # End of loop: add last test entry
         if test_entry:
             results.append(test_entry)
 
-    # Write the suite_summary at the end
+    # Merge with edk2_test_parser.json if present
+    edk2_file = os.path.join(os.path.dirname(output_file), "edk2_test_parser.json")
+    if os.path.exists(edk2_file):
+        with open(edk2_file, "r", encoding="utf-8") as f:
+            edk2_data = json.load(f)
+
+        subtest_dict = {}
+        test_guid_dict = {}
+        for item in edk2_data:
+            ep_guid = item.get("Test Entry Point GUID", "").strip()
+            sub_guid = item.get("sub_Test_GUID", "").strip()
+            result_val = item.get("result", "")
+            reason_val = item.get("reason", "")
+
+            if ep_guid and sub_guid:
+                subtest_dict[(ep_guid.upper(), sub_guid.upper())] = {
+                    "result": result_val,
+                    "reason": reason_val
+                }
+            elif ep_guid and not sub_guid:
+                test_guid_dict[ep_guid.upper()] = {
+                    "result": result_val,
+                    "reason": reason_val
+                }
+
+        # Apply overrides
+        for test_obj in results:
+            ep_guid_current = test_obj["Test Entry Point GUID"].upper()
+            if ep_guid_current in test_guid_dict:
+                test_obj["test_result"] = test_guid_dict[ep_guid_current]["result"]
+                test_obj["reason"] = test_guid_dict[ep_guid_current]["reason"]
+
+            for subtest in test_obj["subtests"]:
+                st_guid = subtest["sub_Test_GUID"].upper()
+                if (ep_guid_current, st_guid) in subtest_dict:
+                    match_record = subtest_dict[(ep_guid_current, st_guid)]
+                    subtest["sub_test_result"] = match_record["result"]
+                    subtest["reason"] = match_record["reason"]
+
+    # Reorder final dictionary so "test_result" & "reason" appear after "Returned Status Code"
+    for i, test_obj in enumerate(results):
+        reordered = {
+            "Test_suite": test_obj["Test_suite"],
+            "Sub_test_suite": test_obj["Sub_test_suite"],
+            "Test_case": test_obj["Test_case"],
+            "Test_case_description": test_obj["Test_case_description"],
+            "Test Entry Point GUID": test_obj["Test Entry Point GUID"],
+            "Returned Status Code": test_obj["Returned Status Code"]
+        }
+        if "test_result" in test_obj:
+            reordered["test_result"] = test_obj["test_result"]
+        if "reason" in test_obj:
+            reordered["reason"] = test_obj["reason"]
+
+        reordered["subtests"] = test_obj["subtests"]
+        reordered["test_case_summary"] = test_obj["test_case_summary"]
+        results[i] = reordered
+
+    # Final step: re-tally subtests so the final results reflect overrides
+    for test_obj in results:
+        tcsum = test_obj["test_case_summary"]
+        # Reset them all to 0, including new "total_ignored"
+        tcsum["total_passed"] = 0
+        tcsum["total_failed"] = 0
+        tcsum["total_failed_with_waiver"] = 0
+        tcsum["total_aborted"] = 0
+        tcsum["total_skipped"] = 0
+        tcsum["total_warnings"] = 0
+        tcsum["total_ignored"] = 0  # <--- NEW category for all overrides
+
+        for subtest in test_obj["subtests"]:
+            final_result = subtest["sub_test_result"].upper()
+            # Classify final_result
+            if "PASS" in final_result:
+                tcsum["total_passed"] += 1
+            elif "FAIL" in final_result:
+                tcsum["total_failed"] += 1
+            elif "ABORTED" in final_result:
+                tcsum["total_aborted"] += 1
+            elif "SKIPPED" in final_result:
+                tcsum["total_skipped"] += 1
+            elif "WARNING" in final_result:
+                tcsum["total_warnings"] += 1
+            else:
+                # ANY other override (IGNORED, KNOWN U-BOOT LIMITATION, etc)
+                tcsum["total_ignored"] += 1
+
+    # Sum them all into suite_summary
+    final_suite_summary = {
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_failed_with_waiver": 0,
+        "total_aborted": 0,
+        "total_skipped": 0,
+        "total_warnings": 0,
+        "total_ignored": 0  # <--- match the new field
+    }
+    for test_obj in results:
+        tcsum = test_obj["test_case_summary"]
+        final_suite_summary["total_passed"] += tcsum["total_passed"]
+        final_suite_summary["total_failed"] += tcsum["total_failed"]
+        final_suite_summary["total_failed_with_waiver"] += tcsum["total_failed_with_waiver"]
+        final_suite_summary["total_aborted"] += tcsum["total_aborted"]
+        final_suite_summary["total_skipped"] += tcsum["total_skipped"]
+        final_suite_summary["total_warnings"] += tcsum["total_warnings"]
+        final_suite_summary["total_ignored"] += tcsum["total_ignored"]
+
     output_data = {
         "test_results": results,
-        "suite_summary": suite_summary
+        "suite_summary": final_suite_summary
     }
-    
+
     with open(output_file, 'w') as json_file:
         json.dump(output_data, json_file, indent=4)
 
@@ -456,6 +566,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse an SCT Log file and save results to a JSON file.")
     parser.add_argument("input_file", help="Input Log file")
     parser.add_argument("output_file", help="Output JSON file")
-
     args = parser.parse_args()
     main(args.input_file, args.output_file)

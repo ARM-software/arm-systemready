@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Define color codes
+YELLOW='\033[1;33m'  # Yellow for WARNING
+RED='\033[0;31m'     # Red for ERROR
+NC='\033[0m'         # No Color (Reset)
 
 # Determine the base directory of the script
 BASE_DIR=$(dirname "$(realpath "$0")")
@@ -41,15 +46,15 @@ ACS_CONFIG_PATH=$2
 SYSTEM_CONFIG_PATH=$3
 WAIVER_JSON=$4
 
-if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then 
-  test_category="/usr/bin/log_parser/test_categoryDT.json"
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+    test_category="/usr/bin/log_parser/test_categoryDT.json"
 else
-  test_category="/usr/bin/log_parser/test_category.json"
+    test_category="/usr/bin/log_parser/test_category.json"
 fi
 
 # Check if ACS_CONFIG_PATH is provided
 if [ -z "$ACS_CONFIG_PATH" ]; then
-    echo "WARNING: ACS information will be affected on summary page as acs_config.txt is not provided"
+    echo -e "${YELLOW}WARNING: ACS information will be affected on summary page as acs_config.txt is not provided${NC}"
     echo ""
     echo "If you want ACS information, please use this format: $0 <acs_results_directory> [acs_config.txt] [system_config.txt] [waiver.json]"
     echo ""
@@ -57,7 +62,7 @@ fi
 
 # Check if SYSTEM_CONFIG_PATH is provided
 if [ -z "$SYSTEM_CONFIG_PATH" ]; then
-    echo "WARNING: System information may be incomplete as system_config.txt is not provided"
+    echo -e "${YELLOW}WARNING: System information may be incomplete as system_config.txt is not provided${NC}"
     echo ""
     echo "If you want complete system information, please use this format: $0 <acs_results_directory> [acs_config.txt] [system_config.txt] [waiver.json]"
     echo ""
@@ -66,34 +71,60 @@ fi
 # Initialize waiver-related variables
 WAIVERS_APPLIED=0
 
-# Check if waiver.json and test_category.json are provided
-if [ -n "$WAIVER_JSON" ];  then
+###############################################################################
+#               Gather ACS Info (acs_info.py)
+###############################################################################
+ACS_SUMMARY_DIR="$LOGS_PATH/acs_summary"
+JSONS_DIR="$ACS_SUMMARY_DIR/acs_jsons"
+mkdir -p "$ACS_SUMMARY_DIR"
+mkdir -p "$JSONS_DIR"
+
+#echo "Gathering ACS info into acs_info.txt and acs_info.json..."
+python3 "$SCRIPTS_PATH/acs_info.py" \
+    --acs_config_path "$ACS_CONFIG_PATH" \
+    --system_config_path "$SYSTEM_CONFIG_PATH" \
+    --uefi_version_log "$LOGS_PATH/uefi_dump/uefi_version.log" \
+    --output_dir "$JSONS_DIR"
+echo ""
+
+# Check if waiver.json is provided
+if [ -n "$WAIVER_JSON" ]; then
     if [ -f "$WAIVER_JSON" ]; then
         WAIVERS_APPLIED=1
         echo "Waivers will be applied using:"
         echo "  Waiver File        : $WAIVER_JSON"
-#        echo "  Output JSON File   : $test_category"
         echo ""
     else
-        echo "WARNING: waiver.json ('$WAIVER_JSON') must be provided to apply waivers."
+        echo -e "${YELLOW}WARNING: waiver.json ('$WAIVER_JSON') must be provided to apply waivers.${NC}"
         echo "Waivers will not be applied."
         echo ""
         WAIVER_JSON=""
     fi
 else
-    echo "WARNING: waiver.json not provided. Waivers will not be applied."
+    echo -e "${YELLOW}WARNING: waiver.json not provided. Waivers will not be applied.${NC}"
     echo ""
     WAIVER_JSON=""
 fi
 
-
 # Function to check if a file exists
 check_file() {
     if [ ! -f "$1" ]; then
-        echo "WARNING: Log file '$(basename "$1")' is not present at the given directory."
+        if [ "${2:-}" = "M" ]; then
+            echo -e "${RED}ERROR: Log file "$1" is missing.${NC}"
+        else
+            echo -e "${YELLOW}WARNING: Log file "$1" is missing.${NC}"
+        fi
         return 1
     fi
     return 0
+}
+
+# print missing json
+print_missing_json() {
+    local debug=0
+    if [ debug = 1 ]; then 	
+        echo -e "${YELLOW}WARNING: "$1" is missing.${NC}"
+    fi
 }
 
 # Function to apply waivers
@@ -103,16 +134,11 @@ apply_waivers() {
 
     if [ "$WAIVERS_APPLIED" -eq 1 ]; then
         python3 "$SCRIPTS_PATH/apply_waivers.py" "$suite_name" "$json_file" "$WAIVER_JSON" "$test_category" --quiet
- #   else
- #       echo "Waivers not applied for suite '$suite_name' as waiver files are not provided."
     fi
 }
 
 # Create directories for JSONs and HTMLs inside acs_summary
-ACS_SUMMARY_DIR="$LOGS_PATH/acs_summary"
-JSONS_DIR="$ACS_SUMMARY_DIR/acs_jsons"
 HTMLS_DIR="$ACS_SUMMARY_DIR/html_detailed_summaries"
-mkdir -p "$JSONS_DIR"
 mkdir -p "$HTMLS_DIR"
 
 # Initialize processing flags
@@ -120,333 +146,541 @@ BSA_PROCESSED=0
 SBSA_PROCESSED=0
 FWTS_PROCESSED=0
 SCT_PROCESSED=0
-MVP_PROCESSED=0
 BBSR_FWTS_PROCESSED=0
 BBSR_SCT_PROCESSED=0
-MANUAL_TESTS_PROCESSED=0
-CAPSULE_PROCESSED=0  # Added flag for Capsule Update
+BBSR_TPM_PROCESSED=0
+Standalone_PROCESSED=0
+OS_TESTS_PROCESSED=0
+CAPSULE_PROCESSED=0
+POST_SCRIPT_PROCESSED=0
 
-# BSA UEFI and Kernel Log Parsing (Processed regardless of the flag)
+################################################################################
+# BSA PARSING
+################################################################################
 BSA_LOG="$LOGS_PATH/uefi/BsaResults.log"
 BSA_KERNEL_LOG="$LOGS_PATH/linux_acs/bsa_acs_app/BsaResultsKernel.log"
 if [ ! -f "$BSA_KERNEL_LOG" ]; then
     BSA_KERNEL_LOG="$LOGS_PATH/linux/BsaResultsKernel.log"
 fi
-
-BSA_JSON="$JSONS_DIR/BSA.json"
-
+BSA_JSON="$JSONS_DIR/bsa.json"
 BSA_LOGS=()
 
-if check_file "$BSA_LOG"; then
-    BSA_LOGS+=("$BSA_LOG")
-fi
-
-if check_file "$BSA_KERNEL_LOG"; then
-    BSA_LOGS+=("$BSA_KERNEL_LOG")
+if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
+    if check_file "$BSA_LOG" "M"; then
+        BSA_LOGS+=("$BSA_LOG")
+    fi
+    if check_file "$BSA_KERNEL_LOG" "M"; then
+        BSA_LOGS+=("$BSA_KERNEL_LOG")
+    fi
+else
+    if check_file "$BSA_LOG"; then
+        BSA_LOGS+=("$BSA_LOG")
+    fi
+    if check_file "$BSA_KERNEL_LOG"; then
+        BSA_LOGS+=("$BSA_KERNEL_LOG")
+    fi
 fi
 
 if [ ${#BSA_LOGS[@]} -gt 0 ]; then
     BSA_PROCESSED=1
     python3 "$SCRIPTS_PATH/bsa/logs_to_json.py" "${BSA_LOGS[@]}" "$BSA_JSON"
-    # Apply waivers
-    apply_waivers "BSA" "$BSA_JSON"
-    python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$BSA_JSON" "$HTMLS_DIR/BSA_detailed.html" "$HTMLS_DIR/BSA_summary.html"
-else
-    echo "WARNING: Skipping BSA log parsing as the log files are missing."
-    echo ""
+    if [ $? -ne 0 ]; then
+        BSA_PROCESSED=0
+        echo -e "${RED}ERROR: BSA logs parsing to json failed.${NC}"
+    else
+        apply_waivers "BSA" "$BSA_JSON"
+        python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$BSA_JSON" "$HTMLS_DIR/bsa_detailed.html" "$HTMLS_DIR/bsa_summary.html"
+    fi
 fi
 
-# SBSA UEFI and Kernel Log Parsing (Process only if the flag is not present)
-SBSA_LOG="$LOGS_PATH/uefi/SbsaResults.log"
-SBSA_KERNEL_LOG="$LOGS_PATH/linux/SbsaResultsKernel.log"
-
-SBSA_JSON="$JSONS_DIR/SBSA.json"
-
-SBSA_LOGS=()
-
+################################################################################
+# SBSA PARSING (if YOCTO_FLAG not present)
+################################################################################
 if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
-    if check_file "$SBSA_LOG"; then
-        SBSA_LOGS+=("$SBSA_LOG")
-    fi
+    SBSA_LOG="$LOGS_PATH/uefi/SbsaResults.log"
+    SBSA_KERNEL_LOG="$LOGS_PATH/linux/SbsaResultsKernel.log"
+    SBSA_JSON="$JSONS_DIR/sbsa.json"
+    SBSA_LOGS=()
 
-    if check_file "$SBSA_KERNEL_LOG"; then
-        SBSA_LOGS+=("$SBSA_KERNEL_LOG")
+    SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/mnt/acs_tests/config/acs_run_config.ini" 2>/dev/null | cut -d'=' -f2)
+    SbsaRunEnabled=${SbsaRunEnabled:-0}  # Default to 0 if empty
+    if [ "$SbsaRunEnabled" -eq 1 ]; then
+        if check_file "$SBSA_LOG" "M"; then
+            SBSA_LOGS+=("$SBSA_LOG")
+        fi
+        if check_file "$SBSA_KERNEL_LOG" "M"; then
+            SBSA_LOGS+=("$SBSA_KERNEL_LOG")
+        fi
+    else
+        if check_file "$SBSA_LOG"; then
+            SBSA_LOGS+=("$SBSA_LOG")
+        fi
+        if check_file "$SBSA_KERNEL_LOG"; then
+            SBSA_LOGS+=("$SBSA_KERNEL_LOG")
+        fi
     fi
 
     if [ ${#SBSA_LOGS[@]} -gt 0 ]; then
         SBSA_PROCESSED=1
         python3 "$SCRIPTS_PATH/bsa/logs_to_json.py" "${SBSA_LOGS[@]}" "$SBSA_JSON"
-        # Apply waivers
-        apply_waivers "SBSA" "$SBSA_JSON"
-        python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$SBSA_JSON" "$HTMLS_DIR/SBSA_detailed.html" "$HTMLS_DIR/SBSA_summary.html"
-    else
-        echo "WARNING: Skipping SBSA log parsing as the log files are missing."
-        echo ""
+        if [ $? -ne 0 ]; then
+            SBSA_PROCESSED=0
+            echo -e "${RED}ERROR: SBSA logs parsing to json failed.${NC}"
+        else
+            apply_waivers "SBSA" "$SBSA_JSON"
+            python3 "$SCRIPTS_PATH/bsa/json_to_html.py" "$SBSA_JSON" "$HTMLS_DIR/sbsa_detailed.html" "$HTMLS_DIR/sbsa_summary.html"
+        fi
     fi
 fi
 
-# FWTS UEFI Log Parsing (Processed regardless of the flag)
+################################################################################
+# FWTS PARSING
+################################################################################
 FWTS_LOG="$LOGS_PATH/fwts/FWTSResults.log"
-FWTS_JSON="$JSONS_DIR/FWTSResults.json"
-if check_file "$FWTS_LOG"; then
+FWTS_JSON="$JSONS_DIR/fwts.json"
+if check_file "$FWTS_LOG" "M"; then
     FWTS_PROCESSED=1
     python3 "$SCRIPTS_PATH/bbr/fwts/logs_to_json.py" "$FWTS_LOG" "$FWTS_JSON"
-    # Apply waivers
-    apply_waivers "FWTS" "$FWTS_JSON"
-    python3 "$SCRIPTS_PATH/bbr/fwts/json_to_html.py" "$FWTS_JSON" "$HTMLS_DIR/fwts_detailed.html" "$HTMLS_DIR/fwts_summary.html"
-else
-    echo "WARNING: Skipping FWTS log parsing as the log file is missing."
-    echo ""
+    if [ $? -ne 0 ]; then
+        FWTS_PROCESSED=0
+        echo -e "${RED}ERROR: FWTS logs parsing to json failed.${NC}"
+    else
+        apply_waivers "FWTS" "$FWTS_JSON"
+        python3 "$SCRIPTS_PATH/bbr/fwts/json_to_html.py" "$FWTS_JSON" "$HTMLS_DIR/fwts_detailed.html" "$HTMLS_DIR/fwts_summary.html"
+    fi
 fi
 
-# SCT Log Parsing (Processed regardless of the flag)
+################################################################################
+# SCT PARSING
+################################################################################
 SCT_LOG="$LOGS_PATH/sct_results/Overall/Summary.log"
-SCT_JSON="$JSONS_DIR/SCT.json"
-if check_file "$SCT_LOG"; then
+SCT_JSON="$JSONS_DIR/sct.json"
+EDK2_PARSER_LOG="$LOGS_PATH/edk2-test-parser/edk2-test-parser.log"
+EDK2_PARSER_JSON="$JSONS_DIR/edk2_test_parser.json"
+
+if check_file "$SCT_LOG" "M"; then
     SCT_PROCESSED=1
+    # EDK2 Log Parsing: Process the edk2-test-parser.log
+    if check_file "$EDK2_PARSER_LOG"; then
+        python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json_edk2.py" "$EDK2_PARSER_LOG" "$EDK2_PARSER_JSON"
+    fi
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$SCT_LOG" "$SCT_JSON"
-    # Apply waivers
-    apply_waivers "SCT" "$SCT_JSON"
-    python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$SCT_JSON" "$HTMLS_DIR/SCT_detailed.html" "$HTMLS_DIR/SCT_summary.html"
-else
-    echo "WARNING: Skipping SCT log parsing as the log file is missing."
-    echo ""
+    if [ $? -ne 0 ]; then
+        SCT_PROCESSED=0
+        echo -e "${RED}ERROR: SCT logs parsing to json failed.${NC}"
+    else
+        apply_waivers "SCT" "$SCT_JSON"
+        python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$SCT_JSON" "$HTMLS_DIR/sct_detailed.html" "$HTMLS_DIR/sct_summary.html"
+    fi
 fi
 
-# BBSR FWTS Log Parsing
-BBSR_FWTS_LOG="$LOGS_PATH/BBSR/fwts/FWTSResults.log"
-BBSR_FWTS_JSON="$JSONS_DIR/bbsr-fwts.json"
+################################################################################
+# BBSR FWTS PARSING
+################################################################################
+BBSR_FWTS_LOG="$LOGS_PATH/bbsr/fwts/FWTSResults.log"
+BBSR_FWTS_JSON="$JSONS_DIR/bbsr_fwts.json"
 if check_file "$BBSR_FWTS_LOG"; then
     BBSR_FWTS_PROCESSED=1
     python3 "$SCRIPTS_PATH/bbr/fwts/logs_to_json.py" "$BBSR_FWTS_LOG" "$BBSR_FWTS_JSON"
-    # Apply waivers
     apply_waivers "BBSR-FWTS" "$BBSR_FWTS_JSON"
-    python3 "$SCRIPTS_PATH/bbr/fwts/json_to_html.py" "$BBSR_FWTS_JSON" "${HTMLS_DIR}/bbsr-fwts_detailed.html" "${HTMLS_DIR}/bbsr-fwts_summary.html"
-else
-    echo "WARNING: Skipping BBSR FWTS log parsing as the log file is missing."
-    echo ""
+    python3 "$SCRIPTS_PATH/bbr/fwts/json_to_html.py" "$BBSR_FWTS_JSON" "$HTMLS_DIR/bbsr_fwts_detailed.html" "$HTMLS_DIR/bbsr_fwts_summary.html"
 fi
 
-# BBSR SCT Log Parsing
-BBSR_SCT_LOG="$LOGS_PATH/BBSR/sct_results/Overall/Summary.log"
-BBSR_SCT_JSON="$JSONS_DIR/bbsr-sct.json"
+################################################################################
+# BBSR SCT PARSING
+################################################################################
+BBSR_SCT_LOG="$LOGS_PATH/bbsr/sct_results/Overall/Summary.log"
+BBSR_SCT_JSON="$JSONS_DIR/bbsr_sct.json"
 if check_file "$BBSR_SCT_LOG"; then
     BBSR_SCT_PROCESSED=1
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$BBSR_SCT_LOG" "$BBSR_SCT_JSON"
-    # Apply waivers
     apply_waivers "BBSR-SCT" "$BBSR_SCT_JSON"
-    python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$BBSR_SCT_JSON" "${HTMLS_DIR}/bbsr-sct_detailed.html" "${HTMLS_DIR}/bbsr-sct_summary.html"
-else
-    echo "WARNING: Skipping BBSR SCT log parsing as the log file is missing."
-    echo ""
+    python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$BBSR_SCT_JSON" "$HTMLS_DIR/bbsr_sct_detailed.html" "$HTMLS_DIR/bbsr_sct_summary.html"
 fi
 
-# MVP Logs Parsing (Process only if the flag is present)
+################################################################################
+# BBSR TPM PARSING
+################################################################################
+BBSR_TPM_LOG="$LOGS_PATH/bbsr/tpm2/verify_tpm_measurements.log"
+BBSR_TPM_JSON="$JSONS_DIR/bbsr_tpm.json"
+if check_file "$BBSR_TPM_LOG"; then
+    BBSR_TPM_PROCESSED=1
+    python3 "$SCRIPTS_PATH/bbr/tpm/logs_to_json.py" "$BBSR_TPM_LOG" "$BBSR_TPM_JSON"
+    apply_waivers "BBSR-TPM" "$BBSR_TPM_JSON"
+    python3 "$SCRIPTS_PATH/bbr/tpm/json_to_html.py" "$BBSR_TPM_JSON" "$HTMLS_DIR/bbsr_tpm_detailed.html" "$HTMLS_DIR/bbsr_tpm_summary.html"
+fi
+
+################################################################################
+# POST-SCRIPT LOG PARSING
+################################################################################
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+    POST_SCRIPT_LOG="$LOGS_PATH/post-script/post-script.log"
+    POST_SCRIPT_JSON="$JSONS_DIR/post_script.json"
+
+    # Attempt to parse post-script.log if it exists
+    if check_file "$POST_SCRIPT_LOG" "M"; then
+        POST_SCRIPT_PROCESSED=1
+        python3 "$SCRIPTS_PATH/post_script/logs_to_json.py" "$POST_SCRIPT_LOG" "$POST_SCRIPT_JSON"
+        if [ $? -ne 0 ]; then
+            POST_SCRIPT_PROCESSED=0
+            echo -e "${RED}ERROR: post-script logs parsing to json failed.${NC}"
+        else
+            # Optionally apply waivers if your apply_waivers.py is relevant
+            apply_waivers "POST_SCRIPT" "$POST_SCRIPT_JSON"
+
+            # Generate the HTML (detailed + summary)
+            python3 "$SCRIPTS_PATH/post_script/json_to_html.py" \
+                "$POST_SCRIPT_JSON" \
+                "$HTMLS_DIR/post_script_detailed.html" \
+                "$HTMLS_DIR/post_script_summary.html"
+        fi
+    fi
+fi
+################################################################################
+# STANDALONE TESTS PARSING (including Capsule)
+################################################################################
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     LINUX_TOOLS_LOGS_PATH="$LOGS_PATH/linux_tools"
+    Standalone_JSONS=()
 
-    # Paths for MVP logs and JSON files
+    # 1) DT_KSELFTEST
     DT_KSELFTEST_LOG="$LINUX_TOOLS_LOGS_PATH/dt_kselftest.log"
-    DT_VALIDATE_LOG="$LINUX_TOOLS_LOGS_PATH/dt-validate.log"
-    ETHTOOL_TEST_LOG="$LINUX_TOOLS_LOGS_PATH/ethtool-test.log"
-    READ_WRITE_CHECK_LOG="$LINUX_TOOLS_LOGS_PATH/read_write_check_blk_devices.log"
-
     DT_KSELFTEST_JSON="$JSONS_DIR/dt_kselftest.json"
-    DT_VALIDATE_JSON="$JSONS_DIR/dt_validate.json"
-    ETHTOOL_TEST_JSON="$JSONS_DIR/ethtool_test.json"
-    READ_WRITE_CHECK_JSON="$JSONS_DIR/read_write_check_blk_devices.json"
-
-    MVP_JSONS=()
-
-    # Process each MVP log
     if check_file "$DT_KSELFTEST_LOG"; then
-        python3 "$SCRIPTS_PATH/mvp/logs_to_json.py" "$DT_KSELFTEST_LOG" "$DT_KSELFTEST_JSON"
-        MVP_JSONS+=("$DT_KSELFTEST_JSON")
-        # Apply waivers
-        apply_waivers "MVP" "$DT_KSELFTEST_JSON"
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$DT_KSELFTEST_LOG" \
+            "$DT_KSELFTEST_JSON"
+        Standalone_JSONS+=("$DT_KSELFTEST_JSON")
+        apply_waivers "Standalone_tests" "$DT_KSELFTEST_JSON"
     fi
 
-    if check_file "$DT_VALIDATE_LOG"; then
-        python3 "$SCRIPTS_PATH/mvp/logs_to_json.py" "$DT_VALIDATE_LOG" "$DT_VALIDATE_JSON"
-        MVP_JSONS+=("$DT_VALIDATE_JSON")
-        # Apply waivers
-        apply_waivers "MVP" "$DT_VALIDATE_JSON"
+    # 2) DT_VALIDATE
+    DT_VALIDATE_LOG="$LINUX_TOOLS_LOGS_PATH/dt-validate.log"
+    DT_VALIDATE_JSON="$JSONS_DIR/dt_validate.json"
+    if check_file "$DT_VALIDATE_LOG" "M"; then
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$DT_VALIDATE_LOG" \
+            "$DT_VALIDATE_JSON"
+        Standalone_JSONS+=("$DT_VALIDATE_JSON")
+        apply_waivers "Standalone_tests" "$DT_VALIDATE_JSON"
     fi
 
-    if check_file "$ETHTOOL_TEST_LOG"; then
-        python3 "$SCRIPTS_PATH/mvp/logs_to_json.py" "$ETHTOOL_TEST_LOG" "$ETHTOOL_TEST_JSON"
-        MVP_JSONS+=("$ETHTOOL_TEST_JSON")
-        # Apply waivers
-        apply_waivers "MVP" "$ETHTOOL_TEST_JSON"
+    # 3) ETHTOOL_TEST
+    ETHTOOL_TEST_LOG="$LINUX_TOOLS_LOGS_PATH/ethtool-test.log"
+    ETHTOOL_TEST_JSON="$JSONS_DIR/ethtool_test.json"
+    if check_file "$ETHTOOL_TEST_LOG" "M"; then
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$ETHTOOL_TEST_LOG" \
+            "$ETHTOOL_TEST_JSON"
+        Standalone_JSONS+=("$ETHTOOL_TEST_JSON")
+        apply_waivers "Standalone_tests" "$ETHTOOL_TEST_JSON"
     fi
 
-    if check_file "$READ_WRITE_CHECK_LOG"; then
-        python3 "$SCRIPTS_PATH/mvp/logs_to_json.py" "$READ_WRITE_CHECK_LOG" "$READ_WRITE_CHECK_JSON"
-        MVP_JSONS+=("$READ_WRITE_CHECK_JSON")
-        # Apply waivers
-        apply_waivers "MVP" "$READ_WRITE_CHECK_JSON"
+    # 4) READ_WRITE_CHECK
+    READ_WRITE_CHECK_LOG="$LINUX_TOOLS_LOGS_PATH/read_write_check_blk_devices.log"
+    READ_WRITE_CHECK_JSON="$JSONS_DIR/read_write_check_blk_devices.json"
+    if check_file "$READ_WRITE_CHECK_LOG" "M"; then
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$READ_WRITE_CHECK_LOG" \
+            "$READ_WRITE_CHECK_JSON"
+        Standalone_JSONS+=("$READ_WRITE_CHECK_JSON")
+        apply_waivers "Standalone_tests" "$READ_WRITE_CHECK_JSON"
     fi
 
-    # Generate combined MVP detailed and summary HTML reports
-    MVP_DETAILED_HTML="$HTMLS_DIR/MVP_detailed.html"
-    MVP_SUMMARY_HTML="$HTMLS_DIR/MVP_summary.html"
+    # 5) CAPSULE UPDATE => parse as standalone
+    CAPSULE_UPDATE_LOG="$(dirname "$LOGS_PATH")/fw/capsule-update.log"
+    CAPSULE_ON_DISK_LOG="$(dirname "$LOGS_PATH")/fw/capsule-on-disk.log"
+    CAPSULE_TEST_RESULTS_LOG="$(dirname "$LOGS_PATH")/fw/capsule_test_results.log"
+    CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
 
-    if [ ${#MVP_JSONS[@]} -gt 0 ]; then
-        MVP_PROCESSED=1
-        python3 "$SCRIPTS_PATH/mvp/json_to_html.py" "${MVP_JSONS[@]}" "$MVP_DETAILED_HTML" "$MVP_SUMMARY_HTML" --include-drop-down
+#    if check_file "$CAPSULE_UPDATE_LOG" "M" && check_file "$CAPSULE_ON_DISK_LOG" "M" && check_file "$CAPSULE_TEST_RESULTS_LOG" "M"; then
+    if check_file "$CAPSULE_TEST_RESULTS_LOG" "M"; then
+    	    python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            capsule_update \
+            "$CAPSULE_UPDATE_LOG" \
+            "$CAPSULE_ON_DISK_LOG" \
+            "$CAPSULE_TEST_RESULTS_LOG" \
+            "$CAPSULE_JSON"
+
+        if [ -f "$CAPSULE_JSON" ]; then
+            CAPSULE_PROCESSED=1
+            apply_waivers "Standalone_tests" "$CAPSULE_JSON"
+            Standalone_JSONS+=("$CAPSULE_JSON")
+        else
+            echo "WARNING: Capsule Update JSON not created."
+        fi
+    fi
+
+    # 6) PSCI CHECK
+    PSCI_LOG="$LINUX_TOOLS_LOGS_PATH/psci/psci_kernel.log"
+    PSCI_JSON="$JSONS_DIR/psci.json"
+    if check_file "$PSCI_LOG"; then
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" psci_check "$PSCI_LOG" "$PSCI_JSON"
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}ERROR: PSCI log parsing to json failed.${NC}"
+        else
+            # Important: add PSCI JSON to the same array that we pass to json_to_html!
+            Standalone_JSONS+=("$PSCI_JSON")
+        fi
+    fi
+
+    # Now generate a single STANDALONE HTML
+    if [ ${#Standalone_JSONS[@]} -gt 0 ]; then
+        Standalone_PROCESSED=1
+        Standalone_DETAILED_HTML="$HTMLS_DIR/standalone_tests_detailed.html"
+        Standalone_SUMMARY_HTML="$HTMLS_DIR/standalone_tests_summary.html"
+
+        python3 "$SCRIPTS_PATH/standalone_tests/json_to_html.py" \
+            "${Standalone_JSONS[@]}" \
+            "$Standalone_DETAILED_HTML" \
+            "$Standalone_SUMMARY_HTML" \
+            --include-drop-down
     fi
 fi
 
-# Paths for UEFI version log and Device Tree DTS
-UEFI_VERSION_LOG="$LOGS_PATH/uefi_dump/uefi_version.log"
-DEVICE_TREE_DTS="$LOGS_PATH/linux_tools/device_tree.dts"
+################################################################################
+# OS TESTS PARSING
+################################################################################
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+    OS_LOGS_PATH="$(dirname "$LOGS_PATH")/os-logs"
+    OS_JSONS_DIR="$JSONS_DIR"
+    mkdir -p "$OS_JSONS_DIR"
+    OS_JSONS=()
+    BOOT_SOURCES_PATHS=()
 
-# Check if UEFI_VERSION_LOG exists
+    if [ -d "$OS_LOGS_PATH" ] && [ "$(ls -A "$OS_LOGS_PATH")" ]; then
+        for OS_DIR in "$OS_LOGS_PATH"/linux*; do
+            if [ -d "$OS_DIR" ]; then
+                OS_NAME=$(basename "$OS_DIR")
+                ETH_TOOL_LOG="$OS_DIR/ethtool_test.log"
+                BOOT_SOURCES_LOG="$OS_DIR/boot_sources.log"
+
+                if [ -f "$ETH_TOOL_LOG" ]; then
+                    OUTPUT_JSON="$OS_JSONS_DIR/ethtool_test_${OS_NAME}.json"
+                    python3 "$SCRIPTS_PATH/os_tests/logs_to_json.py" \
+                        "$ETH_TOOL_LOG" \
+                        "$OUTPUT_JSON" \
+                        "$OS_NAME"
+                    OS_JSONS+=("$OUTPUT_JSON")
+                    apply_waivers "os Tests" "$OUTPUT_JSON"
+                    OS_TESTS_PROCESSED=1
+
+                    if [ -f "$BOOT_SOURCES_LOG" ]; then
+                        BOOT_SOURCES_PATHS+=("$BOOT_SOURCES_LOG")
+                    else
+                        BOOT_SOURCES_PATHS+=("Unknown")
+                    fi
+                else
+                    echo "${RED}ERROR: ethtool_test.log not found in $OS_DIR"
+                fi
+            fi
+        done
+    else
+        echo -e "${RED}ERROR: No os-logs found in os-logs directory at $OS_LOGS_PATH${NC}"
+    fi
+
+    if [ ${#OS_JSONS[@]} -gt 0 ]; then
+        OS_DETAILED_HTML="$HTMLS_DIR/os_tests_detailed.html"
+        OS_SUMMARY_HTML="$HTMLS_DIR/os_tests_summary.html"
+        python3 "$SCRIPTS_PATH/os_tests/json_to_html.py" \
+            "${OS_JSONS[@]}" \
+            "$OS_DETAILED_HTML" \
+            "$OS_SUMMARY_HTML" \
+            --include-drop-down \
+            --boot-sources-paths "${BOOT_SOURCES_PATHS[@]}"
+    fi
+fi
+
+################################################################################
+# UEFI version
+################################################################################
+UEFI_VERSION_LOG="$LOGS_PATH/uefi_dump/uefi_version.log"
+
 if [ ! -f "$UEFI_VERSION_LOG" ]; then
-    echo "WARNING: UEFI version log '$(basename "$UEFI_VERSION_LOG")' not found."
+    echo "INFO: UEFI version log '$(basename "$UEFI_VERSION_LOG")' not found."
     UEFI_VERSION_LOG=""
 fi
 
-if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
-    # Check if DEVICE_TREE_DTS exists
-    if [ ! -f "$DEVICE_TREE_DTS" ]; then
-        echo "WARNING: Device Tree DTS file '$(basename "$DEVICE_TREE_DTS")' not found."
-        DEVICE_TREE_DTS=""
-    fi
-fi
+################################################################################
+# MERGE JSON
+################################################################################
+MERGED_JSON="$JSONS_DIR/merged_results.json"
+JSON_FILES=()
 
-# ---------------------------------------------------------
-# Manual Tests Logs Parsing
-# ---------------------------------------------------------
-
-# Hardcoded path for os-logs
-OS_LOGS_PATH="$(dirname "$LOGS_PATH")/os-logs"
-
-MANUAL_JSONS_DIR="$JSONS_DIR"
-mkdir -p "$MANUAL_JSONS_DIR"
-
-MANUAL_JSONS=()
-BOOT_SOURCES_PATHS=()  # Initialize array for boot_sources_paths
-
-# Find all directories under os-logs starting with 'linux'
-if [ -d "$OS_LOGS_PATH" ]; then
-    for OS_DIR in "$OS_LOGS_PATH"/linux*; do
-        if [ -d "$OS_DIR" ]; then
-            OS_NAME=$(basename "$OS_DIR")
-            ETH_TOOL_LOG="$OS_DIR/ethtool_test.log"
-            BOOT_SOURCES_LOG="$OS_DIR/boot_sources.log"  # Path to boot_sources.log
-
-            if [ -f "$ETH_TOOL_LOG" ]; then
-                # Generate output JSON file path
-                OUTPUT_JSON="$MANUAL_JSONS_DIR/ethtool_test_${OS_NAME}.json"
-                # Call logs_to_json.py
-                python3 "$SCRIPTS_PATH/manual_tests/logs_to_json.py" "$ETH_TOOL_LOG" "$OUTPUT_JSON" "$OS_NAME"
-                # Add to list of JSONs
-                MANUAL_JSONS+=("$OUTPUT_JSON")
-                # Apply waivers if necessary
-                apply_waivers "Manual Tests" "$OUTPUT_JSON"
-                MANUAL_TESTS_PROCESSED=1
-                # Add BOOT_SOURCES_LOG path to BOOT_SOURCES_PATHS
-                if [ -f "$BOOT_SOURCES_LOG" ]; then
-                    BOOT_SOURCES_PATHS+=("$BOOT_SOURCES_LOG")
-                else
-                    BOOT_SOURCES_PATHS+=("Unknown")
-                fi
-            else
-                echo "WARNING: ethtool_test.log not found in $OS_DIR"
-            fi
-        fi
-    done
+###############################################################################
+#             Add acs_info.JSON to the Merge
+###############################################################################
+acs_info_json="$JSONS_DIR/acs_info.json"
+if [ -f "$acs_info_json" ]; then
+    JSON_FILES+=("$acs_info_json")
 else
-    echo "WARNING: os-logs directory not found at $OS_LOGS_PATH"
+    print_missing_json "acs_info.json"
 fi
 
-# Generate combined OS tests detailed and summary HTML reports
-if [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
-    MANUAL_DETAILED_HTML="$HTMLS_DIR/manual_tests_detailed.html"
-    MANUAL_SUMMARY_HTML="$HTMLS_DIR/manual_tests_summary.html"
-    # Pass the boot_sources_paths as arguments
-    python3 "$SCRIPTS_PATH/manual_tests/json_to_html.py" "${MANUAL_JSONS[@]}" "$MANUAL_DETAILED_HTML" "$MANUAL_SUMMARY_HTML" --include-drop-down --boot-sources-paths "${BOOT_SOURCES_PATHS[@]}"
-fi
-# ---------------------------------------------------------
-# End of OS Tests Processing
-# ---------------------------------------------------------
-
-# Capsule Update Logs Parsing
-CAPSULE_PROCESSED=0  # Initialize flag
-
-# We no longer need to define logs directory or pass arguments since paths are hardcoded in the script
-CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
-
-# Run the logs_to_json.py script
-python3 "$SCRIPTS_PATH/capsule_update/logs_to_json.py" \
-    --capsule_update_log "$(dirname "$LOGS_PATH")/fw/capsule-update.log" \
-    --capsule_on_disk_log "$(dirname "$LOGS_PATH")/fw/capsule-on-disk.log" \
-    --capsule_test_results_log "$LOGS_PATH/app_output/capsule_test_results.log" \
-    --output_file "$CAPSULE_JSON"
-
-
-# Check if the JSON file was created
-if [ -f "$CAPSULE_JSON" ]; then
-    CAPSULE_PROCESSED=1
-    # Apply waivers if necessary
-    apply_waivers "Capsule Update" "$CAPSULE_JSON"
-    # Generate HTML reports
-    python3 "$SCRIPTS_PATH/capsule_update/json_to_html.py" "$CAPSULE_JSON" "$HTMLS_DIR/capsule_update_detailed.html" "$HTMLS_DIR/capsule_update_summary.html"
-    echo ""
+# Add BSA
+if [ -f "$BSA_JSON" ]; then
+    JSON_FILES+=("$BSA_JSON")
 else
-    echo "WARNING: Capsule Update JSON file not created. Skipping Capsule Update log parsing."
-    echo ""
+    print_missing_json "bsa.json"
 fi
 
+# Add SBSA
+if [ $SBSA_PROCESSED -eq 1 ] && [ -f "$SBSA_JSON" ]; then
+    JSON_FILES+=("$SBSA_JSON")
+elif [ $SBSA_PROCESSED -eq 1 ]; then
+    print_missing_json "sbsa.json"
+fi
 
-# Generate ACS Summary
+# FWTS
+if [ -f "$FWTS_JSON" ]; then
+    JSON_FILES+=("$FWTS_JSON")
+else
+    print_missing_json "fwts.json"
+fi
+
+# SCT
+if [ -f "$SCT_JSON" ]; then
+    JSON_FILES+=("$SCT_JSON")
+else
+    print_missing_json "sct.json"
+fi
+
+# BBSR-FWTS
+if [ $BBSR_FWTS_PROCESSED -eq 1 ] && [ -f "$BBSR_FWTS_JSON" ]; then
+    JSON_FILES+=("$BBSR_FWTS_JSON")
+else
+    print_missing_json "bbsr_fwts.json"
+fi
+
+# BBSR-SCT
+if [ $BBSR_SCT_PROCESSED -eq 1 ] && [ -f "$BBSR_SCT_JSON" ]; then
+    JSON_FILES+=("$BBSR_SCT_JSON")
+else
+    print_missing_json "bbsr_sct.json"
+fi
+
+# BBSR-TPM
+if [ $BBSR_TPM_PROCESSED -eq 1 ] && [ -f "$BBSR_TPM_JSON" ]; then
+    JSON_FILES+=("$BBSR_TPM_JSON")
+else
+    print_missing_json "bbsr_tpm.json"
+fi
+
+# POST-SCRIPT
+if [ $POST_SCRIPT_PROCESSED -eq 1 ] && [ -f "$POST_SCRIPT_JSON" ]; then
+    JSON_FILES+=("$POST_SCRIPT_JSON")
+else
+    print_missing_json "post_script.json"
+fi
+
+# Standalone
+if [ $Standalone_PROCESSED -eq 1 ] && [ ${#Standalone_JSONS[@]} -gt 0 ]; then
+    JSON_FILES+=("${Standalone_JSONS[@]}")
+else
+    print_missing_json "standalone.json"
+fi
+
+# OS Tests
+if [ $OS_TESTS_PROCESSED -eq 1 ] && [ ${#OS_JSONS[@]} -gt 0 ]; then
+    JSON_FILES+=("${OS_JSONS[@]}")
+else
+    print_missing_json "os-tests"
+fi
+
+if [ ${#JSON_FILES[@]} -gt 0 ]; then
+    python3 "$SCRIPTS_PATH/merge_jsons.py" "$MERGED_JSON" "${JSON_FILES[@]}"
+    echo "ACS Merged JSON: $MERGED_JSON"
+else
+    echo "No JSON files to merge."
+fi
+
+echo ""
+
+################################################################################
+# NOW Generate ACS Summary (ONLY ONCE, at the very end)
+################################################################################
 ACS_SUMMARY_HTML="$HTMLS_DIR/acs_summary.html"
-
-# Build the command to call generate_acs_summary.py
+ACS_SUMMARY_PDF="$ACS_SUMMARY_DIR/acs_summary.pdf"
 GENERATE_ACS_SUMMARY_CMD="python3 \"$SCRIPTS_PATH/generate_acs_summary.py\""
 
-# Include BSA summary (always processed)
-GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/BSA_summary.html\""
+# 1) BSA
+if [ $BSA_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bsa_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
 
-# Include SBSA summary only if processed
+# 2) SBSA
 if [ $SBSA_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/SBSA_summary.html\""
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sbsa_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# Include FWTS summary (always processed)
-GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/fwts_summary.html\""
-
-# Include SCT summary (always processed)
-GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/SCT_summary.html\""
-
-# Include MVP summary only if processed
-if [ $MVP_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$MVP_SUMMARY_HTML\""
+# 3) FWTS
+if [ $FWTS_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/fwts_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# Include OS Tests summary only if processed
-if [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$MANUAL_SUMMARY_HTML\""
+# 4) SCT
+if [ $SCT_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sct_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# Include Capsule Update summary only if processed
-if [ $CAPSULE_PROCESSED -eq 1 ]; then
-    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/capsule_update_summary.html\""
+# 5) BBSR-FWTS
+if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bbsr_fwts_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# Add the output HTML path
+# 6) BBSR-SCT
+if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bbsr_sct_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 7) BBSR-TPM
+if [ $BBSR_TPM_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/bbsr_tpm_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 8) POST-SCRIPT
+if [ $POST_SCRIPT_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/post_script_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi 
+
+# 9) STANDALONE
+if [ $Standalone_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$Standalone_SUMMARY_HTML\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 10) OS TESTS
+if [ $OS_TESTS_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$OS_SUMMARY_HTML\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 11) CAPSULE UPDATE SUMMARY
+CAPSULE_SUMMARY_HTML=""
+GENERATE_ACS_SUMMARY_CMD+=" \"$CAPSULE_SUMMARY_HTML\""
+
+# Then the final argument is the summary HTML
 GENERATE_ACS_SUMMARY_CMD+=" \"$ACS_SUMMARY_HTML\""
 
-# Add optional arguments
+# Optional arguments
 if [ -n "$ACS_CONFIG_PATH" ]; then
     GENERATE_ACS_SUMMARY_CMD+=" --acs_config_path \"$ACS_CONFIG_PATH\""
 fi
@@ -463,169 +697,92 @@ if [ -n "$DEVICE_TREE_DTS" ]; then
     GENERATE_ACS_SUMMARY_CMD+=" --device_tree_dts \"$DEVICE_TREE_DTS\""
 fi
 
-# Execute the generate_acs_summary.py script
-eval $GENERATE_ACS_SUMMARY_CMD
-
-# Summary Prints
-
-# Always print BSA messages
-if [ $BSA_PROCESSED -eq 1 ]; then
-    echo "BSA UEFI Log              : $BSA_LOG"
-    echo "BSA JSON                  : $BSA_JSON"
-    echo "BSA Detailed Summary      : $HTMLS_DIR/BSA_detailed.html"
-    echo "BSA Summary               : $HTMLS_DIR/BSA_summary.html"
-    echo ""
+# If merged_results.json was created, pass it along
+if [ -f "$MERGED_JSON" ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" --merged_json \"$MERGED_JSON\""
 fi
 
-# Print SBSA messages only if processed
-if [ $SBSA_PROCESSED -eq 1 ]; then
-    echo "SBSA UEFI Log             : $SBSA_LOG"
-    echo "SBSA JSON                 : $SBSA_JSON"
-    echo "SBSA Detailed Summary     : $HTMLS_DIR/SBSA_detailed.html"
-    echo "SBSA Summary               : $HTMLS_DIR/SBSA_summary.html"
-    echo ""
+# Finally, call generate_acs_summary.py exactly ONCE at the end
+eval "$GENERATE_ACS_SUMMARY_CMD"
+
+print_path=0  # For debug only
+if [ $print_path -eq 1 ]; then
+    # (All these "print" blocks remain unchanged for debugging)
+    if [ $BSA_PROCESSED -eq 1 ]; then
+        echo "BSA JSON                  : $BSA_JSON"
+        echo "BSA Detailed Summary      : $HTMLS_DIR/bsa_detailed.html"
+        echo "BSA Summary               : $HTMLS_DIR/bsa_summary.html"
+        echo ""
+    fi
+    if [ $SBSA_PROCESSED -eq 1 ]; then
+        echo "SBSA JSON                 : $SBSA_JSON"
+        echo "SBSA Detailed Summary     : $HTMLS_DIR/sbsa_detailed.html"
+        echo "SBSA Summary              : $HTMLS_DIR/sbsa_summary.html"
+        echo ""
+    fi
+    if [ $FWTS_PROCESSED -eq 1 ]; then
+        echo "FWTS JSON                 : $FWTS_JSON"
+        echo "FWTS Detailed Summary     : $HTMLS_DIR/fwts_detailed.html"
+        echo "FWTS Summary              : $HTMLS_DIR/fwts_summary.html"
+        echo ""
+    fi
+    if [ $SCT_PROCESSED -eq 1 ]; then
+        echo "SCT JSON                  : $SCT_JSON"
+        echo "SCT Detailed Summary      : $HTMLS_DIR/sct_detailed.html"
+        echo "SCT Summary               : $HTMLS_DIR/sct_summary.html"
+        echo ""
+    fi
+    if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
+        echo "BBSR FWTS JSON            : $BBSR_FWTS_JSON"
+        echo "BBSR FWTS Detailed Summary: $HTMLS_DIR/bbsr_fwts_detailed.html"
+        echo "BBSR FWTS Summary         : $HTMLS_DIR/bbsr_fwts_summary.html"
+        echo ""
+    fi
+    if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
+        echo "BBSR SCT JSON             : $BBSR_SCT_JSON"
+        echo "BBSR SCT Detailed Summary : $HTMLS_DIR/bbsr_sct_detailed.html"
+        echo "BBSR SCT Summary          : $HTMLS_DIR/bbsr_sct_summary.html"
+        echo ""
+    fi
+    if [ $BBSR_TPM_PROCESSED -eq 1 ]; then
+        echo "BBSR TPM JSON             : $BBSR_TPM_JSON"
+        echo "BBSR TPM Detailed Summary : $HTMLS_DIR/bbsr_tpm_detailed.html"
+        echo "BBSR TPM Summary          : $HTMLS_DIR/bbsr_tpm_summary.html"
+        echo ""
+    fi
+    if [ $POST_SCRIPT_PROCESSED -eq 1 ]; then
+        echo "POST SCRIPTS JSON             : $POST_SCRIPT_JSON"
+        echo "POST SCRIPTS Detailed Summary : $HTMLS_DIR/post_script_detailed.html"
+        echo "POST SCRIPTS Summary          : $HTMLS_DIR/post_script_summary.html"
+        echo ""
+    fi 
+    if [ $Standalone_PROCESSED -eq 1 ]; then
+        echo "Standalone tests Detailed Summary      : $Standalone_DETAILED_HTML"
+        echo "Standalone tests Summary               : $Standalone_SUMMARY_HTML"
+        echo ""
+    fi
+    if [ $OS_TESTS_PROCESSED -eq 1 ]; then
+        echo "OS tests Detailed Summary : $OS_DETAILED_HTML"
+        echo "OS tests Summary          : $OS_SUMMARY_HTML"
+        echo ""
+    fi
+    if [ $CAPSULE_PROCESSED -eq 1 ]; then
+        echo "Capsule Update JSON             : $CAPSULE_JSON"
+        echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
+        echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
+        echo ""
+    fi
 fi
 
-# Always print FWTS messages
-if [ $FWTS_PROCESSED -eq 1 ]; then
-    echo "FWTS Log                  : $FWTS_LOG"
-    echo "FWTS JSON                 : $FWTS_JSON"
-    echo "FWTS Detailed Summary     : $HTMLS_DIR/fwts_detailed.html"
-    echo "FWTS Summary               : $HTMLS_DIR/fwts_summary.html"
-    echo ""
+echo "ACS HTML Summary : $ACS_SUMMARY_HTML"
+
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+    echo " Converting ACS HTML Summary to PDF"
+    # Convert ACS Summary HTML to PDF
+    if [ -f "$ACS_SUMMARY_HTML" ]; then
+        python3 -c "from weasyprint import HTML, CSS; HTML('$ACS_SUMMARY_HTML').write_pdf('$ACS_SUMMARY_PDF', stylesheets=[CSS(string='@page { margin: 0; }')])"
+    fi
 fi
-
-# Always print SCT messages
-if [ $SCT_PROCESSED -eq 1 ]; then
-    echo "SCT Log                   : $SCT_LOG"
-    echo "SCT JSON                  : $SCT_JSON"
-    echo "SCT Detailed Summary      : $HTMLS_DIR/SCT_detailed.html"
-    echo "SCT Summary               : $HTMLS_DIR/SCT_summary.html"
-    echo ""
-fi
-
-# Print BBSR FWTS messages
-if [ $BBSR_FWTS_PROCESSED -eq 1 ]; then
-    echo "BBSR FWTS Log              : $BBSR_FWTS_LOG"
-    echo "BBSR FWTS JSON             : $BBSR_FWTS_JSON"
-    echo "BBSR FWTS Detailed Summary : $HTMLS_DIR/bbsr-fwts_detailed.html"
-    echo "BBSR FWTS Summary          : $HTMLS_DIR/bbsr-fwts_summary.html"
-    echo ""
-fi
-
-# Print BBSR SCT messages
-if [ $BBSR_SCT_PROCESSED -eq 1 ]; then
-    echo "BBSR SCT Log               : $BBSR_SCT_LOG"
-    echo "BBSR SCT JSON              : $BBSR_SCT_JSON"
-    echo "BBSR SCT Detailed Summary  : $HTMLS_DIR/bbsr-sct_detailed.html"
-    echo "BBSR SCT Summary           : $HTMLS_DIR/bbsr-sct_summary.html"
-    echo ""
-fi
-
-# Print MVP messages only if processed
-if [ $MVP_PROCESSED -eq 1 ]; then
-    echo "MVP Logs Processed"
-    echo "MVP Detailed Summary      : $MVP_DETAILED_HTML"
-    echo "MVP Summary               : $MVP_SUMMARY_HTML"
-    echo ""
-fi
-
-# Print OS Tests messages only if processed
-if [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
-    echo "Manual Tests Logs Processed"
-    echo "Manual Tests Detailed Summary : $MANUAL_DETAILED_HTML"
-    echo "Manual Tests Summary          : $MANUAL_SUMMARY_HTML"
-    echo ""
-fi
-
-# Print Capsule Update messages only if processed
-if [ $CAPSULE_PROCESSED -eq 1 ]; then
-    echo "Capsule Update Logs Processed"
-    echo "Capsule Update Log              : $CAPSULE_LOG"
-    echo "Capsule Update JSON             : $CAPSULE_JSON"
-    echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
-    echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
-    echo ""
-fi
-
-echo "ACS Summary               : $ACS_SUMMARY_HTML"
-echo ""
-
-# Output merged JSON file
-MERGED_JSON="$JSONS_DIR/merged_results.json"
-
-# Build list of existing JSON files
-JSON_FILES=()
-
-# Include BSA JSON file
-if [ -f "$BSA_JSON" ]; then
-    JSON_FILES+=("$BSA_JSON")
-else
-    echo "WARNING: $(basename "$BSA_JSON") not found. Skipping this file."
-fi
-
-# Include SBSA JSON file only if processed
-if [ $SBSA_PROCESSED -eq 1 ] && [ -f "$SBSA_JSON" ]; then
-    JSON_FILES+=("$SBSA_JSON")
-elif [ $SBSA_PROCESSED -eq 1 ]; then
-    echo "WARNING: $(basename "$SBSA_JSON") not found. Skipping this file."
-fi
-
-# Include FWTS JSON file
-if [ -f "$FWTS_JSON" ]; then
-    JSON_FILES+=("$FWTS_JSON")
-else
-    echo "WARNING: $(basename "$FWTS_JSON") not found. Skipping this file."
-fi
-
-# Include SCT JSON file
-if [ -f "$SCT_JSON" ]; then
-    JSON_FILES+=("$SCT_JSON")
-else
-    echo "WARNING: $(basename "$SCT_JSON") not found. Skipping this file."
-fi
-
-# Include BBSR FWTS JSON file
-if [ $BBSR_FWTS_PROCESSED -eq 1 ] && [ -f "$BBSR_FWTS_JSON" ]; then
-    JSON_FILES+=("$BBSR_FWTS_JSON")
-else
-    echo "WARNING: $(basename "$BBSR_FWTS_JSON") not found. Skipping this file."
-fi
-
-# Include BBSR SCT JSON file
-if [ $BBSR_SCT_PROCESSED -eq 1 ] && [ -f "$BBSR_SCT_JSON" ]; then
-    JSON_FILES+=("$BBSR_SCT_JSON")
-else
-    echo "WARNING: $(basename "$BBSR_SCT_JSON") not found. Skipping this file."
-fi
-
-# Include MVP JSON files only if processed
-if [ $MVP_PROCESSED -eq 1 ] && [ ${#MVP_JSONS[@]} -gt 0 ]; then
-    JSON_FILES+=("${MVP_JSONS[@]}")
-elif [ $MVP_PROCESSED -eq 1 ]; then
-    echo "WARNING: No MVP JSON files found. Skipping MVP files."
-fi
-
-# Include OS tests JSON files in merged JSON
-if [ $MANUAL_TESTS_PROCESSED -eq 1 ] && [ ${#MANUAL_JSONS[@]} -gt 0 ]; then
-    JSON_FILES+=("${MANUAL_JSONS[@]}")
-elif [ $MANUAL_TESTS_PROCESSED -eq 1 ]; then
-    echo "WARNING: No Manual Tests JSON files found. Skipping Manual Tests files."
-fi
-
-# Include Capsule Update JSON file
-if [ $CAPSULE_PROCESSED -eq 1 ] && [ -f "$CAPSULE_JSON" ]; then
-    JSON_FILES+=("$CAPSULE_JSON")
-else
-    echo "WARNING: $(basename "$CAPSULE_JSON") not found. Skipping this file."
-fi
-
-# Merge all existing JSON files into one
-if [ ${#JSON_FILES[@]} -gt 0 ]; then
-    python3 "$SCRIPTS_PATH/merge_jsons.py" "$MERGED_JSON" "${JSON_FILES[@]}"
-    echo "Merged JSON created at: $MERGED_JSON"
-else
-    echo "No JSON files to merge."
-fi
+echo "ACS PDF Summary : $ACS_SUMMARY_PDF"
 
 echo ""

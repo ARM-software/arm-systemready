@@ -28,6 +28,7 @@ PLATDIR=${TOP_DIR}/output
 OUTDIR=${PLATDIR}
 GRUB_BUILDROOT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub-buildroot.cfg
 EFI_CONFIG_FILE=${TOP_DIR}/uefi_scripts/startup.nsh
+EE_EFI_CONFIG_FILE=${TOP_DIR}/uefi_scripts/startup_ee.nsh
 BBSR_STARTUP_FILE=${TOP_DIR}/uefi_scripts/bbsr_startup.nsh
 BSA_CONFIG_FILE=${TOP_DIR}/uefi_scripts/bsa.nsh
 SBSA_CONFIG_FILE=${TOP_DIR}/uefi_scripts/sbsa.nsh
@@ -36,7 +37,8 @@ DEBUG_CONFIG_FILE=${TOP_DIR}/uefi_scripts/debug_dump.nsh
 ACS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_config.txt
 SYSTEM_CONFIG_FILE=${TOP_DIR}/build-scripts/config/system_config.txt
 ACS_RUN_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_run_config.ini
-CONFIG_PARSER_EFI=${TOP_DIR}/parser/Parser.efi
+CONFIG_PARSER_FILE=${TOP_DIR}/uefi_scripts/parser.nsh
+CONFIG_PARSER_PYTHON_FILE=${TOP_DIR}/../common/parser/Parser.py
 BLOCK_SIZE=512
 SEC_PER_MB=$((1024*2))
 GRUB_PATH=grub
@@ -51,6 +53,7 @@ create_cfgfiles ()
     mcopy -i  $fatpart_name -o ${GRUB_BUILDROOT_CONFIG_FILE} ::/EFI/BOOT/grub.cfg
     mcopy -i  $fatpart_name -o ${BBSR_STARTUP_FILE}   ::/EFI/BOOT/
     mcopy -i  $fatpart_name -o ${EFI_CONFIG_FILE}     ::/EFI/BOOT/
+    mcopy -i  $fatpart_name -o ${EE_EFI_CONFIG_FILE}  ::/EFI/BOOT/
     mcopy -i  $fatpart_name -o ${BSA_CONFIG_FILE}     ::/acs_tests/bsa/
     mcopy -i  $fatpart_name -o ${SBSA_CONFIG_FILE}    ::/acs_tests/bsa/sbsa
     mcopy -i  $fatpart_name -o ${DEBUG_CONFIG_FILE}   ::/acs_tests/debug/
@@ -96,7 +99,9 @@ create_fatpart ()
     mcopy -i $fatpart_name ${TOP_DIR}/bbsr-keys/*.auth ::/acs_tests/bbsr-keys
 
     mcopy -i $fatpart_name ${UEFI_APPS_PATH}/CapsuleApp.efi ::/acs_tests/app
-    mcopy -i $fatpart_name $CONFIG_PARSER_EFI  ::/acs_tests/parser
+    mcopy -i $fatpart_name $OUTDIR/Parser.efi  ::/acs_tests/parser
+    mcopy -i $fatpart_name $CONFIG_PARSER_FILE  ::/acs_tests/parser
+    mcopy -i $fatpart_name $CONFIG_PARSER_PYTHON_FILE  ::/acs_tests/parser
 
     echo "FAT partition image created"
 }
@@ -176,4 +181,3 @@ exit_fun() {
 
 #prepare the disk image
 prepare_disk_image
-

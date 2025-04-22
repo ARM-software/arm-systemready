@@ -1,668 +1,397 @@
 {
-    "catID: 1": {
-        "SuiteID: 1": {
-            "SName: BSA": [
-                {
-                    "TestSuiteID": 1,
-                    "TSName": "PE",
-                    "testcase": [],
-                    "specID": 1,
-                    "specName": "BSA",
-                    "severityID": 3,
-                    "Severity": "Minor",
-                    "waivableID": 1,
-                    "Waivable": "no",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 9,
-                    "Function": "Physical interoperability"
-                }
-            ]
-        }
-    },
-    "catID: 2": {
-        "SuiteID: 2": {
-            "SName: SBSA": [
-                {
-                    "TestSuiteID": 2,
-                    "TSName": "PE",
-                    "testcase": [],
-                    "specID": 1,
-                    "specName": "SBSA",
-                    "severityID": 3,
-                    "Severity": "Minor",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 9,
-                    "Function": "Physical interoperability"
-                }
-            ]
-        }
-    },
-    "catID: 3": {
-        "SuiteID: 1": {
-            "SName: BSA": [
-                {
-                    "TestSuiteID": 3,
-                    "TSName": "GIC",
-                    "testcase": [],
-                    "specID": 1,
-                    "specName": "BSA",
-                    "severityID": 3,
-                    "Severity": "Minor",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 9,
-                    "Function": "Physical interoperability"
-                }
-            ]
-        }
-    },
-    "catID: 4": {
-        "SuiteID: 1": {
-            "SName: BSA": [
-                {
-                    "TestSuiteID": 4,
-                    "TSName": "PCIe",
-                    "testcase": [],
-                    "specID": 1,
-                    "specName": "BSA",
-                    "severityID": 3,
-                    "Severity": "Minor",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 9,
-                    "Function": "Physical interoperability"
-                }
-            ]
-        }
-    },
-    "catID: 5": {
-        "SuiteID: 1": {
-            "SName: BSA": [
-                {
-                    "TestSuiteID": 5,
-                    "TSName": "Timer",
-                    "testcase": [],
-                    "specID": 1,
-                    "specName": "BSA",
-                    "severityID": 3,
-                    "Severity": "Minor",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 9,
-                    "Function": "Physical interoperability"
-                }
-            ]
-        }
-    },
-    "catID: 6": {
-        "SuiteID: 2": {
-            "SName: FWTS": [
-                {
-                    "TestSuiteID": 1,
-                    "TSName": "uefivar",
-                    "testcase": [],
-                    "specID": 4,
-                    "specName": "EBBR",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "yes",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 2,
-                    "Function": "maintenance"
-                }
-            ]
-        }
-    },
-    "catID: 7": {
-        "SuiteID: 2": {
-            "SName: FWTS": [
-                {
-                    "TestSuiteID": 2,
-                    "TSName": "uefirtmisc",
-                    "testcase": [],
-                    "specID": 4,
-                    "specName": "EBBR",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "yes",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 6,
-                    "Function": "other"
-                }
-            ]
-        }
-    },
-    "catID: 8": {
-        "SuiteID: 2": {
-            "SName: FWTS": [
-                {
-                    "TestSuiteID": 3,
-                    "TSName": "dmicheck",
-                    "testcase": [],
-                    "specID": 4,
-                    "specName": "EBBR",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 2,
-                    "Function": "maintenance"
-                }
-            ]
-        }
-    },
-    "catID: 9": {
-        "SuiteID: 2": {
-            "SName: FWTS": [
-                {
-                    "TestSuiteID": 4,
-                    "TSName": "esrt",
-                    "testcase": [],
-                    "specID": 4,
-                    "specName": "EBBR",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 2,
-                    "Function": "maintenance"
-                }
-            ]
-        }
-    },
-    "catID: 10": {
-        "SuiteID: 2": {
-            "SName: FWTS": [
-                {
-                    "TestSuiteID": 5,
-                    "TSName": "rtservices",
-                    "testcase": [],
-                    "specID": 4,
-                    "specName": "EBBR",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 4,
-                    "Function": "runtime"
-                }
-            ]
-        }
-    },
-    "catID: 11": {
-        "SuiteID: 2": {
-            "SName: FWTS": [
-                {
-                    "TestSuiteID": 6,
-                    "TSName": "bootservices",
-                    "testcase": [],
-                    "specID": 4,
-                    "specName": "EBBR",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 1,
-                    "Function": "boot"
-                }
-            ]
-        }
-    },
-    "catID: 12": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 11,
-                    "TSName": "PSCI",
-                    "testcase": [],
-                    "specID": 7,
-                    "specName": "PSCI",
-                    "severityID": 2,
-                    "Severity": "Major",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 1,
-                    "Function": "boot"
-                },
-                {
-                    "TestSuiteID": 1,
-                    "TSName": "genericTest",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "yes",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 6,
-                    "Function": "other"
-                }
-            ]
-        }
-    },
-    "catID: 13": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 2,
-                    "TSName": "BootServicesTest",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "yes",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 1,
-                    "Function": "boot"
-                }
-            ]
-        }
-    },
-    "catID: 14": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 3,
-                    "TSName": "RuntimeServicesTest",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 4,
-                    "Function": "runtime"
-                }
-            ]
-        }
-    },
-    "catID: 15": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 4,
-                    "TSName": "LoadImage",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 1,
-                    "Function": "boot"
-                }
-            ]
-        }
-    },
-    "catID: 16": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 5,
-                    "TSName": "DevicePath",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 1,
-                    "Function": "boot"
-                }
-            ]
-        }
-    },
-    "catID: 17": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 6,
-                    "TSName": "HII",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 1,
-                    "Function": "boot"
-                }
-            ]
-        }
-    },
-    "catID: 18": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 7,
-                    "TSName": "Network",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 1,
-                    "Function": "boot"
-                }
-            ]
-        }
-    },
-    "catID: 19": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 8,
-                    "TSName": "Security",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 2,
-                    "Severity": "Major",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 3,
-                    "Function": "security"
-                }
-            ]
-        }
-    },
-    "catID: 20": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 9,
-                    "TSName": "Capsule",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 2,
-                    "Function": "maintenance"
-                }
-            ]
-        }
-    },
-    "catID: 21": {
-        "SuiteID: 3": {
-            "SName: SCT": [
-                {
-                    "TestSuiteID": 10,
-                    "TSName": "SMBIOS",
-                    "testcase": [],
-                    "specID": 5,
-                    "specName": "UEFI",
-                    "severityID": 3,
-                    "Severity": "Minor",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 2,
-                    "Function": "maintenance"
-                }
-            ]
-        }    
-    },
-    "catID: 22": {
-        "SuiteID: 4": {
-            "SName: MVP": [
-                {
-                    "TestSuiteID": 1,
-                    "TSName": "Network",
-                    "testcase": [],
-                    "specID": 8,
-                    "specName": "SRS",
-                    "severityID": 2,
-                    "Severity": "Major",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 4,
-                    "Function": "runtime"
-                }
-            ]
-        }    
-    },
-    "catID: 23": {
-        "SuiteID: 4": {
-            "SName: MVP": [
-                {
-                    "TestSuiteID": 2,
-                    "TSName": "Peripherals",
-                    "testcase": [],
-                    "specID": 8,
-                    "specName": "SRS",
-                    "severityID": 2,
-                    "Severity": "Major",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 4,
-                    "Function": "runtime"
-                }
-            ]
-        }
-    },
-    "catID: 24": {
-        "SuiteID: 4": {
-            "SName: MVP": [
-                {
-                    "TestSuiteID": 3,
-                    "TSName": "security",
-                    "testcase": [],
-                    "specID": 3,
-                    "specName": "BBSR",
-                    "severityID": 3,
-                    "Severity": "Minor",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 3,
-                    "Function": "security"
-                }
-            ]
-        }
-    },
-    "catID: 25": {
-        "SuiteID: 4": {
-            "SName: MVP": [
-                {
-                    "TestSuiteID": 4,
-                    "TSName": "A/B support",
-                    "testcase": [],
-                    "specID": 8,
-                    "specName": "SRS",
-                    "severityID": 3,
-                    "Severity": "Minor",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 2,
-                    "Function": "maintenance"
-                }
-            ]
-        }
-    },
-    "catID: 26": {
-        "SuiteID: 4": {
-            "SName: MVP": [
-                {
-                    "TestSuiteID": 5,
-                    "TSName": "LinuxInstall",
-                    "testcase": [],
-                    "specID": 8,
-                    "specName": "SRS",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 6,
-                    "Function": "other"
-                }
-            ]
-        }
-    },
-    "catID: 27": {
-        "SuiteID: 4": {
-            "SName: MVP": [
-                {
-                    "TestSuiteID": 6,
-                    "TSName": "CapsuleAutherntication",
-                    "testcase": [],
-                    "specID": 8,
-                    "specName": "SRS",
-                    "severityID": 2,
-                    "Severity": "Major",
-                    "waivableID": 2,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 2,
-                    "Function": "maintenance"
-                }
-            ]
-        }
-    },
-    "catID: 28": {
-        "SuiteID: 4": {
-            "SName: MVP": [
-                {
-                    "TestSuiteID": 7,
-                    "TSName": "DTValidation",
-                    "testcase": [],
-                    "specID": 8,
-                    "specName": "SRS",
-                    "severityID": 1,
-                    "Severity": "Critical",
-                    "waivableID": 1,
-                    "Waivable": "no",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 1,
-                    "Function": "boot"
-                }
-            ]
-        }
-    },
-    "catID: 29": {
-        "SuiteID: 5": {
-            "SName: MVP": [
-                {
-                    "TestSuiteID": 8,
-                    "TSName": "Boot sources",
-                    "testcase": [],
-                    "specID": 3,
-                    "specName": "DT",
-                    "severityID": 2,
-                    "Severity": "Major",
-                    "waivableID": 1,
-                    "Waivable": "yes",
-                    "scopeID": 1,
-                    "scope": "core",
-                    "FunctionID": 1,
-                    "Function": "boot"
-                }
-            ]
-        }
-    },
-    "catID: 30": {
-        "SuiteID: 5": {
-            "SName: BBSR-SCT": [
-                {
-                    "TestSuiteID": 4,
-                    "TSName": "RuntimeServicesTest",
-                    "testcase": [],
-                    "specID": 3,
-                    "specName": "BBSR",
-                    "severityID": 2,
-                    "Severity": "Major",
-                    "waivableID": 1,
-                    "Waivable": "no",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 3,
-                    "Function": "security"
-                }
-            ]
-        }
-    },
-    "catID: 31": {
-        "SuiteID: 6": {
-            "SName: BBSR-FWTS": [
-                {
-                    "TestSuiteID": 4,
-                    "TSName": "RuntimeServicesTest",
-                    "testcase": [],
-                    "specID": 3,
-                    "specName": "BBSR",
-                    "severityID": 2,
-                    "Severity": "Major",
-                    "waivableID": 1,
-                    "Waivable": "YES",
-                    "scopeID": 2,
-                    "scope": "extension",
-                    "FunctionID": 3,
-                    "Function": "security"
-                }
-            ]
-        }
-    }
-}
+    "catID: 1": [
+      {
+        "Suite": "BSA",
+        "Test Suite": "PE",
+        "specName": "BSA",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 9,
+        "Main Readiness Grouping": "Physical readiness"
+      }
+    ],
+    "catID: 2": [
+      {
+        "Suite": "BSA",
+        "Test Suite": "GIC",
+        "specName": "BSA",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 9,
+        "Main Readiness Grouping": "Physical readiness"
+      }
+    ],
+    "catID: 3": [
+      {
+        "Suite": "BSA",
+        "Test Suite": "SMMU",
+        "specName": "BSA",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 9,
+        "Main Readiness Grouping": "Physical readiness"
+      }
+    ],
+    "catID: 4": [
+      {
+        "Suite": "BSA",
+        "Test Suite": "PCIe",
+        "specName": "BSA",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 9,
+        "Main Readiness Grouping": "Physical readiness"
+      }
+    ],
+    "catID: 5": [
+      {
+        "Suite": "BSA",
+        "Test Suite": "Timer",
+        "specName": "BSA",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 9,
+        "Main Readiness Grouping": "Physical readiness"
+      }
+    ],
+    "catID: 6": [
+      {
+        "Suite": "BSA",
+        "Test Suite": "Peripherals",
+        "specName": "BSA",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 9,
+        "Main Readiness Grouping": "Physical readiness"
+      }
+    ],
+    "catID: 7": [
+      {
+        "Suite": "BSA",
+        "Test Suite": "Watchdog",
+        "specName": "BSA",
+        "rel Import. to main readiness": "",
+        "Waivable": "",
+        "SRS scope": "",
+        "FunctionID": "",
+        "Main Readiness Grouping": ""
+      }
+    ],
+    "catID: 8": [
+      {
+        "Suite": "BSA",
+        "Test Suite": "Memory Map",
+        "specName": "BSA",
+        "rel Import. to main readiness": "",
+        "Waivable": "yes",
+        "SRS scope": "",
+        "FunctionID": "",
+        "Main Readiness Grouping": ""
+      }
+    ],
+    "catID: 9": [
+      {
+        "Suite": "FWTS",
+        "Test Suite": "uefivar",
+        "specName": "EBBR",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 2,
+        "Main Readiness Grouping": "maintenance readiness"
+      }
+    ],
+    "catID: 10": [
+      {
+        "Suite": "FWTS",
+        "Test Suite": "uefimisc",
+        "specName": "EBBR",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 6,
+        "Main Readiness Grouping": "Misc readiness"
+      }
+    ],
+    "catID: 11": [
+      {
+        "Suite": "FWTS",
+        "Test Suite": "dmicheck",
+        "specName": "EBBR",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 2,
+        "Main Readiness Grouping": "maintenance readiness"
+      }
+    ],
+    "catID: 12": [
+      {
+        "Suite": "FWTS",
+        "Test Suite": "esrt",
+        "specName": "EBBR",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 2,
+        "Main Readiness Grouping": "maintenance readiness"
+      },
+      {
+        "Suite": "FWTS",
+        "Test Suite": "bootservices",
+        "specName": "EBBR",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+      }
+    ],
+    "catID: 13": [
+      {
+        "Suite": "FWTS",
+        "Test Suite": "rtservices",
+        "specName": "EBBR",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 4,
+        "Main Readiness Grouping": "runtime readiness"
+      }
+    ],
+    "catID: 14": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "genericTest",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 6,
+        "Main Readiness Grouping": "Misc readiness"
+      }
+    ],
+    "catID: 15": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "BootServicesTest",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+      }
+    ],
+    "catID: 16": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "RuntimeServicesTest",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 4,
+        "Main Readiness Grouping": "runtime readiness"
+      }
+    ],
+    "catID: 17": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "LoadImage",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+      }
+    ],
+    "catID: 18": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "DevicePath",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+      }
+    ],
+    "catID: 19": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "HII",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+      }
+    ],
+    "catID: 20": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "Network",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+      }
+    ],
+    "catID: 21": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "Security",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 3,
+        "Main Readiness Grouping": "security readiness"
+      }
+    ],
+    "catID: 22": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "Capsule",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 2,
+        "Main Readiness Grouping": "maintenance readiness"
+      }
+    ],
+    "catID: 23": [
+      {
+        "Suite": "SCT",
+        "Test Suite": "SMBIOS",
+        "specName": "UEFI",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 2,
+        "Main Readiness Grouping": "maintenance readiness"
+      }
+    ],
+    "catID: 24": [
+      {
+        "Suite": "Standalone",
+        "Test Suite": "Network",
+        "specName": "SRS",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Required",
+        "FunctionID": 4,
+        "Main Readiness Grouping": "runtime readiness"
+      }
+    ],
+    "catID: 25": [
+      {
+        "Suite": "Standalone",
+        "Test Suite": "Peripherals",
+        "specName": "SRS",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 4,
+        "Main Readiness Grouping": "runtime readiness"
+      }
+    ],
+    "catID: 26": [
+      {
+        "Suite": "Standalone",
+        "Test Suite": "PSCI",
+        "specName": "PSCI",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 3,
+        "Main Readiness Grouping": "security readiness"
+      }
+    ],
+    "catID: 27": [
+      {
+        "Suite": "Standalone",
+        "Test Suite": "A/B support",
+        "specName": "SRS",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Recommended",
+        "FunctionID": 2,
+        "Main Readiness Grouping": "maintenance readiness"
+      }
+    ],
+    "catID: 28": [
+      {
+        "Suite": "Standalone",
+        "Test Suite": "LinuxInstall",
+        "specName": "SRS",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 6,
+        "Main Readiness Grouping": "Misc readiness"
+      }
+    ],
+    "catID: 29": [
+      {
+        "Suite": "Standalone",
+        "Test Suite": "CapsuleAutherntication",
+        "specName": "SRS",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "no",
+        "SRS scope": "Required",
+        "FunctionID": 2,
+        "Main Readiness Grouping": "maintenance readiness"
+      }
+    ],
+    "catID: 30": [
+      {
+        "Suite": "Standalone",
+        "Test Suite": "DTValidation",
+        "specName": "DT",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+      }
+    ],
+    "catID: 31": [
+      {
+        "Suite": "Standalone",
+        "Test Suite": "Boot sources",
+        "specName": "SRS",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+      }
+    ],
+    "catID: 32": [
+      {
+        "Suite": "BBSR",
+        "Test Suite": "BBSR",
+        "specName": "BBSR",
+        "rel Import. to main readiness": "Critical",
+        "Waivable": "no",
+        "SRS scope": "Recommended",
+        "FunctionID": 3,
+        "Main Readiness Grouping": "security readiness"
+      }
+    ]
+  }
+  

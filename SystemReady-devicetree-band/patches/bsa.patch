@@ -1,30 +1,33 @@
-From 348ba393179b9231fc7914fb1770e7e904263cc6 Mon Sep 17 00:00:00 2001
-From: Amrathesh <amrathesh@arm.com>
-Date: Tue, 10 May 2022 13:59:19 +0530
-Subject: [PATCH] EDK2 BSA Patch
-
-- edk2-tag: edk2-stable202202
-
-Signed-off-by: Amrathesh <amrathesh@arm.com>
----
- ShellPkg/ShellPkg.dsc | 4 ++++
- 1 file changed, 4 insertions(+)
-
+diff --git a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
+index f0a8b9f..e41e0de 100644
+--- a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
++++ b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
+@@ -90,8 +90,8 @@ UefiHiiServicesLibConstructor (
+   //
+   // Retrieve the pointer to the UEFI HII Config Routing Protocol
+   //
+-  Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **)&gHiiConfigRouting);
+-  ASSERT_EFI_ERROR (Status);
++  //Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **)&gHiiConfigRouting);
++  //ASSERT_EFI_ERROR (Status);
+ 
+   //
+   // Retrieve the pointer to the optional UEFI HII Font Protocol
 diff --git a/ShellPkg/ShellPkg.dsc b/ShellPkg/ShellPkg.dsc
-index 38fde3dc71..677625e067 100644
+index 7e985f8..6ea22f8 100644
 --- a/ShellPkg/ShellPkg.dsc
 +++ b/ShellPkg/ShellPkg.dsc
-@@ -63,6 +63,9 @@
-   DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
-   DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
+@@ -66,6 +66,9 @@
    ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
+ 
+   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
++  FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
 +  BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
 +  BsaPalLib|ShellPkg/Application/bsa-acs/pal/uefi_dt/BsaPalLib.inf
-+  FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
  
- [LibraryClasses.ARM,LibraryClasses.AARCH64]
-   #
-@@ -101,6 +104,7 @@
+ [PcdsFixedAtBuild]
+   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0xFF
+@@ -93,6 +96,7 @@
    ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
    ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf
    ShellPkg/Library/UefiShellNetwork2CommandsLib/UefiShellNetwork2CommandsLib.inf
@@ -32,6 +35,3 @@ index 38fde3dc71..677625e067 100644
  
    ShellPkg/Application/Shell/Shell.inf {
      <PcdsFixedAtBuild>
--- 
-2.17.1
-

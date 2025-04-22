@@ -8,7 +8,7 @@
 - [Steps to Manually Build Image](#steps-to-manually-build-image)
 - [Image Directory Structure](#image-directory-structure)
 - [Details and Functionalities of the Image](#details-and-functionalities-of-the-image)
-  - [Grub Menu & Complaince Run](#grub-menu--complaince-run)
+  - [Grub Menu & Compliance Run](#grub-menu--compliance-run)
   - [ACS configs file](#acs-configs-file)
   - [Log Parser scripts](#log-parser-scripts)
     - [Standard Formatted Result](#standard-formatted-result)
@@ -143,8 +143,8 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
   - app directory contains CapsuleApp.efi
   - bbr directory contains SCT related bianries and sequence files
   - bbsr-keys contains cryptographic keys for secure boot and testing secure firmware updates
-  - bsa directory contains bsa uefi executable for bsa complaince
-  - bsa/sbsa directory contains sbsa uefi executable for bsa complaince
+  - bsa directory contains bsa uefi executable for bsa compliance
+  - bsa/sbsa directory contains sbsa uefi executable for bsa compliance
   - config directory contains system, acs related config files
   - debug directory contains script to gather debug information
   - parser directory contains uefi parser executable to parse acs_config file
@@ -164,22 +164,20 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 
 ## Details and Functionalities of the Image
 
-### Grub Menu & Complaince Run
+### Grub Menu & Compliance Run
 ```
  │ Linux Boot                                    │
  │*SystemReady band ACS (Automation)             │
- │ SCT for BBSR (optional)                       │
- │ Linux Boot for BBSR (optional)                │
+ │ BBSR Compliance (Automation)                  │
  │ Linux Boot with SetVirtualAddressMap enabled  |
 ```
  - **Linux Boot** : This option will boot the ACS Linux kernel and run the default Linux tool (linux debug dump, fwts, linux bsa, linux sbsa (if selected))
    - noacs command line parameter: Edit the Linux Boot grub menu option and add **noacs** at the end of Linux Boot grub menu option, to boot into ACS Linux kernel without running the default Linux test suites.
    - initcall_blacklist=psci_checker command line parameter: Edit the Linux Boot grub menu option and add **initcall_blacklist=psci_checker** to skip default linux psci_checker tool.
- - **SystemReady band ACS (Automation)** : This is **default** option and will run the automated complaince
-   - UEFI complaince run - SCT, BSA UEFI, SBSA UEFI (if selected)
-   - Boots to Linux and run Linux complaince run - FWTS, BSA Linux, SBSA Linux (if selected)
- - **SCT for BBSR (optional)** : This option will run the SCT tests required for BBSR complaince. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
- - **Linux Boot for BBSR (optional)** : This option will run the SCT tests required for BBSR complaince. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
+ - **SystemReady band ACS (Automation)** : This is **default** option and will run the automated compliance
+   - UEFI compliance run - SCT, BSA UEFI, SBSA UEFI (if selected)
+   - Boots to Linux and run Linux compliance run - FWTS, BSA Linux, SBSA Linux (if selected)
+ - **BBSR Compliance (Automation)** : This option will run the SCT and FWTS tests required for BBSR compliance, perform a Linux secure boot, and, if a TPM is present, evaluate the measured boot log. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
  - **Linux Boot with SetVirtualAddressMap enabled** : This option is for debug purpose, to boot ACS Linux with SetVAMap on.
 
 ### ACS configs file
