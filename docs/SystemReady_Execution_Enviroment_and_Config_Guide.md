@@ -179,9 +179,3 @@ When selecting **SystemReady band ACS (Automation)**, the following behavior occ
   - **Run test suites manually** using the generated command structure as per config parameters.
 
 ---
-
-## Summary
-
-- `config_enabled_for_automation_run = true`: Selective test execution using config values.
-- `config_enabled_for_automation_run = false`: Full legacy suite execution.
-- Manual and automated execution both supported with user-friendly `Parser.efi`.
