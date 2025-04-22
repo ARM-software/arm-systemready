@@ -28,20 +28,21 @@ SystemReady band compliant platforms must implement a minimum set of hardware an
 The SystemReady band compliance and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
 ## Latest Release details
- - Release version: v3.0.0-BET0
- - **The latest pre-built release of ACS is available for download here: [v24.11_3.0.0-BET0](prebuilt_images/v24.11_3.0.0-BET0)**
+ - Release version: v3.0.1
+ - Quality: EAC
+ - **The latest pre-built release of ACS is available for download here: [v25.04_3.0.1](prebuilt_images/v25.04_3.0.1)**
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
  - SystemReady-band Image Test Suite details
 
 | Test Suite                                                                                   | Test Suite Tag                                               | Specification Version |
 |----------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------|
-| [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs)                    | v24.11_REL1.0.9                                              | BSA v1.0 (c)          |
-| [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs)           | v24.11_REL7.2.1                                              | SBSA v7.1             |
-| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0 | BBR v2.1              |
-| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0 | BBSR v1.3             |
+| [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs)                    | v25.04_SR_3.0.1                                              | BSA v1.1              |
+| [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs)           | v25.04_SR_3.0.1                                              | SBSA v7.2             |
+| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v25.04_SR_3.0.1                                              | BBR v2.1              |
+| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v25.04_SR_3.0.1                                              | BBSR v1.3             |
 | [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4                     |                       |
-| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v24.09.00                                                    |                       |
+| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v25.01.00                                                    |                       |
 
 ## Prebuilt Images
 - Prebuilt images for each release are available in the prebuilt_images folder.To access the prebuilt_images, click [prebuilt_images](prebuilt_images/).
@@ -98,7 +99,9 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 │       ├── bbsr_startup.nsh
 │       ├── bootaa64.efi
 │       ├── grub.cfg
+│       ├── startup_ee.nsh
 │       └── startup.nsh
+|
 ├── acs_tests
 │   ├── app
 │   │   └── CapsuleApp.efi
@@ -121,6 +124,8 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 │   │   ├── Bsa.efi
 │   │   ├── bsa.nsh
 │   │   └── sbsa
+│   |       |── Sbsa.efi
+│   │       └── sbsa.nsh
 │   ├── config
 │   │   ├── acs_config.txt
 │   │   ├── acs_run_config.ini
@@ -128,7 +133,9 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 │   ├── debug
 │   │   └── debug_dump.nsh
 │   └── parser
-│       └── Parser.efi
+│      ├── parser.nsh
+│      ├── Parser.py
+│      └── Parser.efi
 ├── acs_results
 ├── Image
 └── ramdisk-buildroot.img
@@ -139,6 +146,7 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
   - bootaa64.efi - grub executable
   - grub.cfg - grub config file
   - startup.nsh - uefi automation run startup file
+  - startup_ee.nsh - uefi execution enviroment startup file
 - acs_tests contains executable files and configs related for test suites
   - app directory contains CapsuleApp.efi
   - bbr directory contains SCT related bianries and sequence files
@@ -147,7 +155,7 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
   - bsa/sbsa directory contains sbsa uefi executable for bsa compliance
   - config directory contains system, acs related config files
   - debug directory contains script to gather debug information
-  - parser directory contains uefi parser executable to parse acs_config file
+  - parser directory contains uefi parser executable and python parser script to parse acs_config file
 - acs_results will contain result logs of various test suite run
 - Image - Linux kernel image file, also contains linux test suites and processing scripts
   - /init.sh - linux automation script
