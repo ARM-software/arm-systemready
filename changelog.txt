@@ -1,3 +1,17 @@
+v25.04_SR_3.0.1
+** SystemReady band**
+* Addition of execution environment for SystemReady band
+* Enhancing the acs_run_config to cover other acs test suites
+* script added for auto mounting the acs image to update acs run config
+* Automated TPM log review
+* waiver guide added along with example waiver.json to help apply waivers
+* Adding configuration guide for acs_run_config.ini 
+* update verify_tpm_measurements.py script 
+* Install gnu-efi dependencies in github runners
+* Added SR execution environment and acs run config user guide.
+* log parser enhancement to display individual test and overall compliance on console.
+
+
 v23.09_SR_REL2.0.0_ES_REL1.3.0_IR_REL2.1.0
 **SystemReady SR ES IR**
 * Upgraded Linux kernel version to v6.4
