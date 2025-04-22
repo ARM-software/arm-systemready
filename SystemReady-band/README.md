@@ -177,6 +177,8 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
  │ Linux Boot                                    │
  │*SystemReady band ACS (Automation)             │
  │ BBSR Compliance (Automation)                  │
+ │ UEFI Execution Enviroment                     │
+ │ Linux Execution Enviroment                    │
  │ Linux Boot with SetVirtualAddressMap enabled  |
 ```
  - **Linux Boot** : This option will boot the ACS Linux kernel and run the default Linux tool (linux debug dump, fwts, linux bsa, linux sbsa (if selected))
@@ -185,21 +187,22 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
  - **SystemReady band ACS (Automation)** : This is **default** option and will run the automated compliance
    - UEFI compliance run - SCT, BSA UEFI, SBSA UEFI (if selected)
    - Boots to Linux and run Linux compliance run - FWTS, BSA Linux, SBSA Linux (if selected)
- - **BBSR Compliance (Automation)** : This option will run the SCT and FWTS tests required for BBSR compliance, perform a Linux secure boot, and, if a TPM is present, evaluate the measured boot log. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
+ - **UEFI Execution Enviroment** : This option is introduced to manually run the selective UEFI test suites like SCT, BSA and SBSA with desired configuration.
+ - **Linux Execution Enviroment** : This option is introduced to manually run the selective Linux test suites like FWTS, BSA and SBSA with desired configuration
+     For more details on the Execution Enviroment and acs run config, refer to the [SystemReady_Execution_Enviroment_and_Config_Guide](../docs/SystemReady_Execution_Enviroment_and_Config_Guide.md)
+   - UEFI compliance run - SCT, BSA UEFI, SBSA UEFI (if selected)
+   - Boots to Linux and run Linux compliance run - FWTS, BSA Linux, SBSA Linux (if selected)
+ - **BBSR Compliance (Automation)** : This option will run the SCT and FWTS tests required for BBSR compliance, perform a Linux secure boot, and, if a TPM is present, evaluate the measured boot log. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../docs/BBSR_ACS_Verification.md).
  - **Linux Boot with SetVirtualAddressMap enabled** : This option is for debug purpose, to boot ACS Linux with SetVAMap on.
 
 ### ACS configs file
 - **acs_config.txt**: The file specifies the ARM specification version that the ACS tool suite complies with, and this information is included in the **System_Information** table of the **ACS_Summary.html** report.
 
 - **acs_run_config.ini**: This file is used to manage the execution of various ACS test suites and supports passing parameters to them. <br />
-   The current options supported are: <br />
-   -  SbsaRunEnabled - The value supported is 0 and 1.
-      - 0: Don't run SBSA complaince in automation run
-      - 1: Run SBSA complaince in automation run
-    
-  Please refer to [acs run configuration guide](https://github.com/chetan-rathore/arm-systemready/blob/main/common/docs/acs_run_configuration_guide.md) on details of modifying the config file.
+
+  Please refer to [SystemReady_Execution_Enviroment_and_Config_Guide](../docs/SystemReady_Execution_Enviroment_and_Config_Guide.md) on details of modifying the config file.
  
-- **system_config.txt**: The file is used to collect below system information which is required for **ACS_Summary.html** report, this needs to be manually filled by user.
+- **system_config.txt**: The file is used to collect below system information which is required for **ACS_Summary.html** report, It is recommned to fill this information before running the ACS image for complaince.
    - FW source code: Unknown
    - Flashing instructions: Unknown
    - product website: Unknown
@@ -214,8 +217,8 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 - The JSON and HTML formatted results are present in /acs_results/**acs_summary**  folder.
 
 #### Waiver application process
-- Please follow the [waiver application guide](https://github.com/ARM-software/arm-systemready/blob/main/common/docs/waiver_guide.md) on details of waiver application to acs results
-- Template of waiver.json can be found [here](https://github.com/ARM-software/arm-systemready/blob/main/common/docs/example_waiver.json)
+- Please follow the [waiver application guide](https://github.com/ARM-software/arm-systemready/blob/main/docs/waiver_guide.md) on details of waiver application to acs results
+- Template of waiver.json can be found [here](https://github.com/ARM-software/arm-systemready/blob/main/docs/example_waiver.json)
 
 ## Verification on Arm Neoverse N2 reference design
 
