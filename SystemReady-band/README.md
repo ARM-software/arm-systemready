@@ -186,8 +186,10 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 - **acs_run_config.ini**: This file is used to manage the execution of various ACS test suites and supports passing parameters to them. <br />
    The current options supported are: <br />
    -  SbsaRunEnabled - The value supported is 0 and 1.
-      - 0: Don't run SBSA compliance in automation run
-      - 1: Run SBSA compliance in automation run
+      - 0: Don't run SBSA complaince in automation run
+      - 1: Run SBSA complaince in automation run
+    
+  Please refer to [acs run configuration guide](https://github.com/chetan-rathore/arm-systemready/blob/main/common/docs/acs_run_configuration_guide.md) on details of modifying the config file.
  
 - **system_config.txt**: The file is used to collect below system information which is required for **ACS_Summary.html** report, this needs to be manually filled by user.
    - FW source code: Unknown
