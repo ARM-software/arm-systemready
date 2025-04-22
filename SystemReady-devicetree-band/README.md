@@ -8,7 +8,7 @@
 - [Steps to Manually Build Image](#steps-to-manually-build-image)
 - [Image Directory Structure](#image-directory-structure)
 - [Details and Functionalities of the Image](#details-and-functionalities-of-the-image)
-  - [Grub Menu & Complaince Run](#grub-menu--complaince-run)
+  - [Grub Menu & Compliance Run](#grub-menu--compliance-run)
   - [Log Parser scripts](#log-parser-scripts)
     - [Standard Formatted Result](#standard-formatted-result)
     - [Waiver application process](#waiver-application-process)
@@ -100,10 +100,12 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
 │       └── startup.nsh
 ├── acs_tests
 │   ├── app
+│   │   ├── capsule_update.nsh
 │   │   ├── CapsuleApp.efi
 │   │   └── UpdateVars.efi
 │   ├── bbr
 │   │   ├── SCT
+│   │   ├── ScrtStartup.nsh
 │   │   ├── SctStartup.nsh
 │   │   └── bbsr_SctStartup.nsh
 │   ├── bbsr-keys
@@ -141,9 +143,10 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
   - startup.nsh - uefi automation run startup file
 - acs_tests contains executable files and configs related for test suites
   - app directory contains CapsuleApp.efi
-  - bbr directory contains SCT related bianries and sequence files
+  - app/capsule_update.nsh is uefi script for capsule update
+  - bbr directory contains SCT related binaries and sequence files
   - bbsr-keys contains cryptographic keys for secure boot and testing secure firmware updates
-  - bsa directory contains bsa uefi executable for bsa complaince
+  - bsa directory contains bsa uefi executable for bsa compliance
   - config directory contains system, acs related config files
   - debug directory contains script to gather debug information
   - debug/pingtest.nsh is uefi script for ping test
@@ -166,22 +169,20 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
 
 ## Details and Functionalities of the Image
 
-### Grub Menu & Complaince Run
+### Grub Menu & Compliance Run
 ```
  │ Linux Boot                                    │
  │*bbr/bsa                                       │
- │ SCT for BBSR (optional)                       │
- │ Linux Boot for BBSR (optional)                │
+ │ BBSR Compliance (Automation)                  │
 
 ```
  - **Linux Boot** : This option will boot the ACS Linux kernel and run the default Linux tool (linux debug dump, fwts, linux bsa, linux sbsa (if selected))
    - noacs command line parameter: Edit the Linux Boot grub menu option and add **noacs** at the end of Linux Boot grub menu option, to boot into ACS Linux kernel without running the default Linux test suites.
    - initcall_blacklist=psci_checker command line parameter: Edit the Linux Boot grub menu option and add **initcall_blacklist=psci_checker** to skip default linux psci_checker tool.
- - **bbr/bsa** : This is **default** option and will run the automated complaince
-   - UEFI complaince run - SCT, BSA UEFI, [Capsule Update](https://github.com/chetan-rathore/arm-systemready/blob/main/common/docs/Automatic_Capsule_Update_guide.md)
-   - Boots to Linux and run Linux complaince run - FWTS, BSA Linux
- - **SCT for BBSR (optional)** : This option will run the SCT tests required for BBSR complaince. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
- - **Linux Boot for BBSR (optional)** : This option will run the SCT tests required for BBSR complaince. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
+ - **bbr/bsa** : This is **default** option and will run the automated compliance
+   - UEFI compliance run - SCT, BSA UEFI, [Capsule Update](https://github.com/chetan-rathore/arm-systemready/blob/main/common/docs/Automatic_Capsule_Update_guide.md)
+   - Boots to Linux and run Linux compliance run - FWTS, BSA Linux
+ - **BBSR Compliance (Automation)** : This option will run the SCT and FWTS tests required for BBSR compliance, perform a Linux secure boot, and, if a TPM is present, evaluate the measured boot log. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
 
 ### ACS configs file
 - **acs_config_dt.txt**: The file specifies the ARM specification version that the ACS tool suite complies with, and this information is included in the **System_Information** table of the **ACS_Summary.html** report.

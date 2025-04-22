@@ -128,6 +128,7 @@ copy_recipes()
     COMMON_DIR_PATH=`git rev-parse --show-toplevel`"/common"
     mkdir $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files
     cp $COMMON_DIR_PATH/uefi_scripts/*.nsh $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files/.
+    mv $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files/startup_dt.nsh $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files/startup.nsh
     cp $COMMON_DIR_PATH/config/*.txt $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files/.
 
     pushd $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files

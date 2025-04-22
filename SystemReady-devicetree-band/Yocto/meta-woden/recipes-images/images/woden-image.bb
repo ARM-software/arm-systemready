@@ -29,11 +29,12 @@ EXTRA_IMAGEDEPENDS += "bsa-acs \
 IMAGE_EFI_BOOT_FILES += "Bsa.efi;acs_tests/bsa/Bsa.efi \
                          bsa.nsh;acs_tests/bsa/bsa.nsh \
                          pingtest.nsh;acs_tests/debug/pingtest.nsh \
+                         capsule_update.nsh;acs_tests/app/capsule_update.nsh \
                          bsa_dt.flag;acs_tests/bsa/bsa_dt.flag \
                          yocto_image.flag \
                          debug_dump.nsh;acs_tests/debug/debug_dump.nsh \
                          startup.nsh;EFI/BOOT/startup.nsh \
-                         acs_config_dt.txt;acs_tests/config/acs_config_dt.txt \
+                         acs_config.txt;acs_tests/config/acs_config.txt \
                          system_config.txt;acs_tests/config/system_config.txt \
                          bbsr_startup.nsh;EFI/BOOT/bbsr_startup.nsh \
                          bbsr_SctStartup.nsh;acs_tests/bbr/bbsr_SctStartup.nsh \
@@ -86,12 +87,10 @@ do_dir_deploy() {
     wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/acs_tests/bbsr-keys/*.esl
     wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/acs_tests/bbsr-keys/*.key
 
-    # create and copy empty acs_results directory to /results partition
-    mkdir -p acs_results
-    wic cp acs_results ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
-
     # create and copy empty acs_results_template directory to /results partition
-    mkdir -p acs_results_template
+    mkdir -p acs_results_template/acs_results
+    mkdir -p acs_results_template/os-logs
+    mkdir -p acs_results_template/fw
     wic cp acs_results_template ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
 
     #add bsa/bbr bootloder entry and set it has default boot
@@ -102,7 +101,7 @@ do_dir_deploy() {
     LINUX_BOOT_CMD_TEMP=`grep -Po 'Image\s+[a-zA-Z]+=.*' < grub.cfg`
     LINUX_BOOT_CMD=`echo $LINUX_BOOT_CMD_TEMP | head -1`
 
-    sed -i 's\ext4\ext4 video=efifb:off\g' grub.cfg
+    sed -i 's\ext4\ext4 earlycon video=efifb:off\g' grub.cfg
 
     if grep  -Eq "menuentry.*bbr/bsa"  grub.cfg
     then
@@ -114,26 +113,14 @@ do_dir_deploy() {
     sed -i 's\default=boot\default=bbr/bsa\g' grub.cfg
     sed -i 's\boot\Linux Boot\g' grub.cfg
 
-    if grep  -Eq "SCT for BBSR"  grub.cfg
+    if grep  -Eq "BBSR Compliance (Automation)"  grub.cfg
     then
-        echo "grub entry for SCT for BBSR already present"
+        echo "grub entry for BBSR Compliance (Automation) already present"
     else
-        echo "menuentry 'SCT for BBSR (optional)' {chainloader /EFI/BOOT/Shell.efi -nostartup bbsr_startup.nsh}" >> grub.cfg
-    fi
-
-    if grep  -Eq "Linux Boot for BBSR"  grub.cfg
-    then
-        echo "grub entry for Linux Boot for BBSR already present"
-    else
-        awk '/menuentry '\''Linux Boot'\''/, /ext4/' grub.cfg | sed 's/Linux Boot/Linux Boot for BBSR (optional)/' | sed 's/ext4/ext4  psci_checker=disable video=efifb:off secureboot/' >> grub.cfg
-        echo "}" >> grub.cfg
+        echo "menuentry 'BBSR Compliance (Automation)' {chainloader /EFI/BOOT/Shell.efi -nostartup bbsr_startup.nsh}" >> grub.cfg
     fi
 
     sed -i "/menuentry 'Linux Boot'/,/}/{ /linux /a \
-    initrd /core-image-initramfs-boot-genericarm64.cpio.gz
-    }" grub.cfg
-
-    sed -i "/menuentry 'Linux Boot for BBSR (optional)'/,/}/{ /linux /a \
     initrd /core-image-initramfs-boot-genericarm64.cpio.gz
     }" grub.cfg
 
@@ -149,8 +136,8 @@ do_dir_deploy() {
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/startup.nsh startup.nsh
     wic cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/bbsr_startup.nsh bbsr_startup.nsh
 
-    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} video=efifb:off"'/g' startup.nsh
-    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} video=efifb:off secureboot "'/g' bbsr_startup.nsh
+    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} earlycon video=efifb:off"'/g' startup.nsh
+    sed  -i -E 's/Image.*LABEL.*=.*/'"${LINUX_BOOT_CMD1} earlycon video=efifb:off secureboot "'/g' bbsr_startup.nsh
 
     wic cp startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/startup.nsh
     wic cp bbsr_startup.nsh ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/bbsr_startup.nsh
@@ -182,10 +169,22 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         fwupd \
                         fwupd-efi \
                         udisks2 \
+                        pango \
+                        cairo \
+                        gdk-pixbuf \
                         python3-matplotlib \
                         python3-chardet \
                         python3-jinja2 \
                         systemready-scripts \
+                        dejavu-fonts \
+                        python3-cssselect2 \
+                        python3-fonttools \
+                        python3-pydyf \
+                        python3-pyphen \
+                        python3-tinycss2 \
+                        python3-tinyhtml5 \
+                        python3-weasyprint \
+                        python3-webencodings \
                         tar \
 "
 

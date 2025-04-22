@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,18 +57,29 @@ sleep 5
 ADDITIONAL_CMD_OPTION="";
 ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
 
+#mount result partition
+BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1)
+if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
+  mount -o rw $BLOCK_DEVICE_NAME /mnt
+  echo "Mounted the results partition on device $BLOCK_DEVICE_NAME"
+else
+  echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
+fi
+
+# Parse config file
+automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
+if [ "$automation_enabled" == "True" ]; then
+  fwts_command="`python3 /mnt/acs_tests/parser/Parser.py -fwts`"
+  fwts_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_fwts_run`"
+
+  bsa_command="`python3 /mnt/acs_tests/parser/Parser.py -bsa`"
+  bsa_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_bsa_run`"
+
+  sbsa_command="`python3 /mnt/acs_tests/parser/Parser.py -sbsa`"
+  sbsa_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_sbsa_run`"
+fi
+
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
-
-  #mount result partition
-  BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1)
-
-  if [ ! -z "$BLOCK_DEVICE_NAME" ]; then
-    mount $BLOCK_DEVICE_NAME /mnt
-    echo "Mounted the results partition on device $BLOCK_DEVICE_NAME"
-  else
-    echo "Warning: the results partition could not be mounted. Logs may not be saved correctly"
-  fi
-
   if [ $ADDITIONAL_CMD_OPTION == "secureboot" ]; then
     echo "Call BBSR ACS"
     /usr/bin/secure_init.sh
@@ -83,7 +94,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "Linux Boot with SetVirtualMap enabled"
     mkdir -p /mnt/acs_results/SetVAMapMode/fwts
     echo "Executing FWTS"
-    echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
+    echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
     fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
     sync /mnt
     sleep 3
@@ -93,7 +104,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
 
   #Linux debug dump
-
   echo "Collecting Linux Debug Dump"
   mkdir -p /mnt/acs_results/linux_dump
   dmesg > /mnt/acs_results/linux_dump/dmesg.log
@@ -141,55 +151,73 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   sleep 5
   echo "Linux Debug Dump - Completed"
 
+
   # FWTS (SBBR) Execution
-
-  mkdir -p /mnt/acs_results/fwts
   echo "Executing FWTS for SBBR"
-  echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/fwts/FWTSResults.log
-  fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
-  sync /mnt
-  sleep 5
-  echo "FWTS Execution - Completed"
-
-  # Linux BSA Execution
-
-  mkdir -p /mnt/acs_results/linux
-  if [ -f  /lib/modules/bsa_acs.ko ]; then
-    echo "Running Linux BSA tests"
-    insmod /lib/modules/bsa_acs.ko
-    echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/linux/BsaResultsApp.log
-    /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
-    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
+  if [ "$automation_enabled" == "True" ] &&  [ "$fwts_enabled" == "False" ]; then
+    echo "********* FWTS is disabled in config file**************"
+  else
+    mkdir -p /mnt/acs_results/fwts
+    echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/fwts/FWTSResults.log
+    if [ "$automation_enabled" == "False" ]; then
+      fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
+    else
+      $fwts_command -r stdout -q >> /mnt/acs_results/fwts/FWTSResults.log
+    fi
     sync /mnt
     sleep 5
-    echo "Linux BSA test Execution - Completed"
-  else
-    echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run."
+    echo "FWTS Execution - Completed"
   fi
 
-  # Linux SBSA Execution
 
-  # Read the value of SbsaRunEnabled
-  if [ -f  /mnt/acs_tests/config/acs_run_config.ini ]; then
-    SbsaRunEnabled=$(grep -E '^SbsaRunEnabled=' "/mnt/acs_tests/config/acs_run_config.ini" | cut -d'=' -f2 || echo "0")
-    if [ "$SbsaRunEnabled" == "1" ]; then
+  # Linux BSA Execution
+  echo "Running Linux BSA tests"
+  if [ "$automation_enabled" == "True" ] &&  [ "$bsa_enabled" == "False" ]; then
+    echo "********* BSA is disabled in config file**************"
+  else
+    mkdir -p /mnt/acs_results/linux
+    if [ -f  /lib/modules/bsa_acs.ko ]; then
+      insmod /lib/modules/bsa_acs.ko
+      echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/BsaResultsApp.log
+      if [ "$automation_enabled" == "False" ]; then
+        /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
+      else
+        $bsa_command >> /mnt/acs_results/linux/BsaResultsApp.log
+      fi
+      dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
+      sync /mnt
+      sleep 5
+      echo "Linux BSA test Execution - Completed"
+    else
+      echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run."
+    fi
+  fi
+
+
+  # Linux SBSA Execution
+  echo "Running Linux SBSA tests"
+  if [ "$automation_enabled" == "True" ]; then
+    if [ "$sbsa_enabled" == "False" ]; then
+      echo "********* SBSA is disabled in config file**************"
+    else
+      mkdir -p /mnt/acs_results/linux
       if [ -f  /lib/modules/sbsa_acs.ko ]; then
-        echo "Running Linux SBSA tests"
-      	insmod /lib/modules/sbsa_acs.ko
-        echo "SystemReady band ACS v3.0.0-BETA0" > /mnt/acs_results/linux/SbsaResultsApp.log
-        /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
+        insmod /lib/modules/sbsa_acs.ko
+        echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
+        $sbsa_command >> /mnt/acs_results/linux/SbsaResultsApp.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
-	sync /mnt
-	sleep 5
+        sync /mnt
+        sleep 5
         echo "Linux SBSA test Execution - Completed"
       else
         echo "Error: SBSA kernel Driver is not found. Linux SBSA tests cannot be run."
       fi
     fi
+  else
+    echo "SBSA test is disabled by default, please enable in config file to run Sbsa"
   fi
 
   # EDK2 test parser
-
   if [ -d "/mnt/acs_results/sct_results" ]; then
     echo "Running edk2-test-parser tool "
     mkdir -p /mnt/acs_results/edk2-test-parser
@@ -203,8 +231,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
   fi
 
-  # Device Driver script run
 
+  # Device Driver script run
   if [ -f "/mnt/acs_results/uefi_dump/devices.log" ] && [ -f "/mnt/acs_results/uefi_dump/drivers.log" ] && [ -f "/mnt/acs_results/uefi_dump/dh.log" ]; then
     echo "Running Device Driver Matching Script"
     cd /usr/bin/
@@ -217,8 +245,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "Devices/Driver/dh log does not exist, cannot run the script"
   fi
 
-  # ACS log parser run
 
+  # ACS log parser run
   echo "Running acs log parser tool "
   if [ -d "/mnt/acs_results" ]; then
     if [ -d "/mnt/acs_results/acs_summary" ]; then
@@ -229,11 +257,27 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     sleep 5
   fi
 
+  echo "Please wait acs results are syncing on storage medium."
+  sync /mnt
+  sleep 60
+
   echo "ACS automated test suites run is completed."
   echo "Please reboot to run BBSR tests if not done"
+  echo "Please press <Enter> to continue ..."
 else
   echo ""
-  echo "Additional option set to not run ACS Tests. Skipping ACS tests on Linux"
+  echo "Linux Execution Enviroment can be used to run an acs test suite manually with desired options"
+  echo "The supported test suites for Linux enviroment are"
+  echo "  BSA"
+  echo "  SBSA"
+  echo "  FWTS"
+  echo " "
+  echo " To view or modify the supported command line parameters for a test suite"
+  echo " Edit the /mnt/acs_tests/config/acs_run_config.ini"
+  echo " "
+  echo " To run BSA test suite, execute /usr/bin/bsa.sh"
+  echo " To run SBSA test suite, execute /usr/bin/sbsa.sh"
+  echo " To run SCT test suite, execute /usr/bin/fwts.sh"
   echo ""
 fi
 

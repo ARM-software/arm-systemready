@@ -67,29 +67,77 @@ for %q in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 
 :StartTest
-
+# Run the config parser
+if not exist FS%q:\yocto_image.flag then
+    if exist FS%q:\acs_tests\parser\Parser.efi then
+        if exist FS%q:\acs_tests\config\acs_run_config.ini then
+            FS%q:
+            echo "Config File content"
+            echo " "
+            echo " "
+            type acs_tests\config\acs_run_config.ini
+            echo " "
+            echo " "
+            echo "Press any key to modify the Config file"
+            echo "If no key is pressed then default configurations"
+            FS%q:acs_tests\bbr\SCT\Stallforkey.efi 10
+            if %lasterror% == 0 then
+                acs_tests\parser\parser.nsh
+                acs_tests\parser\Parser.efi -automation
+                goto DoneParser
+            else
+                acs_tests\parser\Parser.efi -automation
+                goto DoneParser
+            endif
+        else
+            echo "Config file not found at acs_tests/config/acs_run_config.ini"
+        endif
+    else
+        echo "Parser.efi not present at acs_tests/parser/Parser.efi"
+    endif
+endif
+:DoneParser
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh then
-        # create a file to mark BBSR SCT in progress
-        echo "" > FS%i:\acs_tests\bbr\bbsr_sct_inprogress.flag
-        FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh
-        # remove bbsr_sct_inprogress.flag file to mark BBSR SCT complete
-        rm FS%i:\acs_tests\bbr\bbsr_sct_inprogress.flag
-        for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-            if  exist FS%k:\acs_results\BBSR\sct_results\ then
-                if  exist FS%i:\acs_tests\bbr\SCT\Overall then
-                    cp -r FS%i:\acs_tests\bbr\SCT\Overall FS%k:\acs_results\BBSR\sct_results\
-                endif
-                if  exist FS%i:\acs_tests\bbr\SCT\Dependency\EfiCompliantBBTest then
-                    cp -r FS%i:\acs_tests\bbr\SCT\Dependency\EfiCompliantBBTest FS%k:\acs_results\BBSR\sct_results\
-                endif
-                if  exist FS%i:\acs_tests\bbr\SCT\Sequence then
-                    cp -r FS%i:\acs_tests\bbr\SCT\Sequence FS%k:\acs_results\BBSR\sct_results\
+        # flag BBSR compliance testing is in progress
+        echo "" > FS%i:\acs_tests\bbr\bbsr_inprogress.flag
+        echo "Running SCT test"
+        if exist FS%i:\yocto_image.flag then
+            FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh
+        else
+            if "%config_enabled_for_automation_run%" == "" then
+                echo "config_enabled_for_automation_run variable does not exist"
+                FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh false
+            else
+                if "%config_enabled_for_automation_run%" == "true" then
+                    FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh true
+                else
+                    FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh false
                 endif
             endif
-        endfor
-     echo "BBSR SCT test suite execution is complete. Resetting the system"
-     reset
-     endif
+        endif
+        # remove bbsr_inprogress.flag file to mark BBSR compliance testing,
+        # as we secureboot to Linux in next step
+        rm FS%i:\acs_tests\bbr\bbsr_inprogress.flag
+    endif
 endfor
+
+# Boot Linux with SecureBoot enabled
+echo "Booting Linux (SecureBoot)"
+for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    # Buildroot based build (SystemReady band)
+    if exist FS%l:\Image and exist FS%l:\ramdisk-buildroot.img then
+        FS%l:
+        cd FS%l:\
+        Image initrd=\ramdisk-buildroot.img rootwait verbose debug psci_checker=disable console=tty0 console=ttyS0  console=ttyAMA0 secureboot
+    endif
+    # Yocto based build (SystemReady-DT band)
+    if exist FS%l:\Image and exist FS%l:\yocto_image.flag then
+        FS%l:
+        cd FS%l:\
+        # Below command is placeholder that is populated with working parameters during SystemReady DT ACS build
+        Image LABEL=BOOT secureboot
+    endif
+endfor
+echo "Image not found"
 

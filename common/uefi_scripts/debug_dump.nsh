@@ -15,12 +15,22 @@
 # limitations under the License.
 echo -off
 for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%m:\acs_results then
-        FS%m:
-        cd FS%m:\acs_results
+    if exist FS%m:\yocto_image.flag then
+        if exist FS%m:\acs_results_template\acs_results then
+            FS%m:
+            cd FS%m:\acs_results_template\acs_results
+	    goto DebugRun
+        endif
+    else
+        if exist FS%m:\acs_results then
+            FS%m:
+            cd FS%m:\acs_results
+	    goto DebugRun
+        endif
     endif
 endfor
 
+:DebugRun
 if exist uefi_dump then
     echo "UEFI debug logs already run"
     echo "Press any key to rerun UEFI debug logs"
@@ -34,7 +44,7 @@ else
     mkdir uefi_dump
 :DEBUG_DUMP
     cd uefi_dump
-    echo "Starting UEFI Debug dump"
+    #echo "Starting UEFI Debug dump"
     connect -r
     pci > pci.log
     drivers > drivers.log
@@ -59,18 +69,14 @@ else
     connect -r
     ifconfig -l > ifconfig_after_dhcp.log
     smbiosview > smbiosview.log
-    for %n in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-        if not exist FS%n:\acs_tests\bsa\bsa_dt.flag then
-            echo "" > map.log
-            map -r >> map.log
-            acpiview -l  > acpiview_l.log
-            acpiview -r 2 > acpiview_r.log
-            acpiview > acpiview.log
-            acpiview -s DSDT -d
-            acpiview -s SSDT -d
-            goto Done
-        endif
-        goto Done
-    endfor
+    if not exist FS%m:\acs_tests\bsa\bsa_dt.flag then
+        echo "" > map.log
+        map -r >> map.log
+        acpiview -l  > acpiview_l.log
+        acpiview -r 2 > acpiview_r.log
+        acpiview > acpiview.log
+        acpiview -s DSDT -d
+        acpiview -s SSDT -d
+    endif
 endif
 :Done

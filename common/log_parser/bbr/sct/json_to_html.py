@@ -43,37 +43,55 @@ def determine_css_class(subtest_result):
     elif 'SKIPPED' in subtest_result_upper:
         return 'skipped'
     else:
+        # Anything else (IGNORED, KNOWN U-BOOT LIMITATION, etc.) is 'unknown' in the detailed table
         return 'unknown'
 
-# Function to generate bar chart for SCT results with 'Failed with Waiver'
+# Function to generate bar chart for SCT results with 'Failed with Waiver' and 'Ignored'
 def generate_bar_chart_improved(suite_summary):
-    # Updated labels to include 'Failed with Waiver'
-    labels = ['Passed', 'Failed', 'Failed with Waiver', 'Aborted', 'Skipped', 'Warnings']
-    sizes = [
-        suite_summary['total_passed'],
-        suite_summary['total_failed'],
-        suite_summary.get('total_failed_with_waiver', 0),  # Safely get the value with default 0
-        suite_summary['total_aborted'],
-        suite_summary['total_skipped'],
-        suite_summary['total_warnings']
+    # Updated labels to include 'Failed with Waiver' AND 'Ignored'
+    labels = [
+        'Passed',
+        'Failed',
+        'Failed with Waiver',
+        'Aborted',
+        'Skipped',
+        'Warnings',
+        'Ignored'
     ]
-    # Updated colors to include a color for 'Failed with Waiver'
-    colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']  # Added color for Failed with Waiver
+    sizes = [
+        suite_summary.get('total_passed', 0),
+        suite_summary.get('total_failed', 0),
+        suite_summary.get('total_failed_with_waiver', 0),
+        suite_summary.get('total_aborted', 0),
+        suite_summary.get('total_skipped', 0),
+        suite_summary.get('total_warnings', 0),
+        suite_summary.get('total_ignored', 0)  # new field
+    ]
+    # Updated colors to include a color for 'Ignored'
+    colors = [
+        '#66bb6a',  # Passed
+        '#ef5350',  # Failed
+        '#f39c12',  # Failed with Waiver
+        '#9e9e9e',  # Aborted
+        '#ffc107',  # Skipped
+        '#ffeb3b',  # Warnings
+        '#b2bec3'   # Ignored (gray-ish)
+    ]
 
     plt.figure(figsize=(12, 7))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
 
-    # Add percentage labels on top of the bars
+    # Add percentage labels on top of each bar
     total_tests = sum(sizes)
     for bar, size in zip(bars, sizes):
         yval = bar.get_height()
         percentage = (size / total_tests) * 100 if total_tests > 0 else 0
         plt.text(
-            bar.get_x() + bar.get_width()/2, 
-            yval + max(sizes)*0.01, 
-            f'{percentage:.2f}%', 
-            ha='center', 
-            va='bottom', 
+            bar.get_x() + bar.get_width()/2,
+            yval + max(sizes)*0.01,
+            f'{percentage:.2f}%',
+            ha='center',
+            va='bottom',
             fontsize=12
         )
 
@@ -96,7 +114,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
     env = Environment()
     env.filters['determine_css_class'] = determine_css_class
 
-    # Template for both summary and detailed pages with Waiver handling
+    # Template for both summary and detailed pages with Waiver handling + 'Ignored'
     template = env.from_string("""
     <!DOCTYPE html>
     <html>
@@ -136,7 +154,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                 background-color: #f8d7da;
                 font-weight: bold;
             }
-            .fail-waiver {  /* Added CSS class for Failed with Waiver */
+            .fail-waiver {
                 background-color: #f39c12;
                 font-weight: bold;
                 color: white;
@@ -195,8 +213,11 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                 text-align: center;
                 font-weight: bold;
             }
-            /* New CSS class for Waiver Reason */
             .waiver-reason {
+                text-align: center;
+                font-weight: normal;
+            }
+            .reason-col {
                 text-align: center;
                 font-weight: normal;
             }
@@ -234,7 +255,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                         <td class="fail">{{ total_failed }}</td>
                     </tr>
                     <tr>
-                        <td>Failed with Waiver</td>  <!-- Added row for Failed with Waiver -->
+                        <td>Failed with Waiver</td>
                         <td class="fail-waiver">{{ total_failed_with_waiver }}</td>
                     </tr>
                     <tr>
@@ -249,6 +270,11 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                         <td>Warnings</td>
                         <td class="warning">{{ total_warnings }}</td>
                     </tr>
+                    <!-- NEW ROW for Ignored -->
+                    <tr>
+                        <td>Ignored</td>
+                        <td class="unknown">{{ total_ignored }}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -261,33 +287,37 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
             <div class="heading">Test Case: <span>{{ test.Test_case }}</span></div>
             <div class="heading">Test Case Description: <span>{{ test.Test_case_description }}</span></div>
             <div class="heading">Test Entry Point GUID: <span>{{ test["Test Entry Point GUID"] }}</span></div>
+            <div class="heading">Test Result: <span>{{ test.test_result if test.test_result else "N/A" }}</span></div>
+            <div class="heading">Reason: <span>{{ test.reason if test.reason else "N/A" }}</span></div>
             <br>
             <table>
                 <thead>
                     <tr>
-                        <th>Sub Test Number</th>
+                        <th>Sub Test GUID</th>
                         <th>Sub Test Description</th>
                         <th>Sub Test Result</th>
-                        <th>Sub Test GUID</th>
                         <th>Sub Test Path</th>
-                        <th>Waiver Reason</th>  <!-- New Column Header -->
+                        <th>Reason</th>
+                        <th>Waiver Reason</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for subtest in test.subtests %}
                     <tr>
-                        <td>{{ subtest.sub_Test_Number }}</td>
+                        <td>{{ subtest.sub_Test_GUID }}</td>
                         <td>{{ subtest.sub_Test_Description }}</td>
                         <td class="{{ subtest.sub_test_result | determine_css_class }}">{{ subtest.sub_test_result }}</td>
-                        <td>{{ subtest.sub_Test_GUID }}</td>
                         <td>{{ subtest.sub_Test_Path }}</td>
+                        <td class="reason-col">
+                            {{ subtest.reason if subtest.reason else "N/A" }}
+                        </td>
                         <td class="waiver-reason">
                             {% if 'FAILED WITH WAIVER' in subtest.sub_test_result.upper() or 'FAILURE (WITH WAIVER)' in subtest.sub_test_result.upper() %}
                                 {{ subtest.waiver_reason | default("N/A") }}
                             {% else %}
                                 N/A
                             {% endif %}
-                        </td>  <!-- New Data Cell -->
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -299,61 +329,44 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
     </html>
     """)
 
-    # Calculate total tests
+    # Instead of re-summing, we just read the final suite_summary from the JSON
     total_tests = (
         suite_summary["total_passed"]
         + suite_summary["total_failed"]
+        + suite_summary["total_failed_with_waiver"]
         + suite_summary["total_aborted"]
         + suite_summary["total_skipped"]
         + suite_summary["total_warnings"]
+        + suite_summary.get("total_ignored", 0)
     )
 
     # Render the HTML content
     html_content = template.render(
         chart_data=chart_data,
         total_tests=total_tests,
-        total_passed=suite_summary["total_passed"],
-        total_failed=suite_summary["total_failed"],
-        total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),  # Safely get the value with default 0
-        total_aborted=suite_summary["total_aborted"],
-        total_skipped=suite_summary["total_skipped"],
-        total_warnings=suite_summary["total_warnings"],
+        total_passed=suite_summary.get("total_passed", 0),
+        total_failed=suite_summary.get("total_failed", 0),
+        total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),
+        total_aborted=suite_summary.get("total_aborted", 0),
+        total_skipped=suite_summary.get("total_skipped", 0),
+        total_warnings=suite_summary.get("total_warnings", 0),
+        total_ignored=suite_summary.get("total_ignored", 0),
         test_results=test_results,
         is_summary_page=is_summary_page
     )
 
-    # Save to HTML file
     with open(output_html_path, "w") as file:
         file.write(html_content)
 
-# Main function to process the JSON file and generate the HTML report
 def main(input_json_file, detailed_html_file, summary_html_file):
     # Load JSON data
     with open(input_json_file, 'r') as json_file:
         data = json.load(json_file)
 
-    # Extract the suite summary and test results
-    # Initialize suite_summary with all required keys
-    suite_summary = {
-        'total_passed': 0,
-        'total_failed': 0,  # Only counts FAILED without waiver
-        'total_failed_with_waiver': 0,
-        'total_aborted': 0,
-        'total_skipped': 0,
-        'total_warnings': 0
-    }
-
+    # We DIRECTLY take the final suite_summary from the JSON
+    suite_summary = data["suite_summary"]
+    # And the test_results
     test_results = data["test_results"]
-
-    for test_suite in test_results:
-        test_case_summary = test_suite.get('test_case_summary', {})
-        # Handle different cases for keys (case-insensitive)
-        suite_summary['total_passed'] += get_case_insensitive(test_case_summary, 'total_passed', test_case_summary.get('total_passed', 0))
-        suite_summary['total_failed'] += get_case_insensitive(test_case_summary, 'total_failed', test_case_summary.get('total_failed', 0))
-        suite_summary['total_failed_with_waiver'] += get_case_insensitive(test_case_summary, 'total_failed_with_waiver', test_case_summary.get('total_failed_with_waiver', 0))
-        suite_summary['total_aborted'] += get_case_insensitive(test_case_summary, 'total_aborted', test_case_summary.get('total_aborted', 0))
-        suite_summary['total_skipped'] += get_case_insensitive(test_case_summary, 'total_skipped', test_case_summary.get('total_skipped', 0))
-        suite_summary['total_warnings'] += get_case_insensitive(test_case_summary, 'total_warnings', test_case_summary.get('total_warnings', 0))
 
     # Generate improved bar chart as base64 encoded image
     chart_data = generate_bar_chart_improved(suite_summary)
@@ -371,7 +384,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     input_json_file = sys.argv[1]
-    detailed_html_file = sys.argv[2]  # This will be SCT_detailed.html
-    summary_html_file = sys.argv[3]  # This will be the summary HTML report
+    detailed_html_file = sys.argv[2]
+    summary_html_file = sys.argv[3]
 
     main(input_json_file, detailed_html_file, summary_html_file)

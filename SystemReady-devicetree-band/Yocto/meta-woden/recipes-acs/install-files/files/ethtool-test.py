@@ -177,7 +177,7 @@ if __name__ == "__main__":
             print(result_ping.stderr)
 
             # skip other tests if ping doesn't work
-            if result_ping.returncode != 0 and "100% packet loss" in result_ping.stdout:
+            if result_ping.returncode != 0 or "100% packet loss" in result_ping.stdout:
                 print_color(f"INFO: Failed to ping router/gateway[{ip_address}] for {intrf}", "red")
                 print("\n****************************************************************\n")
                 continue
@@ -193,15 +193,32 @@ if __name__ == "__main__":
 
             if "bad address" in result_ping.stderr:
                 print_color(f"INFO: Unable to resolve www.arm.com, DNS not configured correctly for {intrf}",)
-
-            if result_ping.returncode != 0 and "100% packet loss" in result_ping.stdout:
+            if result_ping.returncode != 0 or "100% packet loss" in result_ping.stdout:
                 print_color(f"INFO: Failed to ping www.arm.com via {intrf}", "red")
             else:
                 print_color(f"INFO: Ping to www.arm.com is successful", "green")
+
+            # Checking connectivity using wget
+            wget_command = f"wget --spider -q --timeout=10 --tries=2 --bind-address={intrf} https://www.arm.com"
+            print_color(f"INFO: Running {wget_command} :", "green")
+            result_wget = subprocess.run(wget_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+            if result_wget.returncode != 0:
+                print_color(f"INFO: wget failed to reach https://www.arm.com via {intrf}", "red")
+            else:
+                print_color(f"INFO: wget successfully accessed https://www.arm.com via {intrf}", "green")
+
+            # Checking connectivity using curl
+            curl_command = f"curl -Is --connect-timeout 20 --interface {intrf} https://www.arm.com"
+            print_color(f"INFO: Running {curl_command} :", "green")
+            result_curl = subprocess.run(curl_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+            print_color(f"INFO: Curl Response: {result_curl.stdout}", "yellow")
+            if "HTTP/2 200" in result_curl.stdout or "HTTP/1.1 200 OK" in result_curl.stdout:
+                print_color(f"INFO: curl successfully fetched https://www.arm.com via {intrf}", "green")
+            else:
+                print_color(f"INFO: curl failed to fetch https://www.arm.com via {intrf}", "red")
+
             print("\n****************************************************************\n")
         exit(0)
     except Exception as e:
         print_color(f"Error occurred: {e}", "red")
         exit(1)
-
-

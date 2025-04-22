@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,35 +21,85 @@ connect -r
 
 # check if BBSR SCT in progress, if yes resume the run.
 for %b in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%b:\acs_tests\bbr\bbsr_sct_inprogress.flag then
-        echo "BBSR SCT in progress, Resuming ..."
+    if exist FS%b:\acs_tests\bbr\bbsr_inprogress.flag then
+        echo "BBSR compliance testing in progress, Resuming ..."
+        echo " "
         FS%b:\EFI\BOOT\bbsr_startup.nsh
     endif
 endfor
 
 # Run the config parser
-for %a in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%a:\acs_tests\parser\Parser.efi  then
-        FS%a:\acs_tests\parser\Parser.efi
+for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%y:\acs_tests\parser\Parser.efi then
+        if exist FS%y:\acs_tests\config\acs_run_config.ini then
+            FS%y:
+            echo "Config File content"
+            echo " "
+            echo " "
+            type acs_tests\config\acs_run_config.ini
+            echo " "
+            echo " "
+            echo "Press any key to modify the Config file"
+            echo "If no key is pressed then default configurations"
+            FS%y:acs_tests\bbr\SCT\Stallforkey.efi 10
+            if %lasterror% == 0 then
+                acs_tests\parser\parser.nsh
+                acs_tests\parser\Parser.efi -automation
+                goto DoneParser
+            else
+                acs_tests\parser\Parser.efi -automation
+                goto DoneParser
+            endif
+        else
+              echo "Config file not found at acs_tests/config/acs_run_config.ini"
+        endif
+    else
+            echo "Parser.efi not present at acs_tests/parser/Parser.efi"
     endif
 endfor
+:DoneParser
 
+# Run the SCT test
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_tests\bbr\SctStartup.nsh then
-        FS%i:\acs_tests\bbr\SctStartup.nsh %1
+        echo " "
+        echo "Running SCT test"
+        if "%config_enabled_for_automation_run%" == "" then
+            echo "config_enabled_for_automation_run variable does not exist"
+            FS%i:\acs_tests\bbr\SctStartup.nsh false
+            goto DoneSCT
+        endif
+        if "%config_enabled_for_automation_run%" == "true" then
+            FS%i:\acs_tests\bbr\SctStartup.nsh true
+        else
+            FS%i:\acs_tests\bbr\SctStartup.nsh false
+        endif
         goto DoneSCT
     endif
 endfor
 :DoneSCT
 
+# Run the SCRT test
 for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%k:\acs_tests\bbr\ScrtStartup.nsh then
-        FS%k:\acs_tests\bbr\ScrtStartup.nsh
-        goto Donebbr
+        echo " "
+        echo "Running SCRT test"
+        if "%config_enabled_for_automation_run%" == "" then
+            echo "config_enabled_for_automation_run variable does not exist"
+            FS%i:\acs_tests\bbr\ScrtStartup.nsh false
+            goto DoneScrt
+        endif
+        if "%config_enabled_for_automation_run%" == "true" then
+            FS%k:\acs_tests\bbr\ScrtStartup.nsh true
+        else
+            FS%k:\acs_tests\bbr\ScrtStartup.nsh false
+        endif
+        goto DoneScrt
     endif
 endfor
-:Donebbr
+:DoneScrt
 
+# Run the Capsule dump
 for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%e:\acs_results then
         FS%e:
@@ -58,167 +108,81 @@ for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             mkdir app_output
         endif
         cd app_output
-        for %q in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-            if exist FS%q:\acs_tests\app\CapsuleApp.efi then
-                echo "Running CapsuleApp "
-                FS%q:\acs_tests\app\CapsuleApp.efi -P > CapsuleApp_FMP_protocol_info.log
-                FS%q:\acs_tests\app\CapsuleApp.efi -E > CapsuleApp_ESRT_table_info.log
+        if exist CapsuleApp_FMP_protocol_info.log and exist CapsuleApp_ESRT_table_info.log then
+            echo " "
+            echo "CapsuleApp already run"
+        else
+            if exist FS%e:\acs_tests\app\CapsuleApp.efi then
+                echo " "
+                echo "Running capsule app dump"
+                FS%e:\acs_tests\app\CapsuleApp.efi -P > CapsuleApp_FMP_protocol_info.log
+                FS%e:\acs_tests\app\CapsuleApp.efi -E > CapsuleApp_ESRT_table_info.log
                 goto DoneApp
             endif
-        endfor
+        endif
     endif
 endfor
 :DoneApp
 
+# Run the DebugDump
 for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%p:\acs_tests\debug\debug_dump.nsh then
+        echo " "
+        echo "Running debug dump"
         FS%p:\acs_tests\debug\debug_dump.nsh
         goto DoneDebug
     endif
 endfor
 :DoneDebug
 
+# Run the BSA test
 for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%j:\acs_tests\bsa\bsa.nsh then
-        FS%j:\acs_tests\bsa\bsa.nsh
+        echo " "
+        echo "Running BSA test"
+        if "%config_enabled_for_automation_run%" == "" then
+            echo "config_enabled_for_automation_run variable does not exist"
+            FS%j:\acs_tests\bsa\bsa.nsh false
+            goto Donebsa
+        endif
+        if "%config_enabled_for_automation_run%" == "true" then
+            FS%j:\acs_tests\bsa\bsa.nsh true
+        else
+            FS%j:\acs_tests\bsa\bsa.nsh false
+        endif
         goto Donebsa
     endif
 endfor
 :Donebsa
 
+# Run the SBSA test
 for %z in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%z:\acs_tests\bsa\sbsa\sbsa.nsh then
-        FS%z:\acs_tests\bsa\sbsa\sbsa.nsh
+        echo " "
+        echo "Running SBSA test"
+        if "%config_enabled_for_automation_run%" == "" then
+            echo "config_enabled_for_automation_run variable does not exist"
+            goto Donesbsa
+        endif
+        if "%config_enabled_for_automation_run%" == "true" then
+            FS%z:\acs_tests\bsa\sbsa\sbsa.nsh true
+        else
+            echo "****** SBSA is disabled by default please enable in acs_tests\config\acs_run_config.ini ********"
+        endif
         goto Donesbsa
     endif
 endfor
 :Donesbsa
 
-for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%m:\acs_tests\debug\pingtest.nsh and exist FS%m:\yocto_image.flag then
-        FS%m:
-        cd FS%m:\acs_results
-        if not exist network_logs then
-            mkdir network_logs
-        endif
-        cd network_logs
-        echo Running ping test...
-        ifconfig -r
-        echo Waiting for network to come up...
-        stall 200000
-        echo "" > ping.log
-        ping 8.8.8.8 >> ping.log
-        type ping.log
-        FS%m:\acs_tests\debug\pingtest.nsh ping.log > pingtest.log
-        set pingreturn %lasterror%
-        type pingtest.log
-        if %pingreturn% == 0x0 then
-            echo Ping test passed.
-        else
-            echo Ping test failed.
-        endif
-        goto DonePing
-    endif
-endfor
-:DonePing
-
-# check for capsule update
-for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%r:\yocto_image.flag and exist FS%r:\acs_tests\app\capsule_update_check.flag then
-        echo "press any key to test capsule update"
-        FS%r:\acs_tests\bbr\SCT\stallforkey.efi 10
-        if %lasterror% == 0 then
-            goto CapsuleUpdate
-        else
-            if exist FS%r:\acs_tests\app\capsule_update_check.flag then
-                echo "capsule update is pending, press any key to skip capsule update"
-                FS%r:\acs_tests\bbr\SCT\stallforkey.efi 10
-                if %lasterror% == 0 then
-                    rm FS%r:\acs_tests\app\capsule_update_check.flag
-                    echo "" > FS%r:\acs_tests\app\capsule_update_ignore.flag
-                    echo "Capsule Update is ignored!!!"
-                else
-                    goto CapsuleUpdate
-                endif
-            endif
-            goto BootLinux
-        endif
-:CapsuleUpdate
-        if exist FS%r:\acs_tests\app\signed_capsule.bin then
-	    if exist FS%r:\acs_results_template then
-	        mkdir FS%r:\acs_results_template\fw
-	    else
-	       echo " template directory not present"
-	       goto BootLinux
-	    endif
-            smbiosview > FS%r:\acs_results_template\fw\smbiosview_before_update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_before_update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_before_update.log
-	    rm FS%r:\acs_tests\app\capsule_update_check.flag
-            echo "" > FS%r:\acs_tests\app\capsule_update_done.flag
-            echo "UEFI capsule update is in progress, system will reboot after update ..."
-            echo "Testing unauth.bin update" > FS%r:\acs_results_template\fw\capsule-update.log
-	    echo "Test_Info" >>  FS%r:\acs_results_template\fw\capsule-update.log
-	    if exist FS%r:\acs_tests\app\unauth.bin then
-              FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\unauth.bin >> FS%r:\acs_results_template\fw\capsule-update.log
-	    else
-	      echo "unauth.bin not present"
-	    endif
-            echo "Testing tampered.bin update" >> FS%r:\acs_results_template\fw\capsule-update.log
-	    echo "Test_Info" >>  FS%r:\acs_results_template\fw\capsule-update.log
-	    if exist FS%r:\acs_tests\app\tampered.bin then
-              FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\tampered.bin >> FS%r:\acs_results_template\fw\capsule-update.log
-	    else
-	      echo "tampered.bin not present"
-	    endif
-            echo "Testing signed_capsule.bin OD update" > FS%r:\acs_results_template\fw\capsule-on-disk.log
-	    echo "Test_Info" >> FS%r:\acs_results_template\fw\capsule-on-disk.log
-            FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\signed_capsule.bin -OD >> FS%r:\acs_results_template\fw\capsule-on-disk.log
-            echo "UEFI capsule update has failed..." >> FS%r:\acs_results_template\fw\capsule-on-disk.log
-            rm FS%r:\acs_tests\app\capsule_update_check.flag
-            rm FS%r:\acs_tests\app\capsule_update_done.flag
-            echo "" > FS%r:\acs_tests\app\capsule_update_unsupport.flag
-            smbiosview > FS%r:\acs_results_template\fw\smbiosview_after_update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_after_update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_after_update.log
-        else
-            rm FS%r:\acs_tests\app\capsule_update_check.flag
-	    mkdir FS%r:\acs_results_template\fw
-            echo "" > FS%r:\acs_tests\app\capsule_update_unsupport.flag
-	    echo "Testing signed_capsule.bin OD update" > FS%r:\acs_results_template\fw\capsule-on-disk.log
-	    echo "Test_Info" >> FS%r:\acs_results_template\fw\capsule-on-disk.log
-	    echo "signed_capsule.bin not present" >  FS%r:\acs_results_template\fw\capsule-on-disk.log
-            echo "signed_capsule.bin file is not present, please copy the same file into acs_tests/app partition"
-        endif
-        goto BootLinux
-    else
-        if exist FS%r:\yocto_image.flag and exist FS%r:\acs_tests\app\capsule_update_done.flag then
-            smbiosview > FS%r:\acs_results_template\fw\smbiosview_after_update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi -E > FS%r:\acs_results_template\fw\CapsuleApp_ESRT_table_info_after_update.log
-            FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_after_update.log
-	    echo "Capsule Update done!!!"
-        endif
-        goto BootLinux
-    endif
-endfor
-
-:BootLinux
-echo "Booting Linux"
+# Boot Linux
 for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%l:\Image and exist FS%l:\ramdisk-buildroot.img then
         FS%l:
         cd FS%l:\
+        echo " "
+        echo "Booting Linux"
         Image initrd=\ramdisk-buildroot.img debug crashkernel=512M,high log_buf_len=1M print-fatal-signals=1 efi=debug acpi=on earlycon systemd.log_target=null plymouth.ignore-serial-consoles console=tty0 console=ttyS0  console=ttyAMA0
-    endif
-    if exist FS%l:\Image and exist FS%l:\ramdisk-busybox.img then
-        FS%l:
-        cd FS%l:\
-        Image initrd=\ramdisk-busybox.img debug crashkernel=512M,high log_buf_len=1M print-fatal-signals=1 efi=debug acpi=on earlycon systemd.log_target=null plymouth.ignore-serial-consoles
-    endif
-    if exist FS%l:\Image and exist FS%l:\yocto_image.flag then
-        FS%l:
-        cd FS%l:\
-        Image LABEL=BOOT root=partuid rootfstype=ext4
+        goto DoneImage
     endif
 endfor
-echo "Image not found"
+:DoneImage

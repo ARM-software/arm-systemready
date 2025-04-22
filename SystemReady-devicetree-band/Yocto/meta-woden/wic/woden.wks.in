@@ -1,5 +1,5 @@
 bootloader --ptable gpt --timeout=10 --append="rootfstype=ext4"
 
-part /boot --source bootimg-efi --sourceparams="loader=${EFI_PROVIDER}" --part-type="C12A7328-F81F-11D2-BA4B-00A0C93EC93B" --label BOOT_ACS --active --align 1024 --use-uuid --size 250M
+part /boot --source bootimg-efi --sourceparams="loader=${EFI_PROVIDER}" --label BOOT_ACS --active --align 1024 --use-uuid --size 360M
 
 part / --source rootfs --fstype=ext4 --label root --align 1024 --use-uuid

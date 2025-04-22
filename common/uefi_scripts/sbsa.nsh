@@ -19,6 +19,18 @@
 echo -off
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_results then
+        if "%1" == "true" then
+            FS%i:
+            acs_tests\parser\Parser.efi -sbsa
+            if "%automation_sbsa_run%" == "" then
+                echo "automation_sbsa_run variable does not exist"
+            else
+                if "%automation_sbsa_run%" == "false" then
+                    echo "************ SBSA is disabled in config file(acs_run_config.ini) ************"
+                    goto Done
+                endif
+            endif
+        endif
         FS%i:
         cd FS%i:\acs_results
         if not exist uefi then
@@ -28,10 +40,16 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         if not exist temp then
             mkdir temp
         endif
+
+        # We are here means bsa.nsh is invoked from UEFI EE
+        if "%1" == "" then
+            FS%i:
+            acs_tests\parser\Parser.efi -sbsa
+            echo "UEFI EE SBSA Command: %SbsaCommand%"
+            FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -f SbsaTempResults.log
+            goto SbsaEE
+        endif
         if exist FS%i:\acs_tests\bsa\sbsa\Sbsa.efi then
-	    if not exist FS%i:\acs_tests\parser\SbsaRunEnabled.flag then
-	        goto Done
-	    endif
             echo "Press any key to start SBSA in verbose mode."
             echo "If no key is pressed then SBSA will be run in normal mode"
             FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
@@ -55,7 +73,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -v 1 -skip 900 -f SbsaVerboseTempResults.log
                 stall 200000
                 if exist FS%i:\acs_results\uefi\SbsaVerboseTempResults.log then
-                    echo " SystemReady band ACS v3.0.0-BETA0" > SbsaVerboseResults.log
+                    echo " SystemReady band ACS v3.0.1" > SbsaVerboseResults.log
                     stall 200000
                     type SbsaVerboseTempResults.log >> SbsaVerboseResults.log
                     cp SbsaVerboseTempResults.log temp/
@@ -82,10 +100,22 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 goto Done
             endif
 :SbsaNormalRun
-            FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
+            if "%1" == "false" then
+                echo "SBSA Command: Sbsa.efi -skip 900"
+                FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
+            else
+                if "%SbsaCommand%" == "" then
+                    echo "SbsaCommand variable does not exist, running default command Sbsa.efi -skip 900"
+                    FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
+                else
+                    echo "SBSA Command: %SbsaCommand%"
+                    FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -f SbsaTempResults.log
+                endif
+            endif
             stall 200000
+:SbsaEE
             if exist FS%i:\acs_results\uefi\SbsaTempResults.log then
-                echo " SystemReady band ACS v3.0.0-BETA0" > SbsaResults.log
+                echo " SystemReady band ACS v3.0.1" > SbsaResults.log
                 stall 200000
                 type SbsaTempResults.log >> SbsaResults.log
                 cp SbsaTempResults.log temp/
@@ -101,8 +131,4 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         goto Done
     endif
 endfor
-echo "acs_results not found"
 :Done
-if exist FS%i:\acs_tests\parser\SbsaRunEnabled.flag then
-  rm FS%i:\acs_tests\parser\SbsaRunEnabled.flag
-endif

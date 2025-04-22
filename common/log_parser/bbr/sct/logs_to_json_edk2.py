@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+
+import argparse
+import json
+import re
+import sys
+import os
+import chardet
+
+def detect_file_encoding(file_path):
+    """Detect file encoding using chardet."""
+    with open(file_path, 'rb') as f:
+        raw_data = f.read()
+        result = chardet.detect(raw_data)
+    return result.get('encoding', 'utf-8')
+
+def parse_edk2_log(input_file):
+    """
+    Parse an edk2-test-parser.log (Markdown table format) and extract exactly four fields:
+      - "Test Entry Point GUID" (from the column "set guid")
+      - "sub_Test_GUID"         (from the column "guid")
+      - "result"                (from the column "result")
+      - "reason"                (from the column "updated by")
+    
+    Returns a list of dictionaries.
+    """
+    if not os.path.exists(input_file):
+        print(f"Error: File not found: {input_file}", file=sys.stderr)
+        sys.exit(1)
+
+    encoding = detect_file_encoding(input_file)
+    results = []
+    header_found = False
+    col_index_map = {}
+
+    # Define target columns (lowercase) with their output JSON key names.
+    targets = {
+        "set guid": "Test Entry Point GUID",
+        "guid": "sub_Test_GUID",
+        "result": "result",
+        "updated by": "reason"
+    }
+
+    with open(input_file, 'r', encoding=encoding, errors='ignore') as f:
+        lines = f.readlines()
+
+    for line in lines:
+        line = line.rstrip("\n")
+        # Process only lines that look like table rows (start and end with "|")
+        if line.strip().startswith("|") and line.strip().endswith("|"):
+            # Split the row by "|" and remove any empty first and last elements.
+            cols = line.strip().split("|")
+            if cols and cols[0] == "":
+                cols = cols[1:]
+            if cols and cols[-1] == "":
+                cols = cols[:-1]
+
+            # Check if this row is a header row by looking for our target column names.
+            lower_cols = [col.strip().lower() for col in cols]
+            if not header_found and any(t in lower_cols for t in targets):
+                col_index_map = {}
+                for idx, col in enumerate(lower_cols):
+                    if col in targets:
+                        col_index_map[col] = idx
+                header_found = True
+                continue  # Skip processing the header row
+
+            # If header is found, skip separator rows (rows that contain only dashes)
+            if header_found:
+                if all(re.fullmatch(r"[-:]+", cell.strip()) for cell in cols if cell.strip()):
+                    continue
+
+                # Build a record based on the header column positions.
+                record = { output_key: "" for output_key in targets.values() }
+                for key, output_key in targets.items():
+                    idx = col_index_map.get(key)
+                    if idx is not None and idx < len(cols):
+                        record[output_key] = cols[idx].strip()
+                # Append the record if at least one target field is non-empty.
+                if any(record.values()):
+                    results.append(record)
+        else:
+            # Reset header_found if we leave a table section.
+            header_found = False
+
+    return results
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Parse an edk2-test-parser.log Markdown file and output JSON with fixed fields."
+    )
+    parser.add_argument("input_file", help="Path to the edk2-test-parser.log file")
+    parser.add_argument("output_file", help="Path to the output JSON file")
+    args = parser.parse_args()
+
+    parsed_results = parse_edk2_log(args.input_file)
+    with open(args.output_file, 'w', encoding='utf-8') as out_f:
+        json.dump(parsed_results, out_f, indent=4)
+
+if __name__ == "__main__":
+    main()

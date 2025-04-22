@@ -10,7 +10,6 @@ COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
 SRC_URI += "git://github.com/ARM-software/bsa-acs;destsuffix=edk2/ShellPkg/Application/bsa-acs;protocol=https;branch=main;name=bsa-acs \
             git://github.com/tianocore/edk2-libc;destsuffix=edk2/edk2-libc;protocol=https;branch=master;name=edk2-libc \
             file://bsa.patch \
-            file://bsa_uboot.patch \
             "
 
 SRCREV_bsa-acs   = "${AUTOREV}"
