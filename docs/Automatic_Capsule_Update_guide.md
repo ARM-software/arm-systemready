@@ -16,6 +16,8 @@ Capsule update is the standard interface to update the firmware. The SystemReady
 2. Boot the ACS image on the platform with the new.dtb file which was generated in Generate
   capsule files.
 
+3. The system must have a separate EFI System Partition (ESP) to support and test capsule updates.
+
 ## Automatic Capsule update flow
 1. Select bbr/bsa from the GRUB boot menu and press Enter. This is the default selection and will run automatically if no other option is chosen.
 
