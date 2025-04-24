@@ -27,19 +27,20 @@ SystemReady-devicetree band compliant platforms implement a minimum set of hardw
 The SystemReady-devicetree band compliance and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
 ## Latest Release details
- - Release version: v3.0.0-BET0
- - **The latest pre-built release of SystemReady-devicetree band ACS is available for download here: [v24.11_3.0.0-BET0](prebuilt_images/v24.11_3.0.0-BET0)**
+ - Release version: v3.0.1
+ - Quality: EAC
+ - **The latest pre-built release of SystemReady-devicetree band ACS is available for download here: [v25.04_3.0.1](prebuilt_images/v25.04_3.0.1)**
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
  - SystemReady-devicetree-band Image Test Suite details
 
 | Test Suite                                                                                   | Test Suite Tag                                               | Specification Version |
 |----------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------|
-| [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs)                    | v24.11_REL1.0.9                                              | BSA v1.0 (c)          |
-| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0 | EBBR v2.2             |
-| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v24.11_EBBR_REL2.2.0-BETA0_SBBR_REL2.1.0-BETA0_BBSR_REL1.3.0 | BBSR v1.3             |
+| [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs)                    | v25.04_DT_3.0.1                                              | BSA v1.1              |
+| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v25.04_DT_3.0.1                                              | EBBR v2.2             |
+| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v25.04_DT_3.0.1                                              | BBSR v1.3             |
 | [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4                     |                       |
-| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v24.09.00                                                    |                       |
+| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v25.01.00                                                    |                       |
 
 ## Prebuilt images
 - Prebuilt images for each release are available in the prebuilt_images folder.To access the prebuilt_images, click : [prebuilt_images](prebuilt_images/)
@@ -85,9 +86,9 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
 - '/' <br />
   Root partition for Linux which contains test-suites to run in Linux environment. <br/>
 - 'BOOT_ACS' <br />
-  Approximate size: 250 MB <br />
+  Approximate size: 350 MB <br />
   contains bootable applications and test suites. <br />
-  contains a 'acs_results' directory which stores logs of the automated execution of ACS.
+  contains an 'acs_results_template' directory which stores logs of the automated execution of ACS.
 
 ## Image Directory Structure
 ```
@@ -128,8 +129,10 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
 │   └── debug
 │       ├── debug_dump.nsh
 │       └── pingtest.nsh
-├── acs_results
 ├── acs_results_template
+│       ├── acs_results
+│       ├── fw
+│       └── os-logs
 ├── Image
 ├── core-image-initramfs-boot-genericarm64.cpio.gz
 ├── ubootefi.var
@@ -150,8 +153,10 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
   - config directory contains system, acs related config files
   - debug directory contains script to gather debug information
   - debug/pingtest.nsh is uefi script for ping test
-- acs_results will contain result logs of various test suite run of ACS test suite tools
-- acs_results_template Place the manual/OS test logs in this folder as per the [systemready-ir-template structure](https://gitlab.arm.com/systemready/systemready-ir-template)
+- acs_results_template main resuts directory
+  - acs_results will contain result logs of various test suite run of ACS test suite tools
+  - fw  contains capsule update test logs
+  - os-logs Manual os testing log needs to be put in this folder
 - Image - Linux kernel image file, also contains linux test suites and processing scripts
   - /usr/bin/init.sh - linux automation script
   - /usr/bin/secure_init.sh - linux automation script for bbsr
@@ -180,9 +185,9 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
    - noacs command line parameter: Edit the Linux Boot grub menu option and add **noacs** at the end of Linux Boot grub menu option, to boot into ACS Linux kernel without running the default Linux test suites.
    - initcall_blacklist=psci_checker command line parameter: Edit the Linux Boot grub menu option and add **initcall_blacklist=psci_checker** to skip default linux psci_checker tool.
  - **bbr/bsa** : This is **default** option and will run the automated compliance
-   - UEFI compliance run - SCT, BSA UEFI, [Capsule Update](https://github.com/chetan-rathore/arm-systemready/blob/main/common/docs/Automatic_Capsule_Update_guide.md)
+   - UEFI compliance run - SCT, BSA UEFI, [Capsule Update](https://github.com/chetan-rathore/arm-systemready/blob/main/docs/Automatic_Capsule_Update_guide.md)
    - Boots to Linux and run Linux compliance run - FWTS, BSA Linux
- - **BBSR Compliance (Automation)** : This option will run the SCT and FWTS tests required for BBSR compliance, perform a Linux secure boot, and, if a TPM is present, evaluate the measured boot log. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../common/docs/BBSR_ACS_Verification.md).
+ - **BBSR Compliance (Automation)** : This option will run the SCT and FWTS tests required for BBSR compliance, perform a Linux secure boot, and, if a TPM is present, evaluate the measured boot log. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../docs/BBSR_ACS_Verification.md).
 
 ### ACS configs file
 - **acs_config_dt.txt**: The file specifies the ARM specification version that the ACS tool suite complies with, and this information is included in the **System_Information** table of the **ACS_Summary.html** report.
@@ -199,11 +204,11 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
 - Also for easier intrepretation, results will also be captured in HTML format.
 
 #### Standard Formatted Result
-- The JSON and HTML formatted results are present in /acs_results/**acs_summary**  folder.
+- The JSON and HTML formatted results are present in acs_results_template/acs_results/**acs_summary**  folder.
 
 #### Waiver application process
-- Please follow the [waiver application guide](https://github.com/ARM-software/arm-systemready/blob/main/common/docs/waiver_guide.md) on details of waiver application to acs results
-- Template of waiver.json can be found [here](https://github.com/ARM-software/arm-systemready/blob/main/common/docs/example_waiver.json)
+- Please follow the [waiver application guide](https://github.com/ARM-software/arm-systemready/blob/main/docs/waiver_guide.md) on details of waiver application to acs results
+- Template of waiver.json can be found [here](https://github.com/ARM-software/arm-systemready/blob/main/docs/example_waiver.json)
 
 ## Verification on Open-Source FVP
 
@@ -216,7 +221,7 @@ The U-Boot firmware and QEMU can be built with [Buildroot](https://buildroot.org
 To download and build the firmware code, do the following:
 
 ```
-git clone https://git.buildroot.net/buildroot -b 2023.05.x
+git clone https://git.buildroot.net/buildroot -b 2024.08
 cd buildroot
 make qemu_aarch64_ebbr_defconfig
 make
@@ -288,5 +293,5 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2022-2024, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2022-2025, Arm Limited and Contributors. All rights reserved.*
 
