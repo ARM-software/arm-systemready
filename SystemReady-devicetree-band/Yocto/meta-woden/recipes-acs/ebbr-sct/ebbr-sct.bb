@@ -14,8 +14,7 @@ export KEYS_DIR="${DEPLOY_DIR_IMAGE}/bbsr-keys"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://bbr-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13"
 
-# TODO 
-SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=https;branch=3.0_dev;name=bbr-acs \
+SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=https;branch=main;name=bbr-acs \
             git://github.com/tianocore/edk2-test;destsuffix=edk2-test;protocol=https;nobranch=1;name=edk2-test \
             gitsm://github.com/tianocore/edk2.git;destsuffix=edk2-test/edk2;protocol=https;nobranch=1;name=edk2 \
             file://sctversion.patch;patch=1;patchdir=edk2-test \
