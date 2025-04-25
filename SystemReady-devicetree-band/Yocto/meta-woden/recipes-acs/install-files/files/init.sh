@@ -52,7 +52,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       /usr/bin/secure_init.sh
       echo "BBSR ACS run is completed\n"
       echo "SecureBoot keys needs to be manually cleared, please refer to BBSR_ACS_Verification.md guide for the steps"
-      echo "https://github.com/ARM-software/arm-systemready/blob/main/docs/BBSR_ACS_Verification.md”
+      echo "https://github.com/ARM-software/arm-systemready/blob/main/docs/BBSR_ACS_Verification.md"
       echo "Please press <Enter> to continue ..."
       echo -e -n "\n"
       exit 0
