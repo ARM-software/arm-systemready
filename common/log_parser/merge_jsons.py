@@ -135,7 +135,7 @@ def count_fails_in_json(data):
 #        "Main Readiness Grouping" fields for each test suite.
 ################################################################################
 
-TEST_CATEGORY_DT_PATH = "/data_sda/ashsha06/forkIR/arm-systemready/common/log_parser/test_categoryDT.json"
+TEST_CATEGORY_DT_PATH = "/usr/bin/log_parser/test_categoryDT.json"
 
 try:
     with open(TEST_CATEGORY_DT_PATH, "r") as catf:
