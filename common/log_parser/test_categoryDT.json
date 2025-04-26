@@ -269,7 +269,7 @@
       "Test Suite": "RuntimeServicesTest",
       "specName": "UEFI",
       "rel Import. to main readiness": "Critical",
-      "Waivable": "yes",
+      "Waivable": "no",
       "SRS scope": "Required",
       "FunctionID": 4,
       "Main Readiness Grouping": "runtime readiness"
@@ -437,7 +437,7 @@
       "Test Suite": "Capsule update",
       "specName": "SRS",
       "rel Import. to main readiness": "Minor",
-      "Waivable": "yes",
+      "Waivable": "no",
       "SRS scope": "Required",
       "FunctionID": 2,
       "Main Readiness Grouping": "maintenance readiness"
