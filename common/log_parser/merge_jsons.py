@@ -288,10 +288,11 @@ def merge_json_files(json_files, output_file):
         merged_results[section_name] = data
 
         # If 'data' is a dict with 'test_results' list, unify it
-        if isinstance(data, dict) and "test_results" in data and isinstance(data["test_results"], list):
+        if (isinstance(data, dict)
+            and "test_results" in data
+            and isinstance(data["test_results"], list)
+        ):
             data_list = data["test_results"]
-            # Overwrite the merged_results entry so it's always a list
-            merged_results[section_name] = data_list
         else:
             data_list = data
 
@@ -540,16 +541,22 @@ def merge_json_files(json_files, output_file):
         "Suite_Name: PSCI": "Suite_Name: Standalone"
     }
 
-    # Right after final compliance logic, before writing out merged_results:
+    def _entry_to_list(entry):
+        if isinstance(entry, list):
+            return entry
+        if (
+            isinstance(entry, dict)
+            and "test_results" in entry
+            and isinstance(entry["test_results"], list)
+        ):
+            return entry["test_results"]
+        return [entry]
+
     for old_key, new_key in RENAME_SUITES_TO_STANDALONE.items():
         if old_key in merged_results:
-            old_data = merged_results.pop(old_key)  # old_data is a list
-            if new_key in merged_results:
-                # If "Suite_Name: Standalone" already exists, extend the list
-                merged_results[new_key].extend(old_data)
-            else:
-                # Otherwise, just rename
-                merged_results[new_key] = old_data
+            old_data_list = _entry_to_list(merged_results.pop(old_key))
+            merged_results.setdefault(new_key, [])
+            merged_results[new_key].extend(old_data_list)
 
     with open(output_file, 'w') as outj:
         json.dump(merged_results, outj, indent=4)
