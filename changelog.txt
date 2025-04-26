@@ -1,3 +1,22 @@
+v25.04_DT_3.0.1
+** Devicetree band**
+* PSCI checks for version added as recommended test.
+* PDF generation of ACS summary.
+* systemready scripts updated to identify latest release version.
+* log parser enhancement to display individual test and overall compliance on console.
+* ethtool test enhanced with wget and curl checks.
+* post scripts logs added to json and html.
+* Fixed acs summary system family field. 
+* Image Linux kernel upgraded to 6.12.
+* FWTS upgraded to 2025.01.
+* edk2 upgraded to 202411.
+* Bug fixes and feebacks to 3.0.0 BETA0 release.
+* edk2 test parser integrated for SCT results.
+* ESP partition removed from ACS image.
+* BBSR uefi and linux seperate grub option merged in single.
+* BBSR auto run of fwts test after sct run.
+* Added support for ttySC0 console for renesas platform.
+
 v25.04_SR_3.0.1
 ** SystemReady band**
 * Addition of execution environment for SystemReady band
