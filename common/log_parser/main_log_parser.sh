@@ -351,7 +351,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             "$DT_KSELFTEST_LOG" \
             "$DT_KSELFTEST_JSON"
         Standalone_JSONS+=("$DT_KSELFTEST_JSON")
-        apply_waivers "Standalone_tests" "$DT_KSELFTEST_JSON"
+        apply_waivers "Standalone" "$DT_KSELFTEST_JSON"
     fi
 
     # 2) DT_VALIDATE
@@ -362,7 +362,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             "$DT_VALIDATE_LOG" \
             "$DT_VALIDATE_JSON"
         Standalone_JSONS+=("$DT_VALIDATE_JSON")
-        apply_waivers "Standalone_tests" "$DT_VALIDATE_JSON"
+        apply_waivers "Standalone" "$DT_VALIDATE_JSON"
     fi
 
     # 3) ETHTOOL_TEST
@@ -373,7 +373,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             "$ETHTOOL_TEST_LOG" \
             "$ETHTOOL_TEST_JSON"
         Standalone_JSONS+=("$ETHTOOL_TEST_JSON")
-        apply_waivers "Standalone_tests" "$ETHTOOL_TEST_JSON"
+        apply_waivers "Standalone" "$ETHTOOL_TEST_JSON"
     fi
 
     # 4) READ_WRITE_CHECK
@@ -384,7 +384,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             "$READ_WRITE_CHECK_LOG" \
             "$READ_WRITE_CHECK_JSON"
         Standalone_JSONS+=("$READ_WRITE_CHECK_JSON")
-        apply_waivers "Standalone_tests" "$READ_WRITE_CHECK_JSON"
+        apply_waivers "Standalone" "$READ_WRITE_CHECK_JSON"
     fi
 
     # 5) CAPSULE UPDATE => parse as standalone
@@ -404,7 +404,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
 
         if [ -f "$CAPSULE_JSON" ]; then
             CAPSULE_PROCESSED=1
-            apply_waivers "Standalone_tests" "$CAPSULE_JSON"
+            apply_waivers "Standalone" "$CAPSULE_JSON"
             Standalone_JSONS+=("$CAPSULE_JSON")
         else
             echo "WARNING: Capsule Update JSON not created."

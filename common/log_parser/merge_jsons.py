@@ -135,7 +135,7 @@ def count_fails_in_json(data):
 #        "Main Readiness Grouping" fields for each test suite.
 ################################################################################
 
-TEST_CATEGORY_DT_PATH = "/data_sda/ashsha06/forkIR/arm-systemready/common/log_parser/test_categoryDT.json"
+TEST_CATEGORY_DT_PATH = "/usr/bin/log_parser/test_categoryDT.json"
 
 try:
     with open(TEST_CATEGORY_DT_PATH, "r") as catf:
@@ -530,6 +530,26 @@ def merge_json_files(json_files, output_file):
         print(f"{GREEN}BBSR extension compliance results: {bbsr_comp_str}{RESET}\n")
     else:
         print(f"{RED}BBSR extension compliance results: {bbsr_comp_str}{RESET}\n")
+    
+    RENAME_SUITES_TO_STANDALONE = {
+        "Suite_Name: DT Kselftest": "Suite_Name: Standalone",
+        "Suite_Name: CAPSULE_UPDATE": "Suite_Name: Standalone",
+        "Suite_Name: DT Validate": "Suite_Name: Standalone",
+        "Suite_Name: Ethtool Test": "Suite_Name: Standalone",
+        "Suite_Name: Read Write Check Block Devices": "Suite_Name: Standalone",
+        "Suite_Name: PSCI": "Suite_Name: Standalone"
+    }
+
+    # Right after final compliance logic, before writing out merged_results:
+    for old_key, new_key in RENAME_SUITES_TO_STANDALONE.items():
+        if old_key in merged_results:
+            old_data = merged_results.pop(old_key)  # old_data is a list
+            if new_key in merged_results:
+                # If "Suite_Name: Standalone" already exists, extend the list
+                merged_results[new_key].extend(old_data)
+            else:
+                # Otherwise, just rename
+                merged_results[new_key] = old_data
 
     with open(output_file, 'w') as outj:
         json.dump(merged_results, outj, indent=4)
