@@ -466,12 +466,11 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
             total_aborted = 0
             total_skipped = 0
             total_warnings = 0
+            total_ignored = 0
 
             for subtest in test_suite_entry.get('subtests', []):
                 sub_test_result = subtest.get('sub_test_result')
-
                 if isinstance(sub_test_result, dict):
-                    # For fwts.json, sct.json, and STANDALONE JSONs
                     total_passed += sub_test_result.get('PASSED', 0)
                     total_failed += sub_test_result.get('FAILED', 0) + sub_test_result.get('FAILED_WITH_WAIVER', 0)
                     total_failed_with_waiver += sub_test_result.get('FAILED_WITH_WAIVER', 0)
@@ -479,27 +478,32 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                     total_skipped += sub_test_result.get('SKIPPED', 0)
                     total_warnings += sub_test_result.get('WARNINGS', 0)
                 elif isinstance(sub_test_result, str):
-                    # For other JSON structures like BSA/SBSA
-                    if 'PASS' in sub_test_result.upper():
+                    r = sub_test_result.upper()
+                    if 'PASS' in r:
                         total_passed += 1
-                    if 'FAIL' in sub_test_result.upper():  # <-- ADDED condition
+                    elif 'FAIL' in r:
                         total_failed += 1
-                        if '(WITH WAIVER)' in sub_test_result.upper():
+                        if '(WITH WAIVER)' in r:
                             total_failed_with_waiver += 1
-                    if 'SKIPPED' in sub_test_result.upper():
+                    elif 'ABORTED' in r:
+                        total_aborted += 1
+                    elif 'SKIPPED' in r:
                         total_skipped += 1
-                    if 'WARNING' in sub_test_result.upper():
+                    elif 'WARNING' in r:
                         total_warnings += 1
-                # Handle other cases if needed
+                    else:
+                        # anything else (IGNORED, NOT SUPPORTED, etc.)
+                        total_ignored += 1
 
             # Update the summary field with the new counts
             test_suite_entry[summary_field] = {
                 'total_passed': total_passed,
-                'total_failed': total_failed,  # Total failed including waivers
+                'total_failed': total_failed,
                 'total_failed_with_waiver': total_failed_with_waiver,
                 'total_aborted': total_aborted,
                 'total_skipped': total_skipped,
-                'total_warnings': total_warnings
+                'total_warnings': total_warnings,
+                'total_ignored': total_ignored,
             }
     if "suite_summary" in json_data and isinstance(json_data["suite_summary"], dict):
         total_passed_top = 0
@@ -508,32 +512,37 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
         total_aborted_top = 0
         total_skipped_top = 0
         total_warnings_top = 0
-        total_ignored_top = 0  # if needed
+        total_ignored_top = 0  # adjust if you track ignored at sub-level
 
         if "test_results" in json_data and isinstance(json_data["test_results"], list):
             for suite_obj in json_data["test_results"]:
-                # Use test_case_summary if available, else test_suite_summary
-                if "test_case_summary" in suite_obj and isinstance(suite_obj["test_case_summary"], dict):
+                # Prefer the more detailed test_case_summary when it exists
+                if (
+                    "test_case_summary" in suite_obj
+                    and isinstance(suite_obj["test_case_summary"], dict)
+                ):
                     summary = suite_obj["test_case_summary"]
-                elif "test_suite_summary" in suite_obj and isinstance(suite_obj["test_suite_summary"], dict):
-                    summary = suite_obj["test_suite_summary"]
                 else:
-                    summary = {}
-                total_passed_top += summary.get("total_passed", 0)
-                total_failed_top += summary.get("total_failed", 0)
-                total_failed_with_waiver_top += summary.get("total_failed_with_waiver", 0)
-                total_aborted_top += summary.get("total_aborted", 0)
-                total_skipped_top += summary.get("total_skipped", 0)
-                total_warnings_top += summary.get("total_warnings", 0)
-                total_ignored_top += summary.get("total_ignored", 0)
+                    summary = suite_obj.get("test_suite_summary", {})
 
-        json_data["suite_summary"]["total_passed"] = total_passed_top
-        json_data["suite_summary"]["total_failed"] = total_failed_top
-        json_data["suite_summary"]["total_failed_with_waiver"] = total_failed_with_waiver_top
-        json_data["suite_summary"]["total_aborted"] = total_aborted_top
-        json_data["suite_summary"]["total_skipped"] = total_skipped_top
-        json_data["suite_summary"]["total_warnings"] = total_warnings_top
-        json_data["suite_summary"]["total_ignored"] = total_ignored_top        
+                total_passed_top              += summary.get("total_passed", 0)
+                total_failed_top              += summary.get("total_failed", 0)
+                total_failed_with_waiver_top  += summary.get("total_failed_with_waiver", 0)
+                total_aborted_top             += summary.get("total_aborted", 0)
+                total_skipped_top             += summary.get("total_skipped", 0)
+                total_warnings_top            += summary.get("total_warnings", 0)
+                total_ignored_top             += summary.get("total_ignored", 0)
+
+        # this eliminates the old UPPER-CASE keys
+        json_data["suite_summary"] = {
+            "total_passed":               total_passed_top,
+            "total_failed":               total_failed_top,
+            "total_failed_with_waiver":   total_failed_with_waiver_top,
+            "total_aborted":              total_aborted_top,
+            "total_skipped":              total_skipped_top,
+            "total_warnings":             total_warnings_top,
+            "total_ignored":              total_ignored_top,
+        }        
 
     # Write the updated JSON data back to the file
     try:
