@@ -20,6 +20,13 @@ Navigate to the SystemReady-devicetree band, or SystemReady band for further det
 * [SystemReady-devicetree-band](./SystemReady-devicetree-band/)
 * [SystemReady-band](./SystemReady-band)
 
+## Legacy Repository
+
+> ⚠️ **Note:** This project has a legacy version that is no longer actively maintained but may still be useful for historical reference or backward compatibility.
+
+You can find the legacy repository here:  
+🔗 [**Legacy_systemready**](https://github.com/ARM-software/arm-systemready/tree/legacy_systemready)
+
 ## SystemReady BBSR:
 The SystemReady BBSR tests if the firmware meets the requirements specified by the Arm [Base Boot Security Requirements specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). BBSR ACS is integrated in SystemReady band and SystemReady-devicetree band ACS prebuilt images.
 
