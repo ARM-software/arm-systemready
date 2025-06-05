@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -345,6 +345,12 @@ def main(input_file, output_file):
         for i, line in enumerate(lines):
             line = line.strip()
 
+            if re.match(r'^\s*Device\s*Path\s*:', line, re.IGNORECASE):
+                dp_value = line.split(':', 1)[1].strip()
+                if test_entry is not None:
+                    test_entry["Device Path"] = dp_value
+                continue
+
             # Start of a new test entry
             if "BBR ACS" in line:
                 if test_entry:
@@ -496,6 +502,9 @@ def main(input_file, output_file):
             "Test Entry Point GUID": test_obj["Test Entry Point GUID"],
             "Returned Status Code": test_obj["Returned Status Code"]
         }
+        if "Device Path" in test_obj:
+            reordered["Device Path"] = test_obj["Device Path"]
+
         if "test_result" in test_obj:
             reordered["test_result"] = test_obj["test_result"]
         if "reason" in test_obj:
