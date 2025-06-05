@@ -1,24 +1,18 @@
-# Block‑Device Read/Write Check
+# Block device checks
 
-*A field‑ready integrity‑check for every storage device on a Linux target*
+* Integrity‑checks for storage device which can be used as OS boot medium
 
 ---
 
 ## 1  Overview
 
-This Python program discovers **all block devices** attached to the system and performs a **read and write check**:
+The python scripts discovers **all block devices** attached to the system and performs a **read and write check** to verify if a storage device is suitable and reliable for booting, confirming basic read/write integrity and explicitly avoiding critical partitions to prevent accidental system corruption.
 
 * **Read‑Test** – one‑megabyte raw read from each partition (or entire raw disk) to prove basic I/O.
 * **Optional Write‑Test** – a single 512‑byte sector is backed up, overwritten with a signed test pattern, read back for SHA‑256 verification, then **restored** byte‑for‑byte.
 
 Critical partitions (e.g., EFI System, BIOS bootloader) are identified using their partition GUIDs and explicitly skipped from read/write operations.
 
-## Use Cases
-
-- **Boot Device Verification:**
-  Quickly verifies if a storage device is suitable and reliable for booting, confirming basic read/write integrity and explicitly avoiding critical partitions to prevent accidental system corruption.
- - **CI Integration:** 
-  Gate write‑test in CI with an environment variable (`NON_INTERACTIVE=1`).
 ## 2  Key Features
 
 | Safety guard                      | Mechanism                                                                                              |
@@ -105,7 +99,7 @@ Root privileges (or `CAP_SYS_RAWIO`) are required for raw block access.
 | --------------------- | ------------------------------------------------------------------------------------- |
 | Add precious MBR ID   | `precious_parts_mbr["<label>"] = "0xXX"`                                              |
 | Add precious GPT GUID | `precious_parts_gpt["<label>"] = "GUID"`                                              |
-| Disable prompts (CI)  | Replace the `input_with_timeout()` call with a hard‑coded "no" or gate behind a flag. |
+| Disable prompts (CI)  | Replace the `input_with_timeout()` call with a hard‑coded "no" or gate write‑test in CI with an environment variable (`NON_INTERACTIVE=1`).. |
 | Change pattern size   | Adjust `bs=512 count=1` in all `dd` commands *and* update padding logic.              |
 | Prompt timeout        | Second argument of `input_with_timeout(prompt, timeout=…)`.                           |
 
@@ -136,7 +130,7 @@ Root privileges (or `CAP_SYS_RAWIO`) are required for raw block access.
 
 ## 9  Conclusion
 
-The utility provides an automated and safe method to verify basic read/write integrity of block devices, explicitly skipping firmware partitions to prevent unintended modifications.
+The utility provides an automated and safe method to verify basic read and write integrity of block devices, explicitly skipping firmware partitions to prevent unintended modifications.
 
 --------------
 *Copyright (c) 2025, Arm Limited and Contributors. All rights reserved.*
