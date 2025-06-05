@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -134,6 +134,8 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                 width: 100%;
                 border-collapse: collapse;
                 margin: 20px 0;
+                table-layout: fixed;
+                word-wrap: break-word;
             }
             th, td {
                 padding: 12px;
@@ -289,6 +291,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
             <div class="heading">Test Entry Point GUID: <span>{{ test["Test Entry Point GUID"] }}</span></div>
             <div class="heading">Test Result: <span>{{ test.test_result if test.test_result else "N/A" }}</span></div>
             <div class="heading">Reason: <span>{{ test.reason if test.reason else "N/A" }}</span></div>
+            <div class="heading">Device Path: <span>{{ test.get('Device Path', 'N/A') }}</span></div>
             <br>
             <table>
                 <thead>
