@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,7 +42,6 @@ UEFI_PATH=edk2
 UEFI_TOOLCHAIN=GCC49
 CROSS_COMPILE=$TOP_DIR/$GCC
 UEFI_LIBC_PATH=edk2-libc
-PATCH_DIR=$TOP_DIR/patches
 OUTDIR=${TOP_DIR}/output
 BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
 KEYS_DIR=$TOP_DIR/bbsr-keys
@@ -50,16 +49,6 @@ KEYS_DIR=$TOP_DIR/bbsr-keys
 do_build()
 {
     pushd $TOP_DIR/$UEFI_PATH
-
-    git checkout ShellPkg/ShellPkg.dsc # Remove if any patches applied
-    if git apply --check $PATCH_DIR/bsa.patch; then
-      echo "Applying BSA Patch ..."
-      git apply $PATCH_DIR/bsa.patch
-    else
-      echo "Error while applying BSA Patch"
-      exit_fun
-    fi
-
     source ./edksetup.sh
     make -C BaseTools/Source/C
     export EDK2_TOOLCHAIN=$UEFI_TOOLCHAIN
@@ -75,7 +64,7 @@ do_build()
 
     export PACKAGES_PATH=$TOP_DIR/$UEFI_PATH:$TOP_DIR/$UEFI_PATH/$UEFI_LIBC_PATH
     export PYTHON_COMMAND=/usr/bin/python3
-    source ShellPkg/Application/bsa-acs/tools/scripts/acsbuild.sh
+    source ShellPkg/Application/sysarch-acs/tools/scripts/acsbuild.sh bsa
     popd
 }
 
