@@ -50,7 +50,7 @@ get_uefi_src()
     popd
 }
 
-get_bsa_src()
+get_sysarch_acs_src()
 {
     pushd $TOP_DIR/edk2
     git clone https://github.com/tianocore/edk2-libc
@@ -59,33 +59,16 @@ get_bsa_src()
         exit 1
     fi
 
-    if [ -z $ARM_BSA_TAG ]; then
+    if [ -z $SYS_ARCH_ACS_TAG ]; then
         #No TAG is provided. Download the latest code
         echo "Downloading Arm BSA source code."
-        git clone --depth 1 https://github.com/ARM-software/bsa-acs.git ShellPkg/Application/bsa-acs
+        git clone --depth 1 https://github.com/ARM-software/sysarch-acs.git ShellPkg/Application/sysarch-acs
     else
-        echo "Downloading Arm BSA source code. TAG : $ARM_BSA_TAG"
-        git clone --depth 1 --branch $ARM_BSA_TAG https://github.com/ARM-software/bsa-acs.git ShellPkg/Application/bsa-acs
+        echo "Downloading Arm BSA source code. TAG : $SYS_ARCH_ACS_TAG"
+        git clone --depth 1 --branch $SYS_ARCH_ACS_TAG https://github.com/ARM-software/sysarch-acs.git ShellPkg/Application/sysarch-acs
     fi
     popd
-    pushd  $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
-    git pull
-    popd
-}
-
-get_sbsa_src()
-{
-    pushd $TOP_DIR/edk2
-    if [ -z $ARM_SBSA_TAG ]; then
-        #No TAG is provided. Download the latest code
-        echo "Downloading Arm SBSA source code."
-        git clone --depth 1 https://github.com/ARM-software/sbsa-acs.git ShellPkg/Application/sbsa-acs
-    else
-        echo "Downloading Arm SBSA source code. TAG : $ARM_SBSA_TAG"
-        git clone --depth 1 --branch $ARM_SBSA_TAG https://github.com/ARM-software/sbsa-acs.git ShellPkg/Application/sbsa-acs
-    fi
-    popd
-    pushd  $TOP_DIR/edk2/ShellPkg/Application/sbsa-acs
+    pushd  $TOP_DIR/edk2/ShellPkg/Application/sysarc-acs
     git pull
     popd
 }
@@ -144,10 +127,14 @@ get_linux-acs_src()
 {
   if [ -z $ARM_LINUX_ACS_TAG ]; then
       echo "Downloading Arm Linux ACS source code."
-      git clone --depth 1 https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
+      git clone https://git.gitlab.arm.com/linux-arm/linux-acs.git linux-acs
+      cd linux-acs
+      git checkout sysarch-acs
   else
       echo "Downloading Arm Linux ACS source code. TAG : ${ARM_LINUX_ACS_TAG}"
-      git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
+      git clone --branch ${ARM_LINUX_ACS_TAG} https://git.gitlab.arm.com/linux-arm/linux-acs.git linux-acs
+      cd linux-acs
+      git checkout sysarch-acs
   fi
 
     pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
@@ -232,8 +219,7 @@ fi
 get_uefi_src
 get_efitools_src
 get_sct_src
-get_bsa_src
-get_sbsa_src
+get_sysarch_acs_src
 get_bbr_acs_src
 get_buildroot_src
 get_cross_compiler

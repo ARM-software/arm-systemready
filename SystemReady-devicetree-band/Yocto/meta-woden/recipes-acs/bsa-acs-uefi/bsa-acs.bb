@@ -4,24 +4,31 @@ PROVIDES:remove = "virtual/uefi-firmware"
 PROVIDES:remove = "virtual/bootloader"
 
 LICENSE += "& Apache-2.0"
-LIC_FILES_CHKSUM += "file://ShellPkg/Application/bsa-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13"
+LIC_FILES_CHKSUM += "file://ShellPkg/Application/sysarch-acs/LICENSE;md5=86d3f3a95c324c9479bd8986968f4327"
 COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
 
-SRC_URI += "git://github.com/ARM-software/bsa-acs;destsuffix=edk2/ShellPkg/Application/bsa-acs;protocol=https;branch=main;name=bsa-acs \
+SRC_URI += "git://github.com/ARM-software/sysarch-acs;destsuffix=edk2/ShellPkg/Application/sysarch-acs;protocol=https;branch=main;name=sysarch-acs \
             git://github.com/tianocore/edk2-libc;destsuffix=edk2/edk2-libc;protocol=https;branch=master;name=edk2-libc \
-            file://bsa.patch \
+            file://edk2_bsa_dt.patch \
             "
 
-SRCREV_bsa-acs   = "${AUTOREV}"
+SRCREV_sysarch-acs   = "${AUTOREV}"
 SRCREV_edk2-libc = "${AUTOREV}"
 
 COMPATIBLE_HOST = "aarch64.*-linux"
 EDK2_ARCH = "AARCH64"
 EDK2_PLATFORM = "Shell"
 EDK2_PLATFORM_DSC = "ShellPkg/ShellPkg.dsc"
-EDK2_EXTRA_BUILD = "--module ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf"
+EDK2_EXTRA_BUILD = "--module ShellPkg/Application/sysarch-acs/apps/uefi/Bsa.inf"
 
-PACKAGES_PATH .= ":${S}/edk2-libc"
+EDK_COMPILER = "GCC49"
+PACKAGES_PATH .= ":${S}/edk2-libc:"
+
+do_compile:prepend() {
+    export ACS_PATH="${S}/ShellPkg/Application/sysarch-acs"
+    export GCC49_AARCH64_PREFIX="${TARGET_PREFIX}"
+    export PATH="${STAGING_BINDIR_TOOLCHAIN}:${PATH}"
+}
 
 do_install() {
     install -d ${D}/firmware
