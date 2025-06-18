@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -288,21 +288,25 @@ def parse_ethtool_test_log(log_data):
             subtest_number += 1
 
         # Self-test detection
-        if "INFO: Ethernet interface" in line and "supports ethtool self test" in line:
-            if "doesn't support ethtool self test" in line:
+        if "INFO: Ethernet interface" in line and "ethtool self test" in line:
+            if "doesn't supports ethtool self test" in line:
                 status = "SKIPPED"
-                desc = f"Self-test on {interface} (Not supported)"
+                desc   = f"Self-test on {interface} (Not supported)"
             else:
-                result_line_idx = i + 2
-                if result_line_idx < len(log_data) and "The test result is" in log_data[result_line_idx]:
-                    if "PASS" in log_data[result_line_idx]:
-                        status = "PASSED"
-                    else:
-                        status = "FAILED"
-                    desc = f"Self-test on {interface}"
+                # Look ahead up to 20 lines to find "The test result is ..."
+                result_status = None
+                for k in range(i + 1, min(i + 21, len(log_data))):
+                    if "The test result is" in log_data[k]:
+                        result_status = "PASSED" if "PASS" in log_data[k] else "FAILED"
+                        break
+
+                if result_status:
+                    status = result_status
+                    desc   = f"Self-test on {interface}"
                 else:
                     status = "FAILED"
-                    desc = f"Self-test on {interface} (Result not found)"
+                    desc   = f"Self-test on {interface} (Result not found)"
+
             sub = create_subtest(subtest_number, desc, status)
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], status)
@@ -324,7 +328,7 @@ def parse_ethtool_test_log(log_data):
             subtest_number += 1
 
         # DHCP
-        if "doesn't support DHCP" in line or "supports DHCP" in line:
+        if "doesn't support DHCP" in line or "support DHCP" in line:
             if "doesn't support DHCP" in line:
                 status = "FAILED"
                 desc = f"DHCP support on {interface}"
