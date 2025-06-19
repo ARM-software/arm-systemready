@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@ TOP_DIR=`pwd`
 
 export KERNEL_SRC=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}/out
 LINUX_PATH=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}
-BSA_PATH=$TOP_DIR/edk2/ShellPkg/Application/bsa-acs
+ACS_PATH=$TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
 
 build_bsa_kernel_driver()
 {
@@ -38,15 +38,15 @@ build_bsa_kernel_driver()
     else
         export CROSS_COMPILE=$TOP_DIR/$GCC
     fi
- ./bsa_setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs
- ./linux_bsa_acs.sh
+ ./acs_setup.sh $TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
+ ./linux_acs.sh bsa
  popd
 }
 
 
 build_bsa_app()
 {
- pushd $BSA_PATH/linux_app/bsa-acs-app
+ pushd $ACS_PATH/apps/linux/bsa-acs-app
  make clean
  make
  popd
@@ -58,7 +58,7 @@ pack_in_ramdisk()
     mkdir $TOP_DIR/ramdisk/linux-bsa
   fi
   cp $TOP_DIR/linux-acs/acs-drv/files/bsa_acs.ko $TOP_DIR/ramdisk/linux-bsa
-  cp $BSA_PATH/linux_app/bsa-acs-app/bsa $TOP_DIR/ramdisk/linux-bsa
+  cp $ACS_PATH/apps/linux/bsa-acs-app/bsa $TOP_DIR/ramdisk/linux-bsa
 }
 
 build_bsa_kernel_driver
