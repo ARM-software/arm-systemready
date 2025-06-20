@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2023-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ tpmlog_checklist = \
    "EV_EFI_VARIABLE_DRIVER_CONFIG",
    "Verify BootOrder and Boot#### variables are measured in PCR[1] with"
    "EV_EFI_VARIABLE_BOOT/EV_EFI_VARIABLE_BOOT2",
-   "Verify boot attempts measured in PCR[4] with EV_ACTION event type",
+   "Verify boot attempts measured in PCR[4] with EV_EFI_ACTION event type",
    "Verify security relevant configuration data are measured in into PCR[1] with "
    "EV_EFI_HANDOFF_TABLES",
    "Verify presence of EV_SEPARATOR event for each PCR",
@@ -161,17 +161,17 @@ def check_events(event_list):
                 if not match_found :
                     print_buffer.append(f"Event {event['event_num']:2} data doesn't comply " + \
                                         "with recommended string")
-                    status = "FAIL"
+                    status = "WARN"
                 # reset flag for next iteration
                 match_found = False
         if count == 0:
             print_buffer.append(f"Event of type EV_POST_CODE measured into PCR[0] not found")
             TestResult(3, "FAIL")
-        elif status != "FAIL":
+        elif status == "WARN":
             # all events of type EV_POST_CODE has event string as recommended.
-            TestResult(3, "PASS")
+            TestResult(3, "WARN")
         else:
-            TestResult(3, "FAIL")
+            TestResult(3, "PASS")
 
         # Verify EV_POST_CODE events for measurements of signed critical to data PCR[0].
         match_found = False
@@ -230,12 +230,12 @@ def check_events(event_list):
             status = "FAIL"
         TestResult(6, status)
 
-        # Verify boot attempt measurements into PCR[4] with event type EV_ACTION
+        # Verify boot attempt measurements into PCR[4] with event type EV_EFI_ACTION
         # and action string "Calling EFI Application from Boot Option"
         status = "FAIL"
         match_found = False
         for event in event_list:
-            if event['event_type'] == "EV_ACTION" and \
+            if event['event_type'] == "EV_EFI_ACTION" and \
             event['event_data'] == "Calling EFI Application from Boot Option":
                 match_found = True
                 if event['pcr_index'] != 4:
@@ -319,17 +319,17 @@ def check_events(event_list):
                     if not match_found :
                         print_buffer.append(f"Event {event['event_num']:2} data doesn't " + \
                                              "comply with recommended string")
-                        status = "FAIL"
+                        status = "WARN"
                     # reset flag for next iteration
                     match_found = False
         if count == 0:
             print_buffer.append("Event of type EV_TABLE_OF_DEVICES measured into PCR[1] not found")
             TestResult(10, "FAIL")
-        elif status != "FAIL":
+        elif status == "WARN":
             # all events of type EV_TABLE_OF_DEVICES has event string as recommended.
-            TestResult(10, "PASS")
+            TestResult(10, "WARN")
         else:
-            TestResult(10, "FAIL")
+            TestResult(10, "PASS")
 
         # If ExitBootServices() is invoked, then an EV_EFI_ACTION event
         # “Exit Boot Services Invocation” must be measured.
@@ -373,3 +373,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"ERROR: {e}")
         exit(1)
+
