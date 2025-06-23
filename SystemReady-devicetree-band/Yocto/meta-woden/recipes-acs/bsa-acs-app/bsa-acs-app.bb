@@ -1,17 +1,17 @@
 SUMMARY = "BSA ACS Linux application"
 LICENSE = "Apache-2.0"
-LIC_FILES_CHKSUM = "file://bsa-acs/LICENSE.md;md5=2a944942e1496af1886903d274dedb13 \
+LIC_FILES_CHKSUM = "file://sysarch-acs/LICENSE;md5=86d3f3a95c324c9479bd8986968f4327 \
 "
 
-SRC_URI = "git://github.com/ARM-software/bsa-acs;destsuffix=bsa-acs;protocol=https;branch=main;name=bsa-acs \
+SRC_URI = "git://github.com/ARM-software/sysarch-acs;destsuffix=sysarch-acs;protocol=https;branch=main;name=sysarch-acs \
 "
-SRCREV_bsa-acs = "${AUTOREV}"
+SRCREV_sysarch-acs = "${AUTOREV}"
 
 S = "${WORKDIR}"
 TARGET_CC_ARCH += "${LDFLAGS}"
 
 do_compile() {
-    cd  ${S}/bsa-acs/linux_app/bsa-acs-app
+    cd  ${S}/sysarch-acs/apps/linux/bsa-acs-app
     ${CC} *.c -Iinclude -o ${S}/bsa
 }
 

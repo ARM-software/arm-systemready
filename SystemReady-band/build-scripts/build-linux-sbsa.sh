@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@ TOP_DIR=`pwd`
 
 export KERNEL_SRC=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}/out
 LINUX_PATH=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}
-SBSA_PATH=$TOP_DIR/edk2/ShellPkg/Application/sbsa-acs
+ACS_PATH=$TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
 
 BUILDROOT_PATH=buildroot
 BUILDROOT_ARCH=arm64
@@ -43,15 +43,15 @@ build_sbsa_kernel_driver()
     else
         export CROSS_COMPILE=$TOP_DIR/$GCC
     fi
-    ./sbsa_setup.sh $TOP_DIR/edk2/ShellPkg/Application/bsa-acs  $TOP_DIR/edk2/ShellPkg/Application/sbsa-acs
-    ./linux_sbsa_acs.sh
+    ./acs_setup.sh $TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
+    ./linux_acs.sh sbsa
     popd
 }
 
 
 build_sbsa_app()
 {
-    pushd $SBSA_PATH/linux_app/sbsa-acs-app
+    pushd $ACS_PATH/apps/linux/sbsa-acs-app
     make clean
     make
     popd
@@ -59,7 +59,7 @@ build_sbsa_app()
 
 build_pmu_app()
 {
-    pushd $SBSA_PATH/linux_app/pmu_app
+    pushd $ACS_PATH/apps/linux/pmu_app
         arch=$(uname -m)
         echo $arch
         if [[ $arch = "aarch64" ]]
@@ -78,7 +78,7 @@ build_pmu_app()
 
 build_mte_test()
 {
-    pushd $SBSA_PATH/linux_app/mte
+    pushd $ACS_PATH/apps/linux/mte
         arch=$(uname -m)
         echo "ARCH = $arch"
         if [[ $arch = "aarch64" ]]
@@ -101,11 +101,11 @@ pack_in_ramdisk()
 
   # Add all needed packages to build root
   cp $TOP_DIR/linux-acs/acs-drv/files/sbsa_acs.ko $TOP_DIR/ramdisk/linux-sbsa/
-  cp $SBSA_PATH/linux_app/sbsa-acs-app/sbsa $TOP_DIR/ramdisk/linux-sbsa
-  cp -r $SBSA_PATH/linux_app/pmu_app/pmuval $TOP_DIR/ramdisk/linux-sbsa
+  cp $ACS_PATH/apps/linux/sbsa-acs-app/sbsa $TOP_DIR/ramdisk/linux-sbsa
+  cp -r $ACS_PATH/apps/linux/pmu_app/pmuval $TOP_DIR/ramdisk/linux-sbsa
 
   #copy mte test to ramdisk
-  cp $SBSA_PATH/linux_app/mte/mte_test $TOP_DIR/ramdisk/linux-sbsa
+  cp $ACS_PATH/apps/linux/mte/mte_test $TOP_DIR/ramdisk/linux-sbsa
 
   rm -rf $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pysweep.so
   rm -rf $TOP_DIR/${BUILDROOT_PATH}/$BUILDROOT_OUT_DIR/target/lib/python3.10/site-packages/pyperf/perf_events.so
