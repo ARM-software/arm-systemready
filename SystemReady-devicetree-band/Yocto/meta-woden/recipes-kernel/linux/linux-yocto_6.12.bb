@@ -42,6 +42,7 @@ KBRANCH:class-devupstream = "v6.12/base"
 
 SRC_URI = "git://git.yoctoproject.org/linux-yocto.git;name=machine;branch=${KBRANCH};protocol=https \
            git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-6.12;destsuffix=${KMETA};protocol=https \
+           https://gitlab.arm.com/linux-arm/linux-acs/-/raw/master/kernel/src/0001-BSA-ACS-Linux-6.12.patch;patch=1;md5sum=4ccb4ee89cc6c290f59a4c61c08e0def \
            file://0001-disable-psci-checker.patch;patch=1 \
            "
 
