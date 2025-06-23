@@ -261,6 +261,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   sync /mnt
   sleep 60
 
+  #copying acs_run_config.ini into results directory.
+  mkdir -p /mnt/acs_results/acs_summary/config
+  cp /mnt/acs_tests/config/acs_run_config.ini /mnt/acs_results/acs_summary/config
+  sync /mnt
+
   echo "ACS automated test suites run is completed."
   echo "Please reboot to run BBSR tests if not done"
   echo "Please press <Enter> to continue ..."
