@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -86,10 +86,10 @@ copy_recipes()
 
 
     # recipes accordingly
-    if [ ! -z "$ARM_BSA_TAG" ]; then
-        sed -i -E 's/SRCREV_bsa-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_bsa-acs = \"'${ARM_BSA_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-uefi/bsa-acs.bb
-        sed -i -E 's/SRCREV_bsa-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_bsa-acs = \"'${ARM_BSA_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-app/bsa-acs-app.bb
-        sed -i -E 's/SRCREV_bsa-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_bsa-acs = \"'${ARM_BSA_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-drv/bsa-acs-drv.bb
+    if [ ! -z "$SYS_ARCH_ACS_TAG" ]; then
+        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${SYS_ARCH_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-uefi/bsa-acs.bb
+        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${SYS_ARCH_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-app/bsa-acs-app.bb
+        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${SYS_ARCH_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-drv/bsa-acs-drv.bb
     fi
 
     if [ ! -z "$EDK2_SRC_TAG" ]; then

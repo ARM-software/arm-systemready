@@ -22,8 +22,8 @@ index 7e985f8..6ea22f8 100644
  
    SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 +  FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
-+  BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
-+  BsaPalLib|ShellPkg/Application/bsa-acs/pal/uefi_dt/BsaPalLib.inf
++  UnifiedValLib|ShellPkg/Application/sysarch-acs/val/UnifiedValLib.inf
++  UnifiedPalLib|ShellPkg/Application/sysarch-acs/pal/uefi_dt/UnifiedPalLib.inf
  
  [PcdsFixedAtBuild]
    gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0xFF
@@ -31,7 +31,7 @@ index 7e985f8..6ea22f8 100644
    ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
    ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf
    ShellPkg/Library/UefiShellNetwork2CommandsLib/UefiShellNetwork2CommandsLib.inf
-+  ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf
++  ShellPkg/Application/sysarch-acs/apps/uefi/Bsa.inf
  
    ShellPkg/Application/Shell/Shell.inf {
      <PcdsFixedAtBuild>
