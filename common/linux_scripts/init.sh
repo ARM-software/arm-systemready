@@ -236,7 +236,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   if [ -f "/mnt/acs_results/uefi_dump/devices.log" ] && [ -f "/mnt/acs_results/uefi_dump/drivers.log" ] && [ -f "/mnt/acs_results/uefi_dump/dh.log" ]; then
     echo "Running Device Driver Matching Script"
     cd /usr/bin/
-    ./device_driver.sh --md /mnt/acs_results/linux_dump/device_driver.log /mnt/acs_results/uefi_dump/devices.log /mnt/acs_results/uefi_dump/drivers.log /mnt/acs_results/uefi_dump/dh.log > /dev/null 2>&1
+    ./device_driver.sh > /mnt/acs_results/linux_dump/device_driver.log    
     cd -
     echo "Device Driver script run completed"
     sync /mnt
