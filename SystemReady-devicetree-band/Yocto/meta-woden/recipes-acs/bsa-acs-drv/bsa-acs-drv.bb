@@ -8,7 +8,7 @@ COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
 inherit module-base
 
 SRC_URI += "git://github.com/ARM-software/sysarch-acs;destsuffix=sysarch-acs;protocol=https;branch=main;name=sysarch-acs \
-            git://git.gitlab.arm.com/linux-arm/linux-acs.git;destsuffix=linux-acs;protocol=https;branch=sysarch-acs;name=linux-acs \
+            git://git.gitlab.arm.com/linux-arm/linux-acs.git;destsuffix=linux-acs;protocol=https;branch=master;name=linux-acs \
             "
 SRCREV_FORMAT = "sysarch-acs_linux-acs"
 SRCREV_sysarch-acs = "${AUTOREV}"
