@@ -99,7 +99,7 @@ for %i in %x%
     endif
 endfor
 
-echo "Ping log is empty or not in standard format, please check logs offline."
+echo "Ping log is empty or not in a recognizable format, please check logs offline."
 set returncode 1
 
 :End
