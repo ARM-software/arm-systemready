@@ -96,7 +96,7 @@ for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         echo "Running ping test..."
         ifconfig -r
         echo "Waiting for network to come up..."
-        stall 200000
+        stall 2000000
         echo "" > ping.log
         ping 8.8.8.8 >> ping.log
         type ping.log
