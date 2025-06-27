@@ -67,6 +67,18 @@ SR_SRS_SCOPE_TABLE = [
     ("SBSA", "R")
 ]
 
+if DT_OR_SR_MODE == "DT":
+    _REQUIREMENT_MAP = {name: req for name, req in DT_SRS_SCOPE_TABLE}
+else:
+    _REQUIREMENT_MAP = {name: req for name, req in SR_SRS_SCOPE_TABLE}
+
+def compliance_label(suite_name: str) -> str:
+    req = _REQUIREMENT_MAP.get(suite_name, "R")
+    tag = "Mandatory" if req == "M" else "Recommended"
+    # Match the console ordering: “Suite: <tag>  : <suite> …”
+    return f"Suite_Name: {tag}  : {suite_name}_compliance"
+
+
 def reformat_json(json_file_path):
     """
     Re‐format (pretty‐print) the file to confirm it's valid JSON.
@@ -267,6 +279,7 @@ def merge_json_files(json_files, output_file):
             suite_key    = f"OS_{base_name_no_ext}"
             global DT_SRS_SCOPE_TABLE
             DT_SRS_SCOPE_TABLE += [(f"OS_{base_name_no_ext}","M")]
+            _REQUIREMENT_MAP[f"OS_{base_name_no_ext}"] = "M"
             os_logs_found += 1
             if os_logs_found == 3:
                 DT_SRS_SCOPE_TABLE.remove(("OS_TEST","M"))
@@ -375,7 +388,7 @@ def merge_json_files(json_files, output_file):
 
     for suite_name, requirement in mandatory_suites:
         if suite_name not in suite_fail_data:
-            label = f"Suite_Name: {suite_name}_compliance"
+            label = compliance_label(suite_name)
             acs_results_summary[label] = "Not Compliant: not run"
             if requirement == "M":
                 print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
@@ -387,7 +400,7 @@ def merge_json_files(json_files, output_file):
             fail_info = suite_fail_data.get(suite_name)
             f = fail_info.get("Failed", 0)
             fw = fail_info.get("Failed_with_Waiver", 0)
-            label = f"Suite_Name: {suite_name}_compliance"
+            label = compliance_label(suite_name)
             if (f + fw) == 0:
                 acs_results_summary[label] = "Compliant"
                 if requirement == "M":
@@ -414,7 +427,7 @@ def merge_json_files(json_files, output_file):
     #Ensure suite-wise compliance lines for *all* discovered suites (including recommended)
     for skey, info in suite_fail_data.items():
         # If no label set, default to "Compliant" if fails=0, else "Not compliant", etc.
-        label = f"Suite_Name: {skey}_compliance"
+        label = compliance_label(skey)
         if label not in acs_results_summary:
             f = info["Failed"]
             fw = info["Failed_with_Waiver"]
@@ -448,9 +461,9 @@ def merge_json_files(json_files, output_file):
     if "Overall Compliance Results" in acs_results_summary:
         del acs_results_summary["Overall Compliance Results"]
 
-    bbsr_tpm = acs_results_summary.get("Suite_Name: BBSR-TPM_compliance", "")
-    bbsr_fwts = acs_results_summary.get("Suite_Name: BBSR-FWTS_compliance", "")
-    bbsr_sct = acs_results_summary.get("Suite_Name: BBSR-SCT_compliance", "")
+    bbsr_tpm  = acs_results_summary.get(compliance_label("BBSR-TPM"), "")
+    bbsr_fwts = acs_results_summary.get(compliance_label("BBSR-FWTS"), "")
+    bbsr_sct  = acs_results_summary.get(compliance_label("BBSR-SCT"), "")
     overall_str = acs_results_summary.get("Overall Compliance Result", "")
 
         # Determine if every BBSR sub‑suite passed with no failures
