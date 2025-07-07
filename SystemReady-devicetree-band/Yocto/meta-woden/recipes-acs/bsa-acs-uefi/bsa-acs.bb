@@ -21,12 +21,10 @@ EDK2_PLATFORM = "Shell"
 EDK2_PLATFORM_DSC = "ShellPkg/ShellPkg.dsc"
 EDK2_EXTRA_BUILD = "--module ShellPkg/Application/sysarch-acs/apps/uefi/Bsa.inf"
 
-EDK_COMPILER = "GCC49"
 PACKAGES_PATH .= ":${S}/edk2-libc:"
 
 do_compile:prepend() {
     export ACS_PATH="${S}/ShellPkg/Application/sysarch-acs"
-    export GCC49_AARCH64_PREFIX="${TARGET_PREFIX}"
     export PATH="${STAGING_BINDIR_TOOLCHAIN}:${PATH}"
 }
 
