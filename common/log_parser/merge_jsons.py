@@ -81,7 +81,7 @@ def compliance_label(suite_name: str) -> str:
 
 def reformat_json(json_file_path):
     """
-    Re‐format (pretty‐print) the file to confirm it's valid JSON.
+    Re-format (pretty-print) the file to confirm it's valid JSON.
     """
     try:
         with open(json_file_path, 'r') as jf:
@@ -466,7 +466,7 @@ def merge_json_files(json_files, output_file):
     bbsr_sct  = acs_results_summary.get(compliance_label("BBSR-SCT"), "")
     overall_str = acs_results_summary.get("Overall Compliance Result", "")
 
-        # Determine if every BBSR sub‑suite passed with no failures
+        # Determine if every BBSR sub-suite passed with no failures
     all_bbsr_compliant = (
         bbsr_tpm  == "Compliant"
         and bbsr_fwts == "Compliant"
@@ -481,7 +481,7 @@ def merge_json_files(json_files, output_file):
         or "waiver" in overall_str.lower()
     )
 
-    # Case A: All sub‑suites passed cleanly
+    # Case A: All sub-suites passed cleanly
     if all_bbsr_compliant:
         # 1) If the *overall* compliance is a hard failure, override and mark BBSR as Not Compliant
         if overall_str.startswith("Not Compliant"):
@@ -504,9 +504,9 @@ def merge_json_files(json_files, output_file):
         else:
             acs_results_summary["BBSR extension compliance results"] = "Compliant with waivers"
 
-    # Case C: Some sub‑suite(s) failed outright without waivers
+    # Case C: Some sub-suite(s) failed outright without waivers
     else:
-        # Gather which suites didn’t run vs. which failed non‑waived
+        # Gather which suites didn’t run vs. which failed non-waived
         missing_list_bbsr = []
         non_waived_list_bbsr = []
 
@@ -518,7 +518,7 @@ def merge_json_files(json_files, output_file):
             # “not run” indicates missing entirely
             if comp_str.lower().startswith("not compliant: not run"):
                 missing_list_bbsr.append(label)
-            # “failed” indicates an explicit non‑waived failure
+            # “failed” indicates an explicit non-waived failure
             elif comp_str.lower().startswith("not compliant: failed"):
                 non_waived_list_bbsr.append(label)
 
@@ -526,12 +526,12 @@ def merge_json_files(json_files, output_file):
         if not missing_list_bbsr and not non_waived_list_bbsr:
             acs_results_summary["BBSR extension compliance results"] = "Not Compliant"
         else:
-            # Build a human‑readable reason with missing vs. non‑waived lists
+            # Build a human-readable reason with missing vs. non-waived lists
             parts = []
             if missing_list_bbsr:
                 parts.append(f"missing suite(s): {', '.join(missing_list_bbsr)}")
             if non_waived_list_bbsr:
-                parts.append(f"non‑waived fails in suite(s): {', '.join(non_waived_list_bbsr)}")
+                parts.append(f"non-waived fails in suite(s): {', '.join(non_waived_list_bbsr)}")
             acs_results_summary["BBSR extension compliance results"] = (
                 f"Not Compliant ({'; '.join(parts)})"
             )

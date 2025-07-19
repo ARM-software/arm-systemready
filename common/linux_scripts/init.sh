@@ -236,7 +236,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   if [ -f "/mnt/acs_results/uefi_dump/devices.log" ] && [ -f "/mnt/acs_results/uefi_dump/drivers.log" ] && [ -f "/mnt/acs_results/uefi_dump/dh.log" ]; then
     echo "Running Device Driver Matching Script"
     cd /usr/bin/
-    ./device_driver.sh > /mnt/acs_results/linux_dump/device_driver.log    
+    ./device_driver.sh > /mnt/acs_results/linux_dump/device_driver.log
     cd -
     echo "Device Driver script run completed"
     sync /mnt
@@ -260,7 +260,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Please wait acs results are syncing on storage medium."
   sync /mnt
   sleep 60
-
   #copying acs_run_config.ini into results directory.
   mkdir -p /mnt/acs_results/acs_summary/config
   cp /mnt/acs_tests/config/acs_run_config.ini /mnt/acs_results/acs_summary/config
