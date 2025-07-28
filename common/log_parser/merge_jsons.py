@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import json
+from collections import OrderedDict
 import argparse
 import os
 
@@ -570,6 +571,38 @@ def merge_json_files(json_files, output_file):
             old_data_list = _entry_to_list(merged_results.pop(old_key))
             merged_results.setdefault(new_key, [])
             merged_results[new_key].extend(old_data_list)
+
+    # Ensure consistent order for ACS Results Summary if present
+    if "Suite_Name: acs_info" in merged_results and "ACS Results Summary" in merged_results["Suite_Name: acs_info"]:
+        preferred_order = [
+            "Band",
+            "Date",
+            "Suite_Name: Mandatory  : Capsule Update_compliance",
+            "Suite_Name: Mandatory  : DT_VALIDATE_compliance",
+            "Suite_Name: Mandatory  : ETHTOOL_TEST_compliance",
+            "Suite_Name: Mandatory  : FWTS_compliance",
+            "Suite_Name: Mandatory  : OS_TEST_compliance",
+            "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance",
+            "Suite_Name: Mandatory  : SCT_compliance",
+            "Suite_Name: Recommended  : BBSR-FWTS_compliance",
+            "Suite_Name: Recommended  : BBSR-SCT_compliance",
+            "Suite_Name: Recommended  : BBSR-TPM_compliance",
+            "Suite_Name: Recommended  : BSA_compliance",
+            "Suite_Name: Recommended  : DT_KSELFTEST_compliance",
+            "Suite_Name: Recommended  : POST_SCRIPT_compliance",
+            "Suite_Name: Recommended  : PSCI_compliance",
+            "BBSR extension compliance results",
+            "Overall Compliance Result",
+        ]
+        actual = merged_results["Suite_Name: acs_info"]["ACS Results Summary"]
+        ordered = OrderedDict()
+        for key in preferred_order:
+            if key in actual:
+                ordered[key] = actual[key]
+        for key in actual:
+            if key not in ordered:
+                ordered[key] = actual[key]
+        merged_results["Suite_Name: acs_info"]["ACS Results Summary"] = ordered
 
     with open(output_file, 'w') as outj:
         json.dump(merged_results, outj, indent=4)
