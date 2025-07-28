@@ -68,6 +68,8 @@ do_sign_images() {
     wic cp DO_SIGN/EFI ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
     wic cp DO_SIGN/Image ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
 
+    # Copy signed EFI binaries back to deploy directory
+    wic cp DO_SIGN/acs_tests ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
     echo "Copy back complete"
 }
 
