@@ -116,6 +116,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   lscpu > /mnt/acs_results/linux_dump/lscpu.log
   lsblk > /mnt/acs_results/linux_dump/lsblk.log
   lsusb > /mnt/acs_results/linux_dump/lsusb.log
+  lshw > /mnt/acs_results/linux_dump/lshw.log
   dmidecode > /mnt/acs_results/linux_dump/dmidecode.log
   dmidecode --dump-bin /mnt/acs_results/linux_dump/dmidecode.bin >> /mnt/acs_results/linux_dump/dmidecode.log 2>&1
   uname -a > /mnt/acs_results/linux_dump/uname.log
