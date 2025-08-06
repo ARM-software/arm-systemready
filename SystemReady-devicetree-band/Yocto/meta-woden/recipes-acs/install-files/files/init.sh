@@ -86,6 +86,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       lspci -vvv &> $LINUX_DUMP_DIR/lspci.log
       lsusb    > $LINUX_DUMP_DIR/lsusb.log
       uname -a > $LINUX_DUMP_DIR/uname.log
+      dmesg > $LINUX_DUMP_DIR/dmesg.log
+      journalctl > $LINUX_DUMP_DIR/journalctl.log
       cat /proc/interrupts > $LINUX_DUMP_DIR/interrupts.log
       cat /proc/cpuinfo    > $LINUX_DUMP_DIR/cpuinfo.log
       cat /proc/meminfo    > $LINUX_DUMP_DIR/meminfo.log
