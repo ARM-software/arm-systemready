@@ -342,13 +342,18 @@ def parse_ethtool_test_log(log_data):
             subtest_number += 1
 
         # Ping to router
-        if "INFO: Ping to router/gateway" in line:
-            if "is successful" in line:
+        if "INFO: Ping to router/gateway" in line and "is successful" in line:
                 status = "PASSED"
                 desc = f"Ping to router/gateway on {interface}"
-            else:
-                status = "FAILED"
-                desc = f"Ping to router/gateway on {interface}"
+                sub = create_subtest(subtest_number, desc, status)
+                update_suite_summary(current_test["test_suite_summary"], status)
+                current_test["subtests"].append(sub)
+                suite_summary[f"total_{status}"] += 1
+                subtest_number += 1
+        if "Failed to ping router/gateway" in line:
+            intf = line.split("for")[-1].strip()
+            status = "FAILED"
+            desc = f"Ping to router/gateway on {intf}"
             sub = create_subtest(subtest_number, desc, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(sub)
@@ -356,13 +361,18 @@ def parse_ethtool_test_log(log_data):
             subtest_number += 1
 
         # Ping to www.arm.com
-        if "INFO: Ping to www.arm.com" in line:
-            if "is successful" in line:
+        if "INFO: Ping to www.arm.com" in line and "is successful" in line:
                 status = "PASSED"
                 desc = f"Ping to www.arm.com on {interface}"
-            else:
-                status = "FAILED"
-                desc = f"Ping to www.arm.com on {interface}"
+                sub = create_subtest(subtest_number, desc, status)
+                update_suite_summary(current_test["test_suite_summary"], status)
+                current_test["subtests"].append(sub)
+                suite_summary[f"total_{status}"] += 1
+                subtest_number += 1
+        if "Failed to ping www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "FAILED"
+            desc = f"Ping to www.arm.com on {intf}"
             sub = create_subtest(subtest_number, desc, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(sub)
