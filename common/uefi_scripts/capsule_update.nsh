@@ -54,7 +54,21 @@ for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 FS%r:\acs_tests\app\CapsuleApp.efi -P > FS%r:\acs_results_template\fw\CapsuleApp_FMP_table_info_before_update.log
                 rm FS%r:\acs_tests\app\capsule_update_check.flag
                 echo "" > FS%r:\acs_tests\app\capsule_update_done.flag
-                echo "UEFI capsule update is in progress, system will reboot after update ..."
+                if exist FS%r:\acs_results_template\fw\capsule-update.log then
+                    echo "Capsule Update for unauth.bin and tampered.bin are already run."
+                    echo "Press any key to start Capsule Update execution again from the beginning."
+                    echo "WARNING: Ensure you have backed up the existing logs."
+                    FS%r:\acs_tests\bbr\SCT\stallforkey.efi 10
+                    if %lasterror% == 0 then
+                        #Backup the existing logs
+                        rm -q FS%r:\acs_results_template\fw\capsule-update_previous_run.log
+                        cp -r FS%r:\acs_results_template\fw\capsule-update.log FS%r:\acs_results_template\fw\capsule-update_previous_run.log
+                        rm -q FS%r:\acs_results_template\fw\capsule-update.log
+                        goto UpdateUnauthAndTampered
+                    endif
+                    goto SkipUnauthAndTamperedUpdate
+                endif
+:UpdateUnauthAndTampered
                 echo "Testing unauth.bin update" > FS%r:\acs_results_template\fw\capsule-update.log
                 echo "Test_Info" >>  FS%r:\acs_results_template\fw\capsule-update.log
                 if exist FS%r:\acs_tests\app\unauth.bin then
@@ -69,6 +83,27 @@ for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 else
                     echo "tampered.bin not present" >> FS%r:\acs_results_template\fw\capsule-update.log
                 endif
+:SkipUnauthAndTamperedUpdate
+                if exist FS%r:\acs_results_template\fw\capsule-on-disk.log then
+                    echo "Capsule Update for signed_capsule.bin is already run."
+                    echo "Press any key to start Capsule Update execution again from the beginning."
+                    echo "WARNING: Ensure you have backed up the existing logs."
+                    FS%r:\acs_tests\bbr\SCT\stallforkey.efi 10
+                    if %lasterror% == 0 then
+                        #Backup the existing logs
+                        rm -q FS%r:\acs_results_template\fw\capsule-on-disk_previous_run.log
+                        cp -r FS%r:\acs_results_template\fw\capsule-on-disk.log FS%r:\acs_results_template\fw\capsule-on-disk_previous_run.log
+                        rm -q FS%r:\acs_results_template\fw\capsule-on-disk.log
+                        goto UpdateSignedCapsule
+                    endif
+                    rm FS%r:\acs_tests\app\capsule_update_check.flag
+                    rm FS%r:\acs_tests\app\capsule_update_done.flag
+                    echo "" > FS%r:\acs_tests\app\capsule_update_ignore.flag
+                    echo "Capsule Update is ignored!!!"
+                    goto Done
+                endif
+:UpdateSignedCapsule
+                echo "UEFI capsule update is in progress, system will reboot after update ..."
                 echo "Testing signed_capsule.bin OD update" > FS%r:\acs_results_template\fw\capsule-on-disk.log
                 echo "Test_Info" >> FS%r:\acs_results_template\fw\capsule-on-disk.log
                 FS%r:\acs_tests\app\CapsuleApp.efi FS%r:\acs_tests\app\signed_capsule.bin -OD >> FS%r:\acs_results_template\fw\capsule-on-disk.log
