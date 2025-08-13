@@ -278,30 +278,6 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
     </html>
     """)
 
-    # Calculate total_failed_with_waiver by summing from each test suite
-    total_failed_with_waiver = 0
-    for test_suite in test_results:
-        ts_summary = test_suite.get('test_suite_summary', {})
-        total_failed_with_waiver += get_case_insensitive(ts_summary, 'total_failed_with_waiver')
-
-    # Compute overall suite_summary from test_results
-    suite_summary = {
-        'total_PASSED': 0,
-        'total_FAILED': 0,  # Only counts FAILED without waiver
-        'total_failed_with_waiver': total_failed_with_waiver,
-        'total_ABORTED': 0,
-        'total_SKIPPED': 0,
-        'total_WARNINGS': 0
-    }
-
-    for test_suite in test_results:
-        ts_summary = test_suite.get('test_suite_summary', {})
-        suite_summary['total_PASSED'] += get_case_insensitive(ts_summary, 'total_passed')
-        suite_summary['total_FAILED'] += get_case_insensitive(ts_summary, 'total_failed')
-        # 'total_failed_with_waiver' already summed above
-        suite_summary['total_ABORTED'] += get_case_insensitive(ts_summary, 'total_aborted')
-        suite_summary['total_SKIPPED'] += get_case_insensitive(ts_summary, 'total_skipped')
-        suite_summary['total_WARNINGS'] += get_case_insensitive(ts_summary, 'total_warnings')
 
     # Calculate total tests
     total_tests = (
@@ -369,7 +345,11 @@ def main(input_json_file, detailed_html_file, summary_html_file):
     for test_suite in test_results:
         ts_summary = test_suite.get('test_suite_summary', {})
         suite_summary['total_PASSED'] += get_case_insensitive(ts_summary, 'total_passed')
-        suite_summary['total_FAILED'] += get_case_insensitive(ts_summary, 'total_failed')
+        suite_summary['total_FAILED'] += max(
+            0,
+            get_case_insensitive(ts_summary, 'total_failed') -
+            get_case_insensitive(ts_summary, 'total_failed_with_waiver')
+        )
         suite_summary['total_failed_with_waiver'] += get_case_insensitive(ts_summary, 'total_failed_with_waiver')
         suite_summary['total_ABORTED'] += get_case_insensitive(ts_summary, 'total_aborted')
         suite_summary['total_SKIPPED'] += get_case_insensitive(ts_summary, 'total_skipped')
