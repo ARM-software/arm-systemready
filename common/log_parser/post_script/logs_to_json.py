@@ -35,11 +35,11 @@ def parse_post_script_log(log_path):
         "Test_suite_Description": "Post script checks from post-script.log",
         "subtests": [],
         "test_suite_summary": {
-            "total_PASSED": 0,
-            "total_FAILED": 0,
-            "total_ABORTED": 0,
-            "total_SKIPPED": 0,
-            "total_WARNINGS": 0
+            "total_passed": 0,
+            "total_failed": 0,
+            "total_aborted": 0,
+            "total_skipped": 0,
+            "total_warnings": 0
         }
     }
 
@@ -124,9 +124,9 @@ def parse_post_script_log(log_path):
 
     # If found a final summary, override the suite's summary from that
     if final_summary_found:
-        test_suite["test_suite_summary"]["total_PASSED"] = final_summary_passed
-        test_suite["test_suite_summary"]["total_FAILED"] = final_summary_failed
-        test_suite["test_suite_summary"]["total_WARNINGS"] = final_summary_warnings
+        test_suite["test_suite_summary"]["total_passed"] = final_summary_passed
+        test_suite["test_suite_summary"]["total_failed"] = final_summary_failed
+        test_suite["test_suite_summary"]["total_warnings"] = final_summary_warnings
         # ABORTED and SKIPPED remain 0 as we don't have them in the summary line
 
     # If we did NOT find a final summary, we can fallback to summing from subtests:
@@ -134,20 +134,20 @@ def parse_post_script_log(log_path):
         # Summation approach in case there's no final summary line
         for sub in test_suite["subtests"]:
             r = sub["sub_test_result"]
-            test_suite["test_suite_summary"]["total_PASSED"] += r["PASSED"]
-            test_suite["test_suite_summary"]["total_FAILED"] += r["FAILED"]
-            test_suite["test_suite_summary"]["total_ABORTED"] += r["ABORTED"]
-            test_suite["test_suite_summary"]["total_SKIPPED"] += r["SKIPPED"]
-            test_suite["test_suite_summary"]["total_WARNINGS"] += r["WARNINGS"]
+            test_suite["test_suite_summary"]["total_passed"] += r["PASSED"]
+            test_suite["test_suite_summary"]["total_failed"] += r["FAILED"]
+            test_suite["test_suite_summary"]["total_aborted"] += r["ABORTED"]
+            test_suite["test_suite_summary"]["total_skipped"] += r["SKIPPED"]
+            test_suite["test_suite_summary"]["total_warnings"] += r["WARNINGS"]
 
     # Next, build the top-level "suite_summary" from this single test suite
     suite_summary = {
-        "total_passed": test_suite["test_suite_summary"]["total_PASSED"],
-        "total_failed": test_suite["test_suite_summary"]["total_FAILED"],
+        "total_passed": test_suite["test_suite_summary"]["total_passed"],
+        "total_failed": test_suite["test_suite_summary"]["total_failed"],
         "total_failed_with_waiver": 0,  # no logic for waivers here
-        "total_aborted": test_suite["test_suite_summary"]["total_ABORTED"],
-        "total_skipped": test_suite["test_suite_summary"]["total_SKIPPED"],
-        "total_warnings": test_suite["test_suite_summary"]["total_WARNINGS"]
+        "total_aborted": test_suite["test_suite_summary"]["total_aborted"],
+        "total_skipped": test_suite["test_suite_summary"]["total_skipped"],
+        "total_warnings": test_suite["test_suite_summary"]["total_warnings"]
     }
 
     # Finally, return the final dictionary in the same style as FWTS parser

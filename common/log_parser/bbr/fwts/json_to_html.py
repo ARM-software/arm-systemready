@@ -43,12 +43,12 @@ def detect_columns_used(subtests):
 def generate_bar_chart_fwts(suite_summary):
     labels = ['Passed', 'Failed', 'Failed with Waiver', 'Aborted', 'Skipped', 'Warnings']
     sizes = [
-        suite_summary['total_PASSED'],
-        suite_summary['total_FAILED'],
+        suite_summary['total_passed'],
+        suite_summary['total_failed'],
         suite_summary.get('total_failed_with_waiver', 0),
-        suite_summary['total_ABORTED'],
-        suite_summary['total_SKIPPED'],
-        suite_summary['total_WARNINGS']
+        suite_summary['total_aborted'],
+        suite_summary['total_skipped'],
+        suite_summary['total_warnings']
     ]
     colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']
 
@@ -208,11 +208,11 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                     </tr>
                     <tr>
                         <td>Passed</td>
-                        <td class="pass">{{ total_PASSED }}</td>
+                        <td class="pass">{{ total_passed }}</td>
                     </tr>
                     <tr>
                         <td>Failed</td>
-                        <td class="fail">{{ total_FAILED }}</td>
+                        <td class="fail">{{ total_failed }}</td>
                     </tr>
                     <tr>
                         <td>Failed with Waiver</td>
@@ -220,15 +220,15 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                     </tr>
                     <tr>
                         <td>Aborted</td>
-                        <td class="aborted">{{ total_ABORTED }}</td>
+                        <td class="aborted">{{ total_aborted }}</td>
                     </tr>
                     <tr>
                         <td>Skipped</td>
-                        <td class="skipped">{{ total_SKIPPED }}</td>
+                        <td class="skipped">{{ total_skipped }}</td>
                     </tr>
                     <tr>
                         <td>Warnings</td>
-                        <td class="warning">{{ total_WARNINGS }}</td>
+                        <td class="warning">{{ total_warnings }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -307,22 +307,22 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
     """)
 
     total_tests = (
-        suite_summary["total_PASSED"]
-        + suite_summary["total_FAILED"]
-        + suite_summary["total_ABORTED"]
-        + suite_summary["total_SKIPPED"]
-        + suite_summary["total_WARNINGS"]
+        suite_summary["total_passed"]
+        + suite_summary["total_failed"]
+        + suite_summary["total_aborted"]
+        + suite_summary["total_skipped"]
+        + suite_summary["total_warnings"]
     )
 
     html_content = template.render(
         chart_data=chart_data,
         total_tests=total_tests,
-        total_PASSED=suite_summary["total_PASSED"],
-        total_FAILED=suite_summary["total_FAILED"],
+        total_passed=suite_summary["total_passed"],
+        total_failed=suite_summary["total_failed"],
         total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),
-        total_ABORTED=suite_summary["total_ABORTED"],
-        total_SKIPPED=suite_summary["total_SKIPPED"],
-        total_WARNINGS=suite_summary["total_WARNINGS"],
+        total_aborted=suite_summary["total_aborted"],
+        total_skipped=suite_summary["total_skipped"],
+        total_warnings=suite_summary["total_warnings"],
         test_results=test_results,
         is_summary_page=is_summary_page
     )
@@ -335,12 +335,12 @@ def main(input_json_file, detailed_html_file, summary_html_file):
         data = json.load(json_file)
 
     suite_summary = {
-        'total_PASSED': 0,
-        'total_FAILED': 0,
+        'total_passed': 0,
+        'total_failed': 0,
         'total_failed_with_waiver': 0,
-        'total_ABORTED': 0,
-        'total_SKIPPED': 0,
-        'total_WARNINGS': 0
+        'total_aborted': 0,
+        'total_skipped': 0,
+        'total_warnings': 0
     }
 
     test_results = data["test_results"]
@@ -348,12 +348,12 @@ def main(input_json_file, detailed_html_file, summary_html_file):
     # Aggregate totals & detect columns for each suite
     for test_suite in test_results:
         ts_summary = test_suite.get('test_suite_summary', {})
-        suite_summary['total_PASSED'] += get_case_insensitive(ts_summary, 'total_passed', ts_summary.get('total_PASSED', 0))
-        suite_summary['total_FAILED'] += get_case_insensitive(ts_summary, 'total_failed', ts_summary.get('total_FAILED', 0))
+        suite_summary['total_passed'] += get_case_insensitive(ts_summary, 'total_passed', ts_summary.get('total_passed', 0))
+        suite_summary['total_failed'] += get_case_insensitive(ts_summary, 'total_failed', ts_summary.get('total_failed', 0))
         suite_summary['total_failed_with_waiver'] += get_case_insensitive(ts_summary, 'total_failed_with_waiver', ts_summary.get('total_failed_with_waiver', 0))
-        suite_summary['total_ABORTED'] += get_case_insensitive(ts_summary, 'total_aborted', ts_summary.get('total_ABORTED', 0))
-        suite_summary['total_SKIPPED'] += get_case_insensitive(ts_summary, 'total_skipped', ts_summary.get('total_SKIPPED', 0))
-        suite_summary['total_WARNINGS'] += get_case_insensitive(ts_summary, 'total_warnings', ts_summary.get('total_WARNINGS', 0))
+        suite_summary['total_aborted'] += get_case_insensitive(ts_summary, 'total_aborted', ts_summary.get('total_aborted', 0))
+        suite_summary['total_skipped'] += get_case_insensitive(ts_summary, 'total_skipped', ts_summary.get('total_skipped', 0))
+        suite_summary['total_warnings'] += get_case_insensitive(ts_summary, 'total_warnings', ts_summary.get('total_warnings', 0))
 
         # Retain column detection for minimal code changes (but we always show Waiver anyway)
         subtests = test_suite.get("subtests", [])

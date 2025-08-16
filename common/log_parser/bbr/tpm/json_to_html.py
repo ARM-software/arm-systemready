@@ -47,7 +47,7 @@ def generate_bar_chart_improved(suite_summary):
     labels = [
         'Passed',
         'Failed',
-        'Failed with Waiver',
+        'Failured with Waiver',
         'Aborted',
         'Skipped',
         'Warnings',

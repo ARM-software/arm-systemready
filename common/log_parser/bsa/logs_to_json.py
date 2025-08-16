@@ -39,11 +39,12 @@ def main(input_files, output_file):
 
     result_data = defaultdict(list)
     suite_summary = {
-        "total_PASSED": 0,
-        "total_FAILED": 0,
-        "total_ABORTED": 0,
-        "total_SKIPPED": 0,
-        "total_WARNINGS": 0
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_aborted": 0,
+        "total_skipped": 0,
+        "total_warnings": 0,
+        "total_failed_with_waiver": 0
     }
 
     # Dictionary to keep track of test numbers per suite to avoid duplicates
@@ -68,7 +69,7 @@ def main(input_files, output_file):
                     else:
                         suite_name = line.strip().split("*** Starting")[1].split("tests")[0].strip()
                     if suite_name == "GICv2m":
-                         suite_name = "GIC"    
+                         suite_name = "GIC"
                     processing = True
                     in_test = False
                     i += 1
@@ -100,15 +101,15 @@ def main(input_files, output_file):
                         test_numbers_per_suite[suite_name].add(test_number)
                         # Update suite_summary
                         if result == "PASSED":
-                            suite_summary["total_PASSED"] += 1
+                            suite_summary["total_passed"] += 1
                         elif result == "FAILED":
-                            suite_summary["total_FAILED"] += 1
+                            suite_summary["total_failed"] += 1
                         elif result == "ABORTED":
-                            suite_summary["total_ABORTED"] += 1
+                            suite_summary["total_aborted"] += 1
                         elif result == "SKIPPED":
-                            suite_summary["total_SKIPPED"] += 1
+                            suite_summary["total_skipped"] += 1
                         elif result == "WARNING":
-                            suite_summary["total_WARNINGS"] += 1
+                            suite_summary["total_warnings"] += 1
                         # Reset variables
                         in_test = False
                         test_number = ""
@@ -157,15 +158,15 @@ def main(input_files, output_file):
                             test_numbers_per_suite[suite_name].add(test_number)
                             # Update suite_summary
                             if result == "PASSED":
-                                suite_summary["total_PASSED"] += 1
+                                suite_summary["total_passed"] += 1
                             elif result == "FAILED":
-                                suite_summary["total_FAILED"] += 1
+                                suite_summary["total_failed"] += 1
                             elif result == "ABORTED":
-                                suite_summary["total_ABORTED"] += 1
+                                suite_summary["total_aborted"] += 1
                             elif result == "SKIPPED":
-                                suite_summary["total_SKIPPED"] += 1
+                                suite_summary["total_skipped"] += 1
                             elif result == "WARNING":
-                                suite_summary["total_WARNINGS"] += 1
+                                suite_summary["total_warnings"] += 1
                             # Reset variables
                             in_test = False
                             test_number = ""
@@ -198,43 +199,41 @@ def main(input_files, output_file):
                     continue
 
     # Prepare the final output structure
-    formatted_result = []
+    formatted_result = {
+         "test_results": [],
+         "suite_summary": suite_summary
+    }
 
     for test_suite, subtests in result_data.items():
         # Initialize test suite summary
         test_suite_summary = {
-            "total_PASSED": 0,
-            "total_FAILED": 0,
-            "total_ABORTED": 0,
-            "total_SKIPPED": 0,
-            "total_WARNINGS": 0
+            "total_passed": 0,
+            "total_failed": 0,
+            "total_aborted": 0,
+            "total_skipped": 0,
+            "total_warnings": 0,
         }
 
         # Count test results for the suite
         for subtest in subtests:
             result = subtest['sub_test_result']
             if result == "PASSED":
-                test_suite_summary["total_PASSED"] += 1
+                test_suite_summary["total_passed"] += 1
             elif result == "FAILED":
-                test_suite_summary["total_FAILED"] += 1
+                test_suite_summary["total_failed"] += 1
             elif result == "ABORTED":
-                test_suite_summary["total_ABORTED"] += 1
+                test_suite_summary["total_aborted"] += 1
             elif result == "SKIPPED":
-                test_suite_summary["total_SKIPPED"] += 1
+                test_suite_summary["total_skipped"] += 1
             elif result == "WARNING":
-                test_suite_summary["total_WARNINGS"] += 1
+                test_suite_summary["total_warnings"] += 1
 
         # Add the test suite and subtests to the result along with the test suite summary
-        formatted_result.append({
+        formatted_result["test_results"].append({
             "Test_suite": test_suite,
             "subtests": subtests,
             "test_suite_summary": test_suite_summary  # Nesting the summary within the test suite object
         })
-
-    # Add the overall Suite_summary at the end
-    formatted_result.append({
-        "Suite_summary": suite_summary
-    })
 
     # Write the result to the JSON file
     with open(output_file, 'w') as json_file:

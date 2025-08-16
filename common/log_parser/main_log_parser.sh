@@ -122,7 +122,7 @@ check_file() {
 # print missing json
 print_missing_json() {
     local debug=0
-    if [ debug = 1 ]; then 	
+    if [ debug = 1 ]; then
         echo -e "${YELLOW}WARNING: "$1" is missing.${NC}"
     fi
 }
@@ -395,7 +395,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
 
 #    if check_file "$CAPSULE_UPDATE_LOG" "M" && check_file "$CAPSULE_ON_DISK_LOG" "M" && check_file "$CAPSULE_TEST_RESULTS_LOG" "M"; then
     if check_file "$CAPSULE_TEST_RESULTS_LOG" "M"; then
-    	    python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
             capsule_update \
             "$CAPSULE_UPDATE_LOG" \
             "$CAPSULE_ON_DISK_LOG" \
@@ -471,7 +471,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
                         BOOT_SOURCES_PATHS+=("Unknown")
                     fi
                 else
-                    echo "${RED}ERROR: ethtool_test.log not found in $OS_DIR"
+                    echo -e "${RED}ERROR: ethtool_test.log not found in $OS_DIR${NC}"
                 fi
             fi
         done

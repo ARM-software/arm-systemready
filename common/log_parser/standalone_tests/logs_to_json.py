@@ -77,7 +77,7 @@ def create_subtest(subtest_number, description, status, reason=""):
 
 def update_suite_summary(suite_summary, status):
     if status in ["PASSED", "FAILED", "SKIPPED", "ABORTED", "WARNINGS"]:
-        key = f"total_{status}"
+        key = f"total_{status.lower()}"
         suite_summary[key] += 1
 
 def parse_dt_kselftest_log(log_data):
@@ -85,11 +85,12 @@ def parse_dt_kselftest_log(log_data):
     mapping = test_suite_mapping[test_suite_key]
 
     suite_summary = {
-        "total_PASSED": 0,
-        "total_FAILED": 0,
-        "total_SKIPPED": 0,
-        "total_ABORTED": 0,
-        "total_WARNINGS": 0
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waivers": 0
     }
 
     current_test = {
@@ -119,8 +120,8 @@ def parse_dt_kselftest_log(log_data):
 
             sub = create_subtest(subtest_number, description, status)
             current_test["subtests"].append(sub)
-            current_test["test_suite_summary"][f"total_{status}"] += 1
-            suite_summary[f"total_{status}"] += 1
+            current_test["test_suite_summary"][f"total_{status.lower()}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
     # >>> REMOVE EMPTY REASON ARRAYS <<<
@@ -147,11 +148,12 @@ def parse_dt_validate_log(log_data):
     mapping = test_suite_mapping[test_suite_key]
 
     suite_summary = {
-        "total_PASSED": 0,
-        "total_FAILED": 0,
-        "total_SKIPPED": 0,
-        "total_ABORTED": 0,
-        "total_WARNINGS": 0
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waiver": 0
     }
 
     current_test = {
@@ -172,8 +174,8 @@ def parse_dt_validate_log(log_data):
             status = 'FAILED'
             sub = create_subtest(subtest_number, description, status, reason=line)
             current_test["subtests"].append(sub)
-            current_test["test_suite_summary"]["total_FAILED"] += 1
-            suite_summary["total_FAILED"] += 1
+            current_test["test_suite_summary"]["total_failed"] += 1
+            suite_summary["total_failed"] += 1
             subtest_number += 1
 
     # >>> REMOVE EMPTY REASON ARRAYS <<<
@@ -200,11 +202,12 @@ def parse_ethtool_test_log(log_data):
     mapping = test_suite_mapping[test_suite_key]
 
     suite_summary = {
-        "total_PASSED": 0,
-        "total_FAILED": 0,
-        "total_SKIPPED": 0,
-        "total_ABORTED": 0,
-        "total_WARNINGS": 0
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waivers": 0
     }
 
     current_test = {
@@ -241,7 +244,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
             continue
 
@@ -259,7 +262,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Bringing up specific interface
@@ -274,7 +277,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Running ethtool command
@@ -284,7 +287,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Self-test detection
@@ -310,7 +313,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Link detection
@@ -324,7 +327,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # DHCP
@@ -338,7 +341,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Ping to router
@@ -348,7 +351,7 @@ def parse_ethtool_test_log(log_data):
                 sub = create_subtest(subtest_number, desc, status)
                 update_suite_summary(current_test["test_suite_summary"], status)
                 current_test["subtests"].append(sub)
-                suite_summary[f"total_{status}"] += 1
+                suite_summary[f"total_{status.lower()}"] += 1
                 subtest_number += 1
         if "Failed to ping router/gateway" in line:
             intf = line.split("for")[-1].strip()
@@ -357,7 +360,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(sub)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Ping to www.arm.com
@@ -367,7 +370,7 @@ def parse_ethtool_test_log(log_data):
                 sub = create_subtest(subtest_number, desc, status)
                 update_suite_summary(current_test["test_suite_summary"], status)
                 current_test["subtests"].append(sub)
-                suite_summary[f"total_{status}"] += 1
+                suite_summary[f"total_{status.lower()}"] += 1
                 subtest_number += 1
         if "Failed to ping www.arm.com via" in line:
             intf = line.split("via")[-1].strip()
@@ -376,7 +379,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(sub)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # >>> Wget checks <<<
@@ -387,7 +390,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(sub)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         if "INFO: wget successfully accessed https://www.arm.com via" in line:
@@ -397,7 +400,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(sub)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # >>> Curl checks <<<
@@ -408,7 +411,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(sub)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         if "INFO: curl successfully fetched https://www.arm.com via" in line:
@@ -418,8 +421,8 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, desc, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(sub)
-            suite_summary[f"total_{status}"] += 1
-            subtest_number += 1    
+            suite_summary[f"total_{status.lower()}"] += 1
+            subtest_number += 1
 
         i += 1
 
@@ -430,7 +433,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, f"Ping to router/gateway on {intf}", "SKIPPED")
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], "SKIPPED")
-            suite_summary["total_SKIPPED"] += 1
+            suite_summary["total_skipped"] += 1
             subtest_number += 1
 
         # Ping to arm.com
@@ -438,7 +441,7 @@ def parse_ethtool_test_log(log_data):
             sub = create_subtest(subtest_number, f"Ping to www.arm.com on {intf}", "SKIPPED")
             current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], "SKIPPED")
-            suite_summary["total_SKIPPED"] += 1
+            suite_summary["total_skipped"] += 1
             subtest_number += 1
 
     # >>> REMOVE EMPTY REASON ARRAYS <<<
@@ -465,11 +468,12 @@ def parse_read_write_check_blk_devices_log(log_data):
     mapping = test_suite_mapping[test_suite_key]
 
     suite_summary = {
-        "total_PASSED": 0,
-        "total_FAILED": 0,
-        "total_SKIPPED": 0,
-        "total_ABORTED": 0,
-        "total_WARNINGS": 0
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waivers": 0
     }
 
     current_test = {
@@ -531,7 +535,7 @@ def parse_read_write_check_blk_devices_log(log_data):
                         sub_read = create_subtest(subtest_number, desc_read, read_status, reason=read_reason)
                         current_test["subtests"].append(sub_read)
                         update_suite_summary(current_test["test_suite_summary"], read_status)
-                        suite_summary[f"total_{read_status}"] += 1
+                        suite_summary[f"total_{read_status.lower()}"] += 1
                         subtest_number += 1
 
                         # Now see if we have a write check (passed/failed) or skip
@@ -545,11 +549,11 @@ def parse_read_write_check_blk_devices_log(log_data):
                             sub_write = create_subtest(subtest_number, desc_write, write_status, reason=write_reason)
                             current_test["subtests"].append(sub_write)
                             update_suite_summary(current_test["test_suite_summary"], write_status)
-                            suite_summary[f"total_{write_status}"] += 1
+                            suite_summary[f"total_{write_status.lower()}"] += 1
                             subtest_number += 1
 
                         elif i < len(log_data) and "Do you want to perform a write check on" in log_data[i]:
-                            
+
                             # If user said yes/no
                             prompt_line = log_data[i].strip()
                             if "yes" in prompt_line.lower():
@@ -581,7 +585,7 @@ def parse_read_write_check_blk_devices_log(log_data):
                                 sub_write = create_subtest(subtest_number, desc_write, ws, reason=wr)
                                 current_test["subtests"].append(sub_write)
                                 update_suite_summary(current_test["test_suite_summary"], ws)
-                                suite_summary[f"total_{ws}"] += 1
+                                suite_summary[f"total_{ws.lower()}"] += 1
                                 subtest_number += 1
                             else:
                                 # User said no or timed out
@@ -596,7 +600,7 @@ def parse_read_write_check_blk_devices_log(log_data):
                                 sub_write = create_subtest(subtest_number, desc_write, write_status, reason=write_reason)
                                 current_test["subtests"].append(sub_write)
                                 update_suite_summary(current_test["test_suite_summary"], write_status)
-                                suite_summary[f"total_{write_status}"] += 1
+                                suite_summary[f"total_{write_status.lower()}"] += 1
                                 subtest_number += 1
 
                     else:
@@ -612,7 +616,7 @@ def parse_read_write_check_blk_devices_log(log_data):
                 sub = create_subtest(subtest_number, desc, status, reason=reason)
                 current_test["subtests"].append(sub)
                 update_suite_summary(current_test["test_suite_summary"], status)
-                suite_summary[f"total_{status}"] += 1
+                suite_summary[f"total_{status.lower()}"] += 1
                 subtest_number += 1
                 i += 1
                 continue
@@ -637,7 +641,7 @@ def parse_read_write_check_blk_devices_log(log_data):
                             sub = create_subtest(subtest_number, desc, status, reason=reason)
                             current_test["subtests"].append(sub)
                             update_suite_summary(current_test["test_suite_summary"], status)
-                            suite_summary[f"total_{status}"] += 1
+                            suite_summary[f"total_{status.lower()}"] += 1
                             subtest_number += 1
 
                             while i < len(log_data):
@@ -673,7 +677,7 @@ def parse_read_write_check_blk_devices_log(log_data):
                             read_sub = create_subtest(subtest_number, read_desc, read_status, reason=read_reason)
                             current_test["subtests"].append(read_sub)
                             update_suite_summary(current_test["test_suite_summary"], read_status)
-                            suite_summary[f"total_{read_status}"] += 1
+                            suite_summary[f"total_{read_status.lower()}"] += 1
                             subtest_number += 1
 
                             # 3) check skip line or write prompt
@@ -688,7 +692,7 @@ def parse_read_write_check_blk_devices_log(log_data):
                                 write_sub = create_subtest(subtest_number, write_desc, write_status, reason=write_reason)
                                 current_test["subtests"].append(write_sub)
                                 update_suite_summary(current_test["test_suite_summary"], write_status)
-                                suite_summary[f"total_{write_status}"] += 1
+                                suite_summary[f"total_{write_status.lower()}"] += 1
                                 subtest_number += 1
 
                             elif i < len(log_data) and "Do you want to perform a write check on" in log_data[i]:
@@ -735,7 +739,7 @@ def parse_read_write_check_blk_devices_log(log_data):
                                     write_sub = create_subtest(subtest_number, write_desc, write_status, reason=write_reason)
                                     current_test["subtests"].append(write_sub)
                                     update_suite_summary(current_test["test_suite_summary"], write_status)
-                                    suite_summary[f"total_{write_status}"] += 1
+                                    suite_summary[f"total_{write_status.lower()}"] += 1
                                     subtest_number += 1
 
                         else:
@@ -778,11 +782,12 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
     }
 
     suite_summary = {
-        "total_PASSED": 0,
-        "total_FAILED": 0,
-        "total_SKIPPED": 0,
-        "total_ABORTED": 0,
-        "total_WARNINGS": 0
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waivers": 0
     }
 
     current_test = {
@@ -812,7 +817,7 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
         sub = create_subtest(subtest_number, desc, status, reason)
         current_test["subtests"].append(sub)
         update_suite_summary(current_test["test_suite_summary"], status)
-        suite_summary[f"total_{status}"] += 1
+        suite_summary[f"total_{status.lower()}"] += 1
         subtest_number += 1
 
     # PARSE capsule-update.log
@@ -978,11 +983,12 @@ def parse_psci_logs(psci_log_path):
     mapping = test_suite_mapping[test_suite_key]
 
     suite_summary = {
-        "total_PASSED": 0,
-        "total_FAILED": 0,
-        "total_SKIPPED": 0,
-        "total_ABORTED": 0,
-        "total_WARNINGS": 0
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waivers": 0
     }
 
     current_test = {
@@ -1003,8 +1009,8 @@ def parse_psci_logs(psci_log_path):
             reason=f"PSCI log file not found at {psci_log_path}"
         )
         current_test["subtests"].append(sub)
-        current_test["test_suite_summary"]["total_WARNINGS"] += 1
-        suite_summary["total_WARNINGS"] += 1
+        current_test["test_suite_summary"]["total_warnings"] += 1
+        suite_summary["total_warnings"] += 1
         return {"test_results": [current_test], "suite_summary": suite_summary}
 
     # Read lines
@@ -1043,8 +1049,8 @@ def parse_psci_logs(psci_log_path):
 
     sub = create_subtest(1, subtest_desc, status, reason)
     current_test["subtests"].append(sub)
-    current_test["test_suite_summary"][f"total_{status}"] += 1
-    suite_summary[f"total_{status}"] += 1
+    current_test["test_suite_summary"][f"total_{status.lower()}"] += 1
+    suite_summary[f"total_{status.lower()}"] += 1
 
     # Cleanup reason arrays
     for s in current_test["subtests"]:
