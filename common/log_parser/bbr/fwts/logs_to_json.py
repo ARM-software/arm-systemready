@@ -30,11 +30,11 @@ def parse_fwts_log(log_path):
 
     # Summary variables
     suite_summary = {
-        "total_PASSED": 0,
-        "total_FAILED": 0,
-        "total_ABORTED": 0,
-        "total_SKIPPED": 0,
-        "total_WARNINGS": 0
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_aborted": 0,
+        "total_skipped": 0,
+        "total_warnings": 0
     }
 
     # First, identify all main tests from the "Running tests:" lines
@@ -60,7 +60,7 @@ def parse_fwts_log(log_path):
                     # Update the test_suite_summary based on subtests
                     for sub in current_test["subtests"]:
                         for key in ["PASSED", "FAILED", "ABORTED", "SKIPPED", "WARNINGS"]:
-                            current_test["test_suite_summary"][f"total_{key}"] += sub["sub_test_result"][key]
+                            current_test["test_suite_summary"][f"total_{key.lower()}"] += sub["sub_test_result"][key]
                     results.append(current_test)
 
                 # Start a new main test
@@ -70,11 +70,11 @@ def parse_fwts_log(log_path):
                     "Test_suite_Description": Test_suite_Description,
                     "subtests": [],
                     "test_suite_summary": {
-                        "total_PASSED": 0,
-                        "total_FAILED": 0,
-                        "total_ABORTED": 0,
-                        "total_SKIPPED": 0,
-                        "total_WARNINGS": 0
+                        "total_passed": 0,
+                        "total_failed": 0,
+                        "total_aborted": 0,
+                        "total_skipped": 0,
+                        "total_warnings": 0
                     }
                 }
                 current_subtest = None  # Reset current_subtest
@@ -259,13 +259,13 @@ def parse_fwts_log(log_path):
         # Update the test_suite_summary from subtests
         for sub in current_test["subtests"]:
             for key in ["PASSED", "FAILED", "ABORTED", "SKIPPED", "WARNINGS"]:
-                current_test["test_suite_summary"][f"total_{key}"] += sub["sub_test_result"][key]
+                current_test["test_suite_summary"][f"total_{key.lower()}"] += sub["sub_test_result"][key]
         results.append(current_test)
 
     # After all tests, update the suite_summary from each test's summary
     for test in results:
         for key in ["PASSED", "FAILED", "ABORTED", "SKIPPED", "WARNINGS"]:
-            suite_summary[f"total_{key}"] += test["test_suite_summary"][f"total_{key}"]
+            suite_summary[f"total_{key.lower()}"] += test["test_suite_summary"][f"total_{key.lower()}"]
 
     # -----------------------------
     # POST-PROCESS THE RESULTS
@@ -275,12 +275,12 @@ def parse_fwts_log(log_path):
 
     # Rename the suite_summary keys & add total_failed_with_waiver
     final_suite_summary = {
-        "total_passed": suite_summary.pop("total_PASSED"),
-        "total_failed": suite_summary.pop("total_FAILED"),
+        "total_passed": suite_summary.pop("total_passed"),
+        "total_failed": suite_summary.pop("total_failed"),
         "total_failed_with_waiver": 0,  # Always 0 unless logic is added
-        "total_aborted": suite_summary.pop("total_ABORTED"),
-        "total_skipped": suite_summary.pop("total_SKIPPED"),
-        "total_warnings": suite_summary.pop("total_WARNINGS")
+        "total_aborted": suite_summary.pop("total_aborted"),
+        "total_skipped": suite_summary.pop("total_skipped"),
+        "total_warnings": suite_summary.pop("total_warnings")
     }
 
     # Process each test in results
@@ -288,12 +288,12 @@ def parse_fwts_log(log_path):
         # Rename that test's summary keys, add total_failed_with_waiver
         t = test["test_suite_summary"]
         test["test_suite_summary"] = {
-            "total_passed": t.pop("total_PASSED"),
-            "total_failed": t.pop("total_FAILED"),
+            "total_passed": t.pop("total_passed"),
+            "total_failed": t.pop("total_failed"),
             "total_failed_with_waiver": 0,  # same handling
-            "total_aborted": t.pop("total_ABORTED"),
-            "total_skipped": t.pop("total_SKIPPED"),
-            "total_warnings": t.pop("total_WARNINGS")
+            "total_aborted": t.pop("total_aborted"),
+            "total_skipped": t.pop("total_skipped"),
+            "total_warnings": t.pop("total_warnings")
         }
 
         # Remove empty reason arrays from each subtest

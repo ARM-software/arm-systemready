@@ -32,12 +32,12 @@ def get_case_insensitive(d, key, default=0):
 def generate_bar_chart(suite_summary):
     labels = ['Passed', 'Failed', 'Failed with Waiver', 'Aborted', 'Skipped', 'Warnings']
     sizes = [
-        suite_summary.get('total_PASSED', 0),
-        suite_summary.get('total_FAILED', 0),
+        suite_summary.get('total_passed', 0),
+        suite_summary.get('total_failed', 0),
         suite_summary.get('total_failed_with_waiver', 0),
-        suite_summary.get('total_ABORTED', 0),
-        suite_summary.get('total_SKIPPED', 0),
-        suite_summary.get('total_WARNINGS', 0)
+        suite_summary.get('total_aborted', 0),
+        suite_summary.get('total_skipped', 0),
+        suite_summary.get('total_warnings', 0)
     ]
     colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']  # Colors for each category
 
@@ -201,11 +201,11 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                     </tr>
                     <tr>
                         <td>Passed</td>
-                        <td class="pass">{{ total_PASSED }}</td>
+                        <td class="pass">{{ total_passed }}</td>
                     </tr>
                     <tr>
                         <td>Failed</td>
-                        <td class="fail">{{ total_FAILED }}</td>
+                        <td class="fail">{{ total_failed }}</td>
                     </tr>
                     <tr>
                         <td>Failed with Waiver</td>
@@ -213,15 +213,15 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                     </tr>
                     <tr>
                         <td>Aborted</td>
-                        <td class="aborted">{{ total_ABORTED }}</td>
+                        <td class="aborted">{{ total_aborted }}</td>
                     </tr>
                     <tr>
                         <td>Skipped</td>
-                        <td class="skipped">{{ total_SKIPPED }}</td>
+                        <td class="skipped">{{ total_skipped }}</td>
                     </tr>
                     <tr>
                         <td>Warnings</td>
-                        <td class="warning">{{ total_WARNINGS }}</td>
+                        <td class="warning">{{ total_warnings }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -286,42 +286,43 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
 
     # Compute overall suite_summary from test_results
     suite_summary = {
-        'total_PASSED': 0,
-        'total_FAILED': 0,  # Only counts FAILED without waiver
-        'total_failed_with_waiver': total_failed_with_waiver,
-        'total_ABORTED': 0,
-        'total_SKIPPED': 0,
-        'total_WARNINGS': 0
+        'total_passed': 0,
+        'total_failed': 0,
+        'total_failed_with_waiver': 0,
+        'total_aborted': 0,
+        'total_skipped': 0,
+        'total_warnings': 0
     }
 
     for test_suite in test_results:
         ts_summary = test_suite.get('test_suite_summary', {})
-        suite_summary['total_PASSED'] += get_case_insensitive(ts_summary, 'total_passed')
-        suite_summary['total_FAILED'] += get_case_insensitive(ts_summary, 'total_failed')
-        # 'total_failed_with_waiver' already summed above
-        suite_summary['total_ABORTED'] += get_case_insensitive(ts_summary, 'total_aborted')
-        suite_summary['total_SKIPPED'] += get_case_insensitive(ts_summary, 'total_skipped')
-        suite_summary['total_WARNINGS'] += get_case_insensitive(ts_summary, 'total_warnings')
+        suite_summary['total_passed'] += get_case_insensitive(ts_summary, 'total_passed')
+        suite_summary['total_failed'] += get_case_insensitive(ts_summary, 'total_failed')
+        suite_summary['total_aborted'] += get_case_insensitive(ts_summary, 'total_aborted')
+        suite_summary['total_skipped'] += get_case_insensitive(ts_summary, 'total_skipped')
+        suite_summary['total_warnings'] += get_case_insensitive(ts_summary, 'total_warnings')
+        suite_summary['total_failed_with_waiver'] += get_case_insensitive(ts_summary, 'total_failed_with_waiver')
 
     # Calculate total tests
     total_tests = (
-        suite_summary.get("total_PASSED", 0)
-        + suite_summary.get("total_FAILED", 0)
-        + suite_summary.get("total_ABORTED", 0)
-        + suite_summary.get("total_SKIPPED", 0)
-        + suite_summary.get("total_WARNINGS", 0)
+        suite_summary.get("total_passed", 0)
+        + suite_summary.get("total_failed", 0)
+        + suite_summary.get("total_aborted", 0)
+        + suite_summary.get("total_skipped", 0)
+        + suite_summary.get("total_warnings", 0)
+        + suite_summary.get("total_failed_with_waiver", 0)
     )
 
     # Render the HTML content
     html_content = template.render(
         chart_data=chart_data,
         total_tests=total_tests,
-        total_PASSED=suite_summary.get("total_PASSED", 0),
-        total_FAILED=suite_summary.get("total_FAILED", 0),
+        total_passed=suite_summary.get("total_passed", 0),
+        total_failed=suite_summary.get("total_failed", 0),
         total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),
-        total_ABORTED=suite_summary.get("total_ABORTED", 0),
-        total_SKIPPED=suite_summary.get("total_SKIPPED", 0),
-        total_WARNINGS=suite_summary.get("total_WARNINGS", 0),
+        total_aborted=suite_summary.get("total_aborted", 0),
+        total_skipped=suite_summary.get("total_skipped", 0),
+        total_warnings=suite_summary.get("total_warnings", 0),
         test_results=test_results,
         is_summary_page=is_summary_page,
         test_suite_name=test_suite_name.upper()  # Ensure uppercase for consistency
@@ -339,7 +340,7 @@ def main(input_json_file, detailed_html_file, summary_html_file):
 
     # Extract the suite summary and test results
     # Assuming the last element is the overall Suite_summary
-    test_results = data[:-1]
+    test_results = data["test_results"]
 
     # Get the test suite name from the input JSON file name
     test_suite_name = os.path.splitext(os.path.basename(input_json_file))[0].upper()
@@ -358,22 +359,22 @@ def main(input_json_file, detailed_html_file, summary_html_file):
         return default
 
     suite_summary = {
-        'total_PASSED': 0,
-        'total_FAILED': 0,  # Only counts FAILED without waiver
+        'total_passed': 0,
+        'total_failed': 0,
         'total_failed_with_waiver': 0,
-        'total_ABORTED': 0,
-        'total_SKIPPED': 0,
-        'total_WARNINGS': 0
+        'total_aborted': 0,
+        'total_skipped': 0,
+        'total_warnings': 0
     }
 
     for test_suite in test_results:
         ts_summary = test_suite.get('test_suite_summary', {})
-        suite_summary['total_PASSED'] += get_case_insensitive(ts_summary, 'total_passed')
-        suite_summary['total_FAILED'] += get_case_insensitive(ts_summary, 'total_failed')
+        suite_summary['total_passed'] += get_case_insensitive(ts_summary, 'total_passed')
+        suite_summary['total_failed'] += get_case_insensitive(ts_summary, 'total_failed')
         suite_summary['total_failed_with_waiver'] += get_case_insensitive(ts_summary, 'total_failed_with_waiver')
-        suite_summary['total_ABORTED'] += get_case_insensitive(ts_summary, 'total_aborted')
-        suite_summary['total_SKIPPED'] += get_case_insensitive(ts_summary, 'total_skipped')
-        suite_summary['total_WARNINGS'] += get_case_insensitive(ts_summary, 'total_warnings')
+        suite_summary['total_aborted'] += get_case_insensitive(ts_summary, 'total_aborted')
+        suite_summary['total_skipped'] += get_case_insensitive(ts_summary, 'total_skipped')
+        suite_summary['total_warnings'] += get_case_insensitive(ts_summary, 'total_warnings')
 
     # Generate bar chart
     chart_data = generate_bar_chart(suite_summary)

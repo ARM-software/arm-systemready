@@ -472,7 +472,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                 sub_test_result = subtest.get('sub_test_result')
                 if isinstance(sub_test_result, dict):
                     total_passed += sub_test_result.get('PASSED', 0)
-                    total_failed += sub_test_result.get('FAILED', 0) + sub_test_result.get('FAILED_WITH_WAIVER', 0)
+                    total_failed += sub_test_result.get('FAILED', 0)
                     total_failed_with_waiver += sub_test_result.get('FAILED_WITH_WAIVER', 0)
                     total_aborted += sub_test_result.get('ABORTED', 0)
                     total_skipped += sub_test_result.get('SKIPPED', 0)
@@ -482,9 +482,10 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                     if 'PASS' in r:
                         total_passed += 1
                     elif 'FAIL' in r:
-                        total_failed += 1
                         if '(WITH WAIVER)' in r:
                             total_failed_with_waiver += 1
+                        else:
+                            total_failed += 1
                     elif 'ABORTED' in r:
                         total_aborted += 1
                     elif 'SKIPPED' in r:
@@ -542,7 +543,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
             "total_skipped":              total_skipped_top,
             "total_warnings":             total_warnings_top,
             "total_ignored":              total_ignored_top,
-        }        
+        }
 
     # Write the updated JSON data back to the file
     try:

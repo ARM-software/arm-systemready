@@ -40,7 +40,7 @@ def create_subtest(subtest_number, description, status, reason=""):
 
 def update_suite_summary(suite_summary, status):
     if status in ["PASSED", "FAILED", "SKIPPED", "ABORTED", "WARNINGS"]:
-        key = f"total_{status}"
+        key = f"total_{status.lower()}"
         suite_summary[key] += 1
 
 def parse_ethtool_test_log(log_data, os_name):
@@ -54,11 +54,11 @@ def parse_ethtool_test_log(log_data, os_name):
     }
 
     suite_summary = {
-        "total_PASSED": 0,
-        "total_FAILED": 0,
-        "total_SKIPPED": 0,
-        "total_ABORTED": 0,
-        "total_WARNINGS": 0
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0
     }
 
     current_test = {
@@ -96,7 +96,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             current_test["subtests"].append(subtest)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
             continue
 
@@ -114,7 +114,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             current_test["subtests"].append(subtest)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Bringing up interface
@@ -130,7 +130,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             current_test["subtests"].append(subtest)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Running ethtool Command
@@ -140,7 +140,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             current_test["subtests"].append(subtest)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Ethernet interface self-test
@@ -164,7 +164,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             current_test["subtests"].append(subtest)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Link detection
@@ -178,7 +178,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             current_test["subtests"].append(subtest)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # DHCP support
@@ -192,7 +192,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             current_test["subtests"].append(subtest)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Ping to router/gateway
@@ -206,7 +206,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(subtest)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         # Ping to www.arm.com
@@ -220,7 +220,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(subtest)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
         i += 1
@@ -243,7 +243,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             current_test["subtests"].append(subtest)
             update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
         if not ping_to_arm_present:
             # Ping to www.arm.com
@@ -252,7 +252,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest = create_subtest(subtest_number, description, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(subtest)
-            suite_summary[f"total_{status}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
     # Finalize results
