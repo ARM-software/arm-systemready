@@ -26,7 +26,7 @@
 # UEFI_BUILD_ENABLED - Flag to enable building UEFI
 # UEFI_PATH - sub-directory containing UEFI code
 # UEFI_BUILD_MODE - DEBUG or RELEASE
-# UEFI_TOOLCHAIN - Toolchain supported by Linaro uefi-tools: GCC49, GCC48 or GCC47
+# UEFI_TOOLCHAIN - Toolchain supported by Linaro uefi-tools
 # UEFI_PLATFORMS - List of platforms to build
 # UEFI_PLAT_{platform name} - array of platform parameters:
 #     - platname - the name of the platform used by the build
@@ -39,11 +39,11 @@
 TOP_DIR=`pwd`
 . $TOP_DIR/../common/config/systemready-band-source.cfg
 UEFI_PATH=edk2
-UEFI_TOOLCHAIN=GCC49
+UEFI_TOOLCHAIN=GCC
 CROSS_COMPILE=$TOP_DIR/$GCC
 UEFI_LIBC_PATH=edk2-libc
 OUTDIR=${TOP_DIR}/output
-BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC49/AARCH64/
+BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC/AARCH64/
 KEYS_DIR=$TOP_DIR/bbsr-keys
 
 do_build()
@@ -75,7 +75,7 @@ do_clean()
     PATH="$PATH:$CROSS_COMPILE_DIR"
     source ./edksetup.sh
     make -C BaseTools/Source/C clean
-    rm -rf Build/Shell/DEBUG_GCC49
+    rm -rf Build/Shell/DEBUG_GCC
     popd
 }
 
