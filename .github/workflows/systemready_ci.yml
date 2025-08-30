@@ -1,0 +1,100 @@
+name: SystemReady-ACS CI (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      run-sysready:
+        description: "Run SystemReady band build"
+        type: boolean
+        required: false
+        default: true
+      run-dt:
+        description: "Run Devicetree band build"
+        type: boolean
+        required: false
+        default: true
+    secrets:
+      dummy:
+        required: false
+
+jobs:
+  #######################################################################
+  # SystemReady band build
+  #######################################################################
+  systemready:
+    if: ${{ inputs.run-sysready }}
+    name: SystemReady band • build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install gnu-efi dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y gnu-efi
+
+      - name: Start building
+        run: |
+          sudo -s;
+          git config --global user.name "arm-systemready";
+          git config --global user.email "arm-systemready@arm.com";
+          cd SystemReady-band/;
+          ./build-scripts/get_source.sh;
+          ./build-scripts/build-systemready-band-live-image.sh
+
+      - name: Upload SystemReady image
+        uses: actions/upload-artifact@v4
+        with:
+          name: systemready_acs_live_image.img.xz
+          path: SystemReady-band/output/systemready_acs_live_image.img.xz
+          if-no-files-found: error
+
+  #######################################################################
+  # Devicetree band build
+  #######################################################################
+  devicetree:
+    if: ${{ inputs.run-dt }}
+    name: Devicetree band • build
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Start building
+        run: |
+          sudo -s;
+          git config --global user.name "arm-systemready";
+          git config --global user.email "arm-systemready@arm.com";
+          cd SystemReady-devicetree-band/Yocto;
+          ./build-scripts/get_source.sh;
+          sed -i 's/if 0 == os.getuid/if 1 == os.getuid/' meta-woden/poky/meta/classes-global/sanity.bbclass;
+          ./build-scripts/build-systemready-dt-band-live-image.sh
+
+      - name: Upload Devicetree image
+        uses: actions/upload-artifact@v4
+        with:
+          name: systemready-dt_acs_live_image.wic.xz
+          path: SystemReady-devicetree-band/Yocto/meta-woden/build/tmp/deploy/images/generic-arm64/systemready-dt_acs_live_image.wic.xz
+          if-no-files-found: error
+

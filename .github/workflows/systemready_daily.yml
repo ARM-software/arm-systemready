@@ -1,0 +1,15 @@
+name: SystemReady-ACS Daily
+
+on:
+  schedule:
+    - cron: '30 17 * * *'  # 11:00 PM IST (GitHub cron is UTC)
+  workflow_dispatch:
+
+jobs:
+  run:
+    uses: ./.github/workflows/systemready_ci.yml
+    with:
+      run-sysready: true
+      run-dt: true
+    secrets: inherit
+
