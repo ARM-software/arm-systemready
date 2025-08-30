@@ -1,0 +1,17 @@
+name: SystemReady-ACS Integration Build (push/PR)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  run:
+    uses: ./.github/workflows/systemready_ci.yml
+    with:
+      run-sysready: true
+      run-dt: true
+    secrets: inherit
+
