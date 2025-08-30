@@ -26,7 +26,7 @@
 # UEFI_BUILD_ENABLED - Flag to enable building UEFI
 # UEFI_PATH - sub-directory containing UEFI code
 # UEFI_BUILD_MODE - DEBUG or RELEASE
-# UEFI_TOOLCHAIN - Toolchain supported by Linaro uefi-tools: GCC49, GCC48 or GCC47
+# UEFI_TOOLCHAIN - Toolchain supported by Linaro uefi-tools
 # UEFI_PLATFORMS - List of platforms to build
 # UEFI_PLAT_{platform name} - array of platform parameters:
 #     - platname - the name of the platform used by the build

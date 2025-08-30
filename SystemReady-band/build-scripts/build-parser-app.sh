@@ -53,7 +53,7 @@ rm -rf "$APP_PATH"
 cp -r "$TOP_DIR/../common/parser" "$APP_PATH"
 
 echo "Setting environment variables..."
-export GCC49_AARCH64_PREFIX="$GCC_BIN"
+export GCC_AARCH64_PREFIX="$GCC_BIN"
 export PACKAGES_PATH="$EDK2_DIR:$LIBC_DIR"
 
 echo "packages path : $PACKAGES_PATH"
@@ -63,9 +63,9 @@ source ./edksetup.sh --reconfig
 make -C BaseTools/Source/C
 
 echo "Building Parser.efi..."
-build -a AARCH64 -t GCC49 -p ShellPkg/ShellPkg.dsc -m ShellPkg/Application/$APP_NAME/Parser.inf
+build -a AARCH64 -t GCC -p ShellPkg/ShellPkg.dsc -m ShellPkg/Application/$APP_NAME/Parser.inf
 
-cp "$EDK2_DIR/Build/Shell/DEBUG_GCC49/AARCH64/Parser.efi" "$TOP_DIR/$APP_NAME/Parser.efi"
+cp "$EDK2_DIR/Build/Shell/DEBUG_GCC/AARCH64/Parser.efi" "$TOP_DIR/$APP_NAME/Parser.efi"
 git reset --hard
 
 popd
@@ -93,7 +93,7 @@ do_clean()
     PATH="$PATH:$CROSS_COMPILE_DIR"
     source ./edksetup.sh
     make -C BaseTools/Source/C clean
-    rm -rf Build/Shell/DEBUG_GCC49
+    rm -rf Build/Shell/DEBUG_GCC
     popd
 }
 
