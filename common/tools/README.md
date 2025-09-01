@@ -25,7 +25,7 @@ To display usage information, run:
 ---
 This script streamlines the process of updating ACS configuration files in prebuilt images, incorporating error handling and automation. Additionally, it can be used to copy the ACS image results directory.
 
-## Notes
+### Notes
 
 - The script requires `sudo` privileges for mounting and copying files.
 
