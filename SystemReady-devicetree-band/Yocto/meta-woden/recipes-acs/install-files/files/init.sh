@@ -226,24 +226,71 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fi
     else
       if [ -f /mnt/acs_tests/app/capsule_update_done.flag ]; then
-        fw_pattern="FwVersion\s*-\s*(0x[0-9A-Fa-f]+)"
-        fw_status_pattern="LastAttemptStatus\s*-\s*(0x[0-9A-Fa-f]+)"
-
-        prev_fw_ver=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_before_update.log)
-        cur_fw_ver=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log)
-        last_attempted_status=$(python3 /usr/bin/extract_capsule_fw_version.py $fw_status_pattern /mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log)
-
-
+        fw_pattern="^ *FwVersion\s*-\s*(0x[0-9A-Fa-f]+)"
+        fw_status_pattern="^ *LastAttemptStatus\s*-\s*(0x[0-9A-Fa-f]+)"
+        fw_class_pattern="^ *FwClass\s*-\s*([A-Fa-f0-9\-]+)"
         fw_status="0x0"
-        echo "Testing ESRT FW version update" >> /mnt/acs_results_template/fw/capsule_test_results.log
-        echo "INFO: prev version: $prev_fw_ver,  current version: $cur_fw_ver, last attempted status: $last_attempted_status" >> /mnt/acs_results_template/fw/capsule_test_results.log
-        if [ "$((cur_fw_ver))" -gt "$((prev_fw_ver))" ] && [ "$((last_attempted_status))" == "$((fw_status))" ]; then
-          echo "RESULTS: PASSED" >> /mnt/acs_results_template/fw/capsule_test_results.log
-          echo "Capsule update has passed"
-        else
-          echo "RESULTS: FAILED" >> /mnt/acs_results_template/fw/capsule_test_results.log
-          echo "Capsule update has failed"
-        fi
+        extract_script_path="/usr/bin/extract_capsule_fw_version.py"
+        before_update_log="/mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_before_update.log"
+        after_update_log="/mnt/acs_results_template/fw/CapsuleApp_ESRT_table_info_after_update.log"
+
+        i=0
+        for val in $(python3 "$extract_script_path" "$fw_class_pattern" "$before_update_log" | tr '\n' ' '); do
+          eval "fw_class_$i='$val'"
+          i=$((i+1))
+        done
+
+        i=0
+        for val in $(python3 "$extract_script_path" "$fw_guid" "$before_update_log" | tr '\n' ' '); do
+          eval "fw_guid_$i='$val'"
+          i=$((i+1))
+        done
+
+        i=0
+        for val in $(python3 "$extract_script_path" "$fw_pattern" "$before_update_log" | tr '\n' ' '); do
+          eval "prev_fw_$i='$val'"
+          i=$((i+1))
+        done
+        entry_count=$i
+
+        i=0
+        for val in $(python3 "$extract_script_path" "$fw_pattern" "$after_update_log" | tr '\n' ' '); do
+          eval "cur_fw_$i='$val'"
+          i=$((i+1))
+        done
+
+        i=0
+        for val in $(python3 "$extract_script_path" "$fw_status_pattern" "$after_update_log" | tr '\n' ' '); do
+          eval "status_fw_$i='$val'"
+          i=$((i+1))
+        done
+
+        echo "Testing ESRT FW version update" > /mnt/acs_results_template/fw/capsule_test_results.log
+        overall_result="PASSED"
+        i=0
+        while [ $i -lt $entry_count ]; do
+          eval prev_val=\$prev_fw_$i
+          eval cur_val=\$cur_fw_$i
+          eval status_val=\$status_fw_$i
+          eval guid_val=\$fw_class_$i
+
+          [ -z "$status_val" ] && status_val="0xFFFFFFFF"
+
+          echo "INFO: Fmp Payload GUID:$guid_val, prev version: $prev_val, current version: $cur_val, last attempted status: $status_val" >> /mnt/acs_results_template/fw/capsule_test_results.log
+
+          prev_ver=$(printf "%d" "$prev_val")
+          cur_ver=$(printf "%d" "$cur_val")
+          prev_status=$(printf "%d" "$status_val")
+          expected_status=$(printf "%d" "$fw_status")
+          if [ "$cur_ver" -gt "$prev_ver" ] && [ "$prev_status" -eq "$expected_status" ]; then
+            echo "RESULTS: Fmp Payload  with GUID $guid_val was successfully update -- PASSED" >> /mnt/acs_results_template/fw/capsule_test_results.log
+          else
+            echo "RESULTS: Fmp Payload  with GUID $guid_val failed to update -- FAILED" >> /mnt/acs_results_template/fw/capsule_test_results.log
+            overall_result="FAILED"
+          fi
+          i=$((i+1))
+        done
+        echo "RESULTS: Overall Capsule Update Result: $overall_result" >> /mnt/acs_results_template/fw/capsule_test_results.log
         rm /mnt/acs_tests/app/capsule_update_done.flag
       elif [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
         echo "Capsule update has failed"
