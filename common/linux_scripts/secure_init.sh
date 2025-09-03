@@ -71,14 +71,17 @@ mkdir -p $RESULTS_DIR/bbsr/fwts
 
 if [ -f  /bin/bbsr_fwts_tests.ini ]; then
   test_list=`cat /bin/bbsr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
-  echo "Test Executed are $test_list"
   if [ -f "$YOCTO_FLAG" ]; then
+    # Drop tpm2 for DT systems as these tests are ACPI checks
+    test_list=$(printf '%s\n' $test_list | grep -vw tpm2 | xargs)
+    echo "Test Executed are $test_list"
     echo "SystemReady devicetree band ACS v3.0.1" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
     fwts `echo $test_list` -f -r stdout >> $RESULTS_DIR/bbsr/fwts/FWTSResults.log
   else
     if [ "$automation_enabled" == "True" ] && [ "$bbsr_fwts_enabled" == "False" ]; then
       echo "**************BBSR FWTS disabled in config file*******************"
     else
+        echo "Test Executed are $test_list"
         echo "SystemReady band ACS v3.0.1" > $RESULTS_DIR/bbsr/fwts/FWTSResults.log
         fwts `echo $test_list` -f -r stdout >> $RESULTS_DIR/bbsr/fwts/FWTSResults.log
     fi
