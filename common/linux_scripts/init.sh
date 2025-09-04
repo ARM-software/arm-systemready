@@ -152,6 +152,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   sleep 5
   echo "Linux Debug Dump - Completed"
 
+  # Linux Device Driver script run
+  echo "Running Device Driver Matching Script"
+  cd /usr/bin/
+  ./device_driver_sr.sh > /mnt/acs_results/linux_dump/device_driver.log
+  cd -
+  echo "Device Driver script run completed"
+  sync /mnt
+  sleep 5
 
   # FWTS (SBBR) Execution
   echo "Executing FWTS for SBBR"
@@ -231,21 +239,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   else
     echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
   fi
-
-
-  # Device Driver script run
-  if [ -f "/mnt/acs_results/uefi_dump/devices.log" ] && [ -f "/mnt/acs_results/uefi_dump/drivers.log" ] && [ -f "/mnt/acs_results/uefi_dump/dh.log" ]; then
-    echo "Running Device Driver Matching Script"
-    cd /usr/bin/
-    ./device_driver.sh > /mnt/acs_results/linux_dump/device_driver.log
-    cd -
-    echo "Device Driver script run completed"
-    sync /mnt
-    sleep 5
-  else
-    echo "Devices/Driver/dh log does not exist, cannot run the script"
-  fi
-
 
   # ACS log parser run
   echo "Running acs log parser tool "

@@ -67,8 +67,8 @@ do_build ()
 
     cp  $TOP_DIR/ramdisk/secure_init.sh root_fs_overlay/usr/bin/
     chmod +x root_fs_overlay/usr/bin/secure_init.sh
-    cp  $TOP_DIR/ramdisk/device_driver.sh root_fs_overlay/usr/bin/
-    chmod +x root_fs_overlay/usr/bin/device_driver.sh
+    cp  $TOP_DIR/ramdisk/device_driver_sr.sh root_fs_overlay/usr/bin/
+    chmod +x root_fs_overlay/usr/bin/device_driver_sr.sh
     cp  $TOP_DIR/ramdisk/bsa.sh root_fs_overlay/bin/
     chmod +x root_fs_overlay/bin/bsa.sh
     cp  $TOP_DIR/ramdisk/sbsa.sh root_fs_overlay/bin/
