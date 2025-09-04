@@ -773,7 +773,7 @@ def parse_read_write_check_blk_devices_log(log_data):
     }
 
 # PARSER FOR CAPSULE UPDATE 
-def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path, capsule_test_results_log_path):
+def parse_capsule_update_logs(capsule_update_log_path, capsule_test_results_log_path):
     test_suite_key = "capsule_update"
     mapping = {
         "Test_suite_name": "Capsule Update",
@@ -807,7 +807,6 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
             return []
 
     update_lines = read_file_lines(capsule_update_log_path, encoding='utf-16')
-    on_disk_lines = read_file_lines(capsule_on_disk_log_path, encoding='utf-16')
     results_lines = read_file_lines(capsule_test_results_log_path, encoding='utf-8')
 
     subtest_number = 1
@@ -857,48 +856,7 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
                     break
                 else:
                     i += 1
-            add_subtest(test_desc, result, reason=test_info)
-        i += 1
-
-    # PARSE capsule-on-disk.log
-    i = 0
-    while i < len(on_disk_lines):
-        line = on_disk_lines[i].strip()
-        match = re.match(r"Testing\s+signed_capsule\.bin\s+OD\s+update", line, re.IGNORECASE)
-        if match:
-            test_desc = line
-            test_info = ""
-            result = "FAILED"
-            i += 1
-            while i < len(on_disk_lines):
-                cur = on_disk_lines[i].strip()
-                if re.match(r"Testing\s+", cur, re.IGNORECASE):
-                    i -= 1
-                    break
-                elif re.match(r"Test[_\s]Info", cur, re.IGNORECASE):
-                    i += 1
-                    info_lines = []
-                    while i < len(on_disk_lines):
-                        info_line = on_disk_lines[i].strip()
-                        if re.match(r"Testing\s+", info_line, re.IGNORECASE):
-                            i -= 1
-                            break
-                        info_lines.append(info_line)
-                        i += 1
-                    test_info = "\n".join(info_lines)
-                    if "signed_capsule.bin not present" in test_info.lower():
-                        result = "FAILED"
-                    elif "succeed to write signed_capsule.bin" in test_info.lower():
-                        if "uefi capsule update has failed" in test_info.lower():
-                            result = "FAILED"
-                        else:
-                            result = "PASSED"
-                    else:
-                        result = "FAILED"
-                    break
-                else:
-                    i += 1
-            add_subtest(test_desc, result, reason=test_info)
+            add_subtest(test_desc, result, reason=test_info.splitlines())
         i += 1
 
     # PARSE capsule_test_results.log
@@ -928,12 +886,15 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
                     break
                 else:
                     i += 1
-            add_subtest(test_desc, result, reason=test_info)
+            add_subtest(test_desc, result, reason=test_info.splitlines())
 
         elif esrt_match:
             test_desc = "Testing ESRT FW version update"
-            test_info = ""
+            test_info_lines = []
             result = "FAILED"
+            any_failed = False
+            overall = None
+            last_info_idx = -1
             i += 1
             while i < len(results_lines):
                 cur = results_lines[i].strip()
@@ -941,20 +902,30 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
                     i -= 1
                     break
                 elif cur.lower().startswith("info:"):
-                    test_info = cur[len("INFO:"):].strip()
+                    info_text = cur[len("INFO:"):].strip()
+                    test_info_lines.append(info_text)
+                    last_info_idx = len(test_info_lines) - 1
                     i += 1
                 elif cur.lower().startswith("results:"):
-                    outcome = cur[len("RESULTS:"):].strip()
-                    if outcome.upper() == "PASSED":
-                        result = "PASSED"
+                    outcome_line = cur[len("RESULTS:"):].strip()
+                    if re.search(r"overall\s+capsule\s+update\s+result", outcome_line, re.IGNORECASE):
+                        overall = "PASSED" if "PASSED" in outcome_line.upper() else "FAILED"
                     else:
-                        result = "FAILED"
-                    break
+                        # tag the last INFO with this outcome
+                        outcome = "FAILED" if "FAILED" in outcome_line.upper() else ("PASSED" if "PASSED" in outcome_line.upper() else None)
+                        if outcome == "FAILED":
+                            any_failed = True
+                        if last_info_idx >= 0 and outcome:
+                            test_info_lines[last_info_idx] = f"{test_info_lines[last_info_idx]} - {outcome}"
+                    i += 1
                 else:
                     i += 1
-            add_subtest(test_desc, result, reason=test_info)
-        else:
-            i += 1
+            if overall:
+                result = overall
+            else:
+                result = "FAILED" if any_failed else "PASSED"
+            add_subtest(test_desc, result, reason=test_info_lines)
+
 
     # >>> REMOVE EMPTY REASON ARRAYS <<<
     for subtest in current_test["subtests"]:
@@ -1094,10 +1065,10 @@ if __name__ == "__main__":
             json.dump(result, out, indent=4)
         sys.exit(0)
 
-    elif len(args) == 5 and args[0].lower() == "capsule_update":
+    elif len(args) == 4 and args[0].lower() == "capsule_update":
         # Capsule update usage
-        _, update_log, on_disk_log, test_results_log, output_json = args
-        result = parse_capsule_update_logs(update_log, on_disk_log, test_results_log)
+        _, update_log, test_results_log, output_json = args
+        result = parse_capsule_update_logs(update_log, test_results_log)
         with open(output_json, 'w') as out:
             json.dump(result, out, indent=4)
         sys.exit(0)
@@ -1113,6 +1084,6 @@ if __name__ == "__main__":
     else:
         print("Usage:")
         print("  1) Single log:      python3 logs_to_json.py <path_to_log> <output_JSON>")
-        print("  2) Capsule update:  python3 logs_to_json.py capsule_update <update_log> <on_disk_log> <test_results_log> <output_JSON>")
+        print("  2) Capsule update:  python3 logs_to_json.py capsule_update <update_log> <test_results_log> <output_JSON>")
         print("  3) PSCI check:      python3 logs_to_json.py psci_check <psci_kernel.log> <output_JSON>")
         sys.exit(1)

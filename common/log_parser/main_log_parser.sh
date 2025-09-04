@@ -389,16 +389,14 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
 
     # 5) CAPSULE UPDATE => parse as standalone
     CAPSULE_UPDATE_LOG="$(dirname "$LOGS_PATH")/fw/capsule-update.log"
-    CAPSULE_ON_DISK_LOG="$(dirname "$LOGS_PATH")/fw/capsule-on-disk.log"
     CAPSULE_TEST_RESULTS_LOG="$(dirname "$LOGS_PATH")/fw/capsule_test_results.log"
     CAPSULE_JSON="$JSONS_DIR/capsule_update.json"
 
-#    if check_file "$CAPSULE_UPDATE_LOG" "M" && check_file "$CAPSULE_ON_DISK_LOG" "M" && check_file "$CAPSULE_TEST_RESULTS_LOG" "M"; then
+#    if check_file "$CAPSULE_UPDATE_LOG" "M" && check_file "$CAPSULE_TEST_RESULTS_LOG" "M"; then
     if check_file "$CAPSULE_TEST_RESULTS_LOG" "M"; then
             python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
             capsule_update \
             "$CAPSULE_UPDATE_LOG" \
-            "$CAPSULE_ON_DISK_LOG" \
             "$CAPSULE_TEST_RESULTS_LOG" \
             "$CAPSULE_JSON"
 
