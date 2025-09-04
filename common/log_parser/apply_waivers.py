@@ -262,7 +262,7 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
                             if reason:
                                 sub_test_result['waiver_reason'] = reason
                                 existing_fail_reasons = sub_test_result.get('fail_reasons', [])
-                                updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
+                                updated_fail_reasons = [(s + ' (WITH WAIVER)') for fr in existing_fail_reasons for s in (fr if isinstance(fr, list) else [fr])]
                                 sub_test_result['fail_reasons'] = updated_fail_reasons
                             if verbose:
                                 print(f"Subtest-level waiver applied to subtest '{subtest_description}' with reason: {reason}")

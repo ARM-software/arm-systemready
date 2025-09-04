@@ -323,13 +323,19 @@ def generate_html(suite_summary, test_results_list, output_html_path,
                     </td>
                     {# Combine pass, fail, skip, abort, warning reasons into one "Reason" column #}
                     {% set all_reasons = [] %}
-                    {% if r.pass_reasons %}{% for reason in r.pass_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
-                    {% if r.fail_reasons %}{% for reason in r.fail_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
-                    {% if r.abort_reasons %}{% for reason in r.abort_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
-                    {% if r.skip_reasons %}{% for reason in r.skip_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
-                    {% if r.warning_reasons %}{% for reason in r.warning_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                    {% for reasons in [r.pass_reasons, r.fail_reasons, r.abort_reasons, r.skip_reasons, r.warning_reasons] if reasons %}
+                        {% for reason in reasons %}
+                            {% if reason is iterable and reason is not string %}
+                                {% for subreason in reason %}
+                                    {% set _ = all_reasons.append(subreason) %}
+                                {% endfor %}
+                            {% else %}
+                                {% set _ = all_reasons.append(reason) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
                     <td>
-                        {{ all_reasons|join("; ") if all_reasons else "N/A" }}
+                        {{ all_reasons|join("<br>")|safe if all_reasons else "N/A" }}
                     </td>
                     <td>
                         {{ r.waiver_reason if r.waiver_reason else "N/A" }}
