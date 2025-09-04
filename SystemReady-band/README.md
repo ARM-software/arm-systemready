@@ -166,7 +166,7 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
   - /lib/modules/sbsa_acs.ko  - SBSA Linux test kernel module
   - /bin/sbsa  - SBSA Linux app
   - /usr/bin/edk2-test-parser - SCT results parser
-  - /usr/bin/device_driver.sh - device driver script
+  - /usr/bin/device_driver_sr.sh - device driver script
   - /usr/bin/log_parser - directory containing results post processing script
 - ramdisk-buildroot.img - ram disk file
 
@@ -285,5 +285,4 @@ SystemReady ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2022-2024, Arm Limited and Contributors. All rights reserved.*
-
+*Copyright (c) 2022-2025, Arm Limited and Contributors. All rights reserved.*
