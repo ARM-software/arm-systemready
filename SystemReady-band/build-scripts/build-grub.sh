@@ -59,6 +59,7 @@ do_build ()
         # required the bootstrap tool to be executed before the configure step.
         if [ -e bootstrap ]; then
             if [ ! -e grub-core/lib/gnulib/stdlib.in.h ]; then
+                GNULIB_URL="https://github.com/coreutils/gnulib.git" \
                 ./bootstrap
             fi
         fi
