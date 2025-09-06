@@ -6,7 +6,7 @@ SRC_URI = "git://git.gitlab.arm.com/systemready/systemready-scripts.git;destsuff
 "
 SRCREV_systemready-scripts = "${AUTOREV}"
 
-RDEPENDS:${PN} += "bash python3-requests python3-construct tar"
+RDEPENDS:${PN} += "bash python3-requests python3-construct tar findutils python3-pyyaml"
 
 do_install(){
     install -d ${D}${bindir}
