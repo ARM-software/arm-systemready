@@ -317,17 +317,25 @@ def merge_json_files(json_files, output_file):
         # suite_key is e.g. "BSA", so we'll look up suite_key.lower() in test_cat_dict
         # data might be a list of test_suite dicts (like BSA suite).
         # If there's a match on "Test_suite" => "Test Suite", copy fields.
-        if suite_key.lower() in test_cat_dict:
+        # Determine lookup suite key for Standalone-style sub-suites
+        lookup_suite_key = suite_key.lower()
+        standalone_aliases = {
+            "dt_kselftest", "dt_validate", "ethtool_test",
+            "read_write_check_blk_devices", "psci", "capsule update"
+        }
+        if lookup_suite_key in standalone_aliases or lookup_suite_key.startswith("os_"):
+            lookup_suite_key = "standalone"
+
+        if lookup_suite_key in test_cat_dict:
             # Now use 'data_list' instead of 'data'
             if isinstance(data_list, list):
                 for ts_dict in data_list:
                     if not isinstance(ts_dict, dict):
                         continue
 
-                    # EXACT code as before for copying fields, reorder keys, etc.
-                    ts_name_merged = ts_dict.get("Test_suite", "").strip().lower()
-                    if ts_name_merged in test_cat_dict[suite_key.lower()]:
-                        row_vals = test_cat_dict[suite_key.lower()][ts_name_merged]
+                    ts_name_merged = (ts_dict.get("Test_suite") or ts_dict.get("Test_suite_name") or "").strip().lower()
+                    if ts_name_merged in test_cat_dict[lookup_suite_key]:
+                        row_vals = test_cat_dict[lookup_suite_key][ts_name_merged]
                         if "Waivable" in row_vals:
                             ts_dict["Waivable"] = row_vals["Waivable"]
                         if "SRS scope" in row_vals:
@@ -337,7 +345,9 @@ def merge_json_files(json_files, output_file):
 
                         desired_order = [
                             "Test_suite",
+                            "Test_suite_name",
                             "Test_suite_Description",
+                            "Test_suite_description",
                             "Waivable",
                             "SRS scope",
                             "Main Readiness Grouping",
