@@ -90,9 +90,9 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
         echo "Running BSA in verbose mode"
         if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
             #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
-            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -os -skip 900 -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
+            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -os -skip 1500 -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
         else
-            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -skip 900 -f BsaVerboseTempResults.log
+            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -skip 1500 -f BsaVerboseTempResults.log
         endif
         stall 200000
         if exist BsaVerboseTempResults.log then
@@ -128,15 +128,15 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
 :BsaRun
     if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
        #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
-       FS%i:\acs_tests\bsa\Bsa.efi -os -skip 900 -dtb BsaDevTree.dtb -f BsaTempResults.log
+       FS%i:\acs_tests\bsa\Bsa.efi -os -skip 1500 -dtb BsaDevTree.dtb -f BsaTempResults.log
     else
         if "%1" == "false" then
-            echo "BSA Command: Bsa.efi -skip 900"
-            FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
+            echo "BSA Command: Bsa.efi -skip 1500"
+            FS%i:\acs_tests\bsa\Bsa.efi -skip 1500 -f BsaTempResults.log
         else
             if "%BsaCommand%" == "" then
-                echo "BsaCommand variable does not exist, running default command Bsa.efi -skip 900"
-                FS%i:\acs_tests\bsa\Bsa.efi -skip 900 -f BsaTempResults.log
+                echo "BsaCommand variable does not exist, running default command Bsa.efi -skip 1500"
+                FS%i:\acs_tests\bsa\Bsa.efi -skip 1500 -f BsaTempResults.log
             else
                 echo "BSA Command: %BsaCommand%"
                 FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
