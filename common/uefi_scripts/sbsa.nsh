@@ -70,7 +70,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 endif
 :SbsaVerboseRun
                 echo "Running SBSA in verbose mode"
-                FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -v 1 -skip 900 -f SbsaVerboseTempResults.log
+                FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -v 1 -skip 1500 -f SbsaVerboseTempResults.log
                 stall 200000
                 if exist FS%i:\acs_results\uefi\SbsaVerboseTempResults.log then
                     echo " SystemReady band ACS v3.0.1" > SbsaVerboseResults.log
@@ -101,12 +101,12 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             endif
 :SbsaNormalRun
             if "%1" == "false" then
-                echo "SBSA Command: Sbsa.efi -skip 900"
-                FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
+                echo "SBSA Command: Sbsa.efi -skip 1500"
+                FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 1500 -f SbsaTempResults.log
             else
                 if "%SbsaCommand%" == "" then
-                    echo "SbsaCommand variable does not exist, running default command Sbsa.efi -skip 900"
-                    FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 900 -f SbsaTempResults.log
+                    echo "SbsaCommand variable does not exist, running default command Sbsa.efi -skip 1500"
+                    FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip 1500 -f SbsaTempResults.log
                 else
                     echo "SBSA Command: %SbsaCommand%"
                     FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -f SbsaTempResults.log
