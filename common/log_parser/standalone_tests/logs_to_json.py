@@ -22,7 +22,7 @@ import os
 # Test Suite Mapping
 test_suite_mapping = {
     "dt_kselftest": {
-        "Test_suite_name": "DTValidation",
+        "Test_suite_name": "Peripherals",
         "Test_suite_description": "Validation for device tree",
         "Test_case_description": "Device Tree kselftests"
     },
