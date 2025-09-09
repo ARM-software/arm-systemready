@@ -122,7 +122,7 @@
   "catID: 11": [
     {
       "Suite": "FWTS",
-      "Test Suite": "uefimisc",
+      "Test Suite": "uefirtmisc",
       "specName": "EBBR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -182,40 +182,16 @@
   "catID: 16": [
     {
       "Suite": "FWTS",
-      "Test Suite": "uefirtmisc",
-      "specName": "EBBR",
-      "rel Import. to main readiness": "Critical",
-      "Waivable": "no",
-      "SRS scope": "Required",
-      "FunctionID": 4,
-      "Main Readiness Grouping": "runtime readiness"
-    }
-  ],
-  "catID: 17": [
-    {
-      "Suite": "FWTS",
-      "Test Suite": "rtservices",
-      "specName": "EBBR",
-      "rel Import. to main readiness": "Critical",
-      "Waivable": "no",
-      "SRS scope": "Required",
-      "FunctionID": 4,
-      "Main Readiness Grouping": "runtime readiness"
-    }
-  ],
-  "catID: 18": [
-    {
-      "Suite": "FWTS",
       "Test Suite": "uefibootpath",
       "specName": "EBBR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
       "SRS scope": "Required",
-      "FunctionID": 4,
-      "Main Readiness Grouping": "runtime readiness"
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
     }
   ],
-  "catID: 19": [
+  "catID: 17": [
     {
       "Suite": "FWTS",
       "Test Suite": "dt_base",
@@ -227,22 +203,10 @@
       "Main Readiness Grouping": "runtime readiness"
     }
   ],
-  "catID: 20": [
-    {
-      "Suite": "FWTS",
-      "Test Suite": "bootservices",
-      "specName": "EBBR",
-      "rel Import. to main readiness": "Critical",
-      "Waivable": "no",
-      "SRS scope": "Required",
-      "FunctionID": 1,
-      "Main Readiness Grouping": "boot readiness"
-    }
-  ],
-  "catID: 21": [
+  "catID: 18": [
     {
       "Suite": "SCT",
-      "Test Suite": "genericTest",
+      "Test Suite": "GenericTest",
       "specName": "UEFI",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -251,7 +215,7 @@
       "Main Readiness Grouping": "Misc readiness"
     }
   ],
-  "catID: 22": [
+  "catID: 19": [
     {
       "Suite": "SCT",
       "Test Suite": "BootServicesTest",
@@ -263,7 +227,7 @@
       "Main Readiness Grouping": "boot readiness"
     }
   ],
-  "catID: 23": [
+  "catID: 20": [
     {
       "Suite": "SCT",
       "Test Suite": "RuntimeServicesTest",
@@ -275,7 +239,7 @@
       "Main Readiness Grouping": "runtime readiness"
     }
   ],
-  "catID: 24": [
+  "catID: 21": [
     {
       "Suite": "SCT",
       "Test Suite": "LoadedImageProtocolTest",
@@ -287,7 +251,7 @@
       "Main Readiness Grouping": "boot readiness"
     }
   ],
-  "catID: 25": [
+  "catID: 22": [
     {
       "Suite": "SCT",
       "Test Suite": "DevicePathProcotols",
@@ -299,7 +263,7 @@
       "Main Readiness Grouping": "boot readiness"
     }
   ],
-  "catID: 26": [
+  "catID: 23": [
     {
       "Suite": "SCT",
       "Test Suite": "HIITest",
@@ -311,7 +275,7 @@
       "Main Readiness Grouping": "boot readiness"
     }
   ],
-  "catID: 27": [
+  "catID: 24": [
     {
       "Suite": "SCT",
       "Test Suite": "NetworkSupportTest",
@@ -323,7 +287,7 @@
       "Main Readiness Grouping": "boot readiness"
     }
   ],
-  "catID: 28": [
+  "catID: 25": [
     {
       "Suite": "SCT",
       "Test Suite": "SecureTechTest",
@@ -335,7 +299,7 @@
       "Main Readiness Grouping": "security readiness"
     }
   ],
-  "catID: 29": [
+  "catID: 26": [
     {
       "Suite": "SCT",
       "Test Suite": "ConsoleSupportTest",
@@ -347,7 +311,7 @@
       "Main Readiness Grouping": "Misc readiness"
     }
   ],
-  "catID: 30": [
+  "catID: 27": [
     {
       "Suite": "SCT",
       "Test Suite": "Capsule",
@@ -359,7 +323,7 @@
       "Main Readiness Grouping": "maintenance readiness"
     }
   ],
-  "catID: 31": [
+  "catID: 28": [
     {
       "Suite": "SCT",
       "Test Suite": "SMBIOS",
@@ -371,7 +335,7 @@
       "Main Readiness Grouping": "maintenance readiness"
     }
   ],
-  "catID: 32": [
+  "catID: 29": [
     {
       "Suite": "Standalone",
       "Test Suite": "Network",
@@ -383,7 +347,7 @@
       "Main Readiness Grouping": "runtime readiness"
     }
   ],
-  "catID: 33": [
+  "catID: 30": [
     {
       "Suite": "Standalone",
       "Test Suite": "Peripherals",
@@ -395,7 +359,7 @@
       "Main Readiness Grouping": "runtime readiness"
     }
   ],
-  "catID: 34": [
+  "catID: 31": [
     {
       "Suite": "Standalone",
       "Test Suite": "PSCI",
@@ -407,7 +371,7 @@
       "Main Readiness Grouping": "security readiness"
     }
   ],
-  "catID: 35": [
+  "catID: 32": [
     {
       "Suite": "Standalone",
       "Test Suite": "A/B support",
@@ -419,7 +383,7 @@
       "Main Readiness Grouping": "maintenance readiness"
     }
   ],
-  "catID: 36": [
+  "catID: 33": [
     {
       "Suite": "Standalone",
       "Test Suite": "LinuxInstall",
@@ -431,7 +395,7 @@
       "Main Readiness Grouping": "Misc readiness"
     }
   ],
-  "catID: 37": [
+  "catID: 34": [
     {
       "Suite": "Standalone",
       "Test Suite": "Capsule update",
@@ -443,7 +407,7 @@
       "Main Readiness Grouping": "maintenance readiness"
     }
   ],
-  "catID: 38": [
+  "catID: 35": [
     {
       "Suite": "Standalone",
       "Test Suite": "DTValidation",
@@ -455,7 +419,7 @@
       "Main Readiness Grouping": "boot readiness"
     }
   ],
-  "catID: 39": [
+  "catID: 36": [
     {
       "Suite": "Standalone",
       "Test Suite": "Boot sources",
@@ -467,7 +431,7 @@
       "Main Readiness Grouping": "boot readiness"
     }
   ],
-  "catID: 40": [
+  "catID: 37": [
     {
       "Suite": "BBSR-FWTS",
       "Test Suite": "uefirtauthvar",
@@ -479,19 +443,7 @@
       "Main Readiness Grouping": "security readiness"
     }
   ],
-  "catID: 41": [
-    {
-      "Suite": "BBSR-FWTS",
-      "Test Suite": "tpm2",
-      "specName": "BBSR",
-      "rel Import. to main readiness": "Critical",
-      "Waivable": "no",
-      "SRS scope": "Recommended",
-      "FunctionID": 3,
-      "Main Readiness Grouping": "security readiness"
-    }
-  ],
-  "catID: 42": [
+  "catID: 38": [
     {
       "Suite": "BBSR-SCT",
       "Test Suite": "RuntimeServicesTest",
@@ -503,10 +455,22 @@
       "Main Readiness Grouping": "security readiness"
     }
   ],
-  "catID: 43": [
+  "catID: 39": [
     {
       "Suite": "BBSR-SCT",
       "Test Suite": "PlatformResetAttackMitigationPsciTest",
+      "specName": "BBSR",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Recommended",
+      "FunctionID": 3,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 40": [
+    {
+      "Suite": "BBSR-SCT",
+      "Test Suite": "TCG2ProtocolTest",
       "specName": "BBSR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
