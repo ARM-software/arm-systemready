@@ -419,7 +419,7 @@ def merge_json_files(json_files, output_file):
                 else:
                     print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
             elif f == fw:
-                acs_results_summary[label] = "Compliant with waivers"
+                acs_results_summary[label] = f"Compliant with waivers: Waivers {fw}"
                 if requirement == "M":
                     print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
                 else:
