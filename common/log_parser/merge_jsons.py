@@ -133,9 +133,10 @@ def count_fails_in_json(data):
             elif isinstance(res, str):
                 # e.g. "FAILED (WITH WAIVER)"
                 if "FAILED" in res.upper() or "FAILURE" in res.upper() or "FAIL" in res.upper():
-                    total_failed += 1
                     if "(WITH WAIVER)" in res.upper():
                         total_failed_with_waiver += 1
+                    else
+                        total_failed +=1
 
     # If we found zero subtests across the entire suite => treat that as a fail
     if not any_subtests_found:
