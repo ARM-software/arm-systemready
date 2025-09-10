@@ -22,32 +22,32 @@ import os
 # Test Suite Mapping
 test_suite_mapping = {
     "dt_kselftest": {
-        "Test_suite_name": "Peripherals",
+        "Test_suite": "Peripherals",
         "Test_suite_description": "Validation for device tree",
         "Test_case_description": "Device Tree kselftests"
     },
     "dt_validate": {
-        "Test_suite_name": "DTValidation",
+        "Test_suite": "DTValidation",
         "Test_suite_description": "Validation for device tree",
         "Test_case_description": "Device Tree Validation"
     },
     "ethtool_test": {
-        "Test_suite_name": "Network",
+        "Test_suite": "Network",
         "Test_suite_description": "Network validation",
         "Test_case_description": "Ethernet Tool Tests"
     },
     "read_write_check_blk_devices": {
-        "Test_suite_name": "Boot sources",
+        "Test_suite": "Boot sources",
         "Test_suite_description": "Checks for boot sources",
         "Test_case_description": "Read/Write Check on Block Devices"
     },
     "capsule_update": {
-        "Test_suite_name": "Capsule Update",
+        "Test_suite": "Capsule Update",
         "Test_suite_description": "Testing firmware capsule update mechanism",
         "Test_case_description": "Capsule Update Tests"
     },
     "psci_check": {
-        "Test_suite_name": "PSCI",
+        "Test_suite": "PSCI",
         "Test_suite_description": "PSCI version check",
         "Test_case_description": "PSCI compliance"
     },
@@ -94,7 +94,7 @@ def parse_dt_kselftest_log(log_data):
     }
 
     current_test = {
-        "Test_suite_name": mapping["Test_suite_name"],
+        "Test_suite": mapping["Test_suite"],
         "Test_suite_description": mapping["Test_suite_description"],
         "Test_case": test_suite_key,
         "Test_case_description": mapping["Test_case_description"],
@@ -157,7 +157,7 @@ def parse_dt_validate_log(log_data):
     }
 
     current_test = {
-        "Test_suite_name": mapping["Test_suite_name"],
+        "Test_suite": mapping["Test_suite"],
         "Test_suite_description": mapping["Test_suite_description"],
         "Test_case": test_suite_key,
         "Test_case_description": mapping["Test_case_description"],
@@ -211,7 +211,7 @@ def parse_ethtool_test_log(log_data):
     }
 
     current_test = {
-        "Test_suite_name": mapping["Test_suite_name"],
+        "Test_suite": mapping["Test_suite"],
         "Test_suite_description": mapping["Test_suite_description"],
         "Test_case": test_suite_key,
         "Test_case_description": mapping["Test_case_description"],
@@ -477,7 +477,7 @@ def parse_read_write_check_blk_devices_log(log_data):
     }
 
     current_test = {
-        "Test_suite_name": mapping["Test_suite_name"],
+        "Test_suite": mapping["Test_suite"],
         "Test_suite_description": mapping["Test_suite_description"],
         "Test_case": test_suite_key,
         "Test_case_description": mapping["Test_case_description"],
@@ -776,7 +776,7 @@ def parse_read_write_check_blk_devices_log(log_data):
 def parse_capsule_update_logs(capsule_update_log_path, capsule_test_results_log_path):
     test_suite_key = "capsule_update"
     mapping = {
-        "Test_suite_name": "Capsule Update",
+        "Test_suite": "Capsule Update",
         "Test_suite_description": "Tests for automatic capsule update",
         "Test_case_description": "Capsule Update"
     }
@@ -791,7 +791,7 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_test_results_log_
     }
 
     current_test = {
-        "Test_suite_name": mapping["Test_suite_name"],
+        "Test_suite": mapping["Test_suite"],
         "Test_suite_description": mapping["Test_suite_description"],
         "Test_case": test_suite_key,
         "Test_case_description": mapping["Test_case_description"],
@@ -963,7 +963,7 @@ def parse_psci_logs(psci_log_path):
     }
 
     current_test = {
-        "Test_suite_name": mapping["Test_suite_name"],       # "PSCI"
+        "Test_suite": mapping["Test_suite"],       # "PSCI"
         "Test_suite_description": mapping["Test_suite_description"],  # "PSCI version check"
         "Test_case": test_suite_key,                         # "psci_check"
         "Test_case_description": mapping["Test_case_description"],  # "PSCI compliance"

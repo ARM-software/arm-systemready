@@ -20,6 +20,18 @@ import re
 import chardet
 import os
 
+def normalize_result(r):
+    r = r.strip().upper()
+    # Map single-word states to full past tense
+    if r == "PASS":
+        return "PASSED"
+    if r == "FAIL":
+        return "FAILED"
+    # Normalize SKIP to SKIPPED while preserving SKIPPED
+    if r == "SKIP":
+        return "SKIPPED"
+    return r
+
 # JSON mapping of Test Suites, Sub Test Suites, and Test Cases
 test_mapping = {
     "GenericTest": {
@@ -405,7 +417,7 @@ def main(input_file, output_file):
                         continue
                     m = re.search(r'^([^:]+):\s*\[(.*?)\]', candidate)
                     if m:
-                        test_entry["test_result"] = m.group(2).upper()
+                        test_entry["test_result"] = normalize_result(m.group(2))
                         test_entry["reason"] = ""
                     break
 
@@ -413,7 +425,7 @@ def main(input_file, output_file):
             if re.search(r'--\s*(PASS|FAIL|FAILURE|WARNING|NOT SUPPORTED)', line, re.IGNORECASE):
                 parts = line.rsplit(' -- ', 1)
                 test_desc = clean_test_description(parts[0])
-                result_str = parts[1].upper()
+                result_str = normalize_result(parts[1])
 
                 # Tally in test_case_summary *before* overrides
                 if "PASS" in result_str:
@@ -482,14 +494,14 @@ def main(input_file, output_file):
         for test_obj in results:
             ep_guid_current = test_obj["Test Entry Point GUID"].upper()
             if ep_guid_current in test_guid_dict:
-                test_obj["test_result"] = test_guid_dict[ep_guid_current]["result"]
+                test_obj["test_result"] = normalize_result(test_guid_dict[ep_guid_current]["result"])
                 test_obj["reason"] = test_guid_dict[ep_guid_current]["reason"]
 
             for subtest in test_obj["subtests"]:
                 st_guid = subtest["sub_Test_GUID"].upper()
                 if (ep_guid_current, st_guid) in subtest_dict:
                     match_record = subtest_dict[(ep_guid_current, st_guid)]
-                    subtest["sub_test_result"] = match_record["result"]
+                    subtest["sub_test_result"] = normalize_result(match_record["result"])
                     subtest["reason"] = match_record["reason"]
 
     # Reorder final dictionary so "test_result" & "reason" appear after "Returned Status Code"

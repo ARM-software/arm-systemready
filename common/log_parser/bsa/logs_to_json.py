@@ -44,7 +44,8 @@ def main(input_files, output_file):
         "total_aborted": 0,
         "total_skipped": 0,
         "total_warnings": 0,
-        "total_failed_with_waiver": 0
+        "total_failed_with_waiver": 0,
+        "total_ignored": 0
     }
 
     # Dictionary to keep track of test numbers per suite to avoid duplicates
@@ -100,7 +101,9 @@ def main(input_files, output_file):
                         result_data[suite_name].append(subtest_entry)
                         test_numbers_per_suite[suite_name].add(test_number)
                         # Update suite_summary
-                        if result == "PASSED":
+                        if "FAILED" in result and "WAIVER" in result:
+                            suite_summary["total_failed_with_waiver"] += 1
+                        elif result == "PASSED":
                             suite_summary["total_passed"] += 1
                         elif result == "FAILED":
                             suite_summary["total_failed"] += 1
@@ -157,7 +160,9 @@ def main(input_files, output_file):
                             result_data[suite_name].append(subtest_entry)
                             test_numbers_per_suite[suite_name].add(test_number)
                             # Update suite_summary
-                            if result == "PASSED":
+                            if "FAILED" in result and "WAIVER" in result:
+                                suite_summary["total_failed_with_waiver"] += 1
+                            elif result == "PASSED":
                                 suite_summary["total_passed"] += 1
                             elif result == "FAILED":
                                 suite_summary["total_failed"] += 1
@@ -212,12 +217,16 @@ def main(input_files, output_file):
             "total_aborted": 0,
             "total_skipped": 0,
             "total_warnings": 0,
+            "total_failed_with_waiver": 0,
+            "total_ignored": 0
         }
 
         # Count test results for the suite
         for subtest in subtests:
             result = subtest['sub_test_result']
-            if result == "PASSED":
+            if "FAILED" in result and "WAIVER" in result:
+                test_suite_summary["total_failed_with_waiver"] += 1
+            elif result == "PASSED":
                 test_suite_summary["total_passed"] += 1
             elif result == "FAILED":
                 test_suite_summary["total_failed"] += 1
