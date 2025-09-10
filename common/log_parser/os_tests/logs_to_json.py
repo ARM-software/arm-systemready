@@ -39,16 +39,27 @@ def create_subtest(subtest_number, description, status, reason=""):
     return result
 
 def update_suite_summary(suite_summary, status):
-    if status in ["PASSED", "FAILED", "SKIPPED", "ABORTED", "WARNINGS"]:
-        key = f"total_{status.lower()}"
-        suite_summary[key] += 1
+    s = status.strip().upper()
+    if s in ("FAILED (WITH WAIVER)", "FAILED_WITH_WAIVER"):
+        suite_summary["total_failed_with_waiver"] += 1
+        return
+    mapping = {
+        "PASSED": "total_passed",
+        "FAILED": "total_failed",
+        "SKIPPED": "total_skipped",
+        "ABORTED": "total_aborted",
+        "WARNING": "total_warnings",
+        "WARNINGS": "total_warnings",
+    }
+    if s in mapping:
+        suite_summary[mapping[s]] += 1
 
 def parse_ethtool_test_log(log_data, os_name):
     results = []
     test_suite_key = f"ethtool_test_{os_name}"  # e.g., ethtool_test_linux-opensuse-leap-15.5-version
 
     mapping = {
-        "Test_suite_name": "Network",
+        "Test_suite": "Network",
         "Test_suite_description": "Network validation",
         "Test_case_description": "Ethernet Tool Tests"
     }
@@ -56,13 +67,14 @@ def parse_ethtool_test_log(log_data, os_name):
     suite_summary = {
         "total_passed": 0,
         "total_failed": 0,
+        "total_failed_with_waiver": 0,
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0
     }
 
     current_test = {
-        "Test_suite_name": mapping["Test_suite_name"],
+        "Test_suite": mapping["Test_suite"],
         "Test_suite_description": mapping["Test_suite_description"],
         "Test_case": test_suite_key,
         "Test_case_description": mapping["Test_case_description"],
