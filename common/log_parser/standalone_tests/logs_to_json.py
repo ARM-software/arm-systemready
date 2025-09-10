@@ -959,7 +959,8 @@ def parse_psci_logs(psci_log_path):
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0,
-        "total_failed_with_waivers": 0
+        "total_failed_with_waiver": 0,
+        "total_ignored": 0
     }
 
     current_test = {
