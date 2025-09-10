@@ -128,7 +128,7 @@ def count_fails_in_json(data):
                 # e.g. { "FAILED": 1, "FAILED_WITH_WAIVER": 1, ... }
                 f = res.get("FAILED", 0)
                 fw = res.get("FAILED_WITH_WAIVER", 0)
-                total_failed += (f + fw)
+                total_failed += f
                 total_failed_with_waiver += fw
             elif isinstance(res, str):
                 # e.g. "FAILED (WITH WAIVER)"
