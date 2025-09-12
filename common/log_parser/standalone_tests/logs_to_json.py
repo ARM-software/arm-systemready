@@ -863,8 +863,17 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_test_results_log_
     i = 0
     while i < len(results_lines):
         line = results_lines[i].strip()
-        sanity_match = re.match(r"Testing\s+signed_capsule\.bin\s+sanity", line, re.IGNORECASE)
+        sanity_match = re.match(r"Testing\s+signed_capsule\.bin\s", line, re.IGNORECASE)
         esrt_match = re.match(r"(Testing|Test:\s+Testing)\s+ESRT\s+FW\s+version\s+update", line, re.IGNORECASE)
+        no_signed = re.match(r"Capsule\s+update\s+has\s+failed", line, re.IGNORECASE)
+
+
+        if no_signed:
+            test_desc = "Testing signed_capsule.bin"
+            test_info = "signed_capsule.bin not found"
+            result = "FAILED"
+            i += 1
+            add_subtest(test_desc, result, reason=test_info.splitlines())
 
         if sanity_match:
             test_desc = line
