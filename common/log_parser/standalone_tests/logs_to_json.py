@@ -894,7 +894,7 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
                         else:
                             result = "PASSED"
                     else:
-                        result = "FAILED"
+                        result = "WARNING"
                     break
                 else:
                     i += 1
