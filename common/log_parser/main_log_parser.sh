@@ -116,6 +116,7 @@ check_file() {
         fi
         return 1
     fi
+    echo -e "Processing "$1" file."
     return 0
 }
 
