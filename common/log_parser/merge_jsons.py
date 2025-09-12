@@ -75,7 +75,12 @@ else:
 
 def compliance_label(suite_name: str) -> str:
     req = _REQUIREMENT_MAP.get(suite_name, "R")
-    tag = "Mandatory" if req == "M" else "Recommended"
+    if req == "M":
+        tag = "Mandatory"
+    elif req == "CM":
+        tag = "Conditional-Mandatory"
+    else:
+        tag = "Recommended"
     # Match the console ordering: “Suite: <tag>  : <suite> …”
     return f"Suite_Name: {tag}  : {suite_name}_compliance"
 

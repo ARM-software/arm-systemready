@@ -156,26 +156,28 @@ def parse_ethtool_test_log(log_data, os_name):
             suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
-        # Ethernet interface self-test
-        if "INFO: Ethernet interface" in line and "supports ethtool self test" in line:
-            if "doesn't support ethtool self test" in line:
+        # Self-test detection
+        if "INFO: Ethernet interface" in line and "ethtool self test" in line:
+            if "doesn't supports ethtool self test" in line:
                 status = "SKIPPED"
-                description = f"Self-test on {interface} (Not supported)"
+                desc   = f"Self-test on {interface} (Not supported)"
             else:
-                # Check the test result
-                result_index = i + 2  # Assuming result is two lines after
-                if result_index < len(log_data) and "The test result is" in log_data[result_index]:
-                    result_line = log_data[result_index].strip()
-                    if "PASS" in result_line:
-                        status = "PASSED"
-                    else:
-                        status = "FAILED"
-                    description = f"Self-test on {interface}"
+                # Look ahead up to 20 lines to find "The test result is ..."
+                result_status = None
+                for k in range(i + 1, min(i + 21, len(log_data))):
+                    if "The test result is" in log_data[k]:
+                        result_status = "PASSED" if "PASS" in log_data[k] else "FAILED"
+                        break
+
+                if result_status:
+                    status = result_status
+                    desc   = f"Self-test on {interface}"
                 else:
                     status = "FAILED"
-                    description = f"Self-test on {interface} (Result not found)"
-            subtest = create_subtest(subtest_number, description, status)
-            current_test["subtests"].append(subtest)
+                    desc   = f"Self-test on {interface} (Result not found)"
+
+            sub = create_subtest(subtest_number, desc, status)
+            current_test["subtests"].append(sub)
             update_suite_summary(current_test["test_suite_summary"], status)
             suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
@@ -195,7 +197,7 @@ def parse_ethtool_test_log(log_data, os_name):
             subtest_number += 1
 
         # DHCP support
-        if "doesn't support DHCP" in line or "supports DHCP" in line:
+        if "doesn't support DHCP" in line or "support DHCP" in line:
             if "doesn't support DHCP" in line:
                 status = "FAILED"
                 description = f"DHCP support on {interface}"
@@ -222,6 +224,17 @@ def parse_ethtool_test_log(log_data, os_name):
             suite_summary[f"total_{status.lower()}"] += 1
             subtest_number += 1
 
+        # --- router/gateway failure variant (from updated ethtool function) ---
+        if "Failed to ping router/gateway" in line:
+            intf = line.split("for")[-1].strip()
+            status = "FAILED"
+            description = f"Ping to router/gateway on {intf}"
+            subtest = create_subtest(subtest_number, description, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(subtest)
+            suite_summary[f"total_{status.lower()}"] += 1
+            subtest_number += 1
+
         # Ping to www.arm.com
         if "INFO: Ping to www.arm.com" in line:
             if "is successful" in line:
@@ -230,6 +243,59 @@ def parse_ethtool_test_log(log_data, os_name):
             else:
                 status = "FAILED"
                 description = f"Ping to www.arm.com on {interface}"
+            subtest = create_subtest(subtest_number, description, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(subtest)
+            suite_summary[f"total_{status.lower()}"] += 1
+            subtest_number += 1
+
+        # --- www.arm.com failure/success variants (from updated ethtool function) ---
+        if "Failed to ping www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "FAILED"
+            description = f"Ping to www.arm.com on {intf}"
+            subtest = create_subtest(subtest_number, description, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(subtest)
+            suite_summary[f"total_{status.lower()}"] += 1
+            subtest_number += 1
+
+        # >>> Wget checks <<<
+        if "INFO: wget failed to reach https://www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "FAILED"
+            description = f"Wget connectivity to https://www.arm.com on {intf}"
+            subtest = create_subtest(subtest_number, description, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(subtest)
+            suite_summary[f"total_{status.lower()}"] += 1
+            subtest_number += 1
+
+        if "INFO: wget successfully accessed https://www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "PASSED"
+            description = f"Wget connectivity to https://www.arm.com on {intf}"
+            subtest = create_subtest(subtest_number, description, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(subtest)
+            suite_summary[f"total_{status.lower()}"] += 1
+            subtest_number += 1
+
+        # >>> Curl checks <<<
+        if "INFO: curl failed to fetch https://www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "FAILED"
+            description = f"Curl connectivity to https://www.arm.com on {intf}"
+            subtest = create_subtest(subtest_number, description, status)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            current_test["subtests"].append(subtest)
+            suite_summary[f"total_{status.lower()}"] += 1
+            subtest_number += 1
+
+        if "INFO: curl successfully fetched https://www.arm.com via" in line:
+            intf = line.split("via")[-1].strip()
+            status = "PASSED"
+            description = f"Curl connectivity to https://www.arm.com on {intf}"
             subtest = create_subtest(subtest_number, description, status)
             update_suite_summary(current_test["test_suite_summary"], status)
             current_test["subtests"].append(subtest)
@@ -315,3 +381,4 @@ if __name__ == "__main__":
 
     with open(output_file_path, 'w') as outfile:
         json.dump(output_json, outfile, indent=4)
+
