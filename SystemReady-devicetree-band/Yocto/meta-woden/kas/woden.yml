@@ -37,11 +37,12 @@ repos:
       meta-tpm2:
 
 local_conf_header:
-  threads: |
+  meta-custom: |
     GLIBC_GENERATE_LOCALES = "en_US.UTF-8 en_GB.UTF-8 C.UTF-8"
     IMAGE_LINGUAS = "en-us en-gb"
     BB_NUMBER_THREADS = "16"
     PARALLEL_MAKE = "-j16"
+    GNU_MIRROR = "http://ftpmirror.gnu.org"
 
 distro: woden
 machine: genericarm64
