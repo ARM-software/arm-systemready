@@ -86,6 +86,8 @@ def parse_post_script_log(log_path):
             if st is not None:
                 test_suite["subtests"].append(st)
         elif line.startswith("WARNING"):
+            if line.startswith("WARNING run_identify: Could not identify"):
+                continue
             subtest_counter += 1
             st = make_subtest(subtest_counter, "WARNING", line)
             if st is not None:
