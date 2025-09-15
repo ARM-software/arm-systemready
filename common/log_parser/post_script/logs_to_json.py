@@ -46,19 +46,6 @@ def parse_post_script_log(log_path):
     # We'll keep a running index for sub_Test_Number
     subtest_counter = 0
 
-    # We can also keep track of whether we found a final summary line
-    final_summary_found = False
-    final_summary_passed = 0
-    final_summary_failed = 0
-    final_summary_warnings = 0
-    # (We have no direct 'aborted' or 'skipped' from the final summary line, so those remain zero.)
-
-    # Regex to detect the final summary line, e.g.:
-    # INFO <module>:
-    summary_regex = re.compile(
-        r"INFO\s+<module>:\s+(\d+)\s+checks,\s+(\d+)\s+pass,\s+(\d+)\s+warnings?,\s+(\d+)\s+errors?"
-    )
-
     # Helper function to create a subtest entry
     def make_subtest(line_num, severity, text_line):
         """
@@ -89,18 +76,6 @@ def parse_post_script_log(log_path):
 
     # Parse line by line
     for line in lines:
-        line_stripped = line.strip()
-
-        # Check for final summary line
-        m = summary_regex.search(line)
-        if m:
-            final_summary_found = True
-            total_checks = int(m.group(1))
-            final_summary_passed = int(m.group(2))
-            final_summary_warnings = int(m.group(3))
-            final_summary_failed = int(m.group(4))
-            # We do *not* store it as a subtest. It's purely a summary.
-            continue
 
         # Identify severity based on prefix: "ERROR ", "WARNING ", "INFO "
         # We'll do a quick search. If no match, we skip or treat as INFO
@@ -122,24 +97,15 @@ def parse_post_script_log(log_path):
             # parse lines that do not start with these tokens,skip them to keep the subtests clean
             pass
 
-    # If found a final summary, override the suite's summary from that
-    if final_summary_found:
-        test_suite["test_suite_summary"]["total_passed"] = final_summary_passed
-        test_suite["test_suite_summary"]["total_failed"] = final_summary_failed
-        test_suite["test_suite_summary"]["total_warnings"] = final_summary_warnings
-        # ABORTED and SKIPPED remain 0 as we don't have them in the summary line
-
-    # If we did NOT find a final summary, we can fallback to summing from subtests:
-    else:
-        # Summation approach in case there's no final summary line
-        for sub in test_suite["subtests"]:
-            r = sub["sub_test_result"]
-            test_suite["test_suite_summary"]["total_passed"] += r["PASSED"]
-            test_suite["test_suite_summary"]["total_failed"] += r["FAILED"]
-            test_suite["test_suite_summary"]["total_aborted"] += r["ABORTED"]
-            test_suite["test_suite_summary"]["total_skipped"] += r["SKIPPED"]
-            test_suite["test_suite_summary"]["total_warnings"] += r["WARNINGS"]
-
+    # Always summarize from subtests (ignore any final INFO summary line)
+    for sub in test_suite["subtests"]:
+        r = sub["sub_test_result"]
+        test_suite["test_suite_summary"]["total_failed"]   += r["FAILED"]
+        test_suite["test_suite_summary"]["total_aborted"]  += r["ABORTED"]
+        test_suite["test_suite_summary"]["total_skipped"]  += r["SKIPPED"]
+        test_suite["test_suite_summary"]["total_warnings"] += r["WARNINGS"]
+        test_suite["test_suite_summary"]["total_passed"]   += r["PASSED"]
+        
     # Next, build the top-level "suite_summary" from this single test suite
     suite_summary = {
         "total_passed": test_suite["test_suite_summary"]["total_passed"],
