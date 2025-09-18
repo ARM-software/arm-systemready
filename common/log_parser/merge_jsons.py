@@ -428,8 +428,8 @@ def merge_json_files(json_files, output_file):
     for suite_name, requirement in mandatory_suites:
         if suite_name not in suite_fail_data:
             label = compliance_label(suite_name)
-            acs_results_summary[label] = "Not Compliant: not run"
             if requirement == "M":
+                acs_results_summary[label] = "Not Compliant: not run"
                 print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
                 overall_comp = "Not Compliant"
                 missing_list.append(suite_name)
@@ -439,7 +439,14 @@ def merge_json_files(json_files, output_file):
                 #overall_comp = "Not Compliant"
                 #missing_list.append(suite_name)
             else:
-                print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
+                if DT_OR_SR_MODE == "DT":
+                    acs_results_summary[label] = "Not Compliant: not run"
+                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
+                    overall_comp = "Not Compliant"
+                    missing_list.append(suite_name)
+                else:
+                    acs_results_summary[label] = "Not Run"
+                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
         else:
             fail_info = suite_fail_data.get(suite_name)
             f = fail_info.get("Failed", 0)
