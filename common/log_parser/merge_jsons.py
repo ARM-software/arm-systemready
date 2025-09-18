@@ -25,6 +25,9 @@ YELLOW = "\033[93m"
 GREEN = "\033[32m"
 RESET = "\033[0m"
 
+# Requirement map for each suite
+_REQUIREMENT_MAP = {}
+
 ################################################################################
 # 1. Determine if we're in Device Tree (DT) mode or SR mode by checking yocto flag
 ################################################################################
@@ -67,11 +70,6 @@ SR_SRS_SCOPE_TABLE = [
     ("BBSR-TPM", "R"),
     ("SBSA", "R")
 ]
-
-if DT_OR_SR_MODE == "DT":
-    _REQUIREMENT_MAP = {name: req for name, req in DT_SRS_SCOPE_TABLE}
-else:
-    _REQUIREMENT_MAP = {name: req for name, req in SR_SRS_SCOPE_TABLE}
 
 def compliance_label(suite_name: str) -> str:
     req = _REQUIREMENT_MAP.get(suite_name, "R")
@@ -141,12 +139,25 @@ def count_fails_in_json(data):
                     if "(WITH WAIVER)" in res.upper():
                         total_failed_with_waiver += 1
                     else:
-                        total_failed +=1
+                        total_failed += 1
 
     # If we found zero subtests across the entire suite => treat that as a fail
     if not any_subtests_found:
         total_failed += 1
     return (total_failed, total_failed_with_waiver)
+
+def _get_suite_summary(d):
+    if isinstance(d, dict):
+        return d.get("suite_summary") or {}
+    return {}
+
+def _sum_suite_summary(a, b):
+    keys = [
+        "total_passed","total_failed","total_failed_with_waiver",
+        "total_aborted","total_skipped","total_warnings","total_ignored"
+    ]
+    sa = _get_suite_summary(a); sb = _get_suite_summary(b)
+    return {k: int(sa.get(k, 0)) + int(sb.get(k, 0)) for k in keys}
 
 ################################################################################
 # We will load the test_categoryDT.json data here, so we can enrich the
@@ -264,7 +275,7 @@ def merge_json_files(json_files, output_file):
             suite_key    = "BBSR-SCT"
         elif "BBSR" in fn and "TPM" in fn:
             section_name = "Suite_Name: BBSR-TPM"
-            suite_key    = "BBSR-TPM"    
+            suite_key    = "BBSR-TPM"
         elif "SCT" in fn:
             section_name = "Suite_Name: SCT"
             suite_key    = "SCT"
@@ -378,20 +389,31 @@ def merge_json_files(json_files, output_file):
                         ts_dict.update(temp)
 
         f, fw = count_fails_in_json(data)
-        suite_fail_data[suite_key] = {
-            "Failed": f,
-            "Failed_with_Waiver": fw
-        }
+        if suite_key in suite_fail_data:
+            suite_fail_data[suite_key]["Failed"] += f
+            suite_fail_data[suite_key]["Failed_with_Waiver"] += fw
+        else:
+            suite_fail_data[suite_key] = {
+                "Failed": f,
+                "Failed_with_Waiver": fw
+            }
+    # --- ensure labels use the right Mandatory/Recommended tags for this mode ---
+    base_table = DT_SRS_SCOPE_TABLE if DT_OR_SR_MODE == "DT" else SR_SRS_SCOPE_TABLE
+    for n, r in base_table:
+        _REQUIREMENT_MAP.setdefault(n, r)
 
     # Step 3) Compute *per-suite* and overall compliance
-    # Decide mandatory set
+    # Base mandatory set
     if DT_OR_SR_MODE == "DT":
         mandatory_suites = set(DT_SRS_SCOPE_TABLE)
     else:
         mandatory_suites = set(SR_SRS_SCOPE_TABLE)
-        # If SBSA is present, treat it as mandatory
-        if "SBSA" in suite_fail_data:
-            mandatory_suites = {("SBSA", "M") if suite[0] == "SBSA" else suite for suite in mandatory_suites}
+        # Promote SBSA to Mandatory if present in results
+        promote = {"SBSA"} & set(suite_fail_data.keys())
+        for n in promote:
+            _REQUIREMENT_MAP[n] = "M"
+        if promote:
+            mandatory_suites = {(n, "M") if n in promote else (n, r) for (n, r) in mandatory_suites}
 
     overall_comp = "Compliant"
     # Keep track of missing_suites and non_waived_suites for parentheses
@@ -411,6 +433,11 @@ def merge_json_files(json_files, output_file):
                 print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
                 overall_comp = "Not Compliant"
                 missing_list.append(suite_name)
+            elif requirement == "CM":
+                acs_results_summary[label] = "Not Run"
+                print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                #overall_comp = "Not Compliant"
+                #missing_list.append(suite_name)
             else:
                 print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
         else:
@@ -420,22 +447,31 @@ def merge_json_files(json_files, output_file):
             label = compliance_label(suite_name)
             if (f + fw) == 0:
                 acs_results_summary[label] = "Compliant"
-                if requirement == "M":
-                    print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                if requirement in ("M", "CM"):
+                    if requirement == "M":
+                        print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                    else:
+                        print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
                 else:
                     print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
             elif f == 0 and fw > 0:
                 acs_results_summary[label] = f"Compliant with waivers: Waivers {fw}"
-                if requirement == "M":
-                    print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                if requirement in ("M", "CM"):
+                    if requirement == "M":
+                        print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                    else:
+                         print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
                 else:
                     print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
-                if requirement == "M" and overall_comp != "Not Compliant":
+                if requirement in ("M", "CM") and overall_comp != "Not Compliant":
                     overall_comp="Compliant with waivers"
             else:
                 acs_results_summary[label] = f"Not Compliant: Failed {f}"
-                if requirement == "M":
-                    print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
+                if requirement in ("M", "CM"):
+                    if requirement == "M":
+                        print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
+                    else:
+                        print(f"{RED}Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
                     overall_comp="Not Compliant"
                     non_waived_list.append(suite_name)
                 else:
@@ -483,85 +519,60 @@ def merge_json_files(json_files, output_file):
     bbsr_sct  = acs_results_summary.get(compliance_label("BBSR-SCT"), "")
     overall_str = acs_results_summary.get("Overall Compliance Result", "")
 
-        # Determine if every BBSR sub-suite passed with no failures
-    all_bbsr_compliant = (
-        bbsr_tpm  == "Compliant"
-        and bbsr_fwts == "Compliant"
-        and bbsr_sct  == "Compliant"
-    )
+    # --- handle BBSR result ---
+    def _is_missing(val: str) -> bool:
+        return (not val) or val.lower().startswith("not compliant: not run")
 
-    # Check if any suite or the overall result used a waiver
-    any_waiver = (
-        "waiver" in bbsr_tpm.lower()
-        or "waiver" in bbsr_fwts.lower()
-        or "waiver" in bbsr_sct.lower()
-        or "waiver" in overall_str.lower()
-    )
-
-    # Case A: All sub-suites passed cleanly
-    if all_bbsr_compliant:
-        # 1) If the *overall* compliance is a hard failure, override and mark BBSR as Not Compliant
-        if overall_str.startswith("Not Compliant"):
-            acs_results_summary["BBSR extension compliance results"] = "Not Compliant"
-
-        # 2) If the overall result is “Compliant with waivers,” reflect that here
-        elif overall_str.lower().startswith("compliant with waivers"):
-            acs_results_summary["BBSR extension compliance results"] = "Compliant with waivers"
-
-        # 3) Otherwise (overall is strictly Compliant), BBSR is Compliant
-        else:
-            acs_results_summary["BBSR extension compliance results"] = "Compliant"
-
-    # Case B: At least one suite or the overall result involved a waiver
-    elif any_waiver:
-        # 1) Still respect a hard overall failure as Not Compliant
-        if overall_str.startswith("Not Compliant"):
-            acs_results_summary["BBSR extension compliance results"] = "Not Compliant"
-        # 2) Otherwise, we have a waiver situation
-        else:
-            acs_results_summary["BBSR extension compliance results"] = "Compliant with waivers"
-
-    # Case C: Some sub-suite(s) failed outright without waivers
+    _no_bbsr_logs = all(_is_missing(x) for x in (bbsr_tpm, bbsr_fwts, bbsr_sct))
+    if _no_bbsr_logs:
+        acs_results_summary["BBSR compliance results"] = "Not run"
+        merged_results["Suite_Name: acs_info"]["BBSR compliance results"] = "Not run"
     else:
         # Gather which suites didn’t run vs. which failed non-waived
         missing_list_bbsr = []
         non_waived_list_bbsr = []
+        waiver_seen = False
 
         for label, comp_str in [
             ("BBSR-TPM", bbsr_tpm),
             ("BBSR-FWTS", bbsr_fwts),
             ("BBSR-SCT", bbsr_sct),
         ]:
-            # “not run” indicates missing entirely
-            if comp_str.lower().startswith("not compliant: not run"):
+            low = (comp_str or "").lower()
+            if low.startswith("not compliant: not run"):
                 missing_list_bbsr.append(label)
-            # “failed” indicates an explicit non-waived failure
-            elif comp_str.lower().startswith("not compliant: failed"):
+            elif low.startswith("not compliant: failed"):
                 non_waived_list_bbsr.append(label)
+            elif "waiver" in low:
+                waiver_seen = True
 
-        # If no specific details, at least flag as generic Not Compliant
-        if not missing_list_bbsr and not non_waived_list_bbsr:
-            acs_results_summary["BBSR extension compliance results"] = "Not Compliant"
-        else:
-            # Build a human-readable reason with missing vs. non-waived lists
+        if non_waived_list_bbsr:
             parts = []
             if missing_list_bbsr:
                 parts.append(f"missing suite(s): {', '.join(missing_list_bbsr)}")
             if non_waived_list_bbsr:
                 parts.append(f"non-waived fails in suite(s): {', '.join(non_waived_list_bbsr)}")
-            acs_results_summary["BBSR extension compliance results"] = (
-                f"Not Compliant ({'; '.join(parts)})"
+            acs_results_summary["BBSR compliance results"] = (
+                "Not Compliant" + (f" ({'; '.join(parts)})" if parts else "")
             )
+        elif missing_list_bbsr:
+            acs_results_summary["BBSR compliance results"] = (
+                f"Not Compliant (missing suite(s): {', '.join(missing_list_bbsr)})"
+            )
+        elif waiver_seen:
+            acs_results_summary["BBSR compliance results"] = "Compliant with waivers"
+        else:
+            acs_results_summary["BBSR compliance results"] = "Compliant"
 
-    # Finally, print out the BBSR extension result with color coding
-    bbsr_comp_str = acs_results_summary["BBSR extension compliance results"]
+    # Persist + print BBSR result with color
+    bbsr_comp_str = acs_results_summary["BBSR compliance results"]
     if bbsr_comp_str.lower().startswith("compliant with waivers"):
-        print(f"{YELLOW}BBSR extension compliance results: {bbsr_comp_str}{RESET}\n")
+        print(f"{YELLOW}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
     elif bbsr_comp_str.lower().startswith("compliant"):
-        print(f"{GREEN}BBSR extension compliance results: {bbsr_comp_str}{RESET}\n")
+        print(f"{GREEN}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
     else:
-        print(f"{RED}BBSR extension compliance results: {bbsr_comp_str}{RESET}\n")
-    
+        print(f"{RED}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
+
     RENAME_SUITES_TO_STANDALONE = {
         "Suite_Name: DT Kselftest": "Suite_Name: Standalone",
         "Suite_Name: CAPSULE_UPDATE": "Suite_Name: Standalone",
@@ -607,7 +618,7 @@ def merge_json_files(json_files, output_file):
             "Suite_Name: Recommended  : DT_KSELFTEST_compliance",
             "Suite_Name: Recommended  : POST_SCRIPT_compliance",
             "Suite_Name: Recommended  : PSCI_compliance",
-            "BBSR extension compliance results",
+            "BBSR compliance results",
             "Overall Compliance Result",
         ]
         actual = merged_results["Suite_Name: acs_info"]["ACS Results Summary"]

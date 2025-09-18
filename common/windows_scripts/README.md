@@ -14,7 +14,7 @@ pnputil /enum-devices /connected
 ```cmd
 ipconfig /all
 ```
-> Outputs detailed networking configuration, including IP address, gateway, DNS, MAC address, DHCP info, and more. Helpful for verifying network connectivity in pre-boot environments.
+> Outputs detailed networking configuration — including IP address, gateway, DNS, MAC address, DHCP info, and more. Helpful for verifying network connectivity in pre-boot environments.
 ---
 
 ### Usage

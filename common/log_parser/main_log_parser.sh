@@ -658,7 +658,7 @@ if [ $POST_SCRIPT_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/post_script_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
-fi 
+fi
 
 # 9) STANDALONE
 if [ $Standalone_PROCESSED -eq 1 ]; then
@@ -756,7 +756,7 @@ if [ $print_path -eq 1 ]; then
         echo "POST SCRIPTS Detailed Summary : $HTMLS_DIR/post_script_detailed.html"
         echo "POST SCRIPTS Summary          : $HTMLS_DIR/post_script_summary.html"
         echo ""
-    fi 
+    fi
     if [ $Standalone_PROCESSED -eq 1 ]; then
         echo "Standalone tests Detailed Summary      : $Standalone_DETAILED_HTML"
         echo "Standalone tests Summary               : $Standalone_SUMMARY_HTML"

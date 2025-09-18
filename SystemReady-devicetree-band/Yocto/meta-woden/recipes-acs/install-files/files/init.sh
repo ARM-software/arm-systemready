@@ -39,6 +39,13 @@ else
 fi
 sleep 3
 
+if [ -f /mnt/acs_tests/bbr/boot_tolinuxprompt.flag ]; then
+  echo "Booted after Secure Boot clearance. Skipping ACS tests, Booting to Linux terminal..."
+  rm /mnt/acs_tests/bbr/boot_tolinuxprompt.flag
+ # echo "Please press <Enter> to continue ..."
+  exit 0
+fi
+
 #Skip running of ACS Tests if the grub option is added
 ADDITIONAL_CMD_OPTION="";
 ADDITIONAL_CMD_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
@@ -51,11 +58,22 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo "Call BBSR ACS in Linux"
       /usr/bin/secure_init.sh
       echo "BBSR ACS run is completed\n"
-      echo "SecureBoot keys needs to be manually cleared, please refer to BBSR_ACS_Verification.md guide for the steps"
-      echo "https://github.com/ARM-software/arm-systemready/blob/main/docs/BBSR_ACS_Verification.md"
-      echo "Please press <Enter> to continue ..."
-      echo -e -n "\n"
-      exit 0
+      secureboot_state=$(hexdump -v -e '1/1 "%02x"' /sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c 2>/dev/null | tail -c 2)
+      if [ "$secureboot_state" = "01" ]; then
+        echo -e "\033[1;31m*** Secure Boot is ENABLED. Disabling Secure Boot.....     ***\033[0m"
+        touch /mnt/acs_tests/bbr/clear_secureboot.flag
+        sync
+        umount /mnt
+        echo "Rebooting system to enter UEFI shell"
+        sleep 1
+        reboot
+        sleep 3
+      else
+        echo "Secure Boot is not enabled. Skipping secureboot PK clearance"
+        echo "Please press <Enter> to continue ..."
+        echo -e -n "\n"
+        exit 0
+      fi
     fi
 
     check_flag=0
