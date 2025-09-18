@@ -61,7 +61,7 @@ def get_system_info():
                 break
         else:
             # If we didn't find 'Product Name:'
-            system_info['System Name'] = 'Unknown'    
+            system_info['System Name'] = 'Unknown'
     except Exception:
         system_info['System Name'] = 'Unknown'
 
@@ -161,10 +161,10 @@ def read_overall_compliance_from_merged_json(merged_json_path):
         acs_summary = acs_info_data.get("ACS Results Summary", {})
         overall_result = acs_summary.get("Overall Compliance Result", "Unknown")
         # If not found in ACS Results Summary, try at top level of acs_info_data
-        if "BBSR extension compliance results" in acs_info_data:
-            bbsr_result = acs_info_data.get("BBSR extension compliance results", "Unknown")
+        if "BBSR compliance results" in acs_info_data:
+            bbsr_result = acs_info_data.get("BBSR compliance results", "Unknown")
         else:
-            bbsr_result = acs_summary.get("BBSR extension compliance results", "Unknown")
+            bbsr_result = acs_summary.get("BBSR compliance results", "Unknown")
     except Exception as e:
         print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
     return overall_result, bbsr_result
@@ -183,7 +183,7 @@ def generate_html(system_info, acs_results_summary,
     sct_summary_content = read_html_content(sct_summary_path)
     bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path)
-    bbsr_tpm_summary_content = read_html_content(bbsr_tpm_summary_path) 
+    bbsr_tpm_summary_content = read_html_content(bbsr_tpm_summary_path)
     post_script_summary_content = read_html_content(post_script_summary_path)
     standalone_summary_content = read_html_content(standalone_summary_path)
     OS_tests_summary_content = read_html_content(OS_tests_summary_path)
@@ -369,7 +369,7 @@ def generate_html(system_info, acs_results_summary,
                     <tr>
                         <th>SRS requirements compliance results</th>
                         <td style="
-                            color: 
+                            color:
                             {% if 'Not Compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
                                 red
                             {% elif 'Compliant with Waivers' in acs_results_summary.get('Overall Compliance Results', '') %}
@@ -383,23 +383,28 @@ def generate_html(system_info, acs_results_summary,
                             {{ acs_results_summary.get('Overall Compliance Results', 'Unknown') }}
                         </td>
                     </tr>
+                </table>
+            </div>
+            <div class="acs-results-summary">
+                <h2>Extensions</h2>
+                <table>
                     <tr>
-                         <th>BBSR extension compliance results</th>
-                         <td style="
-                             color: 
-                             {% if 'Not Compliant' in acs_results_summary.get('BBSR extension compliance results', '') %}
-                                 red
-                             {% elif 'Compliant with waivers' in acs_results_summary.get('BBSR extension compliance results', '')|lower %}
-                                 #FFBF00
-                             {% elif 'Compliant' in acs_results_summary.get('BBSR extension compliance results', '') %}
-                                 green
-                             {% else %}
-                                 black
-                             {% endif %}
-                         ">
-                             {{ acs_results_summary.get('BBSR extension compliance results', 'Unknown') }}
-                         </td>
-                     </tr>
+                        <th>BBSR compliance results</th>
+                        <td style="
+                            color:
+                            {% if 'Not Compliant' in acs_results_summary.get('BBSR compliance results', '') %}
+                                red
+                            {% elif 'waiver' in acs_results_summary.get('BBSR compliance results', '')|lower %}
+                                #FFBF00
+                            {% elif 'Compliant' in acs_results_summary.get('BBSR compliance results', '') %}
+                                green
+                            {% else %}
+                                black
+                            {% endif %}
+                        ">
+                            {{ acs_results_summary.get('BBSR compliance results', 'Not run') }}
+                        </td>
+                    </tr>
                 </table>
             </div>
             <div class="dropdown">
@@ -417,9 +422,9 @@ def generate_html(system_info, acs_results_summary,
                     {% if sct_summary_content %}
                     <a href="#sct_summary">SCT Summary</a>
                     {% endif %}
-                    {% if post_script_summary_content %} 
-                    <a href="#post_script_summary">POST-SCRIPT Summary</a> 
-                    {% endif %} 
+                    {% if post_script_summary_content %}
+                    <a href="#post_script_summary">POST-SCRIPT Summary</a>
+                    {% endif %}
                     {% if standalone_summary_content %}
                     <a href="#standalone_summary">Standalone tests Summary</a>
                     {% endif %}
@@ -428,7 +433,7 @@ def generate_html(system_info, acs_results_summary,
                     {% endif %}
                     {% if bbsr_sct_summary_content %}
                     <a href="#bbsr_sct_summary">BBSR-SCT Summary</a>
-                    {% endif %} 
+                    {% endif %}
                     {% if bbsr_tpm_summary_content %}
                     <a href="#bbsr_tpm_summary">BBSR-TPM Summary</a>
                     {% endif %}
@@ -471,14 +476,14 @@ def generate_html(system_info, acs_results_summary,
                     </div>
                 </div>
                 {% endif %}
-                {% if post_script_summary_content %} 
-                <div class="summary" id="post_script_summary"> 
-                    {{ post_script_summary_content | safe }} 
-                    <div class="details-link"> 
-                        <a href="post_script_detailed.html" target="_blank">Click here to go to the detailed summary for POST-SCRIPT</a> 
-                    </div> 
-                </div> 
-                {% endif %} 
+                {% if post_script_summary_content %}
+                <div class="summary" id="post_script_summary">
+                    {{ post_script_summary_content | safe }}
+                    <div class="details-link">
+                        <a href="post_script_detailed.html" target="_blank">Click here to go to the detailed summary for POST-SCRIPT</a>
+                    </div>
+                </div>
+                {% endif %}
                 {% if standalone_summary_content %}
                 <div class="summary" id="standalone_summary">
                     {{ standalone_summary_content | safe }}
@@ -548,7 +553,7 @@ def generate_html(system_info, acs_results_summary,
     detailed_summaries = [
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_fwts_detailed.html'), 'BBSR-FWTS'),
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_sct_detailed.html'), 'BBSR-SCT'),
-        (os.path.join(os.path.dirname(output_html_path), 'bbsr_tpm_detailed.html'), 'BBSR-TPM'), 
+        (os.path.join(os.path.dirname(output_html_path), 'bbsr_tpm_detailed.html'), 'BBSR-TPM'),
         (os.path.join(os.path.dirname(output_html_path), 'os_tests_detailed.html'), 'OS'),
         (os.path.join(os.path.dirname(output_html_path), 'standalone_tests_detailed.html'), 'Standalone'),
         (os.path.join(os.path.dirname(output_html_path), 'post_script_detailed.html'), 'POST-SCRIPT')
@@ -565,7 +570,7 @@ if __name__ == "__main__":
     parser.add_argument("sct_summary_path", help="Path to the SCT summary HTML file")
     parser.add_argument("bbsr_fwts_summary_path", help="Path to the BBSR FWTS summary HTML file")
     parser.add_argument("bbsr_sct_summary_path", help="Path to the BBSR SCT summary HTML file")
-    parser.add_argument("bbsr_tpm_summary_path", help="Path to the BBSR TPM summary HTML file") 
+    parser.add_argument("bbsr_tpm_summary_path", help="Path to the BBSR TPM summary HTML file")
     parser.add_argument("post_script_summary_path", help="Path to the post-script summary HTML file")
     parser.add_argument("standalone_summary_path", help="Path to the Standalone tests summary HTML file")
     parser.add_argument("OS_tests_summary_path", help="Path to the OS Tests summary HTML file")
@@ -631,7 +636,7 @@ if __name__ == "__main__":
         'Band': acs_config_info.get('Band', 'Unknown'),
         'Date': summary_generated_date,
         'Overall Compliance Results': overall_compliance,
-        'BBSR extension compliance results': bbsr_compliance
+        'BBSR compliance results': bbsr_compliance
     }
 
     # 10) Finally, generate the consolidated HTML page
@@ -644,7 +649,7 @@ if __name__ == "__main__":
         args.sct_summary_path,
         args.bbsr_fwts_summary_path,
         args.bbsr_sct_summary_path,
-        args.bbsr_tpm_summary_path, 
+        args.bbsr_tpm_summary_path,
         args.post_script_summary_path,
         args.standalone_summary_path,
         args.OS_tests_summary_path,
