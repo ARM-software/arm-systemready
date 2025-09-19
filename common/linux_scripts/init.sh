@@ -257,6 +257,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   #copying acs_run_config.ini into results directory.
   mkdir -p /mnt/acs_results/acs_summary/config
   cp /mnt/acs_tests/config/acs_run_config.ini /mnt/acs_results/acs_summary/config
+  # Copying acs_waiver.json into result directory.
+  if [ -f /mnt/acs_tests/config/acs_waiver.json ]; then
+    cp /mnt/acs_tests/config/acs_waiver.json /mnt/acs_results/acs_summary/config
+  fi
   sync /mnt
 
   echo "ACS automated test suites run is completed."
