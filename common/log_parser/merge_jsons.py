@@ -42,6 +42,9 @@ else:
 #    (Recommended suites are simply "not in this list"; they won't affect compliance.)
 ################################################################################
 
+# BBSR is extension
+# BSA, Kselftest, PSCI, post script are recommendation
+
 # DT SRS scope table
 DT_SRS_SCOPE_TABLE = [
     ("SCT", "M"),
@@ -51,23 +54,27 @@ DT_SRS_SCOPE_TABLE = [
     ("READ_WRITE_CHECK_BLK_DEVICES", "M"),
     ("ETHTOOL_TEST", "M"),
     ("BSA", "R"),
-    ("BBSR-SCT", "R"),
-    ("BBSR-TPM", "R"),
-    ("BBSR-FWTS", "R"),
+    ("BBSR-SCT", "EM"),
+    ("BBSR-TPM", "EM"),
+    ("BBSR-FWTS", "EM"),
     ("DT_KSELFTEST", "R"),
     ("PSCI", "R"),
     ("POST_SCRIPT", "R"),
     ("OS_TEST", "M")
 ]
 
+# SBSA is mandatory for servers only, default treat as recommended
+# if SBSA is run, treat as mandatory
+# BBSR is extension
+
 # SR SRS scope table
 SR_SRS_SCOPE_TABLE = [
     ("SCT", "M"),
     ("FWTS", "M"),
     ("BSA", "M"),
-    ("BBSR-SCT", "R"),
-    ("BBSR-FWTS", "R"),
-    ("BBSR-TPM", "R"),
+    ("BBSR-SCT", "EM"),
+    ("BBSR-FWTS", "EM"),
+    ("BBSR-TPM", "EM"),
     ("SBSA", "R")
 ]
 
@@ -77,6 +84,8 @@ def compliance_label(suite_name: str) -> str:
         tag = "Mandatory"
     elif req == "CM":
         tag = "Conditional-Mandatory"
+    elif req == "EM":
+        tag = "Extension"
     else:
         tag = "Recommended"
     # Match the console ordering: “Suite: <tag>  : <suite> …”
@@ -438,6 +447,11 @@ def merge_json_files(json_files, output_file):
                 print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
                 #overall_comp = "Not Compliant"
                 #missing_list.append(suite_name)
+            elif requirement == "EM":
+                acs_results_summary[label] = "Not Run"
+                print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
+                #overall_comp = "Not Compliant"
+                #missing_list.append(suite_name)
             else:
                 if DT_OR_SR_MODE == "DT":
                     acs_results_summary[label] = "Not Compliant: not run"
@@ -459,6 +473,8 @@ def merge_json_files(json_files, output_file):
                         print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
                     else:
                         print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                elif requirement == "EM":
+                    print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
                 else:
                     print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
             elif f == 0 and fw > 0:
@@ -468,6 +484,8 @@ def merge_json_files(json_files, output_file):
                         print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
                     else:
                          print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                elif requirement == "EM":
+                    print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
                 else:
                     print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
                 if requirement in ("M", "CM") and overall_comp != "Not Compliant":
@@ -481,6 +499,8 @@ def merge_json_files(json_files, output_file):
                         print(f"{RED}Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
                     overall_comp="Not Compliant"
                     non_waived_list.append(suite_name)
+                elif requirement == "EM":
+                    print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
                 else:
                     print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
 
@@ -528,7 +548,7 @@ def merge_json_files(json_files, output_file):
 
     # --- handle BBSR result ---
     def _is_missing(val: str) -> bool:
-        return (not val) or val.lower().startswith("not compliant: not run")
+        return (not val) or val.lower().startswith("not run")
 
     _no_bbsr_logs = all(_is_missing(x) for x in (bbsr_tpm, bbsr_fwts, bbsr_sct))
     if _no_bbsr_logs:
@@ -546,7 +566,7 @@ def merge_json_files(json_files, output_file):
             ("BBSR-SCT", bbsr_sct),
         ]:
             low = (comp_str or "").lower()
-            if low.startswith("not compliant: not run"):
+            if low.startswith("not run"):
                 missing_list_bbsr.append(label)
             elif low.startswith("not compliant: failed"):
                 non_waived_list_bbsr.append(label)
@@ -577,6 +597,8 @@ def merge_json_files(json_files, output_file):
         print(f"{YELLOW}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
     elif bbsr_comp_str.lower().startswith("compliant"):
         print(f"{GREEN}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
+    elif bbsr_comp_str.lower().startswith("not run"):
+        print(f"BBSR compliance results: {bbsr_comp_str}\n")
     else:
         print(f"{RED}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
 
