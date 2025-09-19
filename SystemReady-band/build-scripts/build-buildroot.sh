@@ -73,8 +73,6 @@ do_build ()
     chmod +x root_fs_overlay/usr/bin/bsa.sh
     cp  $TOP_DIR/ramdisk/sbsa.sh root_fs_overlay/usr/bin/
     chmod +x root_fs_overlay/usr/bin/sbsa.sh
-    cp  $TOP_DIR/ramdisk/sbmr.sh root_fs_overlay/usr/bin/
-    chmod +x root_fs_overlay/usr/bin/sbmr.sh
     cp  $TOP_DIR/ramdisk/fwts.sh root_fs_overlay/usr/bin/
     chmod +x root_fs_overlay/usr/bin/fwts.sh
     cp  $TOP_DIR/bbr-acs/bbsr/config/bbsr_fwts_tests.ini root_fs_overlay/bin/
