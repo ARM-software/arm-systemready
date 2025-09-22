@@ -169,14 +169,47 @@ def parse_dt_validate_log(log_data):
     for line in log_data:
         line = line.strip()
         # Often dt-validate will show lines like /path: error blah
-        if re.match(r'^/.*: ', line):
-            description = line
+        if re.match(r'^/.*: ', line) and ' dt-validate ' not in line:
+            # format: "/path: node: message"
+            rest = line.split(': ', 1)[1] if ': ' in line else line
+            if ': ' in rest:
+                node, msg = rest.split(': ', 1)
+            else:
+                node, msg = rest, ''
+            description = node.strip() if node.strip() else '/'
             status = 'FAILED'
-            sub = create_subtest(subtest_number, description, status, reason=line)
+            reason_text = msg.strip()
+            sub = create_subtest(subtest_number, description, status, reason=reason_text)
+            # ensure reasons go to fail_reasons (create_subtest already does for FAILED)
             current_test["subtests"].append(sub)
             current_test["test_suite_summary"]["total_failed"] += 1
             suite_summary["total_failed"] += 1
             subtest_number += 1
+        else:
+            # format: "<node>  dt-validate <error|warning> [extra words]  <message>"
+            m = re.match(r'^\s*(\S.*?)\s+dt-validate\s+(error|warning)(?:\s+(?:missing\s+property|naming))?\s{2,}(.+?)\s*$', line, re.IGNORECASE)
+            if m:
+                description = (m.group(1) or "").split()[0]
+                level = m.group(2).lower()
+                message = m.group(3).strip()
+
+                if level == 'error':
+                    status = 'FAILED'
+                    sub = create_subtest(subtest_number, description, status, reason=message)
+                    current_test["subtests"].append(sub)
+                    current_test["test_suite_summary"]["total_failed"] += 1
+                    suite_summary["total_failed"] += 1
+                else:
+                    status = 'WARNINGS'
+                    sub = create_subtest(subtest_number, description, status, reason="")
+                    # Manually set WARNINGS=1 and place message under warning_reasons
+                    sub["sub_test_result"]["WARNINGS"] = 1
+                    sub["sub_test_result"]["warning_reasons"] = [message]
+                    current_test["subtests"].append(sub)
+                    current_test["test_suite_summary"]["total_warnings"] += 1
+                    suite_summary["total_warnings"] += 1
+
+                subtest_number += 1
 
     # >>> REMOVE EMPTY REASON ARRAYS <<<
     for subtest in current_test["subtests"]:

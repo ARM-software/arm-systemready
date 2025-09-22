@@ -356,7 +356,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     fi
 
     # 2) DT_VALIDATE
-    DT_VALIDATE_LOG="$LINUX_TOOLS_LOGS_PATH/dt-validate.log"
+    DT_VALIDATE_LOG="$LINUX_TOOLS_LOGS_PATH/dt-validate-parser.log"
     DT_VALIDATE_JSON="$JSONS_DIR/dt_validate.json"
     if check_file "$DT_VALIDATE_LOG" "M"; then
         python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
