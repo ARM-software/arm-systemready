@@ -32,7 +32,7 @@ def parse_post_script_log(log_path):
     # Define a single test suite container (similar structure to FWTS parser)
     test_suite = {
         "Test_suite": "post scripts checks",
-        "Test_suite_Description": "Post script checks from post-script.log",
+        "Test_suite_description": "Post script checks from post-script.log",
         "subtests": [],
         "test_suite_summary": {
             "total_passed": 0,
@@ -81,6 +81,8 @@ def parse_post_script_log(log_path):
         # We'll do a quick search. If no match, we skip or treat as INFO
         # Variation: you could also treat lines with no recognized prefix as "INFO"
         if line.startswith("ERROR"):
+            if line.startswith("ERROR check_file: `/mnt/acs_results_template/report.txt' missing"):
+                continue
             subtest_counter += 1
             st = make_subtest(subtest_counter, "ERROR", line)
             if st is not None:

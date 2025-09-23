@@ -252,6 +252,18 @@ def parse_ethtool_test_log(log_data):
     while i < len(log_data):
         line = log_data[i].strip()
         # Detecting interfaces
+        if line.startswith("INFO: No ethernet interfaces detected via ip linux command"):
+            status = "FAILED"
+            desc = "No Ethernet Interfaces Detected"
+            sub = create_subtest(subtest_number, desc, status)
+            current_test["subtests"].append(sub)
+            update_suite_summary(current_test["test_suite_summary"], status)
+            suite_summary[f"total_{status.lower()}"] += 1
+            subtest_number += 1
+            i += 1
+            continue
+
+        # Detecting interfaces
         if line.startswith("INFO: Detected following ethernet interfaces via ip command :"):
             interfaces = []
             i += 1

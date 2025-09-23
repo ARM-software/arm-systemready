@@ -325,8 +325,6 @@ def merge_json_files(json_files, output_file):
             section_name = "Suite_Name: Unknown"
             suite_key    = "Unknown"
 
-        merged_results[section_name] = data
-
         # If 'data' is a dict with 'test_results' list, unify it
         if (isinstance(data, dict)
             and "test_results" in data
@@ -372,7 +370,6 @@ def merge_json_files(json_files, output_file):
                         desired_order = [
                             "Test_suite",
                             "Test_suite_name",
-                            "Test_suite_Description",
                             "Test_suite_description",
                             "Waivable",
                             "SRS scope",
@@ -396,6 +393,7 @@ def merge_json_files(json_files, output_file):
                                 temp[key] = val
                         ts_dict.clear()
                         ts_dict.update(temp)
+        merged_results[section_name] = data
 
         f, fw = count_fails_in_json(data)
         if suite_key in suite_fail_data:
@@ -417,12 +415,13 @@ def merge_json_files(json_files, output_file):
         mandatory_suites = set(DT_SRS_SCOPE_TABLE)
     else:
         mandatory_suites = set(SR_SRS_SCOPE_TABLE)
-        # Promote SBSA to Mandatory if present in results
-        promote = {"SBSA"} & set(suite_fail_data.keys())
+        present = set(suite_fail_data.keys())
+
+        # Always consider SBSA mandatory if present (your existing rule)
+        promote = {"SBSA"} if "SBSA" in present else set()
         for n in promote:
             _REQUIREMENT_MAP[n] = "M"
-        if promote:
-            mandatory_suites = {(n, "M") if n in promote else (n, r) for (n, r) in mandatory_suites}
+        mandatory_suites = {(n, "M") if n in promote else (n, r) for (n, r) in mandatory_suites}
 
     overall_comp = "Compliant"
     # Keep track of missing_suites and non_waived_suites for parentheses
@@ -640,9 +639,9 @@ def merge_json_files(json_files, output_file):
             "Suite_Name: Mandatory  : OS_TEST_compliance",
             "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance",
             "Suite_Name: Mandatory  : SCT_compliance",
-            "Suite_Name: Recommended  : BBSR-FWTS_compliance",
-            "Suite_Name: Recommended  : BBSR-SCT_compliance",
-            "Suite_Name: Recommended  : BBSR-TPM_compliance",
+            "Suite_Name: Extension  : BBSR-FWTS_compliance",
+            "Suite_Name: Extension  : BBSR-SCT_compliance",
+            "Suite_Name: Extension  : BBSR-TPM_compliance",
             "Suite_Name: Recommended  : BSA_compliance",
             "Suite_Name: Recommended  : DT_KSELFTEST_compliance",
             "Suite_Name: Recommended  : POST_SCRIPT_compliance",

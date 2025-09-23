@@ -27,6 +27,8 @@ def normalize_result(r):
         return "PASSED"
     if r == "FAIL":
         return "FAILED"
+    if r == "FAILURE":
+        return "FAILED"
     # Normalize SKIP to SKIPPED while preserving SKIPPED
     if r == "SKIP":
         return "SKIPPED"

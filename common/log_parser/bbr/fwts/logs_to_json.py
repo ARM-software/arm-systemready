@@ -107,16 +107,16 @@ def parse_fwts_log(log_path):
             }
             continue
 
-        # Check for test abortion and properly append the whole reason
-        if "Aborted" in line or "ABORTED" in line:
+        # Treat esrt abort test as failure
+        if "Aborted" in line and "Cannot find ESRT table" in line:
             if not current_subtest:
                 current_subtest = {
                     "sub_Test_Number": "Test 1 of 1",
-                    "sub_Test_Description": "Aborted test",
+                    "sub_Test_Description": " ",
                     "sub_test_result": {
                         "PASSED": 0,
-                        "FAILED": 0,
-                        "ABORTED": 1,
+                        "FAILED": 1,
+                        "ABORTED": 0,
                         "SKIPPED": 0,
                         "WARNINGS": 0,
                         "pass_reasons": [],

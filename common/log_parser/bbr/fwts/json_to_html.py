@@ -238,7 +238,7 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
         <div class="detailed-summary">
             {% for test in test_results %}
             <div class="test-suite-header">Test Suite: {{ test.Test_suite }}</div>
-            <div class="test-suite-description">Description: {{ test.Test_suite_Description }}</div>
+            <div class="test-suite-description">Description: {{ test.Test_suite_description }}</div>
 
             <table>
                 <thead>
