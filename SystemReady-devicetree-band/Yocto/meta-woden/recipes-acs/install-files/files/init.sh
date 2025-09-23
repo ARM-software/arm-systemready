@@ -25,6 +25,11 @@ if ! grep -q "ttySC0" /etc/securetty; then
   echo "added ttySC0"
 fi
 
+if ! grep -q "ttyAML0" /etc/securetty; then
+  echo "ttyAML0" >> /etc/securetty
+  echo "added ttyAML0"
+fi
+
 sleep 5
 
 echo "Attempting to mount the results partition ..."
