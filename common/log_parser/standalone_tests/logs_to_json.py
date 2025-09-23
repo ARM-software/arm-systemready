@@ -166,45 +166,38 @@ def parse_dt_validate_log(log_data):
     }
 
     subtest_number = 1
+    start_processing = False
     for line in log_data:
         line = line.strip()
-        # Often dt-validate will show lines like /path: error blah
-        if re.match(r'^/.*: ', line) and ' dt-validate ' not in line:
-            # format: "/path: node: message"
-            rest = line.split(': ', 1)[1] if ': ' in line else line
-            if ': ' in rest:
-                node, msg = rest.split(': ', 1)
-            else:
-                node, msg = rest, ''
-            description = node.strip() if node.strip() else '/'
-            status = 'FAILED'
-            reason_text = msg.strip()
-            sub = create_subtest(subtest_number, description, status, reason=reason_text)
-            # ensure reasons go to fail_reasons (create_subtest already does for FAILED)
-            current_test["subtests"].append(sub)
-            current_test["test_suite_summary"]["total_failed"] += 1
-            suite_summary["total_failed"] += 1
-            subtest_number += 1
-        else:
-            # format: "<node>  dt-validate <error|warning> [extra words]  <message>"
-            m = re.match(r'^\s*(\S.*?)\s+dt-validate\s+(error|warning)(?:\s+(?:missing\s+property|naming))?\s{2,}(.+?)\s*$', line, re.IGNORECASE)
-            if m:
-                description = (m.group(1) or "").split()[0]
-                level = m.group(2).lower()
-                message = m.group(3).strip()
+        # enable parsing only after marker
+        if not start_processing:
+            if line.lower().startswith("non-ignored entries"):
+                start_processing = True
+            continue
+        # skip underline dashes after marker
+        if line.startswith("---"):
+            continue
 
-                if level == 'error':
+        # --- normalize new table rows to legacy format & skip noise ---
+        m_tab = re.match(
+            r'^\s*(\S.*?)\s+.*?\b(error|warning)\b\s*(.*)\s*$' , line, flags=re.IGNORECASE
+        )
+        if m_tab:
+            node = m_tab.group(1).strip()
+            status = m_tab.group(2).lower()
+            msg = m_tab.group(3).strip()
+            if node and status in ['error', 'warning']:
+                if status == 'error':
                     status = 'FAILED'
-                    sub = create_subtest(subtest_number, description, status, reason=message)
+                    sub = create_subtest(subtest_number, node, status, reason=msg)
                     current_test["subtests"].append(sub)
                     current_test["test_suite_summary"]["total_failed"] += 1
                     suite_summary["total_failed"] += 1
                 else:
                     status = 'WARNINGS'
-                    sub = create_subtest(subtest_number, description, status, reason="")
-                    # Manually set WARNINGS=1 and place message under warning_reasons
+                    sub = create_subtest(subtest_number, node, status, reason=msg)
                     sub["sub_test_result"]["WARNINGS"] = 1
-                    sub["sub_test_result"]["warning_reasons"] = [message]
+                    sub["sub_test_result"]["warning_reasons"] = [msg]
                     current_test["subtests"].append(sub)
                     current_test["test_suite_summary"]["total_warnings"] += 1
                     suite_summary["total_warnings"] += 1
