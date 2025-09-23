@@ -212,7 +212,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, is_
     <div class="detailed-container">
         <h2>Detailed Subtests</h2>
         {% for suite in test_results %}
-        <h3>{{ suite.Test_suite }}: {{ suite.Test_suite_Description }}</h3>
+        <h3>{{ suite.Test_suite }}: {{ suite.Test_suite_description }}</h3>
         <table>
             <thead>
                 <tr>

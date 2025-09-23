@@ -268,7 +268,7 @@ def generate_html(suite_summary, test_results_list, output_html_path,
             {% for idx, test_results in enumerate(test_results_list) %}
             {% if test_results and test_results[0] %}
             {% set test = test_results[0] %}
-            <option value="section{{ idx }}">{{ test.Test_suite_name }} - {{ test.Test_case }}</option>
+            <option value="section{{ idx }}">{{ test.Test_suite }} - {{ test.Test_case }}</option>
             {% endif %}
             {% endfor %}
         </select>
@@ -282,7 +282,7 @@ def generate_html(suite_summary, test_results_list, output_html_path,
         {% endif %}
         {% for test in test_results %}
 
-        <div class="test-suite-header">Test Suite: {{ test.Test_suite_name }}</div>
+        <div class="test-suite-header">Test Suite: {{ test.Test_suite }}</div>
         <div class="test-suite-description">Description: {{ test.Test_suite_description }}</div>
 
         <div class="test-case-header">Test Case: {{ test.Test_case }}</div>

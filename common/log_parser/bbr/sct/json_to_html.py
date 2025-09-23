@@ -32,9 +32,9 @@ def determine_css_class(subtest_result):
     subtest_result_upper = subtest_result.upper()
     if 'FAILED WITH WAIVER' in subtest_result_upper or 'FAILURE (WITH WAIVER)' in subtest_result_upper:
         return 'fail-waiver'
-    elif 'FAILURE' in subtest_result_upper:
+    elif 'FAILED' in subtest_result_upper:
         return 'fail'
-    elif 'PASS' in subtest_result_upper:
+    elif 'PASSED' in subtest_result_upper:
         return 'pass'
     elif 'WARNING' in subtest_result_upper:
         return 'warning'
