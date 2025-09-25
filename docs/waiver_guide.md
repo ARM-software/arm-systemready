@@ -190,91 +190,104 @@ Waiving the entire `BSA` suite due to platform constraints.
 
 ### 2. TestSuite-Level Waiver
 
-Waiving the `uefirtmisc` test suite within the `FWTS` suite.
+Waives all failed subtests in the Standalone DTValidation test suite.
 
 ```json
 {
-    "Suites": [
+  "Suites": [
+    {
+      "Suite": "Standalone",
+      "TestSuites": [
         {
-            "Suite": "FWTS",
-            "TestSuites": [
-                {
-                    "TestSuite": "uefirtmisc",
-                    "Reason": "Not applicable to the current firmware implementation."
-                }
-            ]
+          "TestSuite": "DTValidation",
+          "Reason": "Specific DT bindings intentionally omitted for this hardware."
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
 
 ### 3. SubSuite-Level Waiver
 
-Waiving the `EFICompliantTest` sub-suite within the `SCT` suite.
+Some suites (e.g., SCT) support sub-suite waivers. Example shown for completeness:
 
 ```json
 {
-    "Suites": [
+  "Suites": [
+    {
+      "Suite": "SCT",
+      "TestSuites": [
         {
-            "Suite": "SCT",
-            "TestSuites": [
-                {
-                    "SubSuite": {
-                        "SubSuite": "EFICompliantTest",
-                        "Reason": "Waived due to known compliance exceptions."
-                    }
-                }
-            ]
+          "SubSuite": {
+            "SubSuite": "VariableServicesTest",
+            "Reason": "Waiving entire SubSuite due to platform constraints."
+          }
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
+Note: SubSuite/TestCase-level waivers are supported only for certain suites (SCT, Standalone, BBSR-SCT, BBSR-FWTS). Keep this as an example if you’re documenting behavior.
 
 ### 4. TestCase-Level Waiver
 
-Waiving the `CheckEvent_Func` test case within the `SCT` suite.
+Waives all failed subtests within the specified test case only.
 
 ```json
 {
-    "Suites": [
+  "Suites": [
+    {
+      "Suite": "Standalone",
+      "TestSuites": [
         {
-            "Suite": "SCT",
-            "TestSuites": [
-                {
-                    "TestCase": {
-                        "Test_case": "CheckEvent_Func",
-                        "Reason": "Event handling not relevant for this platform."
-                    }
-                }
-            ]
+          "TestCase": {
+            "Test_case": "psci_check",
+            "Reason": "PSCI nuances out of scope for this product variant."
+          }
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
 
 ### 5. SubTest-Level Waiver
 
-Waiving a specific subtest based on description within the `Standalone` suite.
+Targets specific subtests by exact description text.
 
 ```json
 {
-    "Suites": [
+  "Suites": [
+    {
+      "Suite": "Standalone",
+      "TestSuites": [
         {
-            "Suite": "Standalone",
-            "TestSuites": [
-                {
-                    "TestCase": {
-                        "SubTests": [
-                            {
-                                "sub_Test_Description": "Partition table check on /dev/ram0",
-                                "Reason": "RAM disk not used in this configuration."
-                            }
-                        ]
-                    }
-                }
+          "TestCase": {
+            "Test_case": "ethtool_test",
+            "SubTests": [
+              {
+                "sub_Test_Description": "No Ethernet Interfaces Detected",
+                "Reason": "Networking stack is not included on this SKU."
+              }
             ]
+          }
+        },
+        {
+          "TestCase": {
+            "Test_case": "dt_kselftest",
+            "SubTests": [
+              {
+                "sub_Test_Description": "/soc@0/bus@32c00000",
+                "Reason": "ADC node not required on this platform."
+              }
+            ]
+          }
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
 
