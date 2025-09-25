@@ -30,7 +30,7 @@ You can find the legacy repository here:
 ## SystemReady BBSR:
 The SystemReady BBSR tests if the firmware meets the requirements specified by the Arm [Base Boot Security Requirements specification](https://developer.arm.com/documentation/den0107/latest) (BBSR). BBSR ACS is integrated in SystemReady band and SystemReady-devicetree band ACS prebuilt images.
 
-For further details on BBSR ACS, please refer to [BBSR ACS Verification Guide](./common/docs/BBSR_ACS_Verification.md).
+For further details on BBSR ACS, please refer to [BBSR ACS Verification Guide](./docs/BBSR_ACS_Verification.md).
 
 ## Limitations
 
@@ -75,4 +75,5 @@ Arm SystemReady ACS is distributed under Apache v2.0 License.
 --------------
 
 *Copyright (c) 2021-2024, Arm Limited and Contributors. All rights reserved.*
+
 
