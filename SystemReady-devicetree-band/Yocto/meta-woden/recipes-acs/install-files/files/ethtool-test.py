@@ -67,14 +67,14 @@ if __name__ == "__main__":
                 print_color(f"{index}: {intrf}", "yellow")
 
         # bring down all ethernet devices
-        print_color("\nINFO: Bringing down all ethernet interfaces using ifconfig", "green")
+        print_color("\nINFO: Bringing down all ethernet interfaces", "green")
         for intrf in ether_interfaces:
-            command = f"ifconfig {intrf} down"
+            command = f"ip link set dev {intrf} down"
             print(command)
             result_down= subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
 
             if result_down.returncode != 0:
-                print_color(f"INFO: Unable to bring down ethernet interface {intrf} using ifconfig, Exiting ...", "red")
+                print_color(f"INFO: Unable to bring down ethernet interface {intrf}, Exiting ...", "red")
                 exit(1)
 
         print("\n****************************************************************\n")
@@ -84,11 +84,11 @@ if __name__ == "__main__":
             if previous_eth_intrf != "":
                 # bring down current ethernet interface
                 print_color(f"\nINFO: Bringing down ethernet interface: {previous_eth_intrf}", "green")
-                command = f"ifconfig {previous_eth_intrf} down"
+                command = f"ip link set dev {previous_eth_intrf} down"
                 result_down= subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
                 time.sleep(20)
                 if result_down.returncode != 0:
-                    print_color(f"INFO: Unable to bring down ethernet interface {previous_eth_intrf} using ifconfig", "red")
+                    print_color(f"INFO: Unable to bring down ethernet interface {previous_eth_intrf}", "red")
                     print_color(f"INFO: Exiting the tool...", "red")
 
             # update previous_eth_intrf with current intrf for next iteration
@@ -97,11 +97,11 @@ if __name__ == "__main__":
 
             # bring up current ethernet interface
             print_color(f"\nINFO: Bringing up ethernet interface: {intrf}", "green")
-            command = f"ifconfig {intrf} up"
+            command = f"ip link set dev {intrf} up"
             result_up= subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
             time.sleep(20)
             if result_up.returncode != 0:
-                print_color(f"INFO: Unable to bring up ethernet interface {intrf} using ifconfig", "red")
+                print_color(f"INFO: Unable to bring up ethernet interface {intrf}", "red")
                 print("\n****************************************************************\n")
                 continue
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
                 continue
 
             # making sure link is up before ping test
-            command = f"ifconfig {intrf} up"
+            command = f"ip link set dev {intrf} up"
             print_color(f"INFO: Running {command} :", "green")
             result_ping = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
             time.sleep(20)
