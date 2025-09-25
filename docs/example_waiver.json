@@ -1,129 +1,59 @@
 {
-    "Suites": [
+  "Suites": [
+    {
+      "Suite": "BSA",
+      "Reason": "Waive entire BSA suite for this SKU."
+    },
+    {
+      "Suite": "BSA",
+      "TestSuites": [
         {
-            "Suite": "BSA",
-            "Reason": "something"
-        },
-        {
-            "Suite": "SBSA",
-            "TestSuites": [
-                {
-                    "SubSuite": {
-                        "TestCase": {
-                            "SubTests": [
-                                {
-                                    "SubTestID": "3",
-                                    "Reason": "Peripheral not present on this platform."
-                                },
-                                {
-                                    "sub_Test_Description": "Check PE Granule Support",
-                                    "Reason": "Watchdog timer not required for this application."
-                                }
-                            ]
-                        }
-                    }
-                }
-            ]
-        },
-        {
-            "Suite": "FWTS",
-            "TestSuites": [
-                {
-                    "TestSuite": "uefirtmisc",
-                    "Reason": "something"
-                }
-            ]
-        },
-        {
-            "Suite": "SCT",
-            "TestSuites": [
-                {
-                    "SubSuite": {
-                        "SubSuite": "EFICompliantTest",
-                        "Reason": "Waiving entire SubSuite due to platform constraints."
-                    }
-                },
-                {
-                    "TestCase": {
-                        "Test_case": "CheckEvent_Func",
-                        "Reason": "Waiving entire Test_case as it's not applicable."
-                    }
-                }
-            ]
-        },
-        {
-            "Suite": "Standalone",
-            "TestSuites": [
-                {
-                    "TestSuite": "DTValidation",
-                    "Reason": "Waiving Network suite due to hardware constraints."
-                },
-                {
-                    "TestCase": {
-                        "Test_case": "ethtool_test",
-                        "Reason": "Waiving ethtool_test as it's not supported on this platform."
-                    }
-                },
-                {
-                    "TestCase": {
-                        "Test_case": {},
-                        "SubTests": [
-                            {
-                                "sub_Test_Description": "Partition table check on /dev/ram0",
-                                "Reason": "Waiving specific partition table check due to hardware constraints."
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        {
-            "Suite": "BBSR-FWTS",
-            "TestSuites": [
-                {
-                    "TestSuite": "some_fwts_test_suite",
-                    "Reason": "Waiving this test suite for testing purposes."
-                },
-                {
-                    "TestCase": {
-                        "Test_case": {},
-                        "SubTests": [
-                            {
-                                "sub_Test_Description": "Sample subtest description for BBSR-FWTS",
-                                "Reason": "Waiving specific subtest for BBSR-FWTS."
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        {
-            "Suite": "BBSR-SCT",
-            "TestSuites": [
-                {
-                    "SubSuite": {
-                        "SubSuite": "SecureBootTest",
-                        "Reason": "Waiving entire SubSuite for BBSR-SCT testing."
-                    }
-                },
-                {
-                    "TestCase": {
-                        "Test_case": "SampleTestCase",
-                        "Reason": "Waiving specific Test_case in BBSR-SCT."
-                    }
-                },
-                {
-                    "TestCase": {
-                        "Test_case": {},
-                        "SubTests": [
-                            {
-                                "sub_Test_Description": "Sample subtest description for BBSR-SCT",
-                                "Reason": "Waiving specific subtest for BBSR-SCT."
-                            }
-                        ]
-                    }
-                }
-            ]
+          "Test_suite": "PE",
+          "Reason": "PE checks not required for this product variant."
         }
-    ]
+      ]
+    },
+    
+    {
+      "Suite": "Standalone",
+      "TestSuites": [
+        {
+          "TestCase": {
+            "Test_case": "ethtool_test",
+            "SubTests": [
+            {
+            "sub_Test_Description": "No Ethernet Interfaces Detected",
+            "Reason": "Networking stack is not included on this SKU."
+            }
+            ]
+          }
+        },
+        {
+          "TestCase": {
+            "Test_case": "dt_kselftest",
+            "SubTests": [
+              {
+                "sub_Test_Description": "/fw-cfg@9020000",
+                "Reason": "ADC node not required on this platform."
+              }
+            ]
+          }
+        },
+        {
+          "TestCase": {
+            "Test_case": "psci_check",
+            "Reason": "PSCI nuances out of scope for this product variant."
+          }
+        },
+        {
+          "TestSuite": "DTValidation",
+          "Reason": "Specific DT bindings intentionally omitted for this hardware."
+        },
+        {
+          "TestSuite": "Boot sources",
+          "Reason": "Only restricted boot sources are supported by this platform."
+        }
+      ]
+    }
+  ]
 }
