@@ -154,6 +154,7 @@ Standalone_PROCESSED=0
 OS_TESTS_PROCESSED=0
 CAPSULE_PROCESSED=0
 POST_SCRIPT_PROCESSED=0
+PFDI_PROCESSED=0
 
 ################################################################################
 # BSA PARSING
@@ -311,6 +312,35 @@ if check_file "$BBSR_TPM_LOG"; then
     python3 "$SCRIPTS_PATH/bbr/tpm/json_to_html.py" "$BBSR_TPM_JSON" "$HTMLS_DIR/bbsr_tpm_detailed.html" "$HTMLS_DIR/bbsr_tpm_summary.html"
 fi
 
+################################################################################
+# PFDI PARSING
+################################################################################
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then 
+    PFDI_LOG="$LOGS_PATH/uefi/pfdiresults.log"   # adjust if your log lives elsewhere
+    PFDI_JSON="$JSONS_DIR/pfdi.json"
+    PFDI_PROCESSED=0
+
+    if check_file "$PFDI_LOG" "CM"; then
+        PFDI_PROCESSED=1
+        if python3 "$SCRIPTS_PATH/pfdi/logs_to_json.py" \
+                "$PFDI_LOG" \
+                "$PFDI_JSON"; then
+            apply_waivers "PFDI" "$PFDI_JSON"
+            python3 "$SCRIPTS_PATH/pfdi/json_to_html.py" \
+                    "$PFDI_JSON" \
+                    "$HTMLS_DIR/pfdi_detailed.html" \
+                    "$HTMLS_DIR/pfdi_summary.html"
+        else
+            if [ $? -eq 1 ]; then
+                PFDI_PROCESSED=0
+                echo -e " PFDI -- Not Implemented"
+            else
+                PFDI_PROCESSED=0
+                echo -e "${RED}ERROR: PFDI logs parsing to json failed.${NC}"
+            fi
+        fi
+    fi
+fi
 ################################################################################
 # POST-SCRIPT LOG PARSING
 ################################################################################
@@ -567,6 +597,13 @@ else
     print_missing_json "bbsr_tpm.json"
 fi
 
+# PFDI
+if [ $PFDI_PROCESSED -eq 1 ] && [ -f "$PFDI_JSON" ]; then
+    JSON_FILES+=("$PFDI_JSON")
+else
+    print_missing_json "pfdi.json"
+fi
+
 # POST-SCRIPT
 if [ $POST_SCRIPT_PROCESSED -eq 1 ] && [ -f "$POST_SCRIPT_JSON" ]; then
     JSON_FILES+=("$POST_SCRIPT_JSON")
@@ -653,28 +690,35 @@ else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 8) POST-SCRIPT
+# 8) PFDI
+if [ $PFDI_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/pfdi_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 9) POST-SCRIPT
 if [ $POST_SCRIPT_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/post_script_summary.html\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 9) STANDALONE
+# 10) STANDALONE
 if [ $Standalone_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$Standalone_SUMMARY_HTML\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 10) OS TESTS
+# 11) OS TESTS
 if [ $OS_TESTS_PROCESSED -eq 1 ]; then
     GENERATE_ACS_SUMMARY_CMD+=" \"$OS_SUMMARY_HTML\""
 else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
-# 11) CAPSULE UPDATE SUMMARY
+# 12) CAPSULE UPDATE SUMMARY
 CAPSULE_SUMMARY_HTML=""
 GENERATE_ACS_SUMMARY_CMD+=" \"$CAPSULE_SUMMARY_HTML\""
 
@@ -772,6 +816,12 @@ if [ $print_path -eq 1 ]; then
         echo "Capsule Update Detailed Summary : $HTMLS_DIR/capsule_update_detailed.html"
         echo "Capsule Update Summary          : $HTMLS_DIR/capsule_update_summary.html"
         echo ""
+    fi
+    if [ $PFDI_PROCESSED -eq 1 ]; then
+    echo "PFDI JSON                 : $PFDI_JSON"
+    echo "PFDI Detailed Summary     : $HTMLS_DIR/pfdi_detailed.html"
+    echo "PFDI Summary              : $HTMLS_DIR/pfdi_summary.html"
+    echo ""
     fi
 fi
 

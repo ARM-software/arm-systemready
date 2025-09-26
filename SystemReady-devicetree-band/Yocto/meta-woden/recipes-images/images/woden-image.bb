@@ -25,9 +25,12 @@ EXTRA_IMAGEDEPENDS += "bsa-acs \
                        update-vars \
                        ebbr-sct \
                        bootfs-files \
+                       pfdi-acs \
 "
 IMAGE_EFI_BOOT_FILES += "Bsa.efi;acs_tests/bsa/Bsa.efi \
                          bsa.nsh;acs_tests/bsa/bsa.nsh \
+                         pfdi.efi;acs_tests/pfdi/pfdi.efi \
+                         pfdi.nsh;acs_tests/pfdi/pfdi.nsh \
                          pingtest.nsh;acs_tests/debug/pingtest.nsh \
                          capsule_update.nsh;acs_tests/app/capsule_update.nsh \
                          bsa_dt.flag;acs_tests/bsa/bsa_dt.flag \
@@ -58,6 +61,7 @@ do_sign_images() {
     TEST_DB1_CRT=$KEYS_DIR/TestDB1.crt
 
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/acs_tests/bsa/Bsa.efi --output DO_SIGN/acs_tests/bsa/Bsa.efi
+    sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/acs_tests/pfdi/pfdi.efi --output DO_SIGN/acs_tests/pfdi/pfdi.efi
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/Shell.efi --output DO_SIGN/EFI/BOOT/Shell.efi
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/EFI/BOOT/bootaa64.efi --output DO_SIGN/EFI/BOOT/bootaa64.efi
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/acs_tests/app/CapsuleApp.efi --output DO_SIGN/acs_tests/app/CapsuleApp.efi

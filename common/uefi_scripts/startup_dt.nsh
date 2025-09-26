@@ -131,6 +131,17 @@ for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 :Donebsa
 
+# Run the PFDI test
+for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+    if exist FS%k:\acs_tests\pfdi\pfdi.nsh then
+        echo " "
+        echo "Running pfdi test"
+        FS%k:\acs_tests\pfdi\pfdi.nsh
+        goto Donepfdi
+    endif
+endfor
+:Donepfdi
+
 # Run the pingtest
 for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%m:\acs_tests\debug\pingtest.nsh then

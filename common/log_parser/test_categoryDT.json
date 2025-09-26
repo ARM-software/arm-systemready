@@ -478,5 +478,17 @@
       "FunctionID": 3,
       "Main Readiness Grouping": "security readiness"
     }
-  ],    
+  ],
+  "catID: 41": [
+    {
+      "Suite": "PFDI",
+      "Test Suite": "PFDI",
+      "specName": "PFDI",
+      "rel Import. to main readiness": "Critical",
+      "Waivable": "no",
+      "SRS scope": "Conditional Required",
+      "FunctionID": 3,
+      "Main Readiness Grouping": "safety readiness"
+    }
+  ]
 }

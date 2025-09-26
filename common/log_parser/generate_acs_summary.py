@@ -171,7 +171,7 @@ def read_overall_compliance_from_merged_json(merged_json_path):
 
 def generate_html(system_info, acs_results_summary,
                   bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
-                  bbsr_fwts_summary_path, bbsr_sct_summary_path,bbsr_tpm_summary_path,
+                  bbsr_fwts_summary_path, bbsr_sct_summary_path,bbsr_tpm_summary_path,pfdi_summary_path,
                   post_script_summary_path,
                   standalone_summary_path, OS_tests_summary_path,
                   output_html_path):
@@ -184,6 +184,7 @@ def generate_html(system_info, acs_results_summary,
     bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path)
     bbsr_tpm_summary_content = read_html_content(bbsr_tpm_summary_path)
+    pfdi_summary_content = read_html_content(pfdi_summary_path)
     post_script_summary_content = read_html_content(post_script_summary_path)
     standalone_summary_content = read_html_content(standalone_summary_path)
     OS_tests_summary_content = read_html_content(OS_tests_summary_path)
@@ -434,6 +435,9 @@ def generate_html(system_info, acs_results_summary,
                     {% if bbsr_sct_summary_content %}
                     <a href="#bbsr_sct_summary">BBSR-SCT Summary</a>
                     {% endif %}
+                    {% if pfdi_summary_content %}
+                    <a href="#pfdi_summary">PFDI Summary</a>
+                    {% endif %}
                     {% if bbsr_tpm_summary_content %}
                     <a href="#bbsr_tpm_summary">BBSR-TPM Summary</a>
                     {% endif %}
@@ -516,6 +520,16 @@ def generate_html(system_info, acs_results_summary,
                     </div>
                 </div>
                 {% endif %}
+                {% if pfdi_summary_content %}
+                <div class="summary" id="pfdi_summary">
+                    {{ pfdi_summary_content | safe }}
+                    <div class="details-link">
+                        <a href="pfdi_detailed.html" target="_blank">
+                            Click here to go to the detailed summary for PFDI
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
                 {% if OS_tests_summary_content %}
                 <div class="summary" id="OS_tests_summary">
                     {{ OS_tests_summary_content | safe }}
@@ -541,6 +555,7 @@ def generate_html(system_info, acs_results_summary,
         bbsr_fwts_summary_content=bbsr_fwts_summary_content,
         bbsr_sct_summary_content=bbsr_sct_summary_content,
         bbsr_tpm_summary_content=bbsr_tpm_summary_content,
+        pfdi_summary_content=pfdi_summary_content,
         post_script_summary_content=post_script_summary_content,
         standalone_summary_content=standalone_summary_content,
         OS_tests_summary_content=OS_tests_summary_content
@@ -554,6 +569,7 @@ def generate_html(system_info, acs_results_summary,
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_fwts_detailed.html'), 'BBSR-FWTS'),
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_sct_detailed.html'), 'BBSR-SCT'),
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_tpm_detailed.html'), 'BBSR-TPM'),
+        (os.path.join(os.path.dirname(output_html_path), 'pfdi_detailed.html'), 'PFDI'),
         (os.path.join(os.path.dirname(output_html_path), 'os_tests_detailed.html'), 'OS'),
         (os.path.join(os.path.dirname(output_html_path), 'standalone_tests_detailed.html'), 'Standalone'),
         (os.path.join(os.path.dirname(output_html_path), 'post_script_detailed.html'), 'POST-SCRIPT')
@@ -571,6 +587,7 @@ if __name__ == "__main__":
     parser.add_argument("bbsr_fwts_summary_path", help="Path to the BBSR FWTS summary HTML file")
     parser.add_argument("bbsr_sct_summary_path", help="Path to the BBSR SCT summary HTML file")
     parser.add_argument("bbsr_tpm_summary_path", help="Path to the BBSR TPM summary HTML file")
+    parser.add_argument("pfdi_summary_path",help="Path to the pfdi summary HTML file")
     parser.add_argument("post_script_summary_path", help="Path to the post-script summary HTML file")
     parser.add_argument("standalone_summary_path", help="Path to the Standalone tests summary HTML file")
     parser.add_argument("OS_tests_summary_path", help="Path to the OS Tests summary HTML file")
@@ -618,6 +635,7 @@ if __name__ == "__main__":
         "BBSR-FWTS": read_html_content(args.bbsr_fwts_summary_path),
         "BBSR-SCT": read_html_content(args.bbsr_sct_summary_path),
         "BBSR-TPM": read_html_content(args.bbsr_tpm_summary_path),
+        "PFDI": read_html_content(args.pfdi_summary_path),
         "POST-SCRIPT": read_html_content(args.post_script_summary_path),
         "Standalone tests": standalone_summary_content,
         "OS tests": read_html_content(args.OS_tests_summary_path)
@@ -650,6 +668,7 @@ if __name__ == "__main__":
         args.bbsr_fwts_summary_path,
         args.bbsr_sct_summary_path,
         args.bbsr_tpm_summary_path,
+        args.pfdi_summary_path,
         args.post_script_summary_path,
         args.standalone_summary_path,
         args.OS_tests_summary_path,
