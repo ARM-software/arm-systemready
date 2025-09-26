@@ -1,6 +1,7 @@
-ACS version: ACS v25.04_3.0.1
-SRS version: SRS 3.0
+ACS version: ACS v25.10_3.1.0
+SRS version: SRS 3.1
 BSA version: BSA v1.1
+PFDI version: PFDI 1.0 BET0
 BBR version: BBR v2.1
 EBBR version: EBBR v2.2.0
 BBSR version: BBSR v1.3

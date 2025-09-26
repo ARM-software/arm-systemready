@@ -29,7 +29,7 @@ if [ "$automation_enabled" == "True" ] &&  [ "$fwts_enabled" == "False" ]; then
   echo "********* FWTS is disabled in config file**************"
 else
   mkdir -p /mnt/acs_results/fwts
-  echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/fwts/FWTSResults.log
+  echo "SystemReady band ACS v3.1.0" > /mnt/acs_results/fwts/FWTSResults.log
   if [ "$automation_enabled" == "False" ]; then
     fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
   else

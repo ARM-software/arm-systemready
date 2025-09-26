@@ -1,0 +1,37 @@
+diff --git a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
+index f0a8b9f..e41e0de 100644
+--- a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
++++ b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
+@@ -90,8 +90,8 @@ UefiHiiServicesLibConstructor (
+   //
+   // Retrieve the pointer to the UEFI HII Config Routing Protocol
+   //
+-  Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **)&gHiiConfigRouting);
+-  ASSERT_EFI_ERROR (Status);
++  //Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **)&gHiiConfigRouting);
++  //ASSERT_EFI_ERROR (Status);
+ 
+   //
+   // Retrieve the pointer to the optional UEFI HII Font Protocol
+diff --git a/ShellPkg/ShellPkg.dsc b/ShellPkg/ShellPkg.dsc
+index 7e985f8..5ea90eb 100644
+--- a/ShellPkg/ShellPkg.dsc
++++ b/ShellPkg/ShellPkg.dsc
+@@ -66,6 +66,9 @@
+   ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
+ 
+   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
++  FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
++  UnifiedValLib|ShellPkg/Application/sysarch-acs/val/UnifiedValLib.inf
++  UnifiedPalLib|ShellPkg/Application/sysarch-acs/pal/uefi_dt/UnifiedPalLib.inf
+ 
+ [PcdsFixedAtBuild]
+   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0xFF
+@@ -93,6 +96,7 @@
+   ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
+   ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf
+   ShellPkg/Library/UefiShellNetwork2CommandsLib/UefiShellNetwork2CommandsLib.inf
++  ShellPkg/Application/sysarch-acs/apps/uefi/Pfdi.inf
+ 
+   ShellPkg/Application/Shell/Shell.inf {
+     <PcdsFixedAtBuild>

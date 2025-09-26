@@ -60,7 +60,8 @@ DT_SRS_SCOPE_TABLE = [
     ("DT_KSELFTEST", "R"),
     ("PSCI", "R"),
     ("POST_SCRIPT", "R"),
-    ("OS_TEST", "M")
+    ("OS_TEST", "M"),
+    ("PFDI", "CM")
 ]
 
 # SBSA is mandatory for servers only, default treat as recommended
@@ -316,7 +317,9 @@ def merge_json_files(json_files, output_file):
         elif "PSCI" in fn:
             section_name = "Suite_Name: PSCI"
             suite_key    = "PSCI"
-
+        elif "PFDI" in fn:
+            section_name = "Suite_Name: PFDI"
+            suite_key    = "PFDI"
         elif "POST_SCRIPT" in fn:
             section_name = "Suite_Name: POST_SCRIPT"
             suite_key    = "POST_SCRIPT"
