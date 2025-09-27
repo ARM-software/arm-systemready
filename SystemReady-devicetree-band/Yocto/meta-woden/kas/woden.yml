@@ -43,6 +43,11 @@ local_conf_header:
     BB_NUMBER_THREADS = "16"
     PARALLEL_MAKE = "-j16"
     GNU_MIRROR = "http://ftpmirror.gnu.org"
+    # Redirect IPv6-only 0pointer to public GitHub mirror (IPv4 OK)
+    PREMIRRORS:append = " \
+     git://git.0pointer.net/libatasmart.git https://github.com/libatasmart/libatasmart.git \n \
+     git://git.0pointer.de/libatasmart.git  https://github.com/libatasmart/libatasmart.git \n \
+    "
 
 distro: woden
 machine: genericarm64
