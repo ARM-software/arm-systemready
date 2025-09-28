@@ -181,12 +181,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         fi
         echo "Running dt-validate tool "
         dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
-        sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.12 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
+        sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.16 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         if [ ! -s /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log ]; then
           echo "The FDT is compliant according to schema " >> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         fi
-		# Run dt parser on dt-validate log to categorize failures
-		/usr/bin/systemready-scripts/dt-parser.py /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log --print 2>&1 | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate-parser.log
+        # Run dt parser on dt-validate log to categorize failures
+        /usr/bin/systemready-scripts/dt-parser.py /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log --print 2>&1 | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate-parser.log
       else
         echo  "Error: The FDT devicetree file, fdt, does not exist at /sys/firmware/fdt. Cannot run dt-schema tool" | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
       fi
