@@ -1052,18 +1052,9 @@ def parse_psci_logs(psci_log_path):
         "test_suite_summary": suite_summary.copy()
     }
 
-    # If file not found => Instead of failing, let's mark this as a WARNING
+    # If file not found, return so that it is treated as failure
     if not os.path.isfile(psci_log_path):
-        sub = create_subtest(
-            subtest_number=1,
-            description="PSCI version checker(1.0 or above)",
-            status="WARNINGS",
-            reason=f"PSCI log file not found at {psci_log_path}"
-        )
-        current_test["subtests"].append(sub)
-        current_test["test_suite_summary"]["total_warnings"] += 1
-        suite_summary["total_warnings"] += 1
-        return {"test_results": [current_test], "suite_summary": suite_summary}
+        sys.exit(1)
 
     # Read lines
     with open(psci_log_path, 'r') as f:
@@ -1087,17 +1078,17 @@ def parse_psci_logs(psci_log_path):
                 status = "PASSED"
                 reason = f"PSCI version {version_found} >= 1.0"
             else:
-                # Below 1.0 => WARNING, not fail
-                status = "WARNINGS"
-                reason = f"PSCI version {version_found} < 1.0 => WARN"
+                # Below 1.0 => FAIL
+                status = "FAILED"
+                reason = f"PSCI version {version_found} < 1.0"
         except ValueError:
-            # Invalid format => WARNING, not fail
-            status = "WARNINGS"
+            # Invalid format => FAILED
+            status = "FAILED"
             reason = f"Invalid PSCI version format: {version_found}"
     else:
-        # No PSCI line found => WARNING, not fail
-        status = "WARNINGS"
-        reason = "No 'PSCIvX.Y detected in firmware' line found"
+        # PSCI is recommened, as for cases where psci is not supported no psci version will come
+        # treat that case as not run and failure
+        sys.exit(1)
 
     sub = create_subtest(1, subtest_desc, status, reason)
     current_test["subtests"].append(sub)
@@ -1159,8 +1150,11 @@ if __name__ == "__main__":
         # logs_to_json.py psci_check <psci_log> <output_json>
         _, psci_log, output_json = args
         result = parse_psci_logs(psci_log)
-        with open(output_json, 'w') as out:
-            json.dump(result, out, indent=4)
+        if result is None or result == {}:
+            print("Invalid PSCI log, skipping JSON dump.")
+        else:
+            with open(output_json, 'w') as out:
+                json.dump(result, out, indent=4)
         sys.exit(0)
     else:
         print("Usage:")
