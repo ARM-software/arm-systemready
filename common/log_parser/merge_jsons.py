@@ -555,7 +555,6 @@ def merge_json_files(json_files, output_file):
     _no_bbsr_logs = all(_is_missing(x) for x in (bbsr_tpm, bbsr_fwts, bbsr_sct))
     if _no_bbsr_logs:
         acs_results_summary["BBSR compliance results"] = "Not run"
-        merged_results["Suite_Name: acs_info"]["BBSR compliance results"] = "Not run"
     else:
         # Gather which suites didn’t run vs. which failed non-waived
         missing_list_bbsr = []
@@ -604,7 +603,7 @@ def merge_json_files(json_files, output_file):
     else:
         print(f"{RED}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
 
-    merged_results["Suite_Name: acs_info"]["BBSR compliance results"] = acs_results_summary.pop("BBSR compliance results", None)    
+    merged_results["Suite_Name: acs_info"]["ACS Results Summary"]["BBSR compliance results"] = (acs_results_summary.pop("BBSR compliance results", None))
 
     RENAME_SUITES_TO_STANDALONE = {
         "Suite_Name: DT Kselftest": "Suite_Name: Standalone",
