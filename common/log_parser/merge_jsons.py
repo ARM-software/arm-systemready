@@ -604,6 +604,8 @@ def merge_json_files(json_files, output_file):
     else:
         print(f"{RED}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
 
+    merged_results["Suite_Name: acs_info"]["BBSR compliance results"] = acs_results_summary.pop("BBSR compliance results", None)    
+
     RENAME_SUITES_TO_STANDALONE = {
         "Suite_Name: DT Kselftest": "Suite_Name: Standalone",
         "Suite_Name: CAPSULE_UPDATE": "Suite_Name: Standalone",
