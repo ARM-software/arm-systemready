@@ -450,7 +450,7 @@ def main():
                     total_tests += 1
                     test_status = 'PASSED'
                     has_skipped = False
-                    saw_pass = False
+                    has_pass = False
 
                     if test.get('subtests'):
                         for subtest in test['subtests']:
@@ -464,11 +464,11 @@ def main():
                                 # treat any other status as failure
                                 test_status = 'FAILED'
                                 break
-                            else:
-                                saw_pass = True
+                            elif subtest_status == 'PASSED':
+                                has_pass = True
                         else:
                             if test_status != 'FAILED':
-                                test_status = 'PASSED' if saw_pass else 'SKIPPED'
+                                test_status = 'PASSED' if has_pass else 'SKIPPED'
                     else:
                         test_status = 'SKIPPED'
 
