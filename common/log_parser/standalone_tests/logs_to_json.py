@@ -75,6 +75,8 @@ def create_subtest(subtest_number, description, status, reason=""):
     }
     return result
 
+ansi_escape = re.compile(r'\x1B\[[0-9;]*[A-Za-z]')
+
 def update_suite_summary(suite_summary, status):
     if status in ["PASSED", "FAILED", "SKIPPED", "ABORTED", "WARNINGS"]:
         key = f"total_{status.lower()}"
@@ -249,8 +251,10 @@ def parse_ethtool_test_log(log_data):
     interface = None
     detected_interfaces = []
     i = 0
+    # strip ANSI codes from the entire log once
+    log_data = [re.sub(ansi_escape, '', s) for s in log_data]
     while i < len(log_data):
-        line = log_data[i].strip()
+        line = re.sub(ansi_escape, '', log_data[i]).strip()
         # Detecting interfaces
         if line.startswith("INFO: No ethernet interfaces detected via ip linux command"):
             status = "FAILED"
@@ -319,7 +323,7 @@ def parse_ethtool_test_log(log_data):
             subtest_number += 1
 
         # Running ethtool command
-        if f"INFO: Running \"ethtool {interface}\" :" in line:
+        if f'INFO: Running "ethtool {interface}' in line:
             status = "PASSED"
             desc = f"Running ethtool on {interface}"
             sub = create_subtest(subtest_number, desc, status)
