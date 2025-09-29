@@ -103,6 +103,7 @@ copy_recipes()
 
     if [ ! -z "$EDK2_LIBC_SRC_TAG" ]; then
         sed -i -E 's/SRCREV_edk2-libc\s+=\s+"\$\{AUTOREV\}"/SRCREV_edk2-libc = \"'${EDK2_LIBC_SRC_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-uefi/bsa-acs.bb
+        sed -i -E 's/SRCREV_edk2-libc\s+=\s+"\$\{AUTOREV\}"/SRCREV_edk2-libc = \"'${EDK2_LIBC_SRC_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/pfdi/pfdi.bb
     fi
 
     if [ ! -z "$SCT_SRC_TAG" ]; then
@@ -120,6 +121,11 @@ copy_recipes()
     if [ ! -z "$SYSTEMREADY_SCRIPTS_TAG" ]; then
         sed -i -E 's/SRCREV_systemready-scripts\s+=\s+"\$\{AUTOREV\}"/SRCREV_systemready-scripts = \"'${SYSTEMREADY_SCRIPTS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/systemready-scripts/systemready-scripts.bb
     fi
+
+    if [ ! -z "$PFDI_SRC_TAG" ];then
+        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${PFDI_SRC_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/pfdi/pfdi.bb
+    fi
+
     # create a bsa-acs patches directory in meta-woden/recipes-acs/bsa-acs-uefi and copy requires BSA patches
     mkdir $TOP_DIR/meta-woden/recipes-acs/bsa-acs-uefi/bsa-acs
     cp $TOP_DIR/../patches/* $TOP_DIR/meta-woden/recipes-acs/bsa-acs-uefi/bsa-acs/.

@@ -128,7 +128,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       echo "Executing FWTS for EBBR"
       test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
       echo "Test Executed are $test_list"
-      echo "SystemReady devicetree band ACS v3.0.1" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
+      echo "SystemReady devicetree band ACS v3.1.0" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
       /usr/bin/fwts --ebbr `echo $test_list` -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
       echo -e -n "\n"
       sync /mnt
@@ -141,7 +141,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       if [ -f /lib/modules/*/kernel/bsa_acs/bsa_acs.ko ]; then
         echo "Running Linux BSA tests"
         insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
-        echo "SystemReady devicetree band ACS v3.0.1" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+        echo "SystemReady devicetree band ACS v3.1.0" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
         bsa >> /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
         sync /mnt
@@ -181,12 +181,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         fi
         echo "Running dt-validate tool "
         dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
-        sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.12 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
+        sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.16 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         if [ ! -s /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log ]; then
           echo "The FDT is compliant according to schema " >> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         fi
-		# Run dt parser on dt-validate log to categorize failures
-		/usr/bin/systemready-scripts/dt-parser.py /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log --print 2>&1 | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate-parser.log
+        # Run dt parser on dt-validate log to categorize failures
+        /usr/bin/systemready-scripts/dt-parser.py /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log --print 2>&1 | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate-parser.log
       else
         echo  "Error: The FDT devicetree file, fdt, does not exist at /sys/firmware/fdt. Cannot run dt-schema tool" | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
       fi

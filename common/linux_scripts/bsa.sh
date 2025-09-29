@@ -30,7 +30,7 @@ else
   mkdir -p /mnt/acs_results/linux
   if [ -f  /lib/modules/bsa_acs.ko ]; then
     insmod /lib/modules/bsa_acs.ko
-    echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/BsaResultsApp.log
+    echo "SystemReady band ACS v3.1.0" > /mnt/acs_results/linux/BsaResultsApp.log
     if [ "$automation_enabled" == "False" ]; then
       /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
     else

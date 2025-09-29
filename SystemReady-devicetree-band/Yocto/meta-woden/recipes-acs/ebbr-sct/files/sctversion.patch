@@ -6,7 +6,7 @@ index 94cae289..5ecc0946 100644
  #include "StandardTest.h"
  #include <Library/EntsLib.h>
  
-+#define ACS_VERSION "SystemReady devicetree ACS v3.0.1\nBBR ACS 2.2.1 (EBBR)"
++#define ACS_VERSION "SystemReady devicetree ACS v3.1.0\nBBR ACS 2.2.1 (EBBR)"
  static EFI_TIME Epoch = { .Year = 1970, .Month = 1, .Day = 1 };
  
  //

@@ -60,7 +60,8 @@ DT_SRS_SCOPE_TABLE = [
     ("DT_KSELFTEST", "R"),
     ("PSCI", "R"),
     ("POST_SCRIPT", "R"),
-    ("OS_TEST", "M")
+    ("OS_TEST", "M"),
+    ("PFDI", "CM")
 ]
 
 # SBSA is mandatory for servers only, default treat as recommended
@@ -316,7 +317,9 @@ def merge_json_files(json_files, output_file):
         elif "PSCI" in fn:
             section_name = "Suite_Name: PSCI"
             suite_key    = "PSCI"
-
+        elif "PFDI" in fn:
+            section_name = "Suite_Name: PFDI"
+            suite_key    = "PFDI"
         elif "POST_SCRIPT" in fn:
             section_name = "Suite_Name: POST_SCRIPT"
             suite_key    = "POST_SCRIPT"
@@ -454,7 +457,7 @@ def merge_json_files(json_files, output_file):
             else:
                 if DT_OR_SR_MODE == "DT":
                     acs_results_summary[label] = "Not Compliant: not run"
-                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
+                    print(f"{RED}Suite: Recommended: {suite_name}: {acs_results_summary[label]}{RESET}")
                     overall_comp = "Not Compliant"
                     missing_list.append(suite_name)
                 else:
@@ -523,7 +526,7 @@ def merge_json_files(json_files, output_file):
         if missing_list:
             reason_parts.append(f"missing suite(s): {', '.join(missing_list)}")
         if non_waived_list:
-            reason_parts.append(f"non-waived fails in suite(s): {', '.join(non_waived_list)}")
+            reason_parts.append(f"failures in suite(s): {', '.join(non_waived_list)}")
         if reason_parts:
             overall_comp += f" ({'; '.join(reason_parts)})"
     elif overall_comp == "Compliant with waivers":

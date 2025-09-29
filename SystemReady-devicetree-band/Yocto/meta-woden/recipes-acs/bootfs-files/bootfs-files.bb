@@ -7,6 +7,7 @@ DEPENDS = "ebbr-sct"
 S = "${WORKDIR}"
 
 SRC_URI = " file://bsa.nsh \
+            file://pfdi.nsh \
             file://debug_dump.nsh \
             file://startup.nsh \
             file://pingtest.nsh \
@@ -28,6 +29,7 @@ do_install[noexec] = "1"
 do_deploy() {
    # Copy the files to deploy directory
    cp bsa.nsh ${DEPLOYDIR}/
+   cp pfdi.nsh ${DEPLOYDIR}/
    cp debug_dump.nsh ${DEPLOYDIR}/
    cp startup.nsh ${DEPLOYDIR}/
    cp pingtest.nsh ${DEPLOYDIR}/

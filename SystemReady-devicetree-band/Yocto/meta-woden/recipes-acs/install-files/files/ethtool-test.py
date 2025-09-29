@@ -147,22 +147,25 @@ if __name__ == "__main__":
                 print_color(f"INFO: {intrf} support DHCP", "green")
 
             # find router/gateway IP and ping it
-            command = f"ip route show dev {intrf}"
-            result_router = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
-            print_color(f"INFO: Running {command} :", "green")
-            print(result_router.stdout)
-            print(result_router.stderr)
-
-            ip_pattern = r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'
-            router_ip = re.search(ip_pattern, result_router.stdout)
-
-            if router_ip:
-                ip_address = router_ip.group()
-                print_color(f"INFO: Router/Gateway IP for {intrf} : {ip_address}", "green")
-            else:
-                print_color(f"INFO: Unable to find Router/Gateway IP for {intrf}", "red")
+            print_color("INFO: Running ip route get 8.8.8.8", "green")
+            r = subprocess.run("ip route get 8.8.8.8", shell=True, capture_output=True, text=True)
+            print(r.stdout)
+            if r.returncode != 0:
+                print_color(f"INFO: No default route available for {intrf} (route get failed), skipping further tests for this interface", "yellow")
                 print("\n****************************************************************\n")
                 continue
+            m = re.search(r'\bvia\s+(\d{1,3}(?:\.\d{1,3}){3}).*?\bdev\s+(\S+)', r.stdout)
+            if not m:
+                print_color(f"INFO: Unable to parse gateway/dev from route output, skipping further tests for {intrf}", "yellow")
+                print("\n****************************************************************\n")
+                continue
+            gw, dev_on_path = m.group(1), m.group(2)
+            if dev_on_path != intrf:
+                print_color(f"INFO: Default route to 8.8.8.8 is via {dev_on_path}, not {intrf}; skipping further tests for {intrf}", "yellow")
+                print("\n****************************************************************\n")
+                continue
+            ip_address = gw
+            print_color(f"INFO: Router/Gateway IP for {intrf} : {ip_address}", "green")
 
             # making sure link is up before ping test
             command = f"ip link set dev {intrf} up"
@@ -170,7 +173,7 @@ if __name__ == "__main__":
             result_ping = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
             time.sleep(20)
 
-            command = f"ping -w 10000 -c 3 -I {intrf} {ip_address}"
+            command = f"ping -c 3 -W 10 -I {intrf} {ip_address}"
             print_color(f"INFO: Running {command} :", "green")
             result_ping = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
             print(result_ping.stdout)
@@ -185,7 +188,7 @@ if __name__ == "__main__":
                 print_color(f"INFO: Ping to router/gateway[{ip_address}] for {intrf} is successful", "green")
 
             # ping www.arm.com to check whether DNS is working
-            command = f"ping -w 10000 -c 3 -I {intrf} www.arm.com"
+            command = f"ping -c 3 -W 10 -I {intrf} www.arm.com"
             print_color(f"INFO: Running {command} :", "green")
             result_ping = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
             print(result_ping.stdout)
