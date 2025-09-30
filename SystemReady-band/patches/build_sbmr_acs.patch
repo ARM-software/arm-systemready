@@ -1,0 +1,687 @@
+From a4b11b8e2f464e59465fd028c8df927f66c42740 Mon Sep 17 00:00:00 2001
+From: Guru9902 <gururaj.revankar@arm.com>
+Date: Mon, 2 Jun 2025 09:41:27 +0000
+Subject: [PATCH] build_sbmr_acs
+
+Signed-off-by: Guru9902 <gururaj.revankar@arm.com>
+---
+ package/Config.in                             | 13 ++++++++++++
+ package/python-jsonpath-rw/Config.in          |  7 +++++++
+ .../python-jsonpath-rw.hash                   |  3 +++
+ .../python-jsonpath-rw/python-jsonpath-rw.mk  | 14 +++++++++++++
+ package/python-jsonpointer/Config.in          |  7 +++++++
+ .../python-jsonpointer.hash                   |  3 +++
+ .../python-jsonpointer/python-jsonpointer.mk  | 14 +++++++++++++
+ package/python-pbr/Config.in                  |  7 +++++++
+ package/python-redfish/Config.in              |  7 +++++++
+ package/python-redfish/python-redfish.hash    |  3 +++
+ package/python-redfish/python-redfish.mk      | 14 +++++++++++++
+ package/python-redfishtool/Config.in          |  7 +++++++
+ .../python-redfishtool.hash                   |  3 +++
+ .../python-redfishtool/python-redfishtool.mk  | 14 +++++++++++++
+ package/python-requests-unixsocket/Config.in  |  7 +++++++
+ .../python-requests-unixsocket.hash           |  3 +++
+ .../python-requests-unixsocket.mk             | 15 ++++++++++++++
+ .../python-robotframework-requests/Config.in  |  7 +++++++
+ .../python-robotframework-requests.hash       |  2 ++
+ .../python-robotframework-requests.mk         | 14 +++++++++++++
+ .../Config.in                                 |  9 +++++++++
+ .../python-robotframework-scplibrary.hash     |  3 +++
+ .../python-robotframework-scplibrary.mk       | 14 +++++++++++++
+ .../Config.in                                 |  9 +++++++++
+ .../python-robotframework-sshlibrary.hash     |  3 +++
+ .../python-robotframework-sshlibrary.mk       | 14 +++++++++++++
+ package/python-robotframework/Config.in       |  9 +++++++++
+ .../python-robotframework.hash                |  5 +++++
+ .../python-robotframework.mk                  | 20 +++++++++++++++++++
+ package/python-scp/Config.in                  |  7 +++++++
+ package/python-scp/python-scp.hash            |  2 ++
+ package/python-scp/python-scp.mk              | 14 +++++++++++++
+ package/python-wheel/Config.in                |  7 +++++++
+ package/python-wheel/python-wheel.hash        |  3 +++
+ package/python-wheel/python-wheel.mk          | 14 +++++++++++++
+ package/redfish-finder/Config.in              |  5 +++++
+ package/redfish-finder/redfish_finder.hash    |  5 +++++
+ package/redfish-finder/redfish_finder.mk      | 18 +++++++++++++++++
+ 38 files changed, 325 insertions(+)
+ create mode 100644 package/python-jsonpath-rw/Config.in
+ create mode 100644 package/python-jsonpath-rw/python-jsonpath-rw.hash
+ create mode 100644 package/python-jsonpath-rw/python-jsonpath-rw.mk
+ create mode 100644 package/python-jsonpointer/Config.in
+ create mode 100644 package/python-jsonpointer/python-jsonpointer.hash
+ create mode 100644 package/python-jsonpointer/python-jsonpointer.mk
+ create mode 100644 package/python-pbr/Config.in
+ create mode 100644 package/python-redfish/Config.in
+ create mode 100644 package/python-redfish/python-redfish.hash
+ create mode 100644 package/python-redfish/python-redfish.mk
+ create mode 100644 package/python-redfishtool/Config.in
+ create mode 100644 package/python-redfishtool/python-redfishtool.hash
+ create mode 100644 package/python-redfishtool/python-redfishtool.mk
+ create mode 100644 package/python-requests-unixsocket/Config.in
+ create mode 100644 package/python-requests-unixsocket/python-requests-unixsocket.hash
+ create mode 100644 package/python-requests-unixsocket/python-requests-unixsocket.mk
+ create mode 100644 package/python-robotframework-requests/Config.in
+ create mode 100644 package/python-robotframework-requests/python-robotframework-requests.hash
+ create mode 100644 package/python-robotframework-requests/python-robotframework-requests.mk
+ create mode 100644 package/python-robotframework-scplibrary/Config.in
+ create mode 100644 package/python-robotframework-scplibrary/python-robotframework-scplibrary.hash
+ create mode 100644 package/python-robotframework-scplibrary/python-robotframework-scplibrary.mk
+ create mode 100644 package/python-robotframework-sshlibrary/Config.in
+ create mode 100644 package/python-robotframework-sshlibrary/python-robotframework-sshlibrary.hash
+ create mode 100644 package/python-robotframework-sshlibrary/python-robotframework-sshlibrary.mk
+ create mode 100644 package/python-robotframework/Config.in
+ create mode 100644 package/python-robotframework/python-robotframework.hash
+ create mode 100644 package/python-robotframework/python-robotframework.mk
+ create mode 100644 package/python-scp/Config.in
+ create mode 100644 package/python-scp/python-scp.hash
+ create mode 100644 package/python-scp/python-scp.mk
+ create mode 100644 package/python-wheel/Config.in
+ create mode 100644 package/python-wheel/python-wheel.hash
+ create mode 100644 package/python-wheel/python-wheel.mk
+ create mode 100644 package/redfish-finder/Config.in
+ create mode 100644 package/redfish-finder/redfish_finder.hash
+ create mode 100644 package/redfish-finder/redfish_finder.mk
+
+diff --git a/package/Config.in b/package/Config.in
+index d1c098c48f..1204ad9f1e 100644
+--- a/package/Config.in
++++ b/package/Config.in
+@@ -1083,6 +1083,8 @@ menu "External python modules"
+ 	source "package/python-janus/Config.in"
+ 	source "package/python-jaraco-classes/Config.in"
+ 	source "package/python-jaraco-functools/Config.in"
++	source "package/python-jsonpath-rw/Config.in"
++	source "package/python-jsonpointer/Config.in"
+ 	source "package/python-jedi/Config.in"
+ 	source "package/python-jinja2/Config.in"
+ 	source "package/python-jmespath/Config.in"
+@@ -1138,6 +1140,7 @@ menu "External python modules"
+ 	source "package/python-pathpy/Config.in"
+ 	source "package/python-pathtools/Config.in"
+ 	source "package/python-pathvalidate/Config.in"
++	source "package/python-pbr/Config.in"
+ 	source "package/python-periphery/Config.in"
+ 	source "package/python-pexpect/Config.in"
+ 	source "package/python-pickleshare/Config.in"
+@@ -1216,6 +1219,8 @@ menu "External python modules"
+ 	source "package/python-pyzmq/Config.in"
+ 	source "package/python-qrcode/Config.in"
+ 	source "package/python-raven/Config.in"
++	source "package/python-redfish/Config.in"
++	source "package/python-redfishtool/Config.in"
+ 	source "package/python-redis/Config.in"
+ 	source "package/python-reentry/Config.in"
+ 	source "package/python-regex/Config.in"
+@@ -1224,6 +1229,11 @@ menu "External python modules"
+ 	source "package/python-requests/Config.in"
+ 	source "package/python-requests-oauthlib/Config.in"
+ 	source "package/python-requests-toolbelt/Config.in"
++	source "package/python-requests-unixsocket/Config.in"
++	source "package/python-robotframework/Config.in"
++	source "package/python-robotframework-requests/Config.in"
++	source "package/python-robotframework-sshlibrary/Config.in"
++	source "package/python-robotframework-scplibrary/Config.in"
+ 	source "package/python-rfc3987/Config.in"
+ 	source "package/python-rpi-gpio/Config.in"
+ 	source "package/python-rpi-ws281x/Config.in"
+@@ -1234,6 +1244,7 @@ menu "External python modules"
+ 	source "package/python-s3transfer/Config.in"
+ 	source "package/python-scandir/Config.in"
+ 	source "package/python-scapy/Config.in"
++	source "package/python-scp/Config.in"
+ 	source "package/python-schedule/Config.in"
+ 	source "package/python-scipy/Config.in"
+ 	source "package/python-sdnotify/Config.in"
+@@ -1311,6 +1322,7 @@ menu "External python modules"
+ 	source "package/python-websocket-client/Config.in"
+ 	source "package/python-websockets/Config.in"
+ 	source "package/python-werkzeug/Config.in"
++	source "package/python-wheel/Config.in"
+ 	source "package/python-whoosh/Config.in"
+ 	source "package/python-wrapt/Config.in"
+ 	source "package/python-ws4py/Config.in"
+@@ -2537,6 +2549,7 @@ comment "Utilities"
+ 	source "package/pinentry/Config.in"
+ 	source "package/qprint/Config.in"
+ 	source "package/ranger/Config.in"
++	source "package/redfish-finder/Config.in"
+ 	source "package/rtty/Config.in"
+ 	source "package/screen/Config.in"
+ 	source "package/screenfetch/Config.in"
+diff --git a/package/python-jsonpath-rw/Config.in b/package/python-jsonpath-rw/Config.in
+new file mode 100644
+index 0000000000..beb3838e3c
+--- /dev/null
++++ b/package/python-jsonpath-rw/Config.in
+@@ -0,0 +1,7 @@
++config BR2_PACKAGE_PYTHON_JSONPATH_RW
++	bool "python-jsonpath-rw"
++	help
++    The Redfish library performs GET, POST, PUT, PATCH and DELETE HTTP operationson
++    resources within a Redfish service.
++
++    https://pypi.org/project/redfish/
+diff --git a/package/python-jsonpath-rw/python-jsonpath-rw.hash b/package/python-jsonpath-rw/python-jsonpath-rw.hash
+new file mode 100644
+index 0000000000..2f2fbafb8b
+--- /dev/null
++++ b/package/python-jsonpath-rw/python-jsonpath-rw.hash
+@@ -0,0 +1,3 @@
++md5  3a807e05c2c12158fc6bb0a402fd5778  jsonpath-rw-1.4.0.tar.gz
++sha256  05c471281c45ae113f6103d1268ec7a4831a2e96aa80de45edc89b11fac4fbec  jsonpath-rw-1.4.0.tar.gz
++
+diff --git a/package/python-jsonpath-rw/python-jsonpath-rw.mk b/package/python-jsonpath-rw/python-jsonpath-rw.mk
+new file mode 100644
+index 0000000000..0dad9f9a5a
+--- /dev/null
++++ b/package/python-jsonpath-rw/python-jsonpath-rw.mk
+@@ -0,0 +1,14 @@
++################################################################################
++#
++# python-redfish
++#
++################################################################################
++
++PYTHON_JSONPATH_RW_VERSION = 1.4.0
++PYTHON_JSONPATH_RW_SOURCE = jsonpath-rw-$(PYTHON_JSONPATH_RW_VERSION).tar.gz
++PYTHON_JSONPATH_RW_SITE = https://files.pythonhosted.org/packages/71/7c/45001b1f19af8c4478489fbae4fc657b21c4c669d7a5a036a86882581d85
++PYTHON_JSONPATH_RW_SETUP_TYPE = setuptools
++PYTHON_JSONPATH_RW_LICENSE = Apache License
++PYTHON_JSONPATH_RW_LICENSE_FILES = LICENSE.txt
++
++$(eval $(python-package))
+diff --git a/package/python-jsonpointer/Config.in b/package/python-jsonpointer/Config.in
+new file mode 100644
+index 0000000000..9442c6e796
+--- /dev/null
++++ b/package/python-jsonpointer/Config.in
+@@ -0,0 +1,7 @@
++config BR2_PACKAGE_PYTHON_JSONPOINTER
++	bool "python-jsonpointer"
++	help
++    The Redfish library performs GET, POST, PUT, PATCH and DELETE HTTP operationson
++    resources within a Redfish service.
++
++    https://pypi.org/project/redfish/
+diff --git a/package/python-jsonpointer/python-jsonpointer.hash b/package/python-jsonpointer/python-jsonpointer.hash
+new file mode 100644
+index 0000000000..33703b10a5
+--- /dev/null
++++ b/package/python-jsonpointer/python-jsonpointer.hash
+@@ -0,0 +1,3 @@
++md5  57fd6581e61d56960d8c2027ff33f5c0  jsonpointer-2.3.tar.gz
++sha256  97cba51526c829282218feb99dab1b1e6bdf8efd1c43dc9d57be093c0d69c99a  jsonpointer-2.3.tar.gz
++
+diff --git a/package/python-jsonpointer/python-jsonpointer.mk b/package/python-jsonpointer/python-jsonpointer.mk
+new file mode 100644
+index 0000000000..a95b3f8967
+--- /dev/null
++++ b/package/python-jsonpointer/python-jsonpointer.mk
+@@ -0,0 +1,14 @@
++################################################################################
++#
++# python-redfish
++#
++################################################################################
++
++PYTHON_JSONPOINTER_VERSION = 2.3
++PYTHON_JSONPOINTER_SOURCE = jsonpointer-$(PYTHON_JSONPOINTER_VERSION).tar.gz
++PYTHON_JSONPOINTER_SITE = https://files.pythonhosted.org/packages/a0/6c/c52556b957a0f904e7c45585444feef206fe5cb1ff656303a1d6d922a53b
++PYTHON_JSONPOINTER_SETUP_TYPE = setuptools
++PYTHON_JSONPOINTER_LICENSE = BSD License
++PYTHON_JSONPOINTER_LICENSE_FILES = LICENSE.txt
++
++$(eval $(python-package))
+diff --git a/package/python-pbr/Config.in b/package/python-pbr/Config.in
+new file mode 100644
+index 0000000000..6dc85a9c64
+--- /dev/null
++++ b/package/python-pbr/Config.in
+@@ -0,0 +1,7 @@
++config BR2_PACKAGE_PYTHON_PBR
++	bool "python-pbr"
++	help
++	  Requests is an Apache2 Licensed HTTP library, written in
++	  Python, for human beings.
++
++	  http://www.python-requests.org/
+diff --git a/package/python-redfish/Config.in b/package/python-redfish/Config.in
+new file mode 100644
+index 0000000000..fa9839651d
+--- /dev/null
++++ b/package/python-redfish/Config.in
+@@ -0,0 +1,7 @@
++config BR2_PACKAGE_PYTHON_REDFISH
++	bool "python-redfish"
++	help
++    The Redfish library performs GET, POST, PUT, PATCH and DELETE HTTP operationson
++    resources within a Redfish service.
++
++    https://pypi.org/project/redfish/
+diff --git a/package/python-redfish/python-redfish.hash b/package/python-redfish/python-redfish.hash
+new file mode 100644
+index 0000000000..a9b192ea99
+--- /dev/null
++++ b/package/python-redfish/python-redfish.hash
+@@ -0,0 +1,3 @@
++md5  c242f7365d3faad2ccb1e05440694a1f  redfish-3.1.9.tar.gz
++sha256  0199fb90f5e44bea202bfd4e275821a8310b72aca0bb8eee6b57d8ef3e30df86  redfish-3.1.9.tar.gz
++
+diff --git a/package/python-redfish/python-redfish.mk b/package/python-redfish/python-redfish.mk
+new file mode 100644
+index 0000000000..dfd0720129
+--- /dev/null
++++ b/package/python-redfish/python-redfish.mk
+@@ -0,0 +1,14 @@
++################################################################################
++#
++# python-redfish
++#
++################################################################################
++
++PYTHON_REDFISH_VERSION = 3.1.9
++PYTHON_REDFISH_SOURCE = redfish-$(PYTHON_REDFISH_VERSION).tar.gz
++PYTHON_REDFISH_SITE = https://files.pythonhosted.org/packages/7f/dd/83577803201a31bb63e5fda0e3c2ab807e4728df70743f7de4bf776975a6
++PYTHON_REDFISH_SETUP_TYPE = setuptools
++PYTHON_REDFISH_LICENSE = BSD License (BSD 3-clause "New" or "Revised License")
++PYTHON_REDFISH_LICENSE_FILES = LICENSE.md
++
++$(eval $(python-package))
+diff --git a/package/python-redfishtool/Config.in b/package/python-redfishtool/Config.in
+new file mode 100644
+index 0000000000..f5c150a6a0
+--- /dev/null
++++ b/package/python-redfishtool/Config.in
+@@ -0,0 +1,7 @@
++config BR2_PACKAGE_PYTHON_REDFISHTOOL
++	bool "python-redfishtool"
++	help
++    redfishtool is a commandline tool that implements the client side of the
++    Redfish RESTful API for Data Center Hardware Management.
++
++    https://pypi.org/project/redfishtool/
+diff --git a/package/python-redfishtool/python-redfishtool.hash b/package/python-redfishtool/python-redfishtool.hash
+new file mode 100644
+index 0000000000..aef137c4ed
+--- /dev/null
++++ b/package/python-redfishtool/python-redfishtool.hash
+@@ -0,0 +1,3 @@
++md5  9479edbb38fac5fb6764def67ffe60cb  redfishtool-1.1.6.tar.gz
++sha256  76d12873fdb7cf9dbd9ad82d60bb1931074b88da1be45052a946ad812855efae  redfishtool-1.1.6.tar.gz
++
+diff --git a/package/python-redfishtool/python-redfishtool.mk b/package/python-redfishtool/python-redfishtool.mk
+new file mode 100644
+index 0000000000..24de233885
+--- /dev/null
++++ b/package/python-redfishtool/python-redfishtool.mk
+@@ -0,0 +1,14 @@
++################################################################################
++#
++# python-redfishtool
++#
++################################################################################
++
++PYTHON_REDFISHTOOL_VERSION = 1.1.6
++PYTHON_REDFISHTOOL_SOURCE = redfishtool-$(PYTHON_REDFISHTOOL_VERSION).tar.gz
++PYTHON_REDFISHTOOL_SITE = https://files.pythonhosted.org/packages/78/2d/bfba15847929ab90d4139a58810c2eebb6e803807f671b1d95ec8c1ae959
++PYTHON_REDFISHTOOL_SETUP_TYPE = setuptools
++PYTHON_REDFISHTOOL_LICENSE = BSD License (BSD 3-clause "New" or "Revised License")
++PYTHON_REDFISHTOOL_LICENSE_FILES = LICENSE.md
++
++$(eval $(python-package))
+diff --git a/package/python-requests-unixsocket/Config.in b/package/python-requests-unixsocket/Config.in
+new file mode 100644
+index 0000000000..d3675090b4
+--- /dev/null
++++ b/package/python-requests-unixsocket/Config.in
+@@ -0,0 +1,7 @@
++config BR2_PACKAGE_PYTHON_REQUESTS_UNIXSOCKET
++  depends on BR2_PACKAGE_PYTHON_PBR
++  depends on BR2_PACKAGE_PYTHON_WHEEL
++	bool "python-requests-unixsocket"
++	help
++	  Requests is an Apache2 Licensed HTTP library, written in
++	  Python, for human beings.
+diff --git a/package/python-requests-unixsocket/python-requests-unixsocket.hash b/package/python-requests-unixsocket/python-requests-unixsocket.hash
+new file mode 100644
+index 0000000000..1cb06187bd
+--- /dev/null
++++ b/package/python-requests-unixsocket/python-requests-unixsocket.hash
+@@ -0,0 +1,3 @@
++# md5, sha256 from https://pypi.org/pypi/requests/json
++md5  ca405eabee3505e6d557752ba0d0db5e  requests-unixsocket-0.2.0.tar.gz
++sha256  9e5c1a20afc3cf786197ae59c79bcdb0e7565f218f27df5f891307ee8817c1ea  requests-unixsocket-0.2.0.tar.gz
+diff --git a/package/python-requests-unixsocket/python-requests-unixsocket.mk b/package/python-requests-unixsocket/python-requests-unixsocket.mk
+new file mode 100644
+index 0000000000..266d517090
+--- /dev/null
++++ b/package/python-requests-unixsocket/python-requests-unixsocket.mk
+@@ -0,0 +1,15 @@
++################################################################################
++#
++# python-requests
++#
++################################################################################
++
++PYTHON_REQUESTS_UNIXSOCKET_VERSION = 0.2.0
++PYTHON_REQUESTS_UNIXSOCKET_SOURCE = requests-unixsocket-$(PYTHON_REQUESTS_UNIXSOCKET_VERSION).tar.gz
++PYTHON_REQUESTS_UNIXSOCKET_SITE = https://files.pythonhosted.org/packages/4d/ce/78b651fe0adbd4227578fa432d1bde03b4f4945a70c81e252a2b6a2d895f
++PYTHON_REQUESTS_UNIXSOCKET_SETUP_TYPE = pep517
++PYTHON_REQUESTS_UNIXSOCKET_LICENSE = Apache-2.0
++PYTHON_REQUESTS_UNIXSOCKET_LICENSE_FILES = LICENSE
++PYTHON_REQUESTS_UNIXSOCKET_DEPENDENCIES = host-python-wheel host-python-pbr
++
++$(eval $(python-package))
+diff --git a/package/python-robotframework-requests/Config.in b/package/python-robotframework-requests/Config.in
+new file mode 100644
+index 0000000000..7d699ec861
+--- /dev/null
++++ b/package/python-robotframework-requests/Config.in
+@@ -0,0 +1,7 @@
++config BR2_PACKAGE_PYTHON_ROBOTFRAMEWORK_REQUESTS
++  bool "python-robotframework-requests"
++  help
++    RequestsLibrary is a Robot Framework library aimed to provide HTTP api
++    testing functionalities by wrapping the well known Python Requests Library
++
++    https://pypi.org/project/robotframework-requests/
+diff --git a/package/python-robotframework-requests/python-robotframework-requests.hash b/package/python-robotframework-requests/python-robotframework-requests.hash
+new file mode 100644
+index 0000000000..65fd2dd124
+--- /dev/null
++++ b/package/python-robotframework-requests/python-robotframework-requests.hash
+@@ -0,0 +1,2 @@
++md5  6b72d98642f8c83c3fde5c3d82d04e29  robotframework-requests-0.9.4.tar.gz
++sha256  e00943b8526c38bed5c3c661c813ec9d5a2106961bd91da0068712c2a0d49e82  robotframework-requests-0.9.4.tar.gz
+diff --git a/package/python-robotframework-requests/python-robotframework-requests.mk b/package/python-robotframework-requests/python-robotframework-requests.mk
+new file mode 100644
+index 0000000000..eee69c5e40
+--- /dev/null
++++ b/package/python-robotframework-requests/python-robotframework-requests.mk
+@@ -0,0 +1,14 @@
++################################################################################
++#
++# python-robotframework-requests
++#
++################################################################################
++
++PYTHON_ROBOTFRAMEWORK_REQUESTS_VERSION = 0.9.4
++PYTHON_ROBOTFRAMEWORK_REQUESTS_SOURCE = robotframework-requests-$(PYTHON_ROBOTFRAMEWORK_REQUESTS_VERSION).tar.gz
++PYTHON_ROBOTFRAMEWORK_REQUESTS_SITE = https://files.pythonhosted.org/packages/d8/de/2d73b2de764f5430c7833fb07c7b56f2959aa02e473256a199eee4af22e1
++PYTHON_ROBOTFRAMEWORK_REQUESTS_SETUP_TYPE = setuptools
++PYTHON_ROBOTFRAMEWORK_REQUESTS_LICENSE = MIT
++PYTHON_ROBOTFRAMEWORK_REQUESTS_LICENSE_FILES = LICENSE.md
++
++$(eval $(python-package))
+diff --git a/package/python-robotframework-scplibrary/Config.in b/package/python-robotframework-scplibrary/Config.in
+new file mode 100644
+index 0000000000..5665dd7674
+--- /dev/null
++++ b/package/python-robotframework-scplibrary/Config.in
+@@ -0,0 +1,9 @@
++config BR2_PACKAGE_PYTHON_ROBOTFRAMEWORK_SCPLIBRARY
++  depends on BR2_PACKAGE_PYTHON3
++  select BR2_PACKAGE_PYTHON3_ZLIB
++  select BR2_PACKAGE_PYTHON3_PYEXPAT
++	bool "python-robotframework-scplibrary"
++	help
++	  A Robot Framework test library for secure copy (scp)
++
++	  https://pypi.org/project/robotframework-scplibrary/
+diff --git a/package/python-robotframework-scplibrary/python-robotframework-scplibrary.hash b/package/python-robotframework-scplibrary/python-robotframework-scplibrary.hash
+new file mode 100644
+index 0000000000..d1caca0738
+--- /dev/null
++++ b/package/python-robotframework-scplibrary/python-robotframework-scplibrary.hash
+@@ -0,0 +1,3 @@
++md5  85b2ce815f2c6dc614b55566ffeaeda4  robotframework-scplibrary-1.2.0.tar.gz
++sha256  0a10ab2335004f9dce867b917fd9d1738705896a6b3f552ed109212caf3cd9a1  robotframework-scplibrary-1.2.0.tar.gz
++
+diff --git a/package/python-robotframework-scplibrary/python-robotframework-scplibrary.mk b/package/python-robotframework-scplibrary/python-robotframework-scplibrary.mk
+new file mode 100644
+index 0000000000..8cf0d35049
+--- /dev/null
++++ b/package/python-robotframework-scplibrary/python-robotframework-scplibrary.mk
+@@ -0,0 +1,14 @@
++################################################################################
++#
++# python-robotframework
++#
++################################################################################
++
++PYTHON_ROBOTFRAMEWORK_SCPLIBRARY_VERSION = 1.2.0
++PYTHON_ROBOTFRAMEWORK_SCPLIBRARY_SOURCE = robotframework-scplibrary-$(PYTHON_ROBOTFRAMEWORK_SCPLIBRARY_VERSION).tar.gz
++PYTHON_ROBOTFRAMEWORK_SCPLIBRARY_SITE = https://files.pythonhosted.org/packages/1a/06/f30e988e9ae9fd0cf77a7c42cd584bfc11eacaf109ff2fbefefba91c0904
++PYTHON_ROBOTFRAMEWORK_SCPLIBRARY_SETUP_TYPE = setuptools
++PYTHON_ROBOTFRAMEWORK_SCPLIBRARY_LICENSE = Apache License 2.0
++PYTHON_ROBOTFRAMEWORK_SCPLIBRARY_LICENSE_FILES = LICENSE.txt
++
++$(eval $(python-package))
+diff --git a/package/python-robotframework-sshlibrary/Config.in b/package/python-robotframework-sshlibrary/Config.in
+new file mode 100644
+index 0000000000..8c185c9923
+--- /dev/null
++++ b/package/python-robotframework-sshlibrary/Config.in
+@@ -0,0 +1,9 @@
++config BR2_PACKAGE_PYTHON_ROBOTFRAMEWORK_SSHLIBRARY
++  depends on BR2_PACKAGE_PYTHON3
++  select BR2_PACKAGE_PYTHON3_ZLIB
++  select BR2_PACKAGE_PYTHON3_PYEXPAT
++	bool "python-robotframework-sshlibrary"
++	help
++	  A Robot Framework test library for SSH and SFTP
++
++	  https://pypi.org/project/robotframework-sshlibrary/
+diff --git a/package/python-robotframework-sshlibrary/python-robotframework-sshlibrary.hash b/package/python-robotframework-sshlibrary/python-robotframework-sshlibrary.hash
+new file mode 100644
+index 0000000000..1380c0a555
+--- /dev/null
++++ b/package/python-robotframework-sshlibrary/python-robotframework-sshlibrary.hash
+@@ -0,0 +1,3 @@
++md5  f1e900bef88efcee9493405e905d450a  robotframework-sshlibrary-3.8.0.tar.gz
++sha256  aedf8a02bcb7344404cf8575d0ada25d6c7dc2fcb65de2113c4e07c63d2446c2  robotframework-sshlibrary-3.8.0.tar.gz
++
+diff --git a/package/python-robotframework-sshlibrary/python-robotframework-sshlibrary.mk b/package/python-robotframework-sshlibrary/python-robotframework-sshlibrary.mk
+new file mode 100644
+index 0000000000..18697b9ec3
+--- /dev/null
++++ b/package/python-robotframework-sshlibrary/python-robotframework-sshlibrary.mk
+@@ -0,0 +1,14 @@
++################################################################################
++#
++# python-robotframework
++#
++################################################################################
++
++PYTHON_ROBOTFRAMEWORK_SSHLIBRARY_VERSION = 3.8.0
++PYTHON_ROBOTFRAMEWORK_SSHLIBRARY_SOURCE = robotframework-sshlibrary-$(PYTHON_ROBOTFRAMEWORK_SSHLIBRARY_VERSION).tar.gz
++PYTHON_ROBOTFRAMEWORK_SSHLIBRARY_SITE = https://files.pythonhosted.org/packages/23/e9/74f3345024645a1e874c53064787a324eaecfb0c594c189699474370a147
++PYTHON_ROBOTFRAMEWORK_SSHLIBRARY_SETUP_TYPE = setuptools
++PYTHON_ROBOTFRAMEWORK_SSHLIBRARY_LICENSE = Apache License 2.0
++PYTHON_ROBOTFRAMEWORK_SSHLIBRARY_LICENSE_FILES = LICENSE.txt
++
++$(eval $(python-package))
+diff --git a/package/python-robotframework/Config.in b/package/python-robotframework/Config.in
+new file mode 100644
+index 0000000000..7cbcbc4245
+--- /dev/null
++++ b/package/python-robotframework/Config.in
+@@ -0,0 +1,9 @@
++config BR2_PACKAGE_PYTHON_ROBOTFRAMEWORK
++  depends on BR2_PACKAGE_PYTHON3
++  select BR2_PACKAGE_PYTHON3_ZLIB
++  select BR2_PACKAGE_PYTHON3_PYEXPAT
++	bool "python-robotframework"
++	help
++	  A generic test automation framework
++
++	  https://robotframework.org
+diff --git a/package/python-robotframework/python-robotframework.hash b/package/python-robotframework/python-robotframework.hash
+new file mode 100644
+index 0000000000..1ee4da2aff
+--- /dev/null
++++ b/package/python-robotframework/python-robotframework.hash
+@@ -0,0 +1,5 @@
++md5  c50ec195953eb6cfb613fff137525746  robotframework-6.0.2.zip
++sha256  6a9c06deb220099990f190c6e4e772675f625e4d5d84640fca6f0ad46ff538d0  robotframework-6.0.2.zip
++
++sha256  cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30  LICENSE.txt
++
+diff --git a/package/python-robotframework/python-robotframework.mk b/package/python-robotframework/python-robotframework.mk
+new file mode 100644
+index 0000000000..386b160372
+--- /dev/null
++++ b/package/python-robotframework/python-robotframework.mk
+@@ -0,0 +1,20 @@
++################################################################################
++#
++# python-robotframework
++#
++################################################################################
++
++PYTHON_ROBOTFRAMEWORK_VERSION = 6.0.2
++PYTHON_ROBOTFRAMEWORK_SOURCE = robotframework-$(PYTHON_ROBOTFRAMEWORK_VERSION).zip
++PYTHON_ROBOTFRAMEWORK_SITE = https://files.pythonhosted.org/packages/8e/08/018fa8662f17ae912debcb939f8279fc40c4cf0bf172fdd1875532997e41
++PYTHON_ROBOTFRAMEWORK_SETUP_TYPE = setuptools
++PYTHON_ROBOTFRAMEWORK_LICENSE = Apache License 2.0
++PYTHON_ROBOTFRAMEWORK_LICEiNSE_FILES = LICENSE.txt
++
++define PYTHON_ROBOTFRAMEWORK_EXTRACT_CMDS
++	$(UNZIP) -d $(@D) $(PYTHON_ROBOTFRAMEWORK_DL_DIR)/$(PYTHON_ROBOTFRAMEWORK_SOURCE)
++	mv $(@D)/robotframework-$(PYTHON_ROBOTFRAMEWORK_VERSION)/* $(@D)
++	$(RM) -r $(@D)/robotframework-$(PYTHON_FONTTOOLS_VERSION)
++endef
++
++$(eval $(python-package))
+diff --git a/package/python-scp/Config.in b/package/python-scp/Config.in
+new file mode 100644
+index 0000000000..2c11523713
+--- /dev/null
++++ b/package/python-scp/Config.in
+@@ -0,0 +1,7 @@
++config BR2_PACKAGE_PYTHON_SCP
++	bool "python-scp"
++	help
++    The Redfish library performs GET, POST, PUT, PATCH and DELETE HTTP operationson
++    resources within a Redfish service.
++
++    https://pypi.org/project/redfish/
+diff --git a/package/python-scp/python-scp.hash b/package/python-scp/python-scp.hash
+new file mode 100644
+index 0000000000..002e50074c
+--- /dev/null
++++ b/package/python-scp/python-scp.hash
+@@ -0,0 +1,2 @@
++md5  b7465344048ddbc0f6a7d7fb649105ea  scp-0.14.5.tar.gz
++sha256  64f0015899b3d212cb8088e7d40ebaf0686889ff0e243d5c1242efe8b50f053e  scp-0.14.5.tar.gz
+diff --git a/package/python-scp/python-scp.mk b/package/python-scp/python-scp.mk
+new file mode 100644
+index 0000000000..dc73c23747
+--- /dev/null
++++ b/package/python-scp/python-scp.mk
+@@ -0,0 +1,14 @@
++################################################################################
++#
++# python-redfish
++#
++################################################################################
++
++PYTHON_SCP_VERSION = 0.14.5
++PYTHON_SCP_SOURCE = scp-$(PYTHON_SCP_VERSION).tar.gz
++PYTHON_SCP_SITE = https://files.pythonhosted.org/packages/b6/50/277f788967eed7aa2cbb669ff91dff90d2232bfda95577515a783bbccf73
++PYTHON_SCP_SETUP_TYPE = setuptools
++PYTHON_SCP_LICENSE = GNU Library or Lesser General Public License (LGPL) (LGPL-2.1-or-later)
++PYTHON_SCP_LICENSE_FILES = LICENSE
++
++$(eval $(python-package))
+diff --git a/package/python-wheel/Config.in b/package/python-wheel/Config.in
+new file mode 100644
+index 0000000000..af74c8e31b
+--- /dev/null
++++ b/package/python-wheel/Config.in
+@@ -0,0 +1,7 @@
++config BR2_PACKAGE_PYTHON_WHEEL
++	bool "python-wheel"
++	help
++    The Redfish library performs GET, POST, PUT, PATCH and DELETE HTTP operationson
++    resources within a Redfish service.
++
++    https://pypi.org/project/redfish/
+diff --git a/package/python-wheel/python-wheel.hash b/package/python-wheel/python-wheel.hash
+new file mode 100644
+index 0000000000..4a2ff8b408
+--- /dev/null
++++ b/package/python-wheel/python-wheel.hash
+@@ -0,0 +1,3 @@
++md5  83bb4e7bd4d687d398733f341a64ab91  wheel-0.38.4.tar.gz
++sha256  965f5259b566725405b05e7cf774052044b1ed30119b5d586b2703aafe8719ac  wheel-0.38.4.tar.gz
++
+diff --git a/package/python-wheel/python-wheel.mk b/package/python-wheel/python-wheel.mk
+new file mode 100644
+index 0000000000..7a51898ad6
+--- /dev/null
++++ b/package/python-wheel/python-wheel.mk
+@@ -0,0 +1,14 @@
++################################################################################
++#
++# python-redfish
++#
++################################################################################
++
++PYTHON_WHEEL_VERSION = 0.38.4
++PYTHON_WHEEL_SOURCE = wheel-$(PYTHON_WHEEL_VERSION).tar.gz
++PYTHON_WHEEL_SITE = https://files.pythonhosted.org/packages/a2/b8/6a06ff0f13a00fc3c3e7d222a995526cbca26c1ad107691b6b1badbbabf1
++PYTHON_WHEEL_SETUP_TYPE = setuptools
++PYTHON_WHEEL_LICENSE = MIT LICENSE
++PYTHON_WHEEL_LICENSE_FILES = LICENSE
++
++$(eval $(host-python-package))
+diff --git a/package/redfish-finder/Config.in b/package/redfish-finder/Config.in
+new file mode 100644
+index 0000000000..61e6ebcf79
+--- /dev/null
++++ b/package/redfish-finder/Config.in
+@@ -0,0 +1,5 @@
++config BR2_PACKAGE_REDFISH_FINDER
++	bool "redfish-finder"
++	help
++		redfish-finder to construct redfish host interface
++		via smbios type 42.
+diff --git a/package/redfish-finder/redfish_finder.hash b/package/redfish-finder/redfish_finder.hash
+new file mode 100644
+index 0000000000..ab34c9b087
+--- /dev/null
++++ b/package/redfish-finder/redfish_finder.hash
+@@ -0,0 +1,5 @@
++# https://github.com/nhorman/redfish-finder/archive/refs/tags/V0.4.tar.gz
++sha256  495bec2395dc1a309d96a9dbe97eabd9a2b00e603439f552421a1171334f2adc  V0.4.tar.gz
++
++# Locally calculated
++sha256  e6d6a009505e345fe949e1310334fcb0747f28dae2856759de102ab66b722cb4  COPYING
+diff --git a/package/redfish-finder/redfish_finder.mk b/package/redfish-finder/redfish_finder.mk
+new file mode 100644
+index 0000000000..b5d751f895
+--- /dev/null
++++ b/package/redfish-finder/redfish_finder.mk
+@@ -0,0 +1,18 @@
++################################################################################
++#
++# redfish-finder
++#
++################################################################################
++
++REDFISH_FINDER_VERSION = f0ac9ccb641f3956bc26f30c4fbb4167a3e7343f
++REDFISH_FINDER_SITE = https://github.com/nhorman/redfish-finder.git
++REDFISH_FINDER_SITE_METHOD = git
++REDFISH_FINDER_LICENSE = GPL-2.0 license
++REDFISH_FINDER_LICENSE_FILES = COPYING
++
++define REDFISH_FINDER_INSTALL_TARGET_CMDS
++	${INSTALL} -D -m 0755 $(@D)/redfish-finder \
++												${TARGET_DIR}/usr/bin/redfish-finder
++endef
++
++$(eval $(generic-package))
+-- 
+2.43.0
+
