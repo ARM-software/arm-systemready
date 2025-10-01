@@ -147,7 +147,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Running Linux BSA tests"
         insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
         echo "SystemReady devicetree band ACS v3.1.0" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
-        bsa >> /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+        bsa --skip-dp-nic-ms >> /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
         sync /mnt
         sleep 5

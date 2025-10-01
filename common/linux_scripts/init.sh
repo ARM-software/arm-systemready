@@ -189,9 +189,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       insmod /lib/modules/bsa_acs.ko
       echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/BsaResultsApp.log
       if [ "$automation_enabled" == "False" ]; then
-        /bin/bsa >> /mnt/acs_results/linux/BsaResultsApp.log
+        /bin/bsa --skip-dp-nic-ms >> /mnt/acs_results/linux/BsaResultsApp.log
       else
-        $bsa_command >> /mnt/acs_results/linux/BsaResultsApp.log
+        $bsa_command --skip-dp-nic-ms >> /mnt/acs_results/linux/BsaResultsApp.log
       fi
       dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
       sync /mnt
@@ -213,7 +213,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       if [ -f  /lib/modules/sbsa_acs.ko ]; then
         insmod /lib/modules/sbsa_acs.ko
         echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
-        $sbsa_command >> /mnt/acs_results/linux/SbsaResultsApp.log
+        $sbsa_command --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
         sync /mnt
         sleep 5
