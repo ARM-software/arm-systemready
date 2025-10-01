@@ -155,6 +155,9 @@ OS_TESTS_PROCESSED=0
 CAPSULE_PROCESSED=0
 POST_SCRIPT_PROCESSED=0
 PFDI_PROCESSED=0
+SBMR_PROCESSED=0
+SBMR_IB_PROCESSED=0
+SBMR_OOB_PROCESSED=0
 
 ################################################################################
 # BSA PARSING
@@ -340,6 +343,65 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             fi
         fi
     fi
+fi
+################################################################################
+# SBMR PARSING (IB + OOB)
+################################################################################
+# Execute only if YOCTO_FLAG_PRESENT is 0
+if [ "$YOCTO_FLAG_PRESENT" -eq 0 ]; then
+
+    # Paths relative to LOGS_PATH (new layout)
+    SBMR_IB_LOG="$LOGS_PATH/sbmr/sbmr_in_band_logs/console.log"
+    SBMR_OOB_LOG="$LOGS_PATH/sbmr/sbmr_out_of_band_logs/console.log"
+
+    SBMR_IB_JSON="$JSONS_DIR/sbmr_ib.json"
+    SBMR_OOB_JSON="$JSONS_DIR/sbmr_oob.json"
+
+    # Reset flags
+    SBMR_IB_PROCESSED=0
+    SBMR_OOB_PROCESSED=0
+
+    # Parse IB
+    if check_file "$SBMR_IB_LOG" "M"; then
+        SBMR_IB_PROCESSED=1
+        python3 "$SCRIPTS_PATH/sbmr/logs_to_json.py" "$SBMR_IB_LOG" "$SBMR_IB_JSON"
+        if [ $? -ne 0 ]; then
+            SBMR_IB_PROCESSED=0
+            echo -e "${RED}ERROR: SBMR IB logs parsing to json failed.${NC}"
+        else
+            apply_waivers "SBMR" "$SBMR_IB_JSON"
+        fi
+    fi
+
+    # Parse OOB
+    if check_file "$SBMR_OOB_LOG" "M"; then
+        SBMR_OOB_PROCESSED=1
+        python3 "$SCRIPTS_PATH/sbmr/logs_to_json.py" "$SBMR_OOB_LOG" "$SBMR_OOB_JSON"
+        if [ $? -ne 0 ]; then
+            SBMR_OOB_PROCESSED=0
+            echo -e "${RED}ERROR: SBMR OOB logs parsing to json failed.${NC}"
+        else
+            apply_waivers "SBMR" "$SBMR_OOB_JSON"
+        fi
+    fi
+
+    # Generate separate HTMLs per band
+    if [ $SBMR_IB_PROCESSED -eq 1 ]; then
+        python3 "$SCRIPTS_PATH/sbmr/json_to_html.py" \
+            "$SBMR_IB_JSON" \
+            "$HTMLS_DIR/sbmr_ib_detailed.html" \
+            "$HTMLS_DIR/sbmr_ib_summary.html" \
+            "$LOGS_PATH/sbmr/sbmr_in_band_logs/report.html"
+    fi
+
+    if [ $SBMR_OOB_PROCESSED -eq 1 ]; then
+        python3 "$SCRIPTS_PATH/sbmr/json_to_html.py" \
+            "$SBMR_OOB_JSON" \
+            "$HTMLS_DIR/sbmr_oob_detailed.html" \
+            "$HTMLS_DIR/sbmr_oob_summary.html" \
+            "$LOGS_PATH/sbmr/sbmr_out_of_band_logs/report.html"
+    fi
+
 fi
 ################################################################################
 # POST-SCRIPT LOG PARSING
@@ -576,6 +638,20 @@ else
     print_missing_json "sct.json"
 fi
 
+# SBMR IB
+if [ $SBMR_IB_PROCESSED -eq 1 ] && [ -f "$SBMR_IB_JSON" ]; then
+    JSON_FILES+=("$SBMR_IB_JSON")
+else
+    print_missing_json "sbmr_ib.json"
+fi
+
+# SBMR OOB
+if [ $SBMR_OOB_PROCESSED -eq 1 ] && [ -f "$SBMR_OOB_JSON" ]; then
+    JSON_FILES+=("$SBMR_OOB_JSON")
+else
+    print_missing_json "sbmr_oob.json"
+fi
+
 # BBSR-FWTS
 if [ $BBSR_FWTS_PROCESSED -eq 1 ] && [ -f "$BBSR_FWTS_JSON" ]; then
     JSON_FILES+=("$BBSR_FWTS_JSON")
@@ -721,6 +797,20 @@ fi
 # 12) CAPSULE UPDATE SUMMARY
 CAPSULE_SUMMARY_HTML=""
 GENERATE_ACS_SUMMARY_CMD+=" \"$CAPSULE_SUMMARY_HTML\""
+
+# 13) SBMR-IB
+if [ $SBMR_IB_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sbmr_ib_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
+# 14) SBMR-OOB
+if [ $SBMR_OOB_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/sbmr_oob_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
 
 # Then the final argument is the summary HTML
 GENERATE_ACS_SUMMARY_CMD+=" \"$ACS_SUMMARY_HTML\""

@@ -77,6 +77,8 @@ if [ "$automation_enabled" == "True" ]; then
 
   sbsa_command="`python3 /mnt/acs_tests/parser/Parser.py -sbsa`"
   sbsa_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_sbsa_run`"
+
+  sbmr_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_sbmr_in_band_run`"
 fi
 
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
@@ -94,7 +96,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "Linux Boot with SetVirtualMap enabled"
     mkdir -p /mnt/acs_results/SetVAMapMode/fwts
     echo "Executing FWTS"
-    echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
+    echo "SystemReady band ACS v3.1.0" > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
     fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
     sync /mnt
     sleep 3
@@ -167,7 +169,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "********* FWTS is disabled in config file**************"
   else
     mkdir -p /mnt/acs_results/fwts
-    echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/fwts/FWTSResults.log
+    echo "SystemReady band ACS v3.1.0" > /mnt/acs_results/fwts/FWTSResults.log
     if [ "$automation_enabled" == "False" ]; then
       fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
     else
@@ -187,7 +189,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     mkdir -p /mnt/acs_results/linux
     if [ -f  /lib/modules/bsa_acs.ko ]; then
       insmod /lib/modules/bsa_acs.ko
-      echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/BsaResultsApp.log
+      echo "SystemReady band ACS v3.1.0" > /mnt/acs_results/linux/BsaResultsApp.log
       if [ "$automation_enabled" == "False" ]; then
         # based on previous certification/complaince inputs, side effects are seen
         # when bsa/sbsa test changes config of PCIe devices whose class code are
@@ -215,7 +217,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       mkdir -p /mnt/acs_results/linux
       if [ -f  /lib/modules/sbsa_acs.ko ]; then
         insmod /lib/modules/sbsa_acs.ko
-        echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
+        echo "SystemReady band ACS v3.1.0" > /mnt/acs_results/linux/SbsaResultsApp.log
         $sbsa_command --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
         sync /mnt
@@ -227,6 +229,33 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     fi
   else
     echo "SBSA test is disabled by default, please enable in config file to run Sbsa"
+  fi
+
+run_sbmr_in_band(){
+      echo "Call SBMR ACS in-band test"
+      cd /usr/bin
+      python redfish-finder
+      cd sbmr-acs
+      ./run-sbmr-acs.sh linux
+      mkdir -p /mnt/acs_results/sbmr
+      cp -r logs /mnt/acs_results/sbmr/sbmr_in_band_logs
+      cd /
+      echo "SBMR ACS in-band run is completed\n"
+}
+
+  # Run SBMR-ACS In-Band Tests 
+  if [ "$automation_enabled" == "True" ]; then
+    if [ "$sbmr_enabled" == "False" ]; then
+      echo "********* SBMR In-Band is disabled in config file**************"
+    else
+      run_sbmr_in_band
+      sync /mnt
+      sleep 3
+      echo "NOTE: This ACS image runs SBMR IN-BAND tests ONLY." 1>&2
+      echo "For SBMR OUT-OF-BAND tests, see: https://github.com/ARM-software/sbmr-acs.git" 1>&2
+    fi
+  else
+    echo "SBMR-ACS In-Band test is disabled by default, please enable in config file to run SBMR-ACS In-Band test"
   fi
 
   # EDK2 test parser
@@ -283,6 +312,7 @@ else
   echo " To run BSA test suite, execute /usr/bin/bsa.sh"
   echo " To run SBSA test suite, execute /usr/bin/sbsa.sh"
   echo " To run SCT test suite, execute /usr/bin/fwts.sh"
+  echo " To run SBMR test suite, execute /usr/bin/sbmr.sh"
   echo ""
 fi
 

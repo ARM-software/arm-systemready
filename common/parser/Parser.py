@@ -111,6 +111,7 @@ def main():
     parser.add_argument('-automation_bbsr_fwts_run', action='store_true', help='Check if BBSR FWTS is enabled')
     parser.add_argument('-automation_bbsr_tpm_run', action='store_true', help='Check if BBSR TPM is enabled')
     parser.add_argument('--config', default='/mnt/acs_tests/config/acs_run_config.ini', help='Path to the config file')
+    parser.add_argument('-automation_sbmr_in_band_run', action='store_true', help='Check if SBMR is enabled')
 
     args = parser.parse_args()
 
@@ -147,6 +148,9 @@ def main():
         print(enabled)
     elif args.automation_bbsr_tpm_run:
         enabled = check_section_enable(config, 'BBSR_TPM', 'automation_bbsr_tpm_run')
+        print(enabled)
+    elif args.automation_sbmr_in_band_run:
+        enabled = check_section_enable(config, 'SBMR', 'automation_sbmr_in_band_run')
         print(enabled)
     else:
         print("Please specify a valid command or use --help for more information.")
