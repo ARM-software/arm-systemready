@@ -47,6 +47,7 @@ TOP_DIR=`pwd`
 LINUX_ARCH=arm64
 LINUX_IMAGE_TYPE=Image
 KEYS_DIR=$TOP_DIR/bbsr-keys
+SRBAND_DEFCONFIG=$TOP_DIR/../common/config/srband_defconfig
 
 do_build ()
 {
@@ -85,6 +86,7 @@ do_build ()
     #Configurations to increase serial ports
     echo "CONFIG_SERIAL_8250_NR_UARTS=32" >> $LINUX_OUT_DIR/.config
     echo "CONFIG_SERIAL_8250_RUNTIME_UARTS=32" >> $LINUX_OUT_DIR/.config
+    cat $SRBAND_DEFCONFIG >> $LINUX_OUT_DIR/.config
 
     if [[ $arch = "aarch64" ]]
     then

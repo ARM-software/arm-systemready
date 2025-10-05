@@ -76,6 +76,8 @@ SR_SRS_SCOPE_TABLE = [
     ("BBSR-SCT", "EM"),
     ("BBSR-FWTS", "EM"),
     ("BBSR-TPM", "EM"),
+    ("SBMR-IB", "R"),
+    ("SBMR-OOB", "R"),
     ("SBSA", "R")
 ]
 
@@ -150,6 +152,22 @@ def count_fails_in_json(data):
                         total_failed_with_waiver += 1
                     else:
                         total_failed += 1
+        ### NEW for SBMR
+        for case in suite_entry.get("Test_cases", []):
+            for sub in case.get("subtests", []):
+                res = sub.get("sub_test_result")
+                any_subtests_found = True
+                if isinstance(res, dict):
+                    f = res.get("FAILED", 0)
+                    fw = res.get("FAILED_WITH_WAIVER", 0)
+                    total_failed += f
+                    total_failed_with_waiver += fw
+                elif isinstance(res, str):
+                    if "FAILED" in res.upper() or "FAILURE" in res.upper() or "FAIL" in res.upper():
+                        if "(WITH WAIVER)" in res.upper():
+                            total_failed_with_waiver += 1
+                        else:
+                            total_failed += 1
 
     # If we found zero subtests across the entire suite => treat that as a fail
     if not any_subtests_found:
@@ -268,6 +286,7 @@ def merge_json_files(json_files, output_file):
 
         # Identify suite name from filename
         fn = os.path.basename(json_path).upper()
+        base_lower = os.path.basename(json_path).lower()
         if "BSA" in fn and "SBSA" not in fn:
             section_name = "Suite_Name: BSA"
             suite_key    = "BSA"
@@ -289,6 +308,12 @@ def merge_json_files(json_files, output_file):
         elif "SCT" in fn:
             section_name = "Suite_Name: SCT"
             suite_key    = "SCT"
+        elif "SBMR_IB" in fn or "SBMR-IB" in fn or "sbmr_ib" in base_lower:
+            section_name = "Suite_Name: SBMR-IB"
+            suite_key    = "SBMR-IB"
+        elif "SBMR_OOB" in fn or "SBMR-OOB" in fn or "sbmr_oob" in base_lower:
+            section_name = "Suite_Name: SBMR-OOB"
+            suite_key    = "SBMR-OOB"
         elif "CAPSULE_UPDATE" in fn:
             section_name = "Suite_Name: CAPSULE_UPDATE"
             suite_key    = "Capsule Update"
@@ -352,7 +377,8 @@ def merge_json_files(json_files, output_file):
         }
         if lookup_suite_key in standalone_aliases or lookup_suite_key.startswith("os_"):
             lookup_suite_key = "standalone"
-
+        if lookup_suite_key in ("sbmr-ib", "sbmr-oob"):
+            lookup_suite_key = "sbmr"
         if lookup_suite_key in test_cat_dict:
             # Now use 'data_list' instead of 'data'
             if isinstance(data_list, list):
@@ -422,6 +448,10 @@ def merge_json_files(json_files, output_file):
 
         # Always consider SBSA mandatory if present (your existing rule)
         promote = {"SBSA"} if "SBSA" in present else set()
+
+        # if either SBMR-IB or SBMR-OOB is present, promote BOTH to mandatory
+        if {"SBMR-IB", "SBMR-OOB"} & present:
+            promote.update({"SBMR-IB", "SBMR-OOB"})
         for n in promote:
             _REQUIREMENT_MAP[n] = "M"
         mandatory_suites = {(n, "M") if n in promote else (n, r) for (n, r) in mandatory_suites}
@@ -653,6 +683,18 @@ def merge_json_files(json_files, output_file):
             "BBSR compliance results",
             "Overall Compliance Result",
         ]
+        # Ensure SBMR appears in the ordered summary (tag adapts via compliance_label)
+        # ensure SBMR appears
+        try:
+            insert_after = "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance"
+            idx = preferred_order.index(insert_after) + 1
+        except ValueError:
+            idx = len(preferred_order)
+
+        if DT_OR_SR_MODE == "SR":
+            preferred_order.insert(idx,   compliance_label("SBMR-IB"))
+            preferred_order.insert(idx+1, compliance_label("SBMR-OOB"))
+
         actual = merged_results["Suite_Name: acs_info"]["ACS Results Summary"]
         ordered = OrderedDict()
         for key in preferred_order:
