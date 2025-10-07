@@ -171,7 +171,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     mkdir -p /mnt/acs_results/fwts
     echo "SystemReady band ACS v3.1.0" > /mnt/acs_results/fwts/FWTSResults.log
     if [ "$automation_enabled" == "False" ]; then
-      fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
+      fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
     else
       $fwts_command -r stdout -q >> /mnt/acs_results/fwts/FWTSResults.log
     fi
