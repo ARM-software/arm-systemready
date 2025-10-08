@@ -930,13 +930,12 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
                     test_info = "\n".join(info_lines)
                     if "signed_capsule.bin not present" in test_info.lower():
                         result = "FAILED"
+                    elif "uefi capsule update has failed" in test_info.lower():
+                        result = "FAILED"
                     elif "succeed to write signed_capsule.bin" in test_info.lower():
-                        if "uefi capsule update has failed" in test_info.lower():
-                            result = "FAILED"
-                        else:
-                            result = "PASSED"
+                        result = "PASSED"
                     else:
-                        result = "WARNING"
+                        result = "FAILED"
                     break
                 else:
                     i += 1
