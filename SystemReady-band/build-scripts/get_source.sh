@@ -159,9 +159,22 @@ get_bbr_acs_src()
 get_sbmr_acs_src()
 {
     echo "Downloading sbmr-acs source code."
-    git clone --depth 1 https://github.com/ARM-software/sbmr-acs sbmr-acs
+    if [ -z "$SBMR_ACS_TAG" ]; then
+        git clone --depth 1 https://github.com/ARM-software/sbmr-acs sbmr-acs
+        if [ $? -ne 0 ]; then
+            echo "Error: Failed to download sbmr-acs source code"
+            exit 1
+        fi
+    else
+        echo "Using SBMR-ACS TAG: $SBMR_ACS_TAG"
+        git clone --depth 1 --branch "$SBMR_ACS_TAG" https://github.com/ARM-software/sbmr-acs sbmr-acs
+        if [ $? -ne 0 ]; then
+            echo "Error: Failed to download sbmr-acs source code with tag $SBMR_ACS_TAG"
+            exit 1
+        fi
+    fi
     pushd $TOP_DIR/sbmr-acs
-        git archive --format=tar.gz -o sbmr-acs.tar.gz main
+        git archive --format=tar.gz -o sbmr-acs.tar.gz HEAD
     popd
 }
 
