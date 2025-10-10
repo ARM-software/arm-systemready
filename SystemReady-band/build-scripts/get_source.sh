@@ -156,6 +156,15 @@ get_bbr_acs_src()
     fi
 }
 
+get_sbmr_acs_src()
+{
+    echo "Downloading sbmr-acs source code."
+    git clone --depth 1 https://github.com/ARM-software/sbmr-acs sbmr-acs
+    pushd $TOP_DIR/sbmr-acs
+        git archive --format=tar.gz -o sbmr-acs.tar.gz main
+    popd
+}
+
 get_buildroot_src()
 {
     echo "Downloading Buildroot source code. TAG : $BUILDROOT_SRC_VERSION"
@@ -170,6 +179,12 @@ get_buildroot_src()
         echo "Applying Buildroot FWTS patch..."
         # patch buildroot config
         git apply $TOP_DIR/../common/patches/build_fwts_version_25.01.00.patch
+    popd
+    pushd $TOP_DIR/buildroot
+        echo "Applying Buildroot SBMR-ACS patch..."
+        git apply $TOP_DIR/patches/build_sbmr_acs.patch
+        #This patch is to update dmidecode to v3.6 , which is a SBMR requirment.
+        git apply $TOP_DIR/patches/0001-dmidecode-version-3.6.patch
     popd
 }
 
@@ -223,3 +238,4 @@ get_edk2-test-parser_src
 get_grub_src
 get_linux_src
 get_linux-acs_src
+get_sbmr_acs_src

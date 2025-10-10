@@ -30,7 +30,7 @@ if [ "$automation_enabled" == "True" ] &&  [ "$sbsa_enabled" == "False" ]; then
 else
   if [ -f  /lib/modules/sbsa_acs.ko ]; then
     insmod /lib/modules/sbsa_acs.ko
-    echo "SystemReady band ACS v3.0.1" > /mnt/acs_results/linux/SbsaResultsApp.log
+    echo "SystemReady band ACS v3.1.0" > /mnt/acs_results/linux/SbsaResultsApp.log
     if [ "$automation_enabled" == "False" ]; then
       /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
     else

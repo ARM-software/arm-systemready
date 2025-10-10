@@ -90,16 +90,18 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
         echo "Running BSA in verbose mode"
         if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
             #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
-            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -os -skip 1500 -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
+            echo "BSA Command: Bsa.efi  -v 1 -os -skip 1500 -skip-dp-nic-ms -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log"
+            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -os -skip 1500 -skip-dp-nic-ms -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
         else
-            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -skip 1500 -f BsaVerboseTempResults.log
+            echo "BSA Command: Bsa.efi  -v 1 -skip 1500 -skip-dp-nic-ms -f BsaVerboseTempResults.log"
+            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -skip 1500 -skip-dp-nic-ms -f BsaVerboseTempResults.log
         endif
         stall 200000
         if exist BsaVerboseTempResults.log then
             if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
                 echo " SystemReady devicetree band ACS v3.1.0" > BsaVerboseResults.log
             else
-                echo " SystemReady band ACS v3.0.1" > BsaVerboseResults.log
+                echo " SystemReady band ACS v3.1.0" > BsaVerboseResults.log
             endif
             stall 200000
             type BsaVerboseTempResults.log >> BsaVerboseResults.log
@@ -128,18 +130,19 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
 :BsaRun
     if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
        #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
-       FS%i:\acs_tests\bsa\Bsa.efi -os -skip 1500 -dtb BsaDevTree.dtb -f BsaTempResults.log
+       echo "BSA Command: Bsa.efi  -os -skip 1500 -dtb BsaDevTree.dtb -skip-dp-nic-ms -f BsaTempResults.log"
+       FS%i:\acs_tests\bsa\Bsa.efi -os -skip 1500 -dtb BsaDevTree.dtb -skip-dp-nic-ms -f BsaTempResults.log
     else
         if "%1" == "false" then
-            echo "BSA Command: Bsa.efi -skip 1500"
-            FS%i:\acs_tests\bsa\Bsa.efi -skip 1500 -f BsaTempResults.log
+            echo  "BSA Command: Bsa.efi -skip 1500 -skip-dp-nic-ms -f BsaTempResults.log"
+            FS%i:\acs_tests\bsa\Bsa.efi -skip 1500 -skip-dp-nic-ms -f BsaTempResults.log
         else
             if "%BsaCommand%" == "" then
-                echo "BsaCommand variable does not exist, running default command Bsa.efi -skip 1500"
-                FS%i:\acs_tests\bsa\Bsa.efi -skip 1500 -f BsaTempResults.log
+                echo "BsaCommand variable does not exist, running default command Bsa.efi -skip 1500 -skip-dp-nic-ms -f BsaTempResults.log"
+                FS%i:\acs_tests\bsa\Bsa.efi -skip 1500 -skip-dp-nic-ms -f BsaTempResults.log
             else
-                echo "BSA Command: %BsaCommand%"
-                FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
+                echo  "BSA Command: %BsaCommand% -skip-dp-nic-ms -f BsaTempResults.log "
+                FS%i:\acs_tests\bsa\%BsaCommand% -skip-dp-nic-ms -f BsaTempResults.log
             endif
         endif
     endif
@@ -149,7 +152,7 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
         if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
             echo " SystemReady devicetree band ACS v3.1.0" > BsaResults.log
         else
-            echo " SystemReady band ACS v3.0.1" > BsaResults.log
+            echo " SystemReady band ACS v3.1.0" > BsaResults.log
         endif
         stall 200000
         type BsaTempResults.log >> BsaResults.log

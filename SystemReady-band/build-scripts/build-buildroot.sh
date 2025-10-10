@@ -56,6 +56,7 @@ do_build ()
     mkdir -p root_fs_overlay/bin
     mkdir -p root_fs_overlay/lib/modules
     mkdir -p root_fs_overlay/usr/bin
+    mkdir -p root_fs_overlay/usr/bin/sbmr-acs
 
     if [ ! -d root_fs_overlay/usr/bin/edk2-test-parser ]; then
         cp -r $TOP_DIR/edk2-test-parser root_fs_overlay/usr/bin/
@@ -77,6 +78,7 @@ do_build ()
     chmod +x root_fs_overlay/usr/bin/fwts.sh
     cp  $TOP_DIR/bbr-acs/bbsr/config/bbsr_fwts_tests.ini root_fs_overlay/bin/
     cp  $TOP_DIR/ramdisk/verify_tpm_measurements.py root_fs_overlay/bin/
+    tar -xf $TOP_DIR/sbmr-acs/sbmr-acs.tar.gz -C root_fs_overlay/usr/bin/sbmr-acs
 
     touch root_fs_overlay/bin/sr_bsa.flag
     cp  $TOP_DIR/ramdisk/linux-sbsa/sbsa root_fs_overlay/bin/
