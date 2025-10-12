@@ -180,6 +180,32 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "FWTS Execution - Completed"
   fi
 
+  run_sbmr_in_band(){
+      echo "Call SBMR ACS in-band test"
+      cd /usr/bin
+      python redfish-finder
+      cd sbmr-acs
+      ./run-sbmr-acs.sh linux
+      mkdir -p /mnt/acs_results/sbmr
+      cp -r logs /mnt/acs_results/sbmr/sbmr_in_band_logs
+      cd /
+      echo "SBMR ACS in-band run is completed\n"
+  }
+
+  # Run SBMR-ACS In-Band Tests 
+  if [ "$automation_enabled" == "True" ]; then
+    if [ "$sbmr_enabled" == "False" ]; then
+      echo "********* SBMR In-Band is disabled in config file**************"
+    else
+      run_sbmr_in_band
+      sync /mnt
+      sleep 3
+      echo "NOTE: This ACS image runs SBMR IN-BAND tests ONLY." 1>&2
+      echo "For SBMR OUT-OF-BAND tests, see: https://github.com/ARM-software/sbmr-acs.git" 1>&2
+    fi
+  else
+    echo "SBMR-ACS In-Band test is disabled by default, please enable in config file to run SBMR-ACS In-Band test"
+  fi
 
   # Linux BSA Execution
   echo "Running Linux BSA tests"
@@ -229,33 +255,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     fi
   else
     echo "SBSA test is disabled by default, please enable in config file to run Sbsa"
-  fi
-
-run_sbmr_in_band(){
-      echo "Call SBMR ACS in-band test"
-      cd /usr/bin
-      python redfish-finder
-      cd sbmr-acs
-      ./run-sbmr-acs.sh linux
-      mkdir -p /mnt/acs_results/sbmr
-      cp -r logs /mnt/acs_results/sbmr/sbmr_in_band_logs
-      cd /
-      echo "SBMR ACS in-band run is completed\n"
-}
-
-  # Run SBMR-ACS In-Band Tests 
-  if [ "$automation_enabled" == "True" ]; then
-    if [ "$sbmr_enabled" == "False" ]; then
-      echo "********* SBMR In-Band is disabled in config file**************"
-    else
-      run_sbmr_in_band
-      sync /mnt
-      sleep 3
-      echo "NOTE: This ACS image runs SBMR IN-BAND tests ONLY." 1>&2
-      echo "For SBMR OUT-OF-BAND tests, see: https://github.com/ARM-software/sbmr-acs.git" 1>&2
-    fi
-  else
-    echo "SBMR-ACS In-Band test is disabled by default, please enable in config file to run SBMR-ACS In-Band test"
   fi
 
   # EDK2 test parser
