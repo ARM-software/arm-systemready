@@ -35,14 +35,16 @@ The SystemReady band compliance and testing requirements are specified in the [A
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
  - SystemReady-band Image Test Suite details
 
-| Test Suite                                                                                   | Test Suite Tag                                               | Specification Version |
+| Test Suite                                                                                   | Test Suite Tag / Commit                                      | Specification Version |
 |----------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------|
-| [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs)                    | v25.04_SR_3.0.1                                              | BSA v1.1              |
-| [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sbsa-acs)           | v25.04_SR_3.0.1                                              | SBSA v7.2             |
-| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v25.04_SR_3.0.1                                              | BBR v2.1              |
-| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v25.04_SR_3.0.1                                              | BBSR v1.3             |
-| [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4                     |                       |
+| [Base System Architecture (BSA)](https://github.com/ARM-software/sysarch-acs)                | v25.10_BSA_1.1.2                                             | BSA v1.1              |
+| [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sysarch-acs)        | v25.10_SBSA_7.2.4                                            | SBSA v7.2             |
+| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | 00be42e82452cdad0b862728082568f3d7d2a1c3                     | BBR v2.1              |
+| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | 00be42e82452cdad0b862728082568f3d7d2a1c3                     | BBSR v1.3             |
+| [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | ba6c13f4e4fa1bf92ed04f5cb969d6c8a76f8605                     |                       |
 | [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v25.01.00                                                    |                       |
+| [Server Base Manageability Requirements (SBMR)](https://github.com/ARM-software/sbmr-acs)    | 27803824d966df48f34ce5290599f616bc0de8e9                     | SBMR v2.0             |
+
 
 ## Prebuilt Images
 - Prebuilt images for each release are available in the prebuilt_images folder.To access the prebuilt_images, click [prebuilt_images](prebuilt_images/).
@@ -186,12 +188,12 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
    - initcall_blacklist=psci_checker command line parameter: Edit the Linux Boot grub menu option and add **initcall_blacklist=psci_checker** to skip default linux psci_checker tool.
  - **SystemReady band ACS (Automation)** : This is **default** option and will run the automated compliance
    - UEFI compliance run - SCT, BSA UEFI, SBSA UEFI (if selected)
-   - Boots to Linux and run Linux compliance run - FWTS, BSA Linux, SBSA Linux (if selected)
+   - Boots to Linux and run Linux compliance run - SBMR IB, FWTS, BSA Linux, SBSA Linux (if selected)
  - **UEFI Execution Enviroment** : This option is introduced to manually run the selective UEFI test suites like SCT, BSA and SBSA with desired configuration.
  - **Linux Execution Enviroment** : This option is introduced to manually run the selective Linux test suites like FWTS, BSA and SBSA with desired configuration
      For more details on the Execution Enviroment and acs run config, refer to the [SystemReady_Execution_Enviroment_and_Config_Guide](../docs/SystemReady_Execution_Enviroment_and_Config_Guide.md)
    - UEFI compliance run - SCT, BSA UEFI, SBSA UEFI (if selected)
-   - Boots to Linux and run Linux compliance run - FWTS, BSA Linux, SBSA Linux (if selected)
+   - Boots to Linux and run Linux compliance run - SBMR IB, FWTS, BSA Linux, SBSA Linux (if selected)
  - **BBSR Compliance (Automation)** : This option will run the SCT and FWTS tests required for BBSR compliance, perform a Linux secure boot, and, if a TPM is present, evaluate the measured boot log. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../docs/BBSR_ACS_Verification.md).
  - **Linux Boot with SetVirtualAddressMap enabled** : This option is for debug purpose, to boot ACS Linux with SetVAMap on.
 

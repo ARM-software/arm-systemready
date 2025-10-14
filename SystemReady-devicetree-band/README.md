@@ -34,13 +34,14 @@ The SystemReady-devicetree band compliance and testing requirements are specifie
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
  - SystemReady-devicetree-band Image Test Suite details
 
-| Test Suite                                                                                   | Test Suite Tag                                               | Specification Version |
+| Test Suite                                                                                   | Test Suite Tag/Commit                                        | Specification Version |
 |----------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------|
-| [Base System Architecture (BSA)](https://github.com/ARM-software/bsa-acs)                    | v25.04_DT_3.0.1                                              | BSA v1.1              |
-| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v25.04_DT_3.0.1                                              | EBBR v2.2             |
-| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v25.04_DT_3.0.1                                              | BBSR v1.3             |
+| [Base System Architecture (BSA)](https://github.com/ARM-software/sysarch-acs)                | v25.10_BSA_1.1.2                                             | BSA v1.1              |
+| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | af2e92c7e92693bdd0a60c81e258936e8f1f02c6                     | EBBR v2.2             |
+| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | af2e92c7e92693bdd0a60c81e258936e8f1f02c6                     | BBSR v1.3             |
 | [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4                     |                       |
 | [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v25.01.00                                                    |                       |
+| [Platform Fault Detection Interface (PFDI)](https://github.com/ARM-software/sysarch-acs)     | v25.09_PFDI_0.8.0                                            | PFDI v1.0-BETA        |
 
 ## Prebuilt images
 - Prebuilt images for each release are available in the prebuilt_images folder.To access the prebuilt_images, click : [prebuilt_images](prebuilt_images/)
@@ -123,6 +124,9 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
 │   │   ├── Bsa.efi
 │   │   ├── bsa.nsh
 │   │   └── bsa_dt.flag
+│   ├── pfdi
+│   │   ├── pfdi.efi
+│   │   ├── pfdi.nsh
 │   ├── config
 │   │   ├── acs_config_dt.txt
 │   │   └── system_config.txt
@@ -150,6 +154,7 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
   - bbr directory contains SCT related binaries and sequence files
   - bbsr-keys contains cryptographic keys for secure boot and testing secure firmware updates
   - bsa directory contains bsa uefi executable for bsa compliance
+  - pfdi directory contains pfdi uefi executable for pfdi compliance
   - config directory contains system, acs related config files
   - debug directory contains script to gather debug information
   - debug/pingtest.nsh is uefi script for ping test
@@ -185,7 +190,7 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
    - noacs command line parameter: Edit the Linux Boot grub menu option and add **noacs** at the end of Linux Boot grub menu option, to boot into ACS Linux kernel without running the default Linux test suites.
    - initcall_blacklist=psci_checker command line parameter: Edit the Linux Boot grub menu option and add **initcall_blacklist=psci_checker** to skip default linux psci_checker tool.
  - **bbr/bsa** : This is **default** option and will run the automated compliance
-   - UEFI compliance run - SCT, BSA UEFI, [Capsule Update](https://github.com/chetan-rathore/arm-systemready/blob/main/docs/Automatic_Capsule_Update_guide.md)
+   - UEFI compliance run - SCT, BSA UEFI, PFDI UEFI [Capsule Update](https://github.com/chetan-rathore/arm-systemready/blob/main/docs/Automatic_Capsule_Update_guide.md)
    - Boots to Linux and run Linux compliance run - FWTS, BSA Linux
  - **BBSR Compliance (Automation)** : This option will run the SCT and FWTS tests required for BBSR compliance, perform a Linux secure boot, and, if a TPM is present, evaluate the measured boot log. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../docs/BBSR_ACS_Verification.md).
 
