@@ -1,3 +1,101 @@
+v25.10_DT_3.1.0
+** Devicetree band**
+* adding readme for read and write block devices
+* sct device path included in sct.json and html summary pages
+* delete legacy directory(IR,SR,ES) after migration to new structure
+* Added FWTS Version in both Systemready and Devicetree bands
+* With changes in xBSA linux acs code to not depend on linux boot time information, xbsa patch is not required.
+* Ethtool fix and wget enhancement
+* Updated the script for string mismatch and EV_EFI_ACTION
+* Copy acs_run_config.ini to result directory
+* Fix log redirection of device_driver.sh script
+* Merge the sysarch-acs branch changes to main branch
+* Update linux-acs tag to track latest mainline code
+* Drop GCC49 dependency in BSA-ACS Yocto recipe
+* linux-yocto: Add USB config for KV260
+* suite wise compliance now matches console output and include mandatory and recommended
+* Copy signed EFI binaries to deploy image for runtime availability
+* ACS-DT sort all keys of JSON objects
+* Ethtool Test and UEFI ping test Readme files and enhancements
+* Enabling lshw command in SR image
+* Capturing dmesg and journalctl logs to DT linux logs
+* Ethtool_test: Handle explicit ping failures to router/gateway and www.arm.com
+* Move to latest edk2-test-parser commit
+* Log Parser changes enhancements and fixes
+* dt-schema related changes
+* Clone systemready-scripts with linux_dump max entries 20
+* Remove the use of old GCC49 variables
+* Update the edk2-test-parser commit to fix for ignore the old HII
+* Drop TPM2 module test from FWTS for DT based system
+* Refactor capsule update log parsing
+* Add support for capturing results of multi-payload capsule updates
+* build: fix gnulib fetch by updating GNULIB_URL to GitHub
+* Add findutils and python3-pyyaml dependencies
+* Update systemready scripts to changed xbsa exerciser base 1500
+* Standalone tests now aligned with test_category json.
+* Updates to DT test category table
+* Log parser changes for making merged json fields consistent
+* Failure count should not include waiver test count
+* Enable SPMI PMIF + MT6315 regulator to support MTK devices
+* Fixed else statement bug and count issue for compliant with waivers
+* Add GNU_MIRROR for more stable and faster responses
+* copy acs_waiver.json into result directory
+* Use sysarch-acs version update commit id
+* Updates to DT test category table
+* dt-validate parser: support new format and warnings
+* Run dt-parser on dt-validate log for failure categorization
+* dt-validate: handle table-style logs; skip preamble/summary noise
+* Minor improvements and fixes
+* updating waiver.json and waiver guide according to waivable suites in test category json
+* ethtool-test.py: use ip over deprecated ifconfig to bring interfaces up/down
+* Integration of pfdi acs in DT ACS
+* Updated the dt bindings source to linux 6.16
+* fix(psci): treat psci not run or supported as non-compliance
+* enable MediaTek DWMAC Ethernet driver as module
+* upgrade edk2 and edk2-test versions
+* log parser changes for ethtool and os tests and minor fixes
+* bbsr extension results comes under acs summary in merged json
+* Enable automatic root login on ttyAML0
+* use linux-acs commit with msi-x vector guard
+* Skip PCIe displayport, mass storage, nic card
+* refine capsule-on-disk result logic for stricter verdict consistency
+
+v25.10_SR_3.1.0
+** SystemReady band**
+* Add the message that secureboot keys needs to be manually cleared
+* sct device path included in sct.json and html summary pages
+* delete legacy directory(IR,SR,ES) after migration to new structure
+* Added FWTS Version in both Systemready and Devicetree bands
+* Make the config tag NULL to fetch latest xbsa and bbr code for daily builds.
+* With changes in xBSA linux acs code to not depend on linux boot time information, xbsa patch is not required.
+* Update linux-acs tag to point to legacy repo for backward compatibility
+* Copy acs_run_config.ini to result directory
+* Log Parser changes enhancements and fixes
+* Remove the use of old GCC49 variables
+* Collecting Linux device driver data in SR image
+* Adding script for collecting WinPE device driver data
+* Update systemready scripts to changed xbsa exerciser base 1500
+* Log parser changes for making merged json fields consistent
+* Failure count should not include waiver test count
+* Fixed else statement bug and count issue for compliant with waivers
+* Add GNU_MIRROR for more stable and faster responses
+* copy acs_waiver.json into result directory
+* Use sysarch-acs version update commit id
+* Minor improvements and fixes
+* upgrade edk2 and edk2-test versions
+* bbsr extension results comes under acs summary in merged json
+* Fix commit ids for BSA test suite for DT
+* use linux-acs commit with msi-x vector guard
+* Skip PCIe displayport, mass storage, nic card
+* Remove duplicate fwts tests esrt and uefibootpath
+* SBMR integration on the main branch
+* Enable tag-based SBMR-ACS download
+* Run SBMR ACS before the hardware tests of xBSA
+* Upgrade sct version prints for SR band for v3.1.0
+* Readme updates for systemready v3.1.0 release
+* Skip SBSA test 105 from automation run temporary
+
+
 v25.04_DT_3.0.1
 ** Devicetree band**
 * PSCI checks for version added as recommended test.
