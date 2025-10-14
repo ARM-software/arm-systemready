@@ -136,8 +136,8 @@ Note: SystemReady-devicetree-band ACS image can also be run using the above step
 
 ## Running BBSR ACS on QEMU with uboot firmware
 
-### Build u-boot firmware and QEMU
-Follow the instructions provided in [Verification of the SystemReady-devicetree-band image on QEMU Arm machine](../../SystemReady-devicetree-band/README.md#verification-of-the-systemready-devicetree-band-image-on-qemu-arm-machine) section of SystemReady-devicetree-band Yocto README.
+### Build u-boot firmware 
+Follow the instructions provided in [Verification of the SystemReady-devicetree-band image on QEMU Arm machine](../../SystemReady-devicetree-band/README.md#software-stack-and-model) section of SystemReady-devicetree-band Yocto README.
 
 ### Running BBSR ACS with Prebuilt SystemReady-devicetree-band ACS image on QEMU
 1. Create a script "run_qemu.sh" as below with variables configured as per your environment:
