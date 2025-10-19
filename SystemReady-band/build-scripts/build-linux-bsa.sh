@@ -26,18 +26,42 @@ ACS_PATH=$TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
 build_bsa_kernel_driver()
 {
  pushd $TOP_DIR/linux-acs/acs-drv/files
+
+ pushd $TOP_DIR/linux-acs
+ if [ -z $BSA_ACS_TAG ]; then
+     echo "No BSA ACS tag defined, use latest main branch source"
+     git checkout master
+     git pull --ff-only origin master
+ else
+     echo "Checkout tag $BSA_ACS_TAG"
+     git checkout --detach "tags/${BSA_ACS_TAG}"
+ fi
+ popd
+
  rm -rf $TOP_DIR/linux-acs/acs-drv/files/val
  rm -rf $TOP_DIR/linux-acs/acs-drv/files/test_pool
 
  arch=$(uname -m)
-    echo $arch
-    if [[ $arch = "aarch64" ]]
-    then
-        echo "arm64 native build"
-        export CROSS_COMPILE=''
-    else
-        export CROSS_COMPILE=$TOP_DIR/$GCC
-    fi
+ echo $arch
+ if [[ $arch = "aarch64" ]]
+ then
+     echo "arm64 native build"
+     export CROSS_COMPILE=''
+ else
+     export CROSS_COMPILE=$TOP_DIR/$GCC
+ fi
+
+ pushd $TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
+ if [ -z $BSA_ACS_TAG ]; then
+     echo "No BSA ACS tag defined, use latest main branch source"
+     git checkout main
+     git pull --ff-only origin main
+ else
+     echo "Checkout tag $BSA_ACS_TAG"
+     git checkout --detach "tags/${BSA_ACS_TAG}"
+ fi
+ popd
+
  ./acs_setup.sh $TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
  ./linux_acs.sh bsa
  popd

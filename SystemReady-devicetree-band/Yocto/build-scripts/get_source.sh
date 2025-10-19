@@ -86,10 +86,10 @@ copy_recipes()
 
 
     # recipes accordingly
-    if [ ! -z "$SYS_ARCH_ACS_TAG" ]; then
-        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${SYS_ARCH_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-uefi/bsa-acs.bb
-        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${SYS_ARCH_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-app/bsa-acs-app.bb
-        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${SYS_ARCH_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-drv/bsa-acs-drv.bb
+    if [ ! -z "$BSA_ACS_TAG" ]; then
+        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${BSA_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-uefi/bsa-acs.bb
+        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${BSA_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-app/bsa-acs-app.bb
+        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${BSA_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-drv/bsa-acs-drv.bb
     fi
 
     if [ ! -z "$EDK2_SRC_TAG" ]; then
@@ -110,8 +110,8 @@ copy_recipes()
         sed -i -E 's/SRCREV_edk2-test\s+=\s+"\$\{AUTOREV\}"/SRCREV_edk2-test = \"'${SCT_SRC_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/ebbr-sct/ebbr-sct.bb
     fi
 
-    if [ ! -z "$ARM_LINUX_ACS_TAG" ]; then
-        sed -i -E 's/SRCREV_linux-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_linux-acs = \"'${ARM_LINUX_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-drv/bsa-acs-drv.bb
+    if [ ! -z "$BSA_ACS_TAG" ]; then
+        sed -i -E 's/SRCREV_linux-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_linux-acs = \"'${BSA_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-drv/bsa-acs-drv.bb
     fi
 
     if [ ! -z "$EDK2_TEST_PARSER_TAG" ]; then

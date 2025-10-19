@@ -59,14 +59,8 @@ get_sysarch_acs_src()
         exit 1
     fi
 
-    if [ -z $SYS_ARCH_ACS_TAG ]; then
-        #No TAG is provided. Download the latest code
-        echo "Downloading Arm SYSARCH-ACS source code."
-        git clone --depth 1 https://github.com/ARM-software/sysarch-acs.git ShellPkg/Application/sysarch-acs
-    else
-        echo "Downloading Arm SYSARCH-ACS source code. TAG : $SYS_ARCH_ACS_TAG"
-        git clone --depth 1 --branch $SYS_ARCH_ACS_TAG https://github.com/ARM-software/sysarch-acs.git ShellPkg/Application/sysarch-acs
-    fi
+    echo "Downloading Arm SYSARCH-ACS source code."
+    git clone --depth 1 https://github.com/ARM-software/sysarch-acs.git ShellPkg/Application/sysarch-acs
     popd
     pushd  $TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
     git pull
@@ -86,12 +80,12 @@ get_cross_compiler()
         mkdir -p tools
         pushd $TOP_DIR/tools
         wget $CROSS_COMPILER_URL --no-check-certificate
-	if [ $? -ne 0 ]; then
+        if [ $? -ne 0 ]; then
             echo "Error: Failed to dowload toolchain"
             exit 1
         fi
         tar -xf arm-gnu-toolchain-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
-	mv arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu
+        mv arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-linux-gnu arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu
         rm arm-gnu-toolchain-${GCC_TOOLS_VERSION}-x86_64-${TAG}.tar.xz
         popd
     fi
@@ -125,13 +119,8 @@ get_sct_src()
 
 get_linux-acs_src()
 {
-  if [ -z $ARM_LINUX_ACS_TAG ]; then
-      echo "Downloading Arm Linux ACS source code."
-      git clone --depth 1 https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
-  else
-      echo "Downloading Arm Linux ACS source code. TAG : ${ARM_LINUX_ACS_TAG}"
-      git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
-  fi
+    echo "Downloading Arm Linux ACS source code."
+    git clone --depth 1 https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
 
     pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
     git am $TOP_DIR/../common/patches/0001-SystemReady-Linux-${LINUX_KERNEL_VERSION}.patch
@@ -182,7 +171,6 @@ get_buildroot_src()
 {
     echo "Downloading Buildroot source code. TAG : $BUILDROOT_SRC_VERSION"
     #git clone -b $BUILDROOT_SRC_VERSION https://git.busybox.net/buildroot/
-    #TODO  git clone was failing with busybox url, try gitlab
     git clone -b $BUILDROOT_SRC_VERSION https://gitlab.com/buildroot.org/buildroot.git
     if [ $? -ne 0 ]; then
         echo "Error: Failed to download buildroot source code"

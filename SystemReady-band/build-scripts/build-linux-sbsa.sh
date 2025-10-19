@@ -31,6 +31,18 @@ PLATDIR=${TOP_DIR}/output
 build_sbsa_kernel_driver()
 {
     pushd $TOP_DIR/linux-acs/acs-drv/files
+
+    pushd $TOP_DIR/linux-acs
+    if [ -z $SBSA_ACS_TAG ]; then
+        echo "No SBSA ACS tag defined, use latest main branch source"
+        git checkout master
+        git pull --ff-only origin master
+    else
+        echo "Checkout tag $SBSA_ACS_TAG"
+        git checkout --detach "tags/${SBSA_ACS_TAG}"
+    fi
+    popd
+
     rm -rf $TOP_DIR/linux-acs/acs-drv/files/val
     rm -rf $TOP_DIR/linux-acs/acs-drv/files/test_pool
 
@@ -43,6 +55,18 @@ build_sbsa_kernel_driver()
     else
         export CROSS_COMPILE=$TOP_DIR/$GCC
     fi
+
+    pushd $TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
+    if [ -z $SBSA_ACS_TAG ]; then
+        echo "No SBSA ACS tag defined, use latest main branch source"
+        git checkout main
+        git pull --ff-only origin main
+    else
+        echo "Checkout tag $SBSA_ACS_TAG"
+        git checkout --detach "tags/${SBSA_ACS_TAG}"
+    fi
+    popd
+
     ./acs_setup.sh $TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
     ./linux_acs.sh sbsa
     popd

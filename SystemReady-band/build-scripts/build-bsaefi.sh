@@ -49,6 +49,16 @@ KEYS_DIR=$TOP_DIR/bbsr-keys
 do_build()
 {
     pushd $TOP_DIR/$UEFI_PATH
+    pushd ShellPkg/Application/sysarch-acs
+    if [ -z $BSA_ACS_TAG ]; then
+        echo "No BSA ACS tag defined, use latest main branch source"
+        git checkout main
+        git pull --ff-only origin main
+    else
+        echo "Checkout tag $BSA_ACS_TAG"
+        git checkout --detach "tags/${BSA_ACS_TAG}"
+    fi
+    popd
     source ./edksetup.sh
     make -C BaseTools/Source/C
     export EDK2_TOOLCHAIN=$UEFI_TOOLCHAIN
