@@ -564,11 +564,11 @@ def merge_json_files(json_files, output_file):
 
     acs_results_summary["Overall Compliance Result"] = overall_comp
     if overall_comp.startswith("Not Compliant"):
-        print(f"\n{RED}SRS 3.0 Compliance result: {overall_comp}{RESET}\n")
+        print(f"\n{RED}SRS requirements compliance result: {overall_comp}{RESET}\n")
     elif overall_comp.startswith("Compliant with waivers"):
-        print(f"\n{YELLOW}SRS 3.0 Compliance result: {overall_comp}{RESET}\n")
+        print(f"\n{YELLOW}SRS requirements compliance result: {overall_comp}{RESET}\n")
     else:
-        print(f"\n{GREEN}SRS 3.0 Compliance result: {overall_comp}{RESET}\n")
+        print(f"\n{GREEN}SRS requirements compliance result: {overall_comp}{RESET}\n")
 
     if "Overall Compliance Results" in acs_results_summary:
         del acs_results_summary["Overall Compliance Results"]
