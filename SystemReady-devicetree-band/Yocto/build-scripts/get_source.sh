@@ -76,7 +76,7 @@ copy_recipes()
     rm $TOP_DIR/meta-woden/poky/meta/recipes-kernel/linux/linux-yocto_6.6.bb
 
     #Increase the initramfs size to hold more storage drivers in ACS image
-    sed -i 's/INITRAMFS_MAXSIZE ??= "131072"/INITRAMFS_MAXSIZE ??= "180000"/' $TOP_DIR/meta-woden/poky/meta/conf/bitbake.conf
+    sed -i 's/INITRAMFS_MAXSIZE ??= "131072"/INITRAMFS_MAXSIZE ??= "190000"/' $TOP_DIR/meta-woden/poky/meta/conf/bitbake.conf
 
 
     #copy linux_yocto.bbappend with empty defconfig

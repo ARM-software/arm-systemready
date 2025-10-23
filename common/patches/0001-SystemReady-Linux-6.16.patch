@@ -1,0 +1,106 @@
+From d98e17c06af9126952db516fb2ff6c614efa1dcb Mon Sep 17 00:00:00 2001
+From: Rajat Goyal <Rajat.Goyal@arm.com>
+Date: Tue, 8 Apr 2025 09:38:34 +0000
+Subject: [PATCH] SystemReady Linux 6.13
+
+Signed-off-by: Rajat Goyal <Rajat.Goyal@arm.com>
+Change-Id: I9f5488a91fc531bb9a626893c4edd5d71e7ed159
+---
+ .../admin-guide/kernel-parameters.txt         |  1 +
+ .../firmware/efi/libstub/efi-stub-helper.c    |  2 ++
+ drivers/firmware/efi/libstub/efistub.h        |  1 +
+ drivers/firmware/efi/libstub/fdt.c            | 21 +++++++++++++++++--
+ 4 files changed, 23 insertions(+), 2 deletions(-)
+
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index 3872bc6ec49d..fe35184d28cf 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -1469,6 +1469,7 @@
+ 			reservation and treat the memory by its base type
+ 			(i.e. EFI_CONVENTIONAL_MEMORY / "System RAM").
+ 			novamap: do not call SetVirtualAddressMap().
++			acsforcevamap: Arm ACS, force the call of SetVirtualAddressMap().
+ 			no_disable_early_pci_dma: Leave the busmaster bit set
+ 			on all PCI bridges while in the EFI boot stub
+ 
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index c0c81ca4237e..e08bda316892 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -20,6 +20,7 @@
+ bool efi_nochunk;
+ bool efi_nokaslr = !IS_ENABLED(CONFIG_RANDOMIZE_BASE);
+ bool efi_novamap;
++bool efi_acsforcevamap = false;
+ 
+ static bool efi_noinitrd;
+ static bool efi_nosoftreserve;
+@@ -87,6 +88,7 @@ efi_status_t efi_parse_options(char const *cmdline)
+ 		} else if (!strcmp(param, "efi") && val) {
+ 			efi_nochunk = parse_option_str(val, "nochunk");
+ 			efi_novamap |= parse_option_str(val, "novamap");
++			efi_acsforcevamap |= parse_option_str(val, "acsforcevamap");
+ 
+ 			efi_nosoftreserve = IS_ENABLED(CONFIG_EFI_SOFT_RESERVE) &&
+ 					    parse_option_str(val, "nosoftreserve");
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 76e44c185f29..97232efbc21c 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -39,6 +39,7 @@ extern bool efi_nokaslr;
+ extern int efi_loglevel;
+ extern int efi_mem_encrypt;
+ extern bool efi_novamap;
++extern bool efi_acsforcevamap;
+ extern const efi_system_table_t *efi_system_table;
+ 
+ typedef union efi_dxe_services_table efi_dxe_services_table_t;
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 6a337f1f8787..4471ea1811be 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -232,13 +232,30 @@ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
+ 	unsigned long fdt_addr = 0;
+ 	unsigned long fdt_size = 0;
+ 
+-	if (!efi_novamap) {
++    if(efi_acsforcevamap) {
++        efi_info("ACS:acsforcevamap is 1\n");
++	}
++	else {
++        efi_info("ACS:acsforcevamap is 0\n");
++	}
++
++    if(efi_novamap) {
++        efi_info("ACS:efi_novamap is 1\n");
++	}
++	else {
++        efi_info("ACS:efi_novamap is 0\n");
++	}
++
++
++	if (!efi_novamap || efi_acsforcevamap) {
++        efi_info("ACS:Alloc memory for virtual address map ...");
+ 		status = efi_alloc_virtmap(&priv.runtime_map, &desc_size,
+ 					   &desc_ver);
+ 		if (status != EFI_SUCCESS) {
+ 			efi_err("Unable to retrieve UEFI memory map.\n");
+ 			return status;
+ 		}
++		efi_info(" Success\n");
+ 	}
+ 
+ 	/*
+@@ -294,7 +311,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
+ 	if (status == EFI_SUCCESS) {
+ 		efi_set_virtual_address_map_t *svam;
+ 
+-		if (efi_novamap)
++		if (efi_novamap && !efi_acsforcevamap)
+ 			return EFI_SUCCESS;
+ 
+ 		/* Install the new virtual address map */
+-- 
+2.34.1
+

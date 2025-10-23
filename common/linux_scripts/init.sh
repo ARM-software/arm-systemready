@@ -47,7 +47,6 @@ mdev -s
 
 echo "Starting disk drivers"
 insmod /lib/modules/xhci-pci-renesas.ko
-insmod /lib/modules/xhci-pci.ko
 insmod /lib/modules/nvme-core.ko
 insmod /lib/modules/nvme.ko
 
