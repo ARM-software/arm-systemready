@@ -1,0 +1,182 @@
+From 7882e4035aa21402ba1252cb56b289e770eca6e0 Mon Sep 17 00:00:00 2001
+From: Guru9902 <gururaj.revankar@arm.com>
+Date: Thu, 23 Oct 2025 14:35:31 +0000
+Subject: [PATCH] build_fwts_version_25.09.00
+
+Signed-off-by: Guru9902 <gururaj.revankar@arm.com>
+---
+ .../fwts/0001-build-do-not-use-Werror.patch   | 79 -------------------
+ package/fwts/Config.in                        | 14 +++-
+ package/fwts/fwts.hash                        |  6 +-
+ package/fwts/fwts.mk                          | 13 +--
+ 4 files changed, 22 insertions(+), 90 deletions(-)
+ delete mode 100644 package/fwts/0001-build-do-not-use-Werror.patch
+
+diff --git a/package/fwts/0001-build-do-not-use-Werror.patch b/package/fwts/0001-build-do-not-use-Werror.patch
+deleted file mode 100644
+index 715c4f63a5..0000000000
+--- a/package/fwts/0001-build-do-not-use-Werror.patch
++++ /dev/null
+@@ -1,79 +0,0 @@
+-From e481c2f990ffa71f205d4b9daf0823e71269a7f3 Mon Sep 17 00:00:00 2001
+-From: Erico Nunes <nunes.erico@gmail.com>
+-Date: Fri, 12 Aug 2016 23:11:56 +0200
+-Subject: [PATCH] fwts: do not use -Werror
+-MIME-Version: 1.0
+-Content-Type: text/plain; charset=UTF-8
+-Content-Transfer-Encoding: 8bit
+-
+-Warnings come and go with various compiler versions, so using -Werror is
+-prone to cause build failures with various compiler versions, especially
+-newer versions that introduce new warnings.
+-
+-Remove use of -Werror.
+-
+-Signed-off-by: Erico Nunes <nunes.erico@gmail.com>
+-[Fabrice: updated for 20.08.00]
+-Signed-off-by: Fabrice Fontaine <fontaine.fabrice@gmail.com>
+-[Vincent: rebased onto V21.05.00]
+-Signed-off-by: Vincent Stehlé <vincent.stehle@laposte.net>
+----
+- configure.ac              | 2 +-
+- src/Makefile.am           | 2 +-
+- src/lib/src/Makefile.am   | 2 +-
+- src/utilities/Makefile.am | 2 +-
+- 4 files changed, 4 insertions(+), 4 deletions(-)
+-
+-diff --git a/configure.ac b/configure.ac
+-index f40c3678..0ff5025b 100644
+---- a/configure.ac
+-+++ b/configure.ac
+-@@ -1,5 +1,5 @@
+- 	  AC_INIT([fwts],[0.1],[fwts-devel@lists.ubuntu.com])
+--          AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+-+          AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
+-           m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+- 	  AC_CANONICAL_HOST
+- 	  AC_CONFIG_MACRO_DIR([m4])
+-diff --git a/src/Makefile.am b/src/Makefile.am
+-index cdabb386..7c2e5730 100644
+---- a/src/Makefile.am
+-+++ b/src/Makefile.am
+-@@ -12,7 +12,7 @@ AM_CPPFLAGS = \
+- 	-I$(top_srcdir)/src/acpica/source/compiler	\
+- 	-I$(top_srcdir)/efi_runtime			\
+- 	-pthread `pkg-config --cflags glib-2.0 gio-2.0` \
+--	-Wall -Werror -Wextra				\
+-+	-Wall -Wextra					\
+- 	-Wno-address-of-packed-member			\
+- 	-Wfloat-equal -Wmissing-declarations		\
+- 	-Wno-long-long -Wredundant-decls -Wshadow	\
+-diff --git a/src/lib/src/Makefile.am b/src/lib/src/Makefile.am
+-index 55c52b41..50efa97a 100644
+---- a/src/lib/src/Makefile.am
+-+++ b/src/lib/src/Makefile.am
+-@@ -25,7 +25,7 @@ AM_CPPFLAGS = \
+- 	`pkg-config --silence-errors --cflags json-c`	\
+- 	`pkg-config --cflags glib-2.0 gio-2.0` 		\
+- 	-DDATAROOTDIR=\"$(datarootdir)\"		\
+--	-Wall -Werror -Wextra				\
+-+	-Wall -Wextra					\
+- 	-Wno-address-of-packed-member
+- 
+- pkglib_LTLIBRARIES = libfwts.la
+-diff --git a/src/utilities/Makefile.am b/src/utilities/Makefile.am
+-index 1fc0fc02..53614e33 100644
+---- a/src/utilities/Makefile.am
+-+++ b/src/utilities/Makefile.am
+-@@ -16,7 +16,7 @@
+- # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+- #
+- 
+--AM_CPPFLAGS = -Wall -Werror -Wextra -DDATAROOTDIR=\"$(datarootdir)\" 	\
+-+AM_CPPFLAGS = -Wall -Wextra -DDATAROOTDIR=\"$(datarootdir)\" 	\
+- 	-I$(srcdir)/../lib/include
+- 
+- bin_PROGRAMS = kernelscan
+--- 
+-2.30.2
+-
+diff --git a/package/fwts/Config.in b/package/fwts/Config.in
+index ac9a2e3909..03f16fa75b 100644
+--- a/package/fwts/Config.in
++++ b/package/fwts/Config.in
+@@ -1,6 +1,14 @@
++config BR2_PACKAGE_FWTS_ARCH_SUPPORTS
++	bool
++	default y if BR2_aarch64
++	default y if BR2_arm
++	default y if BR2_i386
++	default y if BR2_RISCV_64
++	default y if BR2_x86_64
++
+ config BR2_PACKAGE_FWTS
+ 	bool "fwts"
+-	depends on BR2_i386 || BR2_x86_64 || BR2_aarch64
++	depends on BR2_PACKAGE_FWTS_ARCH_SUPPORTS
+ 	depends on BR2_PACKAGE_LIBBSD_ARCH_SUPPORTS # libbsd
+ 	depends on BR2_USE_MMU # libglib2
+ 	depends on BR2_USE_WCHAR # libglib2, libbsd
+@@ -33,8 +41,8 @@ comment "efi_runtime module needs a Linux kernel to be built"
+ endif
+ 
+ comment "fwts needs a glibc toolchain w/ wchar, threads, dynamic library"
+-	depends on BR2_i386 || BR2_x86_64 || BR2_aarch64
++	depends on BR2_PACKAGE_FWTS_ARCH_SUPPORTS
+ 	depends on BR2_PACKAGE_LIBBSD_ARCH_SUPPORTS # libbsd
+ 	depends on BR2_USE_MMU
+ 	depends on !BR2_USE_WCHAR || !BR2_TOOLCHAIN_HAS_THREADS || \
+-		!BR2_TOOLCHAIN_USES_GLIBC || BR2_STATIC_LIBS
++		!BR2_TOOLCHAIN_USES_GLIBC || BR2_STATIC_LIBS
+\ No newline at end of file
+diff --git a/package/fwts/fwts.hash b/package/fwts/fwts.hash
+index 8634980e03..e11ac40bd7 100644
+--- a/package/fwts/fwts.hash
++++ b/package/fwts/fwts.hash
+@@ -1,5 +1,5 @@
+-# Hash from: http://fwts.ubuntu.com/release/SHA256SUMS
+-sha256  17d1f0b9639e0f9b092ed8233be2d63d6c44ea8d2a76be0fb5902cc867961374  fwts-V21.11.00.tar.gz
++# Hash from: https://fwts.ubuntu.com/release/SHA256SUMS
++sha256  ecba21d367b1c7aea41b378ad8fd3d43706c0fa4033cc31b59f8152c9cc0d69e  fwts-V25.09.00.tar.gz
+ 
+ # Hash for license file
+-sha256  fbbea748555635dd8c7e6e2f99cddd778f5ee3f9e3510775183bf9799076e5e5  debian/copyright
++sha256  77a5f0ea48e53ee8d67aecc7759cf468bcd340c1caca711ed4307b477a93fb47  debian/copyright
+\ No newline at end of file
+diff --git a/package/fwts/fwts.mk b/package/fwts/fwts.mk
+index 6634cdc40e..38c0848ee0 100644
+--- a/package/fwts/fwts.mk
++++ b/package/fwts/fwts.mk
+@@ -4,10 +4,9 @@
+ #
+ ################################################################################
+ 
+-FWTS_VERSION = 21.11.00
++FWTS_VERSION = 25.09.00
+ FWTS_SOURCE = fwts-V$(FWTS_VERSION).tar.gz
+-FWTS_SITE = http://fwts.ubuntu.com/release
+-FWTS_STRIP_COMPONENTS = 0
++FWTS_SITE = https://fwts.ubuntu.com/release
+ FWTS_LICENSE = GPL-2.0, LGPL-2.1, Custom
+ FWTS_LICENSE_FILES = debian/copyright
+ FWTS_AUTORECONF = YES
+@@ -15,9 +14,13 @@ FWTS_DEPENDENCIES = host-bison host-flex host-pkgconf libglib2 libbsd \
+ 	$(if $(BR2_PACKAGE_BASH_COMPLETION),bash-completion) \
+ 	$(if $(BR2_PACKAGE_DTC),dtc)
+ 
+-ifdef BR2_PACKAGE_FWTS_EFI_RUNTIME_MODULE
++ifeq ($(BR2_OPTIMIZE_0),y)
++FWTS_CONF_ENV = CFLAGS="$(TARGET_CFLAGS) -O1"
++endif
++
++ifeq ($(BR2_PACKAGE_FWTS_EFI_RUNTIME_MODULE),y)
+ FWTS_MODULE_SUBDIRS = efi_runtime
+ $(eval $(kernel-module))
+ endif
+ 
+-$(eval $(autotools-package))
++$(eval $(autotools-package))
+\ No newline at end of file
+-- 
+2.43.0
+
