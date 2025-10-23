@@ -87,7 +87,6 @@ do_build ()
     echo "CONFIG_SERIAL_8250_NR_UARTS=32" >> $LINUX_OUT_DIR/.config
     echo "CONFIG_SERIAL_8250_RUNTIME_UARTS=32" >> $LINUX_OUT_DIR/.config
     cat $SRBAND_DEFCONFIG >> $LINUX_OUT_DIR/.config
-
     if [[ $arch = "aarch64" ]]
     then
         echo "arm64 machine"
@@ -126,7 +125,6 @@ do_package ()
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/nvme/host/nvme.ko $TOP_DIR/ramdisk/drivers
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/nvme/host/nvme-core.ko $TOP_DIR/ramdisk/drivers
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci-renesas.ko $TOP_DIR/ramdisk/drivers
-    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/usb/host/xhci-pci.ko $TOP_DIR/ramdisk/drivers
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/char/tpm/tpm_tis.ko $TOP_DIR/ramdisk/drivers
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/char/tpm/tpm_tis_spi.ko $TOP_DIR/ramdisk/drivers
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/char/tpm/tpm_tis_i2c_cr50.ko $TOP_DIR/ramdisk/drivers
