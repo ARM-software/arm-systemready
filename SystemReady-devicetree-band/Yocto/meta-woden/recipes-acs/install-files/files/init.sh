@@ -185,8 +185,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
           mv /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log.old
         fi
         echo "Running dt-validate tool "
+        echo -e "SystemReady devicetree band ACS v3.1.0 \n DeviceTree bindings of Linux kernel version: 6.16 \ndtschema version: 2025.02  \n\n" > /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         dt-validate -s /usr/bin/processed_schema.json -m /home/root/fdt/fdt 2>> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
-        sed -i '1s/^/DeviceTree bindings of Linux kernel version: 6.16 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         if [ ! -s /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log ]; then
           echo "The FDT is compliant according to schema " >> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         fi
