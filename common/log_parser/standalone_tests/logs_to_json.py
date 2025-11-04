@@ -206,6 +206,12 @@ def parse_dt_validate_log(log_data):
 
                 subtest_number += 1
 
+    if not current_test["subtests"]:
+        sub = create_subtest(1, "dt-validate", "PASSED", reason="No warnings or errors")
+        current_test["subtests"].append(sub)
+        current_test["test_suite_summary"]["total_passed"] += 1
+        suite_summary["total_passed"] += 1
+
     # >>> REMOVE EMPTY REASON ARRAYS <<<
     for subtest in current_test["subtests"]:
         subres = subtest["sub_test_result"]
@@ -814,7 +820,7 @@ def parse_read_write_check_blk_devices_log(log_data):
         "suite_summary": suite_summary
     }
 
-# PARSER FOR CAPSULE UPDATE 
+# PARSER FOR CAPSULE UPDATE
 def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path, capsule_test_results_log_path):
     test_suite_key = "capsule_update"
     mapping = {
@@ -1113,10 +1119,12 @@ def parse_single_log(log_file_path):
         log_data = f.readlines()
 
     log_content = ''.join(log_data)
+    name = os.path.basename(log_file_path).lower()
 
     if re.search(r'selftests: dt: test_unprobed_devices.sh', log_content):
         return parse_dt_kselftest_log(log_data)
-    elif re.search(r'DeviceTree bindings of Linux kernel version', log_content):
+    elif ('dt-validate' in name
+            or re.search(r'DeviceTree bindings of Linux kernel version', log_content, re.I)):
         return parse_dt_validate_log(log_data)
     elif re.search(r'Running ethtool', log_content):
         return parse_ethtool_test_log(log_data)
