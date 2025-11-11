@@ -289,10 +289,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   sleep 60
   #copying acs_run_config.ini into results directory.
   mkdir -p /mnt/acs_results/acs_summary/config
-  cp /mnt/acs_tests/config/acs_run_config.ini /mnt/acs_results/acs_summary/config
+  cp /mnt/acs_tests/config/acs_run_config.ini /mnt/acs_results/acs_summary/config/
   # Copying acs_waiver.json into result directory.
   if [ -f /mnt/acs_tests/config/acs_waiver.json ]; then
-    cp /mnt/acs_tests/config/acs_waiver.json /mnt/acs_results/acs_summary/config
+    cp /mnt/acs_tests/config/acs_waiver.json /mnt/acs_results/acs_summary/config/
+  fi
+  # Copying system_config.txt into result directory
+  if [ -f /mnt/acs_tests/config/system_config.txt ]; then
+    cp /mnt/acs_tests/config/system_config.txt /mnt/acs_results/acs_summary/config/
   fi
   sync /mnt
 
