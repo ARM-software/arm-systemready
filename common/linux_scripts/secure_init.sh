@@ -126,6 +126,18 @@ if [ -d "$RESULTS_DIR" ]; then
       rm -r $RESULTS_DIR/acs_summary
   fi
   /usr/bin/log_parser/main_log_parser.sh $RESULTS_DIR /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
+  # Creating config directory in the results (secure flow)
+  mkdir -p "$RESULTS_DIR/acs_summary/config"
+  # Copy waiver and system config into results
+  if [ -f /mnt/acs_tests/config/acs_waiver.json ]; then
+    cp /mnt/acs_tests/config/acs_waiver.json "$RESULTS_DIR/acs_summary/config/"
+  fi
+  if [ -f /mnt/acs_tests/config/system_config.txt ]; then
+    cp /mnt/acs_tests/config/system_config.txt "$RESULTS_DIR/acs_summary/config/"
+  fi
+  if [ -f /mnt/acs_tests/config/acs_run_config.ini ]; then
+    cp /mnt/acs_tests/config/acs_run_config.ini "$RESULTS_DIR/acs_summary/config/"
+  fi
   echo "Please wait acs results are syncing on storage medium."
   sync /mnt
   sleep 60

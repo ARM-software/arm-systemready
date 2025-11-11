@@ -362,10 +362,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         fi
       /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results_template/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
       fi
+      mkdir -p /mnt/acs_results_template/acs_results/acs_summary/config
       # Copying acs_waiver.json into result directory.
       if [ -f /mnt/acs_tests/config/acs_waiver.json ]; then
-        mkdir -p /mnt/acs_results_template/acs_results/acs_summary/config
-        cp /mnt/acs_tests/config/acs_waiver.json /mnt/acs_results_template/acs_results/acs_summary/config
+        cp /mnt/acs_tests/config/acs_waiver.json /mnt/acs_results_template/acs_results/acs_summary/config/
+      fi
+      # Copying system_config.txt into result directory
+      if [ -f /mnt/acs_tests/config/system_config.txt ]; then
+        cp /mnt/acs_tests/config/system_config.txt /mnt/acs_results_template/acs_results/acs_summary/config/
       fi
       echo "Please wait acs results are syncing on storage medium."
       sync /mnt
