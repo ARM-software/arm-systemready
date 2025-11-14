@@ -1,5 +1,5 @@
 diff --git a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
-index f0a8b9f..e41e0de 100644
+index f0a8b9fe62..e41e0de3e0 100644
 --- a/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
 +++ b/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c
 @@ -90,8 +90,8 @@ UefiHiiServicesLibConstructor (
@@ -14,14 +14,14 @@ index f0a8b9f..e41e0de 100644
    //
    // Retrieve the pointer to the optional UEFI HII Font Protocol
 diff --git a/ShellPkg/ShellPkg.dsc b/ShellPkg/ShellPkg.dsc
-index 7e985f8..6ea22f8 100644
+index 94d95de0eb..797d6abe16 100644
 --- a/ShellPkg/ShellPkg.dsc
 +++ b/ShellPkg/ShellPkg.dsc
 @@ -66,6 +66,9 @@
    ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
  
    SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
-+  FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
++  BaseFdtLib|MdePkg/Library/BaseFdtLib/BaseFdtLib.inf
 +  UnifiedValLib|ShellPkg/Application/sysarch-acs/val/UnifiedValLib.inf
 +  UnifiedPalLib|ShellPkg/Application/sysarch-acs/pal/uefi_dt/UnifiedPalLib.inf
  
