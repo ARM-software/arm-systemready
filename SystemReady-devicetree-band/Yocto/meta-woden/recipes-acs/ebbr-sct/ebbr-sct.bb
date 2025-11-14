@@ -61,7 +61,6 @@ do_configure() {
 
     echo "Applying BBSR ACS patch..."
     cp -r ${S}/bbr-acs/bbsr/sct-tests/BBSRVariableSizeTest uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices
-    cp -r ${S}/bbr-acs/bbsr/sct-tests/SecureBoot uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices
     cp -r ${S}/bbr-acs/bbsr/sct-tests/PlatformResetAttackMitigationPsciTest uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
 
     git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/bbsr/patches/0001-BBSR-Patch-for-UEFI-SCT-Build.patch
@@ -141,7 +140,7 @@ do_compile() {
     # modify build_bbr.sh script to set CROSS_COMPILE to desired TARGET_PREFIX
     sed -i 's/TEMP_CROSS_COMPILE=aarch64-linux-gnu-/TEMP_CROSS_COMPILE='${TARGET_PREFIX}'/g' SctPkg/build_bbr.sh
     # build ebbr
-    ./SctPkg/build_bbr.sh ${EDK2_ARCH} GCC
+    ./SctPkg/build_bbr.sh ${EDK2_ARCH} GCC ENABLE_SECUREBOOT_TESTS
 
     echo "UEFI-SCT Build done..."
 
