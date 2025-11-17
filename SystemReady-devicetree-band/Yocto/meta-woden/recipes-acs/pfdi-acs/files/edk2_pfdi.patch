@@ -35,5 +35,3 @@ index 94d95de0eb..dbd4453044 100644
  
    ShellPkg/Application/Shell/Shell.inf {
      <PcdsFixedAtBuild>
-
-
