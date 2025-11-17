@@ -92,7 +92,7 @@ def compliance_label(suite_name: str) -> str:
     else:
         tag = "Recommended"
     # Match the console ordering: “Suite: <tag>  : <suite> …”
-    return f"Suite_Name: {tag}  : {suite_name}_compliance"
+    return f"Suite_Name: {suite_name}  : {tag}_compliance"
 
 
 def reformat_json(json_file_path):
@@ -227,6 +227,34 @@ def build_testcategory_dict(category_data):
     return result
 
 test_cat_dict = build_testcategory_dict(test_category_dt_data)
+
+def recursive_sort(obj):
+    if isinstance(obj, dict):
+        # Maintain priority: "Test_suite" first, "Sub_test_suite" second, "subtests" last
+        priority_first = ["Test_suite", "Test_sub_suite"]
+        priority_last = ["subtests"]
+
+        def sort_key(k):
+            k_lower = k.lower()
+            if k in priority_first:
+                # Force these to the top, in defined order
+                return (0, priority_first.index(k))
+            elif k in priority_last:
+                # Force these to the end
+                return (2, 0)
+            else:
+                # Everything else goes in the middle alphabetically
+                return (1, k_lower)
+
+        return OrderedDict(
+            (k, recursive_sort(v))
+            for k, v in sorted(obj.items(), key=lambda kv: sort_key(kv[0]))
+        )
+
+    elif isinstance(obj, list):
+        return [recursive_sort(v) for v in obj]
+    else:
+        return obj
 
 def merge_json_files(json_files, output_file):
     merged_results = {}
@@ -660,50 +688,9 @@ def merge_json_files(json_files, output_file):
             old_data_list = _entry_to_list(merged_results.pop(old_key))
             merged_results.setdefault(new_key, [])
             merged_results[new_key].extend(old_data_list)
-
-    # Ensure consistent order for ACS Results Summary if present
-    if "Suite_Name: acs_info" in merged_results and "ACS Results Summary" in merged_results["Suite_Name: acs_info"]:
-        preferred_order = [
-            "Band",
-            "Date",
-            "Suite_Name: Mandatory  : Capsule Update_compliance",
-            "Suite_Name: Mandatory  : DT_VALIDATE_compliance",
-            "Suite_Name: Mandatory  : ETHTOOL_TEST_compliance",
-            "Suite_Name: Mandatory  : FWTS_compliance",
-            "Suite_Name: Mandatory  : OS_TEST_compliance",
-            "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance",
-            "Suite_Name: Mandatory  : SCT_compliance",
-            "Suite_Name: Extension  : BBSR-FWTS_compliance",
-            "Suite_Name: Extension  : BBSR-SCT_compliance",
-            "Suite_Name: Extension  : BBSR-TPM_compliance",
-            "Suite_Name: Recommended  : BSA_compliance",
-            "Suite_Name: Recommended  : DT_KSELFTEST_compliance",
-            "Suite_Name: Recommended  : POST_SCRIPT_compliance",
-            "Suite_Name: Recommended  : PSCI_compliance",
-            "BBSR compliance results",
-            "Overall Compliance Result",
-        ]
-        # Ensure SBMR appears in the ordered summary (tag adapts via compliance_label)
-        # ensure SBMR appears
-        try:
-            insert_after = "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance"
-            idx = preferred_order.index(insert_after) + 1
-        except ValueError:
-            idx = len(preferred_order)
-
-        if DT_OR_SR_MODE == "SR":
-            preferred_order.insert(idx,   compliance_label("SBMR-IB"))
-            preferred_order.insert(idx+1, compliance_label("SBMR-OOB"))
-
-        actual = merged_results["Suite_Name: acs_info"]["ACS Results Summary"]
-        ordered = OrderedDict()
-        for key in preferred_order:
-            if key in actual:
-                ordered[key] = actual[key]
-        for key in actual:
-            if key not in ordered:
-                ordered[key] = actual[key]
-        merged_results["Suite_Name: acs_info"]["ACS Results Summary"] = ordered
+    
+    # Recursive alphabetical sorting of entire JSON
+    merged_results = recursive_sort(merged_results)
 
     with open(output_file, 'w') as outj:
         json.dump(merged_results, outj, indent=4)
