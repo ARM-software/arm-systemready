@@ -64,6 +64,7 @@ do_configure() {
     cp -r ${S}/bbr-acs/bbsr/sct-tests/PlatformResetAttackMitigationPsciTest uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
 
     git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/bbsr/patches/0001-BBSR-Patch-for-UEFI-SCT-Build.patch
+    git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/bbsr/patches/0001-UEFI-SCT-SecureBoot-change-attribute-check-to-warning.patch
 
 }
 
