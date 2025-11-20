@@ -37,6 +37,9 @@ BUILDROOT_OUT_DIR=out/$LINUX_ARCH
 BUILDROOT_RAMDISK_BUILDROOT_PATH=$BUILDROOT_PATH/$BUILDROOT_OUT_DIR/images
 BUILDROOT_DEFCONFIG=$TOP_DIR/$BUILDROOT_PATH/configs/buildroot_defconfig
 OUTDIR=$TOP_DIR/output
+ARCH=arm64
+CROSS_COMPILE=${TOP_DIR}/tools/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+KDIR="${TOP_DIR}/linux-6.16/out" 
 
 do_build ()
 {
@@ -89,6 +92,10 @@ do_build ()
     make O=$BUILDROOT_OUT_DIR buildroot_defconfig
     make O=$BUILDROOT_OUT_DIR -j $PARALLELISM
     rm $BUILDROOT_DEFCONFIG
+    popd
+    pushd $TOP_DIR/$BUILDROOT_PATH/out/arm64/build/fwts-25.09.00/smccc_test
+    make -C "$KDIR" M="$PWD" CROSS_COMPILE="$CROSS_COMPILE" modules
+    cp smccc_test.ko $TOP_DIR/$BUILDROOT_PATH/root_fs_overlay/lib/modules/
     popd
 }
 
