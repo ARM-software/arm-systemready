@@ -502,12 +502,10 @@ def main(input_file, output_file):
 
             for subtest in test_obj["subtests"]:
                 st_guid = subtest["sub_Test_GUID"].upper()
-<<<<<<< HEAD   (20d715 acs sort keys for merged json and sct changes for json)
                 if (ep_guid_current, st_guid) in subtest_dict:
                     match_record = subtest_dict[(ep_guid_current, st_guid)]
                     subtest["sub_test_result"] = normalize_result(match_record["result"])
                     subtest["sub_test_result_reason"] = match_record["reason"]
-=======
                 desc_key = subtest["sub_Test_Description"].strip().upper()
                 lookup_key = (ep_guid_current, st_guid, desc_key)
 
@@ -518,7 +516,6 @@ def main(input_file, output_file):
                     if result_val:
                         subtest["sub_test_result"] = normalize_result(result_val)
                         subtest["reason"] = reason_val
->>>>>>> CHANGE (1260ee Fix duplicate GUID override and add subtest description mapp)
 
     # Reorder final dictionary so "test_result" & "reason" appear after "Returned Status Code"
     for i, test_obj in enumerate(results):
