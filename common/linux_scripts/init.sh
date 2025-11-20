@@ -168,9 +168,15 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "********* FWTS is disabled in config file**************"
   else
     mkdir -p /mnt/acs_results/fwts
+    if [ -f /lib/modules/smccc_test.ko ]; then
+      echo "Loading FWTS SMCCC module"
+      insmod /lib/modules/smccc_test.ko
+    else
+      echo "Error: FWTS SMCCC kernel Driver is not found."
+    fi
     echo "SystemReady band ACS v3.1.0" > /mnt/acs_results/fwts/FWTSResults.log
     if [ "$automation_enabled" == "False" ]; then
-      fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/fwts/FWTSResults.log
+      fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 smccc >> /mnt/acs_results/fwts/FWTSResults.log
     else
       $fwts_command -r stdout -q >> /mnt/acs_results/fwts/FWTSResults.log
     fi

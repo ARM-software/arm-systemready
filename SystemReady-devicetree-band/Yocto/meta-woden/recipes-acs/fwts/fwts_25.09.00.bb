@@ -16,12 +16,15 @@ SRC_URI = "http://fwts.ubuntu.com/release/fwts-V${PV}.tar.gz;subdir=${BP} \
 
 SRC_URI[sha256sum] = "ecba21d367b1c7aea41b378ad8fd3d43706c0fa4033cc31b59f8152c9cc0d69e"
 
-OMPATIBLE_HOST = "(i.86|x86_64|aarch64|powerpc64).*-linux"
+COMPATIBLE_HOST = "(i.86|x86_64|aarch64|powerpc64).*-linux"
 
-DEPENDS = "libpcre glib-2.0 dtc bison-native libbsd"
+DEPENDS = "libpcre glib-2.0 dtc bison-native libbsd virtual/kernel"
 DEPENDS:append:libc-musl = " libexecinfo"
 
-inherit autotools bash-completion pkgconfig
+inherit autotools bash-completion pkgconfig module-base
+
+# Map aarch64 → arm64; otherwise fall back to TARGET_ARCH
+KERNEL_ARCH ?= "${@bb.utils.contains('TUNE_FEATURES', 'aarch64', 'arm64', d.getVar('TARGET_ARCH'), d)}"
 
 LDFLAGS:append:libc-musl = " -lexecinfo"
 
@@ -29,6 +32,30 @@ LDFLAGS:append:libc-musl = " -lexecinfo"
 # surprisingly
 ASNEEDED:powerpc64le = ""
 
+SMCCC_SRC_DIR ?= "${S}/smccc_test"
+MODULE_NAME ?= "smccc_test"
+
+do_compile:append() {
+    if [ -d "${SMCCC_SRC_DIR}" ]; then
+        export KERNEL_SRC=${STAGING_KERNEL_DIR}
+        bbnote "Building smccc_test kernel module in ${SMCCC_SRC_DIR}"
+        oe_runmake -C "${STAGING_KERNEL_DIR}" \
+            M="${SMCCC_SRC_DIR}" \
+            ARCH="${KERNEL_ARCH}" \
+            CROSS_COMPILE="${TARGET_PREFIX}" \
+            modules
+    else
+        bbwarn "SMCCC source directory not found: ${SMCCC_SRC_DIR}"
+    fi
+}
+
+do_install:append() {
+    install -d ${D}${base_libdir}/modules/${KERNEL_VERSION}/kernel/${MODULE_NAME}
+    install -m 0644 ${SMCCC_SRC_DIR}/${MODULE_NAME}.ko \
+        ${D}${base_libdir}/modules/${KERNEL_VERSION}/kernel/${MODULE_NAME}/${MODULE_NAME}.ko
+}
+
+FILES:${PN} += "${base_libdir}/modules/${KERNEL_VERSION}/kernel/${MODULE_NAME}/${MODULE_NAME}.ko"
 FILES:${PN} += "${libdir}/fwts/lib*${SOLIBS}"
 FILES:${PN}-dev += "${libdir}/fwts/lib*${SOLIBSDEV} ${libdir}/fwts/lib*.la"
 FILES:${PN}-staticdev += "${libdir}/fwts/lib*a"

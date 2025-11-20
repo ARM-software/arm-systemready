@@ -130,11 +130,17 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
       # FWTS EBBR run
       mkdir -p /mnt/acs_results_template/acs_results/fwts
+      if [ -f /lib/modules/*/kernel/smccc_test/smccc_test.ko ]; then
+        echo "Loading FWTS SMCCC module"
+        insmod /lib/modules/*/kernel/smccc_test/smccc_test.ko
+      else
+        echo "Error: FWTS SMCCC kernel Driver is not found."
+      fi
       echo "Executing FWTS for EBBR"
       test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
       echo "Test Executed are $test_list"
       echo "SystemReady devicetree band ACS v3.1.1 (RC0)" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
-      /usr/bin/fwts --ebbr `echo $test_list` -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
+      /usr/bin/fwts --ebbr `echo $test_list` smccc -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
       echo -e -n "\n"
       sync /mnt
       sleep 5
