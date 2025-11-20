@@ -149,6 +149,14 @@ def parse_dt_validate_log(log_data):
     test_suite_key = "dt_validate"
     mapping = test_suite_mapping[test_suite_key]
 
+    # Detect if dt-validate crashed with traceback while having no parsed entries
+    saw_traceback = any("Traceback (most recent call last):" in line for line in log_data)
+    no_entries = any(re.search(r"INFO\s+parse:\s*0\s+entries", line) for line in log_data)
+
+    # If both conditions are true, abort immediately — do not create JSON
+    if saw_traceback and no_entries:
+        sys.exit(1)
+
     suite_summary = {
         "total_passed": 0,
         "total_failed": 0,
