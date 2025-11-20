@@ -239,17 +239,19 @@ def parse_dt_validate_log(log_data):
         "suite_summary": suite_summary
     }
 
+
 def parse_ethtool_test_log(log_data):
     test_suite_key = "ethtool_test"
     mapping = test_suite_mapping[test_suite_key]
 
+    # Initialize counters
     suite_summary = {
         "total_passed": 0,
         "total_failed": 0,
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0,
-        "total_failed_with_waivers": 0
+        "total_failed_with_waivers": 0,
     }
 
     current_test = {
@@ -258,266 +260,109 @@ def parse_ethtool_test_log(log_data):
         "Test_case": test_suite_key,
         "Test_case_description": mapping["Test_case_description"],
         "subtests": [],
-        "test_suite_summary": suite_summary.copy()
+        "test_suite_summary": suite_summary.copy(),
     }
 
-    subtest_number = 1
-    interface = None
+    # Clean up ANSI and join
+    log_data = [re.sub(ansi_escape, "", line) for line in log_data]
+    full_text = "\n".join(log_data)
+
+    # Only keep lines after SUMMARY
+    summary_match = re.search(r"^\s*SUMMARY\s*$", full_text, re.M)
+    if summary_match:
+        full_text = full_text[summary_match.start():]
+    else:
+        return {"test_results": [current_test], "suite_summary": suite_summary}
+
+    # Detected Interfaces
     detected_interfaces = []
-    i = 0
-    # strip ANSI codes from the entire log once
-    log_data = [re.sub(ansi_escape, '', s) for s in log_data]
-    while i < len(log_data):
-        line = re.sub(ansi_escape, '', log_data[i]).strip()
-        # Detecting interfaces
-        if line.startswith("INFO: No ethernet interfaces detected via ip linux command"):
-            status = "FAILED"
-            desc = "No Ethernet Interfaces Detected"
-            sub = create_subtest(subtest_number, desc, status)
-            current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-            i += 1
-            continue
+    m_di = re.search(r"Detected Interfaces\s*:.*\(([^)]*)\)", full_text)
+    if m_di:
+        detected_interfaces = [x.strip() for x in m_di.group(1).split(",") if x.strip()]
 
-        # Detecting interfaces
-        if line.startswith("INFO: Detected following ethernet interfaces via ip command :"):
-            interfaces = []
-            i += 1
-            while i < len(log_data) and log_data[i].strip() and not log_data[i].startswith("INFO"):
-                match = re.match(r'\d+:\s+(\S+)', log_data[i].strip())
-                if match:
-                    interfaces.append(match.group(1))
-                i += 1
-            if interfaces:
-                detected_interfaces = interfaces
-                status = "PASSED"
-                desc = f"Detection of Ethernet Interfaces: {', '.join(interfaces)}"
+    subtest_number = 1
+    if detected_interfaces:
+        desc = f"Detected Interfaces: {', '.join(detected_interfaces)}"
+        sub = create_subtest(subtest_number, desc, "PASSED")
+        current_test["subtests"].append(sub)
+        update_suite_summary(current_test["test_suite_summary"], "PASSED")
+        suite_summary["total_passed"] += 1
+        subtest_number += 1
+
+    # Split interface per blocks
+    blocks = re.split(r"(?m)^\s*Interface\s+(\S+)\s*$", full_text)
+    for idx in range(1, len(blocks), 2):
+        iface = blocks[idx]
+        section = blocks[idx + 1]
+
+        for line in section.splitlines():
+            s = line.strip()
+            if not s or s.startswith(("INFO:", "DEBUG:", "CHECK:", "Detected Interfaces", "=")):
+                continue
+
+            if re.search(r":\s*(YES|NO)\s*(?:\(|$)", s, re.IGNORECASE):
+                continue
+
+            m = re.match(r"^(.*?)\s*:\s*(PASSED|FAILED|SKIPPED|WARNING)(?:\s*\((.*?)\))?\s*$", s)
+            if not m:
+                continue
+
+            raw_name = m.group(1).strip()
+            status = m.group(2).strip()
+            reason = (m.group(3) or "").strip()
+
+            # Test Description with interface for readabitlity in logs
+            lname = raw_name.lower()
+            if lname.startswith("bring up"):
+                desc = f"Bring up interface {iface}"
+            elif lname.startswith("ethtool self tests"):
+                desc = f"ethtool self-tests on {iface}"
+            elif lname.startswith("link detected"):
+                desc = f"Link {'detected' if status == 'PASSED' else 'not detected'} on {iface}"
+            elif lname.startswith("ipv4 dhcp"):
+                desc = f"IPv4 DHCP on {iface}"
+            elif lname.startswith("ipv4 address present"):
+                desc = f"IPv4 address present on {iface}"
+            elif lname.startswith("gateway address present"):
+                desc = f"Gateway address present on {iface}"
+            elif lname.startswith("ping gateway"):
+                desc = f"Ping to router/gateway on {iface}"
+            elif lname.startswith("ping www.arm.com"):
+                desc = f"Ping to www.arm.com on {iface}"
+            elif lname.startswith("ipv6 address present"):
+                desc = f"IPv6 address present on {iface}"
+            elif lname.startswith("ping ipv6.google.com"):
+                desc = f"Ping ipv6.google.com (IPv6) on {iface}"
+            elif lname.startswith("wget and curl"):
+                desc = f"wget and curl functionality on {iface}"
             else:
-                status = "FAILED"
-                desc = "No Ethernet Interfaces Detected"
-            sub = create_subtest(subtest_number, desc, status)
-            current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-            continue
+                desc = f"{raw_name} on {iface}"
 
-        # Bringing down all interfaces
-        if "INFO: Bringing down all ethernet interfaces using ifconfig" in line:
-            status = "PASSED"
-            desc = "Bringing down all Ethernet interfaces"
-            for j in range(i + 1, len(log_data)):
-                if "Unable to bring down ethernet interface" in log_data[j]:
-                    status = "FAILED"
-                    desc = "Failed to bring down some Ethernet interfaces"
-                    break
-                if "****************************************************************" in log_data[j]:
-                    break
-            sub = create_subtest(subtest_number, desc, status)
-            current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        # Bringing up specific interface
-        if "INFO: Bringing up ethernet interface:" in line:
-            interface = line.split(":")[-1].strip()
-            if i + 1 < len(log_data) and "Unable to bring up ethernet interface" in log_data[i + 1]:
-                status = "FAILED"
-                desc = f"Bring up interface {interface}"
+            sub = create_subtest(subtest_number, desc, status, reason)
+            if status == "WARNING":
+                sub["sub_test_result"]["WARNINGS"] = 1
+                if reason:
+                    sub["sub_test_result"]["warning_reasons"] = [reason]
+                tot_status = "WARNINGS"
             else:
-                status = "PASSED"
-                desc = f"Bring up interface {interface}"
-            sub = create_subtest(subtest_number, desc, status)
+                tot_status = status
             current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status.lower()}"] += 1
+            update_suite_summary(current_test["test_suite_summary"], tot_status)
+            suite_summary[f"total_{tot_status.lower()}"] += 1
             subtest_number += 1
 
-        # Running ethtool command
-        if f'INFO: Running "ethtool {interface}' in line:
-            status = "PASSED"
-            desc = f"Running ethtool on {interface}"
-            sub = create_subtest(subtest_number, desc, status)
-            current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        # Self-test detection
-        if "INFO: Ethernet interface" in line and "ethtool self test" in line:
-            if "doesn't supports ethtool self test" in line:
-                status = "SKIPPED"
-                desc   = f"Self-test on {interface} (Not supported)"
-            else:
-                # Look ahead up to 20 lines to find "The test result is ..."
-                result_status = None
-                for k in range(i + 1, min(i + 21, len(log_data))):
-                    if "The test result is" in log_data[k]:
-                        result_status = "PASSED" if "PASS" in log_data[k] else "FAILED"
-                        break
-
-                if result_status:
-                    status = result_status
-                    desc   = f"Self-test on {interface}"
-                else:
-                    status = "FAILED"
-                    desc   = f"Self-test on {interface} (Result not found)"
-
-            sub = create_subtest(subtest_number, desc, status)
-            current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        # Link detection
-        if "Link detected:" in line:
-            if "yes" in line:
-                status = "PASSED"
-                desc = f"Link detected on {interface}"
-            else:
-                status = "FAILED"
-                desc = f"Link not detected on {interface}"
-            sub = create_subtest(subtest_number, desc, status)
-            current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        # DHCP
-        if "doesn't support DHCP" in line or "support DHCP" in line:
-            if "doesn't support DHCP" in line:
-                status = "FAILED"
-                desc = f"DHCP support on {interface}"
-            else:
-                status = "PASSED"
-                desc = f"DHCP support on {interface}"
-            sub = create_subtest(subtest_number, desc, status)
-            current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        # Ping to router
-        if "INFO: Ping to router/gateway" in line and "is successful" in line:
-                status = "PASSED"
-                desc = f"Ping to router/gateway on {interface}"
-                sub = create_subtest(subtest_number, desc, status)
-                update_suite_summary(current_test["test_suite_summary"], status)
-                current_test["subtests"].append(sub)
-                suite_summary[f"total_{status.lower()}"] += 1
-                subtest_number += 1
-        if "Failed to ping router/gateway" in line:
-            intf = line.split("for")[-1].strip()
-            status = "FAILED"
-            desc = f"Ping to router/gateway on {intf}"
-            sub = create_subtest(subtest_number, desc, status)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            current_test["subtests"].append(sub)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        # Ping to www.arm.com
-        if "INFO: Ping to www.arm.com" in line and "is successful" in line:
-                status = "PASSED"
-                desc = f"Ping to www.arm.com on {interface}"
-                sub = create_subtest(subtest_number, desc, status)
-                update_suite_summary(current_test["test_suite_summary"], status)
-                current_test["subtests"].append(sub)
-                suite_summary[f"total_{status.lower()}"] += 1
-                subtest_number += 1
-        if "Failed to ping www.arm.com via" in line:
-            intf = line.split("via")[-1].strip()
-            status = "FAILED"
-            desc = f"Ping to www.arm.com on {intf}"
-            sub = create_subtest(subtest_number, desc, status)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            current_test["subtests"].append(sub)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        # >>> Wget checks <<<
-        if "INFO: wget failed to reach https://www.arm.com via" in line:
-            intf = line.split("via")[-1].strip()
-            status = "FAILED"
-            desc = f"Wget connectivity to https://www.arm.com on {intf}"
-            sub = create_subtest(subtest_number, desc, status)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            current_test["subtests"].append(sub)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        if "INFO: wget successfully accessed https://www.arm.com via" in line:
-            intf = line.split("via")[-1].strip()
-            status = "PASSED"
-            desc = f"Wget connectivity to https://www.arm.com on {intf}"
-            sub = create_subtest(subtest_number, desc, status)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            current_test["subtests"].append(sub)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        # >>> Curl checks <<<
-        if "INFO: curl failed to fetch https://www.arm.com via" in line:
-            intf = line.split("via")[-1].strip()
-            status = "FAILED"
-            desc = f"Curl connectivity to https://www.arm.com on {intf}"
-            sub = create_subtest(subtest_number, desc, status)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            current_test["subtests"].append(sub)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        if "INFO: curl successfully fetched https://www.arm.com via" in line:
-            intf = line.split("via")[-1].strip()
-            status = "PASSED"
-            desc = f"Curl connectivity to https://www.arm.com on {intf}"
-            sub = create_subtest(subtest_number, desc, status)
-            update_suite_summary(current_test["test_suite_summary"], status)
-            current_test["subtests"].append(sub)
-            suite_summary[f"total_{status.lower()}"] += 1
-            subtest_number += 1
-
-        i += 1
-
-    # If no ping tests found for the detected interfaces, add them as SKIPPED
-    for intf in detected_interfaces:
-        # Ping to router
-        if not any(st["sub_Test_Description"] == f"Ping to router/gateway on {intf}" for st in current_test["subtests"]):
-            sub = create_subtest(subtest_number, f"Ping to router/gateway on {intf}", "SKIPPED")
-            current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], "SKIPPED")
-            suite_summary["total_skipped"] += 1
-            subtest_number += 1
-
-        # Ping to arm.com
-        if not any(st["sub_Test_Description"] == f"Ping to www.arm.com on {intf}" for st in current_test["subtests"]):
-            sub = create_subtest(subtest_number, f"Ping to www.arm.com on {intf}", "SKIPPED")
-            current_test["subtests"].append(sub)
-            update_suite_summary(current_test["test_suite_summary"], "SKIPPED")
-            suite_summary["total_skipped"] += 1
-            subtest_number += 1
-
-    # >>> REMOVE EMPTY REASON ARRAYS <<<
-    for subtest in current_test["subtests"]:
-        subres = subtest["sub_test_result"]
-        if not subres["pass_reasons"]:
-            del subres["pass_reasons"]
-        if not subres["fail_reasons"]:
-            del subres["fail_reasons"]
-        if not subres["abort_reasons"]:
-            del subres["abort_reasons"]
-        if not subres["skip_reasons"]:
-            del subres["skip_reasons"]
-        if not subres["warning_reasons"]:
-            del subres["warning_reasons"]
+    # Cleanup empty reason arrays
+    for st in current_test["subtests"]:
+        r = st["sub_test_result"]
+        for key in ["pass_reasons", "fail_reasons", "abort_reasons", "skip_reasons", "warning_reasons"]:
+            if not r.get(key):
+                del r[key]
 
     return {
         "test_results": [current_test],
         "suite_summary": suite_summary
     }
+
 
 def parse_read_write_check_blk_devices_log(log_data):
     test_suite_key = "read_write_check_blk_devices"
