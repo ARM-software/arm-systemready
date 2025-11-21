@@ -110,8 +110,8 @@ copy_recipes()
         sed -i -E 's/SRCREV_edk2-test\s+=\s+"\$\{AUTOREV\}"/SRCREV_edk2-test = \"'${SCT_SRC_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/ebbr-sct/ebbr-sct.bb
     fi
 
-    if [ ! -z "$BSA_ACS_TAG" ]; then
-        sed -i -E 's/SRCREV_linux-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_linux-acs = \"'${BSA_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-drv/bsa-acs-drv.bb
+    if [ ! -z "$BSA_LINUX_ACS_TAG" ]; then
+        sed -i -E 's/SRCREV_linux-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_linux-acs = \"'${BSA_LINUX_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/bsa-acs-drv/bsa-acs-drv.bb
     fi
 
     if [ ! -z "$EDK2_TEST_PARSER_TAG" ]; then
@@ -122,8 +122,8 @@ copy_recipes()
         sed -i -E 's/SRCREV_systemready-scripts\s+=\s+"\$\{AUTOREV\}"/SRCREV_systemready-scripts = \"'${SYSTEMREADY_SCRIPTS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/systemready-scripts/systemready-scripts.bb
     fi
 
-    if [ ! -z "$PFDI_SRC_TAG" ];then
-        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${PFDI_SRC_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/pfdi/pfdi.bb
+    if [ ! -z "$PFDI_ACS_TAG" ];then
+        sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${PFDI_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/pfdi/pfdi.bb
     fi
 
     # create a bsa-acs patches directory in meta-woden/recipes-acs/bsa-acs-uefi and copy requires BSA patches
