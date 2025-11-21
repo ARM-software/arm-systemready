@@ -167,7 +167,7 @@ prepare_disk_image ()
         rm $PLATDIR/$IMG_BB.xz
     fi
     echo "Compressing the image : $PLATDIR/$IMG_BB"
-    xz -z $PLATDIR/$IMG_BB
+    xz -T0 -z $PLATDIR/$IMG_BB
 
     if [ -f $PLATDIR/$IMG_BB.xz ]; then
         echo "Completed preparation of disk image for busybox boot"
