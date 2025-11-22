@@ -979,7 +979,7 @@ def parse_single_log(log_file_path):
     elif ('dt-validate' in name
             or re.search(r'DeviceTree bindings of Linux kernel version', log_content, re.I)):
         return parse_dt_validate_log(log_data)
-    elif re.search(r'Running ethtool', log_content):
+    elif re.search(r'Running Networking Checks', log_content):
         return parse_ethtool_test_log(log_data)
     elif re.search(r'Read block devices tool', log_content):
         return parse_read_write_check_blk_devices_log(log_data)
