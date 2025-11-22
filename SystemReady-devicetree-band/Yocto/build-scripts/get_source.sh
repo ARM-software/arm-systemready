@@ -27,6 +27,7 @@ popd
 echo "Getting the sources for $BAND "
 
 . $TOP_DIR/../../common/config/systemready-dt-band-source.cfg
+SYSTEMREADY_COMMIT_LOG=${TOP_DIR}/meta-woden/recipes-acs/bootfs-files/files/systemready-commit.log
 
 
 export GIT_SSL_NO_VERIFY=1
@@ -136,6 +137,10 @@ copy_recipes()
     cp $COMMON_DIR_PATH/uefi_scripts/*.nsh $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files/.
     mv $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files/startup_dt.nsh $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files/startup.nsh
     cp $COMMON_DIR_PATH/config/*.txt $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files/.
+
+    echo "SystemReady DT ACS" >> "$SYSTEMREADY_COMMIT_LOG"
+    echo "    URL(systemready-acs) = $(git remote get-url origin)" >> "$SYSTEMREADY_COMMIT_LOG"
+    echo "    commit(systemready-acs) = $(git rev-parse HEAD)" >> "$SYSTEMREADY_COMMIT_LOG" 
 
     pushd $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files
 

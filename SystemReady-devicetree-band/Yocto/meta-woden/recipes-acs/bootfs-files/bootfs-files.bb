@@ -15,6 +15,7 @@ SRC_URI = " file://bsa.nsh \
             file://bbsr_startup.nsh \
             file://acs_config_dt.txt \
             file://system_config.txt \
+            file://systemready-commit.log \
             "
 
 # no configure step
@@ -37,6 +38,7 @@ do_deploy() {
    cp bbsr_startup.nsh ${DEPLOYDIR}/
    cp acs_config_dt.txt ${DEPLOYDIR}/acs_config.txt
    cp system_config.txt ${DEPLOYDIR}/
+   cp systemready-commit.log ${DEPLOYDIR}/
    cp ${S}/../../../armv8a-oe-linux/ebbr-sct/1.0/bbr-acs/bbsr/config/BBSRStartup.nsh  ${DEPLOYDIR}/bbsr_SctStartup.nsh
 
    # create and copy necessary flags to deploy directory
