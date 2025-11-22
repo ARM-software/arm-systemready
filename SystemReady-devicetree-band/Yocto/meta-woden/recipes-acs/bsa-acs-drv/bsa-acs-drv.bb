@@ -13,6 +13,7 @@ SRC_URI += "git://github.com/ARM-software/sysarch-acs;destsuffix=sysarch-acs;pro
 SRCREV_FORMAT = "sysarch-acs_linux-acs"
 SRCREV_sysarch-acs = "${AUTOREV}"
 SRCREV_linux-acs = "${AUTOREV}"
+SYSTEMREADY_COMMIT_LOG ?= "${TOPDIR}/../recipes-acs/bootfs-files/files/systemready-commit.log"
 
 S = "${WORKDIR}"
 MODULE_NAME = "bsa_acs"
@@ -23,6 +24,18 @@ do_configure(){
 }
 
 do_compile() {
+    echo "BSA ACS (linux)" >> "${SYSTEMREADY_COMMIT_LOG}"
+
+    if [ -d "${S}/sysarch-acs/.git" ]; then
+        echo "    URL(sysarch-acs) = $(git -C "${S}/sysarch-acs" remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+        echo "    commit(sysarch-acs) = $(git -C "${S}/sysarch-acs" rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    fi
+    if [ -d "${S}/linux-acs/.git" ]; then
+        echo "    URL(linux-acs) = $(git -C "${S}/linux-acs" remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+        echo "    commit(linux-acs) = $(git -C "${S}/linux-acs" rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    fi
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
+
     export KERNEL_SRC=${STAGING_KERNEL_DIR}
     cd ${S}/linux-acs/acs-drv/files/
     ./linux_acs.sh bsa
