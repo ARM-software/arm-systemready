@@ -51,6 +51,12 @@ test_suite_mapping = {
         "Test_suite_description": "PSCI version check",
         "Test_case_description": "PSCI compliance"
     },
+    "smbios": {
+    "Test_suite": "SMBIOS",
+    "Test_suite_description": "SMBIOS Table Validation",
+    "Test_case_description": "UEFI SMBIOS table presence check"
+    },
+
 }
 
 def create_subtest(subtest_number, description, status, reason=""):
@@ -966,10 +972,179 @@ def parse_psci_logs(psci_log_path):
 
     return {"test_results": [current_test], "suite_summary": current_test["test_suite_summary"]}
 
+def extract_smbios_block(lines):
+    """
+    Extract the SmbiosTable test block from a full SCT Summary.log.
+
+    Strategy:
+      1. Find the first line that mentions "SmbiosTable".
+      2. Walk backwards to include the surrounding ACS/BBR header.
+      3. Walk forwards until the next "Arm ACS Version" (start of next test) or EOF.
+    """
+    n = len(lines)
+    smbios_idx = None
+
+    # 1) Find first "SmbiosTable" occurrence
+    for i, line in enumerate(lines):
+        if "SmbiosTable" in line:
+            smbios_idx = i
+            break
+
+    if smbios_idx is None:
+        return []
+
+    # 2) Find block start (go back to the ACS header if present)
+    start = 0
+    for j in range(smbios_idx - 1, -1, -1):
+        if "Arm ACS Version" in lines[j]:
+            start = j
+            break
+        if "BBR ACS" in lines[j]:
+            start = j
+            break
+
+    # 3) Find block end (next Arm ACS header = next test)
+    end = n
+    for k in range(smbios_idx + 1, n):
+        if "Arm ACS Version" in lines[k]:
+            end = k
+            break
+
+    return lines[start:end]
+
+
+def parse_smbios_log(log_data):
+    """
+    Parse SMBIOS table test from SCT summary.log format.
+    """
+
+    test_suite_key = "smbios"
+    mapping = test_suite_mapping[test_suite_key]
+
+    # suite summary template
+    suite_summary = {
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waiver": 0,
+        "total_ignored": 0
+    }
+
+    current_test = {
+        "Test_suite": mapping["Test_suite"],
+        "Test_suite_description": mapping["Test_suite_description"],
+        "Test_case": "",                         # will fill from log: "SmbiosTable"
+        "Test_case_description": mapping["Test_case_description"],
+        "subtests": [],
+        "test_suite_summary": suite_summary.copy()
+    }
+
+    # -------------------------------
+    # Extract test case name
+    # e.g. "BBR ACS ... SmbiosTable"
+    # -------------------------------
+    for i, line in enumerate(log_data):
+        if "BBR ACS" in line and i + 1 < len(log_data):
+            current_test["Test_case"] = log_data[i+1].strip()
+            break
+
+    # -------------------------------
+    # Extract description ("Checks that SMBIOS3 table is provided by UEFI.")
+    # -------------------------------
+    description = ""
+    start = False
+    for line in log_data:
+        if "Test Configuration" in line:
+            start = True
+            continue
+        if start and line.strip() and not line.startswith("---"):
+            description = line.strip()
+            break
+
+    # -------------------------------
+    # Extract subtest GUID + PASS/FAIL
+    # Pattern:
+    #   SmbiosTable -- FAILURE
+    #   <guid>
+    # -------------------------------
+    guid = ""
+    result = "FAILED"
+    reason = ""
+
+    for i, line in enumerate(log_data):
+        m = re.search(r'--\s*(PASS|FAILURE|FAIL|WARNING)', line, re.IGNORECASE)
+        if m:
+            raw = m.group(1).upper()
+            if raw == "PASS":
+                result = "PASSED"
+            else:
+                result = "FAILED"
+
+            # GUID on next line
+            if i + 1 < len(log_data):
+                guid = log_data[i+1].strip()
+
+            # Reason on next-next line
+            if i + 2 < len(log_data):
+                reason_line = log_data[i+2].strip()
+                if ":" in reason_line:
+                    reason = reason_line.split(":", 1)[-1].strip()
+            break
+
+    # -------------------------------
+    # Create subtest JSON entry
+    # -------------------------------
+    subtest = {
+        "sub_Test_Number": str(guid),
+        "sub_Test_Description": description,
+        "sub_test_result": {
+            "PASSED": 1 if result == "PASSED" else 0,
+            "FAILED": 1 if result == "FAILED" else 0,
+            "FAILED_WITH_WAIVER": 0,
+            "ABORTED": 0,
+            "SKIPPED": 0,
+            "WARNINGS": 0,
+            "pass_reasons": [reason] if result == "PASSED" and reason else [],
+            "fail_reasons": [reason] if result == "FAILED" and reason else [],
+            "abort_reasons": [],
+            "skip_reasons": [],
+            "warning_reasons": [],
+            "waiver_reason": ""
+        }
+    }
+
+    current_test["subtests"].append(subtest)
+
+    status_key = "total_passed" if result == "PASSED" else "total_failed"
+    current_test["test_suite_summary"][status_key] += 1
+    suite_summary[status_key] += 1
+
+    # Remove empty arrays like other parsers
+    for k in ["pass_reasons", "fail_reasons", "abort_reasons", "skip_reasons", "warning_reasons"]:
+        if not subtest["sub_test_result"][k]:
+            del subtest["sub_test_result"][k]
+
+    return {
+        "test_results": [current_test],
+        "suite_summary": suite_summary
+    }
+
 
 def parse_single_log(log_file_path):
-    with open(log_file_path, 'r') as f:
-        log_data = f.readlines()
+    # Try UTF-8 → fallback to UTF-16 → fallback to binary-safe ignore
+    try:
+        with open(log_file_path, 'r', encoding='utf-8') as f:
+            log_data = f.readlines()
+    except UnicodeDecodeError:
+        try:
+            with open(log_file_path, 'r', encoding='utf-16') as f:
+                log_data = f.readlines()
+        except UnicodeDecodeError:
+            # As last fallback, ignore undecodable bytes
+            with open(log_file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                log_data = f.readlines()
 
     log_content = ''.join(log_data)
     name = os.path.basename(log_file_path).lower()
@@ -983,8 +1158,10 @@ def parse_single_log(log_file_path):
         return parse_ethtool_test_log(log_data)
     elif re.search(r'Read block devices tool', log_content):
         return parse_read_write_check_blk_devices_log(log_data)
+    elif "SmbiosTable" in log_content:
+        smbios_block = extract_smbios_block(log_data)
+        return parse_smbios_log(smbios_block)
     else:
-        # No known pattern => unknown
         raise ValueError("Unknown or unsupported standalone log format.")
 
 if __name__ == "__main__":
