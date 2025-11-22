@@ -12,8 +12,8 @@ SRC_URI += "git://github.com/ARM-software/sysarch-acs;destsuffix=edk2/ShellPkg/A
             "
 
 SRCREV_sysarch-acs = "${AUTOREV}"
-
 SRCREV_edk2-libc = "${AUTOREV}"
+SYSTEMREADY_COMMIT_LOG ?= "${TOPDIR}/../recipes-acs/bootfs-files/files/systemready-commit.log"
 
 COMPATIBLE_HOST = "aarch64.*-linux"
 EDK2_ARCH = "AARCH64"
@@ -27,7 +27,15 @@ do_compile:prepend() {
     export ACS_PATH="${S}/ShellPkg/Application/sysarch-acs"
     export PATH="${STAGING_BINDIR_TOOLCHAIN}:${PATH}"
 }
+do_compile:append() {
+    echo "PFDI ACS (uefi)" >> "${SYSTEMREADY_COMMIT_LOG}"
 
+    if [ -d "${S}/ShellPkg/Application/sysarch-acs/.git" ]; then
+        echo "    URL(sysarch-acs) = $(git -C "${S}/ShellPkg/Application/sysarch-acs" remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+        echo "    commit(sysarch-acs) = $(git -C "${S}/ShellPkg/Application/sysarch-acs" rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    fi
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
+}
 do_install() {
     install -d ${D}/firmware
     install ${B}/Build/${EDK2_PLATFORM}/${EDK2_BUILD_MODE}_${EDK_COMPILER}/*/pfdi.efi ${D}/firmware/pfdi.efi

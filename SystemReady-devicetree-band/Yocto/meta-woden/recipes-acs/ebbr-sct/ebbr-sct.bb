@@ -19,13 +19,14 @@ SRC_URI += "git://github.com/ARM-software/bbr-acs;destsuffix=bbr-acs;protocol=ht
             gitsm://github.com/tianocore/edk2.git;destsuffix=edk2-test/edk2;protocol=https;nobranch=1;name=edk2 \
             file://sctversion.patch;patch=1;patchdir=edk2-test \
 "
+SYSTEMREADY_COMMIT_LOG ?= "${TOPDIR}/../recipes-acs/bootfs-files/files/systemready-commit.log"
 
 S = "${WORKDIR}"
 
 SRCREV_FORMAT    = "edk2-test_edk2_bbr-acs"
 SRCREV_edk2 = "${AUTOREV}"
 SRCREV_edk2-test = "${AUTOREV}"
-SRCREV_bbr-acs   = "${AUTOREV}"
+SRCREV_bbr-acs = "${AUTOREV}"
 
 # set variables as required by edk2 based build
 SBBR_TEST_DIR         = "${S}/bbr-acs/common/sct-tests/sbbr-tests"
@@ -134,6 +135,19 @@ do_signimage() {
 }
 
 do_compile() {
+
+    echo "BBR ACS" >> "${SYSTEMREADY_COMMIT_LOG}"
+
+    if [ -d "${S}/edk2-test/.git" ]; then
+        echo "    URL(edk2-test) = $(git -C "${S}/edk2-test" remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+        echo "    commit(edk2-test) = $(git -C "${S}/edk2-test" rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    fi
+    if [ -d "${S}/bbr-acs/.git" ]; then
+        echo "    URL(bbr-acs) = $(git -C "${S}/bbr-acs" remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+        echo "    commit(bbr-acs) = $(git -C "${S}/bbr-acs" rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    fi
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
+
     cd ${S}/edk2-test
     # create softlink to SctPkg
     ln -sf ${S}/edk2-test/uefi-sct/SctPkg SctPkg
