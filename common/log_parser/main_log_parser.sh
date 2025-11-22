@@ -318,7 +318,7 @@ fi
 ################################################################################
 # PFDI PARSING
 ################################################################################
-if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then 
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     PFDI_LOG="$LOGS_PATH/uefi/pfdiresults.log"   # adjust if your log lives elsewhere
     PFDI_JSON="$JSONS_DIR/pfdi.json"
     PFDI_PROCESSED=0
@@ -515,6 +515,26 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             # Important: add PSCI JSON to the same array that we pass to json_to_html!
             Standalone_JSONS+=("$PSCI_JSON")
         fi
+    fi
+
+    # 7) SMBIOS CHECK (strict parser like PSCI)
+    SMBIOS_LOG="$LOGS_PATH/sct_results/Overall/Summary.log"
+    SMBIOS_JSON="$JSONS_DIR/smbios_check.json"
+
+    if check_file "$SMBIOS_LOG" "M"; then
+        # Use correct full path to standalone SMBIOS parser
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$SMBIOS_LOG" \
+            "$SMBIOS_JSON"
+        # If parser succeeded, include in Standalone reports
+        if [ $? -eq 0 ]; then
+            apply_waivers "Standalone" "$SMBIOS_JSON"
+            Standalone_JSONS+=("$SMBIOS_JSON")
+        else
+            echo -e "${RED}ERROR: SMBIOS log parsing to json failed.${NC}"
+        fi
+    else
+        echo -e "${YELLOW}WARNING: SMBIOS log not found: $SMBIOS_LOG${NC}"
     fi
 
     # Now generate a single STANDALONE HTML
