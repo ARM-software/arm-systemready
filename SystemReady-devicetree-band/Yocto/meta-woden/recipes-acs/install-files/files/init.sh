@@ -354,7 +354,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         mkdir -p /mnt/acs_results_template/acs_results/post-script
         #/usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template > /mnt/acs_results_template/acs_results/post-script/post-script.log 2>&1
         /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
-		cd -
+        cd -
       fi
       sync /mnt
       sleep 5
@@ -376,6 +376,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       # Copying system_config.txt into result directory
       if [ -f /mnt/acs_tests/config/system_config.txt ]; then
         cp /mnt/acs_tests/config/system_config.txt /mnt/acs_results_template/acs_results/acs_summary/config/
+      fi
+      # Copying systemready-commit.log into result directory
+      if [ -f /mnt/acs_tests/config/systemready-commit.log ]; then
+        cp /mnt/acs_tests/config/systemready-commit.log /mnt/acs_results_template/acs_results/acs_summary/config/
       fi
       echo "Please wait acs results are syncing on storage medium."
       sync /mnt
