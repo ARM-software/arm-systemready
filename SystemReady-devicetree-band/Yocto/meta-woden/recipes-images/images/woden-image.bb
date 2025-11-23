@@ -39,6 +39,7 @@ IMAGE_EFI_BOOT_FILES += "Bsa.efi;acs_tests/bsa/Bsa.efi \
                          startup.nsh;EFI/BOOT/startup.nsh \
                          acs_config.txt;acs_tests/config/acs_config.txt \
                          system_config.txt;acs_tests/config/system_config.txt \
+                         systemready-commit.log;acs_tests/config/systemready-commit.log \
                          bbsr_startup.nsh;EFI/BOOT/bbsr_startup.nsh \
                          bbsr_SctStartup.nsh;acs_tests/bbr/bbsr_SctStartup.nsh \
                          CapsuleApp.efi;acs_tests/app/CapsuleApp.efi \
