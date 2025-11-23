@@ -58,7 +58,7 @@ DT_SRS_SCOPE_TABLE = [
     ("BBSR-TPM", "EM"),
     ("BBSR-FWTS", "EM"),
     ("DT_KSELFTEST", "R"),
-    ("SMBIOS", "M"),
+    ("SMBIOS", "R"),
     ("PSCI", "R"),
     ("POST_SCRIPT", "R"),
     ("OS_TEST", "M"),
