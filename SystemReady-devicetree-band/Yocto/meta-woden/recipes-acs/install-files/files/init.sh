@@ -338,7 +338,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Running edk2-test-parser tool "
         mkdir -p /mnt/acs_results_template/acs_results/edk2-test-parser
         cd /usr/bin/edk2-test-parser
-        ./parser.py --md /mnt/acs_results_template/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results_template/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results_template/acs_results/sct_results/Sequence/EBBR.seq > /dev/null 2>&1
+        ./parser.py --md /mnt/acs_results_template/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results_template/acs_results/sct_results/Overall/Summary.ekl \
+              /mnt/acs_results_template/acs_results/sct_results/Sequence/EBBR.seq > /dev/null 2>&1
         echo "edk2-test-parser run completed"
       else
         echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
@@ -352,8 +353,9 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Running post scripts "
         cd /mnt/acs_results_template
         mkdir -p /mnt/acs_results_template/acs_results/post-script
-        #/usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template > /mnt/acs_results_template/acs_results/post-script/post-script.log 2>&1
-        /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
+        /usr/bin/systemready-scripts/compatibles /usr/bin/linux-6.16/bindings > /usr/bin/linux-6.16/compatible-strings.txt
+        /usr/bin/systemready-scripts/check-sr-results.py --cache-dir /usr/bin \
+         --linux-url https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.16.tar.xz --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
         cd -
       fi
       sync /mnt
