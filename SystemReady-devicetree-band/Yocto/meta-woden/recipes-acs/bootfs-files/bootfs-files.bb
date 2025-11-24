@@ -3,7 +3,7 @@ LICENSE = "CLOSED"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 inherit deploy
-DEPENDS = "ebbr-sct"
+DEPENDS = "ebbr-sct pfdi-acs bsa-acs systemready-scripts bsa-acs-drv edk2-test-parser"
 S = "${WORKDIR}"
 
 SRC_URI = " file://bsa.nsh \
