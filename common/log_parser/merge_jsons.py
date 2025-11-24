@@ -93,7 +93,7 @@ def compliance_label(suite_name: str) -> str:
     else:
         tag = "Recommended"
     # Match the console ordering: “Suite: <tag>  : <suite> …”
-    return f"Suite_Name: {suite_name}  : {tag}_compliance"
+    return f"Suite_Name: {tag}  : {suite_name}_compliance"
 
 
 def reformat_json(json_file_path):

@@ -285,13 +285,12 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
         <div class="detailed-summary">
             {% for test in test_results %}
             <div class="heading">Test Suite Name: <span>{{ test.Test_suite }}</span></div>
-            <div class="heading">Test Sub Suite: <span>{{ test.Test_sub_suite }}</span></div>
+            <div class="heading">Sub Test Suite: <span>{{ test.Sub_test_suite }}</span></div>
             <div class="heading">Test Case: <span>{{ test.Test_case }}</span></div>
             <div class="heading">Test Case Description: <span>{{ test.Test_case_description }}</span></div>
-            <div class="heading">Test_case_entry_point_guid: <span>{{ test["Test_case_entry_point_guid"] }}</span></div>
-            <div class="heading">Test Case Status Code: <span>{{ test.Test_case_status_code }}</span></div>
-            <div class="heading">Test Case Result: <span>{{ test.Test_case_result if test.Test_case_result else "N/A" }}</span></div>
-            <div class="heading">Test Case Result Reason: <span>{{ test.Test_case_result_reason if test.Test_case_result_reason else "N/A" }}</span></div>
+            <div class="heading">Test Entry Point GUID: <span>{{ test["Test Entry Point GUID"] }}</span></div>
+            <div class="heading">Test Result: <span>{{ test.test_result if test.test_result else "N/A" }}</span></div>
+            <div class="heading">Reason: <span>{{ test.reason if test.reason else "N/A" }}</span></div>
             <div class="heading">Device Path: <span>{{ test.get('Device Path', 'N/A') }}</span></div>
             <br>
             <table>
@@ -301,7 +300,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                         <th>Sub Test Description</th>
                         <th>Sub Test Result</th>
                         <th>Sub Test Path</th>
-                        <th>Sub Test Result Reason</th>
+                        <th>Reason</th>
                         <th>Waiver Reason</th>
                     </tr>
                 </thead>
@@ -313,7 +312,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                         <td class="{{ subtest.sub_test_result | determine_css_class }}">{{ subtest.sub_test_result }}</td>
                         <td>{{ subtest.sub_Test_Path }}</td>
                         <td class="reason-col">
-                            {{ subtest.sub_test_result_reason if subtest.sub_test_result_reason else "N/A" }}
+                            {{ subtest.reason if subtest.reason else "N/A" }}
                         </td>
                         <td class="waiver-reason">
                             {% if 'FAILED WITH WAIVER' in subtest.sub_test_result.upper() or 'FAILURE (WITH WAIVER)' in subtest.sub_test_result.upper() %}

@@ -371,11 +371,11 @@ def main(input_file, output_file):
                     results.append(test_entry)
                 test_entry = {
                     "Test_suite": "",
-                    "Test_sub_suite": "",
+                    "Sub_test_suite": "",
                     "Test_case": "",
                     "Test_case_description": "",
-                    "Test_case_entry_point_guid": "",
-                    "Test_case_status_code": "",
+                    "Test Entry Point GUID": "",
+                    "Returned Status Code": "",
                     "subtests": [],
                     "test_case_summary": {
                         "total_passed": 0,
@@ -395,7 +395,7 @@ def main(input_file, output_file):
                 # Attempt to find the test suite/subsuite
                 test_suite, sub_test_suite = find_test_suite_and_subsuite(test_entry["Test_case"])
                 test_entry["Test_suite"] = test_suite if test_suite else "Unknown"
-                test_entry["Test_sub_suite"] = sub_test_suite if sub_test_suite else "Unknown"
+                test_entry["Sub_test_suite"] = sub_test_suite if sub_test_suite else "Unknown"
 
             if "Test Configuration #0" in line:
                 capture_description = True
@@ -406,10 +406,10 @@ def main(input_file, output_file):
                 capture_description = False
 
             if "Test Entry Point GUID" in line:
-                test_entry["Test_case_entry_point_guid"] = line.split(':', 1)[1].strip()
+                test_entry["Test Entry Point GUID"] = line.split(':', 1)[1].strip()
 
             if "Returned Status Code" in line:
-                test_entry["Test_case_status_code"] = line.split(':', 1)[1].strip()
+                test_entry["Returned Status Code"] = line.split(':', 1)[1].strip()
                 # Attempt to parse next lines for "XYZ: [RESULT]"
                 j = i + 1
                 while j < len(lines):
@@ -419,8 +419,8 @@ def main(input_file, output_file):
                         continue
                     m = re.search(r'^([^:]+):\s*\[(.*?)\]', candidate)
                     if m:
-                        test_entry["Test_case_result"] = normalize_result(m.group(2))
-                        test_entry["Test_case_result_reason"] = ""
+                        test_entry["test_result"] = normalize_result(m.group(2))
+                        test_entry["reason"] = ""
                     break
 
             # Sub-test detection from lines like "FooTest -- PASS"
@@ -447,11 +447,11 @@ def main(input_file, output_file):
 
                 sub_test_number += 1
 
-                sub_reason = ""
+                reason = ""
                 if ":" in file_path:
                     reason_split = file_path.rsplit(":", 1)
                     if len(reason_split) > 1:
-                        sub_reason = reason_split[1].strip()
+                        reason = reason_split[1].strip()
 
                 sub_test = {
                     "sub_Test_Number": str(sub_test_number),
@@ -459,7 +459,7 @@ def main(input_file, output_file):
                     "sub_Test_GUID": test_guid,
                     "sub_test_result": result_str,
                     "sub_Test_Path": file_path,
-                    "sub_test_result_reason": sub_reason
+                    "reason": reason
                 }
                 test_entry["subtests"].append(sub_test)
 
@@ -495,17 +495,17 @@ def main(input_file, output_file):
 
         # Apply overrides
         for test_obj in results:
-            ep_guid_current = test_obj["Test_case_entry_point_guid"].upper()
+            ep_guid_current = test_obj["Test Entry Point GUID"].upper()
             if ep_guid_current in test_guid_dict:
-                test_obj["Test_case_result"] = normalize_result(test_guid_dict[ep_guid_current]["result"])
-                test_obj["Test_case_result_reason"] = test_guid_dict[ep_guid_current]["reason"]
+                test_obj["test_result"] = normalize_result(test_guid_dict[ep_guid_current]["result"])
+                test_obj["reason"] = test_guid_dict[ep_guid_current]["reason"]
 
             for subtest in test_obj["subtests"]:
                 st_guid = subtest["sub_Test_GUID"].upper()
                 if (ep_guid_current, st_guid) in subtest_dict:
                     match_record = subtest_dict[(ep_guid_current, st_guid)]
                     subtest["sub_test_result"] = normalize_result(match_record["result"])
-                    subtest["sub_test_result_reason"] = match_record["reason"]
+                    subtest["reason"] = match_record["reason"]
                 desc_key = subtest["sub_Test_Description"].strip().upper()
                 lookup_key = (ep_guid_current, st_guid, desc_key)
 
@@ -521,19 +521,19 @@ def main(input_file, output_file):
     for i, test_obj in enumerate(results):
         reordered = {
             "Test_suite": test_obj["Test_suite"],
-            "Test_sub_suite": test_obj["Test_sub_suite"],
+            "Sub_test_suite": test_obj["Sub_test_suite"],
             "Test_case": test_obj["Test_case"],
             "Test_case_description": test_obj["Test_case_description"],
-            "Test_case_entry_point_guid": test_obj["Test_case_entry_point_guid"],
-            "Test_case_status_code": test_obj["Test_case_status_code"]
+            "Test Entry Point GUID": test_obj["Test Entry Point GUID"],
+            "Returned Status Code": test_obj["Returned Status Code"]
         }
         if "Device Path" in test_obj:
             reordered["Device Path"] = test_obj["Device Path"]
 
-        if "Test_case_result" in test_obj:
-            reordered["Test_case_result"] = test_obj["Test_case_result"]
-        if "Test_case_result_reason" in test_obj:
-            reordered["Test_case_result_reason"] = test_obj["Test_case_result_reason"]
+        if "test_result" in test_obj:
+            reordered["test_result"] = test_obj["test_result"]
+        if "reason" in test_obj:
+            reordered["reason"] = test_obj["reason"]
 
         reordered["subtests"] = test_obj["subtests"]
         reordered["test_case_summary"] = test_obj["test_case_summary"]
