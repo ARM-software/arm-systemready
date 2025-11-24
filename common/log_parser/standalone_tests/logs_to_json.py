@@ -341,6 +341,8 @@ def parse_ethtool_test_log(log_data):
                 desc = f"Ping ipv6.google.com (IPv6) on {iface}"
             elif lname.startswith("wget and curl"):
                 desc = f"wget and curl functionality on {iface}"
+            elif lname.startswith("ethtool compliance"):
+                desc = "Ethtool Compliance"
             else:
                 desc = f"{raw_name} on {iface}"
 
