@@ -167,30 +167,61 @@ def print_summary():
             if dv:
                 line += f"  ({dv})"
             print(line)
+    
     def iface_has_failures(iface):
-        # Any test with explicit FAILED makes the iface non-compliant.
         return any(entry.get("status") == FAILED for entry in results.get(iface, {}).values())
 
     def is_virtual_bringup(iface):
         br = results.get(iface, {}).get("Bring up", {})
         return br.get("status") == SKIPPED and "Virtual interface" in br.get("detail", "")
 
+    def link_detected_status(iface):
+        return results.get(iface, {}).get("Link detected", {}).get("status", SKIPPED)
+
+    # Compliance summary
     compliant_ifaces = []
+    non_compliant_ifaces = []
+    untestable_ifaces = []
+
     for iface in results:
         if is_virtual_bringup(iface):
             continue
-        if not iface_has_failures(iface):
+
+        ld_status = link_detected_status(iface)
+
+        if ld_status == WARNING:
+            untestable_ifaces.append(iface)
+            continue
+
+        if ld_status != PASSED:
+            non_compliant_ifaces.append(iface)
+            continue
+
+        if iface_has_failures(iface):
+            non_compliant_ifaces.append(iface)
+        else:
             compliant_ifaces.append(iface)
 
-    if compliant_ifaces:
-        green = "\033[92m"
-        reset = "\033[0m"
-        names = ", ".join(compliant_ifaces)
-        print(f"\nStatus - {green}Compliant ({compliant_ifaces[0]}){reset}\n")
+    green = "\033[92m"
+    red   = "\033[91m"
+    reset = "\033[0m"
+
+    def join_names(names):
+        return ", ".join(names) if names else "None"
+
+    if non_compliant_ifaces:
+        print(f"\nEthtool Compliance : {red}FAILED{reset} "
+              f"(The interfaces {join_names(non_compliant_ifaces)} failed the tests)\n")
     else:
-        red = "\033[91m"
-        reset = "\033[0m"
-        print(f"\nStatus - {red}Non-compliant{reset}\n")
+        if compliant_ifaces:
+            print(f"\nEthtool Compliance : {green}PASSED{reset} "
+                  f"(Passed interface(s) {join_names(compliant_ifaces)})\n")
+        else:
+            if untestable_ifaces:
+                print(f"\nEthtool Compliance : {red}FAILED{reset} "
+                      f"(Unable to test — Link detected was WARNING on {join_names(untestable_ifaces)})\n")
+            else:
+                print(f"\nEthtool Compliance : {red}FAILED{reset} (No testable interfaces)\n")
 
 original_states = {}
 
