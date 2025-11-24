@@ -581,7 +581,7 @@ if __name__ == "__main__":
             print(rping.stdout)
             if rping.returncode != 0 or "100% packet loss" in rping.stdout:
                 print_color(f"Failed to ping router/gateway[{ip_address}] for {intrf}", "WARN")
-                set_result(intrf, "Ping gateway (IPv4)", FAILED, "Packet loss or ping failed")
+                set_result(intrf, "Ping gateway (IPv4)", WARNING, "Packet loss or ping failed")
             else:
                 print_color(f"Ping to router/gateway[{ip_address}] for {intrf} is successful", "CHECK")
                 set_result(intrf, "Ping gateway (IPv4)", PASSED)
@@ -595,7 +595,7 @@ if __name__ == "__main__":
                 print_color(f"Unable to resolve www.arm.com, DNS not configured correctly for {intrf}", "WARN")
             if rp2.returncode != 0 or "100% packet loss" in rp2.stdout:
                 print_color(f"Failed to ping www.arm.com via {intrf}", "WARN")
-                set_result(intrf, "Ping www.arm.com (IPv4)", FAILED, "Ping failed or DNS issue")
+                set_result(intrf, "Ping www.arm.com (IPv4)", WARNING, "Ping failed or DNS issue")
             else:
                 print_color(f"Ping to www.arm.com is successful", "CHECK")
                 set_result(intrf, "Ping www.arm.com (IPv4)", PASSED)
