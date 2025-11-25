@@ -139,8 +139,8 @@ if [ -d "$RESULTS_DIR" ]; then
     cp /mnt/acs_tests/config/acs_run_config.ini "$RESULTS_DIR/acs_summary/config/"
   fi
   # Copying systemready-commit.log into result directory
-  if [ -f /mnt/acs_tests/config/systemready-commit.log ]; then
-    cp /mnt/acs_tests/config/systemready-commit.log "$RESULTS_DIR/acs_summary/config/"
+  if [ -f /mnt/acs_tests/systemready-commit.log ]; then
+    cp /mnt/acs_tests/systemready-commit.log "$RESULTS_DIR/acs_summary/config/"
   fi
 
   echo "Please wait acs results are syncing on storage medium."

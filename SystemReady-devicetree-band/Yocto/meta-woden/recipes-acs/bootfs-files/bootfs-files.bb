@@ -36,7 +36,7 @@ do_deploy() {
    cp capsule_update.nsh ${DEPLOYDIR}/
    cp bbsr_startup.nsh ${DEPLOYDIR}/
    cp acs_config_dt.txt ${DEPLOYDIR}/acs_config.txt
-   cp systemready-commit.log ${DEPLOYDIR}/
+   cp system_config.txt ${DEPLOYDIR}/
    cp ${S}/../../../armv8a-oe-linux/ebbr-sct/1.0/bbr-acs/bbsr/config/BBSRStartup.nsh  ${DEPLOYDIR}/bbsr_SctStartup.nsh
 
    # create and copy necessary flags to deploy directory

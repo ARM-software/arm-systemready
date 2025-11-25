@@ -39,7 +39,6 @@ IMAGE_EFI_BOOT_FILES += "Bsa.efi;acs_tests/bsa/Bsa.efi \
                          startup.nsh;EFI/BOOT/startup.nsh \
                          acs_config.txt;acs_tests/config/acs_config.txt \
                          system_config.txt;acs_tests/config/system_config.txt \
-                         systemready-commit.log;acs_tests/config/systemready-commit.log \
                          bbsr_startup.nsh;EFI/BOOT/bbsr_startup.nsh \
                          bbsr_SctStartup.nsh;acs_tests/bbr/bbsr_SctStartup.nsh \
                          CapsuleApp.efi;acs_tests/app/CapsuleApp.efi \
@@ -88,6 +87,8 @@ do_dir_deploy() {
     wic cp ${DEPLOY_DIR_IMAGE}/bbr ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/acs_tests/
     wic cp ${DEPLOY_DIR_IMAGE}/bbsr-keys ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/acs_tests/
     wic cp ${DEPLOY_DIR_IMAGE}/core-image-initramfs-boot-genericarm64.cpio.gz ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/
+    # Copy commit file to /acs_tests
+    wic cp ${SYSTEMREADY_COMMIT_LOG} ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/acs_tests/
 
     do_sign_images;
 
@@ -153,8 +154,6 @@ do_dir_deploy() {
     # remove additional startup.nsh from /boot partition
     wic rm ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/startup.nsh
 
-   # Copy commit file to deploy dir
-   cp ${SYSTEMREADY_COMMIT_LOG} ${DEPLOYDIR}/
 
 }
 

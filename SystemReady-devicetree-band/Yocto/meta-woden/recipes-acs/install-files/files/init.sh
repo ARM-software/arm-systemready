@@ -382,8 +382,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         cp /mnt/acs_tests/config/system_config.txt /mnt/acs_results_template/acs_results/acs_summary/config/
       fi
       # Copying systemready-commit.log into result directory
-      if [ -f /mnt/acs_tests/config/systemready-commit.log ]; then
-        cp /mnt/acs_tests/config/systemready-commit.log /mnt/acs_results_template/acs_results/acs_summary/config/
+      if [ -f /mnt/acs_tests/systemready-commit.log ]; then
+        cp /mnt/acs_tests/systemready-commit.log /mnt/acs_results_template/acs_results/acs_summary/config/
       fi
       echo "Please wait acs results are syncing on storage medium."
       sync /mnt
