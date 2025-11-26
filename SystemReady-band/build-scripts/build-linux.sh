@@ -129,6 +129,8 @@ do_package ()
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/char/tpm/tpm_tis_spi.ko $TOP_DIR/ramdisk/drivers
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/char/tpm/tpm_tis_i2c_cr50.ko $TOP_DIR/ramdisk/drivers
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/spi/spi-tegra210-quad.ko $TOP_DIR/ramdisk/drivers
+    cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/drivers/cpufreq/cppc_cpufreq.ko $TOP_DIR/ramdisk/drivers
+
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
