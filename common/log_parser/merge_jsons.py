@@ -135,6 +135,28 @@ def count_fails_in_json(data):
         return (0, 0)
 
     for suite_entry in test_results:
+        # For BSA/SBSA: also count testcase-level failures
+        for testcase in suite_entry.get("testcases", []):
+            test_result = testcase.get("Test_result", "")
+            if isinstance(test_result, str):
+                if "FAILED" in test_result.upper() or "FAILURE" in test_result.upper() or "FAIL" in test_result.upper():
+                    any_subtests_found = True
+                    if "(WITH WAIVER)" in test_result.upper():
+                        total_failed_with_waiver += 1
+                    else:
+                        total_failed += 1
+
+            # Also count subtests under testcases (BSA structure)
+            for subtest in testcase.get("subtests", []):
+                sub_result = subtest.get("sub_test_result", "")
+                if isinstance(sub_result, str):
+                    if "FAILED" in sub_result.upper() or "FAILURE" in sub_result.upper() or "FAIL" in sub_result.upper():
+                        any_subtests_found = True
+                        if "(WITH WAIVER)" in sub_result.upper():
+                            total_failed_with_waiver += 1
+                        else:
+                            total_failed += 1
+        # Standard structure: subtests at suite level
         subtests = suite_entry.get("subtests", [])
         if subtests:
             any_subtests_found = True
@@ -693,7 +715,7 @@ def merge_json_files(json_files, output_file):
             old_data_list = _entry_to_list(merged_results.pop(old_key))
             merged_results.setdefault(new_key, [])
             merged_results[new_key].extend(old_data_list)
-    
+
     # Recursive alphabetical sorting of entire JSON
     merged_results = recursive_sort(merged_results)
 

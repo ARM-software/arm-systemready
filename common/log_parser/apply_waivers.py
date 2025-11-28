@@ -61,6 +61,36 @@ def load_waivers(waiver_data, suite_name):
                         if verbose:
                             print(f"ERROR: Waiver for TestSuite '{test_suite_name}' is missing 'Reason'. Skipping TestSuite-level waiver.")
 
+                # For BSA/SBSA: also load Test_case level waivers within TestSuites
+                if suite_name.upper() in ['BSA', 'SBSA']:
+                    if 'TestCases' in test_suite:
+                        for testcase_entry in test_suite['TestCases']:
+                            testcase_name = testcase_entry.get('Test_case')
+                            reason = testcase_entry.get('Reason')
+                            if testcase_name and reason:
+                                testcase_level_waivers.append({'Test_case': testcase_name, 'Reason': reason})
+                            elif testcase_name and not reason:
+                                if verbose:
+                                    print(f"ERROR: Waiver for Test_case '{testcase_name}' is missing 'Reason'. Skipping Test_case-level waiver.")
+
+                            # Also load SubTest-level waivers for this testcase
+                            if 'SubTests' in testcase_entry:
+                                for subtest_entry in testcase_entry['SubTests']:
+                                    subtest_id = subtest_entry.get('sub_Rule_ID')
+                                    subtest_desc = subtest_entry.get('sub_Test_Description')
+                                    subtest_reason = subtest_entry.get('Reason')
+                                    if (subtest_id or subtest_desc) and subtest_reason:
+                                        subtest_level_waivers.append({
+                                            'Test_case': testcase_name,
+                                            'sub_Rule_ID': subtest_id,
+                                            'sub_Test_Description': subtest_desc,
+                                            'Reason': subtest_reason
+                                        })
+                                    elif (subtest_id or subtest_desc) and not subtest_reason:
+                                        if verbose:
+                                            subtest_key = subtest_id or subtest_desc
+                                            print(f"ERROR: Waiver for SubTest '{subtest_key}' under Test_case '{testcase_name}' is missing 'Reason'. Skipping SubTest-level waiver.")
+
                 # Include 'BBSR-SCT' and 'BBSR-FWTS' suites
                 # Only load SubSuite and Test_case waivers if the suite is 'SCT', 'STANDALONE', 'BBSR-SCT', or 'BBSR-FWTS'
                 if suite_name.upper() in ['SCT', 'STANDALONE', 'BBSR-SCT', 'BBSR-FWTS', 'BBSR-TPM','PFDI']:
@@ -133,6 +163,18 @@ def apply_suite_level_waivers(test_suite_entry, suite_waivers):
     # Apply waivers to all applicable failed subtests in the suite
     for waiver in suite_waivers:
         reason = waiver['Reason']
+
+        # For BSA/SBSA: apply to testcases
+        for testcase in test_suite_entry.get('testcases', []):
+            test_result = testcase.get('test_result', '')
+            if isinstance(test_result, str):
+                if 'FAILED' in test_result.upper() and '(WITH WAIVER)' not in test_result.upper():
+                    testcase['test_result'] = test_result + ' (WITH WAIVER)'
+                    testcase['waiver_reason'] = reason
+                    if verbose:
+                        print(f"Suite-level waiver applied to testcase '{testcase.get('Test_case')}' with reason: {reason}")
+
+        # For other structures: apply to subtests
         for subtest in test_suite_entry.get('subtests', []):
             sub_test_result = subtest.get('sub_test_result')
 
@@ -149,7 +191,7 @@ def apply_suite_level_waivers(test_suite_entry, suite_waivers):
                     if verbose:
                         print(f"Suite-level waiver applied to subtest '{subtest.get('sub_Test_Description')}' with reason: {reason}")
             elif isinstance(sub_test_result, str):
-                if 'FAILED' in sub_test_result.upper() or 'FAILURE' in sub_test_result.upper() or 'FAIL' in sub_test_result.upper():
+                if 'FAILED' in sub_test_result.upper() or 'FAILURE' in sub_test_result.upper():
                     if '(WITH WAIVER)' not in sub_test_result.upper():
                         subtest['sub_test_result'] += ' (WITH WAIVER)'
                         subtest['waiver_reason'] = reason
@@ -181,11 +223,22 @@ def apply_suite_level_waivers(test_suite_entry, suite_waivers):
 def apply_testsuite_level_waivers(test_suite_entry, testsuite_waivers):
     # Get the test_suite_name considering different keys
     test_suite_name = test_suite_entry.get('Test_suite') or test_suite_entry.get('Test_suite_name')
-    # Apply waivers to all applicable failed subtests within specific TestSuites
+    # Apply waivers to all applicable failed tests within specific TestSuites
     for waiver in testsuite_waivers:
         target_testsuite = waiver['TestSuite']
         reason = waiver['Reason']
         if test_suite_name == target_testsuite:
+            # For BSA/SBSA: apply to testcases
+            for testcase in test_suite_entry.get('testcases', []):
+                test_result = testcase.get('Test_result', '')
+                if isinstance(test_result, str):
+                    if 'FAILED' in test_result.upper() and '(WITH WAIVER)' not in test_result.upper():
+                        testcase['Test_result'] = test_result + ' (WITH WAIVER)'
+                        testcase['waiver_reason'] = reason
+                        if verbose:
+                            print(f"TestSuite-level waiver applied to testcase '{testcase.get('Test_case')}' in TestSuite '{target_testsuite}' with reason: {reason}")
+
+            # For other structures: apply to subtests
             for subtest in test_suite_entry.get('subtests', []):
                 sub_test_result = subtest.get('sub_test_result')
 
@@ -267,6 +320,23 @@ def apply_testcase_level_waivers(test_suite_entry, testcase_waivers):
     for waiver in testcase_waivers:
         target_testcase = waiver['Test_case']
         reason = waiver['Reason']
+
+        # For BSA/SBSA: apply directly to testcases
+        for testcase in test_suite_entry.get('testcases', []):
+            test_case_name = testcase.get('Test_case', '')
+            # Extract just the rule ID from "B_XXX_01 : 1" format
+            test_case_id = test_case_name.split(':')[0].strip() if ':' in test_case_name else test_case_name
+
+            if test_case_id == target_testcase or test_case_name == target_testcase:
+                test_result = testcase.get('Test_result', '')
+                if isinstance(test_result, str):
+                    if 'FAILED' in test_result.upper() and '(WITH WAIVER)' not in test_result.upper():
+                        testcase['Test_result'] = test_result + ' (WITH WAIVER)'
+                        testcase['waiver_reason'] = reason
+                        if verbose:
+                            print(f"Test_case-level waiver applied to testcase '{test_case_name}' with reason: {reason}")
+
+        # For other structures: apply to subtests
         if test_suite_entry.get('Test_case') == target_testcase:
             for subtest in test_suite_entry.get('subtests', []):
                 sub_test_result = subtest.get('sub_test_result')
@@ -316,6 +386,45 @@ def apply_testcase_level_waivers(test_suite_entry, testcase_waivers):
                                     subtest['waiver_reason'] = reason
 
 def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
+    # For BSA/SBSA: apply waivers to subtests within testcases
+    if suite_name.upper() in ['BSA', 'SBSA']:
+        for testcase in test_suite_entry.get('testcases', []):
+            testcase_name = testcase.get('Test_case', '')
+            testcase_id = testcase_name.split(':')[0].strip() if ':' in testcase_name else testcase_name
+
+            for subtest in testcase.get('subtests', []):
+                sub_rule_id = subtest.get('sub_Rule_ID', '')
+                sub_test_desc = subtest.get('sub_Test_Description', '')
+                sub_test_result = subtest.get('sub_test_result', '')
+
+                # Check if this subtest has a waiver
+                for waiver in subtest_waivers:
+                    # Waiver must match the testcase
+                    waiver_testcase = waiver.get('Test_case', '')
+                    waiver_testcase_id = waiver_testcase.split(':')[0].strip() if ':' in waiver_testcase else waiver_testcase
+
+                    if waiver_testcase_id != testcase_id and waiver_testcase != testcase_id:
+                        continue
+
+                    # Match by sub_Rule_ID or sub_Test_Description
+                    waiver_id = waiver.get('sub_Rule_ID', '')
+                    waiver_desc = waiver.get('sub_Test_Description', '')
+                    reason = waiver.get('Reason', '')
+
+                    match = False
+                    if waiver_id and waiver_id == sub_rule_id:
+                        match = True
+                    elif waiver_desc and waiver_desc == sub_test_desc:
+                        match = True
+
+                    if match and isinstance(sub_test_result, str):
+                        if 'FAILED' in sub_test_result.upper() and '(WITH WAIVER)' not in sub_test_result.upper():
+                            subtest['sub_test_result'] = sub_test_result + ' (WITH WAIVER)'
+                            subtest['waiver_reason'] = reason
+                            if verbose:
+                                print(f"Subtest-level waiver applied to subtest '{sub_rule_id}' ({sub_test_desc}) in testcase '{testcase_name}' with reason: {reason}")
+                            break  # Waiver applied
+
     # Apply waivers to individual subtests based on SubTestID or sub_Test_Description
     for subtest in test_suite_entry.get('subtests', []):
         sub_test_result = subtest.get('sub_test_result')
@@ -432,7 +541,7 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
                         if reason:
                             subtest['waiver_reason'] = reason
                         if verbose:
-                            print(f"Subtest-level waiver applied to subtest '{subtest_description}' with SubTestID '{subtest_id}' and reason: {reason}")
+                            print(f"Subtest-level waiver applied to subtest '{subtest.get('sub_Test_Description')}' with SubTestID '{subtest_id}' and reason: {reason}")
                         break
                     elif waiver_desc:
                         cleaned_waiver_desc = clean_description(waiver_desc)
@@ -527,7 +636,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
     # Get waivers for the suite, categorized by their scope
     suite_level_waivers, testsuite_level_waivers, subsuite_level_waivers, testcase_level_waivers, subtest_level_waivers = load_waivers(waiver_data, suite_name)
 
-    if not (suite_level_waivers or testsuite_level_waivers or (suite_name.upper() in ['SCT', 'STANDALONE', 'BBSR-SCT', 'BBSR-FWTS', "SBMR"] and (subsuite_level_waivers or testcase_level_waivers)) or subtest_level_waivers):
+    if not (suite_level_waivers or testsuite_level_waivers or (suite_name.upper() in ['SCT', 'STANDALONE', 'BBSR-SCT', 'BBSR-FWTS', "SBMR", 'BSA', 'SBSA'] and (subsuite_level_waivers or testcase_level_waivers)) or subtest_level_waivers):
         if verbose:
             print(f"No valid waivers found for suite '{suite_name}'. No changes applied.")
         return
@@ -581,6 +690,11 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
         if testsuite_level_waivers:
             apply_testsuite_level_waivers(test_suite_entry, testsuite_level_waivers)
 
+        # Apply Test_case level waivers for BSA/SBSA and other suites
+        if testcase_level_waivers:
+            if suite_name.upper() in ['BSA', 'SBSA', 'SCT', 'STANDALONE', 'BBSR-SCT', 'BBSR-FWTS', 'BBSR-TPM']:
+                apply_testcase_level_waivers(test_suite_entry, testcase_level_waivers)
+
         # Include 'BBSR-SCT' and 'BBSR-FWTS' suites
         # Only apply SubSuite and Test_case level waivers if the suite is 'SCT', 'STANDALONE', 'BBSR-SCT', or 'BBSR-FWTS'
         if suite_name.upper() in ['SCT', 'STANDALONE', 'BBSR-SCT', 'BBSR-FWTS', 'BBSR-TPM']:
@@ -603,6 +717,49 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
         if subtest_level_waivers:
             apply_subtest_level_waivers(test_suite_entry, subtest_level_waivers, suite_name)
 
+        # === FIX: Recompute testcase-level Test_result based on subtests (BSA/SBSA) ===
+        # After waivers are applied to subtests, testcase result must reflect the actual status
+        if suite_name.upper() in ('BSA', 'SBSA'):
+            for testcase in test_suite_entry.get('testcases', []):
+                subtests = testcase.get('subtests', [])
+                if not subtests:
+                    continue  # No subtests to check, keep original
+
+                # Check subtest results to determine testcase result
+                has_non_waivered_failed = False
+                has_waivered_failed = False
+                has_passed = False
+                has_skipped = False
+
+                for subtest in subtests:
+                    sub_result = subtest.get('sub_test_result', '')
+                    if isinstance(sub_result, str):
+                        sub_upper = sub_result.upper()
+                        if 'FAILED' in sub_upper:
+                            if '(WITH WAIVER)' in sub_upper:
+                                has_waivered_failed = True
+                            else:
+                                has_non_waivered_failed = True
+                        elif 'PASSED' in sub_upper:
+                            has_passed = True
+                        elif 'SKIPPED' in sub_upper:
+                            has_skipped = True
+
+                # Update testcase Test_result based on subtests
+                if has_non_waivered_failed:
+                    # If any subtest has FAILED (not waivered), testcase must be FAILED
+                    testcase['Test_result'] = 'FAILED'
+                elif has_waivered_failed:
+                    # If has waivered failures (and no non-waivered failures), mark as FAILED (WITH WAIVER)
+                    testcase['Test_result'] = 'FAILED (WITH WAIVER)'
+                elif has_passed:
+                    # All passed
+                    testcase['Test_result'] = 'PASSED'
+                elif has_skipped:
+                    # All skipped
+                    testcase['Test_result'] = 'SKIPPED'
+                # Otherwise, keep original result
+
         # Update test suite summary
         # Determine the summary field based on suite name
         if suite_name.upper() in ['SCT', 'BBSR-SCT', 'BBSR-TPM']:
@@ -612,54 +769,103 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
         else:
             summary_field = 'test_suite_summary'
 
-        if summary_field in test_suite_entry:
-            # Reset counters
-            total_passed = 0
-            total_failed = 0
-            total_failed_with_waiver = 0
-            total_aborted = 0
-            total_skipped = 0
-            total_warnings = 0
-            total_ignored = 0
+        if suite_name.upper() in ('BSA', 'SBSA'):
+            passed = 0
+            partial = 0
+            warnings = 0
+            skipped = 0
+            failed = 0
+            pal = 0
+            notimpl = 0
+            waived = 0
 
-            for subtest in test_suite_entry.get('subtests', []):
-                sub_test_result = subtest.get('sub_test_result')
-                if isinstance(sub_test_result, dict):
-                    total_passed += sub_test_result.get('PASSED', 0)
-                    total_failed += sub_test_result.get('FAILED', 0)
-                    total_failed_with_waiver += sub_test_result.get('FAILED_WITH_WAIVER', 0)
-                    total_aborted += sub_test_result.get('ABORTED', 0)
-                    total_skipped += sub_test_result.get('SKIPPED', 0)
-                    total_warnings += sub_test_result.get('WARNINGS', 0)
-                elif isinstance(sub_test_result, str):
-                    r = sub_test_result.upper()
-                    if 'PASS' in r:
-                        total_passed += 1
-                    elif 'FAIL' in r:
-                        if '(WITH WAIVER)' in r:
-                            total_failed_with_waiver += 1
+            # Count total rules: only count main testcases, not subtests
+            testcases = test_suite_entry.get('testcases', [])
+            total_rules = len(testcases)
+
+            # Process results from testcases only
+            for testcase in testcases:
+                test_result = testcase.get('test_result', '')
+                if isinstance(test_result, str):
+                    r = test_result.upper()
+                    if 'FAILED' in r:
+                        if 'WITH WAIVER' in r:
+                            waived += 1
                         else:
-                            total_failed += 1
-                    elif 'ABORTED' in r:
-                        total_aborted += 1
+                            failed += 1
+                    elif 'PAL NOT SUPPORTED' in r:
+                        pal += 1
+                    elif 'NOT TESTED (TEST NOT IMPLEMENTED)' in r:
+                        notimpl += 1
                     elif 'SKIPPED' in r:
-                        total_skipped += 1
-                    elif 'WARNING' in r:
-                        total_warnings += 1
-                    else:
-                        # anything else (IGNORED, NOT SUPPORTED, etc.)
-                        total_ignored += 1
+                        skipped += 1
+                    elif 'STATUS' in r:
+                        warnings += 1
+                    elif 'PARTIAL' in r:
+                        partial += 1
+                    elif 'PASS' in r:
+                        passed += 1
 
-            # Update the summary field with the new counts
-            test_suite_entry[summary_field] = {
-                'total_passed': total_passed,
-                'total_failed': total_failed,
-                'total_failed_with_waiver': total_failed_with_waiver,
-                'total_aborted': total_aborted,
-                'total_skipped': total_skipped,
-                'total_warnings': total_warnings,
-                'total_ignored': total_ignored,
+            test_suite_entry['test_suite_summary'] = {
+                "Total Rules Run": total_rules,
+                "Passed": passed,
+                "Passed (Partial)": partial,
+                "Warnings": warnings,
+                "Skipped": skipped,
+                "Failed": failed,
+                "PAL Not Supported": pal,
+                "Not Implemented": notimpl,
+                "Total_failed_with_waiver": waived,
             }
+        else:
+            if summary_field in test_suite_entry:
+                # Reset counters
+                total_passed = 0
+                total_failed = 0
+                total_failed_with_waiver = 0
+                total_aborted = 0
+                total_skipped = 0
+                total_warnings = 0
+                total_ignored = 0
+
+                for subtest in test_suite_entry.get('subtests', []):
+                    sub_test_result = subtest.get('sub_test_result')
+                    if isinstance(sub_test_result, dict):
+                        total_passed += sub_test_result.get('PASSED', 0)
+                        total_failed += sub_test_result.get('FAILED', 0)
+                        total_failed_with_waiver += sub_test_result.get('FAILED_WITH_WAIVER', 0)
+                        total_aborted += sub_test_result.get('ABORTED', 0)
+                        total_skipped += sub_test_result.get('SKIPPED', 0)
+                        total_warnings += sub_test_result.get('WARNINGS', 0)
+                    elif isinstance(sub_test_result, str):
+                        r = sub_test_result.upper()
+                        if 'PASS' in r:
+                            total_passed += 1
+                        elif 'FAIL' in r:
+                            if '(WITH WAIVER)' in r:
+                                total_failed_with_waiver += 1
+                            else:
+                                total_failed += 1
+                        elif 'ABORTED' in r:
+                            total_aborted += 1
+                        elif 'SKIPPED' in r:
+                            total_skipped += 1
+                        elif 'WARNING' in r:
+                            total_warnings += 1
+                        else:
+                            # anything else (IGNORED, NOT SUPPORTED, etc.)
+                            total_ignored += 1
+
+                # Update the summary field with the new counts
+                test_suite_entry[summary_field] = {
+                    'total_passed': total_passed,
+                    'total_failed': total_failed,
+                    'total_failed_with_waiver': total_failed_with_waiver,
+                    'total_aborted': total_aborted,
+                    'total_skipped': total_skipped,
+                    'total_warnings': total_warnings,
+                    'total_ignored': total_ignored,
+                }
 
         # SBMR: recompute per-case and roll up to suite summary (without changing original logic)
         if suite_name.upper() == 'SBMR' and test_suite_entry.get('Test_cases'):
@@ -713,44 +919,134 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                 'total_ignored': ti,
             }
 
+    # Recalculate test_suite_summary for BSA/SBSA from per-testcase results (including waivers)
+    # Count only testcases (not subtests) to match original logs and be consistent with "Total Rules Run"
+    if suite_name.upper() in ('BSA', 'SBSA') and "test_results" in json_data:
+        for test_suite in json_data.get("test_results", []):
+            suite_totals = {
+                "Total Rules Run": 0,
+                "Passed": 0,
+                "Passed (Partial)": 0,
+                "Warnings": 0,
+                "Skipped": 0,
+                "Failed": 0,
+                "PAL Not Supported": 0,
+                "Not Implemented": 0,
+                "Total_failed_with_waiver": 0,
+            }
+
+            for testcase in test_suite.get("testcases", []):
+                # Count the testcase itself ONLY (not subtests)
+                test_result = testcase.get("Test_result", "").upper()
+                if "WITH WAIVER" in test_result:
+                    suite_totals["Total_failed_with_waiver"] += 1
+                elif "FAILED" in test_result:
+                    suite_totals["Failed"] += 1
+                elif "PASSED(*PARTIAL)" in test_result or "PASSED (PARTIAL)" in test_result:
+                    suite_totals["Passed (Partial)"] += 1
+                elif "NOT TESTED (TEST NOT IMPLEMENTED)" in test_result:
+                    suite_totals["Not Implemented"] += 1
+                elif "NOT TESTED (PAL NOT SUPPORTED)" in test_result:
+                    suite_totals["PAL Not Supported"] += 1
+                elif "SKIPPED" in test_result:
+                    suite_totals["Skipped"] += 1
+                elif "WARNING" in test_result:
+                    suite_totals["Warnings"] += 1
+                elif "PASSED" in test_result:
+                    suite_totals["Passed"] += 1
+
+                suite_totals["Total Rules Run"] += 1
+
+            test_suite["test_suite_summary"] = suite_totals
+
     if "suite_summary" in json_data and isinstance(json_data["suite_summary"], dict):
-        total_passed_top = 0
-        total_failed_top = 0
-        total_failed_with_waiver_top = 0
-        total_aborted_top = 0
-        total_skipped_top = 0
-        total_warnings_top = 0
-        total_ignored_top = 0  # adjust if you track ignored at sub-level
+        if suite_name.upper() in ('BSA', 'SBSA'):
+            totals = {
+                "Total Rules Run": 0,
+                "Passed": 0,
+                "Passed (Partial)": 0,
+                "Warnings": 0,
+                "Skipped": 0,
+                "Failed": 0,
+                "PAL Not Supported": 0,
+                "Not Implemented": 0,
+                "Total_failed_with_waiver": 0,
+            }
+            if "test_results" in json_data and isinstance(json_data["test_results"], list):
+                for suite_obj in json_data["test_results"]:
+                    s = suite_obj.get("test_suite_summary", {})
+                    totals["Total Rules Run"] += s.get("Total Rules Run", 0)
+                    totals["Passed"] += s.get("Passed", 0)
+                    totals["Passed (Partial)"] += s.get("Passed (Partial)", 0)
+                    totals["Warnings"] += s.get("Warnings", 0)
+                    totals["Skipped"] += s.get("Skipped", 0)
+                    totals["Failed"] += s.get("Failed", 0)
+                    totals["PAL Not Supported"] += s.get("PAL Not Supported", 0)
+                    totals["Not Implemented"] += s.get("Not Implemented", 0)
+                    totals["Total_failed_with_waiver"] += s.get("Total_failed_with_waiver", 0)
+            json_data["suite_summary"] = totals
+        else:
+            total_passed_top = 0
+            total_failed_top = 0
+            total_failed_with_waiver_top = 0
+            total_aborted_top = 0
+            total_skipped_top = 0
+            total_warnings_top = 0
+            total_ignored_top = 0  # adjust if you track ignored at sub-level
 
-        if "test_results" in json_data and isinstance(json_data["test_results"], list):
-            for suite_obj in json_data["test_results"]:
-                # Prefer the more detailed test_case_summary when it exists
-                if (
-                    "test_case_summary" in suite_obj
-                    and isinstance(suite_obj["test_case_summary"], dict)
-                ):
-                    summary = suite_obj["test_case_summary"]
-                else:
-                    summary = suite_obj.get("test_suite_summary", {})
+            if "test_results" in json_data and isinstance(json_data["test_results"], list):
+                for suite_obj in json_data["test_results"]:
+                    # Prefer the more detailed test_case_summary when it exists
+                    if (
+                        "test_case_summary" in suite_obj
+                        and isinstance(suite_obj["test_case_summary"], dict)
+                    ):
+                        summary = suite_obj["test_case_summary"]
+                    else:
+                        summary = suite_obj.get("test_suite_summary", {})
 
-                total_passed_top              += summary.get("total_passed", 0)
-                total_failed_top              += summary.get("total_failed", 0)
-                total_failed_with_waiver_top  += summary.get("total_failed_with_waiver", 0)
-                total_aborted_top             += summary.get("total_aborted", 0)
-                total_skipped_top             += summary.get("total_skipped", 0)
-                total_warnings_top            += summary.get("total_warnings", 0)
-                total_ignored_top             += summary.get("total_ignored", 0)
+                    total_passed_top              += summary.get("total_passed", 0)
+                    total_failed_top              += summary.get("total_failed", 0)
+                    total_failed_with_waiver_top  += summary.get("Total_failed_with_waiver", 0)
+                    total_aborted_top             += summary.get("total_aborted", 0)
+                    total_skipped_top             += summary.get("total_skipped", 0)
+                    total_warnings_top            += summary.get("total_warnings", 0)
+                    total_ignored_top             += summary.get("total_ignored", 0)
 
-        # this eliminates the old UPPER-CASE keys
-        json_data["suite_summary"] = {
-            "total_passed":               total_passed_top,
-            "total_failed":               total_failed_top,
-            "total_failed_with_waiver":   total_failed_with_waiver_top,
-            "total_aborted":              total_aborted_top,
-            "total_skipped":              total_skipped_top,
-            "total_warnings":             total_warnings_top,
-            "total_ignored":              total_ignored_top,
-        }
+            # this eliminates the old UPPER-CASE keys
+            json_data["suite_summary"] = {
+                "total_passed":               total_passed_top,
+                "total_failed":               total_failed_top,
+                "Total_failed_with_waiver":   total_failed_with_waiver_top,
+                "total_aborted":              total_aborted_top,
+                "total_skipped":              total_skipped_top,
+                "total_warnings":             total_warnings_top,
+                "total_ignored":              total_ignored_top,
+            }
+
+    # Recalculate global total_summary for BSA/SBSA from all suites
+    if suite_name.upper() in ('BSA', 'SBSA') and "test_results" in json_data:
+        global_passed = 0
+        global_failed = 0
+        global_failed_with_waiver = 0
+        global_skipped = 0
+        global_partial = 0
+        global_pal = 0
+        global_notimpl = 0
+        global_total = 0
+        global_warnings = 0
+
+        for suite_obj in json_data.get("test_results", []):
+            suite_summary = suite_obj.get("test_suite_summary", {})
+            global_total += suite_summary.get("Total Rules Run", 0)
+            global_passed += suite_summary.get("Passed", 0)
+            global_failed += suite_summary.get("Failed", 0)
+            global_failed_with_waiver += suite_summary.get("Total_failed_with_waiver", 0)
+            global_skipped += suite_summary.get("Skipped", 0)
+            global_partial += suite_summary.get("Passed (Partial)", 0)
+            global_pal += suite_summary.get("PAL Not Supported", 0)
+            global_notimpl += suite_summary.get("Not Implemented", 0)
+            global_warnings += suite_summary.get("Warnings", 0)
 
     # Write the updated JSON data back to the file
     try:
