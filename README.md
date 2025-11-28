@@ -32,35 +32,6 @@ The SystemReady BBSR tests if the firmware meets the requirements specified by t
 
 For further details on BBSR ACS, please refer to [BBSR ACS Verification Guide](./docs/BBSR_ACS_Verification.md).
 
-## Limitations
-
-### BSA
-Validating the compliance of certain PCIe rules defined in the BSA specification require the PCIe end-point generate specific stimulus during the runtime of the test. Examples of such stimulus are  P2P, PASID, ATC, etc. The tests that requires these stimuli are grouped together in the exerciser module. The exerciser layer is an abstraction layer that enables the integration of hardware capable of generating such stimuli to the test framework.
-The details of the hardware or Verification IP which enable these exerciser tests platform specific and are beyond the scope of this document.
-
-The ACS image does not allow customizations, hence, the exerciser module is not included in the ACS image. To enable exerciser tests for greater coverage of PCIe rules, please refer to [BSA](https://github.com/ARM-software/bsa-acs) Or contact your Arm representative for details.
-
-### SBSA
-Validating the compliance of certain PCIe rules defined in the SBSA specification requires the PCIe end-point to generate specific stimulus during the runtime of the test. Examples of such stimulus are  P2P, PASID, ATC, etc. The tests that requires these stimuli are grouped together in the exerciser module. The exerciser layer is an abstraction layer that enables the integration of hardware capable of generating such stimuli to the test framework.
-The details of the hardware or Verification IP which enable these exerciser tests are platform specific and are beyond the scope of this document.
-
- - Some PCIe and Exerciser test are dependent on PCIe features supported by the test system.
-   Please fill the required API's with test system information.
-
-|APIs                         |Description                                                                   |Affected tests          |
-|-----------------------------|------------------------------------------------------------------------------|------------------------|
-|pal_pcie_dev_p2p_support     |Return 0 if the test system PCIe supports peer to peer transaction, else 1    |856, 857                |
-|pal_pcie_is_cache_present    |Return 1 if the test system supports PCIe address translation cache, else 0   |852                     |
-|pal_pcie_get_legacy_irq_map  |Return 0 if system legacy irq map is filled, else 1                           |850                     |
-
-   Below exerciser capabilities are required by exerciser test.
-   - MSI-X interrupt generation.
-   - Incoming Transaction Monitoring(order, type).
-   - Initiating transactions from and to the exerciser.
-   - Ability to check on BDF and register address seen for each configuration address along with access type.
-
- - SBSA Test 803 (Check ECAM Memory accessibility) execution time depends on the system PCIe hierarchy. For systems with multiple ECAMs the time taken to complete can be long which is normal. Please wait until the test completes.
-
 ## License
 
 Arm SystemReady ACS is distributed under Apache v2.0 License.
