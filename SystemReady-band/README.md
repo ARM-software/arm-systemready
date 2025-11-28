@@ -1,7 +1,6 @@
 # SystemReady band ACS
 
 ## Table of Contents
-
 - [Introduction](#introduction)
 - [Latest Release details](#latest-release-details)
 - [Prebuilt Images](#prebuilt-images)
@@ -16,6 +15,7 @@
 - [Verification on Arm Neoverse N2 reference design](#verification-on-arm-neoverse-n2-reference-design)
   - [Software stack and Model](#software-stack-and-model)
   - [Model run command](#model-run-command)
+- [Current Limitations](#current-limitations)
 - [Security Implication](#security-implication)
 - [License](#license)
 - [Feedback, contributions, and support](#feedback-contributions-and-support)
@@ -30,10 +30,10 @@ The SystemReady band compliance and testing requirements are specified in the [A
 ## Latest Release details
  - Release version: v3.1.0
  - Quality: EAC
- - **The latest pre-built release of ACS is available for download here: [v25.10_3.1.0](prebuilt_images/v25.10_3.1.0)**
+ - The latest pre-built release of ACS is available for download here: [v25.10_3.1.0](prebuilt_images/v25.10_3.1.0)
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
- - SystemReady-band Image Test Suite details
+ - **Image Test Suite details**
 
 | Test Suite                                                                                   | Test Suite Tag / Commit                                      | Specification Version |
 |----------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------|
@@ -45,17 +45,24 @@ The SystemReady band compliance and testing requirements are specified in the [A
 | [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v25.01.00                                                    |                       |
 | [Server Base Manageability Requirements (SBMR)](https://github.com/ARM-software/sbmr-acs)    | 27803824d966df48f34ce5290599f616bc0de8e9                     | SBMR v2.0             |
 
+ - **Image Component details**
 
-## Prebuilt Images
+| Component                                                                   | Version           |
+|-----------------------------------------------------------------------------|-------------------|
+| [Linux Kernel](https://github.com/torvalds/linux.git)                       | v6.10             |
+| [EDK2](https://github.com/tianocore/edk2.git)                               | edk2-stable202508 |
+
+
+### Prebuilt Images
 - Prebuilt images for each release are available in the prebuilt_images folder.To access the prebuilt_images, click [prebuilt_images](prebuilt_images/).
 - The prebuilt images are archived after compression to the .xz format. On Linux, use the xz utility to uncompress the image <br />
   `xz -d  systemready_acs_live_image.img.xz` <br />
    On Windows, use the 7zip or a similar utility.
 - If you choose to use the prebuilt image, skip the build steps and navigate to the [Verification on Arm Neoverse N2 reference design](#verification-on-arm-neoverse-n2-reference-design).
 
-## Steps to Manually Build Image
+### Steps to Manually Build Image
 
-### Prerequisites
+#### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
  - Ubuntu 20.04 or later LTS with at least 32GB of free disk space.
  - Use bash shell.
@@ -63,11 +70,11 @@ Before starting the ACS build, ensure that the following requirements are met:
  - Install `git` using `sudo apt install git`
  - `git config --global user.name "Your Name"` and `git config --global user.email "Your Email"` must be configured.
 
-### Code download
+#### Code download
 - To build a release version of the code, checkout the main branch with the appropriate release [tag](https://github.com/ARM-software/arm-systemready/tags).
 - To build the latest version of the code with bug fixes and new features, use the main branch.
 
-### Build Steps
+#### Build Steps
 1. Clone the arm-systemready repository <br />
  `git clone https://github.com/ARM-software/arm-systemready.git`
 
@@ -85,7 +92,7 @@ Before starting the ACS build, ensure that the following requirements are met:
 
 Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before it is used.<br />
 
-### Build output
+#### Build output
 This image comprise of single FAT file system partition recognized by UEFI: <br />
 - 'BOOT_ACS' <br />
   Approximate size: 640 MB <br />
@@ -223,18 +230,15 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 - Template of waiver.json can be found [here](https://github.com/ARM-software/arm-systemready/blob/main/docs/example_waiver.json)
 
 ## Verification on Arm Neoverse N2 reference design
-
 Note: UEFI EDK2 setting for "Console Preference": The default is "Graphical". When that is selected, Linux output will goes to the graphical console (HDMI monitor). To force serial console output, you may change the "Console Preference" to "Serial".
 
 ### Software stack and Model
-
 Follow the steps mentioned in [RD-N2 platform software user guide](https://neoverse-reference-design.docs.arm.com/en/latest/platforms/rdn2.html) to obtain RD-N2 FVP.
 
 #### Prerequisites
 sudo permission is required for  building RD-N2 software stack.
 
-#### For software stack build instructions, follow BusyBox Boot link under Supported Features by RD-N2 platform software stack section in the same guide.
-
+#### For software stack build instructions, follow BusyBox Boot link under Supported Features by RD-N2 platform software stack section in the same guide
 Note: After the download of software stack code, please do the below changes before starting the build steps.<br />
 RD-N2 should be built with the GIC changes as mentioned below as applicable.<br />
 - If the system supports LPIs (Interrupt ID > 8192) then firmware should support installation of handler for LPI interrupts.
@@ -248,7 +252,6 @@ RD-N2 should be built with the GIC changes as mentioned below as applicable.<br 
 
 
 ### Model run command
-
 1. Set the environment variable 'MODEL' <br />
   `export MODEL=<absolute path to the RD-N2 FVP binary/FVP_RD_N2>`
 
@@ -272,6 +275,36 @@ The execution continues from the test that is next in sequence of the test prior
 This is expected behavior and the progress of tests will continue after a 20-minute delay.
 
 
+## Current Limitations
+
+### BSA
+Validating the compliance of certain PCIe rules defined in the BSA specification require the PCIe end-point generate specific stimulus during the runtime of the test. Examples of such stimulus are  P2P, PASID, ATC, etc. The tests that requires these stimuli are grouped together in the exerciser module. The exerciser layer is an abstraction layer that enables the integration of hardware capable of generating such stimuli to the test framework.
+The details of the hardware or Verification IP which enable these exerciser tests platform specific and are beyond the scope of this document.
+
+The ACS image does not allow customizations, hence, the exerciser module is not included in the ACS image. To enable exerciser tests for greater coverage of PCIe rules, please refer to [SYSARCH-ACS Exerciser Guide](https://github.com/ARM-software/sysarch-acs/blob/main/docs/pcie/Exerciser.md) Or contact your Arm representative for details.
+
+### SBSA
+Validating the compliance of certain PCIe rules defined in the SBSA specification requires the PCIe end-point to generate specific stimulus during the runtime of the test. Examples of such stimulus are  P2P, PASID, ATC, etc. The tests that requires these stimuli are grouped together in the exerciser module. The exerciser layer is an abstraction layer that enables the integration of hardware capable of generating such stimuli to the test framework.
+The details of the hardware or Verification IP which enable these exerciser tests are platform specific and are beyond the scope of this document.
+
+ - Some PCIe and Exerciser test are dependent on PCIe features supported by the test system.
+   Please fill the required API's with test system information.
+
+|APIs                         |Description                                                                   |Affected tests          |
+|-----------------------------|------------------------------------------------------------------------------|------------------------|
+|pal_pcie_dev_p2p_support     |Return 0 if the test system PCIe supports peer to peer transaction, else 1    |856, 857                |
+|pal_pcie_is_cache_present    |Return 1 if the test system supports PCIe address translation cache, else 0   |852                     |
+|pal_pcie_get_legacy_irq_map  |Return 0 if system legacy irq map is filled, else 1                           |850                     |
+
+   Below exerciser capabilities are required by exerciser test.
+   - MSI-X interrupt generation.
+   - Incoming Transaction Monitoring(order, type).
+   - Initiating transactions from and to the exerciser.
+   - Ability to check on BDF and register address seen for each configuration address along with access type.
+
+ - SBSA Test 803 (Check ECAM Memory accessibility) execution time depends on the system PCIe hierarchy. For systems with multiple ECAMs the time taken to complete can be long which is normal. Please wait until the test completes.
+
+
 ## Security Implication
 Arm SystemReady band ACS test suite may run at higher privilege level. An attacker may utilize these tests as a means to elevate privilege which can potentially reveal the platform security assets. To prevent the leakage of Secure information, it is strongly recommended that the ACS test suite is run only on development platforms. If it is run on production systems, the system should be scrubbed after running the test suite.
 
@@ -279,7 +312,6 @@ Arm SystemReady band ACS test suite may run at higher privilege level. An attack
 SystemReady ACS is distributed under Apache v2.0 License.
 
 ## Feedback, contributions, and support
-
  - For feedback, use the GitHub Issue Tracker that is associated with this repository.
  - For support, send an email to support-systemready-acs@arm.com with details.
  - Arm licensees can contact Arm directly through their partner managers.
