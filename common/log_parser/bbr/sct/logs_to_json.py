@@ -34,6 +34,20 @@ def normalize_result(r):
         return "SKIPPED"
     return r
 
+def is_smbios_test(test_case_name):
+    """
+    Check if a test case is SMBIOS-related.
+    Matches various naming patterns like:
+    - SmbiosTable
+    - SMBIOS_*
+    - *_SMBIOS_*
+    - *SMBIOS*
+    """
+    if not test_case_name:
+        return False
+    test_lower = test_case_name.lower()
+    return "smbios" in test_lower
+
 # JSON mapping of Test Suites, Sub Test Suites, and Test Cases
 test_mapping = {
     "GenericTest": {
@@ -466,6 +480,9 @@ def main(input_file, output_file):
         # End of loop: add last test entry
         if test_entry:
             results.append(test_entry)
+
+    # Filter out SMBIOS tests using the dedicated function
+    results = [test for test in results if not is_smbios_test(test.get("Test_case", ""))]
 
     # Merge with edk2_test_parser.json if present
     edk2_file = os.path.join(os.path.dirname(output_file), "edk2_test_parser.json")
