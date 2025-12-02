@@ -18,6 +18,17 @@ import sys
 import re
 import json
 
+def is_pci_test(test_suite_name):
+    """
+    Check if a test is PCI-related.
+    PCI tests were added with FWTS upgrade as part of SMBIOS suite.
+    As per SR requirements, these tests should be skipped.
+    """
+    if not test_suite_name:
+        return False
+    test_lower = test_suite_name.lower()
+    return "pci" in test_lower
+
 def parse_fwts_log(log_path):
     with open(log_path, 'r') as f:
         log_data = f.readlines()
@@ -262,7 +273,33 @@ def parse_fwts_log(log_path):
                 current_test["test_suite_summary"][f"total_{key.lower()}"] += sub["sub_test_result"][key]
         results.append(current_test)
 
+    # Filter out PCI tests (case-insensitive) from subtests
+    for test in results:
+        # Filter subtests to exclude those with PCI in their description
+        test["subtests"] = [sub for sub in test["subtests"]
+                           if not is_pci_test(sub.get("sub_Test_Description", ""))]
+
+        # Recalculate test_suite_summary after filtering
+        test["test_suite_summary"] = {
+            "total_passed": 0,
+            "total_failed": 0,
+            "total_aborted": 0,
+            "total_skipped": 0,
+            "total_warnings": 0
+        }
+        for sub in test["subtests"]:
+            for key in ["PASSED", "FAILED", "ABORTED", "SKIPPED", "WARNINGS"]:
+                test["test_suite_summary"][f"total_{key.lower()}"] += sub["sub_test_result"][key]
+
     # After all tests, update the suite_summary from each test's summary
+    # Reset suite_summary since we filtered out PCI tests
+    suite_summary = {
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_aborted": 0,
+        "total_skipped": 0,
+        "total_warnings": 0
+    }
     for test in results:
         for key in ["PASSED", "FAILED", "ABORTED", "SKIPPED", "WARNINGS"]:
             suite_summary[f"total_{key.lower()}"] += test["test_suite_summary"][f"total_{key.lower()}"]
