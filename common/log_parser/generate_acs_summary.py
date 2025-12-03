@@ -151,15 +151,56 @@ def read_overall_compliance_from_merged_json(merged_json_path):
     Opens the merged_results.json and retrieves the final
     "Overall Compliance Result" from:
       data["Suite_Name: acs_info"]["ACS Results Summary"]["Overall Compliance Result"]
+
+    Returns: (overall_result, bbsr_result, mandatory_details, recommended_details)
+    where mandatory_details and recommended_details are dicts with 'not_run' and 'failed' lists
     """
     overall_result = "Unknown"
     bbsr_result = "Unknown"
+    mandatory_details = {"not_run": [], "failed": []}
+    recommended_details = {"not_run": [], "failed": []}
+
     try:
         with open(merged_json_path, 'r') as jf:
             data = json.load(jf)
         acs_info_data = data.get("Suite_Name: acs_info", {})
         acs_summary = acs_info_data.get("ACS Results Summary", {})
         overall_result = acs_summary.get("Overall Compliance Result", "Unknown")
+
+        # Parse the overall result to extract mandatory and recommended details
+        # Format: "Not Compliant : Mandatory - (not run: X; failed: Y) : Recommended - (not run: A; failed: B)"
+        if "Mandatory -" in overall_result or "Recommended -" in overall_result:
+            # Split by " : " to get sections
+            sections = overall_result.split(" : ")
+            for section in sections:
+                if section.startswith("Mandatory -"):
+                    # Extract content within parentheses
+                    match = re.search(r'Mandatory - \((.*?)\)', section)
+                    if match:
+                        content = match.group(1)
+                        # Parse "not run: X; failed: Y"
+                        parts = content.split("; ")
+                        for part in parts:
+                            if part.startswith("not run:"):
+                                suites = part.replace("not run:", "").strip()
+                                mandatory_details["not_run"] = [s.strip() for s in suites.split(",")]
+                            elif part.startswith("failed:"):
+                                suites = part.replace("failed:", "").strip()
+                                mandatory_details["failed"] = [s.strip() for s in suites.split(",")]
+
+                elif section.startswith("Recommended -"):
+                    match = re.search(r'Recommended - \((.*?)\)', section)
+                    if match:
+                        content = match.group(1)
+                        parts = content.split("; ")
+                        for part in parts:
+                            if part.startswith("not run:"):
+                                suites = part.replace("not run:", "").strip()
+                                recommended_details["not_run"] = [s.strip() for s in suites.split(",")]
+                            elif part.startswith("failed:"):
+                                suites = part.replace("failed:", "").strip()
+                                recommended_details["failed"] = [s.strip() for s in suites.split(",")]
+
         # If not found in ACS Results Summary, try at top level of acs_info_data
         if "BBSR compliance results" in acs_info_data:
             bbsr_result = acs_info_data.get("BBSR compliance results", "Unknown")
@@ -167,7 +208,8 @@ def read_overall_compliance_from_merged_json(merged_json_path):
             bbsr_result = acs_summary.get("BBSR compliance results", "Unknown")
     except Exception as e:
         print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
-    return overall_result, bbsr_result
+
+    return overall_result, bbsr_result, mandatory_details, recommended_details
 
 def generate_html(system_info, acs_results_summary,
                   bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path, sbmr_ib_summary_path, sbmr_oob_summary_path,
@@ -370,7 +412,7 @@ def generate_html(system_info, acs_results_summary,
                         <td>{{ acs_results_summary.get('Date', 'Unknown') }}</td>
                     </tr>
                     <tr>
-                        <th>SRS requirements compliance results</th>
+                        <th rowspan="3">SRS requirements compliance results</th>
                         <td style="
                             color:
                             {% if 'Not Compliant' in acs_results_summary.get('Overall Compliance Results', '') %}
@@ -383,9 +425,44 @@ def generate_html(system_info, acs_results_summary,
                                 black
                             {% endif %}
                         ">
-                            {{ acs_results_summary.get('Overall Compliance Results', 'Unknown') }}
+                            {% set overall = acs_results_summary.get('Overall Compliance Results', 'Unknown') %}
+                            {% if ':' in overall %}
+                                {{ overall.split(':')[0].strip() }}
+                            {% else %}
+                                {{ overall }}
+                            {% endif %}
                         </td>
                     </tr>
+                    {% set mandatory = acs_results_summary.get('Mandatory Details', {}) %}
+                    {% set recommended = acs_results_summary.get('Recommended Details', {}) %}
+                    {% if mandatory.get('not_run') or mandatory.get('failed') %}
+                    <tr>
+                        <td style="padding-left: 20px; color: red;">
+                            <strong>Mandatory:</strong>
+                            {% if mandatory.get('not_run') %}
+                                not run: {{ mandatory.get('not_run')|join(', ') }}
+                            {% endif %}
+                            {% if mandatory.get('not_run') and mandatory.get('failed') %}; {% endif %}
+                            {% if mandatory.get('failed') %}
+                                failed: {{ mandatory.get('failed')|join(', ') }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if recommended.get('not_run') or recommended.get('failed') %}
+                    <tr>
+                        <td style="padding-left: 20px; color: red;">
+                            <strong>Recommended:</strong>
+                            {% if recommended.get('not_run') %}
+                                not run: {{ recommended.get('not_run')|join(', ') }}
+                            {% endif %}
+                            {% if recommended.get('not_run') and recommended.get('failed') %}; {% endif %}
+                            {% if recommended.get('failed') %}
+                                failed: {{ recommended.get('failed')|join(', ') }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
                 </table>
             </div>
             <div class="acs-results-summary">
@@ -675,8 +752,10 @@ if __name__ == "__main__":
 
     # 8) Read overall compliance solely from merged JSON (if provided)
     overall_compliance = "Unknown"
+    mandatory_details = {"not_run": [], "failed": []}
+    recommended_details = {"not_run": [], "failed": []}
     if args.merged_json and os.path.isfile(args.merged_json):
-        overall_compliance, bbsr_compliance = read_overall_compliance_from_merged_json(args.merged_json)
+        overall_compliance, bbsr_compliance, mandatory_details, recommended_details = read_overall_compliance_from_merged_json(args.merged_json)
     else:
         print("Warning: merged JSON not provided or does not exist => Overall compliance unknown")
         overall_compliance, bbsr_compliance = "Unknown", "Unknown"
@@ -686,7 +765,9 @@ if __name__ == "__main__":
         'Band': acs_config_info.get('Band', 'Unknown'),
         'Date': summary_generated_date,
         'Overall Compliance Results': overall_compliance,
-        'BBSR compliance results': bbsr_compliance
+        'BBSR compliance results': bbsr_compliance,
+        'Mandatory Details': mandatory_details,
+        'Recommended Details': recommended_details
     }
 
     # 10) Finally, generate the consolidated HTML page
