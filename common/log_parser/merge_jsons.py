@@ -512,8 +512,11 @@ def merge_json_files(json_files, output_file):
 
     overall_comp = "Compliant"
     # Keep track of missing_suites and non_waived_suites for parentheses
-    missing_list = []
-    non_waived_list = []
+    # Separate tracking for mandatory and recommended
+    mandatory_missing_list = []
+    mandatory_non_waived_list = []
+    recommended_missing_list = []
+    recommended_non_waived_list = []
 
     if acs_info_data and isinstance(acs_info_data, dict):
         acs_results_summary = acs_info_data.get("ACS Results Summary", {})
@@ -527,26 +530,27 @@ def merge_json_files(json_files, output_file):
                 acs_results_summary[label] = "Not Compliant: not run"
                 print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
                 overall_comp = "Not Compliant"
-                missing_list.append(suite_name)
+                mandatory_missing_list.append(suite_name)
             elif requirement == "CM":
                 acs_results_summary[label] = "Not Run"
                 print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
                 #overall_comp = "Not Compliant"
-                #missing_list.append(suite_name)
+                #mandatory_missing_list.append(suite_name)
             elif requirement == "EM":
                 acs_results_summary[label] = "Not Run"
                 print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
                 #overall_comp = "Not Compliant"
-                #missing_list.append(suite_name)
+                #mandatory_missing_list.append(suite_name)
             else:
                 if DT_OR_SR_MODE == "DT":
                     acs_results_summary[label] = "Not Compliant: not run"
                     print(f"{RED}Suite: Recommended: {suite_name}: {acs_results_summary[label]}{RESET}")
                     overall_comp = "Not Compliant"
-                    missing_list.append(suite_name)
+                    recommended_missing_list.append(suite_name)
                 else:
                     acs_results_summary[label] = "Not Run"
                     print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
+                    recommended_missing_list.append(suite_name)
         else:
             fail_info = suite_fail_data.get(suite_name)
             f = fail_info.get("Failed", 0)
@@ -584,11 +588,12 @@ def merge_json_files(json_files, output_file):
                     else:
                         print(f"{RED}Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
                     overall_comp="Not Compliant"
-                    non_waived_list.append(suite_name)
+                    mandatory_non_waived_list.append(suite_name)
                 elif requirement == "EM":
                     print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
                 else:
                     print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
+                    recommended_non_waived_list.append(suite_name)
 
     #Ensure suite-wise compliance lines for *all* discovered suites (including recommended)
     for skey, info in suite_fail_data.items():
@@ -607,12 +612,29 @@ def merge_json_files(json_files, output_file):
     # Step 4) Overall compliance
     if overall_comp == "Not Compliant":
         reason_parts = []
-        if missing_list:
-            reason_parts.append(f"missing suite(s): {', '.join(missing_list)}")
-        if non_waived_list:
-            reason_parts.append(f"failures in suite(s): {', '.join(non_waived_list)}")
+
+        # Build Mandatory part
+        mandatory_parts = []
+        if mandatory_missing_list:
+            mandatory_parts.append(f"not run: {', '.join(mandatory_missing_list)}")
+        if mandatory_non_waived_list:
+            mandatory_parts.append(f"failed: {', '.join(mandatory_non_waived_list)}")
+
+        if mandatory_parts:
+            reason_parts.append(f"Mandatory - ({'; '.join(mandatory_parts)})")
+
+        # Build Recommended part
+        recommended_parts = []
+        if recommended_missing_list:
+            recommended_parts.append(f"not run: {', '.join(recommended_missing_list)}")
+        if recommended_non_waived_list:
+            recommended_parts.append(f"failed: {', '.join(recommended_non_waived_list)}")
+
+        if recommended_parts:
+            reason_parts.append(f"Recommended - ({'; '.join(recommended_parts)})")
+
         if reason_parts:
-            overall_comp += f" ({'; '.join(reason_parts)})"
+            overall_comp += f" : {' : '.join(reason_parts)}"
     elif overall_comp == "Compliant with waivers":
         pass
 
