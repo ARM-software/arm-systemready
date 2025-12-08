@@ -195,7 +195,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         if [ ! -s /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log ]; then
           echo "The FDT is compliant according to schema " >> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         fi
-        sed -i '1s/^/SystemReady devicetree band ACS v3.1.1 (RC0) \nDeviceTree bindings of Linux kernel version: 6.16 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
+        sed -i '1s/^/SystemReady devicetree band ACS v3.1.1 (RC0) \nDeviceTree bindings of Linux kernel version: 6.18 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         # Run dt parser on dt-validate log to categorize failures
         /usr/bin/systemready-scripts/dt-parser.py /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log --print 2>&1 | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate-parser.log
       else
