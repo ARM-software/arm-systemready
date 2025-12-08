@@ -3,3 +3,8 @@ Flashing instructions: Unknown
 product website: Unknown
 Tested operated Systems: Unknown
 Testlab assistance: Unknown
+
+# User-defined configs for compliance testing
+
+#Add the number of interfaces to be compliant, if commented or "0", all existing interfaces must be compliant
+Total_number_of_network_controllers= 0
