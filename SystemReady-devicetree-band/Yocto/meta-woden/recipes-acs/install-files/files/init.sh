@@ -233,7 +233,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       # update resolv.conf with 8.8.8.8 DNS server
       echo "nameserver 8.8.8.8" >> /etc/resolv.conf
       # run ethtool-test.py, dump ethernet information, run self-tests if supported, and ping
-      python3 /bin/ethtool-test.py | tee ethtool-test.log
+      python3 /bin/ethtool-test.py /mnt/acs_tests/config/system_config.txt | tee ethtool-test.log
       # remove color characters from log and save
       awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results_template/acs_results/linux_tools/ethtool-test.log
       sync /mnt
