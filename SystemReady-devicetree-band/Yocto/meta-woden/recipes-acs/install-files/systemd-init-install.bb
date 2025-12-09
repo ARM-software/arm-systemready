@@ -12,6 +12,8 @@ SRC_URI:append = " file://acs_run-before-login-prompt.service \
                    file://ethtool-test.py \
                    file://read_write_check_blk_devices.py \
                    file://device_driver_info.sh \
+                   file://acs_https_network_boot.sh \
+                   file://acs_network_boot_parser.sh \
                    file://log_parser \
                  "
 
@@ -32,5 +34,7 @@ do_install:append() {
   install -m 0770 ${WORKDIR}/ethtool-test.py                     ${D}${bindir}
   install -m 0770 ${WORKDIR}/read_write_check_blk_devices.py     ${D}${bindir}
   install -m 0770 ${WORKDIR}/device_driver_info.sh               ${D}${bindir}
+  install -m 0770 ${WORKDIR}/acs_https_network_boot.sh           ${D}${bindir}
+  install -m 0770 ${WORKDIR}/acs_network_boot_parser.sh          ${D}${bindir}
   cp -r ${WORKDIR}/log_parser                                    ${D}${bindir}/
 }

@@ -27,6 +27,12 @@ repos:
       meta-perl:
       meta-python:
 
+  meta-clang:
+    url: https://github.com/kraj/meta-clang.git
+    refspec: scarthgap
+    layers:
+      .:
+
   meta-secure-core:
     url: https://github.com/Wind-River/meta-secure-core
     refspec: scarthgap

@@ -1,0 +1,64 @@
+diff --git a/efi_app/main.c b/efi_app/main.c
+index f47a19a..36e2885 100644
+--- a/efi_app/main.c
++++ b/efi_app/main.c
+@@ -13,13 +13,12 @@ static const struct efi_device_path END = {
+         .length   = sizeof(END),
+ };
+ 
+-static efi_status_t do_http_boot(efi_system_table *st, u16 *host, u32 args)
++static efi_status_t do_http_boot(efi_system_table *st, u16 *host, u16 *label, u32 args)
+ {
+ 	efi_guid_t glob_var_guid = EFI_GLOBAL_VARIABLE_GUID;
+ 	efi_guid_t rng_guid = EFI_RNG_PROTOCOL_GUID;
+ 	struct efi_device_path_uri *uridp;
+ 	efi_status_t ret = EFI_SUCCESS;
+-	u16 *label = u"LEDGE Image";
+ 	unsigned long data_len = 0;
+ 	struct efi_load_option lo;
+ 	efi_rng_protocol_t *rng;
+@@ -189,10 +188,11 @@ static void print_usage(void)
+ {
+ 	glob_st->con_out->output_string(glob_st->con_out, L"-h: help\n");
+ 	glob_st->con_out->output_string(glob_st->con_out, L"-u: URL of iso\n");
++	glob_st->con_out->output_string(glob_st->con_out, L"-l: Label for HTTP boot option\n");
+ 	glob_st->con_out->output_string(glob_st->con_out, L"-f: force HTTP\n");
+-	glob_st->con_out->output_string(glob_st->con_out, L"-b: Don't reboot automatcaily after adding HTTP options\n");
++	glob_st->con_out->output_string(glob_st->con_out, L"-b: Don't reboot automatically after adding HTTP options\n");
+ 	glob_st->con_out->output_string(glob_st->con_out, L"-k: Print Kernel version after http tests to trick LAVA\n");
+-	glob_st->con_out->output_string(glob_st->con_out, L"-s: Skip secire boot testing\n");
++	glob_st->con_out->output_string(glob_st->con_out, L"-s: Skip secure boot testing\n");
+ }
+ 
+ efi_status_t efi_main(void *handle, efi_system_table *st)
+@@ -201,6 +201,7 @@ efi_status_t efi_main(void *handle, efi_system_table *st)
+ 	u16 **argv = NULL;
+ 	u64 argc = 0;
+ 	u16 *host = L"validation-linaro-org.s3.eu-west-1.amazonaws.com/testdata/ledge/core-image-base-genericarm64.rootfs.img";
++	u16 *label = u"LEDGE Image";
+ 	int i;
+ 	u32 http_args = 0;
+ 	bool print_kmsg = false;
+@@ -231,6 +232,14 @@ efi_status_t efi_main(void *handle, efi_system_table *st)
+ 				st->con_out->output_string(st->con_out, L"Error: -u requires a URL\n");
+ 				return 1;
+ 			}
++		} else if (!u16_strcmp(argv[i], L"-l")) {
++			if (i + 1 < argc) {
++				label = argv[i + 1];
++				i++;
++			} else {
++				st->con_out->output_string(st->con_out, L"Error: -l requires a label\n");
++				return 1;
++			}
+ 		} else {
+ 			st->con_out->output_string(st->con_out, L"Unknown argument\n");
+ 			print_usage();
+@@ -249,7 +258,7 @@ efi_status_t efi_main(void *handle, efi_system_table *st)
+ 	if (ret != EFI_SUCCESS)
+ 		goto out;
+ 
+-	ret = do_http_boot(st, host, http_args);
++	ret = do_http_boot(st, host, label, http_args);
+ 	if (print_kmsg)
+ 		st->con_out->output_string(st->con_out, L"Tricking fastboot LAVA ... Linux version 1980\n");
