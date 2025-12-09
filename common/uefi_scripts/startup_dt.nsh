@@ -26,6 +26,46 @@ for %x in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
   endif
 endfor
 
+#Start HTTPs Boot from uefi shell
+for %h in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+  if exist FS%h:\acs_tests\app\https_boot_pending.flag then
+    FS%h:
+    echo "HTTPS/HTTP network boot requested, launching https_boot.nsh..."
+
+    if exist \acs_tests\app\https_boot.nsh then
+      rm \acs_tests\app\https_boot_pending.flag
+      \acs_tests\app\https_boot.nsh
+    else
+      echo "[ERROR] https_boot.nsh not found under FS%h:\acs_tests\app\"
+      goto BootLinux
+    endif
+
+    goto DoneHTTPSBootCheck
+  endif
+endfor
+:DoneHTTPSBootCheck
+
+for %f in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+  if exist FS%f:\acs_tests\app\network_boot_failed.flag then
+    echo "HTTPS network boot previously failed. Cleaning flag and booting Linux..."
+    goto BootLinux
+  endif
+endfor
+
+for %x in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+  if exist FS%x:\acs_tests\app\network_boot_success.flag then
+    echo "HTTPS network boot previously completed. Skipping ACS tests and booting Linux..."
+    goto BootLinux
+  endif
+endfor
+
+for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+  if exist FS%y:\acs_tests\app\network_boot_in_progress.flag then
+    echo "WARNING: network_boot_in_progress flag found. Network boot failed,  please check logs, booting Linux..."
+    goto BootLinux
+  endif
+endfor
+
 # Clearing Secure Boot Key
 for %d in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%d:\acs_tests\bbr\clear_secureboot.flag then

@@ -22,6 +22,7 @@ IMAGE_INSTALL = "packagegroup-core-boot \
 EXTRA_IMAGEDEPENDS += "bsa-acs \
                        shell-app \
                        uefi-apps \
+                       ledge-efi \
                        update-vars \
                        ebbr-sct \
                        bootfs-files \
@@ -31,6 +32,8 @@ IMAGE_EFI_BOOT_FILES += "Bsa.efi;acs_tests/bsa/Bsa.efi \
                          bsa.nsh;acs_tests/bsa/bsa.nsh \
                          pfdi.efi;acs_tests/pfdi/pfdi.efi \
                          pfdi.nsh;acs_tests/pfdi/pfdi.nsh \
+                         https_boot.nsh;acs_tests/app/https_boot.nsh \
+                         ledge.efi;acs_tests/app/ledge.efi \
                          pingtest.nsh;acs_tests/debug/pingtest.nsh \
                          capsule_update.nsh;acs_tests/app/capsule_update.nsh \
                          bsa_dt.flag;acs_tests/bsa/bsa_dt.flag \
@@ -68,6 +71,12 @@ do_sign_images() {
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/acs_tests/app/CapsuleApp.efi --output DO_SIGN/acs_tests/app/CapsuleApp.efi
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/acs_tests/app/UpdateVars.efi --output DO_SIGN/acs_tests/app/UpdateVars.efi
     sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/Image --output DO_SIGN/Image
+
+    if [ -f DO_SIGN/acs_tests/app/ledge.efi ]; then
+        sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/acs_tests/app/ledge.efi --output DO_SIGN/acs_tests/app/ledge.efi
+    else
+        echo "WARNING: ledge.efi not found for signing (skipping)"
+    fi
 
     echo "Signing images complete."
     wic cp DO_SIGN/EFI ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/

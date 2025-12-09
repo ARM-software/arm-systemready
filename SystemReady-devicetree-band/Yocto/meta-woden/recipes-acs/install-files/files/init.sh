@@ -47,9 +47,22 @@ sleep 3
 if [ -f /mnt/acs_tests/bbr/boot_tolinuxprompt.flag ]; then
   echo "Booted after Secure Boot clearance. Skipping ACS tests, Booting to Linux terminal..."
   rm /mnt/acs_tests/bbr/boot_tolinuxprompt.flag
- # echo "Please press <Enter> to continue ..."
   exit 0
 fi
+
+for flag in network_boot_success.flag network_boot_failed.flag network_boot_in_progress.flag https_boot_pending.flag
+do
+    if [ -f /mnt/acs_tests/app/$flag ]; then
+        echo "Booted after network boot, running network boot parser..."
+        if [ -x /usr/bin/acs_network_boot_parser.sh ]; then
+            /usr/bin/acs_network_boot_parser.sh || true
+        else
+            echo "WARNING: acs_network_boot_parser.sh not found or not executable under /usr/bin"
+        fi
+        echo "Clearing $flag"
+        rm -f /mnt/acs_tests/app/$flag
+    fi
+done
 
 #Skip running of ACS Tests if the grub option is added
 ADDITIONAL_CMD_OPTION="";
@@ -240,7 +253,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sleep 5
       echo "Ethtool test run - Completed"
 
-
       # READ_WRITE_BLOCK_DEVICE run
       # RUN read_write_check_blk_devices.py, parse block devices, and perform read if partition doesn't belond in precious partitions
       echo "Running BLK devices read and write check"
@@ -352,6 +364,16 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Capsule update has ignored..."
         rm /mnt/acs_tests/app/capsule_update_ignore.flag
       fi
+
+      #Network Boot script
+      mkdir -p /home/root/fdt
+      pushd /usr/bin
+      echo "running network boot script"
+      ./acs_https_network_boot.sh
+      echo "network script run completed"
+      popd
+      sync /mnt
+      sleep 5
 
       # EDK2 Parser Tool run
       if [ -d "/mnt/acs_results_template/acs_results/sct_results" ]; then
