@@ -457,7 +457,10 @@ def main(input_file, output_file):
                 result_str = normalize_result(parts[1])
 
                 # Tally in test_case_summary *before* overrides
-                if "PASS" in result_str:
+                # Check WARNING first to catch "PASS WITH WARNING" etc.
+                if "WARNING" in result_str:
+                    test_entry["test_case_summary"]["total_warnings"] += 1
+                elif "PASS" in result_str:
                     test_entry["test_case_summary"]["total_passed"] += 1
                 elif "FAIL" in result_str:
                     test_entry["test_case_summary"]["total_failed"] += 1
@@ -465,9 +468,9 @@ def main(input_file, output_file):
                     test_entry["test_case_summary"]["total_aborted"] += 1
                 elif "SKIPPED" in result_str:
                     test_entry["test_case_summary"]["total_skipped"] += 1
-                elif "WARNING" in result_str:
-                    test_entry["test_case_summary"]["total_warnings"] += 1
-                # "NOT SUPPORTED" etc. is not specially counted, you can add if needed.
+                elif "NOT SUPPORTED" not in result_str:
+                    # Count everything else except NOT SUPPORTED as ignored
+                    test_entry["test_case_summary"]["total_ignored"] += 1
 
                 test_guid = lines[i+1].strip() if i+1 < len(lines) else ""
                 file_path = lines[i+2].strip() if i+2 < len(lines) else ""
@@ -591,8 +594,10 @@ def main(input_file, output_file):
 
         for subtest in test_obj["subtests"]:
             final_result = subtest["sub_test_result"].upper()
-            # Classify final_result
-            if "PASS" in final_result:
+            # Classify final_result - check WARNING first to catch "PASS WITH WARNING"
+            if "WARNING" in final_result:
+                tcsum["total_warnings"] += 1
+            elif "PASS" in final_result:
                 tcsum["total_passed"] += 1
             elif "FAIL" in final_result:
                 tcsum["total_failed"] += 1
@@ -600,10 +605,8 @@ def main(input_file, output_file):
                 tcsum["total_aborted"] += 1
             elif "SKIPPED" in final_result:
                 tcsum["total_skipped"] += 1
-            elif "WARNING" in final_result:
-                tcsum["total_warnings"] += 1
-            else:
-                # ANY other override (IGNORED, KNOWN U-BOOT LIMITATION, etc)
+            elif "NOT SUPPORTED" not in final_result:
+                # ANY other override (IGNORED, KNOWN U-BOOT LIMITATION, etc) except NOT SUPPORTED
                 tcsum["total_ignored"] += 1
 
     # Sum them all into suite_summary
@@ -625,6 +628,24 @@ def main(input_file, output_file):
         final_suite_summary["total_skipped"] += tcsum["total_skipped"]
         final_suite_summary["total_warnings"] += tcsum["total_warnings"]
         final_suite_summary["total_ignored"] += tcsum["total_ignored"]
+
+
+        # Also count test-level results (tests with no subtests or test-level overrides)
+        test_result = test_obj.get("test_result", "").upper()
+        if test_result and len(test_obj.get("subtests", [])) == 0:
+            # Only count test-level results if there are no subtests
+            if "WARNING" in test_result:
+                final_suite_summary["total_warnings"] += 1
+            elif "PASS" in test_result:
+                final_suite_summary["total_passed"] += 1
+            elif "FAIL" in test_result:
+                final_suite_summary["total_failed"] += 1
+            elif "ABORTED" in test_result:
+                final_suite_summary["total_aborted"] += 1
+            elif "SKIPPED" in test_result:
+                final_suite_summary["total_skipped"] += 1
+            elif "NOT SUPPORTED" not in test_result:
+                final_suite_summary["total_ignored"] += 1
 
     output_data = {
         "test_results": results,
