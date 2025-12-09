@@ -353,11 +353,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Running post scripts "
         cd /mnt/acs_results_template
         mkdir -p /mnt/acs_results_template/acs_results/post-script
-        /usr/bin/systemready-scripts/compatibles /usr/bin/linux-6.16/bindings > /usr/bin/linux-6.16/compatible-strings.txt
+        /usr/bin/systemready-scripts/compatibles /usr/bin/linux-6.18/bindings > /usr/bin/linux-6.18/compatible-strings.txt
         # Create .stamp file for avoding cache regen
-        echo "linux-6.16" > /usr/bin/linux-6.16/.stamp
+        echo "linux-6.18" > /usr/bin/linux-6.18/.stamp
         /usr/bin/systemready-scripts/check-sr-results.py --cache-dir /usr/bin \
-         --linux-url https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.16.tar.xz --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
+         --linux-url https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
         cd -
       fi
       sync /mnt
