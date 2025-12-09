@@ -48,6 +48,19 @@ def is_smbios_test(test_case_name):
     test_lower = test_case_name.lower()
     return "smbios" in test_lower
 
+def is_runtime_properties_table_test(subtest_description):
+    """
+    Check if a subtest is the buggy EFI Runtime Properties Table test.
+    Matches: "UEFI Compliant - EFI Runtime Properties Table RuntimeServicesSupported field matches the expected value"
+    This subtest has a known bug and should be filtered out to prevent incorrect non-compliance.
+
+    """
+    if not subtest_description:
+        return False
+    # Match the specific subtest description (case-insensitive)
+    target_test = "uefi compliant - efi runtime properties table runtimeservicessupported field matches the expected value"
+    return target_test in subtest_description.lower()
+
 # JSON mapping of Test Suites, Sub Test Suites, and Test Cases
 test_mapping = {
     "GenericTest": {
@@ -483,6 +496,14 @@ def main(input_file, output_file):
 
     # Filter out SMBIOS tests using the dedicated function
     results = [test for test in results if not is_smbios_test(test.get("Test_case", ""))]
+
+    # Filter out Runtime Properties Table test from subtests (appears only as subtest)
+    for test in results:
+        if "subtests" in test and isinstance(test["subtests"], list):
+            test["subtests"] = [
+                subtest for subtest in test["subtests"]
+                if not is_runtime_properties_table_test(subtest.get("sub_Test_Description", ""))
+            ]
 
     # Merge with edk2_test_parser.json if present
     edk2_file = os.path.join(os.path.dirname(output_file), "edk2_test_parser.json")
