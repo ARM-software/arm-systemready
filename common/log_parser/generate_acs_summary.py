@@ -152,13 +152,14 @@ def read_overall_compliance_from_merged_json(merged_json_path):
     "Overall Compliance Result" from:
       data["Suite_Name: acs_info"]["ACS Results Summary"]["Overall Compliance Result"]
 
-    Returns: (overall_result, bbsr_result, mandatory_details, recommended_details)
-    where mandatory_details and recommended_details are dicts with 'not_run' and 'failed' lists
+    Returns: (overall_result, bbsr_result, mandatory_details, recommended_details, bbsr_details)
+    where mandatory_details, recommended_details, and bbsr_details are dicts with 'not_run' and 'failed' lists
     """
     overall_result = "Unknown"
     bbsr_result = "Unknown"
     mandatory_details = {"not_run": [], "failed": []}
     recommended_details = {"not_run": [], "failed": []}
+    bbsr_details = {"not_run": [], "failed": []}
 
     try:
         with open(merged_json_path, 'r') as jf:
@@ -201,15 +202,31 @@ def read_overall_compliance_from_merged_json(merged_json_path):
                                 suites = part.replace("failed:", "").strip()
                                 recommended_details["failed"] = [s.strip() for s in suites.split(",")]
 
-        # If not found in ACS Results Summary, try at top level of acs_info_data
+        # Get BBSR compliance result and parse it
         if "BBSR compliance results" in acs_info_data:
             bbsr_result = acs_info_data.get("BBSR compliance results", "Unknown")
         else:
             bbsr_result = acs_summary.get("BBSR compliance results", "Unknown")
+
+        # Parse BBSR result to extract mandatory details
+        # Format: "Not Compliant : Mandatory - (not run: X; failed: Y)"
+        if "Mandatory -" in bbsr_result:
+            match = re.search(r'Mandatory - \((.*?)\)', bbsr_result)
+            if match:
+                content = match.group(1)
+                parts = content.split("; ")
+                for part in parts:
+                    if part.startswith("not run:"):
+                        suites = part.replace("not run:", "").strip()
+                        bbsr_details["not_run"] = [s.strip() for s in suites.split(",")]
+                    elif part.startswith("failed:"):
+                        suites = part.replace("failed:", "").strip()
+                        bbsr_details["failed"] = [s.strip() for s in suites.split(",")]
+
     except Exception as e:
         print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
 
-    return overall_result, bbsr_result, mandatory_details, recommended_details
+    return overall_result, bbsr_result, mandatory_details, recommended_details, bbsr_details
 
 def generate_html(system_info, acs_results_summary,
                   bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path, sbmr_ib_summary_path, sbmr_oob_summary_path,
@@ -469,7 +486,7 @@ def generate_html(system_info, acs_results_summary,
                 <h2>Extensions</h2>
                 <table>
                     <tr>
-                        <th>BBSR compliance results</th>
+                        <th rowspan="2">BBSR compliance results</th>
                         <td style="
                             color:
                             {% if 'Not Compliant' in acs_results_summary.get('BBSR compliance results', '') %}
@@ -482,9 +499,29 @@ def generate_html(system_info, acs_results_summary,
                                 black
                             {% endif %}
                         ">
-                            {{ acs_results_summary.get('BBSR compliance results', 'Not run') }}
+                            {% set bbsr = acs_results_summary.get('BBSR compliance results', 'Not run') %}
+                            {% if ':' in bbsr %}
+                                {{ bbsr.split(':')[0].strip() }}
+                            {% else %}
+                                {{ bbsr }}
+                            {% endif %}
                         </td>
                     </tr>
+                    {% set bbsr_ext = acs_results_summary.get('BBSR Details', {}) %}
+                    {% if bbsr_ext.get('not_run') or bbsr_ext.get('failed') %}
+                    <tr>
+                        <td style="padding-left: 20px; color: red;">
+                            <strong>Mandatory:</strong>
+                            {% if bbsr_ext.get('not_run') %}
+                                not run: {{ bbsr_ext.get('not_run')|join(', ') }}
+                            {% endif %}
+                            {% if bbsr_ext.get('not_run') and bbsr_ext.get('failed') %}; {% endif %}
+                            {% if bbsr_ext.get('failed') %}
+                                failed: {{ bbsr_ext.get('failed')|join(', ') }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
                 </table>
             </div>
             <div class="dropdown">
@@ -754,8 +791,9 @@ if __name__ == "__main__":
     overall_compliance = "Unknown"
     mandatory_details = {"not_run": [], "failed": []}
     recommended_details = {"not_run": [], "failed": []}
+    bbsr_details = {"not_run": [], "failed": []}
     if args.merged_json and os.path.isfile(args.merged_json):
-        overall_compliance, bbsr_compliance, mandatory_details, recommended_details = read_overall_compliance_from_merged_json(args.merged_json)
+        overall_compliance, bbsr_compliance, mandatory_details, recommended_details, bbsr_details = read_overall_compliance_from_merged_json(args.merged_json)
     else:
         print("Warning: merged JSON not provided or does not exist => Overall compliance unknown")
         overall_compliance, bbsr_compliance = "Unknown", "Unknown"
@@ -767,7 +805,8 @@ if __name__ == "__main__":
         'Overall Compliance Results': overall_compliance,
         'BBSR compliance results': bbsr_compliance,
         'Mandatory Details': mandatory_details,
-        'Recommended Details': recommended_details
+        'Recommended Details': recommended_details,
+        'BBSR Details': bbsr_details
     }
 
     # 10) Finally, generate the consolidated HTML page

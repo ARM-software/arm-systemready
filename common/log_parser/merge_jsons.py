@@ -680,19 +680,16 @@ def merge_json_files(json_files, output_file):
             elif "waiver" in low:
                 waiver_seen = True
 
-        if non_waived_list_bbsr:
-            parts = []
+        if non_waived_list_bbsr or missing_list_bbsr:
+            bbsr_comp = "Not Compliant"
+            reason_parts = []
             if missing_list_bbsr:
-                parts.append(f"missing suite(s): {', '.join(missing_list_bbsr)}")
+                reason_parts.append(f"not run: {', '.join(missing_list_bbsr)}")
             if non_waived_list_bbsr:
-                parts.append(f"non-waived fails in suite(s): {', '.join(non_waived_list_bbsr)}")
-            acs_results_summary["BBSR compliance results"] = (
-                "Not Compliant" + (f" ({'; '.join(parts)})" if parts else "")
-            )
-        elif missing_list_bbsr:
-            acs_results_summary["BBSR compliance results"] = (
-                f"Not Compliant (missing suite(s): {', '.join(missing_list_bbsr)})"
-            )
+                reason_parts.append(f"failed: {', '.join(non_waived_list_bbsr)}")
+            if reason_parts:
+                bbsr_comp += f" : Mandatory - ({'; '.join(reason_parts)})"
+            acs_results_summary["BBSR compliance results"] = bbsr_comp
         elif waiver_seen:
             acs_results_summary["BBSR compliance results"] = "Compliant with waivers"
         else:
