@@ -56,6 +56,11 @@ test_suite_mapping = {
     "Test_suite_description": "SMBIOS Table Validation",
     "Test_case_description": "UEFI SMBIOS table presence check"
     },
+    "network_boot": {
+        "Test_suite": "Network boot",
+        "Test_suite_description": "Network validation",
+        "Test_case_description": "Network Boot Test"
+    },
 
 }
 
@@ -1134,6 +1139,91 @@ def parse_smbios_log(log_data):
     }
 
 
+def parse_network_boot_log(log_data):
+    """
+    Parse network boot test logs.
+    Expected format:
+        [INFO] network_boot_checks
+        <timestamp>
+        Image URL: PASSED (URL Found: http://...)
+        EFI System Partition (ESP): PASSED (detected ESP on the system)
+        ...
+        Network_Boot_Result: PASSED
+    """
+    test_suite_key = "network_boot"
+    mapping = test_suite_mapping[test_suite_key]
+
+    suite_summary = {
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waivers": 0
+    }
+
+    current_test = {
+        "Test_suite": mapping["Test_suite"],
+        "Test_suite_description": mapping["Test_suite_description"],
+        "Test_case": test_suite_key,
+        "Test_case_description": mapping["Test_case_description"],
+        "subtests": [],
+        "test_suite_summary": suite_summary.copy()
+    }
+
+    subtest_number = 1
+
+    for line in log_data:
+        line = line.strip()
+
+        # Skip header and timestamp lines
+        if line.startswith("[INFO]") or not line or re.match(r'^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\w+\s+\d+', line):
+            continue
+
+        # Skip the final result line
+        if "Network_Boot_Result:" in line:
+            continue
+
+        # Parse test lines with explicit status: "Test Name: PASSED/FAILED (reason)"
+        match_explicit = re.match(r'^([^:]+):\s*(PASSED|FAILED)\s*(?:\((.+)\))?$', line)
+        if match_explicit:
+            test_name = match_explicit.group(1).strip()
+            status = match_explicit.group(2).strip()
+            reason = match_explicit.group(3).strip() if match_explicit.group(3) else ""
+
+            # Create subtest with string reasons instead of arrays
+            subtest = {
+                "sub_Test_Number": str(subtest_number),
+                "sub_Test_Description": test_name,
+                "sub_test_result": {
+                    "PASSED": 1 if status == "PASSED" else 0,
+                    "FAILED": 1 if status == "FAILED" else 0,
+                    "FAILED_WITH_WAIVER": 0,
+                    "ABORTED": 0,
+                    "SKIPPED": 0,
+                    "WARNINGS": 0,
+                    "waiver_reason": ""
+                }
+            }
+
+            # Add reason as string (not array) only if present
+            if reason:
+                if status == "PASSED":
+                    subtest["sub_test_result"]["pass_reasons"] = reason
+                elif status == "FAILED":
+                    subtest["sub_test_result"]["fail_reasons"] = reason
+
+            current_test["subtests"].append(subtest)
+            current_test["test_suite_summary"][f"total_{status.lower()}"] += 1
+            suite_summary[f"total_{status.lower()}"] += 1
+            subtest_number += 1
+
+    return {
+        "test_results": [current_test],
+        "suite_summary": suite_summary
+    }
+
+
 def parse_single_log(log_file_path):
     # Try UTF-8 → fallback to UTF-16 → fallback to binary-safe ignore
     try:
@@ -1163,6 +1253,8 @@ def parse_single_log(log_file_path):
     elif "SmbiosTable" in log_content:
         smbios_block = extract_smbios_block(log_data)
         return parse_smbios_log(smbios_block)
+    elif "network_boot_checks" in log_content or "Network_Boot_Result:" in log_content:
+        return parse_network_boot_log(log_data)
     else:
         raise ValueError("Unknown or unsupported standalone log format.")
 

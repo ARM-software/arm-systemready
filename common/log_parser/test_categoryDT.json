@@ -490,5 +490,17 @@
       "FunctionID": 3,
       "Main Readiness Grouping": "safety readiness"
     }
+  ],
+  "catID: 42": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "Network boot",
+      "specName": "SRS",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot readiness"
+    }
   ]
 }

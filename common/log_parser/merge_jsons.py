@@ -53,6 +53,7 @@ DT_SRS_SCOPE_TABLE = [
     ("DT_VALIDATE", "M"),
     ("READ_WRITE_CHECK_BLK_DEVICES", "M"),
     ("ETHTOOL_TEST", "M"),
+    ("NETWORK_BOOT", "R"),
     ("BSA", "R"),
     ("BBSR-SCT", "EM"),
     ("BBSR-TPM", "EM"),
@@ -390,6 +391,9 @@ def merge_json_files(json_files, output_file):
         elif "READ_WRITE_CHECK_BLK_DEVICES" in fn:
             section_name = "Suite_Name: Read Write Check Block Devices"
             suite_key    = "READ_WRITE_CHECK_BLK_DEVICES"
+        elif "NETWORK_BOOT" in fn or "network_boot" in fn.lower():
+            section_name = "Suite_Name: Network boot"
+            suite_key    = "NETWORK_BOOT"
         elif "SMBIOS" in fn:
             section_name = "Suite_Name: SMBIOS"
             suite_key    = "SMBIOS"
