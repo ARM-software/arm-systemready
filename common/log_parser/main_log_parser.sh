@@ -537,6 +537,21 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         echo -e "${YELLOW}WARNING: SMBIOS log not found: $SMBIOS_LOG${NC}"
     fi
 
+    # 8) NETWORK BOOT CHECK
+    NETWORK_BOOT_LOG="$LOGS_PATH/network_boot/network_boot_results.log"
+    NETWORK_BOOT_JSON="$JSONS_DIR/network_boot.json"
+    if check_file "$NETWORK_BOOT_LOG" "M"; then
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$NETWORK_BOOT_LOG" \
+            "$NETWORK_BOOT_JSON"
+        if [ $? -eq 0 ]; then
+            apply_waivers "Standalone" "$NETWORK_BOOT_JSON"
+            Standalone_JSONS+=("$NETWORK_BOOT_JSON")
+        else
+            echo -e "${RED}ERROR: Network boot log parsing to json failed.${NC}"
+        fi
+    fi
+
     # Now generate a single STANDALONE HTML
     if [ ${#Standalone_JSONS[@]} -gt 0 ]; then
         Standalone_PROCESSED=1

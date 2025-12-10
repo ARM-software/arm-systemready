@@ -25,7 +25,7 @@ import argparse
 # 1) Detect which columns are used among all subtests in a given test
 def detect_columns_used(subtests):
     """
-    We keep this function for minimal code changes, 
+    We keep this function for minimal code changes,
     but the only value effectively used now is show_waiver.
     """
     show_pass = False
@@ -156,7 +156,7 @@ def generate_html(suite_summary, test_results_list, output_html_path,
             background-color: #f8d7da;
         }
         .waiver {
-            background-color: #f39c12; 
+            background-color: #f39c12;
         }
         .summary-table {
             margin: 0 auto;
@@ -324,15 +324,20 @@ def generate_html(suite_summary, test_results_list, output_html_path,
                     {# Combine pass, fail, skip, abort, warning reasons into one "Reason" column #}
                     {% set all_reasons = [] %}
                     {% for reasons in [r.pass_reasons, r.fail_reasons, r.abort_reasons, r.skip_reasons, r.warning_reasons] if reasons %}
-                        {% for reason in reasons %}
-                            {% if reason is iterable and reason is not string %}
-                                {% for subreason in reason %}
-                                    {% set _ = all_reasons.append(subreason) %}
-                                {% endfor %}
-                            {% else %}
-                                {% set _ = all_reasons.append(reason) %}
-                            {% endif %}
-                        {% endfor %}
+                        {# Handle both string and array formats #}
+                        {% if reasons is string %}
+                            {% set _ = all_reasons.append(reasons) %}
+                        {% elif reasons is iterable %}
+                            {% for reason in reasons %}
+                                {% if reason is iterable and reason is not string %}
+                                    {% for subreason in reason %}
+                                        {% set _ = all_reasons.append(subreason) %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% set _ = all_reasons.append(reason) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
                     {% endfor %}
                     <td>
                         {{ all_reasons|join("<br>")|safe if all_reasons else "N/A" }}
