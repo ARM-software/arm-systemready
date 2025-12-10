@@ -249,6 +249,27 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       sleep 5
       echo "BLK devices read and write check - Completed"
 
+
+      # systemready-scripts running
+      if [ -d "/mnt/acs_results_template" ]; then
+        echo "Running post scripts check "
+        cd /mnt/acs_results_template
+        mkdir -p /mnt/acs_results_template/acs_results/post-script
+        # Create .stamp file for avoding cache regen
+        echo "linux-6.18" > /usr/bin/linux-6.18/.stamp
+        echo "  Generating comatible strings"
+        /usr/bin/systemready-scripts/compatibles /usr/bin/linux-6.18/bindings > /usr/bin/linux-6.18/compatible-strings.txt
+        sync /mnt
+        sleep 5
+        echo "  Generating comatible strings - Completed"
+        /usr/bin/systemready-scripts/check-sr-results.py --cache-dir /usr/bin \
+         --linux-url https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
+        cd -
+      fi
+      sync /mnt
+      sleep 5
+      echo "Post scripts check - Completed"
+
       if [ $capsule_update_check -eq 1 ]; then
         umount /mnt
         sleep 5
@@ -332,7 +353,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         rm /mnt/acs_tests/app/capsule_update_ignore.flag
       fi
 
-
       # EDK2 Parser Tool run
       if [ -d "/mnt/acs_results_template/acs_results/sct_results" ]; then
         echo "Running edk2-test-parser tool "
@@ -346,23 +366,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fi
       sync /mnt
       sleep 5
-
-
-      # systemready-scripts running
-      if [ -d "/mnt/acs_results_template" ]; then
-        echo "Running post scripts "
-        cd /mnt/acs_results_template
-        mkdir -p /mnt/acs_results_template/acs_results/post-script
-        /usr/bin/systemready-scripts/compatibles /usr/bin/linux-6.18/bindings > /usr/bin/linux-6.18/compatible-strings.txt
-        # Create .stamp file for avoding cache regen
-        echo "linux-6.18" > /usr/bin/linux-6.18/.stamp
-        /usr/bin/systemready-scripts/check-sr-results.py --cache-dir /usr/bin \
-         --linux-url https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
-        cd -
-      fi
-      sync /mnt
-      sleep 5
-
 
       # ACS Log Parser run
       echo "Running acs log parser tool "
