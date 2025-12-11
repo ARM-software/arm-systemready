@@ -81,11 +81,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo -e "\033[1;31m*** Secure Boot is ENABLED. Disabling Secure Boot.....     ***\033[0m"
         touch /mnt/acs_tests/bbr/clear_secureboot.flag
         sync
+        sleep 5
         umount /mnt
         echo "Rebooting system to enter UEFI shell"
-        sleep 1
+        sleep 5
         reboot
-        sleep 3
+        sleep 5
       else
         echo "Secure Boot is not enabled. Skipping secureboot PK clearance"
         echo "Please press <Enter> to continue ..."
@@ -137,7 +138,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "0" | fwupdtool esp-list &> $LINUX_DUMP_DIR/fwupd_esplist.log
         fwupdmgr get-bios-settings    &> $LINUX_DUMP_DIR/fwupd_bios_setting.log
         fwupdmgr get-history          &> $LINUX_DUMP_DIR/fwupd_get_history.log
-        sync /mnt
+        sync
         sleep 5
         echo "Linux debug logs run - Completed"
 
@@ -156,7 +157,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "SystemReady devicetree band ACS v3.1.1 (RC-Final)" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
         /usr/bin/fwts --ebbr `echo $test_list` smccc -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
         echo -e -n "\n"
-        sync /mnt
+        sync
         sleep 5
         echo "FWTS test execution - Completed"
 
@@ -169,7 +170,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
           echo "SystemReady devicetree band ACS v3.1.1 (RC-Final)" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
           bsa --skip-dp-nic-ms >> /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
           dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
-          sync /mnt
+          sync
           sleep 5
           echo "Linux BSA test execution - Completed"
         else
@@ -186,7 +187,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         cp device_driver_info.log /mnt/acs_results_template/acs_results/linux_tools
         echo "device driver script run completed"
         popd
-        sync /mnt
+        sync
         sleep 5
 
 
@@ -198,7 +199,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         if [ -f /sys/firmware/fdt ]; then
           echo "copying fdt "
           cp /sys/firmware/fdt /home/root/fdt
-          sync /mnt
+          sync
 
           # Device Tree Validate script
           if [ -f /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log ]; then
@@ -215,7 +216,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         else
           echo  "Error: The FDT devicetree file, fdt, does not exist at /sys/firmware/fdt. Cannot run dt-schema tool" | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
         fi
-        sync /mnt
+        sync
         sleep 5
 
 
@@ -225,7 +226,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         mount -t debugfs none /sys/kernel/debug
         cat /sys/kernel/debug/psci > /mnt/acs_results_template/acs_results/linux_tools/psci/psci.log
         dmesg | grep psci > /mnt/acs_results_template/acs_results/linux_tools/psci/psci_kernel.log
-        sync /mnt
+        sync
         sleep 5
         echo "PSCI command output - Completed"
 
@@ -237,7 +238,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         chmod +x kselftest/ktap_helpers.sh
         ./run_kselftest.sh -t dt:test_unprobed_devices.sh > /mnt/acs_results_template/acs_results/linux_tools/dt_kselftest.log
         popd
-        sync /mnt
+        sync
         sleep 5
         echo "DT Kernel Self test run - Completed"
 
@@ -250,7 +251,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         python3 /bin/ethtool-test.py /mnt/acs_tests/config/system_config.txt | tee ethtool-test.log
         # remove color characters from log and save
         awk '{gsub(/\x1B\[[0-9;]*[JKmsu]/, "")}1' ethtool-test.log > /mnt/acs_results_template/acs_results/linux_tools/ethtool-test.log
-        sync /mnt
+        sync
         sleep 5
         echo "Ethtool test run - Completed"
 
@@ -258,7 +259,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         # RUN read_write_check_blk_devices.py, parse block devices, and perform read if partition doesn't belond in precious partitions
         echo "Running BLK devices read and write check"
         python3 /bin/read_write_check_blk_devices.py | tee /mnt/acs_results_template/acs_results/linux_tools/read_write_check_blk_devices.log
-        sync /mnt
+        sync
         sleep 5
         echo "BLK devices read and write check - Completed"
 
@@ -272,14 +273,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
           echo "linux-6.18" > /usr/bin/linux-6.18/.stamp
           echo "  Generating comatible strings"
           /usr/bin/systemready-scripts/compatibles /usr/bin/linux-6.18/bindings > /usr/bin/linux-6.18/compatible-strings.txt
-          sync /mnt
+          sync
           sleep 5
           echo "  Generating comatible strings - Completed"
           /usr/bin/systemready-scripts/check-sr-results.py --cache-dir /usr/bin \
            --linux-url https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
           cd -
         fi
-        sync /mnt
+        sync
         sleep 10
         echo "Post scripts check - Completed"
 
@@ -290,10 +291,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         ./acs_https_network_boot.sh
         echo "network script run completed"
         popd
-        sync /mnt
+        sync
         sleep 5
       fi      
       if [ $capsule_update_check -eq 1 ]; then
+        sync
+        sleep 5
         umount /mnt
         sleep 5
         echo "System is rebooting for Capsule update"
@@ -388,7 +391,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       else
         echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
       fi
-      sync /mnt
+      sync
       sleep 5
 
       # ACS Log Parser run
@@ -413,7 +416,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         cp /mnt/acs_tests/systemready-commit.log /mnt/acs_results_template/acs_results/acs_summary/config/
       fi
       echo "Please wait acs results are syncing on storage medium."
-      sync /mnt
+      sync
       sleep 60
 
       echo "ACS automated test suites run is completed."
