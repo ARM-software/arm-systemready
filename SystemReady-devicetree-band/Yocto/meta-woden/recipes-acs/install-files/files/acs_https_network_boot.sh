@@ -156,7 +156,7 @@ main() {
         echo "Checking URL reachability with wget --spider: ${IMAGE_URL}"
         if wget --spider --timeout=20 -q "${IMAGE_URL}"; then
             echo "URL is accessible through wget."
-	    echo "Wget check on URL: PASSED (URL is reachable using wget --spider)" >> "${RESULTS_LOG}"
+            echo "Wget check on URL: PASSED (URL is reachable using wget --spider)" >> "${RESULTS_LOG}"
         else
             echo "WARNING: URL is NOT accessible through wget (wget --spider failed)."
             {
@@ -165,7 +165,7 @@ main() {
             } >> "${RESULTS_LOG}"
             return 0
         fi
-	fi
+    fi
 
     # Prepare https config and flag for UEFI https_boot.nsh
     mkdir -p "${HTTPS_CONFIG_DIR}" "${HTTPS_FLAG_DIR}"
@@ -178,6 +178,7 @@ set HTTPS_IMAGE_SCHEME ${HTTPS_IMAGE_SCHEME}
 EOF
 
     sync
+    sleep 5
 
     # Set flag for UEFI startup_dt.nsh to run https_boot.nsh on next boot
     : > "${HTTPS_PENDING_FLAG}"
@@ -185,11 +186,13 @@ EOF
     echo "Rebooting system for Network boot via UEFI shell"
     sync
     sleep 5
+    umount /mnt
+    sleep 5
 
     if command -v reboot >/dev/null 2>&1; then
-        reboot -f
+        reboot
     elif command -v systemctl >/dev/null 2>&1; then
-        systemctl reboot --force
+        systemctl reboot
     else
         echo b > /proc/sysrq-trigger
     fi
