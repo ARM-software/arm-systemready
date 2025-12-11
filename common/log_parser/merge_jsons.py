@@ -431,7 +431,7 @@ def merge_json_files(json_files, output_file):
         lookup_suite_key = suite_key.lower()
         standalone_aliases = {
             "dt_kselftest", "dt_validate", "ethtool_test",
-            "read_write_check_blk_devices", "psci", "capsule update"
+            "read_write_check_blk_devices", "psci", "capsule update", "network_boot"
         }
         if lookup_suite_key in standalone_aliases or lookup_suite_key.startswith("os_"):
             lookup_suite_key = "standalone"
@@ -719,7 +719,8 @@ def merge_json_files(json_files, output_file):
         "Suite_Name: Ethtool Test": "Suite_Name: Standalone",
         "Suite_Name: Read Write Check Block Devices": "Suite_Name: Standalone",
         "Suite_Name: PSCI": "Suite_Name: Standalone",
-        "Suite_Name: SMBIOS": "Suite_Name: Standalone"
+        "Suite_Name: SMBIOS": "Suite_Name: Standalone",
+        "Suite_Name: Network boot": "Suite_Name: Standalone"
     }
 
     def _entry_to_list(entry):
