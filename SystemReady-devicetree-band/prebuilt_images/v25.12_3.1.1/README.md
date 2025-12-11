@@ -6,6 +6,8 @@ This README describes where to find the **main (GA) release** and **Release Cand
 ## **RC0 directory:** [`./RC0/`](./RC0/)  
   Contains image, changes and known issues.
 
+## **RC-Final directory:** [`./RC-Final/`](./RC-Final/)  
+  Contains image, changes and known issues.
 
 ## Using the Images
 
