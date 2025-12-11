@@ -97,7 +97,10 @@ def parse_config(config_path):
         try:
             with open(config_path, 'r') as cf:
                 for line in cf:
-                    if ':' in line:
+                    # Stop parsing at the user-defined configs section
+                    if line.strip().startswith('# User-defined configs'):
+                        break
+                    if ':' in line and not line.strip().startswith('#'):
                         key, value = line.strip().split(':', 1)
                         config_info[key.strip()] = value.strip()
         except Exception as e:
