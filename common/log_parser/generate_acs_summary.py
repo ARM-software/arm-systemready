@@ -91,7 +91,10 @@ def parse_config(config_path):
         if config_path and os.path.exists(config_path):
             with open(config_path, 'r') as config_file:
                 for line in config_file:
-                    if ':' in line:
+                    # Stop parsing at the user-defined configs section
+                    if line.strip().startswith('# User-defined configs'):
+                        break
+                    if ':' in line and not line.strip().startswith('#'):
                         key, value = line.strip().split(':', 1)
                         config_info[key.strip()] = value.strip()
         else:
