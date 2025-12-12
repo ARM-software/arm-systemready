@@ -86,7 +86,7 @@
   "catID: 8": [
     {
       "Suite": "BSA",
-      "Test Suite": "Wakeup semantic",
+      "Test Suite": "POWER_WAKEUP",
       "specName": "BSA",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -98,7 +98,7 @@
   "catID: 9": [
     {
       "Suite": "BSA",
-      "Test Suite": "Memory Map",
+      "Test Suite": "MEM_MAP",
       "specName": "BSA",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -301,7 +301,7 @@
   ],
   "catID: 26": [
     {
-      "Suite": "SCT",
+      "Suite": "Standalone",
       "Test Suite": "SMBIOS",
       "specName": "UEFI",
       "rel Import. to main readiness": "Minor",
@@ -501,6 +501,18 @@
       "SRS scope": "Recommended",
       "FunctionID": 1,
       "Main Readiness Grouping": "boot readiness"
+    }
+  ],
+  "catID: 43": [
+    {
+      "Suite": "FWTS",
+      "Test Suite": "smccc",
+      "specName": "BBR",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
     }
   ]
 }
