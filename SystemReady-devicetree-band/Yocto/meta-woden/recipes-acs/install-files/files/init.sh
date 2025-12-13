@@ -154,7 +154,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Executing FWTS for EBBR"
         test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
         echo "Test Executed are $test_list"
-        echo "SystemReady devicetree band ACS v3.1.1 (RC-Final)" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
+        echo "SystemReady devicetree band ACS v3.1.1" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
         /usr/bin/fwts --ebbr `echo $test_list` smccc -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
         echo -e -n "\n"
         sync
@@ -167,7 +167,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         if [ -f /lib/modules/*/kernel/bsa_acs/bsa_acs.ko ]; then
           echo "Running Linux BSA tests"
           insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
-          echo "SystemReady devicetree band ACS v3.1.1 (RC-Final)" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+          echo "SystemReady devicetree band ACS v3.1.1" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
           bsa --skip-dp-nic-ms >> /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
           dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
           sync
@@ -210,7 +210,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
           if [ ! -s /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log ]; then
             echo "The FDT is compliant according to schema " >> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
           fi
-          sed -i '1s/^/SystemReady devicetree band ACS v3.1.1 (RC-Final) \nDeviceTree bindings of Linux kernel version: 6.18 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
+          sed -i '1s/^/SystemReady devicetree band ACS v3.1.1\nDeviceTree bindings of Linux kernel version: 6.18 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
           # Run dt parser on dt-validate log to categorize failures
           /usr/bin/systemready-scripts/dt-parser.py /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log --print 2>&1 | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate-parser.log
         else
