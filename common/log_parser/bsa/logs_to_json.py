@@ -152,14 +152,15 @@ def main(input_files, output_file):
             raw_line = lines[i]
             i += 1
 
-            # Detect indentation level (count leading spaces)
-            indent_match = re.match(r'^(\s*)', raw_line)
+            # Strip timestamp [....] if present (keep spaces after timestamp for indentation detection)
+            line_no_timestamp = re.sub(r'^\s*\[.*?\]\s?', '', raw_line)
+
+            # NOW detect indentation level (count leading spaces AFTER timestamp removal)
+            indent_match = re.match(r'^(\s*)', line_no_timestamp)
             indent_spaces = len(indent_match.group(1)) if indent_match else 0
             is_indented = indent_spaces > 0
 
-            # Strip timestamp [....] if present, but preserve other leading spaces for now
-            line_no_timestamp = re.sub(r'^\s*\[.*?\]\s*', '', raw_line)
-            # Now strip only the leading spaces
+            # Strip the leading spaces to get clean line
             line = line_no_timestamp.strip()
 
             if not line:

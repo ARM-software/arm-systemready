@@ -148,15 +148,12 @@ def count_fails_in_json(data):
                         total_failed += 1
 
             # Also count subtests under testcases (BSA structure)
-            for subtest in testcase.get("subtests", []):
-                sub_result = subtest.get("sub_test_result", "")
-                if isinstance(sub_result, str):
-                    if "FAILED" in sub_result.upper() or "FAILURE" in sub_result.upper() or "FAIL" in sub_result.upper():
-                        any_subtests_found = True
-                        if "(WITH WAIVER)" in sub_result.upper():
-                            total_failed_with_waiver += 1
-                        else:
-                            total_failed += 1
+            subtests_in_testcase = testcase.get("subtests", [])
+            # Only set flag if subtests array is non-empty
+            if subtests_in_testcase:
+                any_subtests_found = True
+            # NOTE: For BSA, don't count individual subtest failures
+            # The testcase failure status above already captures it
         # Standard structure: subtests at suite level
         subtests = suite_entry.get("subtests", [])
         if subtests:
