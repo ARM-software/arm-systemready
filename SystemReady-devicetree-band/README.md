@@ -27,29 +27,32 @@ SystemReady-devicetree band compliant platforms implement a minimum set of hardw
 The SystemReady-devicetree band compliance and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
 ## Latest Release details
- - Release version: v3.1.0
+ - Release version: v3.1.1
  - Quality: EAC
- - The latest pre-built release of SystemReady-devicetree band ACS is available for download here: [v25.10_3.1.0](prebuilt_images/v25.10_3.1.0)
+ - The latest pre-built release of SystemReady-devicetree band ACS is available for download here: [v25.12_3.1.1](prebuilt_images/v25.12_3.1.1)
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
- - SystemReady-devicetree-band Image Test Suite details
- - **Image Test Suite details**
+
+> **SystemReady-devicetree-band Image details**
+
+ - Test Suite details
 
 | Test Suite                                                                                   | Test Suite Tag/Commit                                        | Specification Version |
 |----------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------|
-| [Base System Architecture (BSA)](https://github.com/ARM-software/sysarch-acs)                | v25.10_BSA_1.1.2                                             | BSA v1.1              |
-| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | af2e92c7e92693bdd0a60c81e258936e8f1f02c6                     | EBBR v2.2             |
-| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | af2e92c7e92693bdd0a60c81e258936e8f1f02c6                     | BBSR v1.3             |
-| [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | 0e2ced3befa431bb1aebff005c4c4f1a9edfe6b4                     |                       |
-| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v25.01.00                                                    |                       |
-| [Platform Fault Detection Interface (PFDI)](https://github.com/ARM-software/sysarch-acs)     | v25.09_PFDI_0.8.0                                            | PFDI v1.0-BETA        |
+| [Base System Architecture (BSA)](https://github.com/ARM-software/sysarch-acs)                | 13248b722e9ca63522a475771e085b0a8d6d1e9d                     | BSA v1.2              |
+| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v25.12_EBBR_2.2.2                                            | EBBR v2.2, BBR v2.1   |
+| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v25.12_BBSR_1.3.1                                            | BBSR v1.3             |
+| [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | edk2-test-stable202509                                       |                       |
+| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v25.09.00                                                    |                       |
+| [Platform Fault Detection Interface (PFDI)](https://github.com/ARM-software/sysarch-acs)     | 13248b722e9ca63522a475771e085b0a8d6d1e9d                     | PFDI v1.0-BETA        |
 
-- **Image Component details**
+- Component details
 
 | Component                                                                   | Version           |
 |-----------------------------------------------------------------------------|-------------------|
-| [Linux Kernel](https://git.yoctoproject.org/linux-yocto/)                   | v6.12             |
+| [Linux Kernel](https://git.yoctoproject.org/linux-yocto/)                   | v6.16             |
 | [EDK2](https://github.com/tianocore/edk2.git)                               | edk2-stable202508 |
+| [DT bindings source](https://cdn.kernel.org/pub/linux/kernel/v6.x/)         | v6.18             |
 
 
 ### Prebuilt images
