@@ -66,7 +66,7 @@ The SystemReady-devicetree band compliance and testing requirements are specifie
 
 #### Prerequisites
 Before starting the ACS build, ensure that the following requirements are met:
- - Ubuntu 20.04 or later LTS with at least 32GB of free disk space.
+ - Ubuntu 20.04 or later LTS with at least 16 GB of RAM and 150 GB of secondary storage.
  - Use bash shell.
  - You must have **sudo** privilege to install tools required for build.
  - Install `git` using `sudo apt install git`
