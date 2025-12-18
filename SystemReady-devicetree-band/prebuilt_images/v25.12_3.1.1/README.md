@@ -11,8 +11,9 @@ This README describes where to find the **main (GA) release** and **Release Cand
 
 
 ## Main Release Image
-The **DeviceTree Band v3.1.1** release pre-built image is available for download at: **WIP**
+The **DeviceTree Band v3.1.1** release pre-built image is available for download at:
 
+🔗 [Download systemready-dt_acs_live_image.wic.xz](https://github.com/ARM-software/arm-systemready/releases/download/v25.12_DT_3.1.1/systemready-dt_acs_live_image.wic.xz)
 
 
 ### Unzip and Decompressing the Image for use
