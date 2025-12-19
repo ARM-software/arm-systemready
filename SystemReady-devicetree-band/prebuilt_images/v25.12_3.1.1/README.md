@@ -5,8 +5,8 @@ This README describes where to find the **main (GA) release** and **Release Cand
 ## Table of Contents
 - [Main Release Image](#main-release-image)
 - [Release Candidate Images](#release-candidate-images)
-  - [RC0 ](#rc0-directory)
-  - [RC-Final](#rc-final-directory)
+  - [RC0 ](#rc0-rc0)
+  - [RC-Final](#rc-final-rc-final)
 - [Feedback & Issues](#feedback--issues)
 
 
@@ -16,7 +16,7 @@ The **DeviceTree Band v3.1.1** release pre-built image is available for download
 🔗 [Download systemready-dt_acs_live_image.wic.xz](https://github.com/ARM-software/arm-systemready/releases/download/v25.12_DT_3.1.1/systemready-dt_acs_live_image.wic.xz)
 
 
-### Unzip and Decompressing the Image for use
+#### Decompressing the Image for use
 
 Follow the steps below to decompress the pre-built image:
 
@@ -29,13 +29,13 @@ After decompression, you will get the .wic file, which can be used directly with
 
 ## Release Candidate Images
 
-### **RC0 directory:** [`./RC0/`](./RC0/)  
+### **RC0** [`./RC0/`](./RC0/)  
   Contains image, changes and known issues.
 
-### **RC-Final directory:** [`./RC-Final/`](./RC-Final/)  
+### **RC-Final** [`./RC-Final/`](./RC-Final/)  
   Contains image, changes and known issues.
 
-#### Using the Images
+#### Concat and decompress the Image for use
 
 If an image is split (e.g., `…wic.xzaa`, `…wic.xzab`, …), concatenate then decompress:
 
