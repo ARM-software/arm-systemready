@@ -9,7 +9,6 @@ COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
 
 SRC_URI += "git://github.com/ARM-software/sysarch-acs;destsuffix=edk2/ShellPkg/Application/sysarch-acs;protocol=https;branch=main;name=sysarch-acs \
             git://github.com/tianocore/edk2-libc;destsuffix=edk2/edk2-libc;protocol=https;branch=master;name=edk2-libc \
-            file://edk2_bsa_dt.patch \
             "
 
 SRCREV_sysarch-acs = "${AUTOREV}"
@@ -27,6 +26,9 @@ PACKAGES_PATH .= ":${S}/edk2-libc:"
 do_compile:prepend() {
     export ACS_PATH="${S}/ShellPkg/Application/sysarch-acs"
     export PATH="${STAGING_BINDIR_TOOLCHAIN}:${PATH}"
+    cd ${S}
+    git apply ${S}/ShellPkg/Application/sysarch-acs/patches/edk2_bsa_dt.patch
+    cd -
 }
 do_compile:append() {
     echo "BSA ACS (uefi)" >> "${SYSTEMREADY_COMMIT_LOG}"
