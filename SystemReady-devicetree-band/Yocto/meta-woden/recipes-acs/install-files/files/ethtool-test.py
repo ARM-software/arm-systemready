@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2023-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -432,6 +432,7 @@ if __name__ == "__main__":
                 print_color(f"Unable to bring down ethernet interface {intrf} using ip, Exiting ...", "WARN")
 
         print("\n****************************************************************\n")
+        time.sleep(20)
         previous_eth_intrf = ""
 
         for intrf in physical_ifaces:
@@ -762,6 +763,7 @@ if __name__ == "__main__":
 
         # Restore all original interface states and print summary
         print_summary()
+        print("\033[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers\033[0m")
         cleanup()
         sys.exit(0)
 
