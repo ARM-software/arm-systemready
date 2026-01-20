@@ -123,6 +123,10 @@ copy_recipes()
         sed -i -E 's/SRCREV_systemready-scripts\s+=\s+"\$\{AUTOREV\}"/SRCREV_systemready-scripts = \"'${SYSTEMREADY_SCRIPTS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/systemready-scripts/systemready-scripts.bb
     fi
 
+    if [ ! -z "$LEDGE_EFI_TAG" ]; then
+        sed -i -E 's/SRCREV\s+=\s+"\$\{AUTOREV\}"/SRCREV = \"'${LEDGE_EFI_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/ledge-efi/ledge-efi_git.bb
+    fi
+
     if [ ! -z "$PFDI_ACS_TAG" ];then
         sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${PFDI_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/pfdi-acs/pfdi-acs.bb
     fi
