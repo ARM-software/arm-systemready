@@ -2,11 +2,8 @@ SUMMARY = "Build ledge.efi from ts-testing repo and deploy for image use"
 LICENSE = "CLOSED"
 inherit deploy
 
-FILESEXTRAPATHS:prepend := "${THISDIR}/:"
-
 # ts-testing repo
 SRC_URI = "git://gitlab.com/Linaro/trustedsubstrate/ts-testing.git;protocol=https;branch=main \
-           file://ledge-efi-http-label.patch \
           "
 
 SRCREV = "${AUTOREV}"
