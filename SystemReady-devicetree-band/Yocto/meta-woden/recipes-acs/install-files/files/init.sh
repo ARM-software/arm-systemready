@@ -219,7 +219,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         sync
         sleep 5
 
-
         # Capturing System PSCI command output
         echo "Collecting psci command output"
         mkdir -p /mnt/acs_results_template/acs_results/linux_tools/psci
@@ -284,6 +283,15 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         sleep 10
         echo "Post scripts check - Completed"
 
+        # Run the runtime mapping checker that checks overlaps between RT_Code, RT_data and MMIO with DTS nodes
+        echo "Running Runtime Device Mapping Conflict Test"
+        if [ -f "/usr/bin/runtime_device_mapping_conflict_checker.py" ] ; then
+          python3 /usr/bin/runtime_device_mapping_conflict_checker.py
+          ret=$?
+          echo "INFO: runtime_device_mapping_conflict_checker.py returned $ret"
+        else
+          echo "WARNING: Skipping Runtime Device Mapping Conflict Test (missing checker/DTS/memmap)"
+        fi
 
         # NETWORK BOOT script
         pushd /usr/bin
