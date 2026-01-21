@@ -384,6 +384,15 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
           i=$((i+1))
         done
         echo "RESULTS: Overall Capsule Update Result: $overall_result" >> /mnt/acs_results_template/fw/capsule_test_results.log
+        # Capsule On-Disk Update Reporting Variables check
+        if [ -f /usr/bin/capsule_ondisk_reporting_vars_check.py ]; then
+          echo "INFO: Running Capsule On-Disk Update Reporting Variables check"
+          python3 /usr/bin/capsule_ondisk_reporting_vars_check.py
+          ret=$?
+          echo "INFO: capsule_ondisk_reporting_vars_check.py returned $ret"
+        else
+          echo "WARNING: /usr/bin/capsule_ondisk_reporting_vars_check.py not found, skipping"
+        fi
         rm /mnt/acs_tests/app/capsule_update_done.flag
       elif [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
         echo "Capsule update has failed"

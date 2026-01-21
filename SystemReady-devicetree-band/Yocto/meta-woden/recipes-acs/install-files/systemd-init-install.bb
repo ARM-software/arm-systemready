@@ -16,6 +16,7 @@ SRC_URI:append = " file://acs_run-before-login-prompt.service \
                    file://acs_https_network_boot.sh \
                    file://acs_network_boot_parser.sh \
                    file://log_parser \
+                   file://capsule_ondisk_reporting_vars_check.py \
                  "
 
 FILES:${PN} += "${systemd_unitdir}/system"
@@ -38,5 +39,6 @@ do_install:append() {
   install -m 0770 ${WORKDIR}/device_driver_info.sh               ${D}${bindir}
   install -m 0770 ${WORKDIR}/acs_https_network_boot.sh           ${D}${bindir}
   install -m 0770 ${WORKDIR}/acs_network_boot_parser.sh          ${D}${bindir}
+  install -m 0770 ${WORKDIR}/capsule_ondisk_reporting_vars_check.py   ${D}${bindir}
   cp -r ${WORKDIR}/log_parser                                    ${D}${bindir}/
 }
