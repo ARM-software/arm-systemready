@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +39,7 @@ BUILDROOT_DEFCONFIG=$TOP_DIR/$BUILDROOT_PATH/configs/buildroot_defconfig
 OUTDIR=$TOP_DIR/output
 ARCH=arm64
 CROSS_COMPILE=${TOP_DIR}/tools/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
-KDIR="${TOP_DIR}/linux-6.16/out" 
+KDIR="${TOP_DIR}/linux-${LINUX_KERNEL_VERSION}/out" 
 
 do_build ()
 {
