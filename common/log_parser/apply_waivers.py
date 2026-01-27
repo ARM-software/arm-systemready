@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,11 @@ def clean_description(desc):
     desc = re.sub(r'\s+', ' ', desc)  # Replace multiple spaces with a single space
     desc = re.sub(r'[^\w\s-]', '', desc)  # Remove special characters except hyphens
     return desc
+
+def _as_list(v):
+    if v is None:
+        return []
+    return v if isinstance(v, list) else [v]
 
 def load_waivers(waiver_data, suite_name):
     suite_level_waivers = []
@@ -185,7 +190,7 @@ def apply_suite_level_waivers(test_suite_entry, suite_waivers):
                     sub_test_result['FAILED_WITH_WAIVER'] = sub_test_result.get('FAILED_WITH_WAIVER', 0) + 1
                     # Insert waiver_reason inside sub_test_result
                     sub_test_result['waiver_reason'] = reason
-                    existing_fail_reasons = sub_test_result.get('fail_reasons', [])
+                    existing_fail_reasons = _as_list(sub_test_result.get('fail_reasons'))
                     updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                     sub_test_result['fail_reasons'] = updated_fail_reasons
                     if verbose:
@@ -210,7 +215,7 @@ def apply_suite_level_waivers(test_suite_entry, suite_waivers):
                             sub_test_result['FAILED'] -= 1
                             sub_test_result['FAILED_WITH_WAIVER'] = sub_test_result.get('FAILED_WITH_WAIVER', 0) + 1
                             sub_test_result['waiver_reason'] = reason
-                            existing_fail_reasons = sub_test_result.get('fail_reasons', [])
+                            existing_fail_reasons = _as_list(sub_test_result.get('fail_reasons'))
                             updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                             sub_test_result['fail_reasons'] = updated_fail_reasons
                     elif isinstance(sub_test_result, str):
@@ -249,7 +254,7 @@ def apply_testsuite_level_waivers(test_suite_entry, testsuite_waivers):
                         sub_test_result['FAILED_WITH_WAIVER'] = sub_test_result.get('FAILED_WITH_WAIVER', 0) + 1
                         # Insert waiver_reason inside sub_test_result
                         sub_test_result['waiver_reason'] = reason
-                        existing_fail_reasons = sub_test_result.get('fail_reasons', [])
+                        existing_fail_reasons = _as_list(sub_test_result.get('fail_reasons'))
                         updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                         sub_test_result['fail_reasons'] = updated_fail_reasons
                         if verbose:
@@ -276,7 +281,7 @@ def apply_testsuite_level_waivers(test_suite_entry, testsuite_waivers):
                                 sub_test_result['FAILED'] -= 1
                                 sub_test_result['FAILED_WITH_WAIVER'] = sub_test_result.get('FAILED_WITH_WAIVER', 0) + 1
                                 sub_test_result['waiver_reason'] = reason
-                                existing_fail_reasons = sub_test_result.get('fail_reasons', [])
+                                existing_fail_reasons = _as_list(sub_test_result.get('fail_reasons'))
                                 updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                                 sub_test_result['fail_reasons'] = updated_fail_reasons
                         elif isinstance(sub_test_result, str):
@@ -302,7 +307,7 @@ def apply_subsuite_level_waivers(test_suite_entry, subsuite_waivers):
                         sub_test_result['FAILED_WITH_WAIVER'] = sub_test_result.get('FAILED_WITH_WAIVER', 0) + 1
                         # Insert waiver_reason inside sub_test_result
                         sub_test_result['waiver_reason'] = reason
-                        existing_fail_reasons = sub_test_result.get('fail_reasons', [])
+                        existing_fail_reasons = _as_list(sub_test_result.get('fail_reasons'))
                         updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                         sub_test_result['fail_reasons'] = updated_fail_reasons
                         if verbose:
@@ -348,7 +353,7 @@ def apply_testcase_level_waivers(test_suite_entry, testcase_waivers):
                         sub_test_result['FAILED_WITH_WAIVER'] = sub_test_result.get('FAILED_WITH_WAIVER', 0) + 1
                         # Insert waiver_reason inside sub_test_result
                         sub_test_result['waiver_reason'] = reason
-                        existing_fail_reasons = sub_test_result.get('fail_reasons', [])
+                        existing_fail_reasons = _as_list(sub_test_result.get('fail_reasons'))
                         updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                         sub_test_result['fail_reasons'] = updated_fail_reasons
                         if verbose:
@@ -375,7 +380,7 @@ def apply_testcase_level_waivers(test_suite_entry, testcase_waivers):
                                 sub_test_result['FAILED'] -= 1
                                 sub_test_result['FAILED_WITH_WAIVER'] = sub_test_result.get('FAILED_WITH_WAIVER', 0) + 1
                                 sub_test_result['waiver_reason'] = reason
-                                existing_fail_reasons = sub_test_result.get('fail_reasons', [])
+                                existing_fail_reasons = _as_list(sub_test_result.get('fail_reasons'))
                                 updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                                 sub_test_result['fail_reasons'] = updated_fail_reasons
                         elif isinstance(sub_test_result, str):
@@ -460,7 +465,7 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
                             reason = waiver.get('Reason', '')
                             if reason:
                                 sub_test_result['waiver_reason'] = reason
-                                existing_fail_reasons = sub_test_result.get('fail_reasons', [])
+                                existing_fail_reasons = _as_list(sub_test_result.get('fail_reasons'))
                                 updated_fail_reasons = [(s + ' (WITH WAIVER)') for fr in existing_fail_reasons for s in (fr if isinstance(fr, list) else [fr])]
                                 sub_test_result['fail_reasons'] = updated_fail_reasons
                             if verbose:
@@ -470,13 +475,22 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
                         # For FWTS, BBSR-FWTS, and other suites
                         if cleaned_waiver_desc == cleaned_subtest_desc:
                             # Apply waiver
-                            if 'FAILED (WITH WAIVER)' not in sub_test_result.upper() and 'FAILURE (WITH WAIVER)' not in sub_test_result.upper():
-                                subtest['sub_test_result'] += ' (WITH WAIVER)'
+                            if isinstance(sub_test_result, dict):
+                                failed = sub_test_result.get('FAILED', 0)
+                                failed_with_waiver = sub_test_result.get('FAILED_WITH_WAIVER', 0)
+                                if failed > 0:
+                                    sub_test_result['FAILED'] = failed - 1
+                                    sub_test_result['FAILED_WITH_WAIVER'] = failed_with_waiver + 1
+                                else:
+                                    sub_test_result['FAILED_WITH_WAIVER'] = failed_with_waiver + 1
+                            else:
+                                if 'FAILED (WITH WAIVER)' not in sub_test_result.upper() and 'FAILURE (WITH WAIVER)' not in sub_test_result.upper():
+                                    subtest['sub_test_result'] += ' (WITH WAIVER)'
                             # Add waiver_reason inside sub_test_result
                             reason = waiver.get('Reason', '')
                             if reason:
                                 sub_test_result['waiver_reason'] = reason
-                                existing_fail_reasons = sub_test_result.get('fail_reasons', [])
+                                existing_fail_reasons = _as_list(sub_test_result.get('fail_reasons'))
                                 updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                                 sub_test_result['fail_reasons'] = updated_fail_reasons
                             if verbose:
