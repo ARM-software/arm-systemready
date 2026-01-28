@@ -1,3 +1,63 @@
+v25.12_DT_3.1.1
+** Devicetree band**
+* (enhancement) Enable separate tagging for BSA, SBSA, and PFDI sources in sysarch-acs repository
+* (fix) Make consistent SRS compliance results summary tittle in console dump and acs summary html
+* Support more board with more power related IC and boards uses TYPE-C USB port
+* Ensure dt-validate.log has header even when empty
+* Dt_validate changes: mark header-only and empty logs as compliant
+* Updated kernel configs to enable MHUv3 mailbox driver support
+* Adding system_config.txt copy to ACS result directory
+* Upgrade edk2 versions and migrate MdePkg to BaseFdtLib
+* FWTS, Linux updates and pfdi patch updated.
+* edk2: Update PFDI patch to use BaseFdtLib instead of FdtLib
+* Add SecureBoot attribute check warning patch
+* acs sort keys for merged json and sct changes for json
+* Update DT version for v3.1.1 (RC0)
+* Enable multi-threaded compression for ACS live image
+* temp_fix:reverting BSA and PFDI version to sysarch latest stable release for DT build
+* Changes in dt-validate log parsing
+* Fix duplicate GUID override and add subtest description mapping
+* v3.1.1 features : Capturing commit of individual acs, ethtool enhacements, FWTS smccc driver
+* (fix): Match the networking checks heading b/w parser and result log
+* (improv): SMBIOS test addition to standalone suite and others
+* Revert the key name changes in SCT untill schema is established
+* feat: add Ethtool compliance summary in test results
+* feat: add parsing support for Ethtool compliance line log summary
+* Changes in commit log path during build phase
+* v3.1.1 RC0 image, changes and known issues
+* Capture the fwts and linux yocto details in systemready-commit.log
+* (improv) Readme refactoring
+* update edk2_bsa_dt patch and bsa-acs-app recipe
+* Move to latest sysarch-acs tip for latest BSA changes for DT
+* Skip parsing of PCI tests for FWTS json
+* Skip parsing of SMBIOS tests for SCT json
+* Update linux source version to v6.18 in process-schema.bb
+* Updated logs dt band version for v3.1.1 rc-final
+* Skip parsing of EFI Runtime Properties Table test for SCT json
+* feat: Add ethtool_compliant_interfaces support and update compliance logic
+* Update linux source version to 6.18 while running systemready-scripts
+* Updated the BSA/SBSA skip options based on rule based framework
+* Refactor DT band init.sh to streamline post scripts execution
+* Enhanced compliance reporting to show mandatory and recommended suite
+* Enhanced BBSR compliance reporting to show mandatory suite details seperately
+* feat: Add network boot support to systmeready dt using ledge application
+* Added network boot test support to standalone test suite
+* Moving network boot test flow before capsule update and minor improv
+* v3.1.1 rc-final prebuilt image and readme updated
+* image path corrected
+* Fixed system_config.txt parsing to exclude user-defined configuration…
+* Add network boot test to Standalone suite
+* feat: Added acs network boot image and readme for network boot
+* (fix) image with updated network boot merge json fix
+* Fix metadata extraction for SMBIOS, POWER_WAKEUP, and smccc test suites
+* Update DT v3.1.1 release version in logs
+* Fix BSA subtest counting issues in log parsing and compliance calculation
+* fwts: remove smccc option from test invocation for DT Image
+* DT v3.1.1: Updated build tags for ACS and BBR components
+* DT readme updated for v3.1.1 release
+* docs: revise build host system requirements
+* Minor updated to DT readme
+
 v25.10_DT_3.1.0
 ** Devicetree band**
 * adding readme for read and write block devices
