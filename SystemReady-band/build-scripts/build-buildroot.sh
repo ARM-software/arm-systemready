@@ -38,7 +38,7 @@ BUILDROOT_RAMDISK_BUILDROOT_PATH=$BUILDROOT_PATH/$BUILDROOT_OUT_DIR/images
 BUILDROOT_DEFCONFIG=$TOP_DIR/$BUILDROOT_PATH/configs/buildroot_defconfig
 OUTDIR=$TOP_DIR/output
 ARCH=arm64
-CROSS_COMPILE=${TOP_DIR}/tools/arm-gnu-toolchain-13.2.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+CROSS_COMPILE=${TOP_DIR}/${GCC}
 KDIR="${TOP_DIR}/linux-${LINUX_KERNEL_VERSION}/out" 
 
 do_build ()

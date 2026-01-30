@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@ TOP_DIR=`pwd`
 
 # === Configuration ===
 EDK2_TAG="$EDK2_SRC_VERSION"
-GCC_VERSION="13.2.rel1"
+GCC_VERSION="${GCC_TOOLS_VERSION}"
 APP_NAME="parser"
 GCC_PREFIX="aarch64-none-linux-gnu-"
 TOP_DIR=$(pwd)
