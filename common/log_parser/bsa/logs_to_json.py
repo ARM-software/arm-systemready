@@ -166,16 +166,129 @@ def main(input_files, output_file):
             if not line:
                 continue
 
-            # Start processing when we see Selected rules or Running tests or START
+            # Start processing when we see Selected rules / Running tests / START (old format)
+            # or "*** Running <suite> tests ***" (new format)
             if not processing and (
                 "---------------------- Running tests ------------------------" in line
                 or line.startswith("Selected rules:")
                 or line.startswith("START ")
+                or line.startswith("*** Running ")
             ):
                 processing = True
 
             if not processing:
                 continue
+
+            # ---------------- New log format support ----------------
+            # Newer BSA logs can look like:
+            #   *** Running <SUITE> tests ***
+            #   <RULE_ID> : <index> : <description>
+            #   Result: <status text>
+            suite_hdr = re.match(r'^\*\*\*\s+Running\s+(.+?)\s+tests\s+\*\*\*$', line)
+            if suite_hdr:
+                current_suite = suite_hdr.group(1).strip().replace(" ", "_")
+                continue
+
+            # RULE line (main or subtest, determined by indentation)
+            rule_line = re.match(r'^([A-Za-z0-9_]+)\s*:\s*([^:]+?)\s*:\s*(.*)$', line)
+            if rule_line:
+                rule_id = rule_line.group(1).strip()
+                test_index = (rule_line.group(2) or "").strip() or "-"
+                desc = (rule_line.group(3) or "").strip()
+                suite = current_suite or ""
+
+                if not is_indented:
+                    # Main rule: start a new parent context
+                    meta = {
+                        "suite": suite,
+                        "rule_id": rule_id,
+                        "index": test_index,
+                        "description": desc,
+                        "subtests": []
+                    }
+                    active_main[rule_id] = meta
+                    # reset stack to this main rule (prevents accidental nesting across rules)
+                    parent_stack[:] = [rule_id]
+                else:
+                    # Subtest: attach to nearest main rule in the stack (if any)
+                    parent_id = None
+                    for rid in reversed(parent_stack):
+                        if rid in active_main:
+                            parent_id = rid
+                            break
+                    meta = {
+                        "suite": suite,
+                        "rule_id": rule_id,
+                        "index": test_index,
+                        "description": desc,
+                        "parent": parent_id,
+                        "is_indented": is_indented
+                    }
+                    active_sub[rule_id] = meta
+                    parent_stack.append(rule_id)
+
+                continue
+
+            # Result line (belongs to the last opened rule in new-format logs)
+            if line.upper().startswith("RESULT:"):
+                status_text = line.split(":", 1)[1].strip()
+                if not parent_stack:
+                    continue
+
+                rule_id = parent_stack[-1]
+                formatted_result, summary_category = classify_status(status_text)
+
+                # Subtest completion
+                if rule_id in active_sub:
+                    sub_meta = active_sub.pop(rule_id)
+                    parent_id = sub_meta.get("parent")
+                    if parent_id and parent_id in active_main:
+                        parent_meta = active_main[parent_id]
+                        sub_entry = {
+                            "sub_Test_Number": f"{rule_id} : {sub_meta.get('index', '-')}",
+                            "sub_Rule_ID": rule_id,
+                            "sub_Test_Description": sub_meta.get("description", ""),
+                            "sub_test_result": formatted_result
+                        }
+                        parent_meta["subtests"].append(sub_entry)
+
+                    # Pop this subtest from the stack
+                    parent_stack.pop()
+                    continue
+
+                # Main testcase completion
+                if rule_id in active_main:
+                    meta = active_main.pop(rule_id)
+
+                    # Pop main from stack
+                    if parent_stack and parent_stack[-1] == rule_id:
+                        parent_stack.pop()
+
+                    suite = meta.get("suite", "")
+                    desc = meta.get("description", "")
+                    index = meta.get("index", "-")
+                    subtests = meta.get("subtests", [])
+
+                    testcase = {
+                        "Test_case": f"{rule_id} : {index}",
+                        "Test_case_description": desc,
+                        "Test_result": formatted_result
+                    }
+                    if subtests:
+                        testcase["subtests"] = subtests
+
+                    tcs = init_summary()
+                    update_summary_counts(tcs, summary_category, formatted_result)
+                    testcase["Test_case_summary"] = tcs
+
+                    testcases_per_suite[suite].append(testcase)
+                    update_summary_counts(suite_summaries[suite], summary_category, formatted_result)
+                    update_summary_counts(total_summary, summary_category, formatted_result)
+
+                    continue
+
+                continue
+            # -------------- End new log format support --------------
 
             #   START <suite_or_dash> <RULE_ID> <index_or_dash> : <description...>
             start_match = re.match(
