@@ -155,7 +155,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
         echo "Test Executed are $test_list"
         echo "SystemReady devicetree band ACS v3.1.1" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
-        /usr/bin/fwts --ebbr `echo $test_list` -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
+        /usr/bin/fwts --ebbr `echo $test_list` smccc -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
         echo -e -n "\n"
         sync
         sleep 5
