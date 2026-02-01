@@ -84,6 +84,7 @@ python3 "$SCRIPTS_PATH/acs_info.py" \
     --acs_config_path "$ACS_CONFIG_PATH" \
     --system_config_path "$SYSTEM_CONFIG_PATH" \
     --uefi_version_log "$LOGS_PATH/uefi_dump/uefi_version.log" \
+    --dmidecode_log "$LOGS_PATH/linux_dump/dmidecode.log" \
     --output_dir "$JSONS_DIR"
 echo ""
 

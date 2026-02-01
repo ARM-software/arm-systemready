@@ -21,68 +21,70 @@ import re
 import json
 from datetime import datetime
 
-def get_system_info():
+def get_system_info(dmidecode_log_path):
     """
-    Gathers system info from dmidecode (Vendor, System Name, SoC Family, Firmware Version)
-    plus a date/time stamp. If you have a UEFI version log, you can merge that in later.
+    Parse a saved dmidecode output file and return:
+      - Vendor
+      - System Name
+      - SoC Family
+      - Firmware Version
+      - Summary Generated On
     """
-    system_info = {}
+    system_info = {
+        "Firmware Version": "Unknown",
+        "SoC Family": "Unknown",
+        "System Name": "Unknown",
+        "Vendor": "Unknown",
+    }
 
-    # Firmware Version
-    try:
-        fw_version_output = subprocess.check_output(
-            ["dmidecode", "-t", "bios"], universal_newlines=True, stderr=subprocess.DEVNULL
-        )
-        for line in fw_version_output.split('\n'):
-            if 'Version:' in line:
-                system_info['Firmware Version'] = line.split('Version:')[1].strip()
-                break
-    except Exception:
-        system_info['Firmware Version'] = 'Unknown'
+    in_bios_info = False
+    in_system_info = False
 
-    # SoC Family
-    try:
-        soc_family_output = subprocess.check_output(
-            ["dmidecode", "-t", "system"], universal_newlines=True, stderr=subprocess.DEVNULL
-        )
-        # Iterate each line looking for "Family:"
-        for line in soc_family_output.split('\n'):
-            if 'Family:' in line:
-                system_info['SoC Family'] = line.split('Family:', 1)[1].strip()
-                break
-        else:
-            # If we didn't find 'Family:'
-            system_info['SoC Family'] = 'Unknown'
-    except Exception:
-        system_info['SoC Family'] = 'Unknown'
+    kv_re = re.compile(r"^\s*([A-Za-z0-9 /()._-]+)\s*:\s*(.*)\s*$")
 
-    # System Name
-    try:
-        system_name_output = subprocess.check_output(
-            ["dmidecode", "-t", "system"], universal_newlines=True, stderr=subprocess.DEVNULL
-        )
-        for line in system_name_output.split('\n'):
-            if 'Product Name:' in line:
-                system_info['System Name'] = line.split('Product Name:')[1].strip()
-                break
-        else:
-            # If we didn't find 'Product Name:'
-            system_info['System Name'] = 'Unknown'
-    except Exception:
-        system_info['System Name'] = 'Unknown'
+    with open(dmidecode_log_path, "r", errors="replace") as f:
+        for raw in f:
+            line = raw.rstrip("\n")
 
-    # Vendor
-    try:
-        vendor_output = subprocess.check_output(
-            ["dmidecode", "-t", "system"], universal_newlines=True, stderr=subprocess.DEVNULL
-        )
-        for line in vendor_output.split('\n'):
-            if 'Manufacturer:' in line:
-                system_info['Vendor'] = line.split('Manufacturer:')[1].strip()
-                break
-    except Exception:
-        system_info['Vendor'] = 'Unknown'
+            # Section detection
+            if line.strip() == "BIOS Information":
+                in_bios_info = True
+                in_system_info = False
+                continue
 
+            if line.strip() == "System Information":
+                in_system_info = True
+                in_bios_info = False
+                continue
+
+            # New DMI handle block => leave current section until we see section header again
+            if line.startswith("Handle 0x"):
+                in_bios_info = False
+                in_system_info = False
+                continue
+
+            m = kv_re.match(line)
+            if not m:
+                continue
+
+            key, val = m.group(1).strip(), m.group(2).strip()
+
+            # BIOS Information -> Version
+            if in_bios_info and key == "Version" and system_info["Firmware Version"] == "Unknown":
+                system_info["Firmware Version"] = val
+                continue
+
+            # System Information -> Manufacturer / Product Name / Family
+            if in_system_info:
+                if key == "Family" and system_info["SoC Family"] == "Unknown":
+                    system_info["SoC Family"] = val
+                elif key == "Product Name" and system_info["System Name"] == "Unknown":
+                    system_info["System Name"] = val
+                elif key == "Manufacturer" and system_info["Vendor"] == "Unknown":
+                    system_info["Vendor"] = val
+
+    system_info["Summary Generated On"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return system_info
     # Timestamp
     system_info['Summary Generated On'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -131,11 +133,12 @@ def main():
     parser.add_argument("--acs_config_path", default="", help="Path to acs_config.txt (Band, version info, etc.)")
     parser.add_argument("--system_config_path", default="", help="Path to system_config.txt (extra system fields)")
     parser.add_argument("--uefi_version_log", default="", help="Path to uefi_version.log (UTF-16 or text)")
+    parser.add_argument("--dmidecode_log", default=".", help="Path to dmidecode log")
     parser.add_argument("--output_dir", default=".", help="Directory where acs_info.txt and acs_info.json will be created.")
     args = parser.parse_args()
 
     # 1) Gather system info from dmidecode
-    system_info = get_system_info()
+    system_info = get_system_info(args.dmidecode_log)
 
     # 2) Parse config files
     acs_conf = parse_config(args.acs_config_path)
