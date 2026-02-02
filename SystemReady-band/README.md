@@ -42,7 +42,7 @@ The SystemReady band compliance and testing requirements are specified in the [A
 | [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | 00be42e82452cdad0b862728082568f3d7d2a1c3                     | BBR v2.1              |
 | [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | 00be42e82452cdad0b862728082568f3d7d2a1c3                     | BBSR v1.3             |
 | [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | ba6c13f4e4fa1bf92ed04f5cb969d6c8a76f8605                     |                       |
-| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v25.01.00                                                    |                       |
+| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v26.01.00                                                    |                       |
 | [Server Base Manageability Requirements (SBMR)](https://github.com/ARM-software/sbmr-acs)    | 27803824d966df48f34ce5290599f616bc0de8e9                     | SBMR v2.0             |
 
  - **Image Component details**
@@ -319,4 +319,4 @@ SystemReady ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2022-2025, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2022-2026, Arm Limited and Contributors. All rights reserved.*

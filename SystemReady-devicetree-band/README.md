@@ -43,7 +43,7 @@ The SystemReady-devicetree band compliance and testing requirements are specifie
 | [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | v25.12_EBBR_2.2.2                                            | EBBR v2.2, BBR v2.1   |
 | [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | v25.12_BBSR_1.3.1                                            | BBSR v1.3             |
 | [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | edk2-test-stable202509                                       |                       |
-| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v25.09.00                                                    |                       |
+| [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v26.01.00                                                   |                       |
 | [Platform Fault Detection Interface (PFDI)](https://github.com/ARM-software/sysarch-acs)     | 13248b722e9ca63522a475771e085b0a8d6d1e9d                     | PFDI v1.0-BETA        |
 
 - Component details
@@ -315,4 +315,4 @@ System Ready ACS is distributed under Apache v2.0 License.
 
 --------------
 
-*Copyright (c) 2022-2025, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2022-2026, Arm Limited and Contributors. All rights reserved.*
