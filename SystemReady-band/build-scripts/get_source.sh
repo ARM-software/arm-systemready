@@ -190,7 +190,7 @@ get_buildroot_src()
     pushd $TOP_DIR/buildroot/package/fwts
         echo "Applying Buildroot FWTS patch..."
         # patch buildroot config
-        git apply $TOP_DIR/../common/patches/build_fwts_version_25.09.00.patch
+        git apply $TOP_DIR/../common/patches/build_fwts_version_${FWTS_VERSION}.patch
     popd
     pushd $TOP_DIR/buildroot
         echo "Applying Buildroot SBMR-ACS patch..."
