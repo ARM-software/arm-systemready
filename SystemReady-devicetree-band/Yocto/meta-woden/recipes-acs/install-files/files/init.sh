@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2023-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2023-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -385,7 +385,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Running edk2-test-parser tool "
         mkdir -p /mnt/acs_results_template/acs_results/edk2-test-parser
         cd /usr/bin/edk2-test-parser
-        ./parser.py --md /mnt/acs_results_template/acs_results/edk2-test-parser/edk2-test-parser.log /mnt/acs_results_template/acs_results/sct_results/Overall/Summary.ekl \
+        ./parser.py --md /mnt/acs_results_template/acs_results/edk2-test-parser/edk2-test-parser.log --config EBBR.yaml /mnt/acs_results_template/acs_results/sct_results/Overall/Summary.ekl \
               /mnt/acs_results_template/acs_results/sct_results/Sequence/EBBR.seq > /dev/null 2>&1
         echo "edk2-test-parser run completed"
       else
