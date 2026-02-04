@@ -95,6 +95,17 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       fi
     fi
 
+    SCMI_OPTION="";
+    SCMI_OPTION=`cat /proc/cmdline | awk '{ print $NF}'`
+    if [ $SCMI_OPTION = "scmi_acs" ]; then
+      echo "********** Running SCMI ACS Tests **********\n"
+      /usr/bin/scmi_init.sh
+      echo "***** SCMI ACS Tests run is completed ******\n"
+      echo "Please press <Enter> to continue ..."
+      echo -e -n "\n"
+      exit 0
+    fi
+
     check_flag=0
     if [ -f /mnt/acs_tests/app/capsule_update_done.flag ] || [ -f /mnt/acs_tests/app/capsule_update_ignore.flag ] || [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
       check_flag=1
@@ -176,7 +187,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         else
           echo "Error: BSA kernel Driver is not found. Linux BSA tests cannot be run"
         fi
-
 
         # Device Driver Info script
         mkdir -p /home/root/fdt
