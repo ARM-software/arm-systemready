@@ -509,8 +509,8 @@
       "Test Suite": "smccc",
       "specName": "BBR",
       "rel Import. to main readiness": "Minor",
-      "Waivable": "no",
-      "SRS scope": "Required",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
       "FunctionID": 4,
       "Main Readiness Grouping": "security readiness"
     }

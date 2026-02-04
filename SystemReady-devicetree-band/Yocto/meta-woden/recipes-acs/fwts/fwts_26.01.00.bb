@@ -12,6 +12,7 @@ SRC_URI = "https://fwts.ubuntu.com/release/fwts-V${PV}.tar.gz;subdir=${BP} \
            file://0004-Define-__SWORD_TYPE-if-not-defined-by-libc.patch \
            file://0005-Undefine-PAGE_SIZE.patch \
            file://0001-uefi-esrt-Added-esrt_test2-for-EBBR.patch \
+           file://0007-smccc-downgrade-fails-to-warnings.patch \
            "
 
 SRC_URI[sha256sum] = "25565fd007b378bf29581eb0bc36a03a2f0c49326bb6084f980fee9c5921f289"
