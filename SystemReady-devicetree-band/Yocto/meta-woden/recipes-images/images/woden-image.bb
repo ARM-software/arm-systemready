@@ -142,6 +142,13 @@ do_dir_deploy() {
     initrd /core-image-initramfs-boot-genericarm64.cpio.gz
     }" grub.cfg
 
+    if grep -Eq "SCMI Compliance" grub.cfg
+    then
+        echo "grub entry for SCMI Compliance already present"
+    else
+        echo "menuentry 'SCMI Compliance' {linux /${LINUX_BOOT_CMD} scmi_acs; initrd /core-image-initramfs-boot-genericarm64.cpio.gz}" >> grub.cfg
+    fi
+
     wic cp grub.cfg ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.wic:1/EFI/BOOT/grub.cfg
 
     # update startup.nsh linux command with command from grub.cfg
@@ -206,6 +213,7 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         python3-weasyprint \
                         python3-webencodings \
                         tar \
+                        scmi-acs \
 "
 
 addtask dir_deploy before do_populate_lic_deploy after do_image_complete
