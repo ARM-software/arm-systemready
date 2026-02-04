@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+"""Generate the consolidated ACS summary HTML report."""
 
 import json
 import argparse
@@ -117,6 +119,17 @@ def get_uefi_version(uefi_version_log):
     except Exception as e:
         print(f"Error reading UEFI version log: {e}")
     return uefi_version
+
+def read_acs_info_system_info(acs_info_json_path):
+    """Load System Info from acs_info.json if available."""
+    if not acs_info_json_path or not os.path.exists(acs_info_json_path):
+        return {}
+    try:
+        with open(acs_info_json_path, "r") as jf:
+            data = json.load(jf)
+        return data.get("System Info", {}) if isinstance(data, dict) else {}
+    except Exception:
+        return {}
 
 def remove_result_summary_headings(content):
     # Use regular expressions to remove any heading containing 'Result Summary'
@@ -410,8 +423,14 @@ def generate_html(system_info, acs_results_summary,
                         <th>Firmware Version</th>
                         <td>{{ system_info.get('Firmware Version', 'Unknown') }}</td>
                     </tr>
+                    {% if system_info.get('BMC Firmware Version') %}
+                    <tr>
+                        <th>BMC Firmware Version</th>
+                        <td>{{ system_info.get('BMC Firmware Version') }}</td>
+                    </tr>
+                    {% endif %}
                     {% for key, value in system_info.items() %}
-                    {% if key not in ['Vendor', 'System Name', 'SoC Family', 'Firmware Version'] %}
+                    {% if key not in ['Vendor', 'System Name', 'SoC Family', 'Firmware Version', 'BMC Firmware Version'] %}
                     <tr>
                         <th>{{ key }}</th>
                         <td>{{ value }}</td>
@@ -744,6 +763,7 @@ if __name__ == "__main__":
     parser.add_argument("--system_config_path", default="", help="Path to the system_config.txt file")
     parser.add_argument("--uefi_version_log", default="", help="Path to the uefi_version.log file")
     parser.add_argument("--device_tree_dts", default="", help="Path to the device_tree.dts file")
+    parser.add_argument("--acs_info_json", default="", help="Path to acs_info.json for System Info fields")
 
     args = parser.parse_args()
 
@@ -759,6 +779,11 @@ if __name__ == "__main__":
     # 3) UEFI version
     uefi_version = get_uefi_version(args.uefi_version_log)
     system_info['UEFI Version'] = uefi_version
+
+    # 3b) BMC firmware version from acs_info.json
+    acs_info_system = read_acs_info_system_info(args.acs_info_json)
+    if isinstance(acs_info_system, dict) and "BMC Firmware Version" in acs_info_system:
+        system_info["BMC Firmware Version"] = acs_info_system.get("BMC Firmware Version", "N/A")
 
     # 4) Extract summary date from system_info
     summary_generated_date = system_info.pop('Summary Generated On Date/time', 'Unknown')

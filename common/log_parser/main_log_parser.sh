@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -80,11 +80,13 @@ mkdir -p "$ACS_SUMMARY_DIR"
 mkdir -p "$JSONS_DIR"
 
 #echo "Gathering ACS info into acs_info.txt and acs_info.json..."
+IPMITOOL_LOG="$LOGS_PATH/linux_dump/ipmitool.log"
 python3 "$SCRIPTS_PATH/acs_info.py" \
     --acs_config_path "$ACS_CONFIG_PATH" \
     --system_config_path "$SYSTEM_CONFIG_PATH" \
     --uefi_version_log "$LOGS_PATH/uefi_dump/uefi_version.log" \
     --dmidecode_log "$LOGS_PATH/linux_dump/dmidecode.log" \
+    --ipmitool_log "$IPMITOOL_LOG" \
     --output_dir "$JSONS_DIR"
 echo ""
 
@@ -352,8 +354,8 @@ fi
 if [ "$YOCTO_FLAG_PRESENT" -eq 0 ]; then
 
     # Paths relative to LOGS_PATH (new layout)
-    SBMR_IB_LOG="$LOGS_PATH/sbmr/sbmr_in_band_logs/console.log"
-    SBMR_OOB_LOG="$LOGS_PATH/sbmr/sbmr_out_of_band_logs/console.log"
+    SBMR_IB_XML="$LOGS_PATH/sbmr/sbmr_in_band_logs/output.xml"
+    SBMR_OOB_XML="$LOGS_PATH/sbmr/sbmr_out_of_band_logs/output.xml"
 
     SBMR_IB_JSON="$JSONS_DIR/sbmr_ib.json"
     SBMR_OOB_JSON="$JSONS_DIR/sbmr_oob.json"
@@ -363,9 +365,9 @@ if [ "$YOCTO_FLAG_PRESENT" -eq 0 ]; then
     SBMR_OOB_PROCESSED=0
 
     # Parse IB
-    if check_file "$SBMR_IB_LOG" "M"; then
+    if check_file "$SBMR_IB_XML" "M"; then
         SBMR_IB_PROCESSED=1
-        python3 "$SCRIPTS_PATH/sbmr/logs_to_json.py" "$SBMR_IB_LOG" "$SBMR_IB_JSON"
+        python3 "$SCRIPTS_PATH/sbmr/logs_to_json.py" "$SBMR_IB_XML" "$SBMR_IB_JSON"
         if [ $? -ne 0 ]; then
             SBMR_IB_PROCESSED=0
             echo -e "${RED}ERROR: SBMR IB logs parsing to json failed.${NC}"
@@ -375,9 +377,9 @@ if [ "$YOCTO_FLAG_PRESENT" -eq 0 ]; then
     fi
 
     # Parse OOB
-    if check_file "$SBMR_OOB_LOG" "M"; then
+    if check_file "$SBMR_OOB_XML" "M"; then
         SBMR_OOB_PROCESSED=1
-        python3 "$SCRIPTS_PATH/sbmr/logs_to_json.py" "$SBMR_OOB_LOG" "$SBMR_OOB_JSON"
+        python3 "$SCRIPTS_PATH/sbmr/logs_to_json.py" "$SBMR_OOB_XML" "$SBMR_OOB_JSON"
         if [ $? -ne 0 ]; then
             SBMR_OOB_PROCESSED=0
             echo -e "${RED}ERROR: SBMR OOB logs parsing to json failed.${NC}"
@@ -866,6 +868,12 @@ fi
 
 if [ -n "$DEVICE_TREE_DTS" ]; then
     GENERATE_ACS_SUMMARY_CMD+=" --device_tree_dts \"$DEVICE_TREE_DTS\""
+fi
+
+# Provide acs_info.json for System Information fields (e.g., BMC Firmware Version)
+ACS_INFO_JSON="$JSONS_DIR/acs_info.json"
+if [ -f "$ACS_INFO_JSON" ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" --acs_info_json \"$ACS_INFO_JSON\""
 fi
 
 # If merged_results.json was created, pass it along
