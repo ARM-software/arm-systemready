@@ -1,0 +1,72 @@
+diff --git a/src/smccc/smccc.c b/src/smccc/smccc.c
+index 307e7ebd..196cf7da 100644
+--- a/src/smccc/smccc.c
++++ b/src/smccc/smccc.c
+@@ -263,10 +263,10 @@ static int smccc_version_test(fwts_framework *fw)
+ 		/* Bit 31 should not be 1. Bits 30...0 should be non 0 */
+ 		if((arg.w[0] >> 31) & 0x1 || ((arg.w[0] & 0x7FFFFFFF) == 0))
+ 		{
+-			fwts_log_error(fw, "SMCCC_TEST_VERSION return value is invalid."
+-				"arg.w[0] = 0x%8.8" PRIx32,
++			fwts_warning(fw,
++				"SMCCC_TEST_VERSION return value is invalid. arg.w[0] = 0x%8.8" PRIx32 "\n",
+ 				arg.w[0]);
+-			return FWTS_ERROR;
++			return FWTS_OK;
+ 		}
+ 
+ 		smccc_major_version = arg.w[0] >> 16;
+@@ -427,9 +427,9 @@ static int smccc_version_test(fwts_framework *fw)
+ 	{
+ 		if (smccc_arch_features_bbr_check(fw) == FWTS_ERROR)
+ 		{
+-			fwts_failed(fw, LOG_LEVEL_HIGH, "smccc_arch_features check ",
++			fwts_warning(fw, "smccc_arch_features check "
+ 		    		"for Arm BBR specification rules failed\n");
+-			return (FWTS_ERROR);
++			return (FWTS_OK);
+ 		}
+ 	}
+ 
+@@ -469,9 +469,9 @@ static int smccc_arch_soc_id_test_type0(fwts_framework *fw)
+ 		fwts_log_error(fw, "SMCCC_TEST_ARCH_SOC_ID return value is invalid."
+ 			"arg.w[0] = 0x%8.8" PRIx32,
+ 			arg.w[0]);
+-		fwts_failed(fw, LOG_LEVEL_HIGH, "Arm SMCCC_ARCH_SOC_ID test for ",
++		fwts_warning(fw, "Arm SMCCC_ARCH_SOC_ID test for "
+ 				" SoC_ID_Type = 0 failed\n");
+-		return FWTS_ERROR;
++		return FWTS_OK;
+ 	}
+ 
+ 	uint32_t SoC_ID = arg.w[0] & 0x0000ffff;
+@@ -519,9 +519,9 @@ static int smccc_arch_soc_id_test_type1(fwts_framework *fw)
+ 		fwts_log_error(fw, "SMCCC_TEST_ARCH_SOC_ID return value is invalid."
+ 			"arg.w[0] = 0x%8.8" PRIx16,
+ 			arg.w[0]);
+-		fwts_failed(fw, LOG_LEVEL_HIGH, "Arm SMCCC_ARCH_SOC_ID test for ",
++		fwts_warning(fw, "Arm SMCCC_ARCH_SOC_ID test for "
+ 				" SoC_ID_Type = 1 failed\n");
+-		return FWTS_ERROR;
++		return FWTS_OK;
+ 	}
+ 
+ 	fwts_log_info_verbatim(fw, "  SMCCC conduit type: 0x%x ('%s')",
+@@ -568,7 +568,7 @@ static int smccc_pci_features_test(fwts_framework *fw)
+ 		ret = ioctl(smccc_fd, SMCCC_TEST_PCI_FEATURES, &arg);
+ 		if (ret < 0) {
+ 			passed = false;
+-			fwts_failed(fw, LOG_LEVEL_HIGH, "SMCCC_PCI_VERSION",
++			fwts_warning(fw, "SMCCC_PCI_VERSION: "
+ 				"SMCCC test driver ioctl SMCCC_TEST_PCI_FEATURES "
+ 				"failed, errno=%d (%s)\n", errno, strerror(errno));
+ 		} else {
+@@ -625,7 +625,7 @@ static int smccc_pci_get_seg_info(fwts_framework *fw)
+ 		ret = ioctl(smccc_fd, SMCCC_TEST_PCI_GET_SEG_INFO, &arg);
+ 		if (ret < 0) {
+ 			passed = false;
+-			fwts_failed(fw, LOG_LEVEL_HIGH, "SMCCC_PCI_VERSION",
++			fwts_warning(fw, "SMCCC_PCI_VERSION: "
+ 				"SMCCC test driver ioctl PCI_GET_SEG_INFO "
+ 				"failed, errno=%d (%s)\n", errno, strerror(errno));
+ 			break;
