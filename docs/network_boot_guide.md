@@ -105,14 +105,14 @@ flowchart TD
 
 ## ACS Network Boot Image
 
-You can use the ACS image provided for HTTPS/HTTP network-boot testing.
+You can use the ACS image provided for HTTPS/HTTP network-boot testing by uncommenting `HTTPS_BOOT_IMAGE_URL` in [`system_config.txt`](../common/config/system_config.txt).
 
-**Network Boot Image:** [`acs-network-boot-image.img.xz`](../SystemReady-devicetree-band/prebuilt_images/network_boot_image/acs-network-boot-image.img.xz)
+**Network Boot Image:** [`acs-network-boot-image.img`](../SystemReady-devicetree-band/prebuilt_images/network_boot_image/acs-network-boot-image.img)
 
-To use the pre-built image:
+To host the pre-built image locally:
 
-- Download and extract the image:  
-  `xz -d <acs-network-boot-image.img.xz>`
+- Download the image through github or using wget:
+  `wget https://raw.githubusercontent.com/ARM-software/arm-systemready/main/SystemReady-devicetree-band/prebuilt_images/network_boot_image/acs-network-boot-image.img`
 
 - Host the image on a local HTTP server (example):  
   `python3 -m http.server 8000`
