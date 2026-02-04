@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Collects system information from various sources and generates acs_info.json
 
 import argparse
 import subprocess
@@ -40,13 +42,14 @@ def get_system_info(dmidecode_log_path):
     in_bios_info = False
     in_system_info = False
 
+    # Regex to match key-value pairs in dmidecode output
     kv_re = re.compile(r"^\s*([A-Za-z0-9 /()._-]+)\s*:\s*(.*)\s*$")
 
     with open(dmidecode_log_path, "r", errors="replace") as f:
         for raw in f:
             line = raw.rstrip("\n")
 
-            # Section detection
+            # Track which section we're in
             if line.strip() == "BIOS Information":
                 in_bios_info = True
                 in_system_info = False
@@ -57,7 +60,7 @@ def get_system_info(dmidecode_log_path):
                 in_bios_info = False
                 continue
 
-            # New DMI handle block => leave current section until we see section header again
+            # Reset section flags on new DMI handle
             if line.startswith("Handle 0x"):
                 in_bios_info = False
                 in_system_info = False
@@ -69,12 +72,12 @@ def get_system_info(dmidecode_log_path):
 
             key, val = m.group(1).strip(), m.group(2).strip()
 
-            # BIOS Information -> Version
+            # Extract BIOS Version
             if in_bios_info and key == "Version" and system_info["Firmware Version"] == "Unknown":
                 system_info["Firmware Version"] = val
                 continue
 
-            # System Information -> Manufacturer / Product Name / Family
+            # Extract System Information fields
             if in_system_info:
                 if key == "Family" and system_info["SoC Family"] == "Unknown":
                     system_info["SoC Family"] = val
@@ -85,14 +88,11 @@ def get_system_info(dmidecode_log_path):
 
     system_info["Summary Generated On"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return system_info
-    # Timestamp
-    system_info['Summary Generated On'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    return system_info
 
 def parse_config(config_path):
     """
-    Reads a simple 'key: value' config file, merges them into a dict.
+    Reads a 'key: value' config file into a dictionary.
+    Stops parsing at '# User-defined configs' marker.
     """
     config_info = {}
     if config_path and os.path.isfile(config_path):
@@ -114,7 +114,7 @@ def parse_config(config_path):
 
 def get_uefi_version(uefi_version_log):
     """
-    Reads 'UEFI v...' from a log file if present. Returns 'Unknown' otherwise.
+    Reads 'UEFI v...' from UTF-16 encoded log file. Returns 'Unknown' if not found.
     """
     if uefi_version_log and os.path.isfile(uefi_version_log):
         try:
@@ -126,7 +126,38 @@ def get_uefi_version(uefi_version_log):
             print(f"Warning: reading UEFI version log {uefi_version_log}: {e}")
     return 'Unknown'
 
+def extract_bmc_firmware_from_ipmitool_log(log_path):
+    """Extract firmware revision from ipmitool mc info log output."""
+    if not log_path or not os.path.isfile(log_path):
+        warn_prefix = "\033[1;93mWARNING:"
+        warn_suffix = "\033[0m"
+        if not log_path:
+            print(f"{warn_prefix} ipmitool log path not provided for BMC firmware extraction.{warn_suffix}")
+        else:
+            print(f"{warn_prefix} ipmitool log not found at {log_path}{warn_suffix}")
+        return None
+    fw_re = re.compile(r"^\s*Firmware\s+Revision\s*:\s*(.+)\s*$", re.IGNORECASE)
+    with open(log_path, "r", errors="replace") as f:
+        for raw in f:
+            m = fw_re.match(raw)
+            if m:
+                return m.group(1).strip()
+    return None
+
+def get_bmc_firmware_version(ipmitool_log_path):
+    """Return BMC firmware revision from ipmitool log or Unknown if missing."""
+    value = extract_bmc_firmware_from_ipmitool_log(ipmitool_log_path)
+    return value if value else "Unknown"
+
+def is_systemready_band(acs_conf):
+    # Return True only for SystemReady (not DeviceTree) band.
+    band_val = (acs_conf or {}).get("Band", "").strip().lower()
+    return band_val == "systemready band"
+
+
+
 def main():
+    """Entry point for acs_info.json generation."""
     parser = argparse.ArgumentParser(
         description="Collect ACS-like system info & summary data, then write to acs_info.txt & acs_info.json."
     )
@@ -135,12 +166,13 @@ def main():
     parser.add_argument("--uefi_version_log", default="", help="Path to uefi_version.log (UTF-16 or text)")
     parser.add_argument("--dmidecode_log", default=".", help="Path to dmidecode log")
     parser.add_argument("--output_dir", default=".", help="Directory where acs_info.txt and acs_info.json will be created.")
+    parser.add_argument("--ipmitool_log", default="", help="Path to ipmitool mc info log for BMC firmware extraction")
     args = parser.parse_args()
 
-    # 1) Gather system info from dmidecode
+    # Gather system info from dmidecode
     system_info = get_system_info(args.dmidecode_log)
 
-    # 2) Parse config files
+    # Parse and merge config files
     acs_conf = parse_config(args.acs_config_path)
     sys_conf = parse_config(args.system_config_path)
 
@@ -151,12 +183,14 @@ def main():
     for k, v in sys_conf.items():
         system_info[k] = v
 
-    # 4) get UEFI version from log
+    # Add UEFI and BMC firmware versions
     uefi_ver = get_uefi_version(args.uefi_version_log)
     if uefi_ver != 'Unknown':
         system_info['UEFI Version'] = uefi_ver
+    if is_systemready_band(acs_conf):
+        system_info['BMC Firmware Version'] = get_bmc_firmware_version(args.ipmitool_log)
 
-    # 5) Build an "ACS Results Summary"
+    # Build ACS Results Summary
     band_val = acs_conf.get("Band", "Unknown")
     date_str = system_info.get('Summary Generated On', 'Unknown')
 
@@ -165,13 +199,13 @@ def main():
         "Date": date_str,
     }
 
-    # 6) Prepare final JSON
+    # Assemble and write final JSON
     final_json = {
         "System Info": system_info,
         "ACS Results Summary": acs_results_summary
     }
 
-    # 7) Write to JSON
+    # Write to JSON
     os.makedirs(args.output_dir, exist_ok=True)
     json_path = os.path.join(args.output_dir, "acs_info.json")
     with open(json_path, "w") as jf:
