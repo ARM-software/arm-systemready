@@ -130,6 +130,9 @@ copy_recipes()
     if [ ! -z "$PFDI_ACS_TAG" ];then
         sed -i -E 's/SRCREV_sysarch-acs\s+=\s+"\$\{AUTOREV\}"/SRCREV_sysarch-acs = \"'${PFDI_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/pfdi-acs/pfdi-acs.bb
     fi
+    if [ ! -z "$SCMI_ACS_TAG" ];then
+        sed -i -E 's/SRCREV\s+=\s+"\$\{AUTOREV\}"/SRCREV = \"'${SCMI_ACS_TAG}'"/g' $TOP_DIR/meta-woden/recipes-acs/scmi-acs/scmi-acs.bb
+    fi
 
     # copy .nsh files to meta-woden/recipes-acs/bootfs-files/files
     COMMON_DIR_PATH=`git rev-parse --show-toplevel`"/common"
@@ -147,6 +150,7 @@ copy_recipes()
     # remove connect -r from startup.nsh, since it is not required for SystemReady-devicetree-band systems
     sed -i 's/connect -r//g' startup.nsh
     cp $TOP_DIR/../../common/linux_scripts/secure_init.sh $TOP_DIR/meta-woden/recipes-acs/install-files/files
+    cp $TOP_DIR/../../common/linux_scripts/scmi_init.sh $TOP_DIR/meta-woden/recipes-acs/install-files/files
     cp $TOP_DIR/../../common/linux_scripts/verify_tpm_measurements.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
     cp $TOP_DIR/../../common/linux_scripts/extract_capsule_fw_version.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
 
