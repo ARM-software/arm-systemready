@@ -1,9 +1,10 @@
 ACS version: ACS v25.12_3.1.1
-SRS version: SRS 3.1
-BSA version: BSA v1.2
+SRS version: SRS 3.1.1
+BSA version: BSA v1.3
 PFDI version: PFDI 1.0 BET0
 BBR version: BBR v2.1
 EBBR version: EBBR v2.2.0
 BBSR version: BBSR v1.3
+SCMI version: SCMI v3.2
 Band: SystemReady Devicetree band
 Device Tree Version:v0.4
