@@ -3,6 +3,13 @@
     {
       "Suite": "BSA",
       "Test Suite": "PE",
+      "Description": [
+        "The Base System Architecture (BSA) Platform Design Document specifies a hardware system architecture that operating systems, hypervisors, and firmware can rely on.",
+        "The SystemReady Devicetree band recommends compliance with BSA requirements.",
+        "BSA PE tests verify BSA requirements on the Processing Element (PE).",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "BSA",
       "rel Import. to main readiness": "Critical",
       "Waivable": "yes",
@@ -15,6 +22,14 @@
     {
       "Suite": "BSA",
       "Test Suite": "GIC",
+      "Description": [
+        "The Base System Architecture (BSA) Platform Design Document specifies a hardware system architecture that operating systems, hypervisors, and firmware can rely on.",
+        "The SystemReady Devicetree band recommends compliance with BSA requirements.",
+        "BSA GIC tests verify BSA requirements on the Generic Interrupt Controller (GIC).",
+        "The GIC delivers interrupts to the Processing Elements (PEs).",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "BSA",
       "rel Import. to main readiness": "Critical",
       "Waivable": "yes",
@@ -27,6 +42,14 @@
     {
       "Suite": "BSA",
       "Test Suite": "SMMU",
+      "Description": [
+        "The Base System Architecture (BSA) Platform Design Document specifies a hardware system architecture that operating systems, hypervisors, and firmware can rely on.",
+        "The SystemReady Devicetree band recommends compliance with BSA requirements.",
+        "BSA SMMU tests verify BSA requirements on the System Memory Management Unit (SMMU).",
+        "An SMMU translates addresses from devices capable of Direct Memory Access (DMA).",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "BSA",
       "rel Import. to main readiness": "Critical",
       "Waivable": "yes",
@@ -39,6 +62,13 @@
     {
       "Suite": "BSA",
       "Test Suite": "PCIe",
+      "Description": [
+        "The Base System Architecture (BSA) Platform Design Document specifies a hardware system architecture that operating systems, hypervisors, and firmware can rely on.",
+        "The SystemReady Devicetree band recommends compliance with BSA requirements.",
+        "BSA PCIe tests verify BSA requirements on PCI Express (PCIe) integration.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "BSA",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -51,6 +81,13 @@
     {
       "Suite": "BSA",
       "Test Suite": "Timer",
+      "Description": [
+        "The Base System Architecture (BSA) Platform Design Document specifies a hardware system architecture that operating systems, hypervisors, and firmware can rely on.",
+        "The SystemReady Devicetree band recommends compliance with BSA requirements.",
+        "BSA Timer tests verify BSA requirements on the clock and timer subsystem.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "BSA",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -63,6 +100,13 @@
     {
       "Suite": "BSA",
       "Test Suite": "Peripheral",
+      "Description": [
+        "The Base System Architecture (BSA) Platform Design Document specifies a hardware system architecture that operating systems, hypervisors, and firmware can rely on.",
+        "The SystemReady Devicetree band recommends compliance with BSA requirements.",
+        "BSA Peripheral tests verify BSA requirements on the peripheral subsystems (USB, SATA, UART).",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "BSA",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -75,6 +119,13 @@
     {
       "Suite": "BSA",
       "Test Suite": "Watchdog",
+      "Description": [
+        "The Base System Architecture (BSA) Platform Design Document specifies a hardware system architecture that operating systems, hypervisors, and firmware can rely on.",
+        "The SystemReady Devicetree band recommends compliance with BSA requirements.",
+        "BSA Watchdog tests verify BSA requirements on the Generic Watchdog.",
+	"Failures are not expected to prevent an OS from booting.",
+        "https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "BSA",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -87,6 +138,13 @@
     {
       "Suite": "BSA",
       "Test Suite": "POWER_WAKEUP",
+      "Description": [
+        "The Base System Architecture (BSA) Platform Design Document specifies a hardware system architecture that operating systems, hypervisors, and firmware can rely on.",
+        "The SystemReady Devicetree band recommends compliance with BSA requirements.",
+        "BSA POWER_WAKEUP tests verify BSA requirements on the wakeup and power state semantics.",
+	"Failures are not expected to prevent an OS from booting.",
+        "https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "BSA",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -99,6 +157,13 @@
     {
       "Suite": "BSA",
       "Test Suite": "MEM_MAP",
+      "Description": [
+        "The Base System Architecture (BSA) Platform Design Document specifies a hardware system architecture that operating systems, hypervisors, and firmware can rely on.",
+        "The SystemReady Devicetree band recommends compliance with BSA requirements.",
+        "BSA MEM_MAP tests verify BSA requirements on the system's memory map.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "BSA",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -111,6 +176,13 @@
     {
       "Suite": "FWTS",
       "Test Suite": "uefivarinfo",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Firmware Test Suite (FWTS) is a test suite that performs sanity checks on firmware.",
+	"The uefivarinfo FWTS tests verify requirements on UEFI Variables services.",
+	"Failures are not expected to prevent an OS from booting.",
+        "https://wiki.ubuntu.com/FirmwareTestSuite"
+      ],
       "specName": "EBBR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -123,6 +195,14 @@
     {
       "Suite": "FWTS",
       "Test Suite": "uefirtmisc",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Firmware Test Suite (FWTS) is a test suite that performs sanity checks on firmware.",
+	"The uefirtmisc FWTS tests verify requirements on miscellaneous UEFI Runtime services.",
+	"This comprises monotonic counter and capsule services.",
+	"Failures may have only minor effects, or may prevent firmware update.",
+        "https://wiki.ubuntu.com/FirmwareTestSuite"
+      ],
       "specName": "EBBR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -135,6 +215,13 @@
     {
       "Suite": "FWTS",
       "Test Suite": "esrt",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Firmware Test Suite (FWTS) is a test suite that performs sanity checks on firmware.",
+	"The esrt FWTS tests verify requirements on the EFI System Resource Table (ESRT).",
+	"Failures may have only minor effects, or may prevent firmware update.",
+        "https://wiki.ubuntu.com/FirmwareTestSuite"
+      ],
       "specName": "EBBR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -147,6 +234,13 @@
     {
       "Suite": "FWTS",
       "Test Suite": "uefirttime",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Firmware Test Suite (FWTS) is a test suite that performs sanity checks on firmware.",
+	"The uefirttime FWTS tests verify requirements on the UEFI Runtime time-related services.",
+	"Failures may have only minor effects, or may impact OS date and time.",
+        "https://wiki.ubuntu.com/FirmwareTestSuite"
+      ],
       "specName": "EBBR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -159,6 +253,13 @@
     {
       "Suite": "FWTS",
       "Test Suite": "uefibootpath",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Firmware Test Suite (FWTS) is a test suite that performs sanity checks on firmware.",
+	"The uefibootpath FWTS tests verify requirements on the UEFI Boot Options.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://wiki.ubuntu.com/FirmwareTestSuite"
+      ],
       "specName": "EBBR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -171,6 +272,13 @@
     {
       "Suite": "FWTS",
       "Test Suite": "dt_base",
+      "Description": [
+        "The SystemReady Devicetree band defines requirements on the Devicetree provided to an OS.",
+        "The Firmware Test Suite (FWTS) is a test suite that performs sanity checks on firmware.",
+	"The dt_base FWTS tests verify validity of the Devicetree.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://wiki.ubuntu.com/FirmwareTestSuite"
+      ],
       "specName": "EBBR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -183,6 +291,13 @@
     {
       "Suite": "FWTS",
       "Test Suite": "uefirtvariable",
+      "Description": [
+        "The SystemReady Devicetree band defines requirements on the Devicetree provided to an OS.",
+        "The Firmware Test Suite (FWTS) is a test suite that performs sanity checks on firmware.",
+	"The uefirtvariable FWTS tests verify requirements on UEFI Variables services.",
+	"Failures are not expected to prevent an OS from booting.",
+        "https://wiki.ubuntu.com/FirmwareTestSuite"
+      ],
       "specName": "EBBR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -195,6 +310,12 @@
     {
       "Suite": "SCT",
       "Test Suite": "GenericTest",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Self-Certification Test (SCT) is a firmware test environment for the UEFI specification.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -207,6 +328,12 @@
     {
       "Suite": "SCT",
       "Test Suite": "BootServicesTest",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Self-Certification Test (SCT) is a firmware test environment for the UEFI specification.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Critical",
       "Waivable": "yes",
@@ -219,6 +346,12 @@
     {
       "Suite": "SCT",
       "Test Suite": "RuntimeServicesTest",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Self-Certification Test (SCT) is a firmware test environment for the UEFI specification.",
+	"Failures are not expected to prevent an OS from booting.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -231,6 +364,12 @@
     {
       "Suite": "SCT",
       "Test Suite": "LoadedImageProtocolTest",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Self-Certification Test (SCT) is a firmware test environment for the UEFI specification.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -243,6 +382,12 @@
     {
       "Suite": "SCT",
       "Test Suite": "DevicePathProcotols",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Self-Certification Test (SCT) is a firmware test environment for the UEFI specification.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -255,6 +400,12 @@
     {
       "Suite": "SCT",
       "Test Suite": "HIITest",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Self-Certification Test (SCT) is a firmware test environment for the UEFI specification.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -267,6 +418,12 @@
     {
       "Suite": "SCT",
       "Test Suite": "NetworkSupportTest",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Self-Certification Test (SCT) is a firmware test environment for the UEFI specification.",
+        "Failures may have only minor effects, or may prevent network access from UEFI.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -279,6 +436,12 @@
     {
       "Suite": "SCT",
       "Test Suite": "SecureTechTest",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Self-Certification Test (SCT) is a firmware test environment for the UEFI specification.",
+        "Failures may have only minor effects, or may compromise system security.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -291,6 +454,12 @@
     {
       "Suite": "SCT",
       "Test Suite": "ConsoleSupportTest",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+        "The Self-Certification Test (SCT) is a firmware test environment for the UEFI specification.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -303,6 +472,13 @@
     {
       "Suite": "Standalone",
       "Test Suite": "SMBIOS",
+      "Description": [
+        "The System Management BIOS (SMBIOS) Reference Specification defines a management information format.",
+	"The Base Boot Requirements (BBR) Platform Design Document specifies requirements for boot and runtime services that operating systems and hypervisors can rely on.",
+	"The SystemReady Devicetree band recommends compliance with BBR requirements on SMBIOS data structures.",
+	"Failures are not expected to prevent an OS from booting.",
+	"https://github.com/tianocore/edk2-test"
+      ],
       "specName": "UEFI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -315,6 +491,11 @@
     {
       "Suite": "Standalone",
       "Test Suite": "Network",
+      "Description": [
+        "The SystemReady Devicetree band recommends network boot support.",
+        "Failures may have only minor effects, or may prevent an OS to boot from the network.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/ethtool-test.py"
+      ],
       "specName": "SRS",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -327,6 +508,11 @@
     {
       "Suite": "Standalone",
       "Test Suite": "Peripherals",
+      "Description": [
+        "The SystemReady Devicetree band defines requirements on the Devicetree presented to an OS.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://docs.kernel.org/dev-tools/testing-devices.html"
+      ],
       "specName": "SRS",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -339,6 +525,13 @@
     {
       "Suite": "Standalone",
       "Test Suite": "PSCI",
+      "Description": [
+	"The Power State Coordination Interface (PSCI) Platform Design Document defines an interface, which can be used by an OS for power management.",
+	"The Base Boot Requirements (BBR) Platform Design Document specifies requirements for boot and runtime services that operating systems and hypervisors can rely on.",
+        "The SystemReady Devicetree band requires compliance with the EBBR recipe of BBR, which comprises requirements on PSCI.",
+        "Failures may have only minor effects, or may prevent an OS to bring up the secondary cores or perform power management.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/log_parser/standalone_tests/logs_to_json.py"
+      ],
       "specName": "PSCI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -351,6 +544,12 @@
     {
       "Suite": "Standalone",
       "Test Suite": "A/B support",
+      "Description": [
+        "The SystemReady Devicetree band recommends support for A/B firmware update.",
+        "Failures may have only minor effects, or may prevent reliable firmware update.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/log_parser/standalone_tests/logs_to_json.py",
+	"This is not tested by ACS at this point."
+      ],
       "specName": "SRS",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -363,6 +562,11 @@
     {
       "Suite": "Standalone",
       "Test Suite": "LinuxInstall",
+      "Description": [
+        "The SystemReady Devicetree band requires installation and boot of three OSes.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/log_parser/standalone_tests/logs_to_json.py"
+      ],
       "specName": "SRS",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -375,6 +579,12 @@
     {
       "Suite": "Standalone",
       "Test Suite": "Capsule update",
+      "Description": [
+        "The EBBR specification defines a subset of UEFI provided to an OS.",
+	"This comprises requirements when firmware is updated in-band.",
+        "Failures may have only minor effects, or may prevent firmware update.",
+	"https://github.com/ARM-software/arm-systemready/blob/52cb4e39c1b7ff700a7909bacb6ed4de9cc8d8ab/docs/Automatic_Capsule_Update_guide.md"
+      ],
       "specName": "SRS",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -387,6 +597,11 @@
     {
       "Suite": "Standalone",
       "Test Suite": "DTValidation",
+      "Description": [
+        "The SystemReady Devicetree band define requirements on the Devicetree presented to an OS.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/log_parser/standalone_tests/logs_to_json.py"
+      ],
       "specName": "DT",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -399,6 +614,11 @@
     {
       "Suite": "Standalone",
       "Test Suite": "Boot sources",
+      "Description": [
+        "The SystemReady Devicetree band define requirements on the OS boot and installation media.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/log_parser/standalone_tests/logs_to_json.py"
+      ],
       "specName": "SRS",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -411,6 +631,12 @@
     {
       "Suite": "BBSR-SCT",
       "Test Suite": "RuntimeServicesTest",
+      "Description": [
+        "The Base Boot Security Requirements (BBSR) specification defines security interface requirements for boot and runtime services that operating systems and hypervisors can rely on.",
+        "The SystemReady Devicetree band offers compliance with BBSR as an option.",
+        "Failures may have only minor effects, or may compromise system security.",
+        "https://github.com/ARM-software/bbr-acs/tree/main/bbsr/sct-tests"
+      ],
       "specName": "BBSR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -423,6 +649,12 @@
     {
       "Suite": "BBSR-SCT",
       "Test Suite": "PlatformResetAttackMitigationPsciTest",
+      "Description": [
+        "The Base Boot Security Requirements (BBSR) specification defines security interface requirements for boot and runtime services that operating systems and hypervisors can rely on.",
+        "The SystemReady Devicetree band offers compliance with BBSR as an option.",
+        "Failures may have only minor effects, or may compromise system security.",
+        "https://github.com/ARM-software/bbr-acs/tree/main/bbsr/sct-tests"
+      ],
       "specName": "BBSR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -435,6 +667,14 @@
     {
       "Suite": "BBSR-SCT",
       "Test Suite": "TCG2ProtocolTest",
+      "Description": [
+        "The Trusted Computing Group (TCG) specifications define behaviors of a system with a Trusted Platform Module (TPM).",
+        "The Base Boot Security Requirements (BBSR) specification defines security interface requirements for boot and runtime services that operating systems and hypervisors can rely on.",
+	"This comprises requirements on a TPM.",
+        "The SystemReady Devicetree band offers compliance with BBSR as an option.",
+        "Failures may have only minor effects, or may compromise system security.",
+        "https://github.com/ARM-software/bbr-acs/tree/main/bbsr/sct-tests"
+      ],
       "specName": "BBSR",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -447,6 +687,15 @@
     {
       "Suite": "BBSR-FWTS",
       "Test Suite": "uefirtauthvar",
+      "Description": [
+        "The Base Boot Security Requirements (BBSR) specification defines security interface requirements for boot and runtime services that operating systems and hypervisors can rely on.",
+        "This comprises requirements on UEFI Authenticated Variables.",
+        "The SystemReady Devicetree band offers compliance with BBSR as an option.",
+        "The Firmware Test Suite (FWTS) is a test suite that performs sanity checks on firmware.",
+	"The uefirtauthvar FWTS tests verify requirements on UEFI Authenticated Variables services.",
+        "Failures may have only minor effects, or may compromise system security.",
+        "https://wiki.ubuntu.com/FirmwareTestSuite"
+      ],
       "specName": "BBSR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -459,6 +708,12 @@
     {
       "Suite": "BBSR-Standalone",
       "Test Suite": "Capsule Update",
+      "Description": [
+        "The Base Boot Security Requirements (BBSR) specification defines security interface requirements for boot and runtime services that operating systems and hypervisors can rely on.",
+        "The SystemReady Devicetree band requires compliance with BBSR capsule requirements.",
+        "Failures may have only minor effects, or may compromise system security.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/log_parser/standalone_tests/logs_to_json.py"
+      ],
       "specName": "BBSR",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -471,6 +726,13 @@
     {
       "Suite": "BBSR-Standalone",
       "Test Suite": "Measured boot log",
+      "Description": [
+        "The Base Boot Security Requirements (BBSR) specification defines security interface requirements for boot and runtime services that operating systems and hypervisors can rely on.",
+        "This comprises requirements on measured boot.",
+        "The SystemReady Devicetree band offers compliance with BBSR as an option.",
+        "Failures may have only minor effects, or may compromise system security.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/log_parser/standalone_tests/logs_to_json.py"
+      ],
       "specName": "BBSR",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -483,6 +745,12 @@
     {
       "Suite": "PFDI",
       "Test Suite": "PFDI",
+      "Description": [
+        "The Platform Fault Detection Interface (PFDI) specification defines an interface that enables System Software to request fault detection checks from Platform Firmware.",
+        "The SystemReady Devicetree band requires compliance with PFDI, when such an interface is presented to the OS.",
+        "Failures may have only minor effects, or may compromise system safety.",
+	"https://github.com/ARM-software/sysarch-acs"
+      ],
       "specName": "PFDI",
       "rel Import. to main readiness": "Critical",
       "Waivable": "no",
@@ -495,6 +763,11 @@
     {
       "Suite": "Standalone",
       "Test Suite": "Network boot",
+      "Description": [
+        "The SystemReady Devicetree band recommends network boot support.",
+        "Failures may have only minor effects, or may prevent an OS to boot from the network.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/log_parser/standalone_tests/logs_to_json.py"
+      ],
       "specName": "SRS",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -507,6 +780,15 @@
     {
       "Suite": "FWTS",
       "Test Suite": "smccc",
+      "Description": [
+        "The SMC Calling Convention (SMCCC) specification defines a common mechanism for calling firmware or a hypervisor.",
+	"The Base Boot Requirements (BBR) Platform Design Document specifies requirements for boot and runtime services that operating systems and hypervisors can rely on.",
+        "The SystemReady Devicetree band requires compliance with the EBBR recipe of BBR, which comprises requirements on SMCCC.",
+        "The Firmware Test Suite (FWTS) is a test suite that performs sanity checks on firmware.",
+	"The smccc FWTS tests verify requirements on the SMCCC.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+        "https://wiki.ubuntu.com/FirmwareTestSuite"
+      ],
       "specName": "BBR",
       "rel Import. to main readiness": "Minor",
       "Waivable": "yes",
@@ -519,6 +801,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "BASE",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI Base protocol allows to discover which protocols are implemented.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -531,6 +820,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "POWER",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI Power domain management protocol allows to set the power state of a domain.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -543,6 +839,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "SYSTEM POWER",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI System power management protocol allows to shut down the system.",
+	"Failures are not expected to prevent an OS from booting.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -555,6 +858,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "PERFORMANCE",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI Performance domain management protocol allows to set QoS configurations.",
+	"Failures are not expected to prevent an OS from booting.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -567,6 +877,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "CLOCK",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI Clock management protocol allows to enable and configure clocks.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -579,6 +896,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "SENSOR",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI Sensor management protocol allows to read platform sensors.",
+	"Failures are not expected to prevent an OS from booting.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -591,6 +915,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "RESET",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI Reset domain management protocol allows to reset domains.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -603,6 +934,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "VOLTAGE",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI Voltage domain management protocol allows to set voltage levels.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -615,6 +953,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "POWERCAP",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI Power capping and monitoring protocol allows to set power cap for domains.",
+	"Failures are not expected to prevent an OS from booting.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -627,6 +972,13 @@
     {
       "Suite": "SCMI",
       "Test Suite": "PIN CONTROL",
+      "Description": [
+        "The System Control and Management Interface (SCMI) specification defines software interfaces that are used in system management.",
+        "The SystemReady Devicetree band offers compliance with SCMI as an option.",
+	"The SCMI Pin control protocol allows to configure SoC physical pins.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://gitlab.arm.com/tests/scmi-tests"
+      ],
       "specName": "SCMI",
       "rel Import. to main readiness": "Minor",
       "Waivable": "no",
@@ -638,6 +990,12 @@
   "catID: 54": [
     {
       "Suite": "Standalone",
+      "Description": [
+        "The EBBR specification defines requirements, comprising requirements on runtime mappings.",
+        "The Standalone EBBR requirements tests verify those requirements, including device mapping conflicts.",
+        "Failures may have only minor effects, or may prevent an OS to boot.",
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/linux_scripts/runtime_device_mapping_conflict_checker.py"
+      ],
       "Test Suite": "EBBR requirements",
       "specName": "BBR",
       "rel Import. to main readiness": "Minor",
