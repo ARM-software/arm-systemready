@@ -26,11 +26,12 @@ mkdir -p /mnt/acs_results_template/acs_results/linux_acs/scmi_acs_app
 ./scmi_test_agent
 mv /usr/bin/arm_scmi_test_log.txt /mnt/acs_results_template/acs_results/linux_acs/scmi_acs_app/
 echo "SCMI ACS Test Log:\n"
-cat /usr/bin/arm_scmi_test_log.txt
+cat /mnt/acs_results_template/acs_results/linux_acs/scmi_acs_app/arm_scmi_test_log.txt
 cd -
 
 # ACS log parser run
 echo "Running acs log parser tool "
+RESULTS_DIR="/mnt/acs_results_template/acs_results"
 if [ -d "$RESULTS_DIR" ]; then
   if [ -d "$RESULTS_DIR/acs_summary" ]; then
       rm -r $RESULTS_DIR/acs_summary
