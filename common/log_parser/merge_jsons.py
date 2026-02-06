@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +53,7 @@ DT_SRS_SCOPE_TABLE = [
     ("DT_VALIDATE", "M"),
     ("READ_WRITE_CHECK_BLK_DEVICES", "M"),
     ("ETHTOOL_TEST", "M"),
+    ("SCMI", "EM"),
     ("NETWORK_BOOT", "R"),
     ("BSA", "R"),
     ("BBSR-SCT", "EM"),
@@ -119,11 +120,9 @@ def count_fails_in_json(data):
     Expects a structure with top-level 'test_results' => [ {subtests: [...]} ]
     or a top-level list for subtests. If not recognized, returns (0,0).
 
-    *** Added a check so that if no subtests are found at all, we treat it as 1 fail. ***
     """
     total_failed = 0
     total_failed_with_waiver = 0
-    any_subtests_found = False
 
     if isinstance(data, dict) and "test_results" in data:
         test_results = data["test_results"]
@@ -136,48 +135,39 @@ def count_fails_in_json(data):
         return (0, 0)
 
     for suite_entry in test_results:
-        # For BSA/SBSA: also count testcase-level failures
-        for testcase in suite_entry.get("testcases", []):
-            test_result = testcase.get("Test_result", "")
-            if isinstance(test_result, str):
-                if "FAILED" in test_result.upper() or "FAILURE" in test_result.upper() or "FAIL" in test_result.upper():
-                    any_subtests_found = True
-                    if "(WITH WAIVER)" in test_result.upper():
-                        total_failed_with_waiver += 1
-                    else:
-                        total_failed += 1
-
-            # Also count subtests under testcases (BSA structure)
-            subtests_in_testcase = testcase.get("subtests", [])
-            # Only set flag if subtests array is non-empty
-            if subtests_in_testcase:
-                any_subtests_found = True
-            # NOTE: For BSA, don't count individual subtest failures
-            # The testcase failure status above already captures it
-        # Standard structure: subtests at suite level
-        subtests = suite_entry.get("subtests", [])
-        if subtests:
-            any_subtests_found = True
-        for sub in subtests:
-            res = sub.get("sub_test_result")
-            if isinstance(res, dict):
-                # e.g. { "FAILED": 1, "FAILED_WITH_WAIVER": 1, ... }
-                f = res.get("FAILED", 0)
-                fw = res.get("FAILED_WITH_WAIVER", 0)
-                total_failed += f
-                total_failed_with_waiver += fw
-            elif isinstance(res, str):
-                # e.g. "FAILED (WITH WAIVER)"
-                if "FAILED" in res.upper() or "FAILURE" in res.upper() or "FAIL" in res.upper():
-                    if "(WITH WAIVER)" in res.upper():
-                        total_failed_with_waiver += 1
-                    else:
-                        total_failed += 1
-        ### NEW for SBMR
+        # If testcases exist, count only testcase-level results to avoid double counting.
+        testcases = suite_entry.get("testcases", [])
+        if testcases:
+            for testcase in testcases:
+                test_result = testcase.get("Test_result", "")
+                if isinstance(test_result, str):
+                    if "FAILED" in test_result.upper() or "FAILURE" in test_result.upper() or "FAIL" in test_result.upper():
+                        if "(WITH WAIVER)" in test_result.upper():
+                            total_failed_with_waiver += 1
+                        else:
+                            total_failed += 1
+        else:
+            # Standard structure: subtests at suite level
+            subtests = suite_entry.get("subtests", [])
+            for sub in subtests:
+                res = sub.get("sub_test_result")
+                if isinstance(res, dict):
+                    # e.g. { "FAILED": 1, "FAILED_WITH_WAIVER": 1, ... }
+                    f = res.get("FAILED", 0)
+                    fw = res.get("FAILED_WITH_WAIVER", 0)
+                    total_failed += f
+                    total_failed_with_waiver += fw
+                elif isinstance(res, str):
+                    # e.g. "FAILED (WITH WAIVER)"
+                    if "FAILED" in res.upper() or "FAILURE" in res.upper() or "FAIL" in res.upper():
+                        if "(WITH WAIVER)" in res.upper():
+                            total_failed_with_waiver += 1
+                        else:
+                            total_failed += 1
+        # SBMR nested structure
         for case in suite_entry.get("Test_cases", []):
             for sub in case.get("subtests", []):
                 res = sub.get("sub_test_result")
-                any_subtests_found = True
                 if isinstance(res, dict):
                     f = res.get("FAILED", 0)
                     fw = res.get("FAILED_WITH_WAIVER", 0)
@@ -190,9 +180,6 @@ def count_fails_in_json(data):
                         else:
                             total_failed += 1
 
-    # If we found zero subtests across the entire suite => treat that as a fail
-    if not any_subtests_found:
-        total_failed += 1
     return (total_failed, total_failed_with_waiver)
 
 def _get_suite_summary(d):
@@ -400,6 +387,9 @@ def merge_json_files(json_files, output_file):
         elif "PFDI" in fn:
             section_name = "Suite_Name: PFDI"
             suite_key    = "PFDI"
+        elif "SCMI" in fn:
+            section_name = "Suite_Name: SCMI"
+            suite_key    = "SCMI"
         elif "POST_SCRIPT" in fn:
             section_name = "Suite_Name: POST_SCRIPT"
             suite_key    = "POST_SCRIPT"
@@ -497,6 +487,7 @@ def merge_json_files(json_files, output_file):
     # Base mandatory set
     if DT_OR_SR_MODE == "DT":
         mandatory_suites = set(DT_SRS_SCOPE_TABLE)
+        present = set(suite_fail_data.keys())
     else:
         mandatory_suites = set(SR_SRS_SCOPE_TABLE)
         present = set(suite_fail_data.keys())
@@ -540,8 +531,6 @@ def merge_json_files(json_files, output_file):
             elif requirement == "EM":
                 acs_results_summary[label] = "Not Run"
                 print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
-                #overall_comp = "Not Compliant"
-                #mandatory_missing_list.append(suite_name)
             else:
                 if DT_OR_SR_MODE == "DT":
                     acs_results_summary[label] = "Not Compliant: not run"
@@ -707,7 +696,28 @@ def merge_json_files(json_files, output_file):
     else:
         print(f"{RED}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
 
+    # --- handle SCMI result (DT only, separate from Overall Compliance) ---
+    if DT_OR_SR_MODE == "DT":
+        scmi_label = compliance_label("SCMI")
+        scmi_status = acs_results_summary.get(scmi_label, "")
+        if not scmi_status:
+            acs_results_summary["SCMI compliance results"] = "Not Run"
+        else:
+            scmi_low = scmi_status.lower()
+            if scmi_low.startswith("not run"):
+                acs_results_summary["SCMI compliance results"] = "Not Run"
+            elif scmi_low.startswith("not compliant: failed"):
+                acs_results_summary["SCMI compliance results"] = "Not Compliant : Mandatory - (SCMI)"
+            elif "waiver" in scmi_low:
+                acs_results_summary["SCMI compliance results"] = "Compliant with waivers"
+            elif scmi_low.startswith("compliant"):
+                acs_results_summary["SCMI compliance results"] = "Compliant"
+            else:
+                acs_results_summary["SCMI compliance results"] = scmi_status
+
     merged_results["Suite_Name: acs_info"]["ACS Results Summary"]["BBSR compliance results"] = (acs_results_summary.pop("BBSR compliance results", None))
+    if DT_OR_SR_MODE == "DT":
+        merged_results["Suite_Name: acs_info"]["ACS Results Summary"]["SCMI compliance results"] = (acs_results_summary.pop("SCMI compliance results", None))
 
     RENAME_SUITES_TO_STANDALONE = {
         "Suite_Name: DT Kselftest": "Suite_Name: Standalone",

@@ -158,6 +158,7 @@ OS_TESTS_PROCESSED=0
 CAPSULE_PROCESSED=0
 POST_SCRIPT_PROCESSED=0
 PFDI_PROCESSED=0
+SCMI_PROCESSED=0
 SBMR_PROCESSED=0
 SBMR_IB_PROCESSED=0
 SBMR_OOB_PROCESSED=0
@@ -347,6 +348,46 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         fi
     fi
 fi
+
+################################################################################
+# SCMI PARSING
+################################################################################
+if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+    SCMI_JSON="$JSONS_DIR/scmi.json"
+    SCMI_LOGS=()
+    SCMI_LOG_CANDIDATES=(
+        "$LOGS_PATH/linux_acs/scmi_acs_app/arm_scmi_test_log.txt"
+    )
+
+    for scmi_log in "${SCMI_LOG_CANDIDATES[@]}"; do
+        if [ -f "$scmi_log" ]; then
+            SCMI_LOGS+=("$scmi_log")
+            break
+        fi
+    done
+
+    if [ ${#SCMI_LOGS[@]} -gt 0 ]; then
+        SCMI_PROCESSED=1
+        python3 "$SCRIPTS_PATH/scmi/logs_to_json.py" "${SCMI_LOGS[@]}" "$SCMI_JSON"
+        scm_rc=$?
+        if [ $scm_rc -ne 0 ]; then
+            SCMI_PROCESSED=0
+            if [ $scm_rc -eq 2 ]; then
+                export SCMI_LOG_PRESENT=1
+                echo -e "${YELLOW}WARNING: SCMI raw transport base path error; treating SCMI as not run.${NC}"
+            else
+                echo -e "${RED}ERROR: SCMI logs parsing to json failed.${NC}"
+            fi
+        else
+            apply_waivers "SCMI" "$SCMI_JSON"
+            python3 "$SCRIPTS_PATH/scmi/json_to_html.py" \
+                "$SCMI_JSON" \
+                "$HTMLS_DIR/scmi_detailed.html" \
+                "$HTMLS_DIR/scmi_summary.html"
+        fi
+    fi
+fi
+
 ################################################################################
 # SBMR PARSING (IB + OOB)
 ################################################################################
@@ -718,6 +759,13 @@ else
     print_missing_json "pfdi.json"
 fi
 
+# SCMI
+if [ $SCMI_PROCESSED -eq 1 ] && [ -f "$SCMI_JSON" ]; then
+    JSON_FILES+=("$SCMI_JSON")
+else
+    print_missing_json "scmi.json"
+fi
+
 # POST-SCRIPT
 if [ $POST_SCRIPT_PROCESSED -eq 1 ] && [ -f "$POST_SCRIPT_JSON" ]; then
     JSON_FILES+=("$POST_SCRIPT_JSON")
@@ -850,6 +898,13 @@ else
     GENERATE_ACS_SUMMARY_CMD+=" \"\""
 fi
 
+# 15) SCMI
+if [ $SCMI_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" \"$HTMLS_DIR/scmi_summary.html\""
+else
+    GENERATE_ACS_SUMMARY_CMD+=" \"\""
+fi
+
 # Then the final argument is the summary HTML
 GENERATE_ACS_SUMMARY_CMD+=" \"$ACS_SUMMARY_HTML\""
 
@@ -927,6 +982,12 @@ if [ $print_path -eq 1 ]; then
         echo "BBSR TPM JSON             : $BBSR_TPM_JSON"
         echo "BBSR TPM Detailed Summary : $HTMLS_DIR/bbsr_tpm_detailed.html"
         echo "BBSR TPM Summary          : $HTMLS_DIR/bbsr_tpm_summary.html"
+        echo ""
+    fi
+    if [ $SCMI_PROCESSED -eq 1 ]; then
+        echo "SCMI JSON                 : $SCMI_JSON"
+        echo "SCMI Detailed Summary     : $HTMLS_DIR/scmi_detailed.html"
+        echo "SCMI Summary              : $HTMLS_DIR/scmi_summary.html"
         echo ""
     fi
     if [ $POST_SCRIPT_PROCESSED -eq 1 ]; then
