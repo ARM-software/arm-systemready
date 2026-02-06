@@ -21,6 +21,11 @@
 							"Standalone"
 						]
 					},
+					"Description": {
+						"type": "array",
+						"item": { "type": "string" },
+						"minItems": 1
+					},
 					"Test Suite": {
 						"enum": [
 							"A/B support",
@@ -107,6 +112,7 @@
 					}
 				},
 				"required": [
+					"Description",
 					"FunctionID",
 					"Main Readiness Grouping",
 					"SRS scope",
