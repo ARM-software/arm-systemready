@@ -145,6 +145,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   hwclock > /mnt/acs_results/linux_dump/hwclock-after-set.log
   ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
   cp -r /sys/firmware /mnt/acs_results/linux_dump/ >> firmware.log 2>&1
+  ipmitool -C 17 -N 3 -p 623 mc info > /mnt/acs_results/linux_dump/ipmitool.log 2>&1
   # Capturing System PSCI command output
   mkdir -p /mnt/acs_results/linux_tools/psci
   mount -t debugfs none /sys/kernel/debug
