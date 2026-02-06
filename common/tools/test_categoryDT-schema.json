@@ -79,6 +79,11 @@
 							"uefivarinfo"
 						]
 					},
+					"Description": {
+						"type": "array",
+						"item": { "type": "string" },
+						"minItems": 1
+					},
 					"specName": {
 						"enum": [
 							"BBR",
@@ -120,6 +125,7 @@
 					}
 				},
 				"required": [
+					"Description",
 					"FunctionID",
 					"Main Readiness Grouping",
 					"SRS scope",
