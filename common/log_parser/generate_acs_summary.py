@@ -168,7 +168,7 @@ def read_overall_compliance_from_merged_json(merged_json_path):
     "Overall Compliance Result" from:
       data["Suite_Name: acs_info"]["ACS Results Summary"]["Overall Compliance Result"]
 
-    Returns: (overall_result, bbsr_result, mandatory_details, recommended_details, bbsr_details)
+    Returns: (overall_result, bbsr_result, scmi_result, mandatory_details, recommended_details, bbsr_details)
     where mandatory_details, recommended_details, and bbsr_details are dicts with 'not_run' and 'failed' lists
     """
     overall_result = "Unknown"
@@ -176,6 +176,7 @@ def read_overall_compliance_from_merged_json(merged_json_path):
     mandatory_details = {"not_run": [], "failed": []}
     recommended_details = {"not_run": [], "failed": []}
     bbsr_details = {"not_run": [], "failed": []}
+    scmi_result = "Unknown"
 
     try:
         with open(merged_json_path, 'r') as jf:
@@ -239,14 +240,26 @@ def read_overall_compliance_from_merged_json(merged_json_path):
                         suites = part.replace("failed:", "").strip()
                         bbsr_details["failed"] = [s.strip() for s in suites.split(",")]
 
+        # Get SCMI compliance result from ACS Results Summary
+        scmi_result = acs_summary.get("SCMI compliance results", "")
+
     except Exception as e:
         print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
 
-    return overall_result, bbsr_result, mandatory_details, recommended_details, bbsr_details
+    # Derive SCMI details for the Extensions table (without storing in merged JSON)
+    scmi_details = {"not_run": [], "failed": []}
+    scmi_low = (scmi_result or "").lower()
+    if scmi_low.startswith("not run"):
+        scmi_details["not_run"] = ["SCMI"]
+    elif "not compliant" in scmi_low:
+        scmi_details["failed"] = ["SCMI"]
+
+    return overall_result, bbsr_result, scmi_result, mandatory_details, recommended_details, bbsr_details, scmi_details
 
 def generate_html(system_info, acs_results_summary,
-                  bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path, sbmr_ib_summary_path, sbmr_oob_summary_path,
-                  bbsr_fwts_summary_path, bbsr_sct_summary_path,bbsr_tpm_summary_path,pfdi_summary_path,
+                  bsa_summary_path, sbsa_summary_path, fwts_summary_path, sct_summary_path,
+                  sbmr_ib_summary_path, sbmr_oob_summary_path, scmi_summary_path,
+                  bbsr_fwts_summary_path, bbsr_sct_summary_path, bbsr_tpm_summary_path, pfdi_summary_path,
                   post_script_summary_path,
                   standalone_summary_path, OS_tests_summary_path,
                   output_html_path):
@@ -258,6 +271,7 @@ def generate_html(system_info, acs_results_summary,
     sct_summary_content = read_html_content(sct_summary_path)
     sbmr_ib_summary_content  = read_html_content(sbmr_ib_summary_path)
     sbmr_oob_summary_content = read_html_content(sbmr_oob_summary_path)
+    scmi_summary_content = read_html_content(scmi_summary_path)
     bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path)
     bbsr_tpm_summary_content = read_html_content(bbsr_tpm_summary_path)
@@ -544,6 +558,45 @@ def generate_html(system_info, acs_results_summary,
                         </td>
                     </tr>
                     {% endif %}
+                    {% if 'SCMI compliance results' in acs_results_summary %}
+                    <tr>
+                        <th rowspan="2">SCMI compliance results</th>
+                        <td style="
+                            color:
+                            {% if 'not compliant' in acs_results_summary.get('SCMI compliance results', '')|lower %}
+                                red
+                            {% elif 'waiver' in acs_results_summary.get('SCMI compliance results', '')|lower %}
+                                #FFBF00
+                            {% elif 'Compliant' in acs_results_summary.get('SCMI compliance results', '') %}
+                                green
+                            {% else %}
+                                black
+                            {% endif %}
+                        ">
+                            {% set scmi = acs_results_summary.get('SCMI compliance results', 'Not run') %}
+                            {% if ':' in scmi %}
+                                {{ scmi.split(':')[0].strip() }}
+                            {% else %}
+                                {{ scmi }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% set scmi_ext = acs_results_summary.get('SCMI Details', {}) %}
+                    {% if scmi_ext.get('not_run') or scmi_ext.get('failed') %}
+                    <tr>
+                        <td style="padding-left: 20px; color: red;">
+                            <strong>Mandatory:</strong>
+                            {% if scmi_ext.get('not_run') %}
+                                not run: {{ scmi_ext.get('not_run')|join(', ') }}
+                            {% endif %}
+                            {% if scmi_ext.get('not_run') and scmi_ext.get('failed') %}; {% endif %}
+                            {% if scmi_ext.get('failed') %}
+                                failed: {{ scmi_ext.get('failed')|join(', ') }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endif %}
                 </table>
             </div>
             <div class="dropdown">
@@ -560,6 +613,9 @@ def generate_html(system_info, acs_results_summary,
                     {% endif %}
                     {% if sct_summary_content %}
                     <a href="#sct_summary">SCT Summary</a>
+                    {% endif %}
+                    {% if scmi_summary_content %}
+                    <a href="#scmi_summary">SCMI Summary</a>
                     {% endif %}
                     {% if sbmr_ib_summary_content %}
                     <a href="#sbmr_ib_summary">SBMR-IB Summary</a>
@@ -621,6 +677,14 @@ def generate_html(system_info, acs_results_summary,
                     {{ sct_summary_content | safe }}
                     <div class="details-link">
                         <a href="sct_detailed.html" target="_blank">Click here to go to the detailed summary for SCT</a>
+                    </div>
+                </div>
+                {% endif %}
+                {% if scmi_summary_content %}
+                <div class="summary" id="scmi_summary">
+                    {{ scmi_summary_content | safe }}
+                    <div class="details-link">
+                        <a href="scmi_detailed.html" target="_blank">Click here to go to the detailed summary for SCMI</a>
                     </div>
                 </div>
                 {% endif %}
@@ -712,6 +776,7 @@ def generate_html(system_info, acs_results_summary,
         sbsa_summary_content=sbsa_summary_content,
         fwts_summary_content=fwts_summary_content,
         sct_summary_content=sct_summary_content,
+        scmi_summary_content=scmi_summary_content,
         sbmr_ib_summary_content=sbmr_ib_summary_content,
         sbmr_oob_summary_content=sbmr_oob_summary_content,
         bbsr_fwts_summary_content=bbsr_fwts_summary_content,
@@ -758,6 +823,7 @@ if __name__ == "__main__":
     parser.add_argument("capsule_update_summary_path", help="Path to the Capsule Update summary HTML file")
     parser.add_argument("sbmr_ib_summary_path", help="Path to the SBMR-IB summary HTML file")
     parser.add_argument("sbmr_oob_summary_path", help="Path to the SBMR-OOB summary HTML file")
+    parser.add_argument("scmi_summary_path", help="Path to the SCMI summary HTML file")
     parser.add_argument("output_html_path", help="Path to the output ACS summary HTML file")
     parser.add_argument("--acs_config_path", default="", help="Path to the acs_config.txt file")
     parser.add_argument("--system_config_path", default="", help="Path to the system_config.txt file")
@@ -804,6 +870,7 @@ if __name__ == "__main__":
         "SBSA": read_html_content(args.sbsa_summary_path),
         "FWTS": read_html_content(args.fwts_summary_path),
         "SCT": read_html_content(args.sct_summary_path),
+        "SCMI": read_html_content(args.scmi_summary_path),
         "SBMR-IB":  read_html_content(args.sbmr_ib_summary_path),
         "SBMR-OOB": read_html_content(args.sbmr_oob_summary_path),
         "BBSR-FWTS": read_html_content(args.bbsr_fwts_summary_path),
@@ -820,11 +887,12 @@ if __name__ == "__main__":
     mandatory_details = {"not_run": [], "failed": []}
     recommended_details = {"not_run": [], "failed": []}
     bbsr_details = {"not_run": [], "failed": []}
+    scmi_details = {"not_run": [], "failed": []}
     if args.merged_json and os.path.isfile(args.merged_json):
-        overall_compliance, bbsr_compliance, mandatory_details, recommended_details, bbsr_details = read_overall_compliance_from_merged_json(args.merged_json)
+        overall_compliance, bbsr_compliance, scmi_compliance, mandatory_details, recommended_details, bbsr_details, scmi_details = read_overall_compliance_from_merged_json(args.merged_json)
     else:
         print("Warning: merged JSON not provided or does not exist => Overall compliance unknown")
-        overall_compliance, bbsr_compliance = "Unknown", "Unknown"
+        overall_compliance, bbsr_compliance, scmi_compliance = "Unknown", "Unknown", "Unknown"
 
     # 9) Prepare the dictionary that will be used in the final HTML
     acs_results_summary = {
@@ -834,8 +902,11 @@ if __name__ == "__main__":
         'BBSR compliance results': bbsr_compliance,
         'Mandatory Details': mandatory_details,
         'Recommended Details': recommended_details,
-        'BBSR Details': bbsr_details
+        'BBSR Details': bbsr_details,
+        'SCMI Details': scmi_details
     }
+    if scmi_compliance:
+        acs_results_summary['SCMI compliance results'] = scmi_compliance
 
     # 10) Finally, generate the consolidated HTML page
     generate_html(
@@ -847,6 +918,7 @@ if __name__ == "__main__":
         args.sct_summary_path,
         args.sbmr_ib_summary_path,
         args.sbmr_oob_summary_path,
+        args.scmi_summary_path,
         args.bbsr_fwts_summary_path,
         args.bbsr_sct_summary_path,
         args.bbsr_tpm_summary_path,
