@@ -1,0 +1,14 @@
+FW source code: Unknown
+Flashing instructions: Unknown
+product website: Unknown
+Tested operated Systems: Unknown
+Testlab assistance: Unknown
+
+# User-defined configs for compliance testing
+
+#Add the number of interfaces to be compliant, if commented or "0", all existing interfaces must be compliant
+Total_number_of_network_controllers= 0
+
+# Uncomment the following line to enable network boot testing and replace the URL as required
+#HTTPS_BOOT_IMAGE_URL= https://raw.githubusercontent.com/ARM-software/arm-systemready/main/SystemReady-devicetree-band/prebuilt_images/network_boot_image/acs-network-boot-image.img
+
