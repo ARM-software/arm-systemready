@@ -96,7 +96,6 @@ if exist FS%i:\acs_tests\pfdi\pfdi.efi then
 
     stall 200000
     if exist pfditempresults.log then
-        if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
         echo " SystemReady devicetree band ACS v3.1.2" > pfdiresults.log
         stall 200000
         type pfditempresults.log >> pfdiresults.log
