@@ -318,6 +318,15 @@ def generate_html(system_info, acs_results_summary,
                 text-align: left;
                 color: #2c3e50;
             }
+            .acs-results-summary table, .system-info table {
+                width: 100%;
+                table-layout: fixed;
+            }
+            .acs-results-summary table th, .system-info table th {
+                width: 320px;        /* set your fixed left column width */
+                vertical-align: top;
+                white-space: normal;
+            }
             .summary-section {
                 margin-bottom: 40px;
             }

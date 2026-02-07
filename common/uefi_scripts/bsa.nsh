@@ -99,9 +99,9 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
         stall 200000
         if exist BsaVerboseTempResults.log then
             if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
-                echo " SystemReady devicetree band ACS v3.1.1" > BsaVerboseResults.log
+                echo " SystemReady devicetree band ACS v3.1.2" > BsaVerboseResults.log
             else
-                echo " SystemReady band ACS v3.1.0" > BsaVerboseResults.log
+                echo " SystemReady band ACS v3.1.1" > BsaVerboseResults.log
             endif
             stall 200000
             type BsaVerboseTempResults.log >> BsaVerboseResults.log
@@ -150,9 +150,9 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
 :BsaEE
     if exist BsaTempResults.log then
         if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
-            echo " SystemReady devicetree band ACS v3.1.1" > BsaResults.log
+            echo " SystemReady devicetree band ACS v3.1.2" > BsaResults.log
         else
-            echo " SystemReady band ACS v3.1.0" > BsaResults.log
+            echo " SystemReady band ACS v3.1.1" > BsaResults.log
         endif
         stall 200000
         type BsaTempResults.log >> BsaResults.log
