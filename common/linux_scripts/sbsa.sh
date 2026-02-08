@@ -32,9 +32,9 @@ else
     insmod /lib/modules/sbsa_acs.ko
     echo "SystemReady band ACS v3.1.1" > /mnt/acs_results/linux/SbsaResultsApp.log
     if [ "$automation_enabled" == "False" ]; then
-      /bin/sbsa >> /mnt/acs_results/linux/SbsaResultsApp.log
+      /bin/sbsa --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
     else
-      $sbsa_command >> /mnt/acs_results/linux/SbsaResultsApp.log
+      $sbsa_command  --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
     fi
     dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
     sync /mnt

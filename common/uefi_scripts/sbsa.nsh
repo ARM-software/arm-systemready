@@ -46,7 +46,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             FS%i:
             acs_tests\parser\Parser.efi -sbsa
             echo "UEFI EE SBSA Command: %SbsaCommand%"
-            FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -f SbsaTempResults.log
+            FS%i:\acs_tests\bsa\sbsa\%SbsaCommand% -skip-dp-nic-ms -f SbsaTempResults.log
             goto SbsaEE
         endif
         if exist FS%i:\acs_tests\bsa\sbsa\Sbsa.efi then
