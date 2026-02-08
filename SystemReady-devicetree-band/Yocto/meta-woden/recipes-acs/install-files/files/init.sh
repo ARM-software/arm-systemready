@@ -32,6 +32,9 @@ fi
 
 sleep 5
 
+DT_VERSION="SystemReady devicetree band ACS v3.1.2"
+KERNEL_VERSION="6.18"
+
 echo "Attempting to mount the results partition ..."
 #mount result partition
 BLOCK_DEVICE_NAME=$(blkid | grep "BOOT_ACS" | awk -F: '{print $1}' | head -n 1 )
@@ -47,6 +50,8 @@ sleep 3
 if [ -f /mnt/acs_tests/bbr/boot_tolinuxprompt.flag ]; then
   echo "Booted after Secure Boot clearance. Skipping ACS tests, Booting to Linux terminal..."
   rm /mnt/acs_tests/bbr/boot_tolinuxprompt.flag
+  echo "Please press <Enter> to continue ..."
+  echo -e -n "\n"
   exit 0
 fi
 
@@ -165,7 +170,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         echo "Executing FWTS for EBBR"
         test_list=`cat /usr/bin/ir_bbr_fwts_tests.ini | grep -v "^#" | awk '{print $1}' | xargs`
         echo "Test Executed are $test_list"
-        echo "SystemReady devicetree band ACS v3.1.2" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
+        echo "$DT_VERSION" > /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
         /usr/bin/fwts --ebbr `echo $test_list` smccc -r stdout >> /mnt/acs_results_template/acs_results/fwts/FWTSResults.log
         echo -e -n "\n"
         sync
@@ -178,7 +183,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         if [ -f /lib/modules/*/kernel/bsa_acs/bsa_acs.ko ]; then
           echo "Running Linux BSA tests"
           insmod /lib/modules/*/kernel/bsa_acs/bsa_acs.ko
-          echo "SystemReady devicetree band ACS v3.1.2" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
+          echo "DT_VERSION" > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
           bsa --skip-dp-nic-ms >> /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BSALinuxResults.log
           dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log
           sync
@@ -220,7 +225,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
           if [ ! -s /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log ]; then
             echo "The FDT is compliant according to schema " >> /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
           fi
-          sed -i '1s/^/SystemReady devicetree band ACS v3.1.2\nDeviceTree bindings of Linux kernel version: 6.18 \ndtschema version: 2025.02 \n\n/' /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
+          sed -i "1s/^/${DT_VERSION}\nDeviceTree bindings of Linux kernel version: ${KERNEL_VERSION} \ndtschema version: 2025.02 \n\n/" /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log
           # Run dt parser on dt-validate log to categorize failures
           /usr/bin/systemready-scripts/dt-parser.py /mnt/acs_results_template/acs_results/linux_tools/dt-validate.log --print 2>&1 | tee /mnt/acs_results_template/acs_results/linux_tools/dt-validate-parser.log
         else
@@ -280,14 +285,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
           cd /mnt/acs_results_template
           mkdir -p /mnt/acs_results_template/acs_results/post-script
           # Create .stamp file for avoding cache regen
-          echo "linux-6.18" > /usr/bin/linux-6.18/.stamp
-          echo "  Generating comatible strings"
-          /usr/bin/systemready-scripts/compatibles /usr/bin/linux-6.18/bindings > /usr/bin/linux-6.18/compatible-strings.txt
+          echo "linux-${KERNEL_VERSION}" > "/usr/bin/linux-${KERNEL_VERSION}/.stamp"
+          echo "  Generating compatible strings"
+          "/usr/bin/systemready-scripts/compatibles" "/usr/bin/linux-${KERNEL_VERSION}/bindings" > "/usr/bin/linux-${KERNEL_VERSION}/compatible-strings.txt"
           sync
           sleep 5
-          echo "  Generating comatible strings - Completed"
+          echo "  Generating compatible strings - Completed"
           /usr/bin/systemready-scripts/check-sr-results.py --cache-dir /usr/bin \
-           --linux-url https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
+           --linux-url "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${KERNEL_VERSION}.tar.xz" --dir /mnt/acs_results_template 2>&1 | tee /mnt/acs_results_template/acs_results/post-script/post-script.log
           cd -
         fi
         sync
