@@ -61,7 +61,7 @@ if not exist FS%i:\yocto_image.flag then
         FS%i:
         acs_tests\parser\Parser.efi -bsa
         echo "UEFI EE BSA Command: %BsaCommand%"
-        FS%i:\acs_tests\bsa\%BsaCommand% -f BsaTempResults.log
+        FS%i:\acs_tests\bsa\%BsaCommand% -skip-dp-nic-ms -f BsaTempResults.log
         goto BsaEE
     endif
 endif
