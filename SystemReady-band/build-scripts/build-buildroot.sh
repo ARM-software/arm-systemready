@@ -39,7 +39,6 @@ BUILDROOT_DEFCONFIG=$TOP_DIR/$BUILDROOT_PATH/configs/buildroot_defconfig
 OUTDIR=$TOP_DIR/output
 ARCH=arm64
 CROSS_COMPILE=${TOP_DIR}/${GCC}
-KDIR="${TOP_DIR}/linux-${LINUX_KERNEL_VERSION}/out" 
 
 do_build ()
 {
@@ -92,10 +91,6 @@ do_build ()
     make O=$BUILDROOT_OUT_DIR buildroot_defconfig
     make O=$BUILDROOT_OUT_DIR -j $PARALLELISM
     rm $BUILDROOT_DEFCONFIG
-    popd
-    pushd $TOP_DIR/$BUILDROOT_PATH/out/arm64/build/fwts-${FWTS_VERSION}/smccc_test
-    make -C "$KDIR" M="$PWD" CROSS_COMPILE="$CROSS_COMPILE" modules
-    cp smccc_test.ko $TOP_DIR/$BUILDROOT_PATH/root_fs_overlay/lib/modules/
     popd
 }
 
