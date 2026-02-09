@@ -329,11 +329,11 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
 
     if check_file "$PFDI_LOG" "CM"; then
         PFDI_PROCESSED=1
-        if python3 "$SCRIPTS_PATH/pfdi/logs_to_json.py" \
+        if python3 "$SCRIPTS_PATH/bsa/logs_to_json.py" \
                 "$PFDI_LOG" \
                 "$PFDI_JSON"; then
             apply_waivers "PFDI" "$PFDI_JSON"
-            python3 "$SCRIPTS_PATH/pfdi/json_to_html.py" \
+            python3 "$SCRIPTS_PATH/bsa/json_to_html.py" \
                     "$PFDI_JSON" \
                     "$HTMLS_DIR/pfdi_detailed.html" \
                     "$HTMLS_DIR/pfdi_summary.html"
