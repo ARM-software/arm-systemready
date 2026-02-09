@@ -49,7 +49,7 @@ do_build ()
     popd
     pushd $TOP_DIR/$BUILDROOT_PATH/out/arm64/build/fwts-${FWTS_VERSION}/smccc_test
     make -C "$KDIR" M="$PWD" CROSS_COMPILE="$CROSS_COMPILE" modules
-    cp smccc_test.ko $TOP_DIR/out/ramdisk/drivers/
+    cp smccc_test.ko $TOP_DIR/ramdisk/drivers/
     popd
 
 }
