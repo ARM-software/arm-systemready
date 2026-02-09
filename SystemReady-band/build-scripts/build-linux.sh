@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,15 +58,6 @@ do_build ()
     echo "Building using defconfig..."
     cp arch/arm64/configs/defconfig $LINUX_OUT_DIR/.config
     arch=$(uname -m)
-    if [[ $arch = "aarch64" ]]
-    then
-        echo "arm64"
-        make ARCH=arm64 O=$LINUX_OUT_DIR olddefconfig
-    else
-        echo "x86 cross compile"
-        CROSS_COMPILE=$TOP_DIR/$GCC
-        make ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC O=$LINUX_OUT_DIR olddefconfig
-    fi
     #Configurations needed for FWTS
     sed -i 's/# CONFIG_EFI_TEST is not set/CONFIG_EFI_TEST=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_DMI_SYSFS is not set/CONFIG_DMI_SYSFS=y/g' $LINUX_OUT_DIR/.config
@@ -87,11 +78,12 @@ do_build ()
     echo "CONFIG_SERIAL_8250_NR_UARTS=32" >> $LINUX_OUT_DIR/.config
     echo "CONFIG_SERIAL_8250_RUNTIME_UARTS=32" >> $LINUX_OUT_DIR/.config
     cat $SRBAND_DEFCONFIG >> $LINUX_OUT_DIR/.config
-    if [[ $arch = "aarch64" ]]
-    then
+    if [[ $arch = "aarch64" ]]; then
         echo "arm64 machine"
+        make ARCH=arm64 O=$LINUX_OUT_DIR olddefconfig
         make ARCH=arm64 O=$LINUX_OUT_DIR -j$PARALLELISM
     else
+        make ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC O=$LINUX_OUT_DIR olddefconfig
         make ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC O=$LINUX_OUT_DIR -j$PARALLELISM
     fi
     popd
