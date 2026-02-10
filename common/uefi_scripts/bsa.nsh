@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,9 @@
 # limitations under the License.
 
 echo -off
+set DT_Version " SystemReady devicetree band ACS v3.1.2"
+set SR_Version " SystemReady band ACS v3.1.1"
+
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\yocto_image.flag then
         if exist FS%i:\acs_results_template\acs_results then
@@ -99,9 +102,9 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
         stall 200000
         if exist BsaVerboseTempResults.log then
             if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
-                echo " SystemReady devicetree band ACS v3.1.2" > BsaVerboseResults.log
+                echo %DT_Version% > BsaVerboseResults.log
             else
-                echo " SystemReady band ACS v3.1.1" > BsaVerboseResults.log
+                echo %SR_Version% > BsaVerboseResults.log
             endif
             stall 200000
             type BsaVerboseTempResults.log >> BsaVerboseResults.log
@@ -150,9 +153,9 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
 :BsaEE
     if exist BsaTempResults.log then
         if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
-            echo " SystemReady devicetree band ACS v3.1.2" > BsaResults.log
+            echo %DT_Version% > BsaResults.log
         else
-            echo " SystemReady band ACS v3.1.1" > BsaResults.log
+            echo %SR_Version% > BsaResults.log
         endif
         stall 200000
         type BsaTempResults.log >> BsaResults.log
