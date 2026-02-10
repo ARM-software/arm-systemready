@@ -90,8 +90,8 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
         echo "Running BSA in verbose mode"
         if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
             #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
-            echo "BSA Command: Bsa.efi  -v 1 -os -skip-dp-nic-ms -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log"
-            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -os -skip-dp-nic-ms -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
+            echo "BSA Command: Bsa.efi  -v 1 -os -skip-dp-nic-ms -el1physkip -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log"
+            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -os -skip-dp-nic-ms -el1physkip -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
         else
             echo "BSA Command: Bsa.efi -v 1 -skip-dp-nic-ms -f BsaVerboseTempResults.log"
             FS%i:\acs_tests\bsa\Bsa.efi -v 1 -skip-dp-nic-ms -f BsaVerboseTempResults.log
@@ -130,8 +130,8 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
 :BsaRun
     if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
        #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
-       echo "BSA Command: Bsa.efi -os -dtb BsaDevTree.dtb -skip-dp-nic-ms -f BsaTempResults.log"
-       FS%i:\acs_tests\bsa\Bsa.efi -os -dtb BsaDevTree.dtb -skip-dp-nic-ms -f BsaTempResults.log
+       echo "BSA Command: Bsa.efi -os -dtb BsaDevTree.dtb -skip-dp-nic-ms -el1physkip -f BsaTempResults.log"
+       FS%i:\acs_tests\bsa\Bsa.efi -os -dtb BsaDevTree.dtb -skip-dp-nic-ms -el1physkip -f BsaTempResults.log
     else
         if "%1" == "false" then
             echo  "BSA Command: Bsa.efi -skip-dp-nic-ms -f BsaTempResults.log"

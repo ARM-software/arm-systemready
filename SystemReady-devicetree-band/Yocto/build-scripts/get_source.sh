@@ -153,6 +153,8 @@ copy_recipes()
     cp $TOP_DIR/../../common/linux_scripts/scmi_init.sh $TOP_DIR/meta-woden/recipes-acs/install-files/files
     cp $TOP_DIR/../../common/linux_scripts/verify_tpm_measurements.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
     cp $TOP_DIR/../../common/linux_scripts/extract_capsule_fw_version.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
+    cp $TOP_DIR/../../common/linux_scripts/capsule_ondisk_reporting_vars_check.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
+    cp $TOP_DIR/../../common/linux_scripts/runtime_device_mapping_conflict_checker.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
 
     cp -r $TOP_DIR/../../common/log_parser $TOP_DIR/meta-woden/recipes-acs/install-files/files/
     popd
