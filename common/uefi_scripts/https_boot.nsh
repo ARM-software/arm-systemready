@@ -1,5 +1,5 @@
 # @file
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -86,7 +86,7 @@ for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
       echo Using HTTP mode (-f) >> %logfile%
       \acs_tests\app\ledge.efi -s -u %HTTPS_IMAGE_HOSTPATH% -f -l "ACS-Minimal Image"
     else
-      echo Using HTTPS/default mode (no -f) >> %logfile%
+      echo Using HTTPS/default mode >> %logfile%
       \acs_tests\app\ledge.efi -s -u %HTTPS_IMAGE_HOSTPATH% -l "ACS-Minimal Image"
     endif
 
