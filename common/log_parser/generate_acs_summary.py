@@ -530,8 +530,10 @@ def generate_html(system_info, acs_results_summary,
             <div class="acs-results-summary">
                 <h2>Extensions</h2>
                 <table>
+                    {% set bbsr_ext = acs_results_summary.get('BBSR Details', {}) %}
+                    {% set bbsr_has_details = bbsr_ext.get('not_run') or bbsr_ext.get('failed') %}
                     <tr>
-                        <th rowspan="2">BBSR compliance results</th>
+                        <th rowspan="{{ 2 if bbsr_has_details else 1 }}">BBSR compliance results</th>
                         <td style="
                             color:
                             {% if 'Not Compliant' in acs_results_summary.get('BBSR compliance results', '') %}
@@ -552,8 +554,7 @@ def generate_html(system_info, acs_results_summary,
                             {% endif %}
                         </td>
                     </tr>
-                    {% set bbsr_ext = acs_results_summary.get('BBSR Details', {}) %}
-                    {% if bbsr_ext.get('not_run') or bbsr_ext.get('failed') %}
+                    {% if bbsr_has_details %}
                     <tr>
                         <td style="padding-left: 20px; color: red;">
                             <strong>Mandatory:</strong>
@@ -568,8 +569,10 @@ def generate_html(system_info, acs_results_summary,
                     </tr>
                     {% endif %}
                     {% if 'SCMI compliance results' in acs_results_summary %}
+                    {% set scmi_ext = acs_results_summary.get('SCMI Details', {}) %}
+                    {% set scmi_has_details = scmi_ext.get('not_run') or scmi_ext.get('failed') %}
                     <tr>
-                        <th rowspan="2">SCMI compliance results</th>
+                        <th rowspan="{{ 2 if scmi_has_details else 1 }}">SCMI compliance results</th>
                         <td style="
                             color:
                             {% if 'not compliant' in acs_results_summary.get('SCMI compliance results', '')|lower %}
@@ -590,8 +593,7 @@ def generate_html(system_info, acs_results_summary,
                             {% endif %}
                         </td>
                     </tr>
-                    {% set scmi_ext = acs_results_summary.get('SCMI Details', {}) %}
-                    {% if scmi_ext.get('not_run') or scmi_ext.get('failed') %}
+                    {% if scmi_has_details %}
                     <tr>
                         <td style="padding-left: 20px; color: red;">
                             <strong>Mandatory:</strong>
