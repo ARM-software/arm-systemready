@@ -340,7 +340,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         else
             if [ $? -eq 1 ]; then
                 PFDI_PROCESSED=0
-                echo -e " PFDI -- Not Implemented"
+                echo -e "${RED} PFDI -- Not Implemented${NC}"
             else
                 PFDI_PROCESSED=0
                 echo -e "${RED}ERROR: PFDI logs parsing to json failed.${NC}"
@@ -353,37 +353,29 @@ fi
 # SCMI PARSING
 ################################################################################
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+    SCMI_LOG="$LOGS_PATH/linux_acs/scmi_acs_app/arm_scmi_test_log.txt"
     SCMI_JSON="$JSONS_DIR/scmi.json"
-    SCMI_LOGS=()
-    SCMI_LOG_CANDIDATES=(
-        "$LOGS_PATH/linux_acs/scmi_acs_app/arm_scmi_test_log.txt"
-    )
+    SCMI_PROCESSED=0
 
-    for scmi_log in "${SCMI_LOG_CANDIDATES[@]}"; do
-        if [ -f "$scmi_log" ]; then
-            SCMI_LOGS+=("$scmi_log")
-            break
-        fi
-    done
-
-    if [ ${#SCMI_LOGS[@]} -gt 0 ]; then
+    if check_file "$SCMI_LOG"; then
         SCMI_PROCESSED=1
-        python3 "$SCRIPTS_PATH/scmi/logs_to_json.py" "${SCMI_LOGS[@]}" "$SCMI_JSON"
-        scm_rc=$?
-        if [ $scm_rc -ne 0 ]; then
-            SCMI_PROCESSED=0
-            if [ $scm_rc -eq 2 ]; then
-                export SCMI_LOG_PRESENT=1
-                echo -e "${YELLOW}WARNING: SCMI raw transport base path error; treating SCMI as not run.${NC}"
-            else
-                echo -e "${RED}ERROR: SCMI logs parsing to json failed.${NC}"
-            fi
-        else
+        if python3 "$SCRIPTS_PATH/scmi/logs_to_json.py" "$SCMI_LOG" "$SCMI_JSON"; then
             apply_waivers "SCMI" "$SCMI_JSON"
             python3 "$SCRIPTS_PATH/scmi/json_to_html.py" \
                 "$SCMI_JSON" \
                 "$HTMLS_DIR/scmi_detailed.html" \
                 "$HTMLS_DIR/scmi_summary.html"
+        else
+            scm_rc=$?
+            SCMI_PROCESSED=0
+            if [ $scm_rc -eq 2 ]; then
+                export SCMI_LOG_PRESENT=1
+                echo -e "${YELLOW}WARNING: SCMI raw transport base path error; treating SCMI as not run.${NC}"
+            elif [ $scm_rc -eq 1 ]; then
+                echo -e "${RED} SCMI -- Not Implemented${NC}"
+            else
+                echo -e "${RED}ERROR: SCMI logs parsing to json failed.${NC}"
+            fi
         fi
     fi
 fi

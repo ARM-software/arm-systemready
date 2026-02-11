@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ import argparse
 import chardet
 import json
 import re
+import sys
 from collections import defaultdict
 
 def detect_file_encoding(file_path):
@@ -425,6 +426,10 @@ def main(input_files, output_file):
             "test_suite_summary": suite_summaries[suite_name]
         }
         output["test_results"].append(suite_obj)
+
+    acs_run_true = total_summary.get("Total Rules Run", 0) > 0
+    if not acs_run_true:
+        sys.exit(1)
 
     with open(output_file, "w") as jf:
         json.dump(output, jf, indent=2)
