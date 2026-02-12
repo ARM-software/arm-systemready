@@ -138,11 +138,69 @@ def is_disabled_in_ancestry(node: Node) -> bool:
         cur = cur.parent
     return False
 
-def strip_comments(line: str) -> str:
-    """Remove C-style block and line comments from DTS source lines."""
-    line = re.sub(r"/\*.*?\*/", "", line)
-    line = re.sub(r"//.*$", "", line)
-    return line.strip()
+def strip_comments(text: str) -> str:
+    """
+    Remove // and /* */ comments (including multi-line block comments),
+    while keeping string content untouched as best-effort.
+    """
+    out: List[str] = []
+    i = 0
+    n = len(text)
+    in_block = False
+    in_line = False
+    in_str = False
+    str_ch = ""
+
+    while i < n:
+        c = text[i]
+        nxt = text[i + 1] if i + 1 < n else ""
+
+        if in_line:
+            if c == "\n":
+                in_line = False
+                out.append(c)
+            i += 1
+            continue
+
+        if in_block:
+            if c == "*" and nxt == "/":
+                in_block = False
+                i += 2
+            else:
+                i += 1
+            continue
+
+        if in_str:
+            out.append(c)
+            if c == "\\" and i + 1 < n:
+                out.append(text[i + 1])
+                i += 2
+                continue
+            if c == str_ch:
+                in_str = False
+            i += 1
+            continue
+
+        if c in ("'", "\""):
+            in_str = True
+            str_ch = c
+            out.append(c)
+            i += 1
+            continue
+
+        if c == "/" and nxt == "/":
+            in_line = True
+            i += 2
+            continue
+        if c == "/" and nxt == "*":
+            in_block = True
+            i += 2
+            continue
+
+        out.append(c)
+        i += 1
+
+    return "".join(out)
 
 def to_int(tok: str) -> Optional[int]:
     """Parse integer token in hex (0x prefix) or decimal format."""
@@ -317,11 +375,12 @@ def parse_dts_tree(dts_text: str) -> Node:
     """
     root = Node(name="/", path="/", parent=None, props={}, children=[])
     stack: List[Node] = [root]
+    dts_text = strip_comments(dts_text)
     lines = dts_text.splitlines()
 
     i = 0
     while i < len(lines):
-        line = strip_comments(lines[i])
+        line = lines[i].strip()
         if not line:
             i += 1
             continue
@@ -353,7 +412,7 @@ def parse_dts_tree(dts_text: str) -> Node:
                 blob = val
                 while i + 1 < len(lines):
                     i += 1
-                    nxt = strip_comments(lines[i])
+                    nxt = lines[i].strip()
                     blob += " " + nxt
                     if ">" in nxt:
                         break
@@ -533,6 +592,22 @@ def is_memory_like(node: Node) -> bool:
     dev_type = node.props.get("device_type", "")
     return ("\"memory\"" in dev_type) or ("'memory'" in dev_type)
 
+def is_storage_like(node: Node) -> bool:
+    """Check if node represents storage partitions or SPI-NOR flash.
+
+    These nodes describe storage layout, not MMIO register blocks, and
+    should be excluded from runtime conflict checks.
+    """
+    comp = node.props.get("compatible", "")
+    if "fixed-partitions" in comp:
+        return True
+    if "jedec,spi-nor" in comp or "spi-nor" in comp:
+        return True
+    p = node.path or ""
+    if node.name == "partitions" or "/partitions" in p:
+        return True
+    return False
+
 def extract_dts_mmio_ranges(root: Node) -> List[DtsRange]:
     """Extract MMIO register ranges from device tree with address translation.
 
@@ -556,6 +631,8 @@ def extract_dts_mmio_ranges(root: Node) -> List[DtsRange]:
         if n is root:
             continue
         if is_memory_like(n):
+            continue
+        if is_storage_like(n):
             continue
         if is_disabled_in_ancestry(n):
             continue
@@ -589,18 +666,20 @@ def extract_dts_mmio_ranges(root: Node) -> List[DtsRange]:
             # the parent's MMIO window (e.g., syscon/efuse sub-registers). If the immediate
             # parent bus has no ranges (identity translation), treat child_addr as offset
             # when it fits inside the parent's reg size.
-            if phys == child_addr and "ranges-missing->identity" in note:
+            if phys == child_addr and ("ranges-missing->identity" in note or ":identity" in note):
                 preg = parent_bus.props.get("reg", "")
                 preg_cells = extract_cells_from_angle_list(preg)
-                pac = addr_cells(parent_bus)
-                psc = size_cells(parent_bus)
+                # Parent "reg" is expressed in the address space of parent_bus.parent
+                reg_bus = parent_bus.parent
+                pac = addr_cells(reg_bus) if reg_bus is not None else 2
+                psc = size_cells(reg_bus) if reg_bus is not None else 1
                 pt = pac + psc
                 if preg_cells and len(preg_cells) >= pt:
                     p_child_base = join_u32_cells(preg_cells[0:pac])
                     p_sz = join_u32_cells(preg_cells[pac:pt])
                     if p_sz and child_addr < p_sz:
-                        # parent reg is expressed in its parent's address space
-                        start_bus = parent_bus.parent if parent_bus.parent is not None else parent_bus
+                        # Translate parent's base to physical, then add child offset
+                        start_bus = reg_bus if reg_bus is not None else parent_bus
                         p_phys, _p_note = translate_up_to_root(p_child_base, start_bus)
                         if p_phys is not None:
                             phys = p_phys + child_addr
