@@ -136,6 +136,9 @@ get_linux-acs_src()
     git am $TOP_DIR/../common/patches/0001-SystemReady-Linux-${LINUX_KERNEL_VERSION}.patch
     git am $TOP_DIR/../common/patches/0001-disable-psci-checker.patch
     git am $TOP_DIR/patches/0001-usb_host_xhci_plat.patch
+    # The below patch is only for linux 6.12 for resolving the USB 3.0 related crash during linux boot
+    # For linux version greater than 6.12, this patch is not needed.
+    git am $TOP_DIR/patches/0001-xhci-restrict-usb4-tunnel-detection.patch
 
     #apply patches to linux source
     if [ $LINUX_KERNEL_VERSION == "6.4" ]; then
