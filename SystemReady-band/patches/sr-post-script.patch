@@ -1,0 +1,13 @@
+diff --git a/check-sr-results.py b/check-sr-results.py
+index 0a30564..ef738a7 100755
+--- a/check-sr-results.py
++++ b/check-sr-results.py
+@@ -1868,7 +1868,7 @@ if __name__ == '__main__':
+     # Prepare initial meta-data.
+     init_meta(sys.argv, here)
+ 
+-    check_prerequisites()
++    #check_prerequisites()
+ 
+     me = os.path.realpath(__file__)
+     here = os.path.dirname(me)

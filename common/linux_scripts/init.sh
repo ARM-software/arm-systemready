@@ -279,7 +279,22 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     sync /mnt
     sleep 5
   else
-    echo "SCT result does not exist, cannot run edk2-test-parser tool cannot run"
+    echo "SCT result does not exist, cannot run edk2-test-parser tool"
+  fi
+
+  # systemready scripts for os logs
+  if [ -d "/usr/bin/systemready-scripts" ]; then
+    echo "Running systemready scripts "
+    if [ -f "/mnt/acs_results/post-scripts/post-script.log" ]; then
+      rm /mnt/acs_results/post-scripts/post-script.log
+    else
+      mkdir -p /mnt/acs_results/post-scripts
+    fi
+    python3 /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt > /mnt/acs_results/post-scripts/post-script.log 2>&1
+    sync /mnt
+    sleep 5
+  else
+    echo "systemready scripts does not exist, cannot run os logs check"
   fi
 
   # ACS log parser run
@@ -298,7 +313,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   sleep 60
   #copying acs_run_config.ini into results directory.
   mkdir -p /mnt/acs_results/acs_summary/config
-  cp /mnt/acs_tests/config/acs_run_config.ini /mnt/acs_results/acs_summary/config/
+
+  # Copying acs_run_config into result directory.
+  if [ -f /mnt/acs_tests/config/acs_run_config.ini ]; then
+    cp /mnt/acs_tests/config/acs_run_config.ini /mnt/acs_results/acs_summary/config/
+  fi
   # Copying acs_waiver.json into result directory.
   if [ -f /mnt/acs_tests/config/acs_waiver.json ]; then
     cp /mnt/acs_tests/config/acs_waiver.json /mnt/acs_results/acs_summary/config/
@@ -307,6 +326,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   if [ -f /mnt/acs_tests/config/system_config.txt ]; then
     cp /mnt/acs_tests/config/system_config.txt /mnt/acs_results/acs_summary/config/
   fi
+  # Copying systemready-commit.log into result directory
+  if [ -f /mnt/acs_tests/config/systemready-commit.log ]; then
+    cp /mnt/acs_tests/config/systemready-commit.log /mnt/acs_results/acs_summary/config/
+  fi
+
   sync /mnt
 
   echo "ACS automated test suites run is completed."
