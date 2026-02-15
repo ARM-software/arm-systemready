@@ -36,6 +36,7 @@ BBR_CONFIG_FILE=${TOP_DIR}/uefi_scripts/bbr.nsh
 DEBUG_CONFIG_FILE=${TOP_DIR}/uefi_scripts/debug_dump.nsh
 ACS_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_config.txt
 SYSTEM_CONFIG_FILE=${TOP_DIR}/build-scripts/config/system_config.txt
+SYSTEMREADY_COMMIT_FILE=${TOP_DIR}/output/systemready-commit.log
 ACS_RUN_CONFIG_FILE=${TOP_DIR}/build-scripts/config/acs_run_config.ini
 CONFIG_PARSER_FILE=${TOP_DIR}/uefi_scripts/parser.nsh
 CONFIG_PARSER_PYTHON_FILE=${TOP_DIR}/../common/parser/Parser.py
@@ -60,6 +61,7 @@ create_cfgfiles ()
     mcopy -i  $fatpart_name -o ${ACS_CONFIG_FILE}     ::/acs_tests/config/
     mcopy -i  $fatpart_name -o ${SYSTEM_CONFIG_FILE}  ::/acs_tests/config/
     mcopy -i  $fatpart_name -o ${ACS_RUN_CONFIG_FILE}  ::/acs_tests/config/
+    mcopy -i  $fatpart_name -o ${SYSTEMREADY_COMMIT_FILE}  ::/acs_tests/config/
 
 }
 

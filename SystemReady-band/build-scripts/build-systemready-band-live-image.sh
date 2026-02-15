@@ -40,5 +40,3 @@ init_dir
 
 source ./build-scripts/build-all.sh  systemready-band F
 source ./build-scripts/make_image.sh systemready-band
-
-
