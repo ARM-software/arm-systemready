@@ -245,6 +245,37 @@ get_edk2-test-parser_src()
     popd
 }
 
+get_edk2-test-parser_src()
+{
+    echo "Downloading edk2-test-parser source code. TAG : $EDK2_TEST_PARSER_TAG"
+    git clone https://git.gitlab.arm.com/systemready/edk2-test-parser.git
+    pushd $TOP_DIR/edk2-test-parser/
+    if [ -n "$EDK2_TEST_PARSER_TAG" ]; then
+        git checkout $EDK2_TEST_PARSER_TAG
+    fi
+    echo "EDK2 Parser" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    URL(edk2-test-parser) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    commit(edk2-test-parser) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
+    popd
+}
+
+get_systemready_scripts()
+{
+    echo "Downloading systemready scripts source code. TAG : $SYS_SCRIPTS_TAG"
+    git clone https://gitlab.arm.com/systemready/systemready-scripts.git
+    pushd $TOP_DIR/systemready-scripts/
+    if [ -n "$SYS_SCRIPTS_TAG" ]; then
+        git checkout $SYS_SCRIPTS_TAG
+    fi
+    git apply $TOP_DIR/patches/sr-post-script.patch
+    echo "SystemReady Scripts" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    URL(sysrdy-scripts) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    commit(sysrdy-scripts) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
+    popd
+}
+
 source /etc/lsb-release
 
 sudo apt install git curl mtools gdisk gcc \
@@ -282,3 +313,4 @@ get_grub_src
 get_linux_src
 get_linux-acs_src
 get_sbmr_acs_src
+get_systemready_scripts
