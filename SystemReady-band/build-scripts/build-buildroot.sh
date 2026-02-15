@@ -39,6 +39,7 @@ BUILDROOT_DEFCONFIG=$TOP_DIR/$BUILDROOT_PATH/configs/buildroot_defconfig
 OUTDIR=$TOP_DIR/output
 ARCH=arm64
 CROSS_COMPILE=${TOP_DIR}/${GCC}
+SYSTEMREADY_COMMIT_LOG="${OUTDIR}/systemready-commit.log"
 
 do_build ()
 {
@@ -91,6 +92,9 @@ do_build ()
     make O=$BUILDROOT_OUT_DIR buildroot_defconfig
     make O=$BUILDROOT_OUT_DIR -j $PARALLELISM
     rm $BUILDROOT_DEFCONFIG
+    echo "BBR-FWTS" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    tar(fwts) = $(ls -1 "dl/fwts")" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
     popd
 }
 

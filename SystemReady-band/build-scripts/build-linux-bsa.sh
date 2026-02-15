@@ -22,6 +22,7 @@ TOP_DIR=`pwd`
 export KERNEL_SRC=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}/out
 LINUX_PATH=$TOP_DIR/linux-${LINUX_KERNEL_VERSION}
 ACS_PATH=$TOP_DIR/edk2/ShellPkg/Application/sysarch-acs
+SYSTEMREADY_COMMIT_LOG="${TOP_DIR}/output/systemready-commit.log"
 
 build_bsa_kernel_driver()
 {
@@ -36,6 +37,10 @@ build_bsa_kernel_driver()
      echo "Checkout tag $BSA_ACS_TAG"
      git checkout --detach "tags/${BSA_ACS_TAG}"
  fi
+ echo "BSA ACS (linux)" >> "${SYSTEMREADY_COMMIT_LOG}"
+ echo "    URL(linux-acs) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+ echo "    commit(linux-acs) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+ echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
  popd
 
  rm -rf $TOP_DIR/linux-acs/acs-drv/files/val

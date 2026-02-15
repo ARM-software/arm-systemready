@@ -24,6 +24,7 @@ BAND_PATH=`pwd`
 popd
 
 . $TOP_DIR/../common/config/systemready-band-source.cfg
+SYSTEMREADY_COMMIT_LOG="$TOP_DIR/output/systemready-commit.log"
 
 export GIT_SSL_NO_VERIFY=1
 
@@ -35,6 +36,11 @@ get_linux_src()
         echo "Error: Failed to download Linux source code"
         exit 1
     fi
+    echo "Linux" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    URL(linux) = $(git -C "linux-${LINUX_KERNEL_VERSION}" remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    commit(linux) = $(git -C "linux-${LINUX_KERNEL_VERSION}" rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
+
 }
 
 get_uefi_src()
@@ -47,6 +53,10 @@ get_uefi_src()
     fi
     pushd $TOP_DIR/edk2
     git submodule update --init
+    echo "EDK2" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    URL(edk2) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    commit(edk2) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
     popd
 }
 
@@ -119,6 +129,10 @@ get_sct_src()
     fi
     pushd $TOP_DIR/edk2-test
     git checkout $SCT_SRC_TAG
+    echo "BBR SCT" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    URL(edk2-test) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    commit(edk2-test) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
     popd
 }
 
@@ -177,7 +191,11 @@ get_sbmr_acs_src()
         fi
     fi
     pushd $TOP_DIR/sbmr-acs
-        git archive --format=tar.gz -o sbmr-acs.tar.gz HEAD
+    echo "SBMR ACS" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    URL(sbmr-acs) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    commit(sbmr-acs) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
+    git archive --format=tar.gz -o sbmr-acs.tar.gz HEAD
     popd
 }
 
@@ -220,6 +238,10 @@ get_edk2-test-parser_src()
     git clone https://git.gitlab.arm.com/systemready/edk2-test-parser.git
     pushd $TOP_DIR/edk2-test-parser/
     git checkout $EDK2_TEST_PARSER_TAG
+    echo "EDK2 Parser" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    URL(edk2-test-parser) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    commit(edk2-test-parser) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
     popd
 }
 
@@ -242,6 +264,12 @@ else
 fi
 
 
+init_dir()
+{
+ mkdir -p $TOP_DIR/output
+}
+
+init_dir
 get_uefi_src
 get_efitools_src
 get_sct_src

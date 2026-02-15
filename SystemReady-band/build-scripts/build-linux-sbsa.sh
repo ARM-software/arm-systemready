@@ -27,6 +27,7 @@ BUILDROOT_PATH=buildroot
 BUILDROOT_ARCH=arm64
 BUILDROOT_OUT_DIR=out/$BUILDROOT_ARCH
 PLATDIR=${TOP_DIR}/output
+SYSTEMREADY_COMMIT_LOG="${PLATDIR}/systemready-commit.log"
 
 build_sbsa_kernel_driver()
 {
@@ -41,6 +42,10 @@ build_sbsa_kernel_driver()
         echo "Checkout tag $SBSA_ACS_TAG"
         git checkout --detach "tags/${SBSA_ACS_TAG}"
     fi
+    echo "SBSA ACS (linux)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    URL(linux-acs) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    commit(linux-acs) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
     popd
 
     rm -rf $TOP_DIR/linux-acs/acs-drv/files/val

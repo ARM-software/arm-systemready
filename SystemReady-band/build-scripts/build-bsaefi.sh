@@ -45,6 +45,7 @@ UEFI_LIBC_PATH=edk2-libc
 OUTDIR=${TOP_DIR}/output
 BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC/AARCH64/
 KEYS_DIR=$TOP_DIR/bbsr-keys
+SYSTEMREADY_COMMIT_LOG="${OUTDIR}/systemready-commit.log"
 
 do_build()
 {
@@ -58,6 +59,10 @@ do_build()
         echo "Checkout tag $BSA_ACS_TAG"
         git checkout --detach "tags/${BSA_ACS_TAG}"
     fi
+    echo "BSA ACS (uefi)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    URL(sysarch-acs) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "    commit(sysarch-acs) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
     popd
     source ./edksetup.sh
     make -C BaseTools/Source/C
