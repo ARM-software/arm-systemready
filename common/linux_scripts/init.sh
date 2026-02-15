@@ -141,10 +141,13 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   acpixtract -a acpi.dat > acpixtract.log 2>&1
   iasl -d *.dat > iasl.log 2>&1
   cd -
+  ORIG_SYS_TIME="$(date '+%Y-%m-%d %H:%M:%S')"
   date --set="20221215 05:30" > /mnt/acs_results/linux_dump/date-set-202212150530.log
   date > /mnt/acs_results/linux_dump/date-after-set.log
   hwclock --set --date "2023-01-01 09:10:15" > /mnt/acs_results/linux_dump/hw-clock-set-20230101091015.log
   hwclock > /mnt/acs_results/linux_dump/hwclock-after-set.log
+  date --set="$ORIG_SYS_TIME" 2>/dev/null || true
+  hwclock --systohc 2>/dev/null || true
   ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
   cp -r /sys/firmware /mnt/acs_results/linux_dump/ >> firmware.log 2>&1
   ipmitool -C 17 -N 3 -p 623 mc info > /mnt/acs_results/linux_dump/ipmitool.log 2>&1
