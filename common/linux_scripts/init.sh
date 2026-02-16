@@ -53,7 +53,7 @@ insmod /lib/modules/cppc_cpufreq.ko
 
 sleep 5
 
-SR_VERSION="SystemReady band ACS v3.1.1"
+SR_VERSION="SystemReady band ACS v3.1.1 RC0"
 
 #Skip running of ACS Tests if the grub option is added
 ADDITIONAL_CMD_OPTION="";
@@ -282,35 +282,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     echo "SCT result does not exist, cannot run edk2-test-parser tool"
   fi
 
-  # systemready scripts for os logs
-  if [ -d "/usr/bin/systemready-scripts" ]; then
-    echo "Running systemready scripts "
-    if [ -f "/mnt/acs_results/post-scripts/post-script.log" ]; then
-      rm /mnt/acs_results/post-scripts/post-script.log
-    else
-      mkdir -p /mnt/acs_results/post-scripts
-    fi
-    python3 /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt > /mnt/acs_results/post-scripts/post-script.log 2>&1
-    sync /mnt
-    sleep 5
-  else
-    echo "systemready scripts does not exist, cannot run os logs check"
-  fi
-
-  # ACS log parser run
-  echo "Running acs log parser tool "
-  if [ -d "/mnt/acs_results" ]; then
-    if [ -d "/mnt/acs_results/acs_summary" ]; then
-        rm -r /mnt/acs_results/acs_summary
-    fi
-    /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
-    sync /mnt
-    sleep 5
-  fi
-
-  echo "Please wait acs results are syncing on storage medium."
-  sync /mnt
-  sleep 60
   #copying acs_run_config.ini into results directory.
   mkdir -p /mnt/acs_results/acs_summary/config
 
@@ -330,8 +301,41 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   if [ -f /mnt/acs_tests/config/systemready-commit.log ]; then
     cp /mnt/acs_tests/config/systemready-commit.log /mnt/acs_results/acs_summary/config/
   fi
-
   sync /mnt
+
+  # systemready scripts for os logs
+  if [ -d "/usr/bin/systemready-scripts" ]; then
+    echo "Running systemready scripts "
+    if [ -f "/mnt/acs_results/post-scripts/post-script.log" ]; then
+      rm /mnt/acs_results/post-scripts/post-script.log
+    else
+      mkdir -p /mnt/acs_results/post-scripts
+    fi
+    python3 /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt > /mnt/acs_results/post-scripts/post-script.log 2>&1
+    sync /mnt
+    sleep 5
+  else
+    echo "systemready scripts does not exist, cannot run os logs check"
+  fi
+
+  # ACS log parser run
+  echo "Running acs log parser tool "
+  if [ -d "/mnt/acs_results" ]; then
+    if [ -d "/mnt/acs_results/acs_summary/acs_jsons" ]; then
+        rm -r /mnt/acs_results/acs_summary/acs_jsons
+    fi
+    if [ -d "/mnt/acs_results/acs_summary/html_detailed_summaries" ]; then
+        rm -r /mnt/acs_results/acs_summary/html_detailed_summaries
+        rm /mnt/acs_results/acs_summary/acs_summary
+    fi
+    /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
+    sync /mnt
+    sleep 5
+  fi
+
+  echo "Please wait acs results are syncing on storage medium."
+  sync /mnt
+  sleep 60
 
   echo "ACS automated test suites run is completed."
   echo "Please reboot to run BBSR tests if not done"

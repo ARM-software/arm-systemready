@@ -64,7 +64,7 @@ if exist FS%i:\acs_tests\pfdi\pfdi.efi then
         FS%i:\acs_tests\pfdi\pfdi.efi -v 1 -f pfdiverbosetempresults.log
         stall 200000
         if exist pfdiverbosetempresults.log then
-            echo " SystemReady devicetree band ACS v3.1.2" > pfdiverboseresults.log
+            echo " SystemReady devicetree band ACS v3.1.2 RC0" > pfdiverboseresults.log
             stall 200000
             type pfdiverbosetempresults.log >> pfdiverboseresults.log
             cp pfdiverbosetempresults.log temp/
@@ -96,7 +96,7 @@ if exist FS%i:\acs_tests\pfdi\pfdi.efi then
 
     stall 200000
     if exist pfditempresults.log then
-        echo " SystemReady devicetree band ACS v3.1.2" > pfdiresults.log
+        echo " SystemReady devicetree band ACS v3.1.2 RC0" > pfdiresults.log
         stall 200000
         type pfditempresults.log >> pfdiresults.log
         cp pfditempresults.log temp/
