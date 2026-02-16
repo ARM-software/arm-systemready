@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,14 +51,26 @@ def detect_columns_used(subtests):
     }
 
 # Function to generate bar chart for test results
-def generate_bar_chart(suite_summary):
-    labels = ['Passed', 'Failed', 'Skipped']
-    sizes = [
-        suite_summary.get('total_passed', 0),
-        suite_summary.get('total_failed', 0),
-        suite_summary.get('total_skipped', 0)
-    ]
-    colors = ['#66bb6a', '#ef5350', '#f39c12']
+def generate_bar_chart(suite_summary, show_extended=False):
+    if show_extended:
+        labels = ['Passed', 'Failed', 'Failed w/ Waiver', 'Aborted', 'Skipped', 'Warnings']
+        sizes = [
+            suite_summary.get('total_passed', 0),
+            suite_summary.get('total_failed', 0),
+            suite_summary.get('total_failed_with_waiver', 0),
+            suite_summary.get('total_aborted', 0),
+            suite_summary.get('total_skipped', 0),
+            suite_summary.get('total_warnings', 0)
+        ]
+        colors = ['#66bb6a', '#ef5350', '#f39c12', '#95a5a6', '#f1c40f', '#f39c12']
+    else:
+        labels = ['Passed', 'Failed', 'Skipped']
+        sizes = [
+            suite_summary.get('total_passed', 0),
+            suite_summary.get('total_failed', 0),
+            suite_summary.get('total_skipped', 0)
+        ]
+        colors = ['#66bb6a', '#ef5350', '#f39c12']
 
     plt.figure(figsize=(8, 6))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
@@ -115,7 +127,7 @@ def get_subtest_status(subtest_result):
         return 'INFO'  # For informational entries
 
 # Function to generate HTML content for both summary and detailed pages
-def generate_html(suite_summary, test_results_list, output_html_path, is_summary_page=True, include_drop_down=False):
+def generate_html(suite_summary, test_results_list, output_html_path, is_summary_page=True, include_drop_down=False, show_extended_summary=False):
     # Set the test suite name to 'OS Tests'
     test_suite_name = 'OS Tests'
 
@@ -273,10 +285,26 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
                         <td>Failed</td>
                         <td class="fail">{{ total_failed }}</td>
                     </tr>
+                    {% if show_extended_summary %}
+                    <tr>
+                        <td>Failed with Waiver</td>
+                        <td class="fail">{{ total_failed_with_waiver }}</td>
+                    </tr>
+                    <tr>
+                        <td>Aborted</td>
+                        <td class="info">{{ total_aborted }}</td>
+                    </tr>
+                    {% endif %}
                     <tr>
                         <td>Skipped</td>
                         <td class="skipped">{{ total_skipped }}</td>
                     </tr>
+                    {% if show_extended_summary %}
+                    <tr>
+                        <td>Warnings</td>
+                        <td class="info">{{ total_warnings }}</td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -342,6 +370,11 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
                                 {% set _ = all_reasons.append(reason) %}
                             {% endfor %}
                         {% endif %}
+                        {% if subtest.sub_test_result.warning_reasons %}
+                            {% for reason in subtest.sub_test_result.warning_reasons %}
+                                {% set _ = all_reasons.append(reason) %}
+                            {% endfor %}
+                        {% endif %}
                         {% if subtest.sub_test_result.skip_reasons %}
                             {% for reason in subtest.sub_test_result.skip_reasons %}
                                 {% set _ = all_reasons.append(reason) %}
@@ -367,11 +400,21 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
     """)
 
     # Calculate total tests
-    total_tests = suite_summary.get('total_passed', 0) + suite_summary.get('total_failed', 0) + suite_summary.get('total_skipped', 0)
+    total_tests = (
+        suite_summary.get('total_passed', 0)
+        + suite_summary.get('total_failed', 0)
+        + suite_summary.get('total_skipped', 0)
+    )
+    if show_extended_summary:
+        total_tests += (
+            suite_summary.get('total_aborted', 0)
+            + suite_summary.get('total_failed_with_waiver', 0)
+            + suite_summary.get('total_warnings', 0)
+        )
 
     # If not summary page, generate chart data
     if not is_summary_page:
-        chart_data = generate_bar_chart(suite_summary)
+        chart_data = generate_bar_chart(suite_summary, show_extended_summary)
     else:
         chart_data = None  # No chart data for summary page
 
@@ -382,9 +425,13 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
         total_passed=suite_summary.get("total_passed", 0),
         total_failed=suite_summary.get("total_failed", 0),
         total_skipped=suite_summary.get("total_skipped", 0),
+        total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),
+        total_aborted=suite_summary.get("total_aborted", 0),
+        total_warnings=suite_summary.get("total_warnings", 0),
         test_results_list=test_results_list,
         is_summary_page=is_summary_page,
         include_drop_down=include_drop_down,
+        show_extended_summary=show_extended_summary,
         chart_data=chart_data,  # Will be None if is_summary_page is True
         enumerate=enumerate,
         get_subtest_status=get_subtest_status  # Pass the function to the template
@@ -408,8 +455,16 @@ def main():
     total_passed = 0
     total_failed = 0
     total_skipped = 0
+    total_aborted = 0
+    total_warnings = 0
+    total_failed_with_waiver = 0
 
     boot_sources_paths = args.boot_sources_paths if args.boot_sources_paths else []
+
+    sr_single_mode = (
+        len(args.input_json_files) == 1
+        and os.path.basename(args.input_json_files[0]).lower() == "os_test.json"
+    )
 
     for idx, input_json_file in enumerate(args.input_json_files):
         with open(input_json_file, 'r') as json_file:
@@ -422,67 +477,89 @@ def main():
             test_results = data.get("test_results", [])
             os_name = data.get("os_name", "Unknown")
             if test_results:
-                if idx < len(boot_sources_paths):
-                    boot_sources_path = boot_sources_paths[idx]
-                else:
-                    boot_sources_path = "Unknown"
+                is_sr_os_logs = os.path.basename(input_json_file).lower() == "os_test.json"
+                if not is_sr_os_logs:
+                    if idx < len(boot_sources_paths):
+                        boot_sources_path = boot_sources_paths[idx]
+                    else:
+                        boot_sources_path = "Unknown"
 
-                if os_name == "Unknown" and boot_sources_path != "Unknown":
-                    # Try to extract OS name from the boot_sources_path
-                    os_name = boot_sources_path.split('/')[-2]  
+                    if os_name == "Unknown" and boot_sources_path != "Unknown":
+                        # Try to extract OS name from the boot_sources_path
+                        os_name = boot_sources_path.split('/')[-2]
 
-                # Insert the Boot Sources test
-                boot_sources_test = {
-                    "Test_suite_name": "Boot Sources",
-                    "Test_suite_description": "Check for boot sources",
-                    "Test_case": f"Boot Sources for {os_name}",
-                    "Test_case_description": f"Please review the boot source OS logs for {os_name} - path of {boot_sources_path}",
-                    "subtests": [],
-                    "is_boot_source": True
-                }
-                test_results.append(boot_sources_test)
+                    # Insert the Boot Sources test
+                    boot_sources_test = {
+                        "Test_suite_name": "Boot Sources",
+                        "Test_suite_description": "Check for boot sources",
+                        "Test_case": f"Boot Sources for {os_name}",
+                        "Test_case_description": f"Please review the boot source OS logs for {os_name} - path of {boot_sources_path}",
+                        "subtests": [],
+                        "is_boot_source": True
+                    }
+                    test_results.append(boot_sources_test)
+
+                if sr_single_mode and is_sr_os_logs:
+                    suite_summary_data = data.get("suite_summary", {})
+                    total_passed = suite_summary_data.get("total_passed", 0)
+                    total_failed = suite_summary_data.get("total_failed", 0)
+                    total_skipped = suite_summary_data.get("total_skipped", 0)
+                    total_aborted = suite_summary_data.get("total_aborted", 0)
+                    total_warnings = suite_summary_data.get("total_warnings", 0)
+                    total_failed_with_waiver = suite_summary_data.get("total_failed_with_waiver", 0)
+                    total_tests = (
+                        total_passed
+                        + total_failed
+                        + total_skipped
+                        + total_aborted
+                        + total_failed_with_waiver
+                        + total_warnings
+                    )
 
                 # Tally pass/fail/skip
-                for test in test_results:
-                    if test.get('is_boot_source'):
-                        continue
+                if not (sr_single_mode and is_sr_os_logs):
+                    for test in test_results:
+                        if test.get('is_boot_source'):
+                            continue
 
-                    total_tests += 1
-                    test_status = 'PASSED'
-                    has_skipped = False
-                    has_pass = False
+                        total_tests += 1
+                        test_status = 'PASSED'
+                        has_skipped = False
+                        has_pass = False
 
-                    if test.get('subtests'):
-                        for subtest in test['subtests']:
-                            subtest_status = get_subtest_status(subtest['sub_test_result'])
-                            if subtest_status == 'FAILED':
-                                test_status = 'FAILED'
-                                break
-                            elif subtest_status == 'SKIPPED':
-                                has_skipped = True
-                            elif subtest_status not in ('PASSED', 'SKIPPED'):
-                                # treat any other status as failure
-                                test_status = 'FAILED'
-                                break
-                            elif subtest_status == 'PASSED':
-                                has_pass = True
+                        if test.get('subtests'):
+                            for subtest in test['subtests']:
+                                subtest_status = get_subtest_status(subtest['sub_test_result'])
+                                if subtest_status == 'FAILED':
+                                    test_status = 'FAILED'
+                                    break
+                                elif subtest_status == 'SKIPPED':
+                                    has_skipped = True
+                                elif subtest_status not in ('PASSED', 'SKIPPED'):
+                                    # treat any other status as failure
+                                    test_status = 'FAILED'
+                                    break
+                                elif subtest_status == 'PASSED':
+                                    has_pass = True
+                            else:
+                                if test_status != 'FAILED':
+                                    test_status = 'PASSED' if has_pass else 'SKIPPED'
                         else:
-                            if test_status != 'FAILED':
-                                test_status = 'PASSED' if has_pass else 'SKIPPED'
-                    else:
-                        test_status = 'SKIPPED'
+                            test_status = 'SKIPPED'
 
-                    if test_status == 'PASSED':
-                        total_passed += 1
-                    elif test_status == 'FAILED':
-                        total_failed += 1
-                    else:  # 'SKIPPED' or fallback
-                        total_skipped += 1
+                        if test_status == 'PASSED':
+                            total_passed += 1
+                        elif test_status == 'FAILED':
+                            total_failed += 1
+                        else:  # 'SKIPPED' or fallback
+                            total_skipped += 1
 
                 #
                 # For each test, figure out which columns to show
                 #
                 for t in test_results:
+                    if not t.get("Test_suite_name") and t.get("Test_suite"):
+                        t["Test_suite_name"] = t.get("Test_suite")
                     subtests = t.get("subtests", [])
                     t["columns_used"] = detect_columns_used(subtests)
 
@@ -493,6 +570,9 @@ def main():
         'total_passed': total_passed,
         'total_failed': total_failed,
         'total_skipped': total_skipped,
+        'total_aborted': total_aborted,
+        'total_warnings': total_warnings,
+        'total_failed_with_waiver': total_failed_with_waiver
     }
 
     if total_tests == 0:
@@ -505,7 +585,8 @@ def main():
         test_results_list,
         args.detailed_html_file,
         is_summary_page=False,
-        include_drop_down=args.include_drop_down
+        include_drop_down=args.include_drop_down,
+        show_extended_summary=sr_single_mode
     )
 
     # Generate the summary page
@@ -513,7 +594,8 @@ def main():
         suite_summary,
         test_results_list,
         args.summary_html_file,
-        is_summary_page=True
+        is_summary_page=True,
+        show_extended_summary=sr_single_mode
     )
 
 if __name__ == "__main__":
