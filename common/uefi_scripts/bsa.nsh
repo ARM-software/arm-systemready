@@ -17,8 +17,8 @@
 # limitations under the License.
 
 echo -off
-set DT_Version " SystemReady devicetree band ACS v3.1.2"
-set SR_Version " SystemReady band ACS v3.1.1"
+set DT_Version " SystemReady devicetree band ACS v3.1.2 RC0"
+set SR_Version " SystemReady band ACS v3.1.1 RC0"
 
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\yocto_image.flag then
