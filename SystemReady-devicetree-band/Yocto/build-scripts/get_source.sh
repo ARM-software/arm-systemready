@@ -144,7 +144,7 @@ copy_recipes()
     echo "SystemReady DT ACS" >> "$SYSTEMREADY_COMMIT_LOG"
     echo "    URL(systemready-acs) = $(git remote get-url origin)" >> "$SYSTEMREADY_COMMIT_LOG"
     echo "    commit(systemready-acs) = $(git rev-parse HEAD)" >> "$SYSTEMREADY_COMMIT_LOG" 
-
+    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
     pushd $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files
 
     # remove connect -r from startup.nsh, since it is not required for SystemReady-devicetree-band systems
