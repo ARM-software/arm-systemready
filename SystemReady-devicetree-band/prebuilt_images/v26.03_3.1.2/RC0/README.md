@@ -13,8 +13,10 @@
   * FWTS SMCCC tests (**recommended**) are enabled
   * Network boot size reduced and now directly hosted on github
   * PFDI, BSA moved to latest sysarch-acs source
-  * Checks related to CapsuleNNN, CapsuleMax, CapsuleLast variables added in capsule update test
+  * Checks related to CapsuleNNN, CapsuleMax, CapsuleLast variables added. ** Currenly the test parsing is not enabled, as acs plans to observe results of various platforms**
+     * The logs are part of fw/capsule_test_results.log
   * Python based test added for EBBR RuntimeDeviceMappingConflict requirement. ** Currenly the test parsing is not enabled, as acs plans to observe results of various platforms**
+     * The logs are part of acs_results/linux_tool/runtime_device_mapping_conflict_test
 
 * Others
   * ACS results/test partition size increase to 512 MB to accomodate large size capsule update binaries
