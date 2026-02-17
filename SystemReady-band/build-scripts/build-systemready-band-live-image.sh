@@ -17,6 +17,7 @@
 # limitations under the License.
 
 TOP_DIR=`pwd`
+SYSTEMREADY_COMMIT_LOG="$TOP_DIR/output/systemready-commit.log"
 
 create_scripts_link()
 {
@@ -33,6 +34,11 @@ init_dir()
  cp -r $TOP_DIR/../common/config                       $TOP_DIR/build-scripts
  cp -r $TOP_DIR/../common/uefi_scripts                 $TOP_DIR/uefi_scripts 
  mkdir -p $TOP_DIR/output
+ echo "SystemReady ACS" >> "${SYSTEMREADY_COMMIT_LOG}"
+ echo "    URL(sysrdy-acs) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
+ echo "    commit(sysrdy-acs) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
+ echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
+
 }
 
 create_scripts_link
