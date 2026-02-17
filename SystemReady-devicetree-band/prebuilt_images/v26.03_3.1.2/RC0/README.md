@@ -8,8 +8,15 @@
 
 * Test Suites changes
   * SCMI test suite (**optional**) is new suite added, which can be run using seperate GRUB menu option
-  * EfiConformanceTable for ebbr profiles added as part of SCT test
+  * EfiConformanceTable test for ebbr profiles added as part of SCT test
   * BSA and PFDI ACS test suite log refactored, no changes in JSON results
   * FWTS SMCCC tests (**recommended**) are enabled
+  * Network boot size reduced and now directly hosted on github
+  * PFDI, BSA moved to latest sysarch-acs source
+  * Checks related to CapsuleNNN, CapsuleMax, CapsuleLast variables added in capsule update test
+  * Python based test added for EBBR RuntimeDeviceMappingConflict requirement. ** Currenly the test parsing is not enabled, as acs plans to observe results of various platforms**
+
+* Others
+  * ACS results/test partition size increase to 512 MB to accomodate large size capsule update binaries
 
 ## Known Limitations / Issues
