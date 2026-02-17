@@ -12,16 +12,6 @@ This README describes where to find the **main release** and **Release Candidate
 ## Main Release Image
 The **DeviceTree Band v3.1.2** release is WIP
 
-
-#### Decompressing the Image for use
-
-Follow the steps below to decompress the pre-built image:
-
-```bash
-xz -d systemready-dt_acs_live_image.wic.xz
-```
-After decompression, you will get the .wic file, which can be used directly with your target environment.
-
 ---
 
 ## Release Candidate Images
