@@ -45,6 +45,7 @@ LOGS_PATH=$1
 ACS_CONFIG_PATH=$2
 SYSTEM_CONFIG_PATH=$3
 WAIVER_JSON=$4
+POST_SCRIPT_LOG="$LOGS_PATH/post-script/post-script.log"
 
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     test_category="/usr/bin/log_parser/test_categoryDT.json"
@@ -443,7 +444,6 @@ fi
 # POST-SCRIPT LOG PARSING
 ################################################################################
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
-    POST_SCRIPT_LOG="$LOGS_PATH/post-script/post-script.log"
     POST_SCRIPT_JSON="$JSONS_DIR/post_script.json"
 
     # Attempt to parse post-script.log if it exists
@@ -605,6 +605,7 @@ fi
 ################################################################################
 # OS TESTS PARSING
 ################################################################################
+OS_JSONS=()
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     OS_LOGS_PATH="$(dirname "$LOGS_PATH")/os-logs"
     OS_JSONS_DIR="$JSONS_DIR"
@@ -652,6 +653,37 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             "$OS_SUMMARY_HTML" \
             --include-drop-down \
             --boot-sources-paths "${BOOT_SOURCES_PATHS[@]}"
+    fi
+fi
+
+if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
+    OS_LOGS_PATH="$(dirname "$LOGS_PATH")/os-logs"
+    OS_JSONS_DIR="$JSONS_DIR"
+    mkdir -p "$OS_JSONS_DIR"
+    OS_JSONS=()
+
+    # SR band OS logs and post-script checks
+    SR_OS_LOGS_JSON="$OS_JSONS_DIR/os_test.json"
+    python3 "$SCRIPTS_PATH/os_tests/sr_logs_to_json.py" \
+        "$OS_LOGS_PATH" \
+        "$POST_SCRIPT_LOG" \
+        "$SR_OS_LOGS_JSON"
+    if [ $? -eq 0 ]; then
+        OS_JSONS+=("$SR_OS_LOGS_JSON")
+        apply_waivers "os Tests" "$SR_OS_LOGS_JSON"
+        OS_TESTS_PROCESSED=1
+    else
+        echo -e "${RED}ERROR: SR OS logs parsing to json failed.${NC}"
+    fi
+
+    if [ ${#OS_JSONS[@]} -gt 0 ]; then
+        OS_DETAILED_HTML="$HTMLS_DIR/os_tests_detailed.html"
+        OS_SUMMARY_HTML="$HTMLS_DIR/os_tests_summary.html"
+        python3 "$SCRIPTS_PATH/os_tests/json_to_html.py" \
+            "${OS_JSONS[@]}" \
+            "$OS_DETAILED_HTML" \
+            "$OS_SUMMARY_HTML" \
+            --include-drop-down
     fi
 fi
 

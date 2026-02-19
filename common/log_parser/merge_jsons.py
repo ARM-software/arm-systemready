@@ -76,6 +76,7 @@ SR_SRS_SCOPE_TABLE = [
     ("SCT", "M"),
     ("FWTS", "M"),
     ("BSA", "M"),
+    ("OS_TEST", "M"),
     ("BBSR-SCT", "EM"),
     ("BBSR-FWTS", "EM"),
     ("BBSR-TPM", "EM"),
@@ -362,6 +363,10 @@ def merge_json_files(json_files, output_file):
         elif os.path.basename(json_path).lower() == "ethtool_test.json":
             section_name = "Suite_Name: Ethtool Test"
             suite_key    = "ETHTOOL_TEST"
+        elif os.path.basename(json_path).lower() == "os_test.json":
+            section_name = "Suite_Name: OS Tests"
+            suite_key    = "OS_TEST"
+            _REQUIREMENT_MAP["OS_TEST"] = "M"
         elif "ethtool_test" in fn.lower():
             base_name_no_ext = os.path.splitext(os.path.basename(json_path))[0]
             section_name = f"Suite_Name: OS Tests - {base_name_no_ext}"
