@@ -71,7 +71,7 @@ def parse_ethtool_test_log(log_data, os_name):
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0,
-        "total_failed_with_waivers": 0
+        "total_failed_with_waiver": 0
     }
 
     current_test = {

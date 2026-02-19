@@ -1080,17 +1080,17 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
 
                     total_passed_top              += summary.get("total_passed", 0)
                     total_failed_top              += summary.get("total_failed", 0)
-                    total_failed_with_waiver_top  += summary.get("Total_failed_with_waiver", 0)
+                    total_failed_with_waiver_top  += summary.get("total_failed_with_waiver", 0)
                     total_aborted_top             += summary.get("total_aborted", 0)
                     total_skipped_top             += summary.get("total_skipped", 0)
                     total_warnings_top            += summary.get("total_warnings", 0)
                     total_ignored_top             += summary.get("total_ignored", 0)
 
-            # this eliminates the old UPPER-CASE keys
+            # normalize suite_summary to lowercase keys
             json_data["suite_summary"] = {
                 "total_passed":               total_passed_top,
                 "total_failed":               total_failed_top,
-                "Total_failed_with_waiver":   total_failed_with_waiver_top,
+                "total_failed_with_waiver":   total_failed_with_waiver_top,
                 "total_aborted":              total_aborted_top,
                 "total_skipped":              total_skipped_top,
                 "total_warnings":             total_warnings_top,
