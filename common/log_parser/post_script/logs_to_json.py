@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +37,7 @@ def parse_post_script_log(log_path):
         "test_suite_summary": {
             "total_passed": 0,
             "total_failed": 0,
+            "total_failed_with_waiver": 0,
             "total_aborted": 0,
             "total_skipped": 0,
             "total_warnings": 0

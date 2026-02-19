@@ -517,6 +517,126 @@
   ],
   "catID: 44": [
     {
+      "Suite": "SCMI",
+      "Test Suite": "BASE",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 45": [
+    {
+      "Suite": "SCMI",
+      "Test Suite": "POWER",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 46": [
+    {
+      "Suite": "SCMI",
+      "Test Suite": "SYSTEM POWER",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 47": [
+    {
+      "Suite": "SCMI",
+      "Test Suite": "PERFORMANCE",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 48": [
+    {
+      "Suite": "SCMI",
+      "Test Suite": "CLOCK",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 49": [
+    {
+      "Suite": "SCMI",
+      "Test Suite": "SENSOR",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 50": [
+    {
+      "Suite": "SCMI",
+      "Test Suite": "RESET",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 51": [
+    {
+      "Suite": "SCMI",
+      "Test Suite": "VOLTAGE",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 52": [
+    {
+      "Suite": "SCMI",
+      "Test Suite": "POWERCAP",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 53": [
+    {
+      "Suite": "SCMI",
+      "Test Suite": "PIN CONTROL",
+      "specName": "SCMI",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "no",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "security readiness"
+    }
+  ],
+  "catID: 54": [
+    {
       "Suite": "Standalone",
       "Test Suite": "EBBR requirements",
       "specName": "BBR",

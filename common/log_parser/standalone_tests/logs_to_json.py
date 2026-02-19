@@ -107,7 +107,7 @@ def parse_dt_kselftest_log(log_data):
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0,
-        "total_failed_with_waivers": 0
+        "total_failed_with_waiver": 0
     }
 
     current_test = {
@@ -266,7 +266,7 @@ def parse_ethtool_test_log(log_data):
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0,
-        "total_failed_with_waivers": 0,
+        "total_failed_with_waiver": 0,
     }
 
     current_test = {
@@ -391,7 +391,7 @@ def parse_read_write_check_blk_devices_log(log_data):
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0,
-        "total_failed_with_waivers": 0
+        "total_failed_with_waiver": 0
     }
 
     current_test = {
@@ -705,7 +705,7 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0,
-        "total_failed_with_waivers": 0
+        "total_failed_with_waiver": 0
     }
 
     current_test = {
@@ -1195,7 +1195,7 @@ def parse_network_boot_log(log_data):
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0,
-        "total_failed_with_waivers": 0
+        "total_failed_with_waiver": 0
     }
 
     current_test = {
@@ -1275,7 +1275,7 @@ def parse_runtime_dev_map_conflict(log_data):
         "total_skipped": 0,
         "total_aborted": 0,
         "total_warnings": 0,
-        "total_failed_with_waivers": 0
+        "total_failed_with_waiver": 0
     }
 
     current_test = {

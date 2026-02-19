@@ -1,0 +1,1368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ACS Merged Results Schema",
+  "description": "Schema for acs results",
+  "type": "object",
+  "required": [
+    "Suite_Name: acs_info"
+  ],
+  "properties": {
+    "Suite_Name: acs_info": {
+      "$ref": "#/definitions/acs_info"
+    },
+    "Suite_Name: BSA": {
+      "$ref": "#/definitions/bsa_suite"
+    },
+    "Suite_Name: BBSR-FWTS": {
+      "$ref": "#/definitions/bbsr_fwts_suite"
+    },
+    "Suite_Name: BBSR-SCT": {
+      "$ref": "#/definitions/bbsr_sct_suite"
+    },
+    "Suite_Name: FWTS": {
+      "$ref": "#/definitions/fwts_suite"
+    },
+    "Suite_Name: SCT": {
+      "$ref": "#/definitions/sct_suite"
+    },
+    "Suite_Name: PFDI": {
+      "$ref": "#/definitions/pfdi_suite"
+    },
+    "Suite_Name: Standalone": {
+      "$ref": "#/definitions/standalone_suite"
+    },
+    "Suite_Name: POST_SCRIPT": {
+      "$ref": "#/definitions/post_script_suite"
+    },
+    "Suite_Name: SBMR": {
+      "$ref": "#/definitions/sbmr_suite"
+    },
+    "Suite_Name: SCMI": {
+      "$ref": "#/definitions/scmi_suite"
+    }
+  },
+  "patternProperties": {
+    "^Suite_Name: OS Tests - .+$": {
+      "$comment": "OS Tests suites use a variable suffix (distro/version), so they are matched by name pattern.",
+      "$ref": "#/definitions/os_tests_suite"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "non_negative_int": {
+      "$comment": "Shared type for counters that must be >= 0.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "string_list": {
+      "$comment": "Shared type for lists of strings in reasons/notes.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sub_test_result_string": {
+      "$comment": "Some parsers emit a single result string for subtests.",
+      "type": "string",
+      "enum": [
+        "PASSED",
+        "FAILED",
+        "SKIPPED",
+        "ABORTED",
+        "WARNING",
+        "WARNINGS",
+        "IGNORED",
+        "KNOWN ACS LIMITATION",
+        "KNOWN U-BOOT LIMITATION",
+        "NOT TESTED (TEST NOT IMPLEMENTED)",
+        "NOT TESTED (PAL NOT SUPPORTED)",
+        "FAILED (WITH WAIVER)",
+        "PASSED(*PARTIAL)",
+        "STATUS",
+        "UNKNOWN"
+      ]
+    },
+    "sub_test_result_object": {
+      "$comment": "Expanded subtest results with per-status counters and reason lists.",
+      "type": "object",
+      "properties": {
+        "PASSED": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "FAILED": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "SKIPPED": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "ABORTED": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "WARNINGS": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "WARNING": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "FAILED_WITH_WAIVER": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "pass_reasons": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/string_list"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/string_list"
+              }
+            }
+          ]
+        },
+        "fail_reasons": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/string_list"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/string_list"
+              }
+            }
+          ]
+        },
+        "skip_reasons": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/string_list"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/string_list"
+              }
+            }
+          ]
+        },
+        "abort_reasons": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/string_list"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/string_list"
+              }
+            }
+          ]
+        },
+        "warning_reasons": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/string_list"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/string_list"
+              }
+            }
+          ]
+        },
+        "waiver_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/string_list"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "bsa_suite_summary": {
+      "$comment": "BSA/SBSA summary format uses capitalized keys.",
+      "type": "object",
+      "required": [
+        "Failed",
+        "Not Implemented",
+        "PAL Not Supported",
+        "Passed",
+        "Passed (Partial)",
+        "Skipped",
+        "Total Rules Run",
+        "Total_failed_with_waiver",
+        "Warnings"
+      ],
+      "properties": {
+        "Failed": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "Not Implemented": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "PAL Not Supported": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "Passed": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "Passed (Partial)": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "Skipped": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "Total Rules Run": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "Total_failed_with_waiver": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "Warnings": {
+          "$ref": "#/definitions/non_negative_int"
+        }
+      },
+      "additionalProperties": false
+    },
+    "summary_totals_base": {
+      "$comment": "Common lower-case totals block used by most suites (fields optional here).",
+      "type": "object",
+      "properties": {
+        "total_aborted": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_failed": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_failed_with_waiver": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_ignored": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_passed": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_skipped": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_warnings": {
+          "$ref": "#/definitions/non_negative_int"
+        }
+      },
+      "additionalProperties": false
+    },
+    "summary_totals": {
+      "$comment": "Common lower-case totals block with required core counters.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/summary_totals_base"
+        },
+        {
+          "required": [
+            "total_aborted",
+            "total_failed",
+            "total_failed_with_waiver",
+            "total_passed",
+            "total_skipped",
+            "total_warnings"
+          ]
+        }
+      ]
+    },
+    "subtest_base": {
+      "$comment": "Generic subtest shape used by several suites.",
+      "type": "object",
+      "properties": {
+        "sub_Test_Number": {
+          "type": "string"
+        },
+        "sub_Test_Description": {
+          "type": "string"
+        },
+        "sub_Test_GUID": {
+          "type": "string"
+        },
+        "sub_Test_Path": {
+          "type": "string"
+        },
+        "sub_Rule_ID": {
+          "type": "string"
+        },
+        "sub_test_result": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/sub_test_result_string"
+            },
+            {
+              "$ref": "#/definitions/sub_test_result_object"
+            }
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "bsa_subtest": {
+      "$comment": "BSA subtest shape with required IDs and result.",
+      "type": "object",
+      "properties": {
+        "sub_Test_Number": {
+          "type": "string"
+        },
+        "sub_Test_Description": {
+          "type": "string"
+        },
+        "sub_Test_GUID": {
+          "type": "string"
+        },
+        "sub_Rule_ID": {
+          "type": "string"
+        },
+        "sub_test_result": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/sub_test_result_string"
+            },
+            {
+              "$ref": "#/definitions/sub_test_result_object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sub_Test_Number",
+        "sub_Rule_ID",
+        "sub_Test_Description",
+        "sub_test_result"
+      ],
+      "additionalProperties": false
+    },
+    "sbmr_subtest": {
+      "$comment": "SBMR/Standalone subtest shape with optional waiver_reason.",
+      "type": "object",
+      "properties": {
+        "sub_Test_Number": {
+          "type": "string"
+        },
+        "sub_Test_Description": {
+          "type": "string"
+        },
+        "sub_test_result": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/sub_test_result_string"
+            },
+            {
+              "$ref": "#/definitions/sub_test_result_object"
+            }
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "waiver_reason": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/string_list"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sub_Test_Number",
+        "sub_Test_Description",
+        "sub_test_result"
+      ],
+      "additionalProperties": false
+    },
+    "test_case_base": {
+      "$comment": "Common test case fields shared by multiple suites.",
+      "type": "object",
+      "properties": {
+        "Test_case": {
+          "type": "string"
+        },
+        "Test_case_description": {
+          "type": "string"
+        },
+        "Test Entry Point GUID": {
+          "type": "string"
+        },
+        "Test_result": {
+          "type": "string"
+        },
+        "Returned Status Code": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "subtests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/subtest_base"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "test_result_base": {
+      "$comment": "Common test_result metadata fields shared by multiple suites.",
+      "type": "object",
+      "properties": {
+        "Test_suite": {
+          "type": "string"
+        },
+        "Test_suite_description": {
+          "type": "string"
+        },
+        "Sub_test_suite": {
+          "type": "string"
+        }
+      }
+    },
+    "suite_base": {
+      "$comment": "Common suite-level wrapper fields.",
+      "type": "object",
+      "properties": {
+        "Suite_Name": {
+          "type": "string"
+        }
+      }
+    },
+    "test_category_base": {
+      "$comment": "Category metadata required for test_results entries across suites.",
+      "type": "object",
+      "required": [
+        "Main Readiness Grouping",
+        "SRS scope",
+        "Waivable"
+      ],
+      "properties": {
+        "Main Readiness Grouping": {
+          "type": "string"
+        },
+        "SRS scope": {
+          "type": "string"
+        },
+        "Waivable": {
+          "type": "string"
+        }
+      }
+    },
+    "bsa_test_case": {
+      "type": "object",
+      "required": [
+        "Test_case",
+        "Test_case_description",
+        "Test_result",
+        "Test_case_summary"
+      ],
+      "properties": {
+        "Test_case": {
+          "type": "string"
+        },
+        "Test_case_description": {
+          "type": "string"
+        },
+        "Test_result": {
+          "type": "string"
+        },
+        "Test_case_summary": {
+          "$ref": "#/definitions/bsa_suite_summary"
+        },
+        "waiver_reason": {
+          "type": "string"
+        },
+        "subtests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/bsa_subtest"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "Test_result": {
+                "const": "FAILED (WITH WAIVER)"
+              }
+            },
+            "required": [
+              "Test_result"
+            ]
+          },
+          "then": {
+            "required": [
+              "waiver_reason"
+            ]
+          }
+        }
+      ]
+    },
+    "bsa_test_result": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/test_category_base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "Test_suite",
+            "testcases",
+            "test_suite_summary"
+          ],
+          "properties": {
+            "Test_suite": {
+              "type": "string"
+            },
+            "testcases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/bsa_test_case"
+              }
+            },
+            "test_suite_summary": {
+              "$ref": "#/definitions/bsa_suite_summary"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "bsa_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+              "$ref": "#/definitions/bsa_suite_summary"
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/bsa_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "pfdi_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+          "$ref": "#/definitions/bsa_suite_summary"
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/bsa_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "fwts_test_result": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/test_category_base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "Test_suite",
+            "Test_suite_description",
+            "subtests",
+            "test_suite_summary"
+          ],
+          "properties": {
+            "Test_suite": {
+              "type": "string"
+            },
+            "Test_suite_description": {
+              "type": "string"
+            },
+            "subtests": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/subtest_base"
+              }
+            },
+            "test_suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "fwts_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/fwts_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "sct_test_result": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/test_category_base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "Returned Status Code",
+            "Sub_test_suite",
+            "Test Entry Point GUID",
+            "Test_case",
+            "Test_case_description",
+            "Test_suite",
+            "reason",
+            "subtests",
+            "test_case_summary",
+            "test_result"
+          ],
+          "properties": {
+            "Device Path": {
+              "type": "string"
+            },
+            "Returned Status Code": {
+              "type": "string"
+            },
+            "Sub_test_suite": {
+              "type": "string"
+            },
+            "Test Entry Point GUID": {
+              "type": "string"
+            },
+            "Test_case": {
+              "type": "string"
+            },
+            "Test_case_description": {
+              "type": "string"
+            },
+            "Test_suite": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "subtests": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/subtest_base"
+              }
+            },
+            "test_case_summary": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/summary_totals"
+                },
+                {
+                  "required": [
+                    "total_ignored"
+                  ]
+                }
+              ]
+            },
+            "test_result": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "sct_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/summary_totals"
+                },
+                {
+                  "required": [
+                    "total_ignored"
+                  ]
+                }
+              ]
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/sct_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "sbmr_test_case": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/test_case_base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "Test_case",
+            "test_case_summary",
+            "subtests"
+          ],
+          "properties": {
+            "Test_case": {
+              "type": "string"
+            },
+            "test_case_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "subtests": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/sbmr_subtest"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "sbmr_test_result": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/test_category_base"
+        },
+        {
+          "$ref": "#/definitions/test_result_base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "Test_suite",
+            "Test_cases",
+            "test_suite_summary"
+          ],
+          "properties": {
+            "Test_suite": {
+              "type": "string"
+            },
+            "test_suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "Test_cases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/sbmr_test_case"
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "sbmr_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/sbmr_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "standalone_test_result": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/test_category_base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "Test_suite",
+            "Test_suite_description",
+            "Test_case",
+            "Test_case_description",
+            "subtests",
+            "test_suite_summary"
+          ],
+          "properties": {
+            "Test_suite": {
+              "type": "string"
+            },
+            "Test_suite_description": {
+              "type": "string"
+            },
+            "Test_case": {
+              "type": "string"
+            },
+            "Test_case_description": {
+              "type": "string"
+            },
+            "subtests": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/sbmr_subtest"
+              }
+            },
+            "test_suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "standalone_suite": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/standalone_test_result"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "suite_summary": {
+                "$ref": "#/definitions/summary_totals"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "os_tests_test_result": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/test_category_base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "Test_suite",
+            "Test_suite_description",
+            "Test_case",
+            "Test_case_description",
+            "subtests",
+            "test_suite_summary"
+          ],
+          "properties": {
+            "Test_suite": {
+              "type": "string"
+            },
+            "Test_suite_description": {
+              "type": "string"
+            },
+            "Test_case": {
+              "type": "string"
+            },
+            "Test_case_description": {
+              "type": "string"
+            },
+            "subtests": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/sbmr_subtest"
+              }
+            },
+            "test_suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "os_tests_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/os_tests_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "scmi_test_case": {
+      "type": "object",
+      "required": [
+        "Test_case",
+        "Test_case_description",
+        "Test_result"
+      ],
+      "properties": {
+        "Test_case": {
+          "type": "string"
+        },
+        "Test_case_description": {
+          "type": "string"
+        },
+        "Test_result": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "scmi_test_result": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/test_category_base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "Test_suite",
+            "test_suite_summary",
+            "testcases"
+          ],
+          "properties": {
+            "Test_suite": {
+              "type": "string"
+            },
+            "test_suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "testcases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/scmi_test_case"
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "scmi_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/scmi_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "system_info": {
+      "type": "object",
+      "required": [
+        "ACS version",
+        "Band",
+        "BBR version",
+        "BBSR version",
+        "SCMI version",
+        "BSA version",
+        "Device Tree Version",
+        "EBBR version",
+        "Firmware Version",
+        "Flashing instructions",
+        "FW source code",
+        "PFDI version",
+        "product website",
+        "SoC Family",
+        "SRS version",
+        "Summary Generated On",
+        "System Name",
+        "Tested operated Systems",
+        "Testlab assistance",
+        "UEFI Version",
+        "Vendor"
+      ],
+      "properties": {
+        "ACS version": {
+          "type": "string"
+        },
+        "Band": {
+          "type": "string"
+        },
+        "BBR version": {
+          "type": "string"
+        },
+        "BBSR version": {
+          "type": "string"
+        },
+        "SCMI version": {
+          "type": "string"
+        },
+        "BSA version": {
+          "type": "string"
+        },
+        "Device Tree Version": {
+          "type": "string"
+        },
+        "EBBR version": {
+          "type": "string"
+        },
+        "Firmware Version": {
+          "type": "string"
+        },
+        "Flashing instructions": {
+          "type": "string"
+        },
+        "FW source code": {
+          "type": "string"
+        },
+        "PFDI version": {
+          "type": "string"
+        },
+        "product website": {
+          "type": "string"
+        },
+        "SoC Family": {
+          "type": "string"
+        },
+        "SRS version": {
+          "type": "string"
+        },
+        "Summary Generated On": {
+          "type": "string"
+        },
+        "System Name": {
+          "type": "string"
+        },
+        "Tested operated Systems": {
+          "type": "string"
+        },
+        "Testlab assistance": {
+          "type": "string"
+        },
+        "UEFI Version": {
+          "type": "string"
+        },
+        "Vendor": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "acs_results_summary": {
+      "type": "object",
+      "required": [
+        "Band",
+        "BBSR compliance results",
+        "Date",
+        "Overall Compliance Result"
+      ],
+      "properties": {
+        "Band": {
+          "type": "string"
+        },
+        "BBSR compliance results": {
+          "type": "string"
+        },
+        "Date": {
+          "type": "string"
+        },
+        "Overall Compliance Result": {
+          "type": "string"
+        },
+        "SCMI compliance results": {
+          "type": "string"
+        },
+        "Suite_Name: Conditional-Mandatory  : PFDI_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Extension  : BBSR-FWTS_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Extension  : BBSR-SCT_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Extension  : BBSR-TPM_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Extension  : SCMI_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : Capsule Update_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : DT_VALIDATE_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : ETHTOOL_TEST_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : RUNTIME_DEV_MAP_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : FWTS_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : OS_ethtool_test_linux-Fedora-40_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : OS_ethtool_test_linux-Tumbleweed_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : OS_ethtool_test_linux-ubuntu-24_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : SCT_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : BSA_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : DT_KSELFTEST_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : NETWORK_BOOT_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : POST_SCRIPT_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : PSCI_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : SMBIOS_compliance": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "acs_info": {
+      "type": "object",
+      "required": [
+        "System Info",
+        "ACS Results Summary"
+      ],
+      "properties": {
+        "System Info": {
+          "$ref": "#/definitions/system_info"
+        },
+        "ACS Results Summary": {
+          "$ref": "#/definitions/acs_results_summary"
+        }
+      },
+      "additionalProperties": false
+    },
+    "standard_test_result": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/test_result_base"
+        },
+        {
+          "properties": {
+            "test_suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "bbsr_fwts_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/fwts_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "bbsr_sct_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/sct_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "post_script_suite": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/suite_base"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "suite_summary": {
+              "$ref": "#/definitions/summary_totals"
+            },
+            "test_results": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/standard_test_result"
+              }
+            }
+          },
+          "required": [
+            "suite_summary",
+            "test_results"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}
