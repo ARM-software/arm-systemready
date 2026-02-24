@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -281,11 +281,11 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
                         </td>
                         {# Consolidate all reasons into one block #}
                         {% set all_reasons = [] %}
-                        {% if s.pass_reasons %}{% for reason in s.pass_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
-                        {% if s.fail_reasons %}{% for reason in s.fail_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
-                        {% if s.abort_reasons %}{% for reason in s.abort_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
-                        {% if s.skip_reasons %}{% for reason in s.skip_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
-                        {% if s.warning_reasons %}{% for reason in s.warning_reasons %}{% set _ = all_reasons.append(reason) %}{% endfor %}{% endif %}
+                        {% if s.pass_reasons %}{% for reason in s.pass_reasons %}{% set _ = all_reasons.append("[PASSED] " ~ reason) %}{% endfor %}{% endif %}
+                        {% if s.fail_reasons %}{% for reason in s.fail_reasons %}{% set _ = all_reasons.append("[FAILED] " ~ reason) %}{% endfor %}{% endif %}
+                        {% if s.abort_reasons %}{% for reason in s.abort_reasons %}{% set _ = all_reasons.append("[ABORTED] " ~ reason) %}{% endfor %}{% endif %}
+                        {% if s.skip_reasons %}{% for reason in s.skip_reasons %}{% set _ = all_reasons.append("[SKIPPED] " ~ reason) %}{% endfor %}{% endif %}
+                        {% if s.warning_reasons %}{% for reason in s.warning_reasons %}{% set _ = all_reasons.append("[WARNING] " ~ reason) %}{% endfor %}{% endif %}
                         <td>{{ all_reasons|join("<br>") if all_reasons else "N/A" }}</td>
 
                         <td class="waiver-reason">

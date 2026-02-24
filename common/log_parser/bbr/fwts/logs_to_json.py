@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,6 +47,9 @@ def parse_fwts_log(log_path):
         "total_skipped": 0,
         "total_warnings": 0
     }
+
+    def is_new_entry_line(text):
+        return bool(re.match(r"^(Test \d+ of \d+:|\w+:|PASSED\b|FAILED\b|SKIPPED\b|WARNING\b|ABORTED\b)", text))
 
     # First, identify all main tests from the "Running tests:" lines
     running_tests_started = False
@@ -153,7 +156,7 @@ def parse_fwts_log(log_path):
                 while j < len(log_data):
                     next_line = log_data[j].strip()
                     # Break if next_line is empty or looks like the start of a new test/subtest entry
-                    if not next_line or re.match(r"^(Test \d+ of \d+:|\w+:)", next_line):
+                    if not next_line or is_new_entry_line(next_line):
                         break
                     reason_text += " " + next_line
                     j += 1
@@ -170,7 +173,7 @@ def parse_fwts_log(log_path):
                 while j < len(log_data):
                     next_line = log_data[j].strip()
                     # Stop if next_line is empty or looks like the start of a new test/subtest
-                    if not next_line or re.match(r"^(Test \d+ of \d+:|\w+:)", next_line):
+                    if not next_line or is_new_entry_line(next_line):
                         break
                     reason_text += " " + next_line
                     j += 1
@@ -183,7 +186,7 @@ def parse_fwts_log(log_path):
                     while j < len(log_data):
                         next_line = log_data[j].strip()
                         # Break if next_line is empty or looks like the start of a new test/subtest
-                        if not next_line or re.match(r"^(Test \d+ of \d+:|\w+:)", next_line):
+                        if not next_line or is_new_entry_line(next_line):
                             break
                         reason_text += " " + next_line
                         j += 1
@@ -198,7 +201,7 @@ def parse_fwts_log(log_path):
                 while j < len(log_data):
                     next_line = log_data[j].strip()
                     # Break if next_line is empty or looks like the start of a new test/subtest entry
-                    if not next_line or re.match(r"^(Test \d+ of \d+:|\w+:)", next_line):
+                    if not next_line or is_new_entry_line(next_line):
                         break
                     reason_text += " " + next_line
                     j += 1
@@ -336,6 +339,20 @@ def parse_fwts_log(log_path):
         # Remove empty reason arrays from each subtest
         for sub in test["subtests"]:
             sub_res = sub["sub_test_result"]
+            # Mark subtests with no results as warnings for visibility
+            if (
+                sub_res.get("PASSED", 0) == 0
+                and sub_res.get("FAILED", 0) == 0
+                and sub_res.get("ABORTED", 0) == 0
+                and sub_res.get("SKIPPED", 0) == 0
+                and sub_res.get("WARNINGS", 0) == 0
+            ):
+                sub_res["WARNINGS"] = 1
+                sub_res.setdefault("warning_reasons", []).append(
+                    "No result found in log for this subtest."
+                )
+                test["test_suite_summary"]["total_warnings"] += 1
+                final_suite_summary["total_warnings"] += 1
             # For each reason array, remove it if it's empty
             if not sub_res["pass_reasons"]:
                 del sub_res["pass_reasons"]
