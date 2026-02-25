@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,12 +75,12 @@ def create_subtest(subtest_number, description, status, reason=""):
             "FAILED_WITH_WAIVER": 0,  # We'll keep 0 by default unless set by external waiver logic
             "ABORTED": 0,
             "SKIPPED": 1 if status == "SKIPPED" else 0,
-            "WARNINGS": 0,
+            "WARNINGS": 1 if status == "WARNINGS" else 0,
             "pass_reasons": [reason] if (status == "PASSED" and reason) else [],
             "fail_reasons": [reason] if (status == "FAILED" and reason) else [],
             "abort_reasons": [],
             "skip_reasons": [reason] if (status == "SKIPPED" and reason) else [],
-            "warning_reasons": [],
+            "warning_reasons": [reason] if (status == "WARNINGS" and reason) else [],
             "waiver_reason": ""  # Will be filled by waiver logic if needed
         }
     }
@@ -807,7 +807,9 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
                     elif "succeed to write signed_capsule.bin" in test_info.lower():
                         result = "PASSED"
                     else:
-                        result = "FAILED"
+                        result = "WARNINGS"
+                        warning_reason = "Unable to redirect -OD logs to capsule-on-disk.log, possibly due to platform reset or unexpected interruption."
+                        test_info = warning_reason
                     break
                 else:
                     i += 1
