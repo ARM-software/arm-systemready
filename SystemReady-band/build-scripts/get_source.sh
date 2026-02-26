@@ -209,6 +209,7 @@ get_buildroot_src()
         exit 1
     fi
     pushd $TOP_DIR/buildroot/package/fwts
+        cp $TOP_DIR/patches/0001-dmicheck-fix-smbios-table-size-boundary-check.patch $TOP_DIR/buildroot/package/fwts
         echo "Applying Buildroot FWTS patch..."
         # patch buildroot config
         git apply $TOP_DIR/../common/patches/build_fwts_version_${FWTS_VERSION}.patch

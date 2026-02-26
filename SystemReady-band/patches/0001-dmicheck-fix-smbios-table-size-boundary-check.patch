@@ -1,0 +1,13 @@
+diff --git a/src/dmi/dmicheck/dmicheck.c b/src/dmi/dmicheck/dmicheck.c
+index 1eab8360..621b0677 100644
+--- a/src/dmi/dmicheck/dmicheck.c
++++ b/src/dmi/dmicheck/dmicheck.c
+@@ -378,7 +378,7 @@ static int dmi_load_file_variable_size(
+ 		return FWTS_ERROR;
+ 
+ 	for (p = buf, total = count = 0; ; p += count) {
+-		if (total >= sz) {
++		if (total > sz) {
+ 			close(fd);
+ 			return FWTS_ERROR;
+ 		}
