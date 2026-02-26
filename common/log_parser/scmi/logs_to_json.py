@@ -33,6 +33,7 @@ TEST_LINE_RE = re.compile(
     re.I,
 )
 STATUS_LINE_RE = re.compile(r"^(.*?)\s*:\s*(CONFORMANT|NON CONFORMANT|SKIPPED)\s*$", re.I)
+NO_ACCESS_RE = re.compile(r"Calling agent have no access to\s+(.*?)\s+protocol", re.I)
 # If this appears, treat SCMI as not runnable (no JSON/HTML).
 FATAL_SCMI_RE = re.compile(r"Failed to open SCMI raw transport base path", re.I)
 
@@ -90,6 +91,7 @@ def parse_scmi_logs(input_files):
         if suite_name not in suites:
             suites[suite_name] = {
                 "Test_suite": suite_name,
+                "reason": "N/A",
                 "testcases": [],
                 "test_suite_summary": init_summary(),
             }
@@ -144,6 +146,21 @@ def parse_scmi_logs(input_files):
             suite_hdr = SUITE_HDR_RE.search(line)
             if suite_hdr:
                 current_suite = suite_hdr.group(1).strip()
+                current_test = None
+                current_details = []
+                continue
+
+            # Special case: protocol not accessible for this platform.
+            no_access = NO_ACCESS_RE.search(line)
+            if no_access:
+                protocol = no_access.group(1).strip()
+                suite_for_reason = current_suite or protocol
+                ensure_suite(suite_for_reason)
+                suite_key = suite_for_reason.lower()
+                suite_entry = suites[suite_key]
+                reason_text = line.strip()
+                suite_entry["reason"] = reason_text
+                suite_entry["testcases"] = []
                 current_test = None
                 current_details = []
                 continue

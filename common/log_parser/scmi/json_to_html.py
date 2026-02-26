@@ -100,6 +100,7 @@ def build_html(overall_summary, test_results, chart_b64, dest_html, suite_name, 
     .result-summary h2{border-bottom:2px solid #27ae60;padding-bottom:10px;margin-bottom:20px;}
 
     .test-suite-header{font-size:22px;font-weight:bold;color:#34495e;margin-top:30px;}
+    .suite-reason{margin:8px 0 12px 0;font-size:15px;}
     .reason{text-align:center;}
     .waiver-reason{text-align:center;}
   </style>
@@ -130,6 +131,7 @@ def build_html(overall_summary, test_results, chart_b64, dest_html, suite_name, 
 <div class="detailed-summary">
 {% for suite in test_results %}
   <div class="test-suite-header">Test Suite: {{ suite.Test_suite }}</div>
+  <div class="suite-reason"><strong>Reason:</strong> {{ suite.reason | default('N/A') }}</div>
   <table>
     <thead>
       <tr>
