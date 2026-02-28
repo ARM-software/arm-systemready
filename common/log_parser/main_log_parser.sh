@@ -45,7 +45,7 @@ LOGS_PATH=$1
 ACS_CONFIG_PATH=$2
 SYSTEM_CONFIG_PATH=$3
 WAIVER_JSON=$4
-POST_SCRIPT_LOG="$LOGS_PATH/post-script/post-script.log"
+POST_SCRIPT_LOG="$LOGS_PATH/post-scripts/post-script.log"
 
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     test_category="/usr/bin/log_parser/test_categoryDT.json"

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,6 +63,7 @@ do_build()
     echo "    URL(sysarch-acs) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
     echo "    commit(sysarch-acs) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
     echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
+    git apply $TOP_DIR/patches/sbsa_srversion.patch
     popd
     source ./edksetup.sh
     make -C BaseTools/Source/C

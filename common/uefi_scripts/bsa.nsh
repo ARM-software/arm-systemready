@@ -17,8 +17,6 @@
 # limitations under the License.
 
 echo -off
-set DT_Version " SystemReady devicetree band ACS v3.1.2 RC0"
-set SR_Version " SystemReady band ACS v3.1.1 RC0"
 
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\yocto_image.flag then
@@ -101,13 +99,7 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
         endif
         stall 200000
         if exist BsaVerboseTempResults.log then
-            if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
-                echo %DT_Version% > BsaVerboseResults.log
-            else
-                echo %SR_Version% > BsaVerboseResults.log
-            endif
-            stall 200000
-            type BsaVerboseTempResults.log >> BsaVerboseResults.log
+            cp BsaVerboseTempResults.log BsaVerboseResults.log
             cp BsaVerboseTempResults.log temp/
             rm BsaVerboseTempResults.log
             reset
@@ -152,13 +144,7 @@ if exist FS%i:\acs_tests\bsa\Bsa.efi then
     stall 200000
 :BsaEE
     if exist BsaTempResults.log then
-        if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
-            echo %DT_Version% > BsaResults.log
-        else
-            echo %SR_Version% > BsaResults.log
-        endif
-        stall 200000
-        type BsaTempResults.log >> BsaResults.log
+        cp BsaTempResults.log BsaResults.log
         cp BsaTempResults.log temp/
         rm BsaTempResults.log
         reset

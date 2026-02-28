@@ -1,0 +1,12 @@
+diff --git a/apps/uefi/sbsa_main.c b/apps/uefi/sbsa_main.c
+index 1695605..d644135 100644
+--- a/apps/uefi/sbsa_main.c
++++ b/apps/uefi/sbsa_main.c
+@@ -163,6 +163,7 @@ execute_tests()
+         goto exit_acs;
+     }
+ 
++    val_print(ACS_PRINT_ERR, "\n\n SystemReady band ACS v3.1.1 RC-final\n", 0);
+     val_print(ACS_PRINT_ERR, "\n\n SBSA Architecture Compliance Suite\n", 0);
+     val_print(ACS_PRINT_ERR, "    Version %d.", SBSA_ACS_MAJOR_VER);
+     val_print(ACS_PRINT_ERR, "%d.", SBSA_ACS_MINOR_VER);

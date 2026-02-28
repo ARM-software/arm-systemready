@@ -238,19 +238,6 @@ get_edk2-test-parser_src()
     echo "Downloading edk2-test-parser source code. TAG : $EDK2_TEST_PARSER_TAG"
     git clone https://git.gitlab.arm.com/systemready/edk2-test-parser.git
     pushd $TOP_DIR/edk2-test-parser/
-    git checkout $EDK2_TEST_PARSER_TAG
-    echo "EDK2 Parser" >> "${SYSTEMREADY_COMMIT_LOG}"
-    echo "    URL(edk2-test-parser) = $(git remote get-url origin)" >> "${SYSTEMREADY_COMMIT_LOG}"
-    echo "    commit(edk2-test-parser) = $(git rev-parse HEAD)" >> "${SYSTEMREADY_COMMIT_LOG}"
-    echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
-    popd
-}
-
-get_edk2-test-parser_src()
-{
-    echo "Downloading edk2-test-parser source code. TAG : $EDK2_TEST_PARSER_TAG"
-    git clone https://git.gitlab.arm.com/systemready/edk2-test-parser.git
-    pushd $TOP_DIR/edk2-test-parser/
     if [ -n "$EDK2_TEST_PARSER_TAG" ]; then
         git checkout $EDK2_TEST_PARSER_TAG
     fi

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 # limitations under the License.
 
 echo -off
+
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_results then
         if "%1" == "true" then
@@ -73,9 +74,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                 FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -v 1 -skip S_L3MM_01 -skip-dp-nic-ms -f SbsaVerboseTempResults.log
                 stall 200000
                 if exist FS%i:\acs_results\uefi\SbsaVerboseTempResults.log then
-                    echo " SystemReady band ACS v3.1.1 RC0" > SbsaVerboseResults.log
-                    stall 200000
-                    type SbsaVerboseTempResults.log >> SbsaVerboseResults.log
+                    cp SbsaVerboseTempResults.log SbsaVerboseResults.log
                     cp SbsaVerboseTempResults.log temp/
                     rm SbsaVerboseTempResults.log
                     reset
@@ -116,9 +115,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             stall 200000
 :SbsaEE
             if exist FS%i:\acs_results\uefi\SbsaTempResults.log then
-                echo " SystemReady band ACS v3.1.1 RC0" > SbsaResults.log
-                stall 200000
-                type SbsaTempResults.log >> SbsaResults.log
+                cp SbsaTempResults.log SbsaResults.log
                 cp SbsaTempResults.log temp/
                 rm SbsaTempResults.log
                 reset
