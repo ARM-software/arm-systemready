@@ -258,7 +258,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         insmod /lib/modules/sbsa_acs.ko
         echo "${SR_VERSION}" > /mnt/acs_results/linux/SbsaResultsApp.log
         echo "Running command $sbsa_command -skip S_L3_01 --skip-dp-nic-ms"
-        $sbsa_command -skip S_L3_01 --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
+        $sbsa_command --skip S_L3_01 --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
         sync /mnt
         sleep 5
@@ -304,6 +304,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   if [ -f /mnt/acs_tests/config/systemready-commit.log ]; then
     cp /mnt/acs_tests/config/systemready-commit.log /mnt/acs_results/acs_summary/config/
   fi
+  # Copying acs_config.txt into result directory
+  if [ -f /mnt/acs_tests/config/acs_config.txt ]; then
+    cp /mnt/acs_tests/config/acs_config.txt /mnt/acs_results/acs_summary/config/
+  fi
+
   sync /mnt
 
   # systemready scripts for os logs

@@ -189,12 +189,6 @@ def build_results(os_logs_path, post_script_log):
             test_suite["subtests"].append(sub)
             update_suite_summary(test_suite["test_suite_summary"], status)
             subtest_number += 1
-    else:
-        desc = "No post-script errors found for OS logs"
-        sub = create_subtest(subtest_number, desc, "PASSED")
-        test_suite["subtests"].append(sub)
-        update_suite_summary(test_suite["test_suite_summary"], "PASSED")
-        subtest_number += 1
 
     suite_summary = {
         "total_passed": test_suite["test_suite_summary"]["total_passed"],
