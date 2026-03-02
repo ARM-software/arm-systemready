@@ -379,10 +379,8 @@ def main():
         log(f"INFO: OsIndicationsSupported value: 0x{os_indications_value:X}")
 
     if not on_disk_supported:
-        log("RESULTS: Capsule on-disk reporting variables test is not applicable - WARNING")
-        exit_code = 2
-        log(f"INFO: Exit code: {exit_code}")
-        return exit_code
+        log("RESULTS: Capsule on-disk reporting variables test is not applicable - SKIPPED")
+        return 2
 
     log("INFO: OsIndicationsSupported indicates capsule on-disk support; running recommended  checks")
 
@@ -401,7 +399,10 @@ def main():
     log()
 
     exit_code = 3 if failed else 0
-    log(f"INFO: Exit code: {exit_code}")
+    if exit_code == 0:
+        log("RESULTS: Overall Capsule On-Disk Update Reporting Variables Result: PASSED")
+    else:
+        log("RESULTS: Overall Capsule On-Disk Update Reporting Variables Result: WARNING")
     return exit_code
 
 if __name__ == "__main__":
