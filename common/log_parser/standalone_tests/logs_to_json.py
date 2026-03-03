@@ -728,6 +728,8 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
 
     def add_subtest(desc, status, reason=""):
         nonlocal subtest_number
+        if status.lower() == "warning":
+            status = "WARNINGS"
         sub = create_subtest(subtest_number, desc, status, reason)
         current_test["subtests"].append(sub)
         update_suite_summary(current_test["test_suite_summary"], status)
@@ -822,7 +824,8 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
         line = results_lines[i].strip()
         sanity_match = re.match(r"Testing\s+signed_capsule\.bin\s+sanity", line, re.IGNORECASE)
         esrt_match = re.match(r"(Testing|Test:\s+Testing)\s+ESRT\s+FW\s+version\s+update", line, re.IGNORECASE)
-
+        capsule_ondisk_match = re.match(r"(Testing|Test:\s+Testing)\s+Capsule\s+On\s*-\s*Disk\s+Update\s+Reporting\s+Variables",
+                                       line, re.IGNORECASE)
         if sanity_match:
             test_desc = line
             test_info = ""
@@ -882,6 +885,33 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
             else:
                 result = "FAILED" if any_failed else "PASSED"
             add_subtest(test_desc, result, reason=test_info_lines)
+
+        elif capsule_ondisk_match:
+            test_desc = "Testing Capsule On-Disk Update Reporting Variables"
+            test_info_lines = []
+            result = "FAILED"
+            i += 2
+            overall_re = re.compile(
+                r"^RESULTS:\s*Overall\s+Capsule\s+On\-Disk\s+Update\s+Reporting\s+Variables\s+Result\s*:\s*([A-Za-z_]+)\b",
+                re.IGNORECASE)
+
+            prefix_re = re.compile(r"^(INFO|RESULTS):\s*", re.IGNORECASE)
+            while i < len(results_lines):
+                cur_raw = results_lines[i].rstrip("\n")
+                cur = cur_raw.strip()
+
+                m = overall_re.match(cur)
+                if m:
+                    # include the overall line in the captured block (optional)
+                    test_info_lines.append(prefix_re.sub("", cur_raw.strip()))
+                    result = m.group(1).upper()
+                    break
+                # capture everything in the block
+                cleaned = prefix_re.sub("", cur_raw.strip())
+                test_info_lines.append(cleaned)
+                i += 1
+            add_subtest(test_desc, result, reason=test_info_lines)
+
         i += 1
 
     # >>> REMOVE EMPTY REASON ARRAYS <<<
