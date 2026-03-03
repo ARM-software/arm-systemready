@@ -58,6 +58,11 @@ do_build ()
     echo "Building using defconfig..."
     cp arch/arm64/configs/defconfig $LINUX_OUT_DIR/.config
     arch=$(uname -m)
+    if [[ $arch = "aarch64" ]]; then
+        make ARCH=arm64 O=$LINUX_OUT_DIR olddefconfig
+    else
+        make ARCH=arm64 CROSS_COMPILE=$TOP_DIR/$GCC O=$LINUX_OUT_DIR olddefconfig
+    fi
     #Configurations needed for FWTS
     sed -i 's/# CONFIG_EFI_TEST is not set/CONFIG_EFI_TEST=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_DMI_SYSFS is not set/CONFIG_DMI_SYSFS=y/g' $LINUX_OUT_DIR/.config
