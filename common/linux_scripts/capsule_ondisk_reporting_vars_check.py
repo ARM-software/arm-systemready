@@ -369,7 +369,8 @@ def main():
     log("================================================================================================")
 
     if not os.path.isdir(EFIVAR_PATH):
-        log(f"RESULTS: {EFIVAR_PATH} not present. Please ensure efivarfs is enabled and mounted - WARNING")
+        log(f"INFO: {EFIVAR_PATH} not present. Please ensure efivarfs is enabled and mounted - WARNING")
+        log("RESULTS: Overall Capsule On-Disk Update Reporting Variables Result: WARNING")
         return 1
 
     on_disk_supported, os_indications_value = os_indications_supports_ondisk()
@@ -379,7 +380,8 @@ def main():
         log(f"INFO: OsIndicationsSupported value: 0x{os_indications_value:X}")
 
     if not on_disk_supported:
-        log("RESULTS: Capsule on-disk reporting variables test is not applicable - SKIPPED")
+        log("INFO: Capsule on-disk reporting variables test is not applicable - SKIPPED")
+        log("RESULTS: Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED")
         return 2
 
     log("INFO: OsIndicationsSupported indicates capsule on-disk support; running recommended  checks")
