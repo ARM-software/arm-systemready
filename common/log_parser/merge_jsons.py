@@ -62,6 +62,7 @@ DT_SRS_SCOPE_TABLE = [
     ("DT_KSELFTEST", "R"),
     ("SMBIOS", "R"),
     ("PSCI", "R"),
+    ("RUNTIME_DEV_MAP","R"),
     ("POST_SCRIPT", "R"),
     ("OS_TEST", "M"),
     ("PFDI", "CM")
@@ -395,10 +396,12 @@ def merge_json_files(json_files, output_file):
         elif "SCMI" in fn:
             section_name = "Suite_Name: SCMI"
             suite_key    = "SCMI"
+        elif "runtime_dev_map" in fn.lower():
+            section_name = "Suite_Name: Runtime device mapping"
+            suite_key    = "RUNTIME_DEV_MAP"
         elif "POST_SCRIPT" in fn:
             section_name = "Suite_Name: POST_SCRIPT"
             suite_key    = "POST_SCRIPT"
-
         else:
             section_name = "Suite_Name: Unknown"
             suite_key    = "Unknown"
@@ -423,7 +426,7 @@ def merge_json_files(json_files, output_file):
         lookup_suite_key = suite_key.lower()
         standalone_aliases = {
             "dt_kselftest", "dt_validate", "ethtool_test",
-            "read_write_check_blk_devices", "psci", "capsule update", "network_boot", "smbios"
+            "read_write_check_blk_devices", "psci", "capsule update", "network_boot", "smbios", "runtime_dev_map"
         }
         if lookup_suite_key in standalone_aliases or lookup_suite_key.startswith("os_"):
             lookup_suite_key = "standalone"
@@ -732,7 +735,8 @@ def merge_json_files(json_files, output_file):
         "Suite_Name: Read Write Check Block Devices": "Suite_Name: Standalone",
         "Suite_Name: PSCI": "Suite_Name: Standalone",
         "Suite_Name: SMBIOS": "Suite_Name: Standalone",
-        "Suite_Name: Network boot": "Suite_Name: Standalone"
+        "Suite_Name: Network boot": "Suite_Name: Standalone",
+        "Suite_Name: Runtime device mapping": "Suite_Name: Standalone"
     }
 
     def _entry_to_list(entry):

@@ -588,6 +588,21 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         fi
     fi
 
+    # 9) RUNTIME DEVICE MAPPING CHECK
+    RUNTIME_DEV_MAP_LOG="$LINUX_TOOLS_LOGS_PATH/runtime_device_mapping_conflict_test.log"
+    RUNTIME_DEV_MAP_JSON="$JSONS_DIR/runtime_dev_map.json"
+    if check_file "$RUNTIME_DEV_MAP_LOG" "M"; then
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$RUNTIME_DEV_MAP_LOG" \
+            "$RUNTIME_DEV_MAP_JSON"
+        if [ $? -eq 0 ]; then
+            apply_waivers "Standalone" "$RUNTIME_DEV_MAP_JSON"
+            Standalone_JSONS+=("$RUNTIME_DEV_MAP_JSON")
+        else
+            echo -e "${RED}ERROR: Runtime device mapping log parsing to json failed.${NC}"
+        fi
+    fi
+
     # Now generate a single STANDALONE HTML
     if [ ${#Standalone_JSONS[@]} -gt 0 ]; then
         Standalone_PROCESSED=1

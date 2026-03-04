@@ -52,16 +52,20 @@ test_suite_mapping = {
         "Test_case_description": "PSCI compliance"
     },
     "smbios": {
-    "Test_suite": "SMBIOS",
-    "Test_suite_description": "SMBIOS Table Validation",
-    "Test_case_description": "UEFI SMBIOS table presence check"
+        "Test_suite": "SMBIOS",
+        "Test_suite_description": "SMBIOS Table Validation",
+        "Test_case_description": "UEFI SMBIOS table presence check"
     },
     "network_boot": {
         "Test_suite": "Network boot",
         "Test_suite_description": "Network validation",
         "Test_case_description": "Network Boot Test"
     },
-
+    "runtime_dev_mapping": {
+        "Test_suite": "EBBR requirements",
+        "Test_suite_description": "Coverage of EBBR requirements",
+        "Test_case_description": "Checks runtime device mapping conflict"
+    },
 }
 
 def create_subtest(subtest_number, description, status, reason=""):
@@ -1255,6 +1259,83 @@ def parse_network_boot_log(log_data):
         "suite_summary": suite_summary
     }
 
+def parse_runtime_dev_map_conflict(log_data):
+    """
+    Parse runtime device mapping conflict test.
+    Expected format:
+        [INFO] ...
+        [RESULTS] ...
+    """
+    test_suite_key = "runtime_dev_mapping"
+    mapping = test_suite_mapping[test_suite_key]
+
+    suite_summary = {
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waivers": 0
+    }
+
+    current_test = {
+        "Test_suite": mapping["Test_suite"],
+        "Test_suite_description": mapping["Test_suite_description"],
+        "Test_case": "Runtime device mapping conflict test",
+        "Test_case_description": mapping["Test_case_description"],
+        "subtests": [],
+        "test_suite_summary": suite_summary.copy()
+    }
+
+
+    subtest_number = 1
+    test_desc = "Testing Runtime Device Mapping Conflict Test"
+    test_info_lines = []
+    result = "FAILED"   # default if RESULTS not found
+    found_results = False
+
+    for line in log_data:
+        s = line.strip()
+        if not s:
+            continue
+
+        if s.startswith("DEBUG:"):
+            test_info_lines.append(s[len("DEBUG:"):].strip())
+            continue
+
+        if s.startswith("RESULTS:"):
+            found_results = True
+            result = s[len("RESULTS:"):].strip().upper()
+            break
+
+    if not found_results:
+        test_info_lines.append("RESULTS line not found in log")
+
+    sub = create_subtest(subtest_number, test_desc, result, reason=test_info_lines)
+    current_test["subtests"].append(sub)
+    update_suite_summary(current_test["test_suite_summary"], result)
+    suite_summary[f"total_{result.lower()}"] += 1
+    subtest_number += 1
+
+    # >>> REMOVE EMPTY REASON ARRAYS <<<
+    for subtest in current_test["subtests"]:
+        subres = subtest["sub_test_result"]
+        if not subres["pass_reasons"]:
+            del subres["pass_reasons"]
+        if not subres["fail_reasons"]:
+            del subres["fail_reasons"]
+        if not subres["abort_reasons"]:
+            del subres["abort_reasons"]
+        if not subres["skip_reasons"]:
+           del subres["skip_reasons"]
+        if not subres["warning_reasons"]:
+            del subres["warning_reasons"]
+
+    return {
+        "test_results": [current_test],
+        "suite_summary": suite_summary
+    }
+
 
 def parse_single_log(log_file_path):
     # Try UTF-8 → fallback to UTF-16 → fallback to binary-safe ignore
@@ -1287,6 +1368,8 @@ def parse_single_log(log_file_path):
         return parse_smbios_log(smbios_block)
     elif "network_boot_checks" in log_content or "Network_Boot_Result:" in log_content:
         return parse_network_boot_log(log_data)
+    elif re.search(r'Testing Runtime Device Mapping Conflict Test', log_content):
+        return parse_runtime_dev_map_conflict(log_data)
     else:
         raise ValueError("Unknown or unsupported standalone log format.")
 

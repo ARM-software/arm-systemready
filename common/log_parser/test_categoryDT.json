@@ -514,5 +514,17 @@
       "FunctionID": 4,
       "Main Readiness Grouping": "security readiness"
     }
+  ],
+  "catID: 44": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "EBBR requirements",
+      "specName": "BBR",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Required",
+      "FunctionID": 4,
+      "Main Readiness Grouping": "runtime readiness"
+    }
   ]
 }
