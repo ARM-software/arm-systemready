@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,10 +63,11 @@ def detect_columns_used(subtests):
 
 # Function to generate bar chart for test results
 def generate_bar_chart(suite_summary):
-    labels = ['Passed', 'Failed', 'Failed with Waiver']  # We track "Failed with Waiver" separately
+    labels = ['Passed', 'Failed', 'Warnings', 'Failed with Waiver']  # We track "Failed with Waiver" separately
     sizes = [
         suite_summary.get('total_passed', 0),
         suite_summary.get('total_failed', 0),
+        suite_summary.get('total_warnings', 0),
         suite_summary.get('total_failed_with_waiver', 0)
     ]
     colors = ['#66bb6a', '#ef5350', '#f39c12']
@@ -253,6 +254,10 @@ def generate_html(suite_summary, test_results_list, output_html_path,
                     <td class="fail">{{ total_failed }}</td>
                 </tr>
                 <tr>
+                    <td>Warnings</td>
+                    <td class="warning">{{ total_warnings }}</td>
+                </tr>
+                <tr>
                     <td>Failed with Waiver</td>
                     <td class="waiver">{{ total_failed_with_waiver }}</td>
                 </tr>
@@ -360,6 +365,7 @@ def generate_html(suite_summary, test_results_list, output_html_path,
     # Compute total tests for summary
     total_tests = (suite_summary.get('total_passed', 0) +
                    suite_summary.get('total_failed', 0) +
+                   suite_summary.get('total_warnings', 0) +
                    suite_summary.get('total_failed_with_waiver', 0))
 
     # If not summary page, generate chart
@@ -373,6 +379,7 @@ def generate_html(suite_summary, test_results_list, output_html_path,
         total_tests=total_tests,
         total_passed=suite_summary.get("total_passed", 0),
         total_failed=suite_summary.get("total_failed", 0),
+        total_warnings=suite_summary.get("total_warnings", 0),
         total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),
         test_results_list=test_results_list,
         is_summary_page=is_summary_page,
@@ -415,6 +422,7 @@ def main():
     combined_suite_summary = {
         'total_passed': 0,
         'total_failed': 0,
+        'total_warnings':0,
         'total_failed_with_waiver': 0
     }
 
@@ -439,16 +447,21 @@ def main():
             for test in test_results:
                 has_failed_without_waiver = False
                 has_failed_with_waiver = False
+                has_warnings = False
 
                 for subtest in test.get('subtests', []):
                     st_status = get_subtest_status(subtest.get('sub_test_result', {}))
-                    if st_status == 'FAILED':
+                    if st_status == 'WARNINGS':
+                        has_warnings = True
+                    elif st_status == 'FAILED':
                         has_failed_without_waiver = True
                     elif st_status == 'FAILED_WITH_WAIVER':
                         has_failed_with_waiver = True
 
                 if has_failed_without_waiver:
                     combined_suite_summary['total_failed'] += 1
+                elif has_warnings:
+                    combined_suite_summary['total_warnings'] += 1 
                 elif has_failed_with_waiver:
                     combined_suite_summary['total_failed_with_waiver'] += 1
                 else:
@@ -456,6 +469,7 @@ def main():
 
     total_standalones = (combined_suite_summary['total_passed'] +
                          combined_suite_summary['total_failed'] +
+                         combined_suite_summary['total_warnings'] +
                          combined_suite_summary['total_failed_with_waiver'])
     if total_standalones == 0:
         print("No valid data found in input JSON(s).")

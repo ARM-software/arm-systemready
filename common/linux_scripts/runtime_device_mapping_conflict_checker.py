@@ -315,7 +315,7 @@ def parse_memmap(memmap_text: str) -> List[MemSeg]:
 
         parts = line.split()
         if len(parts) < 4:
-            log(f"DEBUG: Skipped malformed memmap line {line_num} (only {len(parts)} fields): {line[:60]}")
+            log(f"INFO: Skipped malformed memmap line {line_num} (only {len(parts)} fields): {line[:60]}")
             skipped_count += 1
             continue
 
@@ -343,7 +343,7 @@ def parse_memmap(memmap_text: str) -> List[MemSeg]:
         uniq[(seg_type, start, end)] = MemSeg(seg_type, start, end, pages, size, attr)
 
     if skipped_count > 0:
-        log(f"DEBUG: Skipped {skipped_count} malformed lines from memmap")
+        log(f"INFO: Skipped {skipped_count} malformed lines from memmap")
 
     return sorted(uniq.values(), key=lambda x: (x.seg_type, x.start))
 
@@ -726,11 +726,13 @@ def main() -> None:
     log(f"INFO: Writing log to: {OUT_LOG_PATH}")
 
     if not DTS_PATH.exists():
-        log(f"RESULTS: DTS file not found: {DTS_PATH} - WARNING")
+        log(f"DEBUG: DTS file not found: {DTS_PATH}")
+        log(f"RESULTS: WARNINGS")
         close_log()
         return
     if not MEMMAP_PATH.exists():
-        log(f"RESULTS: Memmap file not found: {MEMMAP_PATH} - WARNING")
+        log(f"DEBUG: Memmap file not found: {MEMMAP_PATH}")
+        log(f"RESULTS: WARNINGS")
         close_log()
         return
 
@@ -803,23 +805,26 @@ def main() -> None:
                 )
 
     log("")
-    log("RESULTS: ============================================================")
-    log("RESULTS: Runtime Device Mapping Conflict Test Summary")
-    log("RESULTS: ============================================================")
+    log("=====================================================================")
+    log("       Runtime Device Mapping Conflict Test Summary    ")
+    log("=====================================================================")
 
     if not conflicts:
-        log("RESULTS: No overlaps found between UEFI runtime regions and DTS MMIO ranges - PASSED")
+        log("DEBUG: No overlaps found between UEFI runtime regions and DTS MMIO ranges")
+        log("RESULTS: PASSED")
+
     else:
-        log("RESULTS: Conflicting regions:")
+        log("DEBUG: Conflicting regions:")
         for c in conflicts:
             log(
-                    "RESULTS: "
+                    "DEBUG: "
                     f"UEFI {c.mem_type} 0x{c.mem_start:016x}-0x{c.mem_end:016x} "
                     f"overlaps DTS {c.dts_path} "
                     f"0x{c.dts_base:016x}-0x{c.dts_end:016x} "
                     f"(RT size=0x{c.mem_size:x}, DTS size=0x{c.dts_size:x})"
                     )
-        log(f"RESULTS: Detected {len(conflicts)} conflict(s) - WARNING")
+        log(f"DEBUG: Detected {len(conflicts)} conflict(s)")
+        log("RESULTS: WARNINGS")
 
     close_log()
 
