@@ -314,12 +314,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   # systemready scripts for os logs
   if [ -d "/usr/bin/systemready-scripts" ]; then
     echo "Running systemready scripts "
-    if [ -f "/mnt/acs_results/post-scripts/post-script.log" ]; then
-      rm /mnt/acs_results/post-scripts/post-script.log
+    if [ -f "/mnt/acs_results/post-script/post-script.log" ]; then
+      rm /mnt/acs_results/post-script/post-script.log
     else
-      mkdir -p /mnt/acs_results/post-scripts
+      mkdir -p /mnt/acs_results/post-script
     fi
-    python3 /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt > /mnt/acs_results/post-scripts/post-script.log 2>&1
+    python3 /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt > /mnt/acs_results/post-script/post-script.log 2>&1
     sync /mnt
     sleep 5
   else
