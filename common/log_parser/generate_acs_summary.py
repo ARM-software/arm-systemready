@@ -249,9 +249,7 @@ def read_overall_compliance_from_merged_json(merged_json_path):
     # Derive SCMI details for the Extensions table (without storing in merged JSON)
     scmi_details = {"not_run": [], "failed": []}
     scmi_low = (scmi_result or "").lower()
-    if scmi_low.startswith("not run"):
-        scmi_details["not_run"] = ["SCMI"]
-    elif "not compliant" in scmi_low:
+    if "not compliant" in scmi_low:
         scmi_details["failed"] = ["SCMI"]
 
     return overall_result, bbsr_result, scmi_result, mandatory_details, recommended_details, bbsr_details, scmi_details
