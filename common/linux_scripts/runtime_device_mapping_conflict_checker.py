@@ -824,7 +824,7 @@ def main() -> None:
                     f"(RT size=0x{c.mem_size:x}, DTS size=0x{c.dts_size:x})"
                     )
         log(f"DEBUG: Detected {len(conflicts)} conflict(s)")
-        log("RESULTS: WARNINGS")
+        log("RESULTS: FAILED")
 
     close_log()
 

@@ -301,8 +301,20 @@ fi
 ################################################################################
 BBSR_SCT_LOG="$LOGS_PATH/bbsr/sct_results/Overall/Summary.log"
 BBSR_SCT_JSON="$JSONS_DIR/bbsr_sct.json"
+BBSR_EDK2_PARSER_LOG="$LOGS_PATH/edk2-test-parser/edk2-test-parser-bbsr.log"
+BBSR_EDK2_PARSER_JSON="$JSONS_DIR/edk2_test_parser-bbsr.json"
+
+
 if check_file "$BBSR_SCT_LOG"; then
     BBSR_SCT_PROCESSED=1
+
+    if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
+
+       # EDK2 Log Parsing: Process the edk2-test-parser.log
+       if check_file "$BBSR_EDK2_PARSER_LOG"; then
+           python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json_edk2.py" "$BBSR_EDK2_PARSER_LOG" "$BBSR_EDK2_PARSER_JSON"
+       fi
+    fi
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$BBSR_SCT_LOG" "$BBSR_SCT_JSON"
     apply_waivers "BBSR-SCT" "$BBSR_SCT_JSON"
     python3 "$SCRIPTS_PATH/bbr/sct/json_to_html.py" "$BBSR_SCT_JSON" "$HTMLS_DIR/bbsr_sct_detailed.html" "$HTMLS_DIR/bbsr_sct_summary.html"

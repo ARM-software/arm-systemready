@@ -51,14 +51,14 @@ def is_smbios_test(test_case_name):
 def is_runtime_properties_table_test(subtest_description):
     """
     Check if a subtest is the buggy EFI Runtime Properties Table test.
-    Matches: "UEFI Compliant - EFI Runtime Properties Table RuntimeServicesSupported field matches the expected value"
+    Matches: "UEFI Compliant - EFI Runtime Properties Table has inconsistencies in runtime service support"
     This subtest has a known bug and should be filtered out to prevent incorrect non-compliance.
 
     """
     if not subtest_description:
         return False
     # Match the specific subtest description (case-insensitive)
-    target_test = "uefi compliant - efi runtime properties table runtimeservicessupported field matches the expected value"
+    target_test = "uefi compliant - efi runtime properties table has inconsistencies in runtime service support"
     return target_test in subtest_description.lower()
 
 # JSON mapping of Test Suites, Sub Test Suites, and Test Cases
@@ -380,6 +380,11 @@ def main(input_file, output_file):
         # We won't add it unless specifically needed
     }
 
+    bbsr_sct_flag = False
+    output_base = os.path.basename(output_file)
+    if output_base.startswith("bbsr_"):
+        bbsr_sct_flag = True
+
     with open(input_file, "r", encoding=file_encoding, errors="ignore") as file:
         lines = file.readlines()
 
@@ -509,7 +514,11 @@ def main(input_file, output_file):
             ]
 
     # Merge with edk2_test_parser.json if present
-    edk2_file = os.path.join(os.path.dirname(output_file), "edk2_test_parser.json")
+    if bbsr_sct_flag:
+        edk2_file = os.path.join(os.path.dirname(output_file), "edk2_test_parser-bbsr.json")
+    else:
+        edk2_file = os.path.join(os.path.dirname(output_file), "edk2_test_parser.json")
+
     if os.path.exists(edk2_file):
         with open(edk2_file, "r", encoding="utf-8") as f:
             edk2_data = json.load(f)

@@ -70,7 +70,7 @@ def generate_bar_chart(suite_summary):
         suite_summary.get('total_warnings', 0),
         suite_summary.get('total_failed_with_waiver', 0)
     ]
-    colors = ['#66bb6a', '#ef5350', '#f39c12']
+    colors = ['#66bb6a', '#ef5350', '#f39c12', '#fff3cd']
 
     plt.figure(figsize=(8, 6))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
@@ -158,6 +158,9 @@ def generate_html(suite_summary, test_results_list, output_html_path,
         }
         .waiver {
             background-color: #f39c12;
+        }
+        .warning {
+            background-color: #fff3cd;
         }
         .summary-table {
             margin: 0 auto;
@@ -319,7 +322,7 @@ def generate_html(suite_summary, test_results_list, output_html_path,
                 <tr>
                     <td>{{ subtest.sub_Test_Number }}</td>
                     <td>{{ subtest.sub_Test_Description }}</td>
-                    <td class="{% if status == 'PASSED' %}pass{% elif status == 'FAILED' %}fail{% elif status == 'FAILED_WITH_WAIVER' %}waiver{% endif %}">
+                    <td class="{% if status == 'PASSED' %}pass{% elif status == 'FAILED' %}fail{% elif status == 'FAILED_WITH_WAIVER' %}waiver{% elif status == 'WARNINGS' %}warning{% endif %}">
                         {% if status == 'FAILED_WITH_WAIVER' %}
                             FAILED WITH WAIVER
                         {% else %}

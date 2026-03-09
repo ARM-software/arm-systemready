@@ -103,6 +103,9 @@ def parse_edk2_log(input_file):
                 if name_idx is not None and name_idx < len(cols):
                     # Extract from 'name' column
                     record["sub_Test_Description"] = cols[name_idx].strip()
+                    ## TODO
+                    if record["sub_Test_Description"] == "Secure Boot - ImageLoadingTest":
+                        record["sub_Test_Description"] = "Secure Boot - ImageLoadingTest: unable to set db"
                 # Append record if any target field is non-empty
                 if any(record.values()):
                     results.append(record)
