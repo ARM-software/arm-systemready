@@ -118,6 +118,23 @@ else
   echo "***************** BBSR TPM is disabled in config file************************"
 fi
 
+# Run edk2 test parser for DT BBSR SCT
+if [ -f "$YOCTO_FLAG" ]; then
+  # EDK2 test parser
+  if [ -d "$RESULTS_DIR/bbsr/sct_results" ]; then
+    echo "Running edk2-test-parser tool "
+    mkdir -p /mnt/acs_results/edk2-test-parser
+    cd /usr/bin/edk2-test-parser
+    ./parser.py --md $RESULTS_DIR/edk2-test-parser/edk2-test-parser-bbsr.log --config BBSR.yaml $RESULTS_DIR/bbsr/sct_results/Overall/Summary.ekl $RESULTS_DIR/bbsr/sct_results/Sequence/BBSR.seq > /dev/null 2>&1
+    cd -
+    echo "edk2-test-parser run completed"
+    sync /mnt
+    sleep 5
+  else
+    echo "BBSR SCT result does not exist, cannot run edk2-test-parser tool"
+  fi
+fi
+
 # ACS log parser run
 
 echo "Running acs log parser tool "
