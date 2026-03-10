@@ -6,6 +6,7 @@ This README describes where to find the **main release** and **Release Candidate
 - [Main Release Image](#main-release-image)
 - [Release Candidate Images](#release-candidate-images)
   - [RC0 ](#rc0-rc0)
+  - [RC-Final](#rc-final-rc-final)
 - [Feedback & Issues](#feedback--issues)
 
 
@@ -17,6 +18,9 @@ The **DeviceTree Band v3.1.2** release is WIP
 ## Release Candidate Images
 
 ### **RC0** [`./RC0/`](./RC0/)  
+  Contains image, changes and known issues.
+
+### **RC-Final** [`./RC-Final/`](./RC-Final/)  
   Contains image, changes and known issues.
 
 #### Concat and decompress the Image for use
