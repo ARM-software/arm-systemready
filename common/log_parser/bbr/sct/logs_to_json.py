@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -530,6 +530,9 @@ def main(input_file, output_file):
             sub_guid = item.get("sub_Test_GUID", "").strip()
             result_val = item.get("result", "")
             reason_val = item.get("reason", "")
+
+            if result_val == "FAILURE":
+                continue
 
             if ep_guid and sub_guid:
                 desc = item.get("sub_Test_Description", "").strip().upper()
