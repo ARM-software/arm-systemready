@@ -37,7 +37,7 @@ def generate_bar_chart(summary_dict):
         summary_dict.get("total_skipped", 0),
         summary_dict.get("total_warnings", 0),
     ]
-    colors = ["#66bb6a", "#ef5350", "#f39c12", "#9e9e9e", "#ffc107", "#ffeb3b"]
+    colors = ["#d4edda", "#f8d7da", "#f39c12", "#9e9e9e", "#ffe0b2", "#fff3cd"]
 
     plt.figure(figsize=(12, 7))
     bars = plt.bar(labels, sizes, edgecolor="black", color=colors)

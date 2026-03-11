@@ -62,7 +62,7 @@ def generate_bar_chart(suite_summary, show_extended=False):
             suite_summary.get('total_skipped', 0),
             suite_summary.get('total_warnings', 0)
         ]
-        colors = ['#66bb6a', '#ef5350', '#f39c12', '#95a5a6', '#f1c40f', '#f39c12']
+        colors = ['#d4edda', '#f8d7da', '#f39c12', '#9e9e9e', '#ffe0b2', '#fff3cd']
     else:
         labels = ['Passed', 'Failed', 'Skipped']
         sizes = [
@@ -70,7 +70,7 @@ def generate_bar_chart(suite_summary, show_extended=False):
             suite_summary.get('total_failed', 0),
             suite_summary.get('total_skipped', 0)
         ]
-        colors = ['#66bb6a', '#ef5350', '#f39c12']
+        colors = ['#d4edda', '#f8d7da', '#ffe0b2']
 
     plt.figure(figsize=(8, 6))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
@@ -182,6 +182,9 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
                 background-color: #f8d7da;
             }
             .skipped {
+                background-color: #ffe0b2;
+            }
+            .warning {
                 background-color: #fff3cd;
             }
             .info {
@@ -302,7 +305,7 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
                     {% if show_extended_summary %}
                     <tr>
                         <td>Warnings</td>
-                        <td class="info">{{ total_warnings }}</td>
+                        <td class="warning">{{ total_warnings }}</td>
                     </tr>
                     {% endif %}
                 </tbody>
@@ -356,7 +359,7 @@ def generate_html(suite_summary, test_results_list, output_html_path, is_summary
                     <tr>
                         <td>{{ subtest.sub_Test_Number }}</td>
                         <td>{{ subtest.sub_Test_Description }}</td>
-                        <td class="{% if subtest_status == 'PASSED' %}pass{% elif subtest_status == 'FAILED' %}fail{% elif subtest_status == 'SKIPPED' %}skipped{% else %}info{% endif %}">
+                        <td class="{% if subtest_status == 'PASSED' %}pass{% elif subtest_status == 'FAILED' %}fail{% elif subtest_status == 'SKIPPED' %}skipped{% elif subtest_status == 'WARNINGS' %}warning{% else %}info{% endif %}">
                             {{ subtest_status }}
                         </td>
                         {% set all_reasons = [] %}

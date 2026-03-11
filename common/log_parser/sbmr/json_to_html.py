@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,7 +105,7 @@ def generate_bar_chart(suite_summary):
         suite_summary.get('total_skipped', 0),
         suite_summary.get('total_warnings', 0)
     ]
-    colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']
+    colors = ['#d4edda', '#f8d7da', '#f39c12', '#9e9e9e', '#ffe0b2', '#fff3cd']
 
     plt.figure(figsize=(12, 7))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
@@ -155,7 +155,7 @@ DETAIL_TEMPLATE = Template("""
         .fail { background-color: #f8d7da; font-weight: bold; }
         .fail-waiver { background-color: #f39c12; font-weight: bold; }
         .warning { background-color: #fff3cd; font-weight: bold; }
-        .aborted { background-color: #bdbdbd; font-weight: bold; }
+        .aborted { background-color: #9e9e9e; font-weight: bold; }
         .skipped { background-color: #ffe0b2; font-weight: bold; }
         .summary-table { margin: 0 auto; width: 80%; }
         .summary-table td.total-tests { text-align: center; }
@@ -338,7 +338,7 @@ SUMMARY_TEMPLATE = Template("""
         .fail { background-color: #f8d7da; font-weight: bold; }
         .fail-waiver { background-color: #f39c12; font-weight: bold; }
         .warning { background-color: #fff3cd; font-weight: bold; }
-        .aborted { background-color: #bdbdbd; font-weight: bold; }
+        .aborted { background-color: #9e9e9e; font-weight: bold; }
         .skipped { background-color: #ffe0b2; font-weight: bold; }
         .summary-table { margin: 0 auto; width: 80%; }
         .summary-table td.total-tests { text-align: center; }
