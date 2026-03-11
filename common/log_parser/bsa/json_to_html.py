@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -121,6 +121,14 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                 background-color: #fff3cd;
                 font-weight: bold;
             }
+            .passed-partial {
+                background-color: #f8b88b;
+                font-weight: bold;
+            }
+            .not-tested {
+                background-color: #d7bde2;
+                font-weight: bold;
+            }
             .aborted {
                 background-color: #9e9e9e;
                 font-weight: bold;
@@ -170,7 +178,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                 font-weight: bold;
             }
             .not-implemented {
-                background-color: #d7bde2;
+                background-color: #cfd8dc;
                 font-weight: bold;
                 text-align: center;
             }
@@ -181,6 +189,11 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
             }
             .passed-partial {
                 background-color: #f8b88b;
+                font-weight: bold;
+                text-align: center;
+            }
+            .not-tested {
+                background-color: #d7bde2;
                 font-weight: bold;
                 text-align: center;
             }
@@ -272,7 +285,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                     <tr>
                         <td>{{ testcase.Test_case }}</td>
                         <td>{{ testcase.Test_case_description }}</td>
-                        <td class="{% if testcase.Test_result == 'PASSED' %}pass{% elif testcase.Test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif testcase.Test_result == 'FAILED' %}fail{% elif 'PASSED(*PARTIAL)' in testcase.Test_result %}warning{% elif testcase.Test_result == 'SKIPPED' %}skipped{% elif 'NOT TESTED' in testcase.Test_result %}warning{% endif %}">
+                        <td class="{% if testcase.Test_result == 'PASSED' %}pass{% elif testcase.Test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif testcase.Test_result == 'FAILED' %}fail{% elif testcase.Test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in testcase.Test_result %}passed-partial{% elif testcase.Test_result == 'SKIPPED' %}skipped{% elif 'NOT TESTED' in testcase.Test_result %}not-tested{% endif %}">
                             {{ testcase.Test_result }}
                         </td>
                         <td class="waiver-reason">
@@ -301,7 +314,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                                     <tr>
                                         <td>{{ subtest.sub_Test_Number }}</td>
                                         <td>{{ subtest.sub_Test_Description }}</td>
-                                        <td class="{% if subtest.sub_test_result == 'PASSED' %}pass{% elif subtest.sub_test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif subtest.sub_test_result == 'FAILED' %}fail{% elif 'PASSED(*PARTIAL)' in subtest.sub_test_result %}warning{% elif subtest.sub_test_result == 'SKIPPED' %}skipped{% elif 'NOT TESTED' in subtest.sub_test_result %}warning{% endif %}">
+                                        <td class="{% if subtest.sub_test_result == 'PASSED' %}pass{% elif subtest.sub_test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif subtest.sub_test_result == 'FAILED' %}fail{% elif subtest.sub_test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in subtest.sub_test_result %}passed-partial{% elif subtest.sub_test_result == 'SKIPPED' %}skipped{% elif 'NOT TESTED' in subtest.sub_test_result %}not-tested{% endif %}">
                                             {{ subtest.sub_test_result }}
                                         </td>
                                         <td class="waiver-reason">
