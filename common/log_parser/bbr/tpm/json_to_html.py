@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,13 +64,13 @@ def generate_bar_chart_improved(suite_summary):
     ]
 
     colors = [
-        '#66bb6a',  # Passed
-        '#ef5350',  # Failed
+        '#d4edda',  # Passed
+        '#f8d7da',  # Failed
         '#f39c12',  # Failed with Waiver
         '#9e9e9e',  # Aborted
-        '#ffc107',  # Skipped
-        '#ffeb3b',  # Warnings
-        '#b2bec3'   # Ignored (gray)
+        '#ffe0b2',  # Skipped
+        '#fff3cd',  # Warnings
+        '#cccccc'   # Ignored (gray)
     ]
 
     plt.figure(figsize=(12, 7))
@@ -108,7 +108,7 @@ def generate_bar_chart_improved(suite_summary):
 # Generate HTML using Jinja2, same format/structure as the SCT snippet
 # -----------------------------------------------------------------------------
 def generate_html_improved(suite_summary, test_results, chart_data, output_html_path, is_summary_page=True):
-    env = Environment()
+    env = Environment(autoescape=True)
     env.filters['determine_css_class'] = determine_css_class
 
     template = env.from_string("""
@@ -161,7 +161,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
                 font-weight: bold;
             }
             .aborted {
-                background-color: #e0e0e0;
+                background-color: #9e9e9e;
                 font-weight: bold;
             }
             .skipped {

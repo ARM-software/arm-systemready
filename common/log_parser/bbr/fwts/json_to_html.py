@@ -50,7 +50,7 @@ def generate_bar_chart_fwts(suite_summary):
         suite_summary['total_skipped'],
         suite_summary['total_warnings']
     ]
-    colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']
+    colors = ['#d4edda', '#f8d7da', '#f39c12', '#9e9e9e', '#ffe0b2', '#fff3cd']
 
     plt.figure(figsize=(12, 7))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')

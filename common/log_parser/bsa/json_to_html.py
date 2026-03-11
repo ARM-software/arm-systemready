@@ -30,22 +30,45 @@ def get_case_insensitive(d, key, default=0):
 
 # Function to generate bar chart for test results
 def generate_bar_chart(suite_summary):
-    labels = ['Passed', 'Failed', 'Failed with Waiver', 'Aborted', 'Skipped', 'Warnings']
+    labels = [
+        'Passed',
+        'Failed',
+        'Failed with Waiver',
+        'Aborted',
+        'Skipped',
+        'Warnings',
+        'Passed (Partial)',
+        'Not Implemented',
+        'PAL Not Supported'
+    ]
     sizes = [
         suite_summary.get('total_passed', 0),
         suite_summary.get('total_failed', 0),
         suite_summary.get('total_failed_with_waiver', 0),
         suite_summary.get('total_aborted', 0),
         suite_summary.get('total_skipped', 0),
-        suite_summary.get('total_warnings', 0)
+        suite_summary.get('total_warnings', 0),
+        suite_summary.get('total_passed_partial', 0),
+        suite_summary.get('total_not_implemented', 0),
+        suite_summary.get('total_pal_not_supported', 0)
     ]
-    colors = ['#66bb6a', '#ef5350', '#f39c12', '#9e9e9e', '#ffc107', '#ffeb3b']  # Colors for each category
+    colors = [
+        '#d4edda',  # Passed
+        '#f8d7da',  # Failed
+        '#f39c12',  # Failed with Waiver
+        '#9e9e9e',  # Aborted
+        '#ffe0b2',  # Skipped
+        '#fff3cd',  # Warnings
+        '#f8b88b',  # Passed (Partial)
+        '#cfd8dc',  # Not Implemented
+        '#aed6f1'   # PAL Not Supported
+    ]  # Colors for each category
 
-    plt.figure(figsize=(12, 7))
+    plt.figure(figsize=(14, 7))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
 
     # Add percentage labels on top of the bars
-    total_tests = sum(sizes)
+    total_tests = suite_summary.get('total_rules_run', 0) or sum(sizes)
     for bar, size in zip(bars, sizes):
         yval = bar.get_height()
         percentage = (size / total_tests) * 100 if total_tests > 0 else 0
@@ -60,7 +83,7 @@ def generate_bar_chart(suite_summary):
 
     plt.title('Test Results Distribution', fontsize=18, fontweight='bold')
     plt.ylabel('Total Count', fontsize=14)
-    plt.xticks(fontsize=12)
+    plt.xticks(fontsize=11, rotation=30, ha='right')
     plt.yticks(fontsize=12)
     plt.tight_layout()
 
