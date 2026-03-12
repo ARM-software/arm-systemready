@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,17 @@ TOP_DIR=`pwd`
 BAND=$1
 CLEAN_BUILD=$3
 
+PRECONFIG_KEYS_DIR="$KEYS_DIR"
 . $TOP_DIR/../common/config/systemready-band-source.cfg
+if [ -n "$PRECONFIG_KEYS_DIR" ] && [ -z "$KEYS_DIR" ]; then
+    KEYS_DIR="$PRECONFIG_KEYS_DIR"
+fi
+unset PRECONFIG_KEYS_DIR
+
+# Ensure KEYS_DIR is set to a sensible default if the config left it empty
+if [ -z "$KEYS_DIR" ]; then
+    KEYS_DIR="$TOP_DIR/bbsr-keys"
+fi
 
 set -E
 

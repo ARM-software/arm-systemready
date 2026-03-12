@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,8 +43,15 @@ UEFI_PATH=edk2
 UEFI_TOOLCHAIN=GCC5
 UEFI_BUILD_MODE=RELEASE
 PATCH_DIR=$TOP_DIR/../patches
-KEYS_DIR=$TOP_DIR/bbsr-keys
+DEFAULT_KEYS_DIR=$TOP_DIR/bbsr-keys
 UEFI_SHELL_PATH=edk2/Build/Shell/RELEASE_GCC5/AARCH64
+
+# Handle KEYS_DIR: Use configured value or default
+if [ -z "$KEYS_DIR" ]; then
+    KEYS_DIR="$DEFAULT_KEYS_DIR"
+fi
+# Remove trailing slash if present
+KEYS_DIR="${KEYS_DIR%/}"
 
  if [[ $arch != "aarch64" ]]; then
     CROSS_COMPILE=$TOP_DIR/$GCC
@@ -98,8 +105,25 @@ do_package ()
 
     echo "Signing Shell Application... "
     pushd $TOP_DIR
+
+    # Verify that required key files exist
+    if [ ! -f "$KEYS_DIR/TestDB1.key" ] || \
+       [ ! -f "$KEYS_DIR/TestDB1.crt" ]; then
+        echo "ERROR: Required key files not found"
+        echo "  KEYS_DIR=$KEYS_DIR"
+        echo "  Missing: $KEYS_DIR/TestDB1.key or"
+        echo "           $KEYS_DIR/TestDB1.crt"
+        echo "  Please run build-bbsr-keys.sh first"
+        exit 1
+    fi
+
     # sign Shell.efi with db key
-    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi --output $TOP_DIR/$UEFI_SHELL_PATH/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi
+    SHELL_EFI="$TOP_DIR/$UEFI_SHELL_PATH"
+    SHELL_EFI="${SHELL_EFI}/Shell_EA4BB293-2D7F-4456-A681-1F22F42CD0BC.efi"
+    sbsign --key "$KEYS_DIR/TestDB1.key" \
+        --cert "$KEYS_DIR/TestDB1.crt" \
+        "$SHELL_EFI" \
+        --output "$SHELL_EFI"
 
     popd
 

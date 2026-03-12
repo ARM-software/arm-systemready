@@ -15,10 +15,84 @@ inherit perlnative
 
 do_compile() {
 
-    KEYS_DIR="${S}/bbsr-keys"
-    echo "do_compile: bbsr-keys"
-    mkdir -p $KEYS_DIR
-    cd $KEYS_DIR
+    # Source the configuration file to get KEYS_DIR from systemready-dt-band-source.cfg
+    RECIPE_DIR="${FILE_DIRNAME}"
+    if [ -z "$RECIPE_DIR" ] && [ -n "$FILE" ]; then
+        RECIPE_DIR="$(dirname "$FILE")"
+    fi
+    CFG_FILE="$RECIPE_DIR/../../../../../common/config/systemready-dt-band-source.cfg"
+    echo "INFO: Checking config file at $CFG_FILE"
+    if [ -n "$CFG_FILE" ] && [ -f "$CFG_FILE" ]; then
+        . "$CFG_FILE"
+        if [ -n "$KEYS_DIR" ]; then
+            echo "INFO: Sourced KEYS_DIR from config: KEYS_DIR=$KEYS_DIR"
+        fi
+    fi
+
+    # The user can point to an external KEYS_DIR to provide partner-provided keys.
+    # KEYS_DIR can be set in systemready-dt-band-source.cfg or overridden via environment variable.
+    # If KEYS_DIR points to an existing external location, use those keys.
+    # Otherwise, generate keys in the workdir.
+    GEN_DIR="${S}/bbsr-keys"
+    ENFORCE_EXTERNAL_KEYS=0
+
+    # Remove trailing slash if present
+    KEYS_DIR="${KEYS_DIR%/}"
+
+    # KEYS_DIR must be an absolute path for external partner-provided keys.
+    if [ -n "$KEYS_DIR" ] && [ "${KEYS_DIR#/}" = "$KEYS_DIR" ]; then
+        echo "WARNING: KEYS_DIR=$KEYS_DIR is not an absolute path; will generate default test keys"
+        KEYS_DIR=""
+    fi
+
+    # Check if external KEYS_DIR exists and is a valid directory
+    if [ -n "$KEYS_DIR" ]; then
+        if [ ! -d "$KEYS_DIR" ]; then
+            echo "WARNING: KEYS_DIR=$KEYS_DIR does not exist, will generate default test keys"
+            KEYS_DIR=""
+        else
+            echo "INFO: Found KEYS_DIR at $KEYS_DIR, checking for required key files"
+            ENFORCE_EXTERNAL_KEYS=1
+        fi
+    fi
+
+    # Check if all required key files exist in KEYS_DIR
+    REQUIRED_FILES="NullPK.auth TestDB1.auth TestDB1.crt TestDB1.der TestDB1.key TestDBX1.auth TestDBX1.crt TestDBX1.der TestDBX1.key TestKEK1.auth TestKEK1.crt TestKEK1.der TestKEK1.key TestPK1.auth TestPK1.crt TestPK1.der TestPK1.key"
+    ALL_FILES_PRESENT=1
+    MISSING=""
+
+    if [ $ENFORCE_EXTERNAL_KEYS -eq 1 ]; then
+        for file in $REQUIRED_FILES; do
+            if [ ! -f "$KEYS_DIR/$file" ]; then
+                ALL_FILES_PRESENT=0
+                MISSING="$MISSING $file"
+                echo "WARNING: missing key file: $KEYS_DIR/$file"
+            fi
+        done
+    fi
+
+    if [ $ALL_FILES_PRESENT -eq 1 ] && [ $ENFORCE_EXTERNAL_KEYS -eq 1 ]; then
+        echo "do_compile: bbsr-keys: keys already present in KEYS_DIR=$KEYS_DIR"
+        # if external directory differs, copy contents into workdir
+        if [ "$KEYS_DIR" != "${S}/bbsr-keys" ]; then
+            echo "copying existing keys into build directory"
+            mkdir -p ${S}/bbsr-keys
+            cp -r "$KEYS_DIR"/* ${S}/bbsr-keys/
+        fi
+        echo "skipping key generation"
+        return 0
+    fi
+
+    # If external keys were enforced but incomplete, fail the build
+    if [ $ENFORCE_EXTERNAL_KEYS -eq 1 ] && [ $ALL_FILES_PRESENT -eq 0 ]; then
+        echo "KEYS_DIR not provided or incomplete, please generate required keys"
+        bbfatal "ERROR: missing keys in $KEYS_DIR:$MISSING; please provide all required keys or unset KEYS_DIR"
+    fi
+
+    # Generate keys in workdir
+    echo "Generating default test keys in $GEN_DIR"
+    mkdir -p "$GEN_DIR"
+    cd "$GEN_DIR"
 
     # generate TestPK1: DER and signed siglist
     NAME=TestPK1

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,16 +23,98 @@
 # KEYS_DIR - directory where secure boot keys are generated
 
 TOP_DIR=`pwd`
-KEYS_DIR=$TOP_DIR/bbsr-keys
+DEFAULT_KEYS_DIR=$TOP_DIR/bbsr-keys
+
+# Source the configuration file to get KEYS_DIR from systemready-band-source.cfg
+CFG_FILE="$TOP_DIR/../common/config/systemready-band-source.cfg"
+if [ -f "$CFG_FILE" ]; then
+    . "$CFG_FILE"
+    if [ -n "$KEYS_DIR" ]; then
+        echo "INFO: Sourced KEYS_DIR from config: KEYS_DIR=$KEYS_DIR"
+    fi
+fi
+
+# The user can point to an external KEYS_DIR to provide partner-provided keys.
+# KEYS_DIR can be set in systemready-band-source.cfg or overridden via environment variable.
+# If KEYS_DIR points to an existing external location, use those keys.
+# Otherwise, generate keys in the workdir.
+GEN_DIR="$DEFAULT_KEYS_DIR"
+ENFORCE_EXTERNAL_KEYS=0
+
+# Use the default directory if KEYS_DIR is unset.
+if [ -z "$KEYS_DIR" ]; then
+    KEYS_DIR="$DEFAULT_KEYS_DIR"
+fi
+
+# Remove trailing slash if present
+KEYS_DIR="${KEYS_DIR%/}"
+
+# KEYS_DIR must be an absolute path for external partner-provided keys.
+if [ -n "$KEYS_DIR" ] && [ "${KEYS_DIR#/}" = "$KEYS_DIR" ]; then
+    echo "WARNING: KEYS_DIR=$KEYS_DIR is not an absolute path; using default test key directory $DEFAULT_KEYS_DIR"
+    KEYS_DIR="$DEFAULT_KEYS_DIR"
+fi
+
+# Check if external KEYS_DIR exists and is a valid directory
+if [ -n "$KEYS_DIR" ] && [ "$KEYS_DIR" != "$DEFAULT_KEYS_DIR" ]; then
+    if [ ! -d "$KEYS_DIR" ]; then
+        echo "WARNING: KEYS_DIR=$KEYS_DIR does not exist, using default test key directory $DEFAULT_KEYS_DIR"
+        KEYS_DIR="$DEFAULT_KEYS_DIR"
+    else
+        echo "INFO: Found KEYS_DIR at $KEYS_DIR, checking for required key files"
+        ENFORCE_EXTERNAL_KEYS=1
+    fi
+fi
+
+# Check if all required key files exist in KEYS_DIR
+REQUIRED_FILES="NullPK.auth TestDB1.auth TestDB1.crt TestDB1.der TestDB1.key TestDBX1.auth TestDBX1.crt TestDBX1.der TestDBX1.key TestKEK1.auth TestKEK1.crt TestKEK1.der TestKEK1.key TestPK1.auth TestPK1.crt TestPK1.der TestPK1.key"
+ALL_FILES_PRESENT=1
+MISSING=""
+
+if [ $ENFORCE_EXTERNAL_KEYS -eq 1 ]; then
+    for file in $REQUIRED_FILES; do
+        if [ ! -f "$KEYS_DIR/$file" ]; then
+            ALL_FILES_PRESENT=0
+            MISSING="$MISSING $file"
+            echo "WARNING: missing key file: $KEYS_DIR/$file"
+        fi
+    done
+fi
 
 # set the path to pick up the local efitools
 export PATH="$TOP_DIR/efitools:$PATH"
 
 do_build()
 {
+    # Handle case where KEYS_DIR was overwritten by framework.sh sourcing config again
+    if [ ! -d "$KEYS_DIR" ] && [ "$KEYS_DIR" != "$DEFAULT_KEYS_DIR" ]; then
+        echo "WARNING: KEYS_DIR=$KEYS_DIR does not exist, using default test key directory $DEFAULT_KEYS_DIR"
+        KEYS_DIR="$DEFAULT_KEYS_DIR"
+        ENFORCE_EXTERNAL_KEYS=0
+    fi
+
+    if [ $ALL_FILES_PRESENT -eq 1 ] && [ $ENFORCE_EXTERNAL_KEYS -eq 1 ]; then
+        echo "do_build: bbsr-keys: keys already present in KEYS_DIR=$KEYS_DIR"
+        # if external directory differs, copy contents into workdir
+        if [ "$KEYS_DIR" != "$DEFAULT_KEYS_DIR" ]; then
+            echo "copying existing keys into build directory"
+            mkdir -p "$DEFAULT_KEYS_DIR"
+            cp -r "$KEYS_DIR"/* "$DEFAULT_KEYS_DIR/"
+        fi
+        echo "skipping key generation"
+        return 0
+    fi
+
+    # If external keys were enforced but incomplete, fail the build
+    if [ $ENFORCE_EXTERNAL_KEYS -eq 1 ] && [ $ALL_FILES_PRESENT -eq 0 ]; then
+        echo "KEYS_DIR not provided or incomplete, please generate required keys"
+        echo "ERROR: missing keys in $KEYS_DIR:$MISSING; please provide all required keys or unset KEYS_DIR"
+        exit 1
+    fi
+
     echo "do_build: bbsr-keys"
-    mkdir -p $KEYS_DIR
-    pushd $KEYS_DIR
+    mkdir -p "$KEYS_DIR"
+    pushd "$KEYS_DIR"
 
     # generate TestPK1: DER and signed siglist
     NAME=TestPK1
@@ -84,4 +166,3 @@ do_package()
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $DIR/framework.sh $@
-

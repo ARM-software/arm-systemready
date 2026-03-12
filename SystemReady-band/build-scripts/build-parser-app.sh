@@ -25,13 +25,21 @@ GCC_VERSION="${GCC_TOOLS_VERSION}"
 APP_NAME="parser"
 GCC_PREFIX="aarch64-none-linux-gnu-"
 TOP_DIR=$(pwd)
-TOOLCHAIN_PATH="$TOP_DIR/tools/arm-gnu-toolchain-${GCC_VERSION}-x86_64-aarch64-none-linux-gnu/bin"
+GNUTOOLS_VER="${GCC_VERSION}-x86_64-aarch64-none-linux-gnu"
+TOOLCHAIN_PATH="$TOP_DIR/tools/arm-gnu-toolchain-${GNUTOOLS_VER}/bin"
 GCC_BIN="$TOOLCHAIN_PATH/$GCC_PREFIX"
 EDK2_DIR="$TOP_DIR/edk2"
 LIBC_DIR="$EDK2_DIR/edk2-libc"
 APP_PATH="$EDK2_DIR/ShellPkg/Application/$APP_NAME"
-KEYS_DIR=$TOP_DIR/bbsr-keys
+DEFAULT_KEYS_DIR=$TOP_DIR/bbsr-keys
 CONFIG_PARSER_EFI=${TOP_DIR}/parser/Parser.efi
+
+# Handle KEYS_DIR: Use configured value or default
+if [ -z "$KEYS_DIR" ]; then
+    KEYS_DIR="$DEFAULT_KEYS_DIR"
+fi
+# Remove trailing slash if present
+KEYS_DIR="${KEYS_DIR%/}"
 
 do_build()
 {
@@ -63,9 +71,11 @@ source ./edksetup.sh --reconfig
 make -C BaseTools/Source/C
 
 echo "Building Parser.efi..."
-build -a AARCH64 -t GCC -p ShellPkg/ShellPkg.dsc -m ShellPkg/Application/$APP_NAME/Parser.inf
+build -a AARCH64 -t GCC -p ShellPkg/ShellPkg.dsc \
+    -m ShellPkg/Application/$APP_NAME/Parser.inf
 
-cp "$EDK2_DIR/Build/Shell/DEBUG_GCC/AARCH64/Parser.efi" "$TOP_DIR/$APP_NAME/Parser.efi"
+PARSER_EFI="$EDK2_DIR/Build/Shell/DEBUG_GCC/AARCH64/Parser.efi"
+cp "$PARSER_EFI" "$TOP_DIR/$APP_NAME/Parser.efi"
 git reset --hard
 
 popd
@@ -79,9 +89,24 @@ do_package ()
 
     echo "Signing Parser Application... "
     pushd $TOP_DIR
+
+    # Verify that required key files exist
+    if [ ! -f "$KEYS_DIR/TestDB1.key" ] || \
+       [ ! -f "$KEYS_DIR/TestDB1.crt" ]; then
+        echo "ERROR: Required key files not found"
+        echo "  KEYS_DIR=$KEYS_DIR"
+        echo "  Missing: $KEYS_DIR/TestDB1.key or"
+        echo "           $KEYS_DIR/TestDB1.crt"
+        echo "  Please run build-bbsr-keys.sh first"
+        exit 1
+    fi
+
     # sign Parser.efi with db key
-    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $CONFIG_PARSER_EFI --output $TOP_DIR/output/Parser.efi
-    
+    sbsign --key "$KEYS_DIR/TestDB1.key" \
+        --cert "$KEYS_DIR/TestDB1.crt" \
+        "$CONFIG_PARSER_EFI" \
+        --output "$TOP_DIR/output/Parser.efi"
+
     popd
 
 }

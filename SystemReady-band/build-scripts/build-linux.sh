@@ -46,8 +46,15 @@ TOP_DIR=`pwd`
 
 LINUX_ARCH=arm64
 LINUX_IMAGE_TYPE=Image
-KEYS_DIR=$TOP_DIR/bbsr-keys
+DEFAULT_KEYS_DIR=$TOP_DIR/bbsr-keys
 SRBAND_DEFCONFIG=$TOP_DIR/../common/config/srband_defconfig
+
+# Handle KEYS_DIR: Use configured value or default
+if [ -z "$KEYS_DIR" ]; then
+    KEYS_DIR="$DEFAULT_KEYS_DIR"
+fi
+# Remove trailing slash if present
+KEYS_DIR="${KEYS_DIR%/}"
 
 do_build ()
 {
@@ -109,8 +116,22 @@ do_package ()
     cp $TOP_DIR/$LINUX_PATH/$LINUX_OUT_DIR/arch/$LINUX_ARCH/boot/$LINUX_IMAGE_TYPE \
     ${OUTDIR}/$LINUX_IMAGE_TYPE
 
+    # Verify that required key files exist
+    if [ ! -f "$KEYS_DIR/TestDB1.key" ] || \
+       [ ! -f "$KEYS_DIR/TestDB1.crt" ]; then
+        echo "ERROR: Required key files not found"
+        echo "  KEYS_DIR=$KEYS_DIR"
+        echo "  Missing: $KEYS_DIR/TestDB1.key or"
+        echo "           $KEYS_DIR/TestDB1.crt"
+        echo "  Please run build-bbsr-keys.sh first"
+        exit 1
+    fi
+
     # Sign the kernel with DB key
-    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt ${OUTDIR}/$LINUX_IMAGE_TYPE --output ${OUTDIR}/$LINUX_IMAGE_TYPE
+    sbsign --key "$KEYS_DIR/TestDB1.key" \
+        --cert "$KEYS_DIR/TestDB1.crt" \
+        "${OUTDIR}/$LINUX_IMAGE_TYPE" \
+        --output "${OUTDIR}/$LINUX_IMAGE_TYPE"
 
     #Copy drivers for packaging into Ramdisk
     mkdir -p $TOP_DIR/ramdisk/drivers
