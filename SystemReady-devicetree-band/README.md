@@ -87,10 +87,17 @@ Before starting the ACS build, ensure that the following requirements are met:
 3. Run get_source.sh to download all the related sources and tools for the build. Provide sudo permission when prompted <br />
  `./build-scripts/get_source.sh` <br />
 
-4. To start the build of the SystemReady-devicetree band ACS live image, execute the below step <br />
+4. (Optional) To use custom secure boot keys instead of the generated defaults, set `KEYS_DIR` to the directory containing your key files. Required files are: `NullPK.auth`, `TestPK1.auth`, `TestPK1.crt`, `TestPK1.der`, `TestPK1.key`, `TestKEK1.auth`, `TestKEK1.crt`, `TestKEK1.der`, `TestKEK1.key`, `TestDB1.auth`, `TestDB1.crt`, `TestDB1.der`, `TestDB1.key`, `TestDBX1.auth`, `TestDBX1.crt`, `TestDBX1.der`, `TestDBX1.key`. If `KEYS_DIR` is unset or incomplete, the build generates default test keys. For key generation guidance, see the [Secure Boot Test Key Generation Guide](https://github.com/tianocore/edk2-test/blob/master/uefi-sct/Doc/UserGuide/SecureBootTestKeyGenerationAndSetupGuide.md). <br />
+   - `KEYS_DIR` may be defined in `common/config/systemready-dt-band-source.cfg` or overridden by the environment variable.
+   - `KEYS_DIR` must be an absolute path. Relative paths are not supported.
+   - Example: `KEYS_DIR=/absolute/path/to/your/keys`
+   - If all required files already exist in `KEYS_DIR`, the build reuses them and skips regeneration.
+   - Complete `KEYS_DIR` content is required for partner-provided or production key workflows. <br />
+
+5. To start the build of the SystemReady-devicetree band ACS live image, execute the below step <br />
  `./build-scripts/build-systemready-dt-band-live-image.sh`
 
-5. If the above steps are successful, the bootable image will be available at <br />
+6. If the above steps are successful, the bootable image will be available at <br />
    `/path-to-arm-systemready/SystemReady-devicetree-band/Yocto/meta-woden/build/tmp/deploy/images/generic-arm64/systemready-dt_acs_live_image.wic.xz`
 
 Note: The image is generated in a compressed (.xz) format. The image must be uncompressed before it is used.<br />

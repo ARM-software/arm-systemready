@@ -44,7 +44,14 @@ CROSS_COMPILE=$TOP_DIR/$GCC
 UEFI_LIBC_PATH=edk2-libc
 OUTDIR=${TOP_DIR}/output
 BSA_EFI_PATH=edk2/Build/Shell/DEBUG_GCC/AARCH64/
-KEYS_DIR=$TOP_DIR/bbsr-keys
+DEFAULT_KEYS_DIR=$TOP_DIR/bbsr-keys
+
+# Handle KEYS_DIR: Use configured value or default
+if [ -z "$KEYS_DIR" ]; then
+    KEYS_DIR="$DEFAULT_KEYS_DIR"
+fi
+# Remove trailing slash if present
+KEYS_DIR="${KEYS_DIR%/}"
 SYSTEMREADY_COMMIT_LOG="${OUTDIR}/systemready-commit.log"
 
 do_build()
@@ -100,8 +107,23 @@ do_package ()
     echo "Packaging BSA... $VARIANT";
     # Copy binaries to output folder
     cp $TOP_DIR/$BSA_EFI_PATH/Bsa.efi $OUTDIR/Bsa.efi
+
+    # Verify that required key files exist
+    if [ ! -f "$KEYS_DIR/TestDB1.key" ] || \
+       [ ! -f "$KEYS_DIR/TestDB1.crt" ]; then
+        echo "ERROR: Required key files not found"
+        echo "  KEYS_DIR=$KEYS_DIR"
+        echo "  Missing: $KEYS_DIR/TestDB1.key or"
+        echo "           $KEYS_DIR/TestDB1.crt"
+        echo "  Please run build-bbsr-keys.sh first"
+        exit 1
+    fi
+
     # sign Bsa.efi with db key
-    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt $OUTDIR/Bsa.efi --output $OUTDIR/Bsa.efi
+    sbsign --key "$KEYS_DIR/TestDB1.key" \
+        --cert "$KEYS_DIR/TestDB1.crt" \
+        "$OUTDIR/Bsa.efi" \
+        --output "$OUTDIR/Bsa.efi"
 }
 
 exit_fun() {

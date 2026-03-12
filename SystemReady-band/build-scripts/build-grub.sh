@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # @file
-# Copyright (c) 2021-2024, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +37,14 @@ arch=$(uname -m)
 GRUB_TARGET=aarch64-none-linux-gnu
 GRUB_PATH=grub
 GRUB_PLAT_CONFIG_FILE=${TOP_DIR}/build-scripts/config/grub_prefix.cfg
-KEYS_DIR=$TOP_DIR/bbsr-keys
+DEFAULT_KEYS_DIR=$TOP_DIR/bbsr-keys
+
+# Handle KEYS_DIR: Use configured value or default
+if [ -z "$KEYS_DIR" ]; then
+    KEYS_DIR="$DEFAULT_KEYS_DIR"
+fi
+# Remove trailing slash if present
+KEYS_DIR="${KEYS_DIR%/}"
 
 do_build ()
 {
@@ -105,7 +112,22 @@ do_package ()
 {
     # sign grub with db key
     pushd $TOP_DIR/$GRUB_PATH
-    sbsign --key $KEYS_DIR/TestDB1.key --cert $KEYS_DIR/TestDB1.crt output/grubaa64.efi --output output/grubaa64.efi
+
+    # Verify that required key files exist
+    if [ ! -f "$KEYS_DIR/TestDB1.key" ] || \
+       [ ! -f "$KEYS_DIR/TestDB1.crt" ]; then
+        echo "ERROR: Required key files not found"
+        echo "  KEYS_DIR=$KEYS_DIR"
+        echo "  Missing: $KEYS_DIR/TestDB1.key or"
+        echo "           $KEYS_DIR/TestDB1.crt"
+        echo "  Please run build-bbsr-keys.sh first"
+        exit 1
+    fi
+
+    sbsign --key "$KEYS_DIR/TestDB1.key" \
+        --cert "$KEYS_DIR/TestDB1.crt" \
+        output/grubaa64.efi \
+        --output output/grubaa64.efi
     popd
 }
 
