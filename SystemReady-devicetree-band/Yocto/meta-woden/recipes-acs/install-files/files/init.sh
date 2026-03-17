@@ -32,8 +32,8 @@ fi
 
 sleep 5
 
-DT_VERSION="SystemReady devicetree band ACS v3.1.2 RC-final"
-KERNEL_VERSION="6.18"
+DT_VERSION="SystemReady devicetree band ACS v3.1.2"
+KERNEL_VERSION="6.19"
 
 echo "Attempting to mount the results partition ..."
 #mount result partition
