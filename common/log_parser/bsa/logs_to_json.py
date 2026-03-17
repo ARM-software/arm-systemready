@@ -143,6 +143,13 @@ def main(input_files, output_file):
     processing = False
 
     for input_file in input_files:
+        lower_path = input_file.lower()
+        if "/linux" in lower_path or "bsaresultskernel" in lower_path or "/linux_acs" in lower_path:
+            current_source = "linux"
+        elif "/uefi" in lower_path:
+            current_source = "uefi"
+        else:
+            current_source = "unknown"
         file_encoding = detect_file_encoding(input_file)
 
         with open(input_file, "r", encoding=file_encoding, errors="ignore") as f:
@@ -275,6 +282,7 @@ def main(input_files, output_file):
                         "Test_case_description": desc,
                         "Test_result": formatted_result
                     }
+                    testcase["_source"] = current_source
                     if subtests:
                         testcase["subtests"] = subtests
 
@@ -388,6 +396,7 @@ def main(input_files, output_file):
                         "Test_case_description": desc,
                         "Test_result": formatted_result
                     }
+                    testcase["_source"] = current_source
                     if subtests:
                         testcase["subtests"] = subtests
 
@@ -411,6 +420,58 @@ def main(input_files, output_file):
 
             # Ignore all other lines (debug, informational, etc.)
             continue
+
+    # Post-process UEFI/Linux duplicates per testcase
+    processed_testcases = defaultdict(list)
+    for suite_name, tcs in testcases_per_suite.items():
+        seen = {}
+        for tc in tcs:
+            key = tc.get("Test_case")
+            src = tc.pop("_source", "unknown")
+            existing = seen.get(key)
+            if not existing:
+                seen[key] = {"source": src, "index": len(processed_testcases[suite_name])}
+                processed_testcases[suite_name].append(tc)
+                continue
+
+            # Keep UEFI as the base testcase; only override matching fields from Linux.
+            existing_tc = processed_testcases[suite_name][existing["index"]]
+            existing_src = existing["source"]
+
+            # Ensure UEFI testcase is the base.
+            if src == "uefi" and existing_src != "uefi":
+                linux_tc = existing_tc
+                existing_tc = tc
+                processed_testcases[suite_name][existing["index"]] = existing_tc
+                seen[key] = {"source": src, "index": existing["index"]}
+            else:
+                linux_tc = tc if src == "linux" else None
+
+            if linux_tc:
+                # For B_PER_08, keep UEFI testcase result. For others, overwrite testcase result from Linux.
+                if key != "B_PER_08 : -":
+                    existing_tc["Test_result"] = linux_tc.get("Test_result")
+                    existing_tc["Test_case_summary"] = linux_tc.get("Test_case_summary")
+
+                # Override only matching subtests (do not add Linux-only subtests).
+                uefi_subtests = {st.get("sub_Test_Number"): st for st in existing_tc.get("subtests", [])}
+                for st in linux_tc.get("subtests", []) or []:
+                    sub_key = st.get("sub_Test_Number")
+                    if sub_key in uefi_subtests:
+                        uefi_subtests[sub_key] = st
+                existing_tc["subtests"] = list(uefi_subtests.values())
+            continue
+
+    testcases_per_suite = processed_testcases
+
+    # Recompute summaries from processed testcases
+    suite_summaries = defaultdict(init_summary)
+    total_summary = init_summary()
+    for suite_name, tcs in testcases_per_suite.items():
+        for tc in tcs:
+            formatted_result, summary_category = classify_status(tc.get("Test_result"))
+            update_summary_counts(suite_summaries[suite_name], summary_category, formatted_result)
+            update_summary_counts(total_summary, summary_category, formatted_result)
 
     # Build final JSON structure
     output = {
