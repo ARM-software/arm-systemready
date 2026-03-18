@@ -203,13 +203,16 @@ def _sum_suite_summary(a, b):
 #        "Main Readiness Grouping" fields for each test suite.
 ################################################################################
 
-TEST_CATEGORY_DT_PATH = "/usr/bin/log_parser/test_categoryDT.json"
+if DT_OR_SR_MODE == "DT":
+    TEST_CATEGORY_PATH = "/usr/bin/log_parser/test_categoryDT.json"
+else:
+    TEST_CATEGORY_PATH = "/usr/bin/log_parser/test_category.json"
 
 try:
-    with open(TEST_CATEGORY_DT_PATH, "r") as catf:
-        test_category_dt_data = json.load(catf)
+    with open(TEST_CATEGORY_PATH, "r") as catf:
+        test_category_data = json.load(catf)
 except Exception:
-    test_category_dt_data = {}
+    test_category_data = {}
 
 def build_testcategory_dict(category_data):
     """
@@ -236,7 +239,7 @@ def build_testcategory_dict(category_data):
                 result[s_lower][ts_lower] = row
     return result
 
-test_cat_dict = build_testcategory_dict(test_category_dt_data)
+test_cat_dict = build_testcategory_dict(test_category_data)
 
 def recursive_sort(obj):
     if isinstance(obj, dict):
@@ -446,6 +449,8 @@ def merge_json_files(json_files, output_file):
                             ts_dict["Waivable"] = row_vals["Waivable"]
                         if "SRS scope" in row_vals:
                             ts_dict["SRS scope"] = row_vals["SRS scope"]
+                        if "Description" in row_vals:
+                            ts_dict["Test_suite_info"] = row_vals["Description"]
                         if "Main Readiness Grouping" in row_vals:
                             ts_dict["Main Readiness Grouping"] = row_vals["Main Readiness Grouping"]
 
@@ -453,6 +458,7 @@ def merge_json_files(json_files, output_file):
                             "Test_suite",
                             "Test_suite_name",
                             "Test_suite_description",
+                            "Test_suite_info",
                             "Waivable",
                             "SRS scope",
                             "Main Readiness Grouping",
