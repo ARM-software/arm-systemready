@@ -21,6 +21,7 @@ import argparse
 import os
 import subprocess
 import re
+import html
 from jinja2 import Template
 
 def get_system_info():
@@ -146,6 +147,105 @@ def read_html_content(file_path):
             return content
     else:
         return None
+
+def inject_test_suite_info(merged_json_path, output_dir):
+    # Add Test_suite_info into detailed HTMLs after they are generated.
+    if not merged_json_path or not os.path.isfile(merged_json_path):
+        return
+    try:
+        with open(merged_json_path, 'r') as jf:
+            data = json.load(jf)
+    except Exception:
+        return
+
+    def entries(v):
+        # Always return a list of suite entries.
+        if isinstance(v, list):
+            return v
+        if isinstance(v, dict) and isinstance(v.get("test_results"), list):
+            return v["test_results"]
+        if isinstance(v, dict):
+            return [v]
+        return []
+
+    suite_map = {}
+    if isinstance(data, dict):
+        for suite_key, suite_data in data.items():
+            for entry in entries(suite_data):
+                if not isinstance(entry, dict):
+                    continue
+                name = (entry.get("Test_suite") or entry.get("Test_suite_name") or "").strip()
+                info = entry.get("Test_suite_info")
+                if name and info is not None:
+                    # Store by lowercase name so PCIe/PCIE still matches.
+                    suite_map.setdefault(suite_key, {})[name.lower()] = info
+
+    def fmt_info(info):
+        # Format list info as bullets; otherwise keep as plain text.
+        if isinstance(info, list):
+            items = "".join(f"<li>{html.escape(str(i))}</li>" for i in info)
+            return f"<ul style=\"margin: 6px 0 0 18px;\">{items}</ul>"
+        return html.escape(str(info))
+
+    patterns = [
+        # Different detailed HTML templates use different headers.
+        (r'(<div class="test-suite-header">Test Suite:\s*([^<]+)</div>)', 2),
+        (r'(<div class="suite-header">Test Suite:\s*([^<]+)</div>)', 2),
+        (r'(<div class="heading">Test Suite Name:\s*<span>([^<]+)</span></div>)', 2),
+        (r'(<h3>\s*([^:<]+)\s*:[^<]*</h3>)', 2),
+    ]
+    files = [
+        # All detailed HTML files that should get Test_suite_info.
+        ("bsa_detailed.html", "Suite_Name: BSA"),
+        ("sbsa_detailed.html", "Suite_Name: SBSA"),
+        ("fwts_detailed.html", "Suite_Name: FWTS"),
+        ("sct_detailed.html", "Suite_Name: SCT"),
+        ("bbsr_fwts_detailed.html", "Suite_Name: BBSR-FWTS"),
+        ("bbsr_sct_detailed.html", "Suite_Name: BBSR-SCT"),
+        ("bbsr_tpm_detailed.html", "Suite_Name: BBSR-TPM"),
+        ("pfdi_detailed.html", "Suite_Name: PFDI"),
+        ("post_script_detailed.html", "Suite_Name: POST_SCRIPT"),
+        ("scmi_detailed.html", "Suite_Name: SCMI"),
+        ("sbmr_ib_detailed.html", "Suite_Name: SBMR-IB"),
+        ("sbmr_oob_detailed.html", "Suite_Name: SBMR-OOB"),
+        ("standalone_tests_detailed.html", "Suite_Name: Standalone"),
+        ("os_tests_detailed.html", "Suite_Name: OS Tests"),
+    ]
+
+    for filename, suite_key in files:
+        info_map = suite_map.get(suite_key)
+        if not info_map:
+            continue
+        file_path = os.path.join(output_dir, filename)
+        if not os.path.exists(file_path):
+            continue
+        with open(file_path, 'r') as file:
+            content = file.read()
+        updated = content
+        for pattern, name_group in patterns:
+            out = []
+            last = 0
+            for match in re.finditer(pattern, updated, re.IGNORECASE):
+                out.append(updated[last:match.end()])
+                suite_name = (match.group(name_group) or "").strip().lower()
+                info = info_map.get(suite_name)
+                if info is not None:
+                    # Avoid duplicating Test_suite_info in the same section.
+                    lookahead = updated[match.end():match.end() + 300]
+                    if "Test_suite_info" not in lookahead:
+                        block = (
+                            "<div class=\"test-suite-info\" "
+                            "style=\"margin: 6px 0 16px 0; color: #7f8c8d; font-size: 16px;\">"
+                            "<strong>Test_suite_info:</strong>"
+                            f"{fmt_info(info)}</div>"
+                        )
+                        out.append(block)
+                last = match.end()
+            out.append(updated[last:])
+            updated = "".join(out)
+        if updated != content:
+            with open(file_path, 'w') as file:
+                file.write(updated)
 
 def adjust_bbsr_headings(content, suite_name):
     if content:
@@ -937,3 +1037,6 @@ if __name__ == "__main__":
         args.OS_tests_summary_path,
         args.output_html_path
     )
+
+    # Inject Test_suite_info into detailed HTMLs (no change to suite parsers)
+    inject_test_suite_info(args.merged_json, os.path.dirname(args.output_html_path))

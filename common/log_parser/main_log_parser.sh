@@ -90,6 +90,7 @@ python3 "$SCRIPTS_PATH/acs_info.py" \
     --ipmitool_log "$IPMITOOL_LOG" \
     --output_dir "$JSONS_DIR"
 echo ""
+printf "Test category: %s\n\n" "$test_category"
 
 # Check if waiver.json is provided
 if [ -n "$WAIVER_JSON" ]; then
