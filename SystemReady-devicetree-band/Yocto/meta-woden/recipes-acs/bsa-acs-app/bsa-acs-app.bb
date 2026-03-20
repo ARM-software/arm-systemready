@@ -13,7 +13,7 @@ TARGET_CC_ARCH += "${LDFLAGS}"
 do_compile() {
     cd  ${S}/sysarch-acs/apps/linux/bsa-acs-app
     cp  ${S}/sysarch-acs/val/src/rule_enum_string_map.c .
-    ${CC} *.c -Iinclude -I${S}/sysarch-acs/ -I${S}/sysarch-acs/val -o ${S}/bsa
+    ${CC} *.c -Iinclude -I${S}/sysarch-acs -I${S}/sysarch-acs/val/include -o ${S}/bsa
 }
 
 do_install() {
