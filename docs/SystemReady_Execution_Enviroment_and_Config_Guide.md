@@ -32,16 +32,17 @@ automation_scrt_run = true
 [BSA]
 automation_bsa_run = true
 bsa_modules = 
-bsa_tests = 
-bsa_skip = 1500
+bsa_level = 1
+bsa_select_rules = 
+bsa_skip_rules = 
 bsa_verbose = 3
 
 [SBSA]
 automation_sbsa_run = false
 sbsa_modules = 
 sbsa_level = 4
-sbsa_tests = 
-sbsa_skip = 1500
+sbsa_select_rules = 
+sbsa_skip_rules = 
 sbsa_verbose = 3
 
 [FWTS]

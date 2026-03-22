@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2025-2026, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,7 @@
  typedef struct {
      BOOLEAN BsaEnabled;
      CHAR16* BsaModules;
+     CHAR16 *BsaLevel;
      CHAR16* BsaTests;
      CHAR16* BsaSkip;
      CHAR16* BsaVerbose;
@@ -265,6 +266,7 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
      // Initialize BSA config
      BsaConfig->BsaEnabled = FALSE;
      BsaConfig->BsaModules = NULL;
+     BsaConfig->BsaLevel = NULL;
      BsaConfig->BsaTests = NULL;
      BsaConfig->BsaSkip = NULL;
      BsaConfig->BsaVerbose = NULL;
@@ -371,12 +373,17 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
                          if (BsaConfig->BsaModules != NULL) {
                              StrCpyS(BsaConfig->BsaModules, (StrLen(Value) + 1), Value);
                          }
-                     } else if (StrnCmp(Key, L"bsa_tests", 9) == 0) {
+                     } else if (StrnCmp(Key, L"bsa_level", 10) == 0) {
+                         BsaConfig->BsaLevel = AllocatePool((StrLen(Value) + 1) * sizeof(CHAR16));
+                         if (BsaConfig->BsaLevel != NULL) {
+                             StrCpyS(BsaConfig->BsaLevel, (StrLen(Value) + 1), Value);
+                         }
+                     } else if (StrnCmp(Key, L"bsa_select_rules", 9) == 0) {
                          BsaConfig->BsaTests = AllocatePool((StrLen(Value) + 1) * sizeof(CHAR16));
                          if (BsaConfig->BsaTests != NULL) {
                              StrCpyS(BsaConfig->BsaTests, (StrLen(Value) + 1), Value);
                          }
-                     } else if (StrnCmp(Key, L"bsa_skip", 8) == 0) {
+                     } else if (StrnCmp(Key, L"bsa_skip_rules", 8) == 0) {
                          BsaConfig->BsaSkip = AllocatePool((StrLen(Value) + 1) * sizeof(CHAR16));
                          if (BsaConfig->BsaSkip != NULL) {
                              StrCpyS(BsaConfig->BsaSkip, (StrLen(Value) + 1), Value);
@@ -415,6 +422,9 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
          if (BsaConfig->BsaModules != NULL && *BsaConfig->BsaModules != L'\0') {
              CommandStringLength += StrLen(L" -m ") + StrLen(BsaConfig->BsaModules);
          }
+         if (BsaConfig->BsaLevel != NULL && *BsaConfig->BsaLevel != L'\0') {
+             CommandStringLength += StrLen(L" -l ") + StrLen(BsaConfig->BsaLevel);
+         }
          if (BsaConfig->BsaTests != NULL && *BsaConfig->BsaTests != L'\0') {
              CommandStringLength += StrLen(L" -t ") + StrLen(BsaConfig->BsaTests);
          }
@@ -437,6 +447,10 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
          if (BsaConfig->BsaModules != NULL && *BsaConfig->BsaModules != L'\0') {
              StrCatS(CommandString, CommandStringLength, L" -m ");
              StrCatS(CommandString, CommandStringLength, BsaConfig->BsaModules);
+         }
+         if (BsaConfig->BsaLevel != NULL && *BsaConfig->BsaLevel != L'\0') {
+             StrCatS(CommandString, CommandStringLength, L" -l ");
+             StrCatS(CommandString, CommandStringLength, BsaConfig->BsaLevel);
          }
          if (BsaConfig->BsaTests != NULL && *BsaConfig->BsaTests != L'\0') {
              StrCatS(CommandString, CommandStringLength, L" -t ");
@@ -504,16 +518,19 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
      if (BsaCommandString == NULL) {
          Print(L"Failed to generate BSA command string\n");
          if (BsaConfig->BsaModules != NULL && *BsaConfig->BsaModules != L'\0') {
-         FreePool(BsaConfig->BsaModules);
+             FreePool(BsaConfig->BsaModules);
+         }
+         if (BsaConfig->BsaLevel != NULL && *BsaConfig->BsaLevel != L'\0') {
+             FreePool(BsaConfig->BsaLevel);
          }
          if (BsaConfig->BsaTests != NULL && *BsaConfig->BsaTests != L'\0') {
-         FreePool(BsaConfig->BsaTests);
+             FreePool(BsaConfig->BsaTests);
          }
          if (BsaConfig->BsaSkip != NULL && *BsaConfig->BsaSkip != L'\0') {
-         FreePool(BsaConfig->BsaSkip);
+             FreePool(BsaConfig->BsaSkip);
          }
          if (BsaConfig->BsaVerbose != NULL && *BsaConfig->BsaVerbose != L'\0') {
-         FreePool(BsaConfig->BsaVerbose);
+             FreePool(BsaConfig->BsaVerbose);
          }
          FreePool(BsaConfig);
          FreePool(ConfigFileContent);
@@ -563,16 +580,19 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
      // Clean up
      //FreePool(BsaCommandString);
      if (BsaConfig->BsaModules != NULL && *BsaConfig->BsaModules != L'\0') {
-     FreePool(BsaConfig->BsaModules);
+         FreePool(BsaConfig->BsaModules);
+     }
+     if (BsaConfig->BsaLevel != NULL && *BsaConfig->BsaLevel != L'\0') {
+         FreePool(BsaConfig->BsaLevel);
      }
      if (BsaConfig->BsaTests != NULL && *BsaConfig->BsaTests != L'\0') {
-     FreePool(BsaConfig->BsaTests);
+         FreePool(BsaConfig->BsaTests);
      }
      if (BsaConfig->BsaSkip != NULL && *BsaConfig->BsaSkip != L'\0') {
-     FreePool(BsaConfig->BsaSkip);
+         FreePool(BsaConfig->BsaSkip);
      }
      if (BsaConfig->BsaVerbose != NULL && *BsaConfig->BsaVerbose != L'\0') {
-     FreePool(BsaConfig->BsaVerbose);
+         FreePool(BsaConfig->BsaVerbose);
      }
      FreePool(BsaConfig);
      FreePool(ConfigFileContent);
@@ -637,19 +657,19 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
      {
          Print(L"Failed to generate SBSA command string\n");
          if (SbsaConfig->SbsaModules != NULL && *SbsaConfig->SbsaModules != L'\0') {
-         FreePool(SbsaConfig->SbsaModules);
+             FreePool(SbsaConfig->SbsaModules);
          }
          if (SbsaConfig->SbsaLevel != NULL && *SbsaConfig->SbsaLevel != L'\0') {
-         FreePool(SbsaConfig->SbsaLevel);
+             FreePool(SbsaConfig->SbsaLevel);
          }
          if (SbsaConfig->SbsaTests != NULL && *SbsaConfig->SbsaTests != L'\0') {
-         FreePool(SbsaConfig->SbsaTests);
+             FreePool(SbsaConfig->SbsaTests);
          }
          if (SbsaConfig->SbsaSkip != NULL && *SbsaConfig->SbsaSkip != L'\0') {
-         FreePool(SbsaConfig->SbsaSkip);
+             FreePool(SbsaConfig->SbsaSkip);
          }
          if (SbsaConfig->SbsaVerboseMode != NULL && *SbsaConfig->SbsaVerboseMode != L'\0') {
-         FreePool(SbsaConfig->SbsaVerboseMode);
+             FreePool(SbsaConfig->SbsaVerboseMode);
          }
          FreePool(SbsaConfig);
          FreePool(ConfigFileContent);
@@ -703,19 +723,19 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
      // Clean up
      //FreePool(SbsaCommandString);
      if (SbsaConfig->SbsaModules != NULL && *SbsaConfig->SbsaModules != L'\0') {
-     FreePool(SbsaConfig->SbsaModules);
+         FreePool(SbsaConfig->SbsaModules);
      }
      if (SbsaConfig->SbsaLevel != NULL && *SbsaConfig->SbsaLevel != L'\0') {
-     FreePool(SbsaConfig->SbsaLevel);
+         FreePool(SbsaConfig->SbsaLevel);
      }
      if (SbsaConfig->SbsaTests != NULL && *SbsaConfig->SbsaTests != L'\0') {
-     FreePool(SbsaConfig->SbsaTests);
+         FreePool(SbsaConfig->SbsaTests);
      }
      if (SbsaConfig->SbsaSkip != NULL && *SbsaConfig->SbsaSkip != L'\0') {
-     FreePool(SbsaConfig->SbsaSkip);
+         FreePool(SbsaConfig->SbsaSkip);
      }
      if (SbsaConfig->SbsaVerboseMode != NULL && *SbsaConfig->SbsaVerboseMode != L'\0') {
-     FreePool(SbsaConfig->SbsaVerboseMode);
+         FreePool(SbsaConfig->SbsaVerboseMode);
      }
      FreePool(SbsaConfig);
      FreePool(ConfigFileContent);
@@ -872,7 +892,7 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
                              StrCpyS(SbsaConfig->SbsaLevel, (StrLen(Value) + 1), Value);
                          }
                      }
-                     else if (StrnCmp(Key, L"sbsa_tests", 10) == 0)
+                     else if (StrnCmp(Key, L"sbsa_select_rules", 10) == 0)
                      {
                          SbsaConfig->SbsaTests = AllocatePool((StrLen(Value) + 1) * sizeof(CHAR16));
                          if (SbsaConfig->SbsaTests != NULL)
@@ -880,7 +900,7 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
                              StrCpyS(SbsaConfig->SbsaTests, (StrLen(Value) + 1), Value);
                          }
                      }
-                     else if (StrnCmp(Key, L"sbsa_skip", 9) == 0)
+                     else if (StrnCmp(Key, L"sbsa_skip_rules", 9) == 0)
                      {
                          SbsaConfig->SbsaSkip = AllocatePool((StrLen(Value) + 1) * sizeof(CHAR16));
                          if (SbsaConfig->SbsaSkip != NULL)
@@ -941,11 +961,6 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
          if (SbsaConfig->SbsaVerboseMode != NULL && *SbsaConfig->SbsaVerboseMode != L'\0') {
              CommandStringLength += StrLen(L" -v ") + StrLen(SbsaConfig->SbsaVerboseMode);
          }
-         //                      StrLen(L" -m ") + StrLen(SbsaConfig->SbsaModules) +
-         //                      StrLen(L" -l ") + StrLen(SbsaConfig->SbsaLevel) +
-         //                      StrLen(L" -t ") + StrLen(SbsaConfig->SbsaTests) +
-         //                      StrLen(L" -skip ") + StrLen(SbsaConfig->SbsaSkip) +
-         //                      StrLen(L" ") + StrLen(SbsaConfig->SbsaVerboseMode) + 1;
  
          CommandString = AllocatePool(CommandStringLength * sizeof(CHAR16));
          if (CommandString == NULL)
@@ -955,24 +970,24 @@ INTN EFIAPI run_bbsr_sct_logic(UINTN Argc, IN CHAR16 **Argv);
  
          StrCpyS(CommandString, CommandStringLength, L"sbsa.efi");
          if (SbsaConfig->SbsaModules != NULL && *SbsaConfig->SbsaModules != L'\0') {
-         StrCatS(CommandString, CommandStringLength, L" -m ");
-         StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaModules);
+             StrCatS(CommandString, CommandStringLength, L" -m ");
+             StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaModules);
          }
          if (SbsaConfig->SbsaLevel != NULL && *SbsaConfig->SbsaLevel != L'\0') {
-         StrCatS(CommandString, CommandStringLength, L" -l ");
-         StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaLevel);
+             StrCatS(CommandString, CommandStringLength, L" -l ");
+             StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaLevel);
          }
          if (SbsaConfig->SbsaTests != NULL && *SbsaConfig->SbsaTests != L'\0') {
-         StrCatS(CommandString, CommandStringLength, L" -t ");
-         StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaTests);
+             StrCatS(CommandString, CommandStringLength, L" -t ");
+             StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaTests);
          }
          if (SbsaConfig->SbsaSkip != NULL && *SbsaConfig->SbsaSkip != L'\0') {
-         StrCatS(CommandString, CommandStringLength, L" -skip ");
-         StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaSkip);
+             StrCatS(CommandString, CommandStringLength, L" -skip ");
+             StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaSkip);
          }
          if (SbsaConfig->SbsaVerboseMode != NULL && *SbsaConfig->SbsaVerboseMode != L'\0') {
-         StrCatS(CommandString, CommandStringLength, L" -v ");
-         StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaVerboseMode);
+             StrCatS(CommandString, CommandStringLength, L" -v ");
+             StrCatS(CommandString, CommandStringLength, SbsaConfig->SbsaVerboseMode);
          }
      }
  
