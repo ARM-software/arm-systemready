@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ if [ "$automation_enabled" == "True" ] &&  [ "$sbsa_enabled" == "False" ]; then
 else
   if [ -f  /lib/modules/sbsa_acs.ko ]; then
     insmod /lib/modules/sbsa_acs.ko
-    echo "SystemReady band ACS v3.1.1 RC-final" > /mnt/acs_results/linux/SbsaResultsApp.log
+    echo "SystemReady band ACS v3.1.1" > /mnt/acs_results/linux/SbsaResultsApp.log
     if [ "$automation_enabled" == "False" ]; then
       /bin/sbsa --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
     else
