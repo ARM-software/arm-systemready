@@ -53,7 +53,7 @@ insmod /lib/modules/cppc_cpufreq.ko
 
 sleep 5
 
-SR_VERSION="SystemReady band ACS v3.1.1 RC-final"
+SR_VERSION="SystemReady band ACS v3.1.1"
 
 #Skip running of ACS Tests if the grub option is added
 ADDITIONAL_CMD_OPTION="";

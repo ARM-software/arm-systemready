@@ -6,7 +6,7 @@ index 4458fe5..80f964c 100644
          goto exit_acs;
      }
  
-+    val_print(ACS_PRINT_TEST, "\n\n SystemReady band ACS v3.1.1 RC-final", 0);
++    val_print(ACS_PRINT_TEST, "\n\n SystemReady band ACS v3.1.1", 0);
      val_print(ACS_PRINT_TEST, "\n\n BSA Architecture Compliance Suite", 0);
      val_print(ACS_PRINT_TEST, "\n          Version %d.", BSA_ACS_MAJOR_VER);
      val_print(ACS_PRINT_TEST, "%d.", BSA_ACS_MINOR_VER);
