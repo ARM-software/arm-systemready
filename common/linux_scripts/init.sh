@@ -334,7 +334,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     fi
     if [ -d "/mnt/acs_results/acs_summary/html_detailed_summaries" ]; then
         rm -r /mnt/acs_results/acs_summary/html_detailed_summaries
-        rm /mnt/acs_results/acs_summary/acs_summary
     fi
     /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
     sync /mnt
