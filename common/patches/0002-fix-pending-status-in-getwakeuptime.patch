@@ -1,0 +1,15 @@
+diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
+index 9e2628728aad..77b5f7ac3e20 100644
+--- a/drivers/firmware/efi/test/efi_test.c
++++ b/drivers/firmware/efi/test/efi_test.c
+@@ -361,6 +361,10 @@ static long efi_runtime_get_waketime(unsigned long arg)
+ 						getwakeuptime.enabled))
+ 		return -EFAULT;
+ 
++	if (getwakeuptime.pending && put_user(pending,
++						getwakeuptime.pending))
++		return -EFAULT;
++
+ 	if (getwakeuptime.time) {
+ 		if (copy_to_user(getwakeuptime.time, &efi_time,
+ 				sizeof(efi_time_t)))
