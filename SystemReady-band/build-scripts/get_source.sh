@@ -138,13 +138,13 @@ get_sct_src()
 
 get_linux-acs_src()
 {
-  if [ -z $ARM_LINUX_ACS_TAG ]; then
-      echo "Downloading Arm Linux ACS source code."
-      git clone --depth 1 https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
-  else
-      echo "Downloading Arm Linux ACS source code. TAG : ${ARM_LINUX_ACS_TAG}"
-      git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
-  fi
+    if [ -z $ARM_LINUX_ACS_TAG ]; then
+        echo "Downloading Arm Linux ACS source code."
+        git clone --depth 1 https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
+    else
+        echo "Downloading Arm Linux ACS source code. TAG : ${ARM_LINUX_ACS_TAG}"
+        git clone --depth 1 --branch ${ARM_LINUX_ACS_TAG} https://gitlab.arm.com/linux-arm/linux-acs.git linux-acs
+    fi
 
     pushd $TOP_DIR/linux-${LINUX_KERNEL_VERSION}
     git am $TOP_DIR/../common/patches/0001-SystemReady-Linux-${LINUX_KERNEL_VERSION}.patch
@@ -153,6 +153,9 @@ get_linux-acs_src()
     # The below patch is only for linux 6.12 for resolving the USB 3.0 related crash during linux boot
     # For linux version greater than 6.12, this patch is not needed.
     git am $TOP_DIR/patches/0001-xhci-restrict-usb4-tunnel-detection.patch
+    # Below patch is for 6.12 linux version.
+    # For linux version greater than 6.16, this patch is not needed.
+    git apply $TOP_DIR/../common/patches/0002-fix-pending-status-in-getwakeuptime.patch
 
     #apply patches to linux source
     if [ $LINUX_KERNEL_VERSION == "6.4" ]; then
@@ -224,13 +227,13 @@ get_buildroot_src()
 
 get_efitools_src()
 {
-  if [ -z $EFITOOLS_SRC_TAG ]; then
-      echo "Downloading EFI tools source code."
-      git clone --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
-  else
-      echo "Downloading EFI tools source code. TAG : ${EFITOOLS_SRC_TAG}"
-      git clone --depth 1 --branch ${EFITOOLS_SRC_TAG} https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
-  fi
+    if [ -z $EFITOOLS_SRC_TAG ]; then
+        echo "Downloading EFI tools source code."
+        git clone --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
+    else
+        echo "Downloading EFI tools source code. TAG : ${EFITOOLS_SRC_TAG}"
+        git clone --depth 1 --branch ${EFITOOLS_SRC_TAG} https://kernel.googlesource.com/pub/scm/linux/kernel/git/jejb/efitools
+    fi
 }
 
 get_edk2-test-parser_src()
@@ -267,11 +270,11 @@ get_systemready_scripts()
 source /etc/lsb-release
 
 sudo apt install git curl mtools gdisk gcc \
- openssl automake autotools-dev libtool bison flex\
- bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
- make g++ build-essential wget gettext dosfstools unzip \
- sbsigntool uuid-runtime monkeysphere gnu-efi \
- libfile-slurp-perl help2man libbsd-dev -y
+    openssl automake autotools-dev libtool bison flex\
+    bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
+    make g++ build-essential wget gettext dosfstools unzip \
+    sbsigntool uuid-runtime monkeysphere gnu-efi \
+    libfile-slurp-perl help2man libbsd-dev -y
 
 REL="${DISTRIB_RELEASE//[!0-9]/}"
 MAJORREL=${REL:0:2}
@@ -285,7 +288,7 @@ fi
 
 init_dir()
 {
- mkdir -p $TOP_DIR/output
+    mkdir -p $TOP_DIR/output
 }
 
 init_dir
