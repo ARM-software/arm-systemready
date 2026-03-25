@@ -238,6 +238,13 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
 
         <div class="result-summary">
             <h2>Result Summary</h2>
+            {% if not is_summary_page %}
+            <p style="text-align: center; font-weight: bold;">
+                For details on Rule Results Status, refer to -
+                <br>
+                <a href="https://github.com/ARM-software/sysarch-acs/blob/main/docs/common/RuleBasedGuide.md#rule-status-in-logs" target="_blank" rel="noopener noreferrer">https://github.com/ARM-software/sysarch-acs/blob/main/docs/common/RuleBasedGuide.md#rule-status-in-logs</a>
+            </p>
+            {% endif %}
             <table class="summary-table">
                 <thead>
                     <tr>
