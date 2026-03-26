@@ -246,7 +246,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     fi
   fi
 
-
   # Linux SBSA Execution
   echo "Running Linux SBSA tests"
   if [ "$automation_enabled" == "True" ]; then
@@ -257,8 +256,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       if [ -f  /lib/modules/sbsa_acs.ko ]; then
         insmod /lib/modules/sbsa_acs.ko
         echo "${SR_VERSION}" > /mnt/acs_results/linux/SbsaResultsApp.log
-        echo "Running command $sbsa_command --skip S_L3_01,PCI_MM_03 --skip-dp-nic-ms"
-        $sbsa_command --skip S_L3_01,PCI_MM_03 --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
+        echo "Running command $sbsa_command --skip PCI_MM_03 --skip-dp-nic-ms"
+        $sbsa_command --skip PCI_MM_03 --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
         dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
         sync /mnt
         sleep 5
