@@ -1,0 +1,208 @@
+suites:
+  - name: generate_acs_summary
+    files:
+      - common/log_parser/generate_acs_summary.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: cli_requires_many_inputs
+        type: cli
+        args: []
+        expect_exit_nonzero: true
+
+      - name: cli_generates_html_with_summary_sections
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+
+            cat > bsa.html <<'EOF'
+            <h2>Result Summary</h2><div>BSA content</div>
+            EOF
+            cat > sbsa.html <<'EOF'
+            <div>SBSA content</div>
+            EOF
+            cat > fwts.html <<'EOF'
+            <div>FWTS content</div>
+            EOF
+            cat > sct.html <<'EOF'
+            <div>SCT content</div>
+            EOF
+            cat > bbsr_fwts.html <<'EOF'
+            <div>BBSR FWTS content</div>
+            EOF
+            cat > bbsr_sct.html <<'EOF'
+            <div>BBSR SCT content</div>
+            EOF
+            cat > bbsr_tpm.html <<'EOF'
+            <div>BBSR TPM content</div>
+            EOF
+            cat > pfdi.html <<'EOF'
+            <div>PFDI content</div>
+            EOF
+            cat > post_script.html <<'EOF'
+            <div>POST content</div>
+            EOF
+            cat > standalone.html <<'EOF'
+            <div>Standalone content</div>
+            EOF
+            cat > os_tests.html <<'EOF'
+            <div>OS Tests content</div>
+            EOF
+            cat > capsule.html <<'EOF'
+            <div>Capsule content</div>
+            EOF
+            cat > sbmr_ib.html <<'EOF'
+            <div>SBMR IB content</div>
+            EOF
+            cat > sbmr_oob.html <<'EOF'
+            <div>SBMR OOB content</div>
+            EOF
+            cat > scmi.html <<'EOF'
+            <div>SCMI content</div>
+            EOF
+
+            cat > acs_info.json <<'EOF'
+            {
+              "System Info": {
+                "Vendor": "VendorZ",
+                "System Name": "SystemZ",
+                "SoC Family": "FamilyZ",
+                "Firmware Version": "FW-Z",
+                "BMC Firmware Version": "BMC-1"
+              }
+            }
+            EOF
+
+            cat > merged.json <<'EOF'
+            {
+              "ACS Results Summary": {
+                "Overall Compliance Result": "Compliant",
+                "BBSR compliance results": "Compliant",
+                "SCMI compliance results": "Compliant"
+              }
+            }
+            EOF
+
+            python3 "$1" \
+              --merged_json "$PWD/merged.json" \
+              "$PWD/bsa.html" \
+              "$PWD/sbsa.html" \
+              "$PWD/fwts.html" \
+              "$PWD/sct.html" \
+              "$PWD/bbsr_fwts.html" \
+              "$PWD/bbsr_sct.html" \
+              "$PWD/bbsr_tpm.html" \
+              "$PWD/pfdi.html" \
+              "$PWD/post_script.html" \
+              "$PWD/standalone.html" \
+              "$PWD/os_tests.html" \
+              "$PWD/capsule.html" \
+              "$PWD/sbmr_ib.html" \
+              "$PWD/sbmr_oob.html" \
+              "$PWD/scmi.html" \
+              "$PWD/summary.html" \
+              --acs_info_json "$PWD/acs_info.json"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "BSA content"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "FWTS content"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "SCMI content"
+          - type: file_not_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+
+      - name: cli_without_merged_json_still_generates_html
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            for f in bsa sbsa fwts sct bbsr_fwts bbsr_sct bbsr_tpm pfdi post_script standalone os_tests capsule sbmr_ib sbmr_oob scmi; do
+              printf '<div>%s</div>\n' "$f" > "$f.html"
+            done
+
+            python3 "$1" \
+              "$PWD/bsa.html" \
+              "$PWD/sbsa.html" \
+              "$PWD/fwts.html" \
+              "$PWD/sct.html" \
+              "$PWD/bbsr_fwts.html" \
+              "$PWD/bbsr_sct.html" \
+              "$PWD/bbsr_tpm.html" \
+              "$PWD/pfdi.html" \
+              "$PWD/post_script.html" \
+              "$PWD/standalone.html" \
+              "$PWD/os_tests.html" \
+              "$PWD/capsule.html" \
+              "$PWD/sbmr_ib.html" \
+              "$PWD/sbmr_oob.html" \
+              "$PWD/scmi.html" \
+              "$PWD/summary.html"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "standalone"
+
+      - name: cli_removes_result_summary_headings_case_insensitively
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+
+            cat > bsa.html <<'EOF'
+            <h3>RESULT SUMMARY</h3><div>BSA</div>
+            EOF
+            for f in sbsa fwts sct bbsr_fwts bbsr_sct bbsr_tpm pfdi post_script standalone os_tests capsule sbmr_ib sbmr_oob scmi; do
+              printf '<div>%s</div>\n' "$f" > "$f.html"
+            done
+
+            python3 "$1" \
+              "$PWD/bsa.html" \
+              "$PWD/sbsa.html" \
+              "$PWD/fwts.html" \
+              "$PWD/sct.html" \
+              "$PWD/bbsr_fwts.html" \
+              "$PWD/bbsr_sct.html" \
+              "$PWD/bbsr_tpm.html" \
+              "$PWD/pfdi.html" \
+              "$PWD/post_script.html" \
+              "$PWD/standalone.html" \
+              "$PWD/os_tests.html" \
+              "$PWD/capsule.html" \
+              "$PWD/sbmr_ib.html" \
+              "$PWD/sbmr_oob.html" \
+              "$PWD/scmi.html" \
+              "$PWD/summary.html"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_contains
+            path: "{dir}/summary.html"
+            text: "RESULT SUMMARY"

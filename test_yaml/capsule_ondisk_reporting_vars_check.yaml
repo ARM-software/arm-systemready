@@ -1,0 +1,175 @@
+suites:
+  - name: capsule_ondisk_reporting_vars_check
+    files:
+      - common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: contains_required_imports
+        type: source_contains_all
+        patterns:
+          - "import os"
+          - "import re"
+          - "import struct"
+          - "import sys"
+
+      - name: contains_expected_attr_constants
+        type: source_contains_all
+        patterns:
+          - "EFI_VARIABLE_NON_VOLATILE"
+          - "EFI_VARIABLE_BOOTSERVICE_ACCESS"
+          - "EFI_VARIABLE_RUNTIME_ACCESS"
+          - "EXPECTED_ATTR_CAPSULE_MAX"
+          - "EXPECTED_ATTR_CAPSULE_LAST"
+          - "EXPECTED_ATTR_CAPSULE_NNNN"
+
+      - name: contains_guid_constants
+        type: source_contains_all
+        patterns:
+          - "CapsuleReportGuid"
+          - "GlobalVariableGuid"
+          - "EFI_OS_INDICATIONS_FILE_CAPSULE_DELIVERY_SUPPORTED"
+
+      - name: contains_path_and_regex_constants
+        type: source_contains_all
+        patterns:
+          - "EFIVAR_PATH ="
+          - "LOG_FILE ="
+          - "CAPSULE_NAME_RE = re.compile"
+
+      - name: contains_capsule_regex_pattern
+        type: source_contains
+        pattern: "r\"^Capsule[0-9A-Fa-f]{4}$\""
+
+      - name: contains_log_dir_creation
+        type: source_contains_any
+        patterns:
+          - "os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)"
+          - "_ensure_log_dir()"
+
+      - name: contains_file_open_append_logic
+        type: source_contains_all
+        patterns:
+          - "with open(LOG_FILE, \"a\", encoding=\"utf-8\") as f:"
+          - "f.write(msg + \"\\n\")"
+
+      - name: contains_status_strings
+        type: source_contains_all
+        patterns:
+          - "\"PASSED\""
+          - "\"WARNING\""
+
+      - name: contains_efi_varfs_usage
+        type: source_contains
+        pattern: "/sys/firmware/efi/efivars"
+
+      - name: contains_struct_unpack_logic
+        type: source_contains_any
+        patterns:
+          - "struct.unpack"
+          - "struct.unpack_from"
+
+      - name: contains_os_indications_supported_name
+        type: source_contains
+        pattern: "OsIndicationsSupported"
+
+      - name: contains_capsule_variable_names
+        type: source_contains_all
+        patterns:
+          - "CapsuleMax"
+          - "CapsuleLast"
+          - "CapsuleNNNN"
+
+      - name: contains_sorting_or_iteration_for_capsules
+        type: source_contains_any
+        patterns:
+          - "sorted("
+          - "for name in"
+          - "for var_name in"
+
+      - name: contains_log_messages
+        type: source_contains_any
+        patterns:
+          - "Capsule On-Disk Update Reporting"
+          - "CapsuleMax"
+          - "CapsuleLast"
+
+      - name: contains_exception_handling
+        type: source_contains_any
+        patterns:
+          - "except (OSError, IOError):"
+          - "except OSError:"
+          - "except IOError:"
+
+      - name: contains_functions_primary
+        type: function_exists_any
+        functions:
+          - "_ensure_log_dir"
+          - "log"
+          - "status"
+          - "read_efi_var"
+          - "decode_char16_11_no_nul"
+          - "os_indications_supports_ondisk"
+          - "log_attr_test"
+          - "check_capsulemax"
+          - "check_capsulelast"
+          - "check_capsule_nnnn"
+          - "main"
+
+      - name: contains_ensure_log_dir_function
+        type: function_exists
+        function: "_ensure_log_dir"
+
+      - name: contains_log_function
+        type: function_exists
+        function: "log"
+
+      - name: contains_status_function
+        type: function_exists
+        function: "status"
+
+      - name: contains_read_efi_var_function
+        type: function_exists
+        function: "read_efi_var"
+
+      - name: contains_decode_char16_function
+        type: function_exists
+        function: "decode_char16_11_no_nul"
+
+      - name: contains_os_indications_supports_ondisk_function
+        type: function_exists
+        function: "os_indications_supports_ondisk"
+
+      - name: contains_log_attr_test_function
+        type: function_exists
+        function: "log_attr_test"
+
+      - name: contains_check_capsulemax_function
+        type: function_exists
+        function: "check_capsulemax"
+
+      - name: contains_check_capsulelast_function
+        type: function_exists
+        function: "check_capsulelast"
+
+      - name: contains_check_capsule_nnnn_function
+        type: function_exists
+        function: "check_capsule_nnnn"
+
+      - name: contains_main_function
+        type: function_exists
+        function: "main"
+
+      - name: contains_sys_exit_main
+        type: source_contains_any
+        patterns:
+          - "sys.exit(main())"
+          - "raise SystemExit(main())"
+
+      - name: has_main_guard
+        type: main_guard

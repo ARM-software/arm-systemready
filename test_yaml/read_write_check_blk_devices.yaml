@@ -1,0 +1,240 @@
+suites:
+  - name: read_write_check_blk_devices
+    files:
+      - SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/read_write_check_blk_devices.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: contains_core_helpers
+        type: source_contains_all
+        patterns:
+          - "def input_with_timeout(prompt, timeout=5):"
+          - "def calculate_sha256(file_path):"
+          - "def get_partition_space(partition_path):"
+          - "def is_mounted(device):"
+          - "def is_mtd_block_device(device):"
+          - "def is_ram_disk(device):"
+          - "def perform_write_check(partition_label, partition_id, precious_parts):"
+          - "def get_partition_labels(disk):"
+
+      - name: has_main_guard
+        type: main_guard
+
+      - name: cli_no_disks_runs_cleanly
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            python3 - <<'PY' "$1"
+            import runpy
+            import subprocess
+            import sys
+            import builtins
+
+            target = sys.argv[1]
+
+            class R:
+                def __init__(self, returncode=0, stdout="", stderr=""):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = stderr
+
+            def normalize(cmd):
+                if isinstance(cmd, (list, tuple)):
+                    return " ".join(str(x) for x in cmd)
+                return str(cmd)
+
+            def fake_run(cmd, *args, **kwargs):
+                cmd_s = normalize(cmd)
+
+                if "lsblk -e 7 -d" in cmd_s:
+                    return R(0, "", "")
+
+                # Safe default: do not execute real storage/network commands.
+                return R(0, "", "")
+
+            subprocess.run = fake_run
+            builtins.input = lambda *a, **k: "n"
+
+            runpy.run_path(target, run_name="__main__")
+            PY
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Detected following block devices with lsblk command"
+
+      - name: cli_skips_mtd_and_ram_disks
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            python3 - <<'PY' "$1"
+            import runpy
+            import subprocess
+            import sys
+            import builtins
+
+            target = sys.argv[1]
+
+            class R:
+                def __init__(self, returncode=0, stdout="", stderr=""):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = stderr
+
+            def normalize(cmd):
+                if isinstance(cmd, (list, tuple)):
+                    return " ".join(str(x) for x in cmd)
+                return str(cmd)
+
+            def fake_run(cmd, *args, **kwargs):
+                cmd_s = normalize(cmd)
+
+                if "lsblk -e 7 -d" in cmd_s:
+                    return R(0, "mtdblock0\nram0\n", "")
+
+                if "findmnt" in cmd_s or "gdisk" in cmd_s or "fdisk" in cmd_s or "dd " in cmd_s:
+                    return R(0, "", "")
+
+                return R(0, "", "")
+
+            subprocess.run = fake_run
+            builtins.input = lambda *a, **k: "n"
+
+            runpy.run_path(target, run_name="__main__")
+            PY
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Skipping MTD block device /dev/mtdblock0"
+          - "Skipping RAM disk /dev/ram0"
+
+      - name: cli_raw_disk_block_read_success_and_no_write_prompt
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            python3 - <<'PY' "$1"
+            import runpy
+            import subprocess
+            import sys
+            import builtins
+
+            target = sys.argv[1]
+
+            class R:
+                def __init__(self, returncode=0, stdout="", stderr=""):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = stderr
+
+            def normalize(cmd):
+                if isinstance(cmd, (list, tuple)):
+                    return " ".join(str(x) for x in cmd)
+                return str(cmd)
+
+            def fake_run(cmd, *args, **kwargs):
+                cmd_s = normalize(cmd)
+
+                if "lsblk -e 7 -d" in cmd_s:
+                    return R(0, "sda\n", "")
+                if "gdisk -l /dev/sda" in cmd_s:
+                    return R(0, "no partition table here\n", "")
+                if "lsblk -rn -o NAME,TYPE /dev/sda | grep -c part" in cmd_s:
+                    return R(0, "0\n", "")
+                if "dd if=/dev/sda bs=1M count=1" in cmd_s:
+                    return R(0, "", "")
+                if "findmnt -n /dev/sda" in cmd_s:
+                    return R(1, "", "")
+
+                return R(0, "", "")
+
+            subprocess.run = fake_run
+            builtins.input = lambda *a, **k: "n"
+
+            runpy.run_path(target, run_name="__main__")
+            PY
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "No valid partition table found for sda, treating as raw device."
+          - "Performing block read on /dev/sda"
+          - "Block read on /dev/sda successful"
+
+      - name: cli_mbr_precious_partition_is_skipped
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            python3 - <<'PY' "$1"
+            import runpy
+            import subprocess
+            import sys
+            import builtins
+
+            target = sys.argv[1]
+
+            fdisk_out = """Disk /dev/sda: 16 GiB
+            Device     Boot Start    End Sectors Size Id Type
+            /dev/sda1  *    2048 206847 204800 100M ef EFI System
+            """
+
+            class R:
+                def __init__(self, returncode=0, stdout="", stderr=""):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = stderr
+
+            def normalize(cmd):
+                if isinstance(cmd, (list, tuple)):
+                    return " ".join(str(x) for x in cmd)
+                return str(cmd)
+
+            def fake_run(cmd, *args, **kwargs):
+                cmd_s = normalize(cmd)
+
+                if "lsblk -e 7 -d" in cmd_s:
+                    return R(0, "sda\n", "")
+                if "gdisk -l /dev/sda" in cmd_s:
+                    return R(0, "MBR: MBR only\n", "")
+                if "lsblk -rn -o NAME,TYPE /dev/sda | grep -c part" in cmd_s:
+                    return R(0, "1\n", "")
+                if "lsblk -rn -o NAME,TYPE /dev/sda | awk '/part/ {print $1}'" in cmd_s:
+                    return R(0, "sda1\n", "")
+                if "fdisk -l /dev/sda" in cmd_s:
+                    return R(0, fdisk_out, "")
+                if "df -B 512 /dev/sda1 --output=used,avail" in cmd_s:
+                    return R(0, "Used Avail\n10 20\n", "")
+                if "findmnt" in cmd_s or "dd " in cmd_s:
+                    return R(0, "", "")
+
+                return R(0, "", "")
+
+            subprocess.run = fake_run
+            builtins.input = lambda *a, **k: "n"
+
+            runpy.run_path(target, run_name="__main__")
+            PY
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Partition table type : MBR"
+          - "sda1 partition is PRECIOUS"
+          - "Skipping block read/write"

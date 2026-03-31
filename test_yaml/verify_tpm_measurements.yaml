@@ -1,0 +1,540 @@
+suites:
+  - name: verify_tpm_measurements
+    files:
+      - common/linux_scripts/verify_tpm_measurements.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: cli_no_args_fails
+        type: cli
+        args: []
+        expect_exit_code: 1
+        expect_stdout_or_stderr_contains:
+          - "Usage: python3 verify_tpm_measurements.py"
+
+      - name: cli_one_arg_fails
+        type: cli
+        args:
+          - "{dir}/pcr.yaml"
+        expect_exit_code: 1
+        expect_stdout_or_stderr_contains:
+          - "Usage: python3 verify_tpm_measurements.py"
+
+      - name: cli_missing_files_fail_nonzero
+        type: cli
+        args:
+          - "{dir}/missing_pcr.yaml"
+          - "{dir}/missing_event.yaml"
+        expect_exit_nonzero: true
+        expect_stdout_or_stderr_contains:
+          - "FAIL"
+
+      - name: cli_invalid_event_yaml_fails
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > pcr.yaml <<'EOF'
+            sha256:
+              - "a0"
+              - "a1"
+              - "a2"
+              - "a3"
+              - "a4"
+              - "a5"
+              - "a6"
+              - "a7"
+            EOF
+            cat > event.yaml <<'EOF'
+            not: [valid
+            EOF
+            python3 "$1" "$PWD/pcr.yaml" "$PWD/event.yaml"
+        args:
+          - "{file}"
+        expect_exit_nonzero: true
+        expect_stdout_or_stderr_contains:
+          - "FAIL"
+
+      - name: cli_all_required_measurements_pass
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+
+            cat > pcr.yaml <<'EOF'
+            sha256:
+              - "pcr0"
+              - "pcr1"
+              - "pcr2"
+              - "pcr3"
+              - "pcr4"
+              - "pcr5"
+              - "pcr6"
+              - "pcr7"
+            EOF
+
+            cat > event.yaml <<'EOF'
+            pcrs:
+              sha256:
+                - "pcr0"
+                - "pcr1"
+                - "pcr2"
+                - "pcr3"
+                - "pcr4"
+                - "pcr5"
+                - "pcr6"
+                - "pcr7"
+
+            events:
+              - EventNum: 1
+                PCRIndex: 0
+                EventType: EV_NO_ACTION
+                SpecID:
+                  - specVersionMajor: 2
+
+              - EventNum: 2
+                PCRIndex: 0
+                EventType: EV_POST_CODE
+                Event: "BL_31"
+
+              - EventNum: 3
+                PCRIndex: 0
+                EventType: EV_POST_CODE
+                Event: "SECURE_RT_EL3"
+
+              - EventNum: 4
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: SecureBoot
+
+              - EventNum: 5
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: PK
+
+              - EventNum: 6
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: KEK
+
+              - EventNum: 7
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: db
+
+              - EventNum: 8
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: dbx
+
+              - EventNum: 9
+                PCRIndex: 1
+                EventType: EV_EFI_VARIABLE_BOOT
+                Event:
+                  UnicodeName: BootOrder
+
+              - EventNum: 10
+                PCRIndex: 1
+                EventType: EV_EFI_VARIABLE_BOOT2
+                Event:
+                  UnicodeName: Boot0001
+
+              - EventNum: 11
+                PCRIndex: 4
+                EventType: EV_EFI_ACTION
+                Event: "Calling EFI Application from Boot Option"
+
+              - EventNum: 12
+                PCRIndex: 1
+                EventType: EV_EFI_HANDOFF_TABLES
+                Event: "SMBIOS"
+
+              - EventNum: 13
+                PCRIndex: 0
+                EventType: EV_SEPARATOR
+                Event: "sep0"
+
+              - EventNum: 14
+                PCRIndex: 1
+                EventType: EV_SEPARATOR
+                Event: "sep1"
+
+              - EventNum: 15
+                PCRIndex: 2
+                EventType: EV_SEPARATOR
+                Event: "sep2"
+
+              - EventNum: 16
+                PCRIndex: 3
+                EventType: EV_SEPARATOR
+                Event: "sep3"
+
+              - EventNum: 17
+                PCRIndex: 4
+                EventType: EV_SEPARATOR
+                Event: "sep4"
+
+              - EventNum: 18
+                PCRIndex: 5
+                EventType: EV_SEPARATOR
+                Event: "sep5"
+
+              - EventNum: 19
+                PCRIndex: 6
+                EventType: EV_SEPARATOR
+                Event: "sep6"
+
+              - EventNum: 20
+                PCRIndex: 7
+                EventType: EV_SEPARATOR
+                Event: "sep7"
+
+              - EventNum: 21
+                PCRIndex: 1
+                EventType: EV_TABLE_OF_DEVICES
+                Event: "SYS_CONFIG_UART0"
+
+              - EventNum: 22
+                PCRIndex: 5
+                EventType: EV_EFI_ACTION
+                Event: "Exit Boot Services Invocation"
+            EOF
+
+            python3 "$1" "$PWD/pcr.yaml" "$PWD/event.yaml"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7"
+          - "Verify the first event is the EV_NO_ACTION for the Specification ID version"
+          - "Verify EV_POST_CODE events for measurements of firmware to PCR[0] with recommended strings"
+          - "Verify secure boot policy measurements are made into PCR[7] with EV_EFI_VARIABLE_DRIVER_CONFIG"
+          - "Verify BootOrder and Boot#### variables are measured in PCR[1] withEV_EFI_VARIABLE_BOOT/EV_EFI_VARIABLE_BOOT2"
+          - "Verify boot attempts measured in PCR[4] with EV_EFI_ACTION event type"
+          - "Verify security relevant configuration data are measured in into PCR[1] with EV_EFI_HANDOFF_TABLES"
+          - "Verify presence of EV_SEPARATOR event for each PCR"
+          - "Verify EV_TABLE_OF_DEVICES events for measurements of config data to PCR[1] with recommended strings"
+          - "Verify presence of “Exit Boot Services Invocation” event with EV_EFI_ACTION type"
+          - "PASS"
+
+      - name: cli_pcr_mismatch_reports_fail_but_runs
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+
+            cat > pcr.yaml <<'EOF'
+            sha256:
+              - "good0"
+              - "good1"
+              - "good2"
+              - "good3"
+              - "good4"
+              - "good5"
+              - "good6"
+              - "good7"
+            EOF
+
+            cat > event.yaml <<'EOF'
+            pcrs:
+              sha256:
+                - "good0"
+                - "bad1"
+                - "good2"
+                - "good3"
+                - "good4"
+                - "good5"
+                - "good6"
+                - "good7"
+
+            events:
+              - EventNum: 1
+                PCRIndex: 0
+                EventType: EV_NO_ACTION
+                SpecID:
+                  - specVersionMajor: 2
+
+              - EventNum: 2
+                PCRIndex: 0
+                EventType: EV_POST_CODE
+                Event: "BL_31"
+
+              - EventNum: 3
+                PCRIndex: 0
+                EventType: EV_POST_CODE
+                Event: "SECURE_RT_EL3"
+
+              - EventNum: 4
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: SecureBoot
+
+              - EventNum: 5
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: PK
+
+              - EventNum: 6
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: KEK
+
+              - EventNum: 7
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: db
+
+              - EventNum: 8
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: dbx
+
+              - EventNum: 9
+                PCRIndex: 1
+                EventType: EV_EFI_VARIABLE_BOOT
+                Event:
+                  UnicodeName: BootOrder
+
+              - EventNum: 10
+                PCRIndex: 1
+                EventType: EV_EFI_VARIABLE_BOOT2
+                Event:
+                  UnicodeName: Boot0001
+
+              - EventNum: 11
+                PCRIndex: 4
+                EventType: EV_EFI_ACTION
+                Event: "Calling EFI Application from Boot Option"
+
+              - EventNum: 12
+                PCRIndex: 1
+                EventType: EV_EFI_HANDOFF_TABLES
+                Event: "SMBIOS"
+
+              - EventNum: 13
+                PCRIndex: 0
+                EventType: EV_SEPARATOR
+                Event: "sep0"
+
+              - EventNum: 14
+                PCRIndex: 1
+                EventType: EV_SEPARATOR
+                Event: "sep1"
+
+              - EventNum: 15
+                PCRIndex: 2
+                EventType: EV_SEPARATOR
+                Event: "sep2"
+
+              - EventNum: 16
+                PCRIndex: 3
+                EventType: EV_SEPARATOR
+                Event: "sep3"
+
+              - EventNum: 17
+                PCRIndex: 4
+                EventType: EV_SEPARATOR
+                Event: "sep4"
+
+              - EventNum: 18
+                PCRIndex: 5
+                EventType: EV_SEPARATOR
+                Event: "sep5"
+
+              - EventNum: 19
+                PCRIndex: 6
+                EventType: EV_SEPARATOR
+                Event: "sep6"
+
+              - EventNum: 20
+                PCRIndex: 7
+                EventType: EV_SEPARATOR
+                Event: "sep7"
+
+              - EventNum: 21
+                PCRIndex: 1
+                EventType: EV_TABLE_OF_DEVICES
+                Event: "SYS_CONFIG_UART0"
+
+              - EventNum: 22
+                PCRIndex: 5
+                EventType: EV_EFI_ACTION
+                Event: "Exit Boot Services Invocation"
+            EOF
+
+            python3 "$1" "$PWD/pcr.yaml" "$PWD/event.yaml"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "PCR[1] measurements does not match for sha256"
+          - "FAIL"
+
+      - name: cli_boot_variable_missing_reports_fail_but_runs
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+
+            cat > pcr.yaml <<'EOF'
+            sha256:
+              - "pcr0"
+              - "pcr1"
+              - "pcr2"
+              - "pcr3"
+              - "pcr4"
+              - "pcr5"
+              - "pcr6"
+              - "pcr7"
+            EOF
+
+            cat > event.yaml <<'EOF'
+            pcrs:
+              sha256:
+                - "pcr0"
+                - "pcr1"
+                - "pcr2"
+                - "pcr3"
+                - "pcr4"
+                - "pcr5"
+                - "pcr6"
+                - "pcr7"
+
+            events:
+              - EventNum: 1
+                PCRIndex: 0
+                EventType: EV_NO_ACTION
+                SpecID:
+                  - specVersionMajor: 2
+
+              - EventNum: 2
+                PCRIndex: 0
+                EventType: EV_POST_CODE
+                Event: "BL_31"
+
+              - EventNum: 3
+                PCRIndex: 0
+                EventType: EV_POST_CODE
+                Event: "SECURE_RT_EL3"
+
+              - EventNum: 4
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: SecureBoot
+
+              - EventNum: 5
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: PK
+
+              - EventNum: 6
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: KEK
+
+              - EventNum: 7
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: db
+
+              - EventNum: 8
+                PCRIndex: 7
+                EventType: EV_EFI_VARIABLE_DRIVER_CONFIG
+                Event:
+                  UnicodeName: dbx
+
+              - EventNum: 9
+                PCRIndex: 4
+                EventType: EV_EFI_ACTION
+                Event: "Calling EFI Application from Boot Option"
+
+              - EventNum: 10
+                PCRIndex: 1
+                EventType: EV_EFI_HANDOFF_TABLES
+                Event: "SMBIOS"
+
+              - EventNum: 11
+                PCRIndex: 0
+                EventType: EV_SEPARATOR
+                Event: "sep0"
+
+              - EventNum: 12
+                PCRIndex: 1
+                EventType: EV_SEPARATOR
+                Event: "sep1"
+
+              - EventNum: 13
+                PCRIndex: 2
+                EventType: EV_SEPARATOR
+                Event: "sep2"
+
+              - EventNum: 14
+                PCRIndex: 3
+                EventType: EV_SEPARATOR
+                Event: "sep3"
+
+              - EventNum: 15
+                PCRIndex: 4
+                EventType: EV_SEPARATOR
+                Event: "sep4"
+
+              - EventNum: 16
+                PCRIndex: 5
+                EventType: EV_SEPARATOR
+                Event: "sep5"
+
+              - EventNum: 17
+                PCRIndex: 6
+                EventType: EV_SEPARATOR
+                Event: "sep6"
+
+              - EventNum: 18
+                PCRIndex: 7
+                EventType: EV_SEPARATOR
+                Event: "sep7"
+
+              - EventNum: 19
+                PCRIndex: 1
+                EventType: EV_TABLE_OF_DEVICES
+                Event: "SYS_CONFIG_UART0"
+
+              - EventNum: 20
+                PCRIndex: 5
+                EventType: EV_EFI_ACTION
+                Event: "Exit Boot Services Invocation"
+            EOF
+
+            python3 "$1" "$PWD/pcr.yaml" "$PWD/event.yaml"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "BootOrder/Boot#### variable measurements not found"
+          - "FAIL"

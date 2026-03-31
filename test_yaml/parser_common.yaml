@@ -1,0 +1,131 @@
+suites:
+  - name: parser_common
+    files:
+      - common/parser/Parser.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: contains_configparser_import
+        type: source_contains
+        pattern: "import configparser"
+
+      - name: contains_argparse_import
+        type: source_contains
+        pattern: "import argparse"
+
+      - name: contains_read_config_function
+        type: function_exists
+        function: "read_config"
+
+      - name: contains_process_bsa_function
+        type: function_exists
+        function: "process_bsa"
+
+      - name: contains_process_sbsa_function
+        type: function_exists
+        function: "process_sbsa"
+
+      - name: contains_process_fwts_function
+        type: function_exists
+        function: "process_fwts"
+
+      - name: contains_check_section_enable_function
+        type: function_exists
+        function: "check_section_enable"
+
+      - name: contains_main_function
+        type: function_exists
+        function: "main"
+
+      - name: contains_bsa_flag
+        type: source_contains
+        pattern: "parser.add_argument('-bsa'"
+
+      - name: contains_sbsa_flag
+        type: source_contains
+        pattern: "parser.add_argument('-sbsa'"
+
+      - name: contains_fwts_flag
+        type: source_contains
+        pattern: "parser.add_argument('-fwts'"
+
+      - name: contains_automation_flag
+        type: source_contains
+        pattern: "parser.add_argument('-automation'"
+
+      - name: contains_automation_bsa_run_flag
+        type: source_contains
+        pattern: "parser.add_argument('-automation_bsa_run'"
+
+      - name: contains_automation_sbsa_run_flag
+        type: source_contains
+        pattern: "parser.add_argument('-automation_sbsa_run'"
+
+      - name: contains_automation_fwts_run_flag
+        type: source_contains
+        pattern: "parser.add_argument('-automation_fwts_run'"
+
+      - name: contains_automation_bbsr_fwts_run_flag
+        type: source_contains
+        pattern: "parser.add_argument('-automation_bbsr_fwts_run'"
+
+      - name: contains_automation_bbsr_tpm_run_flag
+        type: source_contains
+        pattern: "parser.add_argument('-automation_bbsr_tpm_run'"
+
+      - name: contains_automation_sbmr_in_band_run_flag
+        type: source_contains
+        pattern: "parser.add_argument('-automation_sbmr_in_band_run'"
+
+      - name: contains_config_argument
+        type: source_contains
+        pattern: "parser.add_argument('--config'"
+
+      - name: contains_config_parser_usage
+        type: source_contains_any
+        patterns:
+          - "configparser.ConfigParser()"
+          - "ConfigParser()"
+
+      - name: contains_getboolean_logic
+        type: source_contains
+        pattern: "getboolean"
+
+      - name: contains_bsa_binary
+        type: source_contains
+        pattern: "/bin/bsa"
+
+      - name: contains_sbsa_binary
+        type: source_contains
+        pattern: "/bin/sbsa"
+
+      - name: contains_fwts_binary
+        type: source_contains_any
+        patterns:
+          - "cmd = ['fwts']"
+          - "cmd = [\"fwts\"]"
+
+      - name: contains_invalid_command_message
+        type: source_contains
+        pattern: "Please specify a valid command or use --help for more information."
+
+      - name: has_main_guard
+        type: main_guard
+
+      - name: cli_help_flag
+        type: cli
+        args:
+          - --help
+        expect_exit_code: 0
+        expect_output:
+          - "usage:"
+
+      - name: cli_no_args_runs_cleanly
+        type: cli
+        args: []
+        expect_exit_code: 0

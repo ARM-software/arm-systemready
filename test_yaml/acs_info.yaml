@@ -1,0 +1,346 @@
+suites:
+  - name: acs_info
+    files:
+      - common/log_parser/acs_info.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: cli_help_flag
+        type: cli
+        args:
+          - --help
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Collect ACS-like system info"
+
+      - name: cli_generates_json_from_dmidecode_only
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > dmidecode.log <<'EOF'
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-1.2.3
+
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorA
+                Product Name: BoardA
+                Family: FamilyA
+            EOF
+            python3 "$1" --dmidecode_log "$PWD/dmidecode.log" --output_dir "$PWD/out"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/out/acs_info.json"
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Vendor\": \"VendorA\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"System Name\": \"BoardA\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"SoC Family\": \"FamilyA\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Firmware Version\": \"FW-1.2.3\""
+
+      - name: cli_merges_acs_and_system_config
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > dmidecode.log <<'EOF'
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-2.0
+
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorB
+                Product Name: BoardB
+                Family: FamilyB
+            EOF
+            cat > acs_config.txt <<'EOF'
+            Band: SystemReady Band
+            ACS version: 6.1
+            EOF
+            cat > system_config.txt <<'EOF'
+            Board Revision: RevC
+            EOF
+            python3 "$1" \
+              --dmidecode_log "$PWD/dmidecode.log" \
+              --acs_config_path "$PWD/acs_config.txt" \
+              --system_config_path "$PWD/system_config.txt" \
+              --output_dir "$PWD/out"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"ACS version\": \"6.1\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Board Revision\": \"RevC\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Band\": \"SystemReady Band\""
+
+      - name: cli_stops_parsing_at_user_defined_configs_marker
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > dmidecode.log <<'EOF'
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-3.0
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorC
+                Product Name: BoardC
+                Family: FamilyC
+            EOF
+            cat > acs_config.txt <<'EOF'
+            Band: SystemReady Band
+            ACS version: 7.0
+            # User-defined configs
+            Secret Field: should_not_appear
+            EOF
+            python3 "$1" \
+              --dmidecode_log "$PWD/dmidecode.log" \
+              --acs_config_path "$PWD/acs_config.txt" \
+              --output_dir "$PWD/out"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"ACS version\": \"7.0\""
+          - type: file_not_contains
+            path: "{dir}/out/acs_info.json"
+            text: "should_not_appear"
+
+      - name: cli_reads_utf16_uefi_version
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            python3 - <<'PY'
+            from pathlib import Path
+            Path("uefi_version.log").write_text("UEFI v2.9\n", encoding="utf-16")
+            PY
+            cat > dmidecode.log <<'EOF'
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-4.0
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorD
+                Product Name: BoardD
+                Family: FamilyD
+            EOF
+            python3 "$1" \
+              --dmidecode_log "$PWD/dmidecode.log" \
+              --uefi_version_log "$PWD/uefi_version.log" \
+              --output_dir "$PWD/out"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"UEFI Version\": \"UEFI v2.9\""
+
+      - name: cli_adds_bmc_firmware_only_for_systemready_band
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > dmidecode.log <<'EOF'
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-5.0
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorE
+                Product Name: BoardE
+                Family: FamilyE
+            EOF
+            cat > acs_config.txt <<'EOF'
+            Band: SystemReady Band
+            EOF
+            cat > ipmitool.log <<'EOF'
+            Device ID                 : 32
+            Firmware Revision         : 1.45
+            EOF
+            python3 "$1" \
+              --dmidecode_log "$PWD/dmidecode.log" \
+              --acs_config_path "$PWD/acs_config.txt" \
+              --ipmitool_log "$PWD/ipmitool.log" \
+              --output_dir "$PWD/out"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"BMC Firmware Version\": \"1.45\""
+
+      - name: cli_does_not_add_bmc_firmware_for_non_systemready_band
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > dmidecode.log <<'EOF'
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-6.0
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorF
+                Product Name: BoardF
+                Family: FamilyF
+            EOF
+            cat > acs_config.txt <<'EOF'
+            Band: DeviceTree Band
+            EOF
+            cat > ipmitool.log <<'EOF'
+            Firmware Revision         : 9.99
+            EOF
+            python3 "$1" \
+              --dmidecode_log "$PWD/dmidecode.log" \
+              --acs_config_path "$PWD/acs_config.txt" \
+              --ipmitool_log "$PWD/ipmitool.log" \
+              --output_dir "$PWD/out"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"BMC Firmware Version\""
+
+      - name: cli_uses_first_dmidecode_values_not_later_duplicates
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > dmidecode.log <<'EOF'
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-FIRST
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorFirst
+                Product Name: ProductFirst
+                Family: FamilyFirst
+            Handle 0x0002, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-SECOND
+            Handle 0x0003, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorSecond
+                Product Name: ProductSecond
+                Family: FamilySecond
+            EOF
+            python3 "$1" --dmidecode_log "$PWD/dmidecode.log" --output_dir "$PWD/out"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Vendor\": \"VendorFirst\""
+          - type: file_not_contains
+            path: "{dir}/out/acs_info.json"
+            text: "VendorSecond"
+
+      - name: cli_systemready_band_is_case_and_space_insensitive
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > dmidecode.log <<'EOF'
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-1
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: V
+                Product Name: P
+                Family: F
+            EOF
+            cat > acs_config.txt <<'EOF'
+            Band:   systemready band
+            EOF
+            python3 "$1" \
+              --dmidecode_log "$PWD/dmidecode.log" \
+              --acs_config_path "$PWD/acs_config.txt" \
+              --output_dir "$PWD/out"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"BMC Firmware Version\": \"Unknown\""
+
+      - name: cli_config_value_with_extra_colon_is_preserved
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > dmidecode.log <<'EOF'
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-1
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: V
+                Product Name: P
+                Family: F
+            EOF
+            cat > system_config.txt <<'EOF'
+            Firmware Notes: build:nightly:123
+            EOF
+            python3 "$1" \
+              --dmidecode_log "$PWD/dmidecode.log" \
+              --system_config_path "$PWD/system_config.txt" \
+              --output_dir "$PWD/out"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Firmware Notes\": \"build:nightly:123\""

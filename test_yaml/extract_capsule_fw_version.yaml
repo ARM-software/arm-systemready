@@ -1,0 +1,189 @@
+suites:
+  - name: extract_capsule_fw_version
+    files:
+      - common/linux_scripts/extract_capsule_fw_version.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: cli_no_args_fails
+        type: cli
+        args: []
+        expect_exit_code: 1
+        expect_stdout_or_stderr_contains:
+          - "Usage: python3 extract_capsule_fw_version.py <pattern> <file_path>"
+
+      - name: cli_one_arg_fails
+        type: cli
+        args:
+          - "Capsule=([0-9A-F]+)"
+        expect_exit_code: 1
+        expect_stdout_or_stderr_contains:
+          - "Usage: python3 extract_capsule_fw_version.py <pattern> <file_path>"
+
+      - name: cli_missing_file_is_nonzero
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            python3 "$1" 'Capsule=([0-9A-F]{4})' "$PWD/missing.log"
+        args:
+          - "{file}"
+        expect_exit_nonzero: true
+
+      - name: cli_extracts_two_matching_values
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > input.log <<'EOF'
+            Start
+            Capsule=1A2B
+            Noise
+            Capsule=00FF
+            End
+            EOF
+            python3 "$1" 'Capsule=([0-9A-F]{4})' "$PWD/input.log"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "1A2B"
+          - "00FF"
+
+      - name: cli_no_matches_returns_zero_cleanly
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > input.log <<'EOF'
+            Alpha
+            Beta
+            Gamma
+            EOF
+            python3 "$1" 'Capsule=([0-9A-F]{4})' "$PWD/input.log"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+
+      - name: cli_pattern_without_group_returns_zero_cleanly
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > input.log <<'EOF'
+            Capsule=ABCD
+            Capsule=EF01
+            EOF
+            python3 "$1" 'Capsule=[0-9A-F]{4}' "$PWD/input.log"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+
+      - name: cli_only_prints_group_1_not_full_match
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > input.log <<'EOF'
+            build Capsule=DEAD done
+            EOF
+            python3 "$1" 'Capsule=([0-9A-F]{4})' "$PWD/input.log"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "DEAD"
+
+      - name: cli_multiple_matches_same_line_prints_first_search_per_line
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > input.log <<'EOF'
+            Capsule=AAAA Capsule=BBBB
+            EOF
+            python3 "$1" 'Capsule=([0-9A-F]{4})' "$PWD/input.log"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "AAAA"
+
+      - name: cli_mixed_case_hex_matches
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > input.log <<'EOF'
+            Capsule=AbCd
+            EOF
+            python3 "$1" 'Capsule=([0-9A-Fa-f]{4})' "$PWD/input.log"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "AbCd"
+
+      - name: cli_two_capture_groups_prints_only_first_group
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > input.log <<'EOF'
+            Capsule=ABCD status=OK
+            EOF
+            python3 "$1" 'Capsule=([0-9A-F]{4}) status=(OK)' "$PWD/input.log"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "ABCD"
+
+      - name: cli_invalid_regex_fails
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > input.log <<'EOF'
+            Capsule=ABCD
+            EOF
+            python3 "$1" 'Capsule=([0-9A-F]{4}' "$PWD/input.log"
+        args:
+          - "{file}"
+        expect_exit_nonzero: true
+
+      - name: cli_empty_file_returns_zero
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            : > empty.log
+            python3 "$1" 'Capsule=([0-9A-F]{4})' "$PWD/empty.log"
+        args:
+          - "{file}"
+        expect_exit_code: 0

@@ -1,0 +1,667 @@
+suites:
+  - name: ethtool_test
+    files:
+      - SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/ethtool-test.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+        
+
+      - name: contains_test_order_key_checks
+        type: source_contains_all
+        patterns:
+          - "Detect interface"
+          - "Bring up"
+          - "ethtool present"
+          - "Self-test supported"
+          - "ethtool self tests"
+          - "Link detected"
+          - "IPv4 address present"
+          - "Gateway Address present"
+          - "Ping gateway (IPv4)"
+          - "Ping www.arm.com (IPv4)"
+          - "wget and curl"
+          - "IPv6 address present"
+          - "Ping ipv6.google.com (IPv6)"
+
+      - name: contains_required_helpers
+        type: source_contains_all
+        patterns:
+          - "def get_required_compliant_ifaces():"
+          - "def init_iface_results(iface):"
+          - "def set_result(iface, test_name, status, detail=\"\"):"
+          - "def skip_many(iface, test_names, reason):"
+          - "def print_summary():"
+          - "def is_busybox_tool(tool_name):"
+          - "def is_virtual_iface(iface):"
+          - "def renew_dhcp(intrf, busybox_env):"
+          - "def has_default_route(dev):"
+          - "def cleanup():"
+
+      - name: has_main_guard
+        type: main_guard
+
+      - name: cli_no_ethernet_interfaces_exits_nonzero
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            python3 - <<'PY' "$1"
+            import builtins
+            import os
+            import runpy
+            import shutil
+            import subprocess
+            import sys
+            import time
+            from pathlib import Path
+
+            target = sys.argv[1]
+
+            class R:
+                def __init__(self, returncode=0, stdout="", stderr=""):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = stderr
+
+            def norm(cmd):
+                if isinstance(cmd, (list, tuple)):
+                    return " ".join(str(x) for x in cmd)
+                return str(cmd)
+
+            time.sleep = lambda *a, **k: None
+            builtins.input = lambda *a, **k: ""
+            os.system = lambda *a, **k: 1
+
+            def fake_check_output(cmd, *args, **kwargs):
+                if "ip -o link" in norm(cmd):
+                    return b"1: lo: <LOOPBACK> mtu 65536 qdisc noop state DOWN mode DEFAULT group default qlen 1000\n"
+                return b""
+
+            def fake_run(cmd, *args, **kwargs):
+                return R(0, "", "")
+
+            def fake_call(cmd, *args, **kwargs):
+                return fake_run(cmd, *args, **kwargs).returncode
+
+            def fake_check_call(cmd, *args, **kwargs):
+                result = fake_run(cmd, *args, **kwargs)
+                if result.returncode != 0:
+                    raise subprocess.CalledProcessError(result.returncode, cmd)
+                return 0
+
+            class FakePopen:
+                def __init__(self, cmd, *args, **kwargs):
+                    self.cmd = cmd
+                    self.returncode = 0
+
+                def communicate(self, input=None, timeout=None):
+                    return ("", "")
+
+                def wait(self, timeout=None):
+                    return self.returncode
+
+                def poll(self):
+                    return self.returncode
+
+            subprocess.check_output = fake_check_output
+            subprocess.run = fake_run
+            subprocess.call = fake_call
+            subprocess.check_call = fake_check_call
+            subprocess.Popen = FakePopen
+            shutil.which = lambda name: None
+            Path.read_text = lambda self, *a, **k: ""
+
+            runpy.run_path(target, run_name="__main__")
+            PY
+        args:
+          - "{file}"
+        expect_exit_nonzero: true
+        expect_stdout_or_stderr_contains:
+          - "No ethernet interfaces detected via ip linux command, Exiting"
+
+      - name: cli_virtual_interface_only
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > system_config.txt <<'EOF'
+            total_number_of_network_controllers: 0
+            EOF
+            python3 - <<'PY' "$1" "$PWD/system_config.txt"
+            import builtins
+            import os
+            import runpy
+            import shutil
+            import subprocess
+            import sys
+            import time
+            from pathlib import Path
+
+            target = sys.argv[1]
+            cfg = sys.argv[2]
+
+            class R:
+                def __init__(self, returncode=0, stdout="", stderr=""):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = stderr
+
+            def norm(cmd):
+                if isinstance(cmd, (list, tuple)):
+                    return " ".join(str(x) for x in cmd)
+                return str(cmd)
+
+            time.sleep = lambda *a, **k: None
+            builtins.input = lambda *a, **k: ""
+            os.system = lambda *a, **k: 1
+
+            def fake_check_output(cmd, *args, **kwargs):
+                cmd_s = norm(cmd)
+                if "ip -o link" in cmd_s:
+                    return (
+                        b"1: lo: <LOOPBACK> mtu 65536 state DOWN qlen 1000\n"
+                        b"2: docker0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether 02:42:ac:11:00:01\n"
+                    )
+                return b""
+
+            def fake_run(cmd, *args, **kwargs):
+                cmd_s = norm(cmd)
+                if "ip link show docker0" in cmd_s:
+                    return R(0, "2: docker0: <BROADCAST,MULTICAST> mtu 1500 state DOWN\n", "")
+                if "ip link set dev docker0 down" in cmd_s:
+                    return R(0, "", "")
+                if "ip link set dev docker0 up" in cmd_s:
+                    return R(0, "", "")
+                if "ethtool" in cmd_s or "ping " in cmd_s or "curl " in cmd_s or "wget " in cmd_s:
+                    return R(1, "", "")
+                if "dhclient" in cmd_s or "udhcpc" in cmd_s or "route" in cmd_s:
+                    return R(1, "", "")
+                return R(1, "", f"UNMOCKED COMMAND: {cmd_s}\n")
+
+            def fake_call(cmd, *args, **kwargs):
+                return fake_run(cmd, *args, **kwargs).returncode
+
+            def fake_check_call(cmd, *args, **kwargs):
+                result = fake_run(cmd, *args, **kwargs)
+                if result.returncode != 0:
+                    raise subprocess.CalledProcessError(result.returncode, cmd)
+                return 0
+
+            class FakePopen:
+                def __init__(self, cmd, *args, **kwargs):
+                    self.cmd = cmd
+                    self.returncode = 1
+
+                def communicate(self, input=None, timeout=None):
+                    cmd_s = norm(self.cmd)
+                    return ("", f"UNMOCKED POPEN: {cmd_s}\n")
+
+                def wait(self, timeout=None):
+                    return self.returncode
+
+                def poll(self):
+                    return self.returncode
+
+            def fake_which(name):
+                if name == "ethtool":
+                    return "/usr/sbin/ethtool"
+                return None
+
+            def fake_resolve(self, *args, **kwargs):
+                if str(self).endswith("/sys/class/net/docker0/device"):
+                    return Path("/sys/devices/virtual/net/docker0")
+                return self
+
+            subprocess.check_output = fake_check_output
+            subprocess.run = fake_run
+            subprocess.call = fake_call
+            subprocess.check_call = fake_check_call
+            subprocess.Popen = FakePopen
+            shutil.which = fake_which
+            Path.resolve = fake_resolve
+            Path.read_text = lambda self, *a, **k: ""
+
+            sys.argv = [target, cfg]
+            runpy.run_path(target, run_name="__main__")
+            PY
+        args:
+          - "{file}"
+        expect_stdout_or_stderr_contains:
+          - "docker0"
+
+      - name: cli_sysfs_link_only
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > system_config.txt <<'EOF'
+            total_number_of_network_controllers: 1
+            EOF
+            python3 - <<'PY' "$1" "$PWD/system_config.txt"
+            import builtins
+            import os
+            import runpy
+            import shutil
+            import subprocess
+            import sys
+            import time
+            from pathlib import Path
+
+            target = sys.argv[1]
+            cfg = sys.argv[2]
+
+            class R:
+                def __init__(self, returncode=0, stdout="", stderr=""):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = stderr
+
+            def norm(cmd):
+                if isinstance(cmd, (list, tuple)):
+                    return " ".join(str(x) for x in cmd)
+                return str(cmd)
+
+            time.sleep = lambda *a, **k: None
+            builtins.input = lambda *a, **k: ""
+            os.system = lambda *a, **k: 1
+
+            def fake_check_output(cmd, *args, **kwargs):
+                cmd_s = norm(cmd)
+                if "ip -o link" in cmd_s:
+                    return b"2: eth0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether aa:bb:cc:dd:ee:ff\n"
+                return b""
+
+            def fake_run(cmd, *args, **kwargs):
+                cmd_s = norm(cmd)
+                if "ip link show eth0" in cmd_s:
+                    return R(0, "2: eth0: <BROADCAST,MULTICAST> mtu 1500 state DOWN\n", "")
+                if "ip link set dev eth0 down" in cmd_s:
+                    return R(0, "", "")
+                if "ip link set dev eth0 up" in cmd_s:
+                    return R(0, "", "")
+                if "ip address show dev eth0" in cmd_s:
+                    return R(0, "2: eth0: <BROADCAST,MULTICAST,UP> mtu 1500\n", "")
+                if "ip route show default" in cmd_s:
+                    return R(0, "", "")
+                if "ip -o route show table all default" in cmd_s:
+                    return R(0, "", "")
+                if "dhclient" in cmd_s or "udhcpc" in cmd_s:
+                    return R(1, "", "")
+                if "ping " in cmd_s or "wget " in cmd_s or "curl " in cmd_s or "ethtool" in cmd_s:
+                    return R(1, "", "")
+                return R(1, "", f"UNMOCKED COMMAND: {cmd_s}\n")
+
+            def fake_call(cmd, *args, **kwargs):
+                return fake_run(cmd, *args, **kwargs).returncode
+
+            def fake_check_call(cmd, *args, **kwargs):
+                result = fake_run(cmd, *args, **kwargs)
+                if result.returncode != 0:
+                    raise subprocess.CalledProcessError(result.returncode, cmd)
+                return 0
+
+            class FakePopen:
+                def __init__(self, cmd, *args, **kwargs):
+                    self.cmd = cmd
+                    self.returncode = 1
+
+                def communicate(self, input=None, timeout=None):
+                    cmd_s = norm(self.cmd)
+                    return ("", f"UNMOCKED POPEN: {cmd_s}\n")
+
+                def wait(self, timeout=None):
+                    return self.returncode
+
+                def poll(self):
+                    return self.returncode
+
+            def fake_which(name):
+                return None
+
+            def fake_resolve(self, *args, **kwargs):
+                if str(self).endswith("/sys/class/net/eth0/device"):
+                    return Path("/sys/devices/pci0000:00/0000:00:01.0/net/eth0")
+                return self
+
+            def fake_read_text(self, *args, **kwargs):
+                p = str(self)
+                if p.endswith("/sys/class/net/eth0/carrier"):
+                    return "1"
+                if p.endswith("/sys/class/net/eth0/operstate"):
+                    return "up"
+                return ""
+
+            subprocess.check_output = fake_check_output
+            subprocess.run = fake_run
+            subprocess.call = fake_call
+            subprocess.check_call = fake_check_call
+            subprocess.Popen = FakePopen
+            shutil.which = fake_which
+            Path.resolve = fake_resolve
+            Path.read_text = fake_read_text
+
+            sys.argv = [target, cfg]
+            runpy.run_path(target, run_name="__main__")
+            PY
+        args:
+          - "{file}"
+        expect_stdout_or_stderr_contains:
+          - "eth0"
+
+      - name: cli_full_success
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > system_config.txt <<'EOF'
+            total_number_of_network_controllers: 1
+            EOF
+            python3 - <<'PY' "$1" "$PWD/system_config.txt"
+            import builtins
+            import os
+            import runpy
+            import shutil
+            import subprocess
+            import sys
+            import time
+            from pathlib import Path
+
+            target = sys.argv[1]
+            cfg = sys.argv[2]
+
+            class R:
+                def __init__(self, returncode=0, stdout="", stderr=""):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = stderr
+
+            def norm(cmd):
+                if isinstance(cmd, (list, tuple)):
+                    return " ".join(str(x) for x in cmd)
+                return str(cmd)
+
+            time.sleep = lambda *a, **k: None
+            builtins.input = lambda *a, **k: ""
+            os.system = lambda *a, **k: 1
+
+            def fake_check_output(cmd, *args, **kwargs):
+                cmd_s = norm(cmd)
+                if "ip -o link" in cmd_s:
+                    return b"2: eth1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether aa:bb:cc:dd:ee:11\n"
+                return b""
+
+            def fake_run(cmd, *args, **kwargs):
+                cmd_s = norm(cmd)
+                if "ip link show eth1" in cmd_s:
+                    return R(0, "2: eth1: <BROADCAST,MULTICAST> mtu 1500 state DOWN\n", "")
+                if "ip link set dev eth1 down" in cmd_s:
+                    return R(0, "", "")
+                if "ip link set dev eth1 up" in cmd_s:
+                    return R(0, "", "")
+                if cmd_s.strip() == "ethtool eth1":
+                    return R(0, "Settings for eth1\n\tLink detected: yes\n", "")
+                if cmd_s.strip() == "ethtool -i eth1":
+                    return R(0, "driver: fake\nsupports-test: yes\n", "")
+                if cmd_s.strip() == "ethtool -t eth1":
+                    return R(1, "self-test failed\n", "")
+                if "ip address show dev eth1" in cmd_s:
+                    return R(
+                        0,
+                        "2: eth1: <BROADCAST,MULTICAST,UP> mtu 1500\n"
+                        "    inet 192.0.2.10/24 brd 192.0.2.255 scope global dynamic eth1\n"
+                        "    inet6 2001:db8::10/64 scope global\n",
+                        ""
+                    )
+                if "ip route show default" in cmd_s:
+                    return R(0, "default via 192.0.2.1 dev eth1 proto dhcp\n", "")
+                if "ip -o route show table all default" in cmd_s:
+                    return R(0, "default via 192.0.2.1 dev eth1 proto dhcp\n", "")
+                if "ip route get 8.8.8.8" in cmd_s:
+                    return R(0, "8.8.8.8 via 192.0.2.1 dev eth1 src 192.0.2.10\n", "")
+                if "ping -c 3 -W 10 -I eth1 192.0.2.1" in cmd_s:
+                    return R(0, "3 packets transmitted, 3 received, 0% packet loss\n", "")
+                if "ping -c 3 -W 10 -I eth1 www.arm.com" in cmd_s:
+                    return R(0, "3 packets transmitted, 3 received, 0% packet loss\n", "")
+                if "ping -6 -c 3 -I eth1 ipv6.google.com" in cmd_s:
+                    return R(0, "3 packets transmitted, 3 received, 0% packet loss\n", "")
+                if "curl -Is --connect-timeout 20 --interface eth1 https://www.arm.com" in cmd_s:
+                    return R(0, "HTTP/2 200\n", "")
+                if "wget --spider --timeout=10 https://www.arm.com" in cmd_s:
+                    return R(0, "", "")
+                if "dhclient" in cmd_s or "udhcpc" in cmd_s:
+                    return R(1, "", "")
+                return R(1, "", f"UNMOCKED COMMAND: {cmd_s}\n")
+
+            def fake_call(cmd, *args, **kwargs):
+                return fake_run(cmd, *args, **kwargs).returncode
+
+            def fake_check_call(cmd, *args, **kwargs):
+                result = fake_run(cmd, *args, **kwargs)
+                if result.returncode != 0:
+                    raise subprocess.CalledProcessError(result.returncode, cmd)
+                return 0
+
+            class FakePopen:
+                def __init__(self, cmd, *args, **kwargs):
+                    self.cmd = cmd
+                    self.returncode = 1
+
+                def communicate(self, input=None, timeout=None):
+                    cmd_s = norm(self.cmd)
+                    return ("", f"UNMOCKED POPEN: {cmd_s}\n")
+
+                def wait(self, timeout=None):
+                    return self.returncode
+
+                def poll(self):
+                    return self.returncode
+
+            def fake_which(name):
+                if name in ("ethtool", "wget", "curl", "ping"):
+                    return f"/usr/bin/{name}"
+                return None
+
+            def fake_resolve(self, *args, **kwargs):
+                if str(self).endswith("/sys/class/net/eth1/device"):
+                    return Path("/sys/devices/pci0000:00/0000:00:02.0/net/eth1")
+                return self
+
+            def fake_read_text(self, *args, **kwargs):
+                p = str(self)
+                if p.endswith("/sys/class/net/eth1/carrier"):
+                    return "1"
+                if p.endswith("/sys/class/net/eth1/operstate"):
+                    return "up"
+                return ""
+
+            subprocess.check_output = fake_check_output
+            subprocess.run = fake_run
+            subprocess.call = fake_call
+            subprocess.check_call = fake_check_call
+            subprocess.Popen = FakePopen
+            shutil.which = fake_which
+            Path.resolve = fake_resolve
+            Path.read_text = fake_read_text
+
+            sys.argv = [target, cfg]
+            runpy.run_path(target, run_name="__main__")
+            PY
+        args:
+          - "{file}"
+        expect_stdout_or_stderr_contains:
+          - "eth1"
+
+      - name: cli_required_compliant_ifaces_fail_when_not_enough_pass
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > system_config.txt <<'EOF'
+            total_number_of_network_controllers: 2
+            EOF
+            python3 - <<'PY' "$1" "$PWD/system_config.txt"
+            import builtins
+            import os
+            import runpy
+            import shutil
+            import subprocess
+            import sys
+            import time
+            from pathlib import Path
+
+            target = sys.argv[1]
+            cfg = sys.argv[2]
+
+            class R:
+                def __init__(self, returncode=0, stdout="", stderr=""):
+                    self.returncode = returncode
+                    self.stdout = stdout
+                    self.stderr = stderr
+
+            def norm(cmd):
+                if isinstance(cmd, (list, tuple)):
+                    return " ".join(str(x) for x in cmd)
+                return str(cmd)
+
+            time.sleep = lambda *a, **k: None
+            builtins.input = lambda *a, **k: ""
+            os.system = lambda *a, **k: 1
+
+            def fake_check_output(cmd, *args, **kwargs):
+                cmd_s = norm(cmd)
+                if "ip -o link" in cmd_s:
+                    return (
+                        b"2: eth0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether aa:bb:cc:dd:ee:01\n"
+                        b"3: eth1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether aa:bb:cc:dd:ee:02\n"
+                    )
+                return b""
+
+            def fake_run(cmd, *args, **kwargs):
+                cmd_s = norm(cmd)
+                if "ip link show eth0" in cmd_s:
+                    return R(0, "2: eth0: <BROADCAST,MULTICAST> mtu 1500 state DOWN\n", "")
+                if "ip link show eth1" in cmd_s:
+                    return R(0, "3: eth1: <BROADCAST,MULTICAST> mtu 1500 state DOWN\n", "")
+                if "ip link set dev eth0 down" in cmd_s or "ip link set dev eth1 down" in cmd_s:
+                    return R(0, "", "")
+                if "ip link set dev eth0 up" in cmd_s or "ip link set dev eth1 up" in cmd_s:
+                    return R(0, "", "")
+                if cmd_s.strip() == "ethtool eth0":
+                    return R(0, "Settings for eth0\n\tLink detected: yes\n", "")
+                if cmd_s.strip() == "ethtool eth1":
+                    return R(0, "Settings for eth1\n\tLink detected: no\n", "")
+                if cmd_s.strip() == "ethtool -i eth0" or cmd_s.strip() == "ethtool -i eth1":
+                    return R(0, "driver: fake\nsupports-test: no\n", "")
+                if "ip address show dev eth0" in cmd_s:
+                    return R(
+                        0,
+                        "2: eth0: <BROADCAST,MULTICAST,UP> mtu 1500\n"
+                        "    inet 192.0.2.20/24 brd 192.0.2.255 scope global dynamic eth0\n",
+                        ""
+                    )
+                if "ip address show dev eth1" in cmd_s:
+                    return R(0, "3: eth1: <BROADCAST,MULTICAST,UP> mtu 1500\n", "")
+                if "ip route show default" in cmd_s:
+                    return R(0, "default via 192.0.2.1 dev eth0 proto dhcp\n", "")
+                if "ip -o route show table all default" in cmd_s:
+                    return R(0, "default via 192.0.2.1 dev eth0 proto dhcp\n", "")
+                if "ip route get 8.8.8.8" in cmd_s:
+                    return R(0, "8.8.8.8 via 192.0.2.1 dev eth0 src 192.0.2.20\n", "")
+                if "ping -c 3 -W 10 -I eth0 192.0.2.1" in cmd_s:
+                    return R(0, "3 packets transmitted, 3 received, 0% packet loss\n", "")
+                if "ping -c 3 -W 10 -I eth0 www.arm.com" in cmd_s:
+                    return R(0, "3 packets transmitted, 3 received, 0% packet loss\n", "")
+                if "curl -Is --connect-timeout 20 --interface eth0 https://www.arm.com" in cmd_s:
+                    return R(0, "HTTP/2 200\n", "")
+                if "wget --spider --timeout=10 https://www.arm.com" in cmd_s:
+                    return R(0, "", "")
+                if "dhclient" in cmd_s or "udhcpc" in cmd_s:
+                    return R(1, "", "")
+                return R(1, "", f"UNMOCKED COMMAND: {cmd_s}\n")
+
+            def fake_call(cmd, *args, **kwargs):
+                return fake_run(cmd, *args, **kwargs).returncode
+
+            def fake_check_call(cmd, *args, **kwargs):
+                result = fake_run(cmd, *args, **kwargs)
+                if result.returncode != 0:
+                    raise subprocess.CalledProcessError(result.returncode, cmd)
+                return 0
+
+            class FakePopen:
+                def __init__(self, cmd, *args, **kwargs):
+                    self.cmd = cmd
+                    self.returncode = 1
+
+                def communicate(self, input=None, timeout=None):
+                    cmd_s = norm(self.cmd)
+                    return ("", f"UNMOCKED POPEN: {cmd_s}\n")
+
+                def wait(self, timeout=None):
+                    return self.returncode
+
+                def poll(self):
+                    return self.returncode
+
+            def fake_which(name):
+                if name in ("ethtool", "wget", "curl", "ping"):
+                    return f"/usr/bin/{name}"
+                return None
+
+            def fake_resolve(self, *args, **kwargs):
+                p = str(self)
+                if p.endswith("/sys/class/net/eth0/device"):
+                    return Path("/sys/devices/pci0000:00/0000:00:03.0/net/eth0")
+                if p.endswith("/sys/class/net/eth1/device"):
+                    return Path("/sys/devices/pci0000:00/0000:00:04.0/net/eth1")
+                return self
+
+            def fake_read_text(self, *args, **kwargs):
+                p = str(self)
+                if p.endswith("/sys/class/net/eth0/carrier"):
+                    return "1"
+                if p.endswith("/sys/class/net/eth1/carrier"):
+                    return "0"
+                if p.endswith("/sys/class/net/eth0/operstate"):
+                    return "up"
+                if p.endswith("/sys/class/net/eth1/operstate"):
+                    return "down"
+                return ""
+
+            subprocess.check_output = fake_check_output
+            subprocess.run = fake_run
+            subprocess.call = fake_call
+            subprocess.check_call = fake_check_call
+            subprocess.Popen = FakePopen
+            shutil.which = fake_which
+            Path.resolve = fake_resolve
+            Path.read_text = fake_read_text
+
+            sys.argv = [target, cfg]
+            runpy.run_path(target, run_name="__main__")
+            PY
+        args:
+          - "{file}"
+        expect_stdout_or_stderr_contains:
+          - "eth0"
+          - "eth1"

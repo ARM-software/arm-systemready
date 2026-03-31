@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+echo "===== PRE-COMMIT CHECKS ====="
+
+mkdir -p reports
+
+python3 scripts/report.py 2>&1 | tee reports/precommit_report.log
+STATUS=${PIPESTATUS[0]}
+
+
+if [ "$STATUS" -ne 0 ]; then
+    echo "Pre-commit checks failed."
+    echo "Log saved at: reports/precommit_report.log"
+    exit 1
+fi
+
+echo "All checks passed. Proceeding with commit."
+exit 0

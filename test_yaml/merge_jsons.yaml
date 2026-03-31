@@ -1,0 +1,328 @@
+suites:
+  - name: merge_jsons
+    files:
+      - common/log_parser/merge_jsons.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: contains_main_function
+        type: function_exists
+        function: "main"
+
+      - name: contains_merge_function
+        type: function_exists
+        function: "merge_json_files"
+
+      - name: contains_recursive_sort_function
+        type: function_exists
+        function: "recursive_sort"
+
+      - name: contains_build_testcategory_dict_function
+        type: function_exists
+        function: "build_testcategory_dict"
+
+      - name: contains_json_usage
+        type: source_contains
+        pattern: "json"
+
+      - name: contains_argparse_usage
+        type: source_contains
+        pattern: "argparse"
+
+      - name: contains_os_usage
+        type: source_contains
+        pattern: "os"
+
+      - name: contains_ordereddict_usage
+        type: source_contains
+        pattern: "OrderedDict"
+
+      - name: contains_acs_info_filename_logic
+        type: source_contains
+        pattern: "acs_info.json"
+
+      - name: contains_reformat_json_usage
+        type: source_contains
+        pattern: "reformat_json"
+
+      - name: contains_test_category_path_logic
+        type: source_contains_any
+        patterns:
+          - "test_categoryDT.json"
+          - "test_category.json"
+
+      - name: contains_yocto_flag_logic
+        type: source_contains
+        pattern: "/mnt/yocto_image.flag"
+
+      - name: contains_not_found_warning
+        type: source_contains
+        pattern: "not found. Skipping."
+
+      - name: contains_invalid_json_warning
+        type: source_contains
+        pattern: "is invalid JSON. Skipping."
+
+      - name: contains_overall_compliance_text
+        type: source_contains
+        pattern: "Overall Compliance Result"
+
+      - name: contains_overall_compliance_results_cleanup
+        type: source_contains
+        pattern: "Overall Compliance Results"
+
+      - name: contains_bbsr_compliance_text
+        type: source_contains
+        pattern: "BBSR compliance results"
+
+      - name: contains_scmi_compliance_text
+        type: source_contains
+        pattern: "SCMI compliance results"
+
+      - name: contains_suite_name_acs_info_logic
+        type: source_contains
+        pattern: "Suite_Name: acs_info"
+
+      - name: contains_suite_name_bsa_logic
+        type: source_contains
+        pattern: "Suite_Name: BSA"
+
+      - name: contains_suite_name_sbsa_logic
+        type: source_contains
+        pattern: "Suite_Name: SBSA"
+
+      - name: contains_suite_name_fwts_logic
+        type: source_contains
+        pattern: "Suite_Name: FWTS"
+
+      - name: contains_suite_name_bbsr_fwts_logic
+        type: source_contains
+        pattern: "Suite_Name: BBSR-FWTS"
+
+      - name: contains_suite_name_bbsr_sct_logic
+        type: source_contains
+        pattern: "Suite_Name: BBSR-SCT"
+
+      - name: contains_suite_name_scmi_logic
+        type: source_contains
+        pattern: "Suite_Name: SCMI"
+
+      - name: contains_standalone_rename_logic
+        type: source_contains
+        pattern: "Suite_Name: Standalone"
+
+      - name: contains_failed_with_waiver_logic
+        type: source_contains
+        pattern: "FAILED_WITH_WAIVER"
+
+      - name: contains_sub_test_result_logic
+        type: source_contains
+        pattern: "sub_test_result"
+
+      - name: contains_test_result_logic
+        type: source_contains
+        pattern: "Test_result"
+
+      - name: contains_waivable_enrichment_logic
+        type: source_contains
+        pattern: "Waivable"
+
+      - name: contains_srs_scope_enrichment_logic
+        type: source_contains
+        pattern: "SRS scope"
+
+      - name: contains_test_suite_info_enrichment_logic
+        type: source_contains
+        pattern: "Test_suite_info"
+
+      - name: contains_main_readiness_grouping_logic
+        type: source_contains
+        pattern: "Main Readiness Grouping"
+
+      - name: has_main_guard
+        type: main_guard
+
+      - name: cli_no_args_fails
+        type: cli
+        args: []
+        expect_exit_nonzero: true
+
+      - name: cli_help_flag
+        type: cli
+        args:
+          - --help
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "usage"
+
+      - name: cli_only_output_arg_fails
+        type: cli
+        args:
+          - merged.json
+        expect_exit_nonzero: true
+
+      - name: cli_missing_input_files_returns_nonzero
+        type: cli
+        args:
+          - "{dir}/merged.json"
+          - "{dir}/missing1.json"
+          - "{dir}/missing2.json"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "not found. Skipping."
+
+      - name: cli_with_empty_valid_json_input_returns_nonzero
+        type: cli
+        text_files:
+          one.json: |
+            {}
+        args:
+          - "{dir}/merged.json"
+          - "{dir}/one.json"
+        expect_exit_code: 0
+
+      - name: cli_with_invalid_json_and_missing_file_returns_nonzero
+        type: cli
+        text_files:
+          bad.json: |
+            {invalid
+        args:
+          - "{dir}/merged.json"
+          - "{dir}/bad.json"
+          - "{dir}/missing.json"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "is invalid JSON. Skipping."
+          - "not found. Skipping."
+
+      - name: cli_with_acs_info_only_returns_nonzero
+        type: cli
+        text_files:
+          acs_info.json: |
+            {
+              "ACS Results Summary": {
+                "Overall Compliance Result": "Compliant"
+              }
+            }
+        args:
+          - "{dir}/merged.json"
+          - "{dir}/acs_info.json"
+        expect_exit_code: 0
+
+      - name: cli_with_acs_info_and_fwts_json_returns_nonzero
+        type: cli
+        text_files:
+          acs_info.json: |
+            {
+              "ACS Results Summary": {
+                "Overall Compliance Result": "Unknown"
+              }
+            }
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "Demo FWTS",
+                  "subtests": [
+                    {
+                      "sub_test_result": "FAILED"
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/merged.json"
+          - "{dir}/acs_info.json"
+          - "{dir}/fwts.json"
+        expect_exit_code: 0
+
+      - name: cli_with_bsa_json_returns_nonzero
+        type: cli
+        text_files:
+          bsa.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "BSA Demo",
+                  "testcases": [
+                    {
+                      "Test_case": "Rule1",
+                      "Test_result": "FAILED"
+                    }
+                  ],
+                  "test_suite_summary": {
+                    "Total Rules Run": 1,
+                    "Passed": 0,
+                    "Failed": 1,
+                    "Total_failed_with_waiver": 0
+                  }
+                }
+              ]
+            }
+        args:
+          - "{dir}/merged.json"
+          - "{dir}/bsa.json"
+        expect_exit_code: 0
+
+      - name: cli_with_multiple_suite_jsons_returns_nonzero
+        type: cli
+        text_files:
+          acs_info.json: |
+            {
+              "ACS Results Summary": {
+                "Overall Compliance Result": "Unknown"
+              }
+            }
+          bsa.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "BSA Demo",
+                  "testcases": [
+                    {
+                      "Test_case": "Rule1",
+                      "Test_result": "PASSED"
+                    }
+                  ]
+                }
+              ]
+            }
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "FWTS Demo",
+                  "subtests": [
+                    {
+                      "sub_test_result": "FAILED (WITH WAIVER)"
+                    }
+                  ]
+                }
+              ]
+            }
+          scmi.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "SCMI Demo",
+                  "subtests": [
+                    {
+                      "sub_test_result": "PASSED"
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/merged.json"
+          - "{dir}/acs_info.json"
+          - "{dir}/bsa.json"
+          - "{dir}/fwts.json"
+          - "{dir}/scmi.json"
+        expect_exit_code: 0

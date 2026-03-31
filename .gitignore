@@ -1,0 +1,6 @@
+reports/
+
+__pycache__/
+*.pyc
+*.log
+reports/

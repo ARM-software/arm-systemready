@@ -1,0 +1,286 @@
+suites:
+  - name: runtime_device_mapping_conflict_checker
+    files:
+      - common/linux_scripts/runtime_device_mapping_conflict_checker.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: contains_required_imports
+        type: source_contains_all
+        patterns:
+          - "from __future__ import annotations"
+          - "import re"
+          - "from dataclasses import dataclass"
+          - "from pathlib import Path"
+          - "from typing import Dict, List, Optional, Tuple"
+
+      - name: contains_core_constants
+        type: source_contains_all
+        patterns:
+          - "PAGE_SIZE = 4096"
+          - "DTS_PATH = Path("
+          - "MEMMAP_PATH = Path("
+          - "OUT_LOG_PATH = Path("
+
+      - name: contains_data_models
+        type: source_contains_all
+        patterns:
+          - "class MemSeg"
+          - "class Node"
+          - "class DtsRange"
+          - "class Conflict"
+
+      - name: contains_dataclass_annotations
+        type: source_contains_any
+        patterns:
+          - "@dataclass(frozen=True)"
+          - "@dataclass"
+
+      - name: contains_logging_helpers
+        type: source_contains_all
+        patterns:
+          - "_LOG_FH = None"
+          - "def log(msg: str) -> None:"
+          - "def close_log() -> None:"
+
+      - name: contains_log_parent_mkdir
+        type: source_contains
+        pattern: "OUT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)"
+
+      - name: contains_log_file_open_logic
+        type: source_contains_any
+        patterns:
+          - "OUT_LOG_PATH.open(\"w\", encoding=\"utf-8\", errors=\"replace\")"
+          - "OUT_LOG_PATH.open('w', encoding='utf-8', errors='replace')"
+
+      - name: contains_log_flush
+        type: source_contains
+        pattern: "_LOG_FH.flush()"
+
+      - name: contains_close_log_reset
+        type: source_contains
+        pattern: "_LOG_FH = None"
+
+      - name: contains_overlap_logic
+        type: source_contains
+        pattern: "return a_start <= b_end and b_start <= a_end"
+
+      - name: contains_disabled_node_logic
+        type: source_contains_all
+        patterns:
+          - "def node_is_disabled(node: Node) -> bool:"
+          - "\"disabled\" in v.lower()"
+
+      - name: contains_disabled_ancestry_logic
+        type: source_contains_all
+        patterns:
+          - "def is_disabled_in_ancestry(node: Node) -> bool:"
+          - "while cur is not None:"
+
+      - name: contains_comment_stripping_logic
+        type: source_contains_all
+        patterns:
+          - "def strip_comments(text: str) -> str:"
+          - "in_block = False"
+          - "in_line = False"
+          - "in_str = False"
+
+      - name: contains_comment_marker_logic
+        type: source_contains_all
+        patterns:
+          - "if c == \"/\" and nxt == \"/\":"
+          - "if c == \"/\" and nxt == \"*\":"
+
+      - name: contains_string_preservation_logic
+        type: source_contains_any
+        patterns:
+          - "if c in (\"'\", \"\\\"\"):"
+          - "if c == \"\\\\\" and i + 1 < n:"
+
+      - name: contains_to_int_logic
+        type: source_contains_all
+        patterns:
+          - "def to_int(tok: str) -> Optional[int]:"
+          - "tok.lower().startswith(\"0x\")"
+          - "tok.isdigit()"
+          - "re.fullmatch(r\"[0-9a-fA-F]+\", tok)"
+
+      - name: contains_extract_cells_logic
+        type: source_contains_all
+        patterns:
+          - "def extract_cells_from_angle_list(blob: str) -> List[int]:"
+          - "re.findall(r\"0x[0-9a-fA-F]+|\\b\\d+\\b\", blob)"
+          - "out.append(v)"
+
+      - name: contains_parse_reg_names_logic
+        type: source_contains_all
+        patterns:
+          - "def parse_reg_names(prop: str) -> List[str]:"
+          - "re.findall(r'\"([^\"]*)\"', prop)"
+          - "joined.split(\"\\\\0\")"
+
+      - name: contains_join_u32_cells_logic
+        type: source_contains_all
+        patterns:
+          - "def join_u32_cells(cells: List[int]) -> int:"
+          - "v = (v << 32) | (c & 0xFFFFFFFF)"
+
+      - name: contains_read_text_smart_logic
+        type: source_contains_any
+        patterns:
+          - "def read_text_smart(p: Path) -> str:"
+          - "b = p.read_bytes()"
+          - "utf-16le"
+          - "utf-8"
+
+      - name: contains_memmap_parse_function
+        type: function_exists
+        function: "parse_memmap"
+
+      - name: contains_dts_parse_function
+        type: function_exists
+        function: "parse_dts_tree"
+
+      - name: contains_iter_nodes_function
+        type: function_exists
+        function: "iter_nodes"
+
+      - name: contains_addr_cells_function
+        type: function_exists
+        function: "addr_cells"
+
+      - name: contains_size_cells_function
+        type: function_exists
+        function: "size_cells"
+
+      - name: contains_get_bus_ranges_function
+        type: function_exists
+        function: "get_bus_ranges"
+
+      - name: contains_translate_up_to_root_function
+        type: function_exists
+        function: "translate_up_to_root"
+
+      - name: contains_extract_dts_mmio_ranges_function
+        type: function_exists
+        function: "extract_dts_mmio_ranges"
+
+      - name: contains_translation_logic
+        type: source_contains_any
+        patterns:
+          - "ranges-missing->identity"
+          - ":identity"
+          - "offset-in-parent-reg"
+
+      - name: contains_mmio_filtering_logic
+        type: source_contains_any
+        patterns:
+          - "if is_memory_like(n):"
+          - "if is_storage_like(n):"
+          - "if is_disabled_in_ancestry(n):"
+
+      - name: contains_reg_names_mmap_filter
+        type: source_contains
+        pattern: "if reg_name and ('mmap' in reg_name.lower()):"
+
+      - name: contains_sorted_ranges_return
+        type: source_contains
+        pattern: "return sorted(uniq.values(), key=lambda x: (x.base, x.size, x.node_path))"
+
+      - name: contains_main_banner
+        type: source_contains_all
+        patterns:
+          - "Testing Runtime Device Mapping Conflict Test"
+          - "INFO: Using DTS:"
+          - "INFO: Using memmap:"
+          - "INFO: Writing log to:"
+
+      - name: contains_missing_input_warning_logic
+        type: source_contains_all
+        patterns:
+          - "DEBUG: DTS file not found"
+          - "DEBUG: Memmap file not found"
+          - "RESULTS: WARNINGS"
+
+      - name: contains_checked_segments_text
+        type: source_contains_all
+        patterns:
+          - "All UEFI Memmap segments CHECKED"
+          - "All DTS MMIO ranges CHECKED"
+
+      - name: contains_empty_segment_messages
+        type: source_contains_any
+        patterns:
+          - "No matching segments found in memmap."
+          - "No DTS MMIO ranges extracted."
+
+      - name: contains_total_checked_messages
+        type: source_contains_any
+        patterns:
+          - "Total segments checked:"
+          - "Total DTS ranges checked:"
+
+      - name: contains_no_overlap_message
+        type: source_contains
+        pattern: "No overlaps found between UEFI runtime regions and DTS MMIO ranges"
+
+      - name: contains_results_texts
+        type: source_contains_all
+        patterns:
+          - "RESULTS: PASSED"
+          - "RESULTS: FAILED"
+          - "RESULTS: WARNINGS"
+
+      - name: contains_conflict_label_text
+        type: source_contains_any
+        patterns:
+          - "Conflict"
+          - "conflict"
+
+      - name: contains_functions_group1
+        type: function_exists_any
+        functions:
+          - "log"
+          - "close_log"
+          - "overlaps"
+          - "node_is_disabled"
+          - "is_disabled_in_ancestry"
+          - "strip_comments"
+          - "to_int"
+          - "extract_cells_from_angle_list"
+
+      - name: contains_functions_group2
+        type: function_exists_any
+        functions:
+          - "parse_reg_names"
+          - "join_u32_cells"
+          - "read_text_smart"
+          - "parse_memmap"
+          - "parse_dts_tree"
+          - "iter_nodes"
+          - "get_prop_int"
+          - "inherited_cells"
+
+      - name: contains_functions_group3
+        type: function_exists_any
+        functions:
+          - "addr_cells"
+          - "size_cells"
+          - "get_bus_ranges"
+          - "translate_up_to_root"
+          - "is_memory_like"
+          - "is_storage_like"
+          - "extract_dts_mmio_ranges"
+          - "main"
+
+      - name: contains_main_function
+        type: function_exists
+        function: "main"
+
+      - name: has_main_guard
+        type: main_guard

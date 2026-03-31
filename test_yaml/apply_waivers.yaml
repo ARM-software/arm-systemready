@@ -1,0 +1,396 @@
+suites:
+  - name: apply_waivers
+    files:
+      - common/log_parser/apply_waivers.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: cli_help_flag
+        type: cli
+        args:
+          - --help
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Apply waivers to test suite JSON results."
+
+      - name: cli_missing_json_file_returns_zero_with_warning
+        type: cli
+        args:
+          - FWTS
+          - "{dir}/missing.json"
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "WARNING: Failed to read or parse"
+
+      - name: fwts_suite_level_waiver_marks_failed_subtest
+        type: cli
+        text_files:
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "DemoSuite",
+                  "subtests": [
+                    {
+                      "sub_Test_Description": "failure one",
+                      "sub_Test_Number": "1",
+                      "sub_test_result": "FAILED"
+                    }
+                  ]
+                }
+              ]
+            }
+          waiver.json: |
+            {
+              "Suites": [
+                {
+                  "Suite": "FWTS",
+                  "Reason": "Known FWTS issue"
+                }
+              ]
+            }
+        args:
+          - FWTS
+          - "{dir}/fwts.json"
+          - "{dir}/waiver.json"
+        expect_exit_code: 0
+
+      - name: testsuite_level_waiver_applies_only_to_matching_testsuite
+        type: cli
+        text_files:
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "MatchSuite",
+                  "subtests": [
+                    {
+                      "sub_Test_Description": "alpha",
+                      "sub_Test_Number": "1",
+                      "sub_test_result": "FAILED"
+                    }
+                  ]
+                },
+                {
+                  "Test_suite": "OtherSuite",
+                  "subtests": [
+                    {
+                      "sub_Test_Description": "beta",
+                      "sub_Test_Number": "1",
+                      "sub_test_result": "FAILED"
+                    }
+                  ]
+                }
+              ]
+            }
+          waiver.json: |
+            {
+              "Suites": [
+                {
+                  "Suite": "FWTS",
+                  "TestSuites": [
+                    {
+                      "TestSuite": "MatchSuite",
+                      "Reason": "Specific suite waiver"
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - FWTS
+          - "{dir}/fwts.json"
+          - "{dir}/waiver.json"
+        expect_exit_code: 0
+
+      - name: category_non_waivable_blocks_waiver_application
+        type: cli
+        text_files:
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "DemoSuite",
+                  "subtests": [
+                    {
+                      "sub_Test_Description": "failure one",
+                      "sub_Test_Number": "1",
+                      "sub_test_result": "FAILED"
+                    }
+                  ]
+                }
+              ]
+            }
+          waiver.json: |
+            {
+              "Suites": [
+                {
+                  "Suite": "FWTS",
+                  "Reason": "Known FWTS issue"
+                }
+              ]
+            }
+          category.json: |
+            {
+              "cat1": [
+                {
+                  "Suite": "FWTS",
+                  "Test Suite": "DemoSuite",
+                  "Waivable": "No"
+                }
+              ]
+            }
+        args:
+          - FWTS
+          - "{dir}/fwts.json"
+          - "{dir}/waiver.json"
+          - "{dir}/category.json"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_contains
+            path: "{dir}/fwts.json"
+            text: "WITH WAIVER"
+
+      - name: category_waivable_yes_allows_waiver_application
+        type: cli
+        text_files:
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "DemoSuite",
+                  "subtests": [
+                    {
+                      "sub_Test_Description": "failure one",
+                      "sub_Test_Number": "1",
+                      "sub_test_result": "FAILED"
+                    }
+                  ]
+                }
+              ]
+            }
+          waiver.json: |
+            {
+              "Suites": [
+                {
+                  "Suite": "FWTS",
+                  "Reason": "Known FWTS issue"
+                }
+              ]
+            }
+          category.json: |
+            {
+              "cat1": [
+                {
+                  "Suite": "FWTS",
+                  "Test Suite": "DemoSuite",
+                  "Waivable": "Yes"
+                }
+              ]
+            }
+        args:
+          - FWTS
+          - "{dir}/fwts.json"
+          - "{dir}/waiver.json"
+          - "{dir}/category.json"
+        expect_exit_code: 0
+
+      - name: fwts_subtestid_waiver_applies_by_number
+        type: cli
+        text_files:
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "DemoSuite",
+                  "subtests": [
+                    {
+                      "sub_Test_Description": "something",
+                      "sub_Test_Number": "42",
+                      "sub_test_result": "FAILED"
+                    }
+                  ]
+                }
+              ]
+            }
+          waiver.json: |
+            {
+              "Suites": [
+                {
+                  "Suite": "FWTS",
+                  "TestSuites": [
+                    {
+                      "TestSuite": "DemoSuite",
+                      "TestCase": {
+                        "SubTests": [
+                          {
+                            "SubTestID": "42",
+                            "Reason": "ID-based waiver"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - FWTS
+          - "{dir}/fwts.json"
+          - "{dir}/waiver.json"
+        expect_exit_code: 0
+
+      - name: fwts_does_not_duplicate_existing_with_waiver_marker
+        type: cli
+        text_files:
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "DemoSuite",
+                  "subtests": [
+                    {
+                      "sub_Test_Description": "failure one",
+                      "sub_Test_Number": "1",
+                      "sub_test_result": "FAILED (WITH WAIVER)"
+                    }
+                  ]
+                }
+              ]
+            }
+          waiver.json: |
+            {
+              "Suites": [
+                {
+                  "Suite": "FWTS",
+                  "Reason": "Known issue"
+                }
+              ]
+            }
+        args:
+          - FWTS
+          - "{dir}/fwts.json"
+          - "{dir}/waiver.json"
+        expect_exit_code: 0
+
+      - name: malformed_waiver_file_does_not_modify_json
+        type: cli
+        text_files:
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "DemoSuite",
+                  "subtests": [
+                    {
+                      "sub_Test_Description": "failure one",
+                      "sub_Test_Number": "1",
+                      "sub_test_result": "FAILED"
+                    }
+                  ]
+                }
+              ]
+            }
+          waiver.json: |
+            { invalid json
+        args:
+          - FWTS
+          - "{dir}/fwts.json"
+          - "{dir}/waiver.json"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_contains
+            path: "{dir}/fwts.json"
+            text: "WITH WAIVER"
+
+      - name: bsa_testcase_waiver_marks_failed_case
+        type: cli
+        text_files:
+          bsa.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "RuleGroupA",
+                  "testcases": [
+                    {
+                      "Test_case": "RULE_001",
+                      "test_result": "FAILED"
+                    }
+                  ],
+                  "test_suite_summary": {
+                    "Total Rules Run": 1,
+                    "Passed": 0,
+                    "Passed (Partial)": 0,
+                    "Warnings": 0,
+                    "Skipped": 0,
+                    "Failed": 1,
+                    "PAL Not Supported": 0,
+                    "Not Implemented": 0,
+                    "Total_failed_with_waiver": 0
+                  }
+                }
+              ]
+            }
+          waiver.json: |
+            {
+              "Suites": [
+                {
+                  "Suite": "BSA",
+                  "TestSuites": [
+                    {
+                      "TestSuite": "RuleGroupA",
+                      "TestCases": [
+                        {
+                          "Test_case": "RULE_001",
+                          "Reason": "BSA waiver"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - BSA
+          - "{dir}/bsa.json"
+          - "{dir}/waiver.json"
+        expect_exit_code: 0
+
+      - name: quiet_mode_suppresses_normal_success_message
+        type: cli
+        text_files:
+          fwts.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "DemoSuite",
+                  "subtests": [
+                    {
+                      "sub_Test_Description": "failure one",
+                      "sub_Test_Number": "1",
+                      "sub_test_result": "FAILED"
+                    }
+                  ]
+                }
+              ]
+            }
+          waiver.json: |
+            {
+              "Suites": [
+                {
+                  "Suite": "FWTS",
+                  "Reason": "Known FWTS issue"
+                }
+              ]
+            }
+        args:
+          - FWTS
+          - "{dir}/fwts.json"
+          - "{dir}/waiver.json"
+          - --quiet
+        expect_exit_code: 0

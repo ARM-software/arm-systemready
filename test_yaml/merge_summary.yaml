@@ -1,0 +1,118 @@
+suites:
+  - name: merge_summary
+    files:
+      - common/log_parser/merge_summary.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: cli_help_flag
+        type: cli
+        args:
+          - --help
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Merge multiple files into a single HTML file."
+
+      - name: cli_merges_single_html_file
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > one.html <<'EOF'
+            <h1>A</h1>
+            EOF
+            python3 "$1" "$PWD/one.html" "$PWD/merged.html"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/merged.html"
+          - type: file_contains
+            path: "{dir}/merged.html"
+            text: "<html>"
+          - type: file_contains
+            path: "{dir}/merged.html"
+            text: "<h1>A</h1>"
+
+      - name: cli_merges_two_html_files
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > one.html <<'EOF'
+            <div>One</div>
+            EOF
+            cat > two.html <<'EOF'
+            <div>Two</div>
+            EOF
+            python3 "$1" "$PWD/one.html" "$PWD/two.html" "$PWD/merged.html"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.html"
+            text: "<div>One</div>"
+          - type: file_contains
+            path: "{dir}/merged.html"
+            text: "<div>Two</div>"
+
+      - name: cli_merges_mixed_extensions
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > one.txt <<'EOF'
+            alpha
+            EOF
+            cat > two.html <<'EOF'
+            <p>beta</p>
+            EOF
+            python3 "$1" "$PWD/one.txt" "$PWD/two.html" "$PWD/merged.html"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.html"
+            text: "alpha"
+          - type: file_contains
+            path: "{dir}/merged.html"
+            text: "<p>beta</p>"
+
+      - name: cli_output_contains_html_wrapper
+        type: cli
+        command: "./run_case.sh"
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            cat > one.html <<'EOF'
+            body
+            EOF
+            python3 "$1" "$PWD/one.html" "$PWD/merged.html"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.html"
+            text: "<html>"
+          - type: file_contains
+            path: "{dir}/merged.html"
+            text: "<body>"
+          - type: file_contains
+            path: "{dir}/merged.html"
+            text: "</html>"

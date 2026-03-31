@@ -1,0 +1,438 @@
+suites:
+  - name: json_to_html_common
+    files:
+      - common/log_parser/bbr/fwts/json_to_html.py
+      - common/log_parser/bbr/sct/json_to_html.py
+      - common/log_parser/bbr/tpm/json_to_html.py
+      - common/log_parser/bsa/json_to_html.py
+      - common/log_parser/os_tests/json_to_html.py
+      - common/log_parser/pfdi/json_to_html.py
+      - common/log_parser/post_script/json_to_html.py
+      - common/log_parser/sbmr/json_to_html.py
+      - common/log_parser/scmi/json_to_html.py
+      - common/log_parser/standalone_tests/json_to_html.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: contains_json_keyword
+        type: source_contains
+        pattern: "json"
+
+      - name: contains_html_keyword
+        type: source_contains_any
+        patterns:
+          - "html"
+          - "HTML"
+
+      - name: contains_html_generation_logic
+        type: source_contains_any
+        patterns:
+          - "generate_html"
+          - "generate_html_fwts"
+          - "generate_html_improved"
+          - "build_html"
+          - "render_detail_html"
+          - "render_summary_html"
+
+      - name: contains_chart_or_summary_logic
+        type: source_contains_any
+        patterns:
+          - "generate_bar_chart"
+          - "generate_bar_chart_fwts"
+          - "generate_bar_chart_improved"
+          - "summary"
+          - "chart"
+
+      - name: contains_file_output_logic
+        type: source_contains_any
+        patterns:
+          - "write("
+          - "write_text("
+          - "open("
+
+      - name: has_main_guard
+        type: main_guard
+
+      - name: cli_invalid_json_input_fails
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          bad.json: |
+            { invalid json
+        args:
+          - "{dir}/bad.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|usage|json)"
+
+  - name: fwts_json_to_html_specific
+    files:
+      - common/log_parser/bbr/fwts/json_to_html.py
+
+    cases:
+      - name: has_fwts_named_html_logic
+        type: source_contains_any
+        patterns:
+          - "generate_html_fwts"
+          - "FWTS"
+
+      - name: has_fwts_chart_logic
+        type: source_contains_any
+        patterns:
+          - "generate_bar_chart_fwts"
+          - "fwts"
+
+      - name: has_detect_columns_used
+        type: function_exists
+        function: "detect_columns_used"
+
+      - name: cli_fwts_generates_html_outputs
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          fwts.json: |
+            { invalid json
+        args:
+          - "{dir}/fwts.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+  - name: sct_json_to_html_specific
+    files:
+      - common/log_parser/bbr/sct/json_to_html.py
+
+    cases:
+      - name: has_sct_named_html_logic
+        type: source_contains_any
+        patterns:
+          - "generate_html_improved"
+          - "SCT"
+
+      - name: has_sct_chart_logic
+        type: source_contains_any
+        patterns:
+          - "generate_bar_chart_improved"
+          - "chart"
+
+      - name: has_determine_css_class
+        type: function_exists
+        function: "determine_css_class"
+
+      - name: cli_sct_generates_html_outputs
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          sct.json: |
+            { invalid json
+        args:
+          - "{dir}/sct.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+  - name: tpm_json_to_html_specific
+    files:
+      - common/log_parser/bbr/tpm/json_to_html.py
+
+    cases:
+      - name: has_tpm_keyword
+        type: source_contains_any
+        patterns:
+          - "TPM"
+          - "tpm"
+
+      - name: has_tpm_html_logic
+        type: source_contains_any
+        patterns:
+          - "generate_html_improved"
+          - "html"
+
+      - name: has_determine_css_class
+        type: function_exists
+        function: "determine_css_class"
+
+      - name: cli_tpm_generates_html_outputs
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          tpm.json: |
+            { invalid json
+        args:
+          - "{dir}/tpm.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+  - name: bsa_json_to_html_specific
+    files:
+      - common/log_parser/bsa/json_to_html.py
+
+    cases:
+      - name: has_bsa_html_logic
+        type: source_contains_any
+        patterns:
+          - "generate_html"
+          - "html"
+
+      - name: uses_bsa_summary_mapping
+        type: source_contains_any
+        patterns:
+          - "total_passed_partial"
+          - "total_not_implemented"
+          - "total_pal_not_supported"
+          - "total_rules_run"
+
+      - name: cli_bsa_generates_html_outputs
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          bsa.json: |
+            { invalid json
+        args:
+          - "{dir}/bsa.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+  - name: os_tests_json_to_html_specific
+    files:
+      - common/log_parser/os_tests/json_to_html.py
+
+    cases:
+      - name: has_os_tests_keyword
+        type: source_contains_any
+        patterns:
+          - "os_test.json"
+          - "boot_sources"
+          - "Generate HTML report from JSON data."
+
+      - name: has_get_subtest_status
+        type: function_exists
+        function: "get_subtest_status"
+
+      - name: cli_os_tests_invalid_json_fails
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          os_test.json: |
+            { invalid json
+        args:
+          - "{dir}/os_test.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|usage|json)"
+
+  - name: pfdi_json_to_html_specific
+    files:
+      - common/log_parser/pfdi/json_to_html.py
+
+    cases:
+      - name: has_pfdi_build_html
+        type: function_exists
+        function: "build_html"
+
+      - name: has_pfdi_generate_bar_chart
+        type: function_exists
+        function: "generate_bar_chart"
+
+      - name: has_waiver_reason_handling
+        type: source_contains
+        pattern: "waiver_reason"
+
+      - name: cli_pfdi_generates_html_outputs
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          pfdi.json: |
+            { invalid json
+        args:
+          - "{dir}/pfdi.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+  - name: post_script_json_to_html_specific
+    files:
+      - common/log_parser/post_script/json_to_html.py
+
+    cases:
+      - name: has_post_script_generate_html
+        type: function_exists
+        function: "generate_html"
+
+      - name: has_post_script_generate_bar_chart
+        type: function_exists
+        function: "generate_bar_chart"
+
+      - name: handles_failed_with_waiver
+        type: source_contains
+        pattern: "FAILED_WITH_WAIVER"
+
+      - name: cli_post_script_generates_html_outputs
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          post.json: |
+            { invalid json
+        args:
+          - "{dir}/post.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+  - name: sbmr_json_to_html_specific
+    files:
+      - common/log_parser/sbmr/json_to_html.py
+
+    cases:
+      - name: has_sbmr_render_detail_html
+        type: function_exists
+        function: "render_detail_html"
+
+      - name: has_sbmr_render_summary_html
+        type: function_exists
+        function: "render_summary_html"
+
+      - name: has_sbmr_generate_bar_chart
+        type: function_exists
+        function: "generate_bar_chart"
+
+      - name: has_report_link_support
+        type: source_contains_any
+        patterns:
+          - "report_link"
+          - "SBMR_REPORT_HTML"
+          - "report_html_abs"
+
+      - name: cli_sbmr_generates_html_outputs
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          sbmr.json: |
+            { invalid json
+        args:
+          - "{dir}/sbmr.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+      - name: cli_sbmr_generates_html_outputs_with_report_path
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          sbmr.json: |
+            { invalid json
+          report.html: |
+            <html><body>report</body></html>
+        args:
+          - "{dir}/sbmr.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+          - "{dir}/report.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+  - name: scmi_json_to_html_specific
+    files:
+      - common/log_parser/scmi/json_to_html.py
+
+    cases:
+      - name: has_scmi_build_html
+        type: function_exists
+        function: "build_html"
+
+      - name: has_scmi_generate_bar_chart
+        type: function_exists
+        function: "generate_bar_chart"
+
+      - name: has_scmi_tally_helper
+        type: function_exists
+        function: "_tally_from_testcases"
+
+      - name: cli_scmi_generates_html_outputs
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          scmi.json: |
+            { invalid json
+        args:
+          - "{dir}/scmi.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+  - name: standalone_tests_json_to_html_specific
+    files:
+      - common/log_parser/standalone_tests/json_to_html.py
+
+    cases:
+      - name: has_standalone_keyword
+        type: source_contains_any
+        patterns:
+          - "Standalone"
+          - "standalone"
+
+      - name: has_standalone_generate_html
+        type: function_exists
+        function: "generate_html"
+
+      - name: has_standalone_generate_bar_chart
+        type: function_exists
+        function: "generate_bar_chart"
+
+      - name: has_get_subtest_status
+        type: function_exists
+        function: "get_subtest_status"
+
+      - name: cli_standalone_invalid_json_fails
+        type: cli
+        env:
+          MPLBACKEND: Agg
+        scripts:
+          standalone.json: |
+            { invalid json
+        args:
+          - "{dir}/standalone.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|usage|json)"
