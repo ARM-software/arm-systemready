@@ -138,11 +138,12 @@ index 6634cdc40e..38c0848ee0 100644
  ################################################################################
  
 -FWTS_VERSION = 21.11.00
+-FWTS_SOURCE = fwts-V$(FWTS_VERSION).tar.gz
 +FWTS_VERSION = 26.01.00
- FWTS_SOURCE = fwts-V$(FWTS_VERSION).tar.gz
++FWTS_SOURCE = V$(FWTS_VERSION).tar.gz
 -FWTS_SITE = http://fwts.ubuntu.com/release
 -FWTS_STRIP_COMPONENTS = 0
-+FWTS_SITE = https://fwts.ubuntu.com/release
++FWTS_SITE = https://github.com/fwts/fwts/archive/refs/tags
  FWTS_LICENSE = GPL-2.0, LGPL-2.1, Custom
  FWTS_LICENSE_FILES = debian/copyright
  FWTS_AUTORECONF = YES
