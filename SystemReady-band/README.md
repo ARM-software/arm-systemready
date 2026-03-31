@@ -28,29 +28,29 @@ SystemReady band compliant platforms must implement a minimum set of hardware an
 The SystemReady band compliance and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
 ## Latest Release details
- - Release version: v3.1.0
+ - Release version: v3.1.1
  - Quality: EAC
- - The latest pre-built release of ACS is available for download here: [v25.10_3.1.0](prebuilt_images/v25.10_3.1.0)
+ - The latest pre-built release of ACS is available for download here: [v26.03_3.1.1](prebuilt_images/v26.03_3.1.1)
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
  - **Image Test Suite details**
 
 | Test Suite                                                                                   | Test Suite Tag / Commit                                      | Specification Version |
 |----------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------|
-| [Base System Architecture (BSA)](https://github.com/ARM-software/sysarch-acs)                | v25.10_BSA_1.1.2                                             | BSA v1.1              |
-| [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sysarch-acs)        | v25.10_SBSA_7.2.4                                            | SBSA v7.2             |
-| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | 00be42e82452cdad0b862728082568f3d7d2a1c3                     | BBR v2.1              |
-| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | 00be42e82452cdad0b862728082568f3d7d2a1c3                     | BBSR v1.3             |
-| [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | ba6c13f4e4fa1bf92ed04f5cb969d6c8a76f8605                     |                       |
+| [Base System Architecture (BSA)](https://github.com/ARM-software/sysarch-acs)                | v26.03_BSA_1.2.1                                             | BSA v1.2              |
+| [Server Base System Architecture (SBSA)](https://github.com/ARM-software/sysarch-acs)        | v26.03_SBSA_8.0.1                                            | SBSA v8.0             |
+| [Base Boot Requirements (BBR)](https://github.com/ARM-software/bbr-acs)                      | ce75ea6407b373a6db0357f0957eee9eadbe5e45                     | BBR v2.1              |
+| [Base Boot Security Requirements (BBSR)](https://github.com/ARM-software/bbr-acs)            | ce75ea6407b373a6db0357f0957eee9eadbe5e45                     | BBSR v1.3             |
+| [UEFI Self Certification Tests (UEFI-SCT)](https://github.com/tianocore/edk2-test)           | 346be4f87d085646abdde22b3e50505b5929c43c                     |                       |
 | [Firmware Test Suite (FWTS)](http://kernel.ubuntu.com/git/hwe/fwts.git)                      | v26.01.00                                                    |                       |
-| [Server Base Manageability Requirements (SBMR)](https://github.com/ARM-software/sbmr-acs)    | 27803824d966df48f34ce5290599f616bc0de8e9                     | SBMR v2.0             |
+| [Server Base Manageability Requirements (SBMR)](https://github.com/ARM-software/sbmr-acs)    | v26.03_SBMR_2.1.0                                            | SBMR v2.1             |
 
  - **Image Component details**
 
 | Component                                                                   | Version           |
 |-----------------------------------------------------------------------------|-------------------|
-| [Linux Kernel](https://github.com/torvalds/linux.git)                       | v6.10             |
-| [EDK2](https://github.com/tianocore/edk2.git)                               | edk2-stable202508 |
+| [Linux Kernel](https://github.com/torvalds/linux.git)                       | v6.12             |
+| [EDK2](https://github.com/tianocore/edk2.git)                               | edk2-stable202511 |
 
 
 ### Prebuilt Images
@@ -320,3 +320,4 @@ SystemReady ACS is distributed under Apache v2.0 License.
 --------------
 
 *Copyright (c) 2022-2026, Arm Limited and Contributors. All rights reserved.*
+

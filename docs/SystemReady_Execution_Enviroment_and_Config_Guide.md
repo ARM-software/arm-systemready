@@ -20,44 +20,71 @@ The configuration file is an INI-style file located at a predefined path in the 
 
 ```ini
 [AUTOMATION]
+# This variable determines whether the automation run utilizes this configuration file.
 config_enabled_for_automation_run = false
 
 [SCT]
+# This variable Enable/Disable SCT run(Valid values true or false).
 automation_sct_run = true
+# Valid value is Sequence file.
 sct_sequence_file = SBBR.seq
 
 [SCRT]
+# This variable Enable/Disable SCRT run(Valid values true or false).
 automation_scrt_run = true
 
 [BSA]
+# This variable Enable/Disable BSA run(Valid values true or false).
 automation_bsa_run = true
+# Valid values PE, GIC, SMMU, MEM_MAP, PERIPHERAL, TIMER, WATCHDOG, PCIE, POWER_WAKEUP.
 bsa_modules = 
+# Valid values are 1
 bsa_level = 1
+# Add selected rules to run here.
 bsa_select_rules = 
+# Add rules which you want to skip here.
 bsa_skip_rules = 
+# Default value 
 bsa_verbose = 3
 
 [SBSA]
+# This variable Enable/Disable SBSA run(Valid values true or false).
 automation_sbsa_run = false
+# Valid values PE, GIC, SMMU, MEM_MAP, PERIPHERAL, TIMER, WATCHDOG, PCIE,
+# POWER_WAKEUP, ETE, GPU, MPAM, RAS, PMU
 sbsa_modules = 
+# Valid values are 3,4,5,6,7,8.
 sbsa_level = 4
+# Add selected rules to run here.
 sbsa_select_rules = 
-sbsa_skip_rules = 
+# Add rules which you want to skip here.
+sbsa_skip_rules = S_L3_01
+# valid values 1,2,3,4,5
 sbsa_verbose = 3
 
 [FWTS]
+# This variable Enable/Disable FWTS run(Valid values true or false).
 automation_fwts_run = true
-fwts_modules = --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2
+# Add modules to run in FWTS command, the modules needs to be seperated by space
+fwts_modules = --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 smccc
 
 [BBSR_SCT]
-automation_bbsr_sct_run = true
+# This variable Enable/Disable BBSR_SCT run(Valid values true or false).
+automation_bbsr_sct_run = false
+# Valid value is Sequence file.
 bbsr_sct_sequence_file = BBSR.seq
 
 [BBSR_FWTS]
-automation_bbsr_fwts_run = true
+# This variable Enable/Disable BBSR_FWTS run(Valid values true or false).
+automation_bbsr_fwts_run = false
 
 [BBSR_TPM]
-automation_bbsr_tpm_run = true
+# This variable Enable/Disable BBSR_TPM run(Valid values true or false).
+automation_bbsr_tpm_run = false
+
+[SBMR]
+# This variable Enable/Disable SBMR in-band run(Valid values true or false).
+automation_sbmr_in_band_run = false
 ```
 ---
 
