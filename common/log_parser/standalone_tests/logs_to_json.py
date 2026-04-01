@@ -1227,7 +1227,7 @@ def parse_network_boot_log(log_data):
             status = match_explicit.group(2).strip()
             reason = match_explicit.group(3).strip() if match_explicit.group(3) else ""
 
-            # Create subtest with string reasons instead of arrays
+            # Create subtest with reason lists to match other parsers
             subtest = {
                 "sub_Test_Number": str(subtest_number),
                 "sub_Test_Description": test_name,
@@ -1242,12 +1242,12 @@ def parse_network_boot_log(log_data):
                 }
             }
 
-            # Add reason as string (not array) only if present
+            # Add reason as list to keep downstream waiver logic consistent
             if reason:
                 if status == "PASSED":
-                    subtest["sub_test_result"]["pass_reasons"] = reason
+                    subtest["sub_test_result"]["pass_reasons"] = [reason]
                 elif status == "FAILED":
-                    subtest["sub_test_result"]["fail_reasons"] = reason
+                    subtest["sub_test_result"]["fail_reasons"] = [reason]
 
             current_test["subtests"].append(subtest)
             current_test["test_suite_summary"][f"total_{status.lower()}"] += 1
