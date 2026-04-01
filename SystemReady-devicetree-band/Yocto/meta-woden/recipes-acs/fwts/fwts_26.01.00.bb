@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = "file://src/main.c;beginline=1;endline=16;md5=79533a427253d19
 
 S = "${WORKDIR}/${BP}/fwts-${PV}"
 
-SRC_URI = "https://fwts.ubuntu.com/release/fwts-V${PV}.tar.gz;subdir=${BP} \
+SRC_URI = "https://github.com/fwts/fwts/archive/refs/tags/V${PV}.tar.gz;subdir=${BP} \
            file://0001-Add-correct-printf-qualifier-for-off_t.patch \
            file://0004-Define-__SWORD_TYPE-if-not-defined-by-libc.patch \
            file://0005-Undefine-PAGE_SIZE.patch \
