@@ -315,7 +315,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                     <tr>
                         <td>{{ testcase.Test_case }}</td>
                         <td>{{ testcase.Test_case_description }}</td>
-                        <td class="{% if testcase.Test_result == 'PASSED' %}pass{% elif testcase.Test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif testcase.Test_result == 'FAILED' %}fail{% elif testcase.Test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in testcase.Test_result %}passed-partial{% elif testcase.Test_result == 'SKIPPED' %}skipped{% elif 'NOT TESTED' in testcase.Test_result %}not-tested{% endif %}">
+                        <td class="{% if testcase.Test_result == 'PASSED' %}pass{% elif testcase.Test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif testcase.Test_result == 'FAILED' %}fail{% elif testcase.Test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in testcase.Test_result %}passed-partial{% elif testcase.Test_result == 'SKIPPED' %}skipped{% elif testcase.Test_result in ['PAL NOT SUPPORTED', 'NOT TESTED (PAL NOT SUPPORTED)'] %}pal-not-supported{% elif testcase.Test_result in ['TEST NOT IMPLEMENTED', 'NOT TESTED (TEST NOT IMPLEMENTED)'] %}not-implemented{% elif 'NOT TESTED' in testcase.Test_result %}not-tested{% endif %}">
                             {{ testcase.Test_result }}
                         </td>
                         <td class="waiver-reason">
@@ -344,7 +344,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                                     <tr>
                                         <td>{{ subtest.sub_Test_Number }}</td>
                                         <td>{{ subtest.sub_Test_Description }}</td>
-                                        <td class="{% if subtest.sub_test_result == 'PASSED' %}pass{% elif subtest.sub_test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif subtest.sub_test_result == 'FAILED' %}fail{% elif subtest.sub_test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in subtest.sub_test_result %}passed-partial{% elif subtest.sub_test_result == 'SKIPPED' %}skipped{% elif 'NOT TESTED' in subtest.sub_test_result %}not-tested{% endif %}">
+                                        <td class="{% if subtest.sub_test_result == 'PASSED' %}pass{% elif subtest.sub_test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif subtest.sub_test_result == 'FAILED' %}fail{% elif subtest.sub_test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in subtest.sub_test_result %}passed-partial{% elif subtest.sub_test_result == 'SKIPPED' %}skipped{% elif subtest.sub_test_result in ['PAL NOT SUPPORTED', 'NOT TESTED (PAL NOT SUPPORTED)'] %}pal-not-supported{% elif subtest.sub_test_result in ['TEST NOT IMPLEMENTED', 'NOT TESTED (TEST NOT IMPLEMENTED)'] %}not-implemented{% elif 'NOT TESTED' in subtest.sub_test_result %}not-tested{% endif %}">
                                             {{ subtest.sub_test_result }}
                                         </td>
                                         <td class="waiver-reason">
