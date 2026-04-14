@@ -46,14 +46,14 @@ def classify_status(status_text):
         return formatted_result, summary_category
 
     # PAL not supported
-    if "NOT TESTED" in up and "PAL NOT SUPPORTED" in up:
-        formatted_result = "NOT TESTED (PAL NOT SUPPORTED)"
+    if "PAL NOT SUPPORTED" in up:
+        formatted_result = "PAL NOT SUPPORTED"
         summary_category = "PAL Not Supported"
         return formatted_result, summary_category
 
     # Test not implemented
-    if "NOT TESTED" in up and "TEST NOT IMPLEMENTED" in up:
-        formatted_result = "NOT TESTED (TEST NOT IMPLEMENTED)"
+    if "TEST NOT IMPLEMENTED" in up:
+        formatted_result = "TEST NOT IMPLEMENTED"
         summary_category = "Test Not Implemented"
         return formatted_result, summary_category
 

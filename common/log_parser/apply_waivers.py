@@ -807,7 +807,7 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                             failed += 1
                     elif 'PAL NOT SUPPORTED' in r:
                         pal += 1
-                    elif 'NOT TESTED (TEST NOT IMPLEMENTED)' in r:
+                    elif 'TEST NOT IMPLEMENTED' in r:
                         notimpl += 1
                     elif 'SKIPPED' in r:
                         skipped += 1
@@ -990,9 +990,9 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                     suite_totals["Failed"] += 1
                 elif "PASSED(*PARTIAL)" in test_result or "PASSED (PARTIAL)" in test_result:
                     suite_totals["Passed (Partial)"] += 1
-                elif "NOT TESTED (TEST NOT IMPLEMENTED)" in test_result:
+                elif "TEST NOT IMPLEMENTED" in test_result:
                     suite_totals["Not Implemented"] += 1
-                elif "NOT TESTED (PAL NOT SUPPORTED)" in test_result:
+                elif "PAL NOT SUPPORTED" in test_result:
                     suite_totals["PAL Not Supported"] += 1
                 elif "SKIPPED" in test_result:
                     suite_totals["Skipped"] += 1
