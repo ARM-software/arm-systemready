@@ -20,6 +20,10 @@ import re
 import chardet
 import os
 
+# Determine if we're in Device Tree (DT) mode or SR mode by checking yocto flag.
+YOCTO_FLAG_PATH = "/mnt/yocto_image.flag"
+DT_OR_SR_MODE = "DT" if os.path.isfile(YOCTO_FLAG_PATH) else "SR"
+
 def normalize_result(r):
     r = r.strip().upper()
     # Map single-word states to full past tense
@@ -167,6 +171,79 @@ test_mapping = {
             "SetWatchdogTimer_Conf",
             "SetWatchdogTimer_Func",
             "Stall_Func"
+        ],
+        "SbbrBootServices": [
+            "AcpiTable",
+            "MemoryMap",
+            "SmbiosTable"
+        ]
+    },
+    "PCIBusSupportTest": {
+        "PCIRootBridgeIOProtocolTest": [
+            "AllocateBuffer_Conf",
+            "AllocateBuffer_Func",
+            "Configuration_Func",
+            "CopyMem_Conf",
+            "Flush_Func",
+            "FreeBuffer_Func",
+            "GetAttributes_Conf",
+            "GetAttributes_Func",
+            "IoRead_Conf",
+            "IoRead_Func",
+            "IoWrite_Conf",
+            "IoWrite_Func",
+            "Map_Conf",
+            "MemRead_Conf",
+            "MemRead_Func",
+            "MemWrite_Conf",
+            "MemWrite_Func",
+            "PciRead_Conf",
+            "PciRead_Func",
+            "PciWrite_Conf",
+            "PciWrite_Func",
+            "PollIo_Conf",
+            "PollIo_Func",
+            "PollMem_Conf",
+            "PollMem_Func",
+            "SetAttributes_Conf",
+            "SetAttributes_Func"
+        ],
+        "PCIIOProtocolTest": [
+            "AllocateBuffer_Conf",
+            "AllocateBuffer_Func",
+            "Attributes_Conf",
+            "CopyMem_Conf",
+            "Flush_Func",
+            "FreeBuffer_Func",
+            "GetBarAttributes_Conf",
+            "GetBarAttributes_Func",
+            "GetLocation_Conf",
+            "GetLocation_Func",
+            "IoRead_Conf",
+            "IoRead_Func",
+            "IoWrite_Conf",
+            "IoWrite_Func",
+            "Map_Conf",
+            "MemRead_Conf",
+            "MemRead_Func",
+            "MemWrite_Conf",
+            "MemWrite_Func",
+            "PciRead_Conf",
+            "PciRead_Func",
+            "PciWrite_Conf",
+            "PciWrite_Func",
+            "PollIo_Conf",
+            "PollIo_Func",
+            "PollMem_Conf",
+            "PollMem_Func",
+            "SetBarAttributes_Conf",
+            "SetBarAttributes_Func"
+        ]
+    },
+ 
+    "MediaAccessTest": {
+        "SimpleFileSystemProtocolTest": [
+            "Flush_Func"
         ]
     },
     "RuntimeServicesTest": {
@@ -197,6 +274,7 @@ test_mapping = {
         "MiscRuntimeServicesTest": [
             "QueryCapsuleCapabilities_Conf",
             "QueryCapsuleCapabilities_Func",
+            "ResetSystem_Func",
             "UpdateCapsule_Conf"
         ],
         "SBBRRuntimeServicesTest": [
@@ -265,6 +343,26 @@ test_mapping = {
         ]
     },
     "HIITest": {
+        "HIIConfigRoutingProtocolTest": [
+            "BlockToConfig_Conf",
+            "BlockToConfig_Func",
+            "ConfigToBlock_Conf",
+            "ConfigToBlock_Func",
+            "ExportConfig_Conf",
+            "ExportConfig_Func",
+            "ExtractConfig_Conf",
+            "ExtractConfig_Func",
+            "GetAltCfg_Conf",
+            "GetAltCfg_Func",
+            "RouteConfig_Conf",
+            "RouteConfig_Func"
+        ],
+        "HIIConfigAccessProtocolTest": [
+            "ExtractConfigConformance",
+            "ExtractConfigFunction",
+            "RouteConfigConformance",
+            "RouteConfigFunction"
+        ],
         "HIIDatabaseProtocolTest": [
             "ExportPackageListsConformance",
             "ExportPackageListsFunction",
@@ -286,6 +384,18 @@ test_mapping = {
             "UnregisterPackageNotifyConformance",
             "UpdatePackageListConformance",
             "UpdatePackageListFunction"
+        ],
+        "HIIStringProtocolTest": [
+            "GetLanguagesConformance",
+            "GetLanguagesFunction",
+            "GetSecondaryLanguagesConformance",
+            "GetSecondaryLanguagesFunction",
+            "GetStringConformance",
+            "GetStringFunction",
+            "NewStringConformance",
+            "NewStringFunction",
+            "SetStringConformance",
+            "SetStringFunction"
         ]
     },
     "NetworkSupportTest": {
@@ -317,6 +427,16 @@ test_mapping = {
         ]
     },
     "ConsoleSupportTest": {
+        "GraphicsOutputProtocolTest": [
+            "BltVideoBltBuffer_Func",
+            "BltVideoFill_Func",
+            "BltVideoToVideo_Func",
+            "Blt_Conf"
+        ],
+        "SerialIOProtocolTest": [
+            "SetAttributes_Conf",
+            "SetAttributes_Func"
+        ],
         "SimpleTextInputExProtocolTest": [
             "ReadKeyStrokeExConformance",
             "ReadKeyStrokeExFunctionAuto",
@@ -477,8 +597,10 @@ def main(input_file, output_file):
                     test_entry["test_case_summary"]["total_aborted"] += 1
                 elif "SKIPPED" in result_str:
                     test_entry["test_case_summary"]["total_skipped"] += 1
-                elif "NOT SUPPORTED" not in result_str:
-                    # Count everything else except NOT SUPPORTED as ignored
+                elif "NOT SUPPORTED" in result_str:
+                    # Treat NOT SUPPORTED as skipped for consistent totals
+                    test_entry["test_case_summary"]["total_skipped"] += 1
+                else:
                     test_entry["test_case_summary"]["total_ignored"] += 1
 
                 test_guid = lines[i+1].strip() if i+1 < len(lines) else ""
@@ -506,8 +628,9 @@ def main(input_file, output_file):
         if test_entry:
             results.append(test_entry)
 
-    # Filter out SMBIOS tests using the dedicated function
-    results = [test for test in results if not is_smbios_test(test.get("Test_case", ""))]
+    # Skip SMBIOS tests in DT mode
+    if DT_OR_SR_MODE == "DT":
+        results = [test for test in results if not is_smbios_test(test.get("Test_case", ""))]
 
     # Filter out Runtime Properties Table test from subtests (appears only as subtest)
     for test in results:
@@ -535,7 +658,7 @@ def main(input_file, output_file):
             result_val = item.get("result", "")
             reason_val = item.get("reason", "")
 
-            if result_val == "FAILURE":
+            if not result_val or result_val == "FAILURE":
                 continue
 
             if ep_guid and sub_guid:
@@ -621,8 +744,11 @@ def main(input_file, output_file):
                 tcsum["total_aborted"] += 1
             elif "SKIPPED" in final_result:
                 tcsum["total_skipped"] += 1
-            elif "NOT SUPPORTED" not in final_result:
-                # ANY other override (IGNORED, KNOWN U-BOOT LIMITATION, etc) except NOT SUPPORTED
+            elif "NOT SUPPORTED" in final_result:
+                # Treat NOT SUPPORTED as skipped for consistent totals
+                tcsum["total_skipped"] += 1
+            else:
+                # ANY other override (IGNORED, KNOWN U-BOOT LIMITATION, etc)
                 tcsum["total_ignored"] += 1
 
     # Sum them all into suite_summary
@@ -660,7 +786,10 @@ def main(input_file, output_file):
                 final_suite_summary["total_aborted"] += 1
             elif "SKIPPED" in test_result:
                 final_suite_summary["total_skipped"] += 1
-            elif "NOT SUPPORTED" not in test_result:
+            elif "NOT SUPPORTED" in test_result:
+                # Treat NOT SUPPORTED as skipped for consistent totals
+                final_suite_summary["total_skipped"] += 1
+            else:
                 final_suite_summary["total_ignored"] += 1
 
     output_data = {
