@@ -1,12 +1,12 @@
 diff --git a/apps/uefi/bsa_main.c b/apps/uefi/bsa_main.c
-index 4458fe5..80f964c 100644
+index eb36791..98bc11f 100644
 --- a/apps/uefi/bsa_main.c
 +++ b/apps/uefi/bsa_main.c
-@@ -158,6 +158,7 @@ execute_tests()
+@@ -156,6 +156,7 @@ execute_tests()
          goto exit_acs;
      }
  
-+    val_print(ACS_PRINT_TEST, "\n\n SystemReady band ACS v3.1.1", 0);
-     val_print(ACS_PRINT_TEST, "\n\n BSA Architecture Compliance Suite", 0);
-     val_print(ACS_PRINT_TEST, "\n          Version %d.", BSA_ACS_MAJOR_VER);
-     val_print(ACS_PRINT_TEST, "%d.", BSA_ACS_MINOR_VER);
++    val_print(INFO, "\n\n SystemReady band ACS v3.1.1", 0);
+     val_print(INFO, "\n\n BSA Architecture Compliance Suite");
+     val_print(INFO, "\n          Version %d.", BSA_ACS_MAJOR_VER);
+     val_print(INFO, "%d.", BSA_ACS_MINOR_VER);

@@ -1,3 +1,129 @@
+v26.03_SR_3.1.1
+** SystemReady band**
+* As SBMR ACS IB is now part of main SR band image, removing separate sbmr build job
+* (fix) Make consistent SRS compliance results summary tittle in console dump and acs summary html
+* Adding system_config.txt copy to ACS result directory
+* Upgrade edk2 versions and migrate MdePkg to BaseFdtLib
+* acs sort keys for merged json and sct changes for json
+* Enable multi-threaded compression for ACS live image
+* Changes in commit log path during build phase
+* shipping cpufreq/cppc_cpufreq.ko driver to SR ACS image
+* (improv) Readme refactoring
+* Skip parsing of EFI Runtime Properties Table test for SCT json
+* Update linux source version to 6.18 while running systemready-scripts
+* Updated the BSA/SBSA skip options based on rule based framework
+* Enhanced compliance reporting to show mandatory and recommended suite
+* Enhanced BBSR compliance reporting to show mandatory suite details seperately
+* image path corrected
+* Fix metadata extraction for SMBIOS, POWER_WAKEUP, and smccc test suites
+* Fix BSA subtest counting issues in log parsing and compliance calculation
+* docs: revise build host system requirements
+* feat: add link recovery delay and require QCA808X PHY support
+* build: remove merged patch and pin SRCREV to commit
+* Downgrade Linux kernel version from v6.16 to v6.12 for Systemready-band
+* enable PREEMPT and RCU nocb; add PNP0D15 to xhci-plat
+* fix: normalize fail_reasons and handle FWTS dict waivers
+* feat: updated gcc version from 13.2 to 14.3
+* (sr component upgrade) Update EDK2 and SCT source versions
+* xBSA log parser update for latest format and DT edk2 and sct upgrade
+* (improv) Use existing dmidecode log for deriving system info in acs summary
+* init.sh: pass explicit SBBR/EBBR config to edk2-test-parser
+* feat: Upgrade fwts version to 26.01.00
+* (upgrade) SCT commit id updated to following commit id tianocore/edk2-test@ac270e9
+* fwts: downgrade smccc test failures to warnings in dt
+* parse SBMR Robot XML and enrich summaries
+* Add ipmitool output to acs linux dump
+* chore(config): Update SRS, BSA, and SBSA versions
+* Upcoming release version print updates and minor improvements
+* feat: fix interactive shell config
+* SR: fwts kernel module packaging changes, DT : passing el1physkip
+* bsa.nsh: Add variables for ACS version strings
+* (SR linux fix): Restrict USB4 tunnel detection fix ported to acs kernel 6.12
+* (SR v3.1.1) : added support to capture indivdual test suites build information + systemready scripts run
+* Scripts changes to reflect RC0 releases in logs
+* (sr) capture systemready build details
+* linux: save and restore system time around date & hwclock checks
+* feat: add SR OS test parsing, post-script checks, and reporting
+* fix: stop FWTS reason concatenation across new result lines
+* dmicheck: Fix SMBIOS table size boundary check
+* Skip parsing of base rule tests run from SBSA and reduce uefi xbsa results copy time
+* edk2-test: upgrade; kernel: fix CONFIG_TCG_CRB handling
+* (improv) : Make post-script log path consistent for both bands, added scmi categories, acs json schema
+* fix: refine BSA status colors and warning handling
+* fix: align ACS report colors and bar charts across suites
+* (SR) Skip edk2 test parser grp by failure
+* SR v3.1.1 rc-final print changes
+* fix: bsa parser prefer linux results with uefi exception
+* ix: align dt/sr test_category usage and sct suite mapping
+* Restore S_L3MM_01 for sbsa run
+* Update SR run config based on xBSA rbx design
+* (fix) remove incorrect acs_summary delete cmd
+* Skip PCI_MM_03 run as the test needs to ensure correct BAR memory access
+* SR v3.1.1 release version prints update
+* fix: apply getwakeuptime pending status patch for Linux 6.12
+* fix: add rule status guide link to detailed BSA summary
+* fix: move S_L3_01 skip rule from scripts to acs_run_config.ini
+* SystemReady SR band: update to v3.1.1 release and align component tags
+
+v26.03_DT_3.1.2
+** Devicetree band**
+* Update SystemReady devicetree band config to fetch latest and use upstream sysarch-acs for BSA/PFDI edk2 DT patches
+* feat: add link recovery delay and require QCA808X PHY support
+* build: remove merged patch and pin SRCREV to commit
+* fix: normalize fail_reasons and handle FWTS dict waivers
+* feat: updated gcc version from 13.2 to 14.3
+* DT: Run fwts 'smccc' tests for DT band
+* xBSA log parser update for latest format and DT edk2 and sct upgrade
+* (improv) Use existing dmidecode log for deriving system info in acs summary
+* init.sh: pass explicit SBBR/EBBR config to edk2-test-parser
+* feat: Upgrade fwts version to 26.01.00
+* (upgrade) SCT commit id updated to following commit id tianocore/edk2-test@ac270e9
+* Linux version upgrade to 6.18 in DT image
+* feat: reduce network-boot image size for direct GitHub download
+* fwts: downgrade smccc test failures to warnings in dt
+* Integrate SCMI-TESTS with DT image
+* Add ipmitool output to acs linux dump
+* chore(config): Update SRS, BSA, and SBSA versions
+* Upcoming release version print updates and minor improvements
+* Increase EFI partition size to avoid storage issues
+* feat: add SCMI parsing, DT gating, and waiver support
+* pfdi parser: As pfdi is using same rule based fwk as bsa, use bsa parser
+* feat: fix interactive shell config
+* SR: fwts kernel module packaging changes, DT : passing el1physkip
+* (feat) DT : added python based checks for capsule on disk variables and runtime dev mapping
+* bsa.nsh: Add variables for ACS version strings
+* (DT) build EfiConformanceProfileTableTest for Dt band
+* log_parser: skip PFDI JSON when no rules run; align SCMI handling
+* fix ACS summary table alignment for SCMI/BBSR detail rows
+* fix: simplify HTTPS mode echo message to avoid option parsing
+* Scripts changes to reflect RC0 releases in logs
+* DT v3.1.2 RC0 image and readme updates
+* linux: save and restore system time around date & hwclock checks
+* runtime_device_mapping_conflict_checker: improve DTS parsing and MMIO translation
+* fix: stop FWTS reason concatenation across new result lines
+* fix: skip OD capsule subtest on missing success line
+* dmicheck: Fix SMBIOS table size boundary check
+* fix: record SCMI suite-level access gaps with reasons
+* capsule_ondisk_reporting_vars_check: Align result reporting and skip …
+* edk2-test: upgrade; kernel: fix CONFIG_TCG_CRB handling
+* (dt) : add parser support for capsule ondisk var test
+* (dt) Add support for runtime dev conflict parsing
+* (improv) : Make post-script log path consistent for both bands, added scmi categories, acs json schema
+* Add a description to the SystemReady Devicetree categories
+* fix: hide SCMI "not run" detail row in ACS summary
+* Enable clock controller, interconnect and pinctrl for QCS8300
+* Update version to RC-final for DT v3.1.2
+* DT RC0 feedbacks
+* DT v3.1.2 RC-final image
+* fix: refine BSA status colors and warning handling
+* fix: align ACS report colors and bar charts across suites
+* fix: bsa parser prefer linux results with uefi exception
+* (dt) final image version prints + dt validate updated to 6.19
+* ix: align dt/sr test_category usage and sct suite mapping
+* (fix) yocto bsa-acs-app recipe include path updated
+* (improv) Increase acs initramfs size
+* SystemReady DT band: update to v3.1.2 release and align component tags
+
 v25.12_DT_3.1.1
 ** Devicetree band**
 * (enhancement) Enable separate tagging for BSA, SBSA, and PFDI sources in sysarch-acs repository
