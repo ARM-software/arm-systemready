@@ -4,7 +4,7 @@ PROVIDES:remove = "virtual/uefi-firmware"
 PROVIDES:remove = "virtual/bootloader"
 
 LICENSE += "& Apache-2.0"
-LIC_FILES_CHKSUM += "file://ShellPkg/Application/sysarch-acs/LICENSE;md5=86d3f3a95c324c9479bd8986968f4327"
+LIC_FILES_CHKSUM += "file://ShellPkg/Application/sysarch-acs/LICENSE;md5=e1cd0b49f4875bd7fdf5b963f4b0a147"
 COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
 
 SRC_URI += "git://github.com/ARM-software/sysarch-acs;destsuffix=edk2/ShellPkg/Application/sysarch-acs;protocol=https;branch=main;name=sysarch-acs \

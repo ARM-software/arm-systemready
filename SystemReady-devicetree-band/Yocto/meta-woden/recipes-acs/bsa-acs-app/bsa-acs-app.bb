@@ -1,6 +1,6 @@
 SUMMARY = "BSA ACS Linux application"
 LICENSE = "Apache-2.0"
-LIC_FILES_CHKSUM = "file://sysarch-acs/LICENSE;md5=86d3f3a95c324c9479bd8986968f4327 \
+LIC_FILES_CHKSUM = "file://sysarch-acs/LICENSE;md5=e1cd0b49f4875bd7fdf5b963f4b0a147 \
 "
 
 SRC_URI = "git://github.com/ARM-software/sysarch-acs;destsuffix=sysarch-acs;protocol=https;branch=main;name=sysarch-acs \
