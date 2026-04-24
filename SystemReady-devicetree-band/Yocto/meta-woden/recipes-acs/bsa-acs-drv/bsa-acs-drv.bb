@@ -1,6 +1,6 @@
 SUMMARY = "BSA-ACS Linux driver"
 LICENSE = "GPLv2 & Apache-2.0"
-LIC_FILES_CHKSUM = "file://sysarch-acs/LICENSE;md5=86d3f3a95c324c9479bd8986968f4327 \
+LIC_FILES_CHKSUM = "file://sysarch-acs/LICENSE;md5=e1cd0b49f4875bd7fdf5b963f4b0a147 \
                     file://linux-acs/acs-drv/files/COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e \
 "
 COMPATIBLE_MACHINE:genericarm64 = "genericarm64"
