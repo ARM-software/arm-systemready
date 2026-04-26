@@ -81,12 +81,12 @@ mkdir -p "$ACS_SUMMARY_DIR"
 mkdir -p "$JSONS_DIR"
 
 #echo "Gathering ACS info into acs_info.txt and acs_info.json..."
-IPMITOOL_LOG="$LOGS_PATH/linux_dump/ipmitool.log"
+IPMITOOL_LOG="$LOGS_PATH/linux_dump/ipmitool.txt"
 python3 "$SCRIPTS_PATH/acs_info.py" \
     --acs_config_path "$ACS_CONFIG_PATH" \
     --system_config_path "$SYSTEM_CONFIG_PATH" \
     --uefi_version_log "$LOGS_PATH/uefi_dump/uefi_version.log" \
-    --dmidecode_log "$LOGS_PATH/linux_dump/dmidecode.log" \
+    --dmidecode_log "$LOGS_PATH/linux_dump/dmidecode.txt" \
     --ipmitool_log "$IPMITOOL_LOG" \
     --output_dir "$JSONS_DIR"
 echo ""
@@ -311,10 +311,10 @@ if check_file "$BBSR_SCT_LOG"; then
 
     if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
 
-       # EDK2 Log Parsing: Process the edk2-test-parser.log
-       if check_file "$BBSR_EDK2_PARSER_LOG"; then
-           python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json_edk2.py" "$BBSR_EDK2_PARSER_LOG" "$BBSR_EDK2_PARSER_JSON"
-       fi
+        # EDK2 Log Parsing: Process the edk2-test-parser.log
+        if check_file "$BBSR_EDK2_PARSER_LOG"; then
+            python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json_edk2.py" "$BBSR_EDK2_PARSER_LOG" "$BBSR_EDK2_PARSER_JSON"
+        fi
     fi
     python3 "$SCRIPTS_PATH/bbr/sct/logs_to_json.py" "$BBSR_SCT_LOG" "$BBSR_SCT_JSON"
     apply_waivers "BBSR-SCT" "$BBSR_SCT_JSON"

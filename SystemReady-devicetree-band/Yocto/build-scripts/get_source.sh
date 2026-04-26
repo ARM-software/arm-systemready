@@ -42,10 +42,10 @@ else
 fi
 
 sudo apt install git curl mtools gdisk gcc liblz4-tool zstd \
- openssl automake autotools-dev libtool bison flex \
- bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
- make gcc g++ gnu-efi libfile-slurp-perl help2man \
- python3-pip chrpath diffstat lz4 cpio gawk wget efitools -y
+    openssl automake autotools-dev libtool bison flex \
+    bc uuid-dev python3 libglib2.0-dev libssl-dev autopoint \
+    make gcc g++ gnu-efi libfile-slurp-perl help2man \
+    python3-pip chrpath diffstat lz4 cpio gawk wget efitools -y
 
 sudo pip3 install kas
 
@@ -143,7 +143,7 @@ copy_recipes()
 
     echo "SystemReady DT ACS" >> "$SYSTEMREADY_COMMIT_LOG"
     echo "    URL(systemready-acs) = $(git remote get-url origin)" >> "$SYSTEMREADY_COMMIT_LOG"
-    echo "    commit(systemready-acs) = $(git rev-parse HEAD)" >> "$SYSTEMREADY_COMMIT_LOG" 
+    echo "    commit(systemready-acs) = $(git rev-parse HEAD)" >> "$SYSTEMREADY_COMMIT_LOG"
     echo "" >> "${SYSTEMREADY_COMMIT_LOG}"
     pushd $TOP_DIR/meta-woden/recipes-acs/bootfs-files/files
 
@@ -155,6 +155,8 @@ copy_recipes()
     cp $TOP_DIR/../../common/linux_scripts/extract_capsule_fw_version.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
     cp $TOP_DIR/../../common/linux_scripts/capsule_ondisk_reporting_vars_check.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
     cp $TOP_DIR/../../common/linux_scripts/runtime_device_mapping_conflict_checker.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
+    cp $TOP_DIR/../../common/linux_scripts/ethtool-test.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
+    cp $TOP_DIR/../../common/linux_scripts/read_write_check_blk_devices.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
 
     cp -r $TOP_DIR/../../common/log_parser $TOP_DIR/meta-woden/recipes-acs/install-files/files/
     popd

@@ -74,6 +74,14 @@ do_build ()
     chmod +x root_fs_overlay/usr/bin/secure_init.sh
     cp  $TOP_DIR/ramdisk/device_driver_sr.sh root_fs_overlay/usr/bin/
     chmod +x root_fs_overlay/usr/bin/device_driver_sr.sh
+    cp  $TOP_DIR/ramdisk/linux_init.sh root_fs_overlay/usr/bin/
+    chmod +x root_fs_overlay/usr/bin/linux_init.sh
+    cp  $TOP_DIR/ramdisk/linux_dump.sh root_fs_overlay/usr/bin/
+    chmod +x root_fs_overlay/usr/bin/linux_dump.sh
+    cp  $TOP_DIR/ramdisk/ethtool-test.py root_fs_overlay/usr/bin/
+    chmod +x root_fs_overlay/usr/bin/ethtool-test.py
+    cp  $TOP_DIR/ramdisk/read_write_check_blk_devices.py root_fs_overlay/usr/bin/
+    chmod +x root_fs_overlay/usr/bin/read_write_check_blk_devices.py
     cp  $TOP_DIR/ramdisk/bsa.sh root_fs_overlay/usr/bin/
     chmod +x root_fs_overlay/usr/bin/bsa.sh
     cp  $TOP_DIR/ramdisk/sbsa.sh root_fs_overlay/usr/bin/

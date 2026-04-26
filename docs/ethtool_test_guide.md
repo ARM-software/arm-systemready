@@ -4,7 +4,7 @@
 
 This script automates testing and diagnostics of Ethernet interfaces on Linux-based systems. It evaluates the status, configuration, and connectivity of each interface using standard tools such as `ip`, `ethtool`, `ping`, `wget`, and `curl`.
 
-When executed with a **SystemReady DT image**, the script runs automatically as part of the ACS (Architecture Compliance Suite) test framework with all dependencies. Output logs are generated at `linux_tools/ethtool-test.log` within the `acs_results` directory.
+When executed with a **SystemReady image**, the script runs automatically as part of the ACS (Architecture Compliance Suite) test framework with all dependencies. Output logs are generated at `linux_tools/ethtool-test.log` within the `acs_results` directory.
 
 ---
 
@@ -141,4 +141,4 @@ These messages indicate that the current interface failed validation and is bein
 - `WARN: Default route to 8.8.8.8 is via <other_iface>, not <iface>; skipping further tests for <iface>`
 
 --------------
-*Copyright (c) 2025, Arm Limited and Contributors. All rights reserved.*
+*Copyright (c) 2025-2026, Arm Limited and Contributors. All rights reserved.*

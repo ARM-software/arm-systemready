@@ -494,7 +494,7 @@
       "Description": [
         "The SystemReady Devicetree band recommends network boot support.",
         "Failures may have only minor effects, or may prevent an OS to boot from the network.",
-	"https://github.com/ARM-software/arm-systemready/blob/main/SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/ethtool-test.py"
+	"https://github.com/ARM-software/arm-systemready/blob/main/common/linux_scripts/ethtool-test.py"
       ],
       "specName": "SRS",
       "rel Import. to main readiness": "Minor",

@@ -106,66 +106,18 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     exec sh +m
   fi
 
-
-  #Linux debug dump
-  echo "Collecting Linux Debug Dump"
-  mkdir -p /mnt/acs_results/linux_dump
-  dmesg > /mnt/acs_results/linux_dump/dmesg.log
-  lspci > /mnt/acs_results/linux_dump/lspci.log
-  lspci -vvv &> /mnt/acs_results/linux_dump/lspci-vvv.log
-  cat /proc/interrupts > /mnt/acs_results/linux_dump/interrupts.log
-  cat /proc/cpuinfo > /mnt/acs_results/linux_dump/cpuinfo.log
-  cat /proc/meminfo > /mnt/acs_results/linux_dump/meminfo.log
-  cat /proc/iomem > /mnt/acs_results/linux_dump/iomem.log
-  lscpu > /mnt/acs_results/linux_dump/lscpu.log
-  lsblk > /mnt/acs_results/linux_dump/lsblk.log
-  lsusb > /mnt/acs_results/linux_dump/lsusb.log
-  lshw > /mnt/acs_results/linux_dump/lshw.log
-  dmidecode > /mnt/acs_results/linux_dump/dmidecode.log
-  dmidecode --dump-bin /mnt/acs_results/linux_dump/dmidecode.bin >> /mnt/acs_results/linux_dump/dmidecode.log 2>&1
-  uname -a > /mnt/acs_results/linux_dump/uname.log
-  cat /etc/os-release > /mnt/acs_results/linux_dump/cat-etc-os-release.log
-  date > /mnt/acs_results/linux_dump/date.log
-  cat /proc/driver/rtc > /mnt/acs_results/linux_dump/rtc.log
-  hwclock > /mnt/acs_results/linux_dump/hwclock.log
-  efibootmgr > /mnt/acs_results/linux_dump/efibootmgr.log
-  efibootmgr -t 20 > /mnt/acs_results/linux_dump/efibootmgr-t-20.log
-  efibootmgr -t 5 > /mnt/acs_results/linux_dump/efibootmgr-t-5.log
-  efibootmgr -c > /mnt/acs_results/linux_dump/efibootmgr-c.txt 2>&1
-  ifconfig > /mnt/acs_results/linux_dump/ifconfig.log
-  ip addr show > /mnt/acs_results/linux_dump/ip-addr-show.log
-  ping -c 5 www.arm.com > /mnt/acs_results/linux_dump/ping-c-5-www-arm-com.log
-  acpidump > /mnt/acs_results/linux_dump/acpi.log
-  acpidump > /mnt/acs_results/linux_dump/acpi.dat
-  cd /mnt/acs_results/linux_dump
-  acpixtract -a acpi.dat > acpixtract.log 2>&1
-  iasl -d *.dat > iasl.log 2>&1
+  # Linux dump with ethtool and blk devices script run
+  cd /usr/bin
+  ./linux_init.sh --mode acs
   cd -
-  ORIG_SYS_TIME="$(date '+%Y-%m-%d %H:%M:%S')"
-  date --set="20221215 05:30" > /mnt/acs_results/linux_dump/date-set-202212150530.log
-  date > /mnt/acs_results/linux_dump/date-after-set.log
-  hwclock --set --date "2023-01-01 09:10:15" > /mnt/acs_results/linux_dump/hw-clock-set-20230101091015.log
-  hwclock > /mnt/acs_results/linux_dump/hwclock-after-set.log
-  date --set="$ORIG_SYS_TIME" 2>/dev/null || true
-  hwclock --systohc 2>/dev/null || true
-  ls -lR /sys/firmware > /mnt/acs_results/linux_dump/firmware.log
-  cp -r /sys/firmware /mnt/acs_results/linux_dump/ >> firmware.log 2>&1
-  ipmitool -C 17 -N 3 -p 623 mc info > /mnt/acs_results/linux_dump/ipmitool.log 2>&1
-  # Capturing System PSCI command output
-  mkdir -p /mnt/acs_results/linux_tools/psci
-  mount -t debugfs none /sys/kernel/debug
-  cat /sys/kernel/debug/psci > /mnt/acs_results/linux_tools/psci/psci.log
-  dmesg | grep psci > /mnt/acs_results/linux_tools/psci/psci_kernel.log
-  sync /mnt
-  sleep 5
-  echo "Linux Debug Dump - Completed"
+  sleep 2
 
   # Linux Device Driver script run
   echo "Running Device Driver Matching Script"
-  cd /usr/bin/
+  cd /usr/bin
   ./device_driver_sr.sh > /mnt/acs_results/linux_dump/device_driver.log
   cd -
-  echo "Device Driver script run completed"
+  echo "Device Driver script run - Completed"
   sync /mnt
   sleep 5
 
