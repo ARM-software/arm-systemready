@@ -77,11 +77,6 @@ do_build ()
     sed -i 's/# CONFIG_TEE is not set/CONFIG_TEE=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_OPTEE is not set/CONFIG_OPTEE=y/g' $LINUX_OUT_DIR/.config
     sed -i 's/# CONFIG_ARM_PSCI_CHECKER is not set/CONFIG_ARM_PSCI_CHECKER=y/g' $LINUX_OUT_DIR/.config
-    #Configurations to enable rshim support
-    echo "CONFIG_MLXBF_TMFIFO=y" >> $LINUX_OUT_DIR/.config
-    #Configurations to increase serial ports
-    echo "CONFIG_SERIAL_8250_NR_UARTS=32" >> $LINUX_OUT_DIR/.config
-    echo "CONFIG_SERIAL_8250_RUNTIME_UARTS=32" >> $LINUX_OUT_DIR/.config
     cat $SRBAND_DEFCONFIG >> $LINUX_OUT_DIR/.config
     if [[ $arch = "aarch64" ]]; then
         echo "arm64 machine"

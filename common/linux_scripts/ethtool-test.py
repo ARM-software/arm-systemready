@@ -14,24 +14,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script parses for ethernet interfaces using ip tool and runs ethtool
-# self-test if the interface supports. It also performs link detection,
-# DHCP verification, IPv6 testing, and network connectivity checks via ping,
-# wget, and curl.
+"""This script parses for ethernet interfaces using ip tool and runs ethtool
+self-test if the interface supports. It also performs link detection,
+DHCP verification, IPv6 testing, and network connectivity checks via ping,
+wget, and curl.
+"""
 
-
-import subprocess
 import re
-import time
-import signal
-import sys
 import shutil
-from pathlib import Path
+import signal
+import subprocess  # nosec B404
+import sys
+import time
 from collections import OrderedDict
 from fnmatch import fnmatch
+from pathlib import Path
+from typing import Dict
 
 # To print coloured output on the console
 def print_color(text, level="INFO"):
+    """Print coloured log messages with a severity prefix."""
     colors = {
         "INFO": "\033[92m",   # Green
         "DEBUG": "\033[94m",  # Blue
@@ -48,6 +50,16 @@ PASSED  = "PASSED"
 FAILED  = "FAILED"
 SKIPPED = "SKIPPED"
 WARNING = "WARNING"
+
+# Command paths
+IP_CMD = shutil.which("ip") or "ip"
+ETHTOOL_CMD = shutil.which("ethtool") or "ethtool"
+PING_CMD = shutil.which("ping") or "ping"
+PING6_CMD = shutil.which("ping6") or "ping6"
+UDHCPC_CMD = shutil.which("udhcpc") or "udhcpc"
+DHCLIENT_CMD = shutil.which("dhclient") or "dhclient"
+WGET_CMD = shutil.which("wget") or "wget"
+CURL_CMD = shutil.which("curl") or "curl"
 
 # Order and names of tests shown in the summary
 TEST_ORDER = [
@@ -69,13 +81,15 @@ TEST_ORDER = [
 # Parsing the summary
 results = {}
 
-SYSTEM_CONFIG_PATH = None
 # Get the ethtool compliant interface value from system_config.txt
-def get_required_compliant_ifaces():
+def get_required_compliant_ifaces(system_config_path):
+    """Read required Ethernet controller count from system_config.txt."""
+    if not system_config_path:
+        return 0
     try:
-        cfg = Path(SYSTEM_CONFIG_PATH)
-        text = cfg.read_text()
-    except Exception:
+        cfg = Path(system_config_path)
+        text = cfg.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
         return 0
 
     for line in text.splitlines():
@@ -95,31 +109,38 @@ def get_required_compliant_ifaces():
     return 0
 
 def init_iface_results(iface):
+    """Initialise all test results for an interface as skipped."""
     od = OrderedDict()
     for t in TEST_ORDER:
         od[t] = {"status": SKIPPED, "detail": "Not run"}
     results[iface] = od
 
 def set_result(iface, test_name, status, detail=""):
+    """Set test result for an interface."""
     if iface not in results:
         init_iface_results(iface)
     results[iface][test_name] = {"status": status, "detail": detail or ""}
 
 def skip_many(iface, test_names, reason):
+    """Mark multiple tests as skipped for an interface."""
     for t in test_names:
         if results[iface][t]["status"] == SKIPPED or results[iface][t]["detail"] == "Not run":
             results[iface][t] = {"status": SKIPPED, "detail": reason}
 
-def print_summary():
+def print_summary(system_config_path=None):
+    """Print per-interface test results and the final compliance summary."""
     print("\n================================================================")
     print("                         SUMMARY")
     print("================================================================")
-    c = {"PASSED":"\033[92m", "FAILED":"\033[91m", "SKIPPED":"\033[93m", "WARNING":"\033[36m", "reset":"\033[0m"}
+    c = {"PASSED":"\033[92m", "FAILED":"\033[91m", "SKIPPED":"\033[93m",
+         "WARNING":"\033[36m", "reset":"\033[0m"}
 
     # One-line detected interfaces summary
-    detected_ifaces = [iface for iface in results if results[iface]["Detect interface"]["status"] == PASSED]
+    detected_ifaces = [iface for iface, iface_results in results.items()
+                       if iface_results["Detect interface"]["status"] == PASSED]
     if detected_ifaces:
-        print(f"\nDetected Interfaces :  {c['PASSED']}PASSED{c['reset']} ({', '.join(detected_ifaces)})")
+        print(f"\nDetected Interfaces :  {c['PASSED']}PASSED{c['reset']} "
+              f"({', '.join(detected_ifaces)})")
 
     printable_tests = [t for t in TEST_ORDER if t != "Detect interface"]
     max_name = max(len(t) for t in printable_tests)
@@ -229,7 +250,7 @@ def print_summary():
     def join_names(names):
         return ", ".join(names) if names else "None"
 
-    required = get_required_compliant_ifaces()
+    required = get_required_compliant_ifaces(system_config_path)
 
     # total testable interfaces excluding virtual
     total_testable = len(compliant_ifaces) + len(non_compliant_ifaces)
@@ -265,9 +286,8 @@ def print_summary():
     if len(compliant_ifaces) >= required:
         extra_msgs = []
         if non_compliant_ifaces:
-            extra_msgs.append(
-                f"{len(non_compliant_ifaces)} interface(s) failed: {join_names(non_compliant_ifaces)}"
-            )
+            extra_msgs.append(f"{len(non_compliant_ifaces)} interface(s) failed: "
+                              f"{join_names(non_compliant_ifaces)}")
         extra = f"; {'; '.join(extra_msgs)}" if extra_msgs else ""
         print(
             f"\nEthtool Compliance : {green}PASSED{reset} "
@@ -289,28 +309,29 @@ def print_summary():
             f"({detail})\n"
         )
 
-original_states = {}
+original_states: Dict[str, str] = {}
 
 #To check if a tool is from BusyBox
 def is_busybox_tool(tool_name):
+    """Return True if the given tool appears to be provided by BusyBox."""
     tool_path = shutil.which(tool_name)
     if not tool_path:
         return False
     try:
         r = subprocess.run(
-            f"{tool_path} --help", shell=True,
-            capture_output=True, text=True, timeout=2
-        )
+            [tool_path, "--help"],
+            capture_output=True, text=True, timeout=2, check=False)
         return "BusyBox" in r.stdout or "BusyBox" in r.stderr
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
         return False
 
 def is_virtual_iface(iface):
+    """Return True if the interface appears to be virtual."""
     try:
         target_abs = str(Path(f"/sys/class/net/{iface}/device").resolve())
         if "/devices/virtual/" in target_abs:
             return True
-    except Exception:
+    except OSError:
         pass
 
     virt_prefixes = (
@@ -331,15 +352,16 @@ def is_virtual_iface(iface):
 
 # To renew DHCP when doesn’t exist.
 def renew_dhcp(intrf, busybox_env):
+    """Try to restore a default route for an interface using DHCP."""
     if has_default_route(intrf):
         return False
     print_color(f"Default route via {intrf} is missing; attempting DHCP restore", "INFO")
     try:
         if busybox_env and shutil.which("udhcpc"):
-            subprocess.run(f"udhcpc -n -q -i {intrf}", shell=True, timeout=30)
+            subprocess.run([UDHCPC_CMD, "-n", "-q", "-i", intrf], timeout=30, check=False)
         elif shutil.which("dhclient"):
-            subprocess.run(f"dhclient -r {intrf}", shell=True, timeout=20)
-            subprocess.run(f"dhclient -1 {intrf}", shell=True, timeout=35)
+            subprocess.run([DHCLIENT_CMD, "-r", intrf], timeout=20, check=False)
+            subprocess.run([DHCLIENT_CMD, "-1", intrf], timeout=35, check=False)
         else:
             print_color("No DHCP client found (udhcpc/dhclient). Skipping restore.", "WARN")
     except subprocess.TimeoutExpired:
@@ -353,12 +375,15 @@ def renew_dhcp(intrf, busybox_env):
 
 # To check if the default route already exist.
 def has_default_route(dev):
-    r = subprocess.run("ip route show default", shell=True, capture_output=True, text=True)
+    """Return True if the given interface has a default route."""
+    r = subprocess.run([IP_CMD, "route", "show", "default"], capture_output=True,
+                       text=True, check=False)
     if r.returncode == 0:
         for line in r.stdout.splitlines():
             if f" dev {dev} " in f" {line} ":
                 return True
-    r2 = subprocess.run("ip -o route show table all default", shell=True, capture_output=True, text=True)
+    r2 = subprocess.run([IP_CMD, "-o", "route", "show", "table", "all", "default"],
+                        capture_output=True, text=True, check=False)
     if r2.returncode == 0:
         for line in r2.stdout.splitlines():
             if f" dev {dev} " in f" {line} ":
@@ -367,23 +392,31 @@ def has_default_route(dev):
 
 #Restoring the interfaces to their original states on exit
 def cleanup():
+    """Restore Ethernet interfaces to their original up/down states."""
     print_color("Cleaning up... restoring interface states", "INFO")
     for iface, state in original_states.items():
-        subprocess.run(f"ip link set dev {iface} {state}", shell=True)
+        subprocess.run([IP_CMD, "link", "set", "dev", iface, state],
+                       check=False)
     print_color("Cleanup complete.", "INFO")
 
-signal.signal(signal.SIGINT, lambda sig, frame: (print_summary(), cleanup(), sys.exit(0)))
-signal.signal(signal.SIGTERM, lambda sig, frame: (print_summary(), cleanup(), sys.exit(0)))
+def handle_exit_signal(_signum, _frame):
+    """Print summary, clean up interfaces, and exit on termination signal."""
+    print_summary()
+    cleanup()
+    sys.exit(0)
 
-if __name__ == "__main__":
+signal.signal(signal.SIGINT, handle_exit_signal)
+signal.signal(signal.SIGTERM, handle_exit_signal)
+
+def main():
+    """Run Ethernet validation checks."""
     try:
-        if len(sys.argv) > 1:
-            SYSTEM_CONFIG_PATH = sys.argv[1]
+        system_config_path = sys.argv[1] if len(sys.argv) > 1 else None
 
         have_ethtool = shutil.which("ethtool") is not None
         busybox_env = shutil.which("udhcpc") is not None
         # Discovering ethernet interfaces
-        output = subprocess.check_output("ip -o link", shell=True).decode("utf-8").split('\n')
+        output = subprocess.check_output([IP_CMD, "-o", "link"]).decode("utf-8").split('\n')
         ether_interfaces = []
         for line in output:
             parts = line.split()
@@ -400,12 +433,12 @@ if __name__ == "__main__":
 
         if not ether_interfaces:
             print_color("No ethernet interfaces detected via ip linux command, Exiting ...", "WARN")
-            sys.exit(1)
-        else:
-            print_color("Detected following ethernet interfaces via ip command :", "INFO")
-            for index, intrf in enumerate(ether_interfaces):
-                print(f"{index}: {intrf}")
-                set_result(intrf, "Detect interface", PASSED)
+            return 1
+
+        print_color("Detected following ethernet interfaces via ip command :", "INFO")
+        for index, intrf in enumerate(ether_interfaces):
+            print(f"{index}: {intrf}")
+            set_result(intrf, "Detect interface", PASSED)
 
         #Classify interfaces as virtual or physical
         virtual_ifaces  = [i for i in ether_interfaces if is_virtual_iface(i)]
@@ -416,7 +449,8 @@ if __name__ == "__main__":
         # Recording initial states
         print_color("Capturing original interface states", "INFO")
         for intrf in ether_interfaces:
-            result = subprocess.run(f"ip link show {intrf}", shell=True, capture_output=True, text=True)
+            result = subprocess.run([IP_CMD, "link", "show", intrf], capture_output=True,
+                                    text=True, check=False)
             flags_match = re.search(r'<([^>]+)>', result.stdout)
             flags = flags_match.group(1).split(',') if flags_match else []
             state = "up" if "UP" in flags else "down"
@@ -425,11 +459,13 @@ if __name__ == "__main__":
         # Bringing down all the available interfaces
         print_color("Bringing down all ethernet interfaces using ip", "INFO")
         for intrf in physical_ifaces:
-            cmd = f"ip link set dev {intrf} down"
-            print(cmd)
-            rc = subprocess.run(cmd, shell=True).returncode
+            cmd = [IP_CMD, "link", "set", "dev", intrf, "down"]
+            print(f"ip link set dev {intrf} down")
+            rc = subprocess.run(cmd, check=False).returncode
             if rc != 0:
-                print_color(f"Unable to bring down ethernet interface {intrf} using ip, Exiting ...", "WARN")
+                print_color(
+                        f"Unable to bring down ethernet interface {intrf} using ip, Exiting ...",
+                        "WARN")
 
         print("\n****************************************************************\n")
         time.sleep(20)
@@ -438,13 +474,14 @@ if __name__ == "__main__":
         for intrf in physical_ifaces:
             if previous_eth_intrf:
                 print_color(f"Bringing down ethernet interface: {previous_eth_intrf}", "INFO")
-                subprocess.run(f"ip link set dev {previous_eth_intrf} down", shell=True)
+                subprocess.run([IP_CMD, "link", "set", "dev", previous_eth_intrf, "down"],
+                               check=False)
                 time.sleep(20)
             previous_eth_intrf = intrf
 
             # Bring up the current interface
             print_color(f"Bringing up ethernet interface: {intrf}", "INFO")
-            result_up = subprocess.run(f"ip link set dev {intrf} up", shell=True)
+            result_up = subprocess.run([IP_CMD, "link", "set", "dev", intrf, "up"], check=False)
             if result_up.returncode != 0:
                 print_color(f"Unable to bring up ethernet interface {intrf} using ip", "WARN")
                 set_result(intrf, "Bring up", FAILED, "ip link set up failed")
@@ -453,40 +490,46 @@ if __name__ == "__main__":
                 skip_many(intrf, remaining, "Interface could not be brought up")
                 print("\n****************************************************************\n")
                 continue
-            else:
-                set_result(intrf, "Bring up", PASSED)
+
+            set_result(intrf, "Bring up", PASSED)
             time.sleep(20)
 
             # Check for ethtool availability
             if have_ethtool:
                 set_result(intrf, "ethtool present", PASSED)
                 print_color(f"Running \"ethtool {intrf}\"", "INFO")
-                result_ethdump = subprocess.run(f"ethtool {intrf}", shell=True, capture_output=True, text=True)
+                result_ethdump = subprocess.run([ETHTOOL_CMD, intrf], capture_output=True,
+                                                text=True, check=False)
                 print(result_ethdump.stdout)
 
-                result_test = subprocess.run(f"ethtool -i {intrf}", shell=True, capture_output=True, text=True)
+                result_test = subprocess.run([ETHTOOL_CMD, "-i", intrf], capture_output=True,
+                                             text=True, check=False)
                 print(result_test.stdout)
                 if "supports-test: yes" in result_test.stdout:
                     print_color(f"Ethernet interface {intrf} supports ethtool self test.", "CHECK")
                     set_result(intrf, "Self-test supported", PASSED)
                     print_color(f"Running ethtool -t {intrf}", "INFO")
                     try:
-                        t = subprocess.run(f"ethtool -t {intrf}",shell=True, capture_output=True, text=True, timeout=60)
+                        t = subprocess.run([ETHTOOL_CMD, "-t", intrf], capture_output=True,
+                                           text=True, timeout=60, check=False)
                         print_color(t.stdout, "DEBUG")
                         if t.returncode == 0:
                             set_result(intrf, "ethtool self tests", PASSED)
                         else:
-                            first_line = next((ln for ln in (t.stdout + "\n" + t.stderr).splitlines() if ln.strip()), "")
-                            set_result(intrf, "ethtool self tests", WARNING, first_line or f"returncode={t.returncode}")
+                            output_lines = (t.stdout + "\n" + t.stderr).splitlines()
+                            first_line = next((ln for ln in output_lines if ln.strip()), "")
+                            set_result(intrf, "ethtool self tests", WARNING,
+                                       first_line or f"returncode={t.returncode}")
                     except subprocess.TimeoutExpired:
                         print_color("ethtool -t timed out (60s)", "WARN")
                         set_result(intrf, "ethtool self tests", WARNING, "timeout")
 
-                    subprocess.run(["ip", "link", "set", "dev", intrf, "up"])
+                    subprocess.run([IP_CMD, "link", "set", "dev", intrf, "up"], check=False)
                     for _ in range(10):
                         try:
-                            carrier = Path(f"/sys/class/net/{intrf}/carrier").read_text().strip()
-                        except Exception:
+                            carrier = Path(f"/sys/class/net/{intrf}/carrier").read_text(
+                                    encoding="utf-8").strip()
+                        except OSError:
                             carrier = "0"
                         if carrier == "1":
                             print_color(f"Link restored on {intrf}", "CHECK")
@@ -494,7 +537,8 @@ if __name__ == "__main__":
                         time.sleep(1)
 
                 else:
-                    print_color(f"Ethernet interface {intrf} does not support ethtool self test", "WARN")
+                    print_color(f"Ethernet interface {intrf} does not support ethtool self test",
+                                "WARN")
                     set_result(intrf, "Self-test supported", SKIPPED, "supports-test: no")
                     set_result(intrf, "ethtool self tests", SKIPPED, "Self-test not supported")
 
@@ -521,17 +565,21 @@ if __name__ == "__main__":
                 set_result(intrf, "ethtool self tests", SKIPPED, "No ethtool")
                 print_color("ethtool not found; using sysfs for link detection", "WARN")
                 try:
-                    carrier = Path(f"/sys/class/net/{intrf}/carrier").read_text().strip()
-                except Exception:
+                    carrier = Path(f"/sys/class/net/{intrf}/carrier").read_text(
+                            encoding="utf-8").strip()
+                except OSError:
                     carrier = "0"
                 if carrier != "1":
                     try:
-                        oper = Path(f"/sys/class/net/{intrf}/operstate").read_text().strip()
-                    except Exception:
+                        oper = Path(f"/sys/class/net/{intrf}/operstate").read_text(
+                                encoding="utf-8").strip()
+                    except OSError:
                         oper = "down"
                     if oper != "up":
-                        print_color(f"Link not detected for {intrf} (carrier={carrier}, operstate={oper})", "WARN")
-                        set_result(intrf, "Link detected", FAILED, f"carrier={carrier}, operstate={oper}")
+                        print_color(f"Link not detected for {intrf} "
+                                    f"(carrier={carrier}, operstate={oper})", "WARN")
+                        set_result(intrf, "Link detected", FAILED,
+                                   f"carrier={carrier}, operstate={oper}")
                         skip_many(intrf, [
                             "Gateway Address present",
                             "Ping gateway (IPv4)",
@@ -540,15 +588,16 @@ if __name__ == "__main__":
                             "Ping ipv6.google.com (IPv6)",
                             "wget and curl",
                         ], "Link not detected")
-                        print("\n****************************************************************\n")
+                        print("\n**************************************************************\n")
                         continue
                 print_color(f"Link detected on {intrf} (sysfs)", "CHECK")
                 set_result(intrf, "Link detected", PASSED)
 
             # Check IPv4 and IPv6 address configuration
-            command = f"ip address show dev {intrf}"
-            print_color(f"Running {command}", "INFO")
-            result_addr = subprocess.run(command, shell=True, capture_output=True, text=True)
+            command = [IP_CMD, "address", "show", "dev", intrf]
+            print_color(f"Running ip address show dev {intrf}", "INFO")
+            result_addr = subprocess.run(command, capture_output=True,
+                                         text=True, check=False)
             print(result_addr.stdout)
 
             has_dhcp = "dynamic" in result_addr.stdout
@@ -562,8 +611,9 @@ if __name__ == "__main__":
             # Default route to evaluate whenever we have any IPv4
             if not has_default_route(intrf):
                 renew_dhcp(intrf, busybox_env)
-                command = f"ip address show dev {intrf}"
-                result_addr = subprocess.run(command, shell=True, capture_output=True, text=True)
+                command = [IP_CMD, "address", "show", "dev", intrf]
+                result_addr = subprocess.run(command, capture_output=True,
+                                             text=True, check=False)
                 print(result_addr.stdout)
                 has_dhcp = "dynamic" in result_addr.stdout
                 has_ipv6 = re.search(r'inet6 (?!fe80)', result_addr.stdout)
@@ -589,7 +639,8 @@ if __name__ == "__main__":
             # IPv4 address present (independent from DHCP)
             if has_ipv4:
                 ip_type = "dynamic" if has_dhcp else "static"
-                set_result(intrf, "IPv4 address present", PASSED, f"{ip_type} {', '.join(ipv4_list)}")
+                set_result(intrf, "IPv4 address present", PASSED,
+                           f"{ip_type} {', '.join(ipv4_list)}")
             else:
                 set_result(intrf, "IPv4 address present", FAILED, "No IPv4 address")
 
@@ -598,20 +649,25 @@ if __name__ == "__main__":
             # Run ping6 if global IPv6 address is found
             if has_ipv6:
                 set_result(intrf, "IPv6 address present", PASSED)
-                ipv6_addresses = re.findall(r'inet6 ([\da-f:]+)/\d+ scope global', result_addr.stdout)
+                ipv6_addresses = re.findall(r'inet6 ([\da-f:]+)/\d+ scope global',
+                                            result_addr.stdout)
                 for ip6 in ipv6_addresses:
                     print_color(f"Found global IPv6 address on {intrf} → {ip6}", "CHECK")
                 ping6_bin = shutil.which("ping") or shutil.which("ping6")
                 if "ping6" in (ping6_bin or ""):
-                    ping6_command = f"ping6 -c 3 -I {intrf} ipv6.google.com"
+                    ping6_command = [PING6_CMD, "-c", "3", "-I", intrf, "ipv6.google.com"]
+                    ping6_command_display = f"ping6 -c 3 -I {intrf} ipv6.google.com"
                 else:
-                    ping6_command = f"ping -6 -c 3 -I {intrf} ipv6.google.com"
-                print_color(f"Running {ping6_command}", "INFO")
-                result_ping6 = subprocess.run(ping6_command, shell=True, capture_output=True, text=True)
+                    ping6_command = [PING_CMD, "-6", "-c", "3", "-I", intrf, "ipv6.google.com"]
+                    ping6_command_display = f"ping -6 -c 3 -I {intrf} ipv6.google.com"
+                print_color(f"Running {ping6_command_display}", "INFO")
+                result_ping6 = subprocess.run(ping6_command, capture_output=True,
+                                              text=True, check=False)
                 print(result_ping6.stdout)
                 if result_ping6.returncode != 0 or "100% packet loss" in result_ping6.stdout:
                     print_color(f"Failed to ping ipv6.google.com via {intrf}", "WARN")
-                    set_result(intrf, "Ping ipv6.google.com (IPv6)", WARNING, "Packet loss or ping failed")
+                    set_result(intrf, "Ping ipv6.google.com (IPv6)", WARNING,
+                               "Packet loss or ping failed")
                 else:
                     print_color(f"Ping to ipv6.google.com via {intrf} is successful", "CHECK")
                     set_result(intrf, "Ping ipv6.google.com (IPv6)", PASSED)
@@ -633,10 +689,12 @@ if __name__ == "__main__":
 
             # Determine default router/gateway and verify the route path
             print_color("Running ip route get 8.8.8.8", "INFO")
-            r = subprocess.run("ip route get 8.8.8.8", shell=True, capture_output=True, text=True)
+            r = subprocess.run([IP_CMD, "route", "get", "8.8.8.8"], capture_output=True,
+                               text=True, check=False)
             print(r.stdout)
             if r.returncode != 0:
-                print_color(f"No default route available for {intrf} (route get failed), skipping further tests for this interface", "WARN")
+                print_color(f"No default route available for {intrf} (route get failed), "
+                            "skipping further tests for this interface", "WARN")
                 skip_many(intrf, [
                     "Ping gateway (IPv4)",
                     "Ping www.arm.com (IPv4)",
@@ -647,7 +705,8 @@ if __name__ == "__main__":
 
             m = re.search(r'\bvia\s+(\d{1,3}(?:\.\d{1,3}){3}).*?\bdev\s+(\S+)', r.stdout)
             if not m:
-                print_color(f"Unable to parse gateway/dev from route output, skipping further tests for {intrf}", "WARN")
+                print_color("Unable to parse gateway/dev from route output, "
+                            f"skipping further tests for {intrf}", "WARN")
                 skip_many(intrf, [
                     "Ping gateway (IPv4)",
                     "Ping www.arm.com (IPv4)",
@@ -658,7 +717,8 @@ if __name__ == "__main__":
 
             gw, dev_on_path = m.group(1), m.group(2)
             if dev_on_path != intrf:
-                print_color(f"Default route to 8.8.8.8 is via {dev_on_path}, not {intrf}; skipping further tests for {intrf}", "WARN")
+                print_color(f"Default route to 8.8.8.8 is via {dev_on_path}, "
+                            f"not {intrf}; skipping further tests for {intrf}", "WARN")
                 skip_many(intrf, [
                     "Ping gateway (IPv4)",
                     "Ping www.arm.com (IPv4)",
@@ -672,33 +732,35 @@ if __name__ == "__main__":
 
             set_result(intrf, "Gateway Address present", PASSED, f"gateway {gw}")
 
-            subprocess.run(f"ip link set dev {intrf} up", shell=True)
+            subprocess.run([IP_CMD, "link", "set", "dev", intrf, "up"], check=False)
             time.sleep(20)
 
             # Run IPv4 ping test to the router/gateway
-            cmd = f"ping -c 3 -W 10 -I {intrf} {ip_address}"
-            print_color(f"Running {cmd}", "INFO")
-            rping = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            cmd = [PING_CMD, "-c", "3", "-W", "10", "-I", intrf, ip_address]
+            print_color(f"Running ping -c 3 -W 10 -I {intrf} {ip_address}", "INFO")
+            rping = subprocess.run(cmd, capture_output=True, text=True, check=False)
             print(rping.stdout)
             if rping.returncode != 0 or "100% packet loss" in rping.stdout:
                 print_color(f"Failed to ping router/gateway[{ip_address}] for {intrf}", "WARN")
                 set_result(intrf, "Ping gateway (IPv4)", WARNING, "Packet loss or ping failed")
             else:
-                print_color(f"Ping to router/gateway[{ip_address}] for {intrf} is successful", "CHECK")
+                print_color(f"Ping to router/gateway[{ip_address}] for {intrf} is successful",
+                            "CHECK")
                 set_result(intrf, "Ping gateway (IPv4)", PASSED)
 
             # Ping www.arm.com to verify DNS resolution and external connectivity
-            cmd = f"ping -c 3 -W 10 -I {intrf} www.arm.com"
-            print_color(f"Running {cmd}", "INFO")
-            rp2 = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            cmd = [PING_CMD, "-c", "3", "-W", "10", "-I", intrf, "www.arm.com"]
+            print_color(f"Running ping -c 3 -W 10 -I {intrf} www.arm.com", "INFO")
+            rp2 = subprocess.run(cmd, capture_output=True, text=True, check=False)
             print(rp2.stdout)
             if "bad address" in rp2.stderr:
-                print_color(f"Unable to resolve www.arm.com, DNS not configured correctly for {intrf}", "WARN")
+                print_color(f"Unable to resolve www.arm.com, DNS not configured correctly "
+                            f"for {intrf}", "WARN")
             if rp2.returncode != 0 or "100% packet loss" in rp2.stdout:
                 print_color(f"Failed to ping www.arm.com via {intrf}", "WARN")
                 set_result(intrf, "Ping www.arm.com (IPv4)", WARNING, "Ping failed or DNS issue")
             else:
-                print_color(f"Ping to www.arm.com is successful", "CHECK")
+                print_color("Ping to www.arm.com is successful", "CHECK")
                 set_result(intrf, "Ping www.arm.com (IPv4)", PASSED)
 
             # wget and curl connectivity check
@@ -711,9 +773,10 @@ if __name__ == "__main__":
 
             # wget check
             if wget_available:
-                wget_command = f"wget --spider --timeout=10 https://www.arm.com"
-                print_color(f"Running {wget_command}", "INFO")
-                rwget = subprocess.run(wget_command, shell=True, capture_output=True, text=True)
+                wget_command = [WGET_CMD, "--spider", "--timeout=10", "https://www.arm.com"]
+                print_color("Running wget --spider --timeout=10 https://www.arm.com", "INFO")
+                rwget = subprocess.run(wget_command, capture_output=True,
+                                       text=True, check=False)
                 if rwget.stdout.strip():
                     print_color(rwget.stdout.strip(), "DEBUG")
                 if rwget.stderr.strip():
@@ -731,9 +794,19 @@ if __name__ == "__main__":
 
             # curl check
             if curl_available:
-                curl_command = f"curl -Is --connect-timeout 20 --interface {intrf} https://www.arm.com"
-                print_color(f"Running {curl_command}", "INFO")
-                rcurl = subprocess.run(curl_command, shell=True, capture_output=True, text=True)
+                curl_command = [
+                    CURL_CMD,
+                    "-Is",
+                    "--connect-timeout",
+                    "20",
+                    "--interface",
+                    intrf,
+                    "https://www.arm.com",
+                ]
+                print_color(f"Running curl -Is --connect-timeout 20 --interface {intrf} "
+                            "https://www.arm.com", "INFO")
+                rcurl = subprocess.run(curl_command, capture_output=True,
+                                       text=True, check=False)
                 lines = rcurl.stdout.strip().splitlines() if rcurl.stdout else []
                 first_line = lines[0] if lines else ""
                 if rcurl.stderr.strip():
@@ -762,13 +835,17 @@ if __name__ == "__main__":
             print("\n****************************************************************\n")
 
         # Restore all original interface states and print summary
-        print_summary()
-        print("\033[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers\033[0m")
+        print_summary(system_config_path)
+        print("\033[91mPlease update 'system_config.txt' with the correct value "
+              "for total_number_of_network_controllers\033[0m")
         cleanup()
-        sys.exit(0)
+        return 0
 
     except Exception as e:
         print_color(f"Error occurred: {e}", "ERROR")
-        print_summary()
+        print_summary(system_config_path)
         cleanup()
-        sys.exit(1)
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
