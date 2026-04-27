@@ -79,8 +79,10 @@ echo -e "${BLUE}=====================================${NC}\n"
 # Run validation with concise, readable errors (path + message)
 output=$(python3 - "$JSON_FILE" "$SCHEMA_FILE" <<'PY'
 import json
+import re
 import sys
-from jsonschema import Draft7Validator
+from jsonschema import Draft202012Validator
+from jsonschema.exceptions import best_match
 
 # ANSI colors
 RED = "\033[0;31m"
@@ -109,6 +111,96 @@ def suite_from_path(path):
         return first
     return "<root>"
 
+def collect_key_issues(error):
+    missing = set()
+    unexpected = set()
+
+    def handle(err):
+        if err.validator == "required" and isinstance(err.instance, dict):
+            required = err.validator_value if isinstance(err.validator_value, list) else []
+            for key in required:
+                if key not in err.instance:
+                    missing.add(key)
+        elif err.validator == "additionalProperties" and isinstance(err.message, str):
+            for key in re.findall(r"'([^']+)'", err.message):
+                unexpected.add(key)
+
+    if error.context:
+        for sub in error.context:
+            handle(sub)
+    else:
+        handle(error)
+
+    return missing, unexpected
+
+def best_suberror(error):
+    if error.validator not in ("anyOf", "oneOf") or not error.context:
+        return None
+    # Prefer a concrete schema failure over the fallback additionalProperties noise.
+    non_additional = [e for e in error.context if e.validator != "additionalProperties"]
+    candidate = best_match(non_additional) if non_additional else None
+    # If best match is a type mismatch but additionalProperties exists, surface the key error.
+    if candidate is not None and candidate.validator == "type":
+        for e in error.context:
+            if e.validator == "additionalProperties":
+                return e
+    if candidate is not None:
+        return candidate
+    return best_match(error.context)
+
+
+def error_tag(error, missing, unexpected):
+    if missing:
+        return "MISSING_KEY"
+    if unexpected:
+        return "UNEXPECTED_KEY"
+    if error.validator == "not":
+        return "DISALLOWED_VALUE"
+    if error.validator == "type":
+        return "TYPE_MISMATCH"
+    if error.validator == "enum":
+        return "ENUM"
+    if error.validator:
+        return str(error.validator).upper()
+    return "VALIDATION"
+
+def shorten_message(error, message):
+    # Reduce noisy object/array dumps in messages like "{...} is not of type ..."
+    if isinstance(error.instance, dict) and message.startswith("{") and " is " in message:
+        return "object" + message[message.find(" is "):]
+    if isinstance(error.instance, list) and message.startswith("[") and " is " in message:
+        return "array" + message[message.find(" is "):]
+    # Normalize "not" errors when a value is explicitly disallowed via enum.
+    if error.validator == "not":
+        enum_vals = []
+        if isinstance(error.schema, dict):
+            not_schema = error.schema.get("not")
+            if isinstance(not_schema, dict):
+                enum_vals = not_schema.get("enum") or []
+        if enum_vals:
+            return f"value '{error.instance}' is not allowed"
+    return message
+
+def subtest_result_unexpected_keys(instance, schema):
+    # Generic: detect unexpected keys inside sub_test_result objects.
+    try:
+        allowed = set(schema["definitions"]["sub_test_result_object"]["properties"].keys())
+    except Exception:
+        return set()
+    if not isinstance(instance, dict):
+        return set()
+    subtests = instance.get("subtests")
+    if not isinstance(subtests, list):
+        return set()
+    unexpected = set()
+    for sub in subtests:
+        if not isinstance(sub, dict):
+            continue
+        sr = sub.get("sub_test_result")
+        if isinstance(sr, dict):
+            unexpected.update(set(sr.keys()) - allowed)
+    return unexpected
+
 json_file = sys.argv[1]
 schema_file = sys.argv[2]
 
@@ -117,15 +209,61 @@ with open(schema_file, "r", encoding="utf-8") as sf:
 with open(json_file, "r", encoding="utf-8") as jf:
     instance = json.load(jf)
 
-v = Draft7Validator(schema)
+v = Draft202012Validator(schema)
 errors = sorted(v.iter_errors(instance), key=lambda e: list(e.path))
 if not errors:
     sys.exit(0)
 
+def is_prefix_path(prefix, full):
+    if len(prefix) > len(full):
+        return False
+    return all(p == f for p, f in zip(prefix, full))
+
+# Suppress cascading unevaluatedProperties when a more specific child error exists.
+by_suite = {}
+for e in errors:
+    s = suite_from_path(list(e.path))
+    by_suite.setdefault(s, []).append(e)
+
+filtered = []
+for suite, errs in by_suite.items():
+    other_paths = [list(e.path) for e in errs if e.validator != "unevaluatedProperties"]
+    for e in errs:
+        if e.validator == "unevaluatedProperties" and other_paths:
+            ep = list(e.path)
+            if any(is_prefix_path(ep, op) for op in other_paths):
+                continue
+        filtered.append(e)
+
+errors = sorted(filtered, key=lambda e: list(e.path))
+
 suite_errors = {}
 for err in errors:
     suite = suite_from_path(list(err.path))
-    key = (suite, err.message)
+    sub = best_suberror(err)
+    base_err = sub if sub is not None else err
+    msg = shorten_message(base_err, base_err.message)
+    missing, unexpected = collect_key_issues(base_err)
+
+    # If only a cascading unevaluatedProperties error, surface unexpected keys
+    # from nested sub_test_result objects (generic across suites).
+    if base_err.validator == "unevaluatedProperties" and not missing and not unexpected:
+        sub_unexpected = subtest_result_unexpected_keys(err.instance, schema)
+        if sub_unexpected:
+            unexpected = sub_unexpected
+            msg = "Additional properties are not allowed (" + ", ".join(
+                f"'{k}' was unexpected" for k in sorted(sub_unexpected)
+            ) + ")"
+    details = []
+    if missing:
+        details.append(f"{RED}missing{NC}: " + ", ".join(sorted(missing)))
+    if unexpected:
+        details.append(f"{BLUE}unexpected{NC}: " + ", ".join(sorted(unexpected)))
+    if details:
+        msg = f"{msg} ({'; '.join(details)})"
+    tag = error_tag(base_err, missing, unexpected)
+    msg = f"{YELLOW}{tag}{NC}: {msg}"
+    key = (suite, msg)
     suite_errors.setdefault(key, []).append(err)
 
 suites = [k for k in instance.keys() if isinstance(k, str) and k.startswith("Suite_Name:")]
@@ -147,6 +285,7 @@ for suite in suites:
             print(f"{YELLOW}  *at={p}{NC}")
         if len(paths) > 5:
             print(f"{YELLOW}  *... and {len(paths) - 5} more{NC}")
+        print()
     if not any_err:
         print(f"{GREEN}*suite={suite} no errors{NC}")
 
