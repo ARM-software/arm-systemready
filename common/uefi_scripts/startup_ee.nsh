@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,8 @@ connect -r
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     if exist FS%i:\acs_tests\parser\Parser.efi then
         FS%i:
-        echo "UEFI Execution Enviroment can be used to run an acs test suite manually with desired options"
-        echo "The supported test suites for UEFI enviroment are"
+        echo "UEFI Execution Environment can be used to run an acs test suite manually with desired options"
+        echo "The supported test suites for UEFI environment are"
         echo "  BSA"
         echo "  SBSA"
         echo "  SCT"

@@ -17,7 +17,7 @@ By following this guide, users can gain a clear understanding of the verificatio
 ## SystemReady Band
 
 
-| Test Suites      | Run Enviroment  | Execution                    | Results Path              |
+| Test Suites      | Run Environment | Execution                    | Results Path              |
 |------------------|-----------------|------------------------------|---------------------------|
 | BSA              | UEFI and Linux# | Automatic                    | acs_results/uefi/BsaResults.log  acs_results/linux_acs/BsaResultsKernel.log     |
 | SBSA             | UEFI and Linux# | Automatic (Conditional)*     | acs_results/uefi/SbsaResults.log  acs_results/linux_acs/SbsaResultsKernel.log        |
@@ -37,7 +37,7 @@ By following this guide, users can gain a clear understanding of the verificatio
 
 ## DeviceTree Band
 
-| Test Suites      | Run Enviroment  | Execution                    | Results Path              |
+| Test Suites      | Run Environment | Execution                    | Results Path              |
 |------------------|-----------------|------------------------------|---------------------------|
 | BSA              | UEFI and Linux# | Automatic                    | acs_results_template/acs_results/uefi/BsaResults.log  acs_results_template/acs_results/linux_acs/bsa_acs_app/BsaResultsKernel.log     |
 | SCT              | UEFI            | Automatic                    | acs_results_template/acs_results/sct_results/Overall/Summary.log       |

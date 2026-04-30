@@ -155,7 +155,7 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
   - bootaa64.efi - grub executable
   - grub.cfg - grub config file
   - startup.nsh - uefi automation run startup file
-  - startup_ee.nsh - uefi execution enviroment startup file
+  - startup_ee.nsh - uefi execution environment startup file
 - acs_tests contains executable files and configs related for test suites
   - app directory contains CapsuleApp.efi
   - bbr directory contains SCT related bianries and sequence files
@@ -186,8 +186,8 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
  │ Linux Boot                                    │
  │*SystemReady band ACS (Automation)             │
  │ BBSR Compliance (Automation)                  │
- │ UEFI Execution Enviroment                     │
- │ Linux Execution Enviroment                    │
+ │ UEFI Execution Environment                    │
+ │ Linux Execution Environment                   │
  │ Linux Boot with SetVirtualAddressMap enabled  |
 ```
  - **Linux Boot** : This option will boot the ACS Linux kernel and run the default Linux tool (linux debug dump, fwts, linux bsa, linux sbsa (if selected))
@@ -196,9 +196,9 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
  - **SystemReady band ACS (Automation)** : This is **default** option and will run the automated compliance
    - UEFI compliance run - SCT, BSA UEFI, SBSA UEFI (if selected)
    - Boots to Linux and run Linux compliance run - SBMR IB, FWTS, BSA Linux, SBSA Linux (if selected)
- - **UEFI Execution Enviroment** : This option is introduced to manually run the selective UEFI test suites like SCT, BSA and SBSA with desired configuration.
- - **Linux Execution Enviroment** : This option is introduced to manually run the selective Linux test suites like FWTS, BSA and SBSA with desired configuration
-     For more details on the Execution Enviroment and acs run config, refer to the [SystemReady_Execution_Enviroment_and_Config_Guide](../docs/SystemReady_Execution_Enviroment_and_Config_Guide.md)
+ - **UEFI Execution Environment** : This option is introduced to manually run the selective UEFI test suites like SCT, BSA and SBSA with desired configuration.
+ - **Linux Execution Environment** : This option is introduced to manually run the selective Linux test suites like FWTS, BSA and SBSA with desired configuration
+   For more details on the Execution Environment and acs run config, refer to the [SystemReady_Execution_Environment_and_Config_Guide](../docs/SystemReady_Execution_Environment_and_Config_Guide.md)
    - UEFI compliance run - SCT, BSA UEFI, SBSA UEFI (if selected)
    - Boots to Linux and run Linux compliance run - SBMR IB, FWTS, BSA Linux, SBSA Linux (if selected)
  - **BBSR Compliance (Automation)** : This option will run the SCT and FWTS tests required for BBSR compliance, perform a Linux secure boot, and, if a TPM is present, evaluate the measured boot log. For the verification steps of BBSR ACS, refer to the [BBSR ACS Verification](../docs/BBSR_ACS_Verification.md).
@@ -209,7 +209,7 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 
 - **acs_run_config.ini**: This file is used to manage the execution of various ACS test suites and supports passing parameters to them. <br />
 
-  Please refer to [SystemReady_Execution_Enviroment_and_Config_Guide](../docs/SystemReady_Execution_Enviroment_and_Config_Guide.md) on details of modifying the config file.
+  Please refer to [SystemReady_Execution_Environment_and_Config_Guide](../docs/SystemReady_Execution_Environment_and_Config_Guide.md) on details of modifying the config file.
  
 - **system_config.txt**: The file is used to collect below system information which is required for **ACS_Summary.html** report, It is recommned to fill this information before running the ACS image for complaince.
    - FW source code: Unknown

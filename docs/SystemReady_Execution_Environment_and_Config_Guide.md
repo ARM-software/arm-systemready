@@ -1,10 +1,10 @@
-# SystemReady Band Execution Enviroment and Configuration User Guide
+# SystemReady Band Execution Environment and Configuration User Guide
 
 ## Overview
 
-This guide provides details on the SR band Execution Enviroment and configuration-based feature integrated into the SystemReady-band image.
+This guide provides details on the SR band Execution Environment and configuration-based feature integrated into the SystemReady-band image.
 
-Execution Enviroment is used to run manually only a desired selected test suites, and with a configuration file the test suite run can be customized with required parameter.
+Execution Environment is used to run manually only a desired selected test suites, and with a configuration file the test suite run can be customized with required parameter.
 The configuration file can also be used to selectively enable/disable individual test suites in automation run. This allows for flexible and targeted testing.
 
 ---
@@ -147,17 +147,17 @@ config_enabled_for_automation_run = false
 
 ---
 
-## SR Execution Enviroment
+## SR Execution Environment
 
-The grub menu is updated to provide two more options for execution enviroment.
+The grub menu is updated to provide two more options for execution environment.
 On boot, users are presented with the following GRUB menu:
 
 ```
 Linux Boot
 SystemReady band ACS (Automation)
 BBSR Compliance (Automation)
-UEFI Execution Enviroment
-Linux Execution Enviroment
+UEFI Execution Environment
+Linux Execution Environment
 Set Virtual Address Map
 ```
 ---
@@ -165,8 +165,8 @@ Set Virtual Address Map
 - Linux Boot - Boots into the default Linux environment.
 - SystemReady band ACS (Automation) - Initiates the automation flow.
 - BBSR Compliance (Automation) -  - Launches the BBSR-specific testing environment.
-- UEFI Execution Enviroment - Allows manual execution of UEFI-based test suites using the config file.
-- Linux Execution Enviroment - Allows manual execution of Linux-based test suites using the config file. 
+- UEFI Execution Environment - Allows manual execution of UEFI-based test suites using the config file.
+- Linux Execution Environment - Allows manual execution of Linux-based test suites using the config file. 
 - Set Virtual Address Map - Technical option for configuring memory map behavior in UEFI.
 
 ## SystemReady band ACS (Automation) Flow
@@ -184,21 +184,21 @@ When selecting **SystemReady band ACS (Automation)**, the following behavior occ
 
 ---
 
-## Behavior of Linux Execution Enviroment and UEFI Execution Enviroment
+## Behavior of Linux Execution Environment and UEFI Execution Environment
 
-- **UEFI Execution Enviroment**
-  - Enters UEFI Shell with similar behavior to Linux Execution Enviroment.
+- **UEFI Execution Environment**
+  - Enters UEFI Shell with similar behavior to Linux Execution Environment.
   - Users can run UEFI test suites (like SCT, SCRT) manually.
   - Help/guidance is displayed in the shell to inform how to execute commands using config.
 
-- **Linux Execution Enviroment**
+- **Linux Execution Environment**
   - Boots into Linux shell where users can manually execute test suites.
   - The system reads the config file and allows manual control over which test suites to run based on the enabled sections and their parameters.
   - A help or run-guide is displayed to assist users in running the appropriate commands.
 
 ---
 
-## Manual Execution Instructions (Linux Execution Enviroment / UEFI Execution Enviroment)
+## Manual Execution Instructions (Linux Execution Environment / UEFI Execution Environment)
 
 - Users can manually view/edit the config file using:
   - `acs_tets/parser/Parser.efi` (UEFI shell)
