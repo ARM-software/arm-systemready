@@ -348,8 +348,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   echo "Please press <Enter> to continue ..."
 else
   echo ""
-  echo "Linux Execution Enviroment can be used to run an acs test suite manually with desired options"
-  echo "The supported test suites for Linux enviroment are"
+  echo "Linux Execution Environment can be used to run an acs test suite manually with desired options"
+  echo "The supported test suites for Linux environment are"
   echo "  BSA"
   echo "  SBSA"
   echo "  FWTS"
