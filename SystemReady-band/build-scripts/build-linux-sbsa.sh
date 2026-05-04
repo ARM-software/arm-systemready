@@ -130,7 +130,8 @@ pack_in_ramdisk()
 
   # Add all needed packages to build root
   cp $TOP_DIR/linux-acs/acs-drv/files/sbsa_acs.ko $TOP_DIR/ramdisk/linux-sbsa/
-  cp $ACS_PATH/apps/linux/sbsa-acs-app/sbsa $TOP_DIR/ramdisk/linux-sbsa
+  cp $ACS_PATH/build/apps/sbsa/bin/sbsa $TOP_DIR/ramdisk/linux-bsa
+
   cp -r $ACS_PATH/apps/linux/pmu_app/pmuval $TOP_DIR/ramdisk/linux-sbsa
 
   #copy mte test to ramdisk
