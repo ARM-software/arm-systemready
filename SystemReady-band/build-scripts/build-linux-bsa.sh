@@ -87,7 +87,7 @@ pack_in_ramdisk()
     mkdir $TOP_DIR/ramdisk/linux-bsa
   fi
   cp $TOP_DIR/linux-acs/acs-drv/files/bsa_acs.ko $TOP_DIR/ramdisk/linux-bsa
-  cp $ACS_PATH/apps/linux/bsa-acs-app/bsa $TOP_DIR/ramdisk/linux-bsa
+  cp $ACS_PATH/build/apps/bsa/bin/bsa $TOP_DIR/ramdisk/linux-bsa
 }
 
 build_bsa_kernel_driver
