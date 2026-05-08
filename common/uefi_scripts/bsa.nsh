@@ -69,45 +69,6 @@ endif
 
 #BSA_VERSION_PRINT_PLACEHOLDER
 if exist FS%i:\acs_tests\bsa\Bsa.efi then
-    echo "Press any key to start BSA in verbose mode."
-    echo "If no key is pressed then BSA will be run in normal mode"
-    FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
-    if %lasterror% == 0 then
-        if exist BsaVerboseResults.log then
-            echo "BSA ACS in verbose mode is already run."
-            echo "Press any key to start BSA ACS in verbose mode execution from the beginning."
-            echo "WARNING: Ensure you have backed up the existing logs."
-            FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
-            if %lasterror% == 0 then
-                #Backup the existing logs
-                rm -q BsaVerboseResults_previous_run.log
-                cp -r BsaVerboseResults.log BsaVerboseResults_previous_run.log
-                rm -q BsaVerboseResults.log
-                goto BsaVerboseRun
-            endif
-            goto BsaNormalRun
-        endif
-:BsaVerboseRun
-        echo "Running BSA in verbose mode"
-        if exist FS%i:\acs_tests\bsa\bsa_dt.flag then
-            #Executing for BSA SystemReady-devicetree-band. Execute only OS tests
-            echo "BSA Command: Bsa.efi  -v 1 -os -skip-dp-nic-ms -el1skiptrap cntpct -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log"
-            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -os -skip-dp-nic-ms -el1skiptrap cntpct -dtb BsaDevTree.dtb -f BsaVerboseTempResults.log
-        else
-            echo "BSA Command: Bsa.efi -v 1 -skip-dp-nic-ms -f BsaVerboseTempResults.log"
-            FS%i:\acs_tests\bsa\Bsa.efi -v 1 -skip-dp-nic-ms -f BsaVerboseTempResults.log
-        endif
-        stall 200000
-        if exist BsaVerboseTempResults.log then
-            cp BsaVerboseTempResults.log BsaVerboseResults.log
-            cp BsaVerboseTempResults.log temp/
-            rm BsaVerboseTempResults.log
-            reset
-        else
-            echo "There may be issues in writing of BSA Verbose logs. Please save the console output"
-        endif
-    endif
-:BsaNormalRun
     if exist BsaResults.log then
         echo "BSA ACS is already run."
         echo "Press any key to start BSA ACS execution from the beginning."

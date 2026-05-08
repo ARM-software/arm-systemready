@@ -51,39 +51,6 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             goto SbsaEE
         endif
         if exist FS%i:\acs_tests\bsa\sbsa\Sbsa.efi then
-            echo "Press any key to start SBSA in verbose mode."
-            echo "If no key is pressed then SBSA will be run in normal mode"
-            FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
-            if %lasterror% == 0 then
-                if exist FS%i:\acs_results\uefi\SbsaVerboseResults.log then
-                    echo "SBSA ACS in verbose mode is already run."
-                    echo "Press any key to start SBSA ACS execution from the beginning."
-                    echo "WARNING: Ensure you have backed up the existing logs."
-                    FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
-                    if %lasterror% == 0 then
-                        #Backup the existing logs
-                        rm -q FS%i:\acs_results\uefi\SbsaVerboseResults_previous_run.log
-                        cp -r FS%i:\acs_results\uefi\SbsaVerboseResults.log FS%i:\acs_results\uefi\SbsaVerboseResults_previous_run.log
-                        rm -q FS%i:\acs_results\uefi\SbsaVerboseResults.log
-                        goto SbsaVerboseRun
-                    endif
-                    goto SbsaNormalMode
-                endif
-:SbsaVerboseRun
-                echo "SBSA Command: Sbsa.efi -v 1 -skip-dp-nic-ms -f SbsaVerboseTempResults.log"
-                FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -v 1 -skip-dp-nic-ms -f SbsaVerboseTempResults.log
-                stall 200000
-                if exist FS%i:\acs_results\uefi\SbsaVerboseTempResults.log then
-                    cp SbsaVerboseTempResults.log SbsaVerboseResults.log
-                    cp SbsaVerboseTempResults.log temp/
-                    rm SbsaVerboseTempResults.log
-                    reset
-                else
-                    echo "There may be issues in writing of SBSA Verbose logs. Please save the console output"
-                    reset
-                endif
-            endif
-:SbsaNormalMode
             if exist FS%i:\acs_results\uefi\SbsaResults.log then
                 echo "SBSA ACS is already run."
                 echo "Press any key to start SBSA ACS execution from the beginning."
@@ -94,11 +61,11 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
                     rm -q FS%i:\acs_results\uefi\SbsaResults_previous_run.log
                     cp -r FS%i:\acs_results\uefi\SbsaResults.log FS%i:\acs_results\uefi\SbsaResults_previous_run.log
                     rm -q FS%i:\acs_results\uefi\SbsaResults.log
-                    goto SbsaNormalRun
+                    goto SbsaRun
                 endif
                 goto Done
             endif
-:SbsaNormalRun
+:SbsaRun
             if "%1" == "false" then
                 echo "SBSA Command: Sbsa.efi -skip-dp-nic-ms -f SbsaTempResults.log"
                 FS%i:\acs_tests\bsa\sbsa\Sbsa.efi -skip-dp-nic-ms -f SbsaTempResults.log
