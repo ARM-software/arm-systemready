@@ -2,6 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ACS Merged Results Schema",
   "description": "Schema for acs results",
+  "band-versions": {
+    "SystemReady Devicetree band": "3.1.2+",
+    "SystemReady band": "3.1.1+"
+  },
   "type": "object",
   "required": [
     "Suite_Name: acs_info"
@@ -39,6 +43,12 @@
     },
     "Suite_Name: SCMI": {
       "$ref": "#/definitions/scmi_suite"
+    },
+    "Suite_Name: SBSA": {
+      "$ref": "#/definitions/bsa_suite"
+    },
+    "Suite_Name: OS Tests": {
+      "$ref": "#/definitions/os_tests_suite"
     }
   },
   "patternProperties": {
@@ -291,6 +301,56 @@
         }
       ]
     },
+    "os_summary_totals": {
+      "$comment": "OS tests totals allow both singular and plural waiver counter keys.",
+      "type": "object",
+      "properties": {
+        "total_aborted": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_failed": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_failed_with_waiver": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_failed_with_waivers": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_ignored": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_passed": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_skipped": {
+          "$ref": "#/definitions/non_negative_int"
+        },
+        "total_warnings": {
+          "$ref": "#/definitions/non_negative_int"
+        }
+      },
+      "required": [
+        "total_aborted",
+        "total_failed",
+        "total_passed",
+        "total_skipped",
+        "total_warnings"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "total_failed_with_waiver"
+          ]
+        },
+        {
+          "required": [
+            "total_failed_with_waivers"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
     "subtest_base": {
       "$comment": "Generic subtest shape used by several suites.",
       "type": "object",
@@ -383,16 +443,6 @@
         },
         "reason": {
           "type": "string"
-        },
-        "waiver_reason": {
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "$ref": "#/definitions/string_list"
-            }
-          ]
         }
       },
       "required": [
@@ -474,6 +524,9 @@
         },
         "Waivable": {
           "type": "string"
+        },
+        "Test_suite_info": {
+          "$ref": "#/definitions/string_list"
         }
       }
     },
@@ -538,12 +591,19 @@
           "type": "object",
           "required": [
             "Test_suite",
+            "Test_suite_info",
             "testcases",
             "test_suite_summary"
           ],
           "properties": {
             "Test_suite": {
-              "type": "string"
+              "type": "string",
+              "not": {
+                "enum": [
+                  "Unknown",
+                  "unknown"
+                ]
+              }
             },
             "testcases": {
               "type": "array",
@@ -594,7 +654,7 @@
           "type": "object",
           "properties": {
             "suite_summary": {
-          "$ref": "#/definitions/bsa_suite_summary"
+              "$ref": "#/definitions/bsa_suite_summary"
             },
             "test_results": {
               "type": "array",
@@ -621,12 +681,19 @@
           "required": [
             "Test_suite",
             "Test_suite_description",
+            "Test_suite_info",
             "subtests",
             "test_suite_summary"
           ],
           "properties": {
             "Test_suite": {
-              "type": "string"
+              "type": "string",
+              "not": {
+                "enum": [
+                  "Unknown",
+                  "unknown"
+                ]
+              }
             },
             "Test_suite_description": {
               "type": "string"
@@ -685,6 +752,7 @@
             "Test_case",
             "Test_case_description",
             "Test_suite",
+            "Test_suite_info",
             "reason",
             "subtests",
             "test_case_summary",
@@ -735,6 +803,19 @@
             },
             "test_result": {
               "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "Test_suite": {
+              "not": {
+                "enum": [
+                  "Unknown",
+                  "unknown"
+                ]
+              }
             }
           }
         }
@@ -875,6 +956,7 @@
           "required": [
             "Test_suite",
             "Test_suite_description",
+            "Test_suite_info",
             "Test_case",
             "Test_case_description",
             "subtests",
@@ -936,6 +1018,7 @@
           "required": [
             "Test_suite",
             "Test_suite_description",
+            "Test_suite_info",
             "Test_case",
             "Test_case_description",
             "subtests",
@@ -961,7 +1044,7 @@
               }
             },
             "test_suite_summary": {
-              "$ref": "#/definitions/summary_totals"
+              "$ref": "#/definitions/os_summary_totals"
             }
           }
         }
@@ -977,7 +1060,7 @@
           "type": "object",
           "properties": {
             "suite_summary": {
-              "$ref": "#/definitions/summary_totals"
+              "$ref": "#/definitions/os_summary_totals"
             },
             "test_results": {
               "type": "array",
@@ -1026,11 +1109,16 @@
           "type": "object",
           "required": [
             "Test_suite",
+            "Test_suite_info",
+            "reason",
             "test_suite_summary",
             "testcases"
           ],
           "properties": {
             "Test_suite": {
+              "type": "string"
+            },
+            "reason": {
               "type": "string"
             },
             "test_suite_summary": {
@@ -1078,16 +1166,11 @@
       "required": [
         "ACS version",
         "Band",
-        "BBR version",
         "BBSR version",
-        "SCMI version",
         "BSA version",
-        "Device Tree Version",
-        "EBBR version",
         "Firmware Version",
         "Flashing instructions",
         "FW source code",
-        "PFDI version",
         "product website",
         "SoC Family",
         "SRS version",
@@ -1109,6 +1192,9 @@
           "type": "string"
         },
         "BBSR version": {
+          "type": "string"
+        },
+        "BMC Firmware Version": {
           "type": "string"
         },
         "SCMI version": {
@@ -1159,10 +1245,62 @@
         "UEFI Version": {
           "type": "string"
         },
+        "SBBR version": {
+          "type": "string"
+        },
+        "SBMR version": {
+          "type": "string"
+        },
+        "SBSA version": {
+          "type": "string"
+        },
         "Vendor": {
           "type": "string"
         }
       },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "Band": {
+                "const": "SystemReady Devicetree band"
+              }
+            },
+            "required": [
+              "Band"
+            ]
+          },
+          "then": {
+            "required": [
+              "BBR version",
+              "SCMI version",
+              "Device Tree Version",
+              "EBBR version",
+              "PFDI version"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "Band": {
+                "const": "SystemReady band"
+              }
+            },
+            "required": [
+              "Band"
+            ]
+          },
+          "then": {
+            "required": [
+              "BMC Firmware Version",
+              "SBBR version",
+              "SBMR version",
+              "SBSA version"
+            ]
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "acs_results_summary": {
@@ -1213,9 +1351,6 @@
         "Suite_Name: Mandatory  : ETHTOOL_TEST_compliance": {
           "type": "string"
         },
-        "Suite_Name: Recommended  : RUNTIME_DEV_MAP_compliance": {
-          "type": "string"
-        },
         "Suite_Name: Mandatory  : FWTS_compliance": {
           "type": "string"
         },
@@ -1249,10 +1384,107 @@
         "Suite_Name: Recommended  : PSCI_compliance": {
           "type": "string"
         },
+        "Suite_Name: Recommended  : RUNTIME_DEV_MAP_compliance": {
+          "type": "string"
+        },
         "Suite_Name: Recommended  : SMBIOS_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : BSA_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : OS_TEST_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : SBMR-IB_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : SBMR-OOB_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : SBSA_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : SBSA_compliance": {
           "type": "string"
         }
       },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "Band": {
+                "const": "SystemReady Devicetree band"
+              }
+            },
+            "required": [
+              "Band"
+            ]
+          },
+          "then": {
+            "required": [
+              "Suite_Name: Mandatory  : Capsule Update_compliance",
+              "Suite_Name: Mandatory  : DT_VALIDATE_compliance",
+              "Suite_Name: Mandatory  : ETHTOOL_TEST_compliance",
+              "Suite_Name: Mandatory  : FWTS_compliance",
+              "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance",
+              "Suite_Name: Mandatory  : SCT_compliance",
+              "Suite_Name: Mandatory  : OS_ethtool_test_linux-Fedora-40_compliance",
+              "Suite_Name: Mandatory  : OS_ethtool_test_linux-Tumbleweed_compliance",
+              "Suite_Name: Mandatory  : OS_ethtool_test_linux-ubuntu-24_compliance",
+              "Suite_Name: Recommended  : BSA_compliance",
+              "Suite_Name: Recommended  : DT_KSELFTEST_compliance",
+              "Suite_Name: Recommended  : NETWORK_BOOT_compliance",
+              "Suite_Name: Recommended  : POST_SCRIPT_compliance",
+              "Suite_Name: Recommended  : PSCI_compliance",
+              "Suite_Name: Recommended  : RUNTIME_DEV_MAP_compliance",
+              "Suite_Name: Recommended  : SMBIOS_compliance",
+              "Suite_Name: Extension  : SCMI_compliance",
+              "Suite_Name: Conditional-Mandatory  : PFDI_compliance",
+              "Suite_Name: Extension  : BBSR-FWTS_compliance",
+              "Suite_Name: Extension  : BBSR-SCT_compliance",
+              "Suite_Name: Extension  : BBSR-TPM_compliance"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "Band": {
+                "const": "SystemReady band"
+              }
+            },
+            "required": [
+              "Band"
+            ]
+          },
+          "then": {
+            "required": [
+              "Suite_Name: Mandatory  : BSA_compliance",
+              "Suite_Name: Mandatory  : FWTS_compliance",
+              "Suite_Name: Mandatory  : OS_TEST_compliance",
+              "Suite_Name: Mandatory  : SCT_compliance",
+              "Suite_Name: Recommended  : SBMR-IB_compliance",
+              "Suite_Name: Recommended  : SBMR-OOB_compliance",
+              "Suite_Name: Extension  : BBSR-FWTS_compliance",
+              "Suite_Name: Extension  : BBSR-SCT_compliance",
+              "Suite_Name: Extension  : BBSR-TPM_compliance"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "Suite_Name: Recommended  : SBSA_compliance"
+                ]
+              },
+              {
+                "required": [
+                  "Suite_Name: Mandatory  : SBSA_compliance"
+                ]
+              }
+            ]
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "acs_info": {
@@ -1277,7 +1509,16 @@
           "$ref": "#/definitions/test_result_base"
         },
         {
+          "required": [
+            "subtests"
+          ],
           "properties": {
+            "subtests": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/subtest_base"
+              }
+            },
             "test_suite_summary": {
               "$ref": "#/definitions/summary_totals"
             }
