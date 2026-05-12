@@ -198,7 +198,7 @@ def main(input_files, output_file):
                 continue
 
             # RULE line (main or subtest, determined by indentation)
-            rule_line = re.match(r'^([A-Za-z0-9_]+)\s*:\s*([^:]+?)\s*:\s*(.*)$', line)
+            rule_line = re.match(r'^([A-Za-z0-9_]+)\s*:\s*(-|\d+)\s*:\s*(.*)$', line)
             if rule_line:
                 rule_id = rule_line.group(1).strip()
                 test_index = (rule_line.group(2) or "").strip() or "-"
