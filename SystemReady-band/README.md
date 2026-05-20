@@ -97,7 +97,7 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 - 'BOOT_ACS' <br />
   Approximate size: 640 MB <br />
   contains bootable applications and test suites. <br />
-  contains a 'acs_results' directory which stores logs of the automated execution of ACS.
+  contains a 'acs_results_template' directory which stores logs of the automated execution of ACS.
 
 
 ## Image Directory Structure
@@ -145,7 +145,7 @@ This image comprise of single FAT file system partition recognized by UEFI: <br 
 │      ├── parser.nsh
 │      ├── Parser.py
 │      └── Parser.efi
-├── acs_results
+├── acs_results_template
 ├── Image
 └── ramdisk-buildroot.img
 ```

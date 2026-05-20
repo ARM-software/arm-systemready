@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+LOG_DIR="/mnt/acs_results_template/acs_results"
+
 # Parse config file
 automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
 if [ "$automation_enabled" == "True" ]; then
@@ -30,13 +32,13 @@ if [ "$automation_enabled" == "True" ] &&  [ "$sbsa_enabled" == "False" ]; then
 else
   if [ -f  /lib/modules/sbsa_acs.ko ]; then
     insmod /lib/modules/sbsa_acs.ko
-    echo "SystemReady band ACS v3.1.1" > /mnt/acs_results/linux/SbsaResultsApp.log
+    echo "SystemReady band ACS v3.1.1" > ${LOG_DIR}/linux/SbsaResultsApp.log
     if [ "$automation_enabled" == "False" ]; then
-      /bin/sbsa --skip PCI_MM_03 --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
+      /bin/sbsa --skip PCI_MM_03 --skip-dp-nic-ms >> ${LOG_DIR}/linux/SbsaResultsApp.log
     else
-      $sbsa_command --skip PCI_MM_03 --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
+      $sbsa_command --skip PCI_MM_03 --skip-dp-nic-ms >> ${LOG_DIR}/linux/SbsaResultsApp.log
     fi
-    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
+    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > ${LOG_DIR}/linux/SbsaResultsKernel.log
     sync /mnt
     sleep 5
     echo "Linux SBSA test Execution - Completed"

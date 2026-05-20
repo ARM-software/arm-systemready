@@ -65,7 +65,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 if [ "$MODE" = "auto" ]; then
-    if [ -d /mnt/acs_tests ] || [ -d /mnt/acs_results ]; then
+    if [ -d /mnt/acs_tests ] || [ -d /mnt/acs_results_template/acs_results ]; then
         MODE="acs"
     else
         MODE="os"
@@ -87,7 +87,7 @@ if [ "$MODE" = "os" ]; then
 fi
 
 if [ "$MODE" = "acs" ]; then
-    LOG_DIR="/mnt/acs_results/linux_dump"
+    LOG_DIR="/mnt/acs_results_template/acs_results/linux_dump"
 else
     REAL_USER="${SUDO_USER:-${USER:-root}}"
     REAL_HOME=$(eval echo ~"$REAL_USER")

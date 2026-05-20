@@ -58,12 +58,7 @@ fi
 
 # Add the YOCTO_FLAG variable
 YOCTO_FLAG="/mnt/yocto_image.flag"
-
-if [ -f "$YOCTO_FLAG" ]; then
-    RESULTS_DIR="/mnt/acs_results_template/acs_results"
-else
-    RESULTS_DIR="/mnt/acs_results"
-fi
+RESULTS_DIR="/mnt/acs_results_template/acs_results"
 
 mkdir -p $RESULTS_DIR/bbsr/fwts
 
@@ -123,7 +118,7 @@ if [ -f "$YOCTO_FLAG" ]; then
   # EDK2 test parser
   if [ -d "$RESULTS_DIR/bbsr/sct_results" ]; then
     echo "Running edk2-test-parser tool "
-    mkdir -p /mnt/acs_results/edk2-test-parser
+    mkdir -p $RESULTS_DIR/edk2-test-parser
     cd /usr/bin/edk2-test-parser
     ./parser.py --md $RESULTS_DIR/edk2-test-parser/edk2-test-parser-bbsr.log --config BBSR.yaml $RESULTS_DIR/bbsr/sct_results/Overall/Summary.ekl $RESULTS_DIR/bbsr/sct_results/Sequence/BBSR.seq > /dev/null 2>&1
     cd -

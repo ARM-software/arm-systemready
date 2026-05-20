@@ -54,6 +54,7 @@ insmod /lib/modules/cppc_cpufreq.ko
 sleep 5
 
 SR_VERSION="SystemReady band ACS v3.1.1"
+LOG_DIR="/mnt/acs_results_template/acs_results"
 
 #Skip running of ACS Tests if the grub option is added
 ADDITIONAL_CMD_OPTION="";
@@ -96,10 +97,10 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   if [ $ADDITIONAL_CMD_OPTION == "acsforcevamap" ]; then
     echo "Linux Boot with SetVirtualMap enabled"
-    mkdir -p /mnt/acs_results/SetVAMapMode/fwts
+    mkdir -p ${LOG_DIR}/SetVAMapMode/fwts
     echo "Executing FWTS"
-    echo "${SR_VERSION}" > /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
-    fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> /mnt/acs_results/SetVAMapMode/fwts/FWTSResults.log
+    echo "${SR_VERSION}" > ${LOG_DIR}/SetVAMapMode/fwts/FWTSResults.log
+    fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr esrt uefibootpath aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 >> ${LOG_DIR}/SetVAMapMode/fwts/FWTSResults.log
     sync /mnt
     sleep 3
     echo "The ACS test suites are completed."
@@ -115,7 +116,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   # Linux Device Driver script run
   echo "Running Device Driver Matching Script"
   cd /usr/bin
-  ./device_driver_sr.sh > /mnt/acs_results/linux_dump/device_driver.log
+  ./device_driver_sr.sh > ${LOG_DIR}/linux_dump/device_driver.log
   cd -
   echo "Device Driver script run - Completed"
   sync /mnt
@@ -126,18 +127,18 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   if [ "$automation_enabled" == "True" ] &&  [ "$fwts_enabled" == "False" ]; then
     echo "********* FWTS is disabled in config file**************"
   else
-    mkdir -p /mnt/acs_results/fwts
+    mkdir -p ${LOG_DIR}/fwts
     if [ -f /lib/modules/smccc_test.ko ]; then
       echo "Loading FWTS SMCCC module"
       insmod /lib/modules/smccc_test.ko
     else
       echo "Error: FWTS SMCCC kernel Driver is not found."
     fi
-    echo "${SR_VERSION}" > /mnt/acs_results/fwts/FWTSResults.log
+    echo "${SR_VERSION}" > ${LOG_DIR}/fwts/FWTSResults.log
     if [ "$automation_enabled" == "False" ]; then
-      fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 smccc >> /mnt/acs_results/fwts/FWTSResults.log
+      fwts  -r stdout -q --uefi-set-var-multiple=1 --uefi-get-mn-count-multiple=1 --sbbr aest cedt slit srat hmat pcct pdtt bgrt bert einj erst hest sdei nfit iort mpam ibft ras2 smccc >> ${LOG_DIR}/fwts/FWTSResults.log
     else
-      $fwts_command -r stdout -q >> /mnt/acs_results/fwts/FWTSResults.log
+      $fwts_command -r stdout -q >> ${LOG_DIR}/fwts/FWTSResults.log
     fi
     sync /mnt
     sleep 5
@@ -150,8 +151,8 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       python redfish-finder
       cd sbmr-acs
       ./run-sbmr-acs.sh linux
-      mkdir -p /mnt/acs_results/sbmr
-      cp -r logs /mnt/acs_results/sbmr/sbmr_in_band_logs
+      mkdir -p ${LOG_DIR}/sbmr
+      cp -r logs ${LOG_DIR}/sbmr/sbmr_in_band_logs
       cd /
       echo "SBMR ACS in-band run is completed\n"
   }
@@ -176,20 +177,20 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   if [ "$automation_enabled" == "True" ] &&  [ "$bsa_enabled" == "False" ]; then
     echo "********* BSA is disabled in config file**************"
   else
-    mkdir -p /mnt/acs_results/linux
+    mkdir -p ${LOG_DIR}/linux
     if [ -f  /lib/modules/bsa_acs.ko ]; then
       insmod /lib/modules/bsa_acs.ko
-      echo "${SR_VERSION}" > /mnt/acs_results/linux/BsaResultsApp.log
+      echo "${SR_VERSION}" > ${LOG_DIR}/linux/BsaResultsApp.log
       if [ "$automation_enabled" == "False" ]; then
         # based on previous certification/complaince inputs, side effects are seen
         # when bsa/sbsa test changes config of PCIe devices whose class code are
         # display port, mass storage, network controller...SKIP them
-        /bin/bsa --skip-dp-nic-ms >> /mnt/acs_results/linux/BsaResultsApp.log
+        /bin/bsa --skip-dp-nic-ms >> ${LOG_DIR}/linux/BsaResultsApp.log
       else
         echo "Running command $bsa_command --skip PCI_MM_03 --skip-dp-nic-ms"
-        $bsa_command --skip PCI_MM_03 --skip-dp-nic-ms  >> /mnt/acs_results/linux/BsaResultsApp.log
+        $bsa_command --skip PCI_MM_03 --skip-dp-nic-ms  >> ${LOG_DIR}/linux/BsaResultsApp.log
       fi
-      dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
+      dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > ${LOG_DIR}/linux/BsaResultsKernel.log
       sync /mnt
       sleep 5
       echo "Linux BSA test Execution - Completed"
@@ -204,13 +205,13 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     if [ "$sbsa_enabled" == "False" ]; then
       echo "********* SBSA is disabled in config file**************"
     else
-      mkdir -p /mnt/acs_results/linux
+      mkdir -p ${LOG_DIR}/linux
       if [ -f  /lib/modules/sbsa_acs.ko ]; then
         insmod /lib/modules/sbsa_acs.ko
-        echo "${SR_VERSION}" > /mnt/acs_results/linux/SbsaResultsApp.log
+        echo "${SR_VERSION}" > ${LOG_DIR}/linux/SbsaResultsApp.log
         echo "Running command $sbsa_command --skip PCI_MM_03 --skip-dp-nic-ms"
-        $sbsa_command --skip PCI_MM_03 --skip-dp-nic-ms >> /mnt/acs_results/linux/SbsaResultsApp.log
-        dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/SbsaResultsKernel.log
+        $sbsa_command --skip PCI_MM_03 --skip-dp-nic-ms >> ${LOG_DIR}/linux/SbsaResultsApp.log
+        dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > ${LOG_DIR}/linux/SbsaResultsKernel.log
         sync /mnt
         sleep 5
         echo "Linux SBSA test Execution - Completed"
@@ -223,11 +224,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   fi
 
   # EDK2 test parser
-  if [ -d "/mnt/acs_results/sct_results" ]; then
+  if [ -d "${LOG_DIR}/sct_results" ]; then
     echo "Running edk2-test-parser tool "
-    mkdir -p /mnt/acs_results/edk2-test-parser
+    mkdir -p ${LOG_DIR}/edk2-test-parser
     cd /usr/bin/edk2-test-parser
-    ./parser.py --md /mnt/acs_results/edk2-test-parser/edk2-test-parser.log --config SBBR.yaml /mnt/acs_results/sct_results/Overall/Summary.ekl /mnt/acs_results/sct_results/Sequence/SBBR.seq > /dev/null 2>&1
+    ./parser.py --md ${LOG_DIR}/edk2-test-parser/edk2-test-parser.log --config SBBR.yaml ${LOG_DIR}/sct_results/Overall/Summary.ekl ${LOG_DIR}/sct_results/Sequence/SBBR.seq > /dev/null 2>&1
     cd -
     echo "edk2-test-parser run completed"
     sync /mnt
@@ -237,27 +238,27 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   fi
 
   #copying acs_run_config.ini into results directory.
-  mkdir -p /mnt/acs_results/acs_summary/config
+  mkdir -p ${LOG_DIR}/acs_summary/config
 
   # Copying acs_run_config into result directory.
   if [ -f /mnt/acs_tests/config/acs_run_config.ini ]; then
-    cp /mnt/acs_tests/config/acs_run_config.ini /mnt/acs_results/acs_summary/config/
+    cp /mnt/acs_tests/config/acs_run_config.ini ${LOG_DIR}/acs_summary/config/
   fi
   # Copying acs_waiver.json into result directory.
   if [ -f /mnt/acs_tests/config/acs_waiver.json ]; then
-    cp /mnt/acs_tests/config/acs_waiver.json /mnt/acs_results/acs_summary/config/
+    cp /mnt/acs_tests/config/acs_waiver.json ${LOG_DIR}/acs_summary/config/
   fi
   # Copying system_config.txt into result directory
   if [ -f /mnt/acs_tests/config/system_config.txt ]; then
-    cp /mnt/acs_tests/config/system_config.txt /mnt/acs_results/acs_summary/config/
+    cp /mnt/acs_tests/config/system_config.txt ${LOG_DIR}/acs_summary/config/
   fi
   # Copying systemready-commit.log into result directory
   if [ -f /mnt/acs_tests/config/systemready-commit.log ]; then
-    cp /mnt/acs_tests/config/systemready-commit.log /mnt/acs_results/acs_summary/config/
+    cp /mnt/acs_tests/config/systemready-commit.log ${LOG_DIR}/acs_summary/config/
   fi
   # Copying acs_config.txt into result directory
   if [ -f /mnt/acs_tests/config/acs_config.txt ]; then
-    cp /mnt/acs_tests/config/acs_config.txt /mnt/acs_results/acs_summary/config/
+    cp /mnt/acs_tests/config/acs_config.txt ${LOG_DIR}/acs_summary/config/
   fi
 
   sync /mnt
@@ -265,12 +266,12 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
   # systemready scripts for os logs
   if [ -d "/usr/bin/systemready-scripts" ]; then
     echo "Running systemready scripts "
-    if [ -f "/mnt/acs_results/post-script/post-script.log" ]; then
-      rm /mnt/acs_results/post-script/post-script.log
+    if [ -f "${LOG_DIR}/post-script/post-script.log" ]; then
+      rm ${LOG_DIR}/post-script/post-script.log
     else
-      mkdir -p /mnt/acs_results/post-script
+      mkdir -p ${LOG_DIR}/post-script
     fi
-    python3 /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt > /mnt/acs_results/post-script/post-script.log 2>&1
+    python3 /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt > ${LOG_DIR}/post-script/post-script.log 2>&1
     sync /mnt
     sleep 5
   else
@@ -279,14 +280,14 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
 
   # ACS log parser run
   echo "Running acs log parser tool "
-  if [ -d "/mnt/acs_results" ]; then
-    if [ -d "/mnt/acs_results/acs_summary/acs_jsons" ]; then
-        rm -r /mnt/acs_results/acs_summary/acs_jsons
+  if [ -d "${LOG_DIR}" ]; then
+    if [ -d "${LOG_DIR}/acs_summary/acs_jsons" ]; then
+        rm -r ${LOG_DIR}/acs_summary/acs_jsons
     fi
-    if [ -d "/mnt/acs_results/acs_summary/html_detailed_summaries" ]; then
-        rm -r /mnt/acs_results/acs_summary/html_detailed_summaries
+    if [ -d "${LOG_DIR}/acs_summary/html_detailed_summaries" ]; then
+        rm -r ${LOG_DIR}/acs_summary/html_detailed_summaries
     fi
-    /usr/bin/log_parser/main_log_parser.sh /mnt/acs_results /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
+    /usr/bin/log_parser/main_log_parser.sh ${LOG_DIR} /mnt/acs_tests/config/acs_config.txt /mnt/acs_tests/config/system_config.txt /mnt/acs_tests/config/acs_waiver.json
     sync /mnt
     sleep 5
   fi
