@@ -19,13 +19,13 @@ By following this guide, users can gain a clear understanding of the verificatio
 
 | Test Suites      | Run Environment | Execution                    | Results Path              |
 |------------------|-----------------|------------------------------|---------------------------|
-| BSA              | UEFI and Linux# | Automatic                    | acs_results/uefi/BsaResults.log  acs_results/linux_acs/BsaResultsKernel.log     |
-| SBSA             | UEFI and Linux# | Automatic (Conditional)*     | acs_results/uefi/SbsaResults.log  acs_results/linux_acs/SbsaResultsKernel.log        |
-| SCT              | UEFI            | Automatic                    | acs_results/sct_results/Overall/Summary.log       |
-| SCRT             | UEFI            | Automatic                    |        |
-| FWTS             | Linux           | Automatic                    | acs_results/fwts/FWTSResults.log       |
-| BBSR-SCT         | UEFI            | Manual**                     | acs_results/BBSR/sct_results/Overall/Summary.log       |
-| BBSR-FWTS        | Linux           | Manual**                     | acs_results/BBSR/fwts/FWTSResults.log       |
+| BSA              | UEFI and Linux# | Automatic                    | acs_results_template/acs_results/uefi/BsaResults.log  acs_results_template/acs_results/linux_acs/BsaResultsKernel.log     |
+| SBSA             | UEFI and Linux# | Automatic (Conditional)*     | acs_results_template/acs_results/uefi/SbsaResults.log  acs_results_template/acs_results/linux_acs/SbsaResultsKernel.log        |
+| SCT              | UEFI            | Automatic                    | acs_results_template/acs_results/sct_results/Overall/Summary.log       |
+| SCRT             | UEFI            | Automatic                    | acs_results_template/acs_results/scrt_results/SCRT.log       |
+| FWTS             | Linux           | Automatic                    | acs_results_template/acs_results/fwts/FWTSResults.log       |
+| BBSR-SCT         | UEFI            | Manual**                     | acs_results_template/acs_results/BBSR/sct_results/Overall/Summary.log       |
+| BBSR-FWTS        | Linux           | Manual**                     | acs_results_template/acs_results/BBSR/fwts/FWTSResults.log       |
 
  - UEFI and Linux#: Complete coverage of BSA and SBSA test suite requires run of both the UEFI application of Linux application
 

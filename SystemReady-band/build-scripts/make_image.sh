@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -81,7 +81,9 @@ create_fatpart ()
     mmd -i $fatpart_name ::/acs_tests/debug
     mmd -i $fatpart_name ::/acs_tests/app
     mmd -i $fatpart_name ::/acs_tests/bbsr-keys
-    mmd -i $fatpart_name ::/acs_results
+    mmd -i $fatpart_name ::/acs_results_template
+    mmd -i $fatpart_name ::/acs_results_template/acs_results
+    mmd -i $fatpart_name ::/acs_results_template/os-logs
     mmd -i $fatpart_name ::/acs_tests/config
     mmd -i $fatpart_name ::/acs_tests/parser
 
@@ -178,7 +180,7 @@ prepare_disk_image ()
     echo "----------------------------------------------------"
 }
 exit_fun() {
-   exit 1 # Exit script
+    exit 1 # Exit script
 }
 
 #prepare the disk image

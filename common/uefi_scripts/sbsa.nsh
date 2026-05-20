@@ -19,7 +19,7 @@
 echo -off
 
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%i:\acs_results then
+    if exist FS%i:\acs_results_template\acs_results then
         if "%1" == "true" then
             FS%i:
             acs_tests\parser\Parser.efi -sbsa
@@ -33,7 +33,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             endif
         endif
         FS%i:
-        cd FS%i:\acs_results
+        cd FS%i:\acs_results_template\acs_results
         if not exist uefi then
             mkdir uefi
         endif
@@ -51,16 +51,16 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             goto SbsaEE
         endif
         if exist FS%i:\acs_tests\bsa\sbsa\Sbsa.efi then
-            if exist FS%i:\acs_results\uefi\SbsaResults.log then
+            if exist FS%i:\acs_results_template\acs_results\uefi\SbsaResults.log then
                 echo "SBSA ACS is already run."
                 echo "Press any key to start SBSA ACS execution from the beginning."
                 echo "WARNING: Ensure you have backed up the existing logs."
                 FS%i:\acs_tests\bbr\SCT\stallforkey.efi 10
                 if %lasterror% == 0 then
                     #Backup the existing logs
-                    rm -q FS%i:\acs_results\uefi\SbsaResults_previous_run.log
-                    cp -r FS%i:\acs_results\uefi\SbsaResults.log FS%i:\acs_results\uefi\SbsaResults_previous_run.log
-                    rm -q FS%i:\acs_results\uefi\SbsaResults.log
+                    rm -q FS%i:\acs_results_template\acs_results\uefi\SbsaResults_previous_run.log
+                    cp -r FS%i:\acs_results_template\acs_results\uefi\SbsaResults.log FS%i:\acs_results_template\acs_results\uefi\SbsaResults_previous_run.log
+                    rm -q FS%i:\acs_results_template\acs_results\uefi\SbsaResults.log
                     goto SbsaRun
                 endif
                 goto Done
@@ -81,7 +81,7 @@ for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
             endif
             stall 200000
 :SbsaEE
-            if exist FS%i:\acs_results\uefi\SbsaTempResults.log then
+            if exist FS%i:\acs_results_template\acs_results\uefi\SbsaTempResults.log then
                 cp SbsaTempResults.log SbsaResults.log
                 cp SbsaTempResults.log temp/
                 rm SbsaTempResults.log

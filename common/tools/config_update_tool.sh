@@ -1,6 +1,6 @@
 #!/bin/sh
 # @file
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,9 +64,9 @@ fi
 echo "Copying the acs_results"
 if [ "$3" != "n" ]; then
     if [ "$3" != "0" ]; then
-        sudo cp -r /mnt/acs_results "$path_for_results"
+        sudo cp -r /mnt/acs_results_template/acs_results "$path_for_results"
     else
-        sudo cp -r /mnt/acs_results "$(dirname "$acs_image_path")"
+        sudo cp -r /mnt/acs_results_template/acs_results "$(dirname "$acs_image_path")"
     fi
 else
     echo "acs_results not copied"

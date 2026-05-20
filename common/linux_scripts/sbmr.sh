@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,8 @@
 # limitations under the License.
 # Parse config file
 
+LOG_DIR="/mnt/acs_results_template/acs_results"
+
 automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
 if [ "$automation_enabled" == "True" ]; then
     sbmr_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_sbmr_in_band_run`"
@@ -28,8 +30,8 @@ run_sbmr_in_band(){
     python redfish-finder
     cd sbmr-acs
     ./run-sbmr-acs.sh linux
-    mkdir -p /mnt/acs_results/sbmr
-    cp -r logs /mnt/acs_results/sbmr/sbmr_in_band_logs
+    mkdir -p ${LOG_DIR}/sbmr
+    cp -r logs ${LOG_DIR}/sbmr/sbmr_in_band_logs
     cd /
     echo "SBMR ACS in-band run is completed\n"
 }

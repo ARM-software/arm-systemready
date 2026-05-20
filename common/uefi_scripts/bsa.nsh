@@ -19,18 +19,10 @@
 echo -off
 
 for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%i:\yocto_image.flag then
-        if exist FS%i:\acs_results_template\acs_results then
-            FS%i:
-            cd FS%i:\acs_results_template\acs_results
-            goto RunBsa
-        endif
-    else
-        if exist FS%i:\acs_results then
-            FS%i:
-            cd FS%i:\acs_results
-            goto RunBsa
-        endif
+    if exist FS%i:\acs_results_template\acs_results then
+        FS%i:
+        cd FS%i:\acs_results_template\acs_results
+        goto RunBsa
     endif
 endfor
 

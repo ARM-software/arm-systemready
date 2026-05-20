@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -101,9 +101,9 @@ endfor
 
 # Run the Capsule dump
 for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
-    if exist FS%e:\acs_results then
+    if exist FS%e:\acs_results_template\acs_results then
         FS%e:
-        cd FS%e:\acs_results
+        cd FS%e:\acs_results_template\acs_results
         if not exist app_output then
             mkdir app_output
         endif

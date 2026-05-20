@@ -15,6 +15,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+LOG_DIR="/mnt/acs_results_template/acs_results"
+
 # Parse config file
 automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
 if [ "$automation_enabled" == "True" ]; then
@@ -27,16 +30,16 @@ echo "Running Linux BSA tests"
 if [ "$automation_enabled" == "True" ] &&  [ "$bsa_enabled" == "False" ]; then
   echo "********* BSA is disabled in config file**************"
 else
-  mkdir -p /mnt/acs_results/linux
+  mkdir -p ${LOG_DIR}/linux
   if [ -f  /lib/modules/bsa_acs.ko ]; then
     insmod /lib/modules/bsa_acs.ko
-    echo "SystemReady band ACS v3.1.1" > /mnt/acs_results/linux/BsaResultsApp.log
+    echo "SystemReady band ACS v3.1.1" > ${LOG_DIR}/linux/BsaResultsApp.log
     if [ "$automation_enabled" == "False" ]; then
-      /bin/bsa --skip PCI_MM_03 --skip-dp-nic-ms >> /mnt/acs_results/linux/BsaResultsApp.log
+      /bin/bsa --skip PCI_MM_03 --skip-dp-nic-ms >> ${LOG_DIR}/linux/BsaResultsApp.log
     else
-      $bsa_command --skip PCI_MM_03 --skip-dp-nic-ms >> /mnt/acs_results/linux/BsaResultsApp.log
+      $bsa_command --skip PCI_MM_03 --skip-dp-nic-ms >> ${LOG_DIR}/linux/BsaResultsApp.log
     fi
-    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > /mnt/acs_results/linux/BsaResultsKernel.log
+    dmesg | sed -n 'H; /PE_INFO/h; ${g;p;}' > ${LOG_DIR}/linux/BsaResultsKernel.log
     sync /mnt
     sleep 5
     echo "Linux BSA test Execution - Completed"
