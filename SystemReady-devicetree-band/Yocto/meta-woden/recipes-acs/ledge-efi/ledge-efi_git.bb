@@ -13,7 +13,7 @@ S = "${WORKDIR}/git"
 DEPENDS = "clang-native"
 
 do_compile() {
-    oe_runmake -C ${S}/efi_app
+    oe_runmake -j1 -C ${S}/efi_app
 }
 
 do_install[noexec] = "1"
