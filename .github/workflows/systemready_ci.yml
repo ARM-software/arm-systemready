@@ -42,7 +42,7 @@ jobs:
       - name: Install gnu-efi dependencies
         run: |
           sudo apt update
-          sudo apt install -y gnu-efi
+          sudo apt install -y gnu-efi zip
 
       - name: Start building
         run: |
@@ -53,11 +53,29 @@ jobs:
           ./build-scripts/get_source.sh;
           ./build-scripts/build-systemready-band-live-image.sh
 
+      - name: Create SystemReady OS diagnostics package
+        run: |
+          mkdir -p systemready_os_diagnostics
+          cp common/linux_scripts/linux_dump.sh systemready_os_diagnostics/
+          cp common/linux_scripts/linux_init.sh systemready_os_diagnostics/
+          cp common/linux_scripts/ethtool-test.py systemready_os_diagnostics/
+          cp common/linux_scripts/read_write_check_blk_devices.py systemready_os_diagnostics/
+          cp common/config/system_config.txt systemready_os_diagnostics/
+          cp docs/sr_band_os_test_guide.md systemready_os_diagnostics/
+          zip -r systemready_os_diagnostics.zip systemready_os_diagnostics
+    
       - name: Upload SystemReady image
         uses: actions/upload-artifact@v4
         with:
           name: systemready_acs_live_image.img.xz
           path: SystemReady-band/output/systemready_acs_live_image.img.xz
+          if-no-files-found: error
+
+      - name: Upload SystemReady OS diagnostics package
+        uses: actions/upload-artifact@v4
+        with:
+          name: systemready_os_diagnostics
+          path: systemready_os_diagnostics.zip
           if-no-files-found: error
 
   #######################################################################
