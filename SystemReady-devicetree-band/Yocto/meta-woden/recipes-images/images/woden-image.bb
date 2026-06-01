@@ -24,6 +24,7 @@ EXTRA_IMAGEDEPENDS += "bsa-acs \
                        uefi-apps \
                        ledge-efi \
                        update-vars \
+                       uefi-dump \
                        ebbr-sct \
                        bootfs-files \
                        pfdi-acs \
@@ -46,6 +47,7 @@ IMAGE_EFI_BOOT_FILES += "Bsa.efi;acs_tests/bsa/Bsa.efi \
                          bbsr_SctStartup.nsh;acs_tests/bbr/bbsr_SctStartup.nsh \
                          CapsuleApp.efi;acs_tests/app/CapsuleApp.efi \
                          UpdateVars.efi;acs_tests/app/UpdateVars.efi \
+                         UefiDump.efi;acs_tests/app/UefiDump.efi \
                          Shell.efi;EFI/BOOT/Shell.efi \
 "
 SYSTEMREADY_COMMIT_LOG ?= "${TOPDIR}/../recipes-acs/bootfs-files/files/systemready-commit.log"
@@ -76,6 +78,10 @@ do_sign_images() {
         sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/acs_tests/app/ledge.efi --output DO_SIGN/acs_tests/app/ledge.efi
     else
         echo "WARNING: ledge.efi not found for signing (skipping)"
+    fi
+
+    if [ -f DO_SIGN/acs_tests/app/UefiDump.efi ]; then
+        sbsign --key $TEST_DB1_KEY --cert $TEST_DB1_CRT DO_SIGN/acs_tests/app/UefiDump.efi --output DO_SIGN/acs_tests/app/UefiDump.efi
     fi
 
     echo "Signing images complete."

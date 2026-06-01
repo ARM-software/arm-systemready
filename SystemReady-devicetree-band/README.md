@@ -129,7 +129,8 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
 │   │   ├── CapsuleApp.efi
 │   │   ├── https_boot.nsh
 │   │   ├── ledge.efi
-│   │   └── UpdateVars.efi
+│   │   ├── UpdateVars.efi
+│   │   └── UefiDump.efi
 │   ├── bbr
 │   │   ├── SCT
 │   │   ├── ScrtStartup.nsh
@@ -174,7 +175,7 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
   - grub.cfg - grub config file
   - startup.nsh - uefi automation run startup file
 - acs_tests contains executable files and configs related for test suites
-  - app directory contains CapsuleApp.efi
+  - app directory contains CapsuleApp.efi and UefiDump.efi
   - app/capsule_update.nsh is uefi script for capsule update
   - bbr directory contains SCT related binaries and sequence files
   - bbsr-keys contains cryptographic keys for secure boot and testing secure firmware updates
