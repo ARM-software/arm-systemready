@@ -48,6 +48,13 @@ else
     bcfg boot dump -v > bcfg.log
     devtree > devtree.log
     ver > uefi_version.log
+    if exist FS%m:\yocto_image.flag then
+        if exist FS%m:\acs_tests\app\UefiDump.efi then
+            FS%m:\acs_tests\app\UefiDump.efi
+        else
+            echo "UefiDump.efi not present"
+        endif
+    endif
     dmem > dmem.log
     sermode > sermode.log
     mode > mode.log
