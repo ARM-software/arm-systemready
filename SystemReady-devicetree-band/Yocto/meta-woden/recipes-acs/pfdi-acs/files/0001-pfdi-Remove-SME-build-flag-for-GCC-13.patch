@@ -1,0 +1,20 @@
+diff --git a/val/ValLib.inf b/val/ValLib.inf
+index 09c043a..030d6cf 100644
+--- a/val/ValLib.inf
++++ b/val/ValLib.inf
+@@ -88,4 +88,4 @@
+ 
+ [BuildOptions]
+   GCC:*_*_*_ASM_FLAGS  =  -march=armv8.6-a+sve+profile
+-  GCC:*_*_*_CC_FLAGS   =  -march=armv8.6-a+sve+sve2+sme+profile+lse $(ACS_CORE_INCLUDE_FLAGS) $(ACS_GIC_INCLUDE_FLAGS) $(ACS_PCIE_INCLUDE_FLAGS) -DTARGET_UEFI
++  GCC:*_*_*_CC_FLAGS   =  -march=armv8.6-a+sve+sve2+profile+lse $(ACS_CORE_INCLUDE_FLAGS) $(ACS_GIC_INCLUDE_FLAGS) $(ACS_PCIE_INCLUDE_FLAGS) -DTARGET_UEFI
+diff --git a/val/ValLibRB.inf b/val/ValLibRB.inf
+index 47fbc59..0ef20ce 100644
+--- a/val/ValLibRB.inf
++++ b/val/ValLibRB.inf
+@@ -93,4 +93,4 @@
+ 
+ [BuildOptions]
+   GCC:*_*_*_ASM_FLAGS  =  -march=armv8.6-a+sve+profile
+-  GCC:*_*_*_CC_FLAGS   =  -march=armv8.6-a+sve+sve2+sme+profile+lse $(ACS_CORE_INCLUDE_FLAGS) $(ACS_GIC_INCLUDE_FLAGS) $(ACS_PCIE_INCLUDE_FLAGS) -DTARGET_UEFI -DCOMPILE_RB_EXE
++  GCC:*_*_*_CC_FLAGS   =  -march=armv8.6-a+sve+sve2+profile+lse $(ACS_CORE_INCLUDE_FLAGS) $(ACS_GIC_INCLUDE_FLAGS) $(ACS_PCIE_INCLUDE_FLAGS) -DTARGET_UEFI -DCOMPILE_RB_EXE
