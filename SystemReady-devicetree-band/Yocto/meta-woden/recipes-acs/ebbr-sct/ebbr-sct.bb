@@ -50,6 +50,10 @@ export LDFLAGS = "${BUILD_LFLAGS}"
 do_configure() {
     cd ${S}/edk2-test
 
+    # patch edk2 firmware for EBBR 2.3 conformance profile GUID support
+    echo "Applying EDK2 patch ..."
+    git -C edk2 apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/ebbr/patches/edk2-update-ConformanceProfiles-with-EBBR-2.3-GUID.patch
+
     # patch edk2-test
     echo "Applying SCT patch ..."
     git apply --ignore-whitespace --ignore-space-change ${S}/bbr-acs/common/patches/edk2-test-bbr.patch
@@ -57,7 +61,7 @@ do_configure() {
     # Copy sbbr-test cases from bbr-acs to uefi-sct
     cp -r ${SBBR_TEST_DIR}/SbbrBootServices uefi-sct/SctPkg/TestCase/UEFI/EFI/BootServices/
     cp -r ${SBBR_TEST_DIR}/SbbrEfiSpecVerLvl ${SBBR_TEST_DIR}/SbbrRequiredUefiProtocols ${SBBR_TEST_DIR}/SbbrSysEnvConfig uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
-    cp -r ${EBBR_TEST_DIR}/EfiConformanceProfileTableTest  uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
+    cp -r ${EBBR_TEST_DIR}/EfiEbbrProfileTableTest  uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/EfiCompliant/
     cp ${SBBR_TEST_DIR}/BBR_SCT.dsc uefi-sct/SctPkg/UEFI/
     cp ${SBBR_TEST_DIR}/build_bbr.sh uefi-sct/SctPkg/
     cp ${S}/bbr-acs/ebbr/config/EfiCompliant_EBBR.ini uefi-sct/SctPkg/UEFI/
