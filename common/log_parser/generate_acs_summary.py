@@ -959,6 +959,8 @@ if __name__ == "__main__":
     acs_info_system = read_acs_info_system_info(args.acs_info_json)
     if isinstance(acs_info_system, dict) and "BMC Firmware Version" in acs_info_system:
         system_info["BMC Firmware Version"] = acs_info_system.get("BMC Firmware Version", "N/A")
+    if isinstance(acs_info_system, dict) and "PSCI version" in acs_info_system:
+        system_info["PSCI version"] = acs_info_system.get("PSCI version", "Unknown")
 
     # 4) Extract summary date from system_info
     summary_generated_date = system_info.pop('Summary Generated On Date/time', 'Unknown')

@@ -82,12 +82,14 @@ mkdir -p "$JSONS_DIR"
 
 #echo "Gathering ACS info into acs_info.txt and acs_info.json..."
 IPMITOOL_LOG="$LOGS_PATH/linux_dump/ipmitool.txt"
+PSCI_KERNEL_LOG="$LOGS_PATH/linux_tools/psci/psci_kernel.log"
 python3 "$SCRIPTS_PATH/acs_info.py" \
     --acs_config_path "$ACS_CONFIG_PATH" \
     --system_config_path "$SYSTEM_CONFIG_PATH" \
     --uefi_version_log "$LOGS_PATH/uefi_dump/uefi_version.log" \
     --dmidecode_log "$LOGS_PATH/linux_dump/dmidecode.txt" \
     --ipmitool_log "$IPMITOOL_LOG" \
+    --psci_kernel_log "$PSCI_KERNEL_LOG" \
     --output_dir "$JSONS_DIR"
 echo ""
 printf "Test category: %s\n\n" "$test_category"
