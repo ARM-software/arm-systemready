@@ -1221,6 +1221,9 @@
         "PFDI version": {
           "type": "string"
         },
+        "PSCI version": {
+          "type": "string"
+        },
         "product website": {
           "type": "string"
         },
@@ -1276,7 +1279,8 @@
               "SCMI version",
               "Device Tree Version",
               "EBBR version",
-              "PFDI version"
+              "PFDI version",
+              "PSCI version"
             ]
           }
         },

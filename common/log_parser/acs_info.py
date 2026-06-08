@@ -149,11 +149,27 @@ def get_bmc_firmware_version(ipmitool_log_path):
     value = extract_bmc_firmware_from_ipmitool_log(ipmitool_log_path)
     return value if value else "Unknown"
 
+def get_psci_version(psci_kernel_log_path):
+    """Return PSCI version from kernel log or Unknown if missing."""
+    if not psci_kernel_log_path or not os.path.isfile(psci_kernel_log_path):
+        return "Unknown"
+
+    version_re = re.compile(r"psci:\s+PSCIv([\d.]+)\s+detected in firmware\.", re.IGNORECASE)
+    with open(psci_kernel_log_path, "r", errors="replace") as f:
+        for raw in f:
+            match = version_re.search(raw.strip())
+            if match:
+                return f"PSCI v{match.group(1)}"
+    return "Unknown"
+
 def is_systemready_band(acs_conf):
     # Return True only for SystemReady (not DeviceTree) band.
     band_val = (acs_conf or {}).get("Band", "").strip().lower()
     return band_val == "systemready band"
 
+def is_systemready_dt_band(acs_conf):
+    band_val = (acs_conf or {}).get("Band", "").strip().lower()
+    return band_val == "systemready devicetree band"
 
 
 def main():
@@ -167,6 +183,7 @@ def main():
     parser.add_argument("--dmidecode_log", default=".", help="Path to dmidecode log")
     parser.add_argument("--output_dir", default=".", help="Directory where acs_info.txt and acs_info.json will be created.")
     parser.add_argument("--ipmitool_log", default="", help="Path to ipmitool mc info log for BMC firmware extraction")
+    parser.add_argument("--psci_kernel_log", default="", help="Path to psci_kernel.log for PSCI version extraction")
     args = parser.parse_args()
 
     # Gather system info from dmidecode
@@ -187,6 +204,8 @@ def main():
     uefi_ver = get_uefi_version(args.uefi_version_log)
     if uefi_ver != 'Unknown':
         system_info['UEFI Version'] = uefi_ver
+    if is_systemready_dt_band(acs_conf):
+        system_info['PSCI version'] = get_psci_version(args.psci_kernel_log)
     if is_systemready_band(acs_conf):
         system_info['BMC Firmware Version'] = get_bmc_firmware_version(args.ipmitool_log)
 
