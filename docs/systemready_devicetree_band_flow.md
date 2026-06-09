@@ -24,6 +24,7 @@ The automation flow covers:
 | Base system architecture | BSA |
 | Platform firmware/device interface | PFDI |
 | Secure Boot compliance | BBSR |
+| System control and management | SCMI |
 | Devicetree validation | DT validation tools, DT parser, DT kernel selftests |
 | Linux device visibility | Device driver information script |
 | Network validation | UEFI ping test, HTTPS/network boot, Ethernet checks |
@@ -143,24 +144,30 @@ flowchart LR
     linkStyle default stroke:#2563eb,stroke-width:4px;
 
     A["GRUB<br/>Menu"] --> B{"Boot<br/>option"}
+
     B --> C["bbr/bsa<br/>ACS<br/><b>Automation</b>"]
     B --> D["Linux<br/>Boot"]
     B --> E["BBSR<br/>Compliance<br/><b>Automation</b>"]
+    B --> F["SCMI<br/>Compliance"]
 
-    click C "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemredy_devicetree_band_flow.md#2-bbrbsa-acs-automation-flow" "Go to bbr/bsa ACS Automation Flow"
-    click D "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemredy_devicetree_band_flow.md#3-linux-automation-flow" "Go to Linux Automation Flow"
-    click E "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemredy_devicetree_band_flow.md#4-bbsr-automation-flow" "Go to BBSR Automation Flow"
+    click C "https://github.com/ARM-software/arm-systemready/blob/flow_docs/docs/systemready_devicetree_band_flow.md#2-bbrbsa-acs-automation-flow" "Go to bbr/bsa ACS Automation Flow"
+    click D "https://github.com/ARM-software/arm-systemready/blob/flow_docs/docs/systemready_devicetree_band_flow.md#3-linux-automation-flow" "Go to Linux Automation Flow"
+    click E "https://github.com/ARM-software/arm-systemready/blob/flow_docs/docs/systemready_devicetree_band_flow.md#4-bbsr-automation-flow" "Go to BBSR Automation Flow"
+    click F "https://github.com/ARM-software/arm-systemready/blob/flow_docs/docs/systemready_devicetree_band_flow.md#5-scmi-compliance-flow" "Go to SCMI Compliance Flow"
 
     classDef grub fill:#dbeafe,stroke:#1d4ed8,stroke-width:3px,color:#0f172a;
     classDef decision fill:#ffffff,stroke:#2563eb,stroke-width:3px,color:#0f172a;
     classDef linux fill:#dcfce7,stroke:#16a34a,stroke-width:3px,color:#0f172a;
     classDef uefi fill:#ffedd5,stroke:#ea580c,stroke-width:3px,color:#0f172a;
     classDef bbsr fill:#fef3c7,stroke:#d97706,stroke-width:3px,color:#0f172a;
+    classDef scmi fill:#e0f2fe,stroke:#0284c7,stroke-width:3px,color:#0f172a;
+
     class A grub;
     class B decision;
     class C uefi;
     class D linux;
     class E bbsr;
+    class F scmi;
 ```
 ---
 
@@ -258,8 +265,8 @@ flowchart LR
     I --> J["ACS log parser<br/><br/>(apply waivers<br/>if configured)"]
     J --> K["Print<br/>ACS summary"]
 
-    click H "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemredy_devicetree_band_flow.md#network-boot" "Go to Network Boot Flow"
-    click I "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemredy_devicetree_band_flow.md#capsule-update-flow" "Go to Capsule Update Flow"
+    click H "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemready_devicetree_band_flow.md#network-boot" "Go to Network Boot Flow"
+    click I "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemready_devicetree_band_flow.md#capsule-update-flow" "Go to Capsule Update Flow"
 
     classDef entry fill:#dbeafe,stroke:#1d4ed8,stroke-width:3px,color:#0f172a;
     classDef linux fill:#dcfce7,stroke:#16a34a,stroke-width:3px,color:#0f172a;
@@ -422,8 +429,8 @@ flowchart LR
     I --> J["ACS log parser<br/><br/>(apply waivers<br/>if configured)"]
     J --> K["Print<br/>ACS summary"]
 
-    click H "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemredy_devicetree_band_flow.md#network-boot" "Go to Network Boot Flow"
-    click I "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemredy_devicetree_band_flow.md#capsule-update-flow" "Go to Capsule Update Flow"
+    click H "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemready_devicetree_band_flow.md#network-boot" "Go to Network Boot Flow"
+    click I "https://github.com/ARM-software/arm-systemready/blob/main/docs/systemready_devicetree_band_flow.md#capsule-update-flow" "Go to Capsule Update Flow"
 
     classDef entry fill:#dbeafe,stroke:#1d4ed8,stroke-width:3px,color:#0f172a;
     classDef linux fill:#dcfce7,stroke:#16a34a,stroke-width:3px,color:#0f172a;
@@ -499,6 +506,48 @@ flowchart LR
     class I uefi;
 ```
 ---
+### 5. SCMI Compliance Flow
+
+> This flow is executed when **SCMI Compliance** is selected from GRUB.
+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "flowchart": {
+    "curve": "linear",
+    "nodeSpacing": 30,
+    "rankSpacing": 40
+  },
+  "themeVariables": {
+    "fontFamily": "Arial",
+    "fontSize": "14px",
+    "primaryBorderColor": "#0f172a",
+    "lineColor": "#2563eb",
+    "tertiaryColor": "#ffffff"
+  }
+}}%%
+
+flowchart LR
+
+    linkStyle default stroke:#2563eb,stroke-width:4px;
+
+    A["SCMI<br/>Compliance"]
+    A --> B["Boot<br/>ACS Linux"]
+    B --> C["Detect SCMI<br/>boot option"]
+    C --> D["Run SCMI<br/>ACS tests"]
+    D --> E["Collect SCMI<br/>test log"]
+    E --> F["ACS log parser<br/><br/>(apply waivers<br/>if configured)"]
+    F --> G["Print<br/>ACS summary"]
+
+    classDef scmi fill:#e0f2fe,stroke:#0284c7,stroke-width:3px,color:#0f172a;
+    classDef linux fill:#dcfce7,stroke:#16a34a,stroke-width:3px,color:#0f172a;
+    classDef result fill:#ede9fe,stroke:#7c3aed,stroke-width:3px,color:#0f172a;
+
+    class A,D,E scmi;
+    class B,C linux;
+    class F,G result;
+```
+---
 
 ## GRUB Boot Menu Options
 
@@ -507,6 +556,7 @@ flowchart LR
 | `Linux Boot` | Boots Yocto Linux environment |
 | `bbr/bsa` | Runs the main automated DT compliance flow |
 | `BBSR Compliance (Automation)` | Runs Secure Boot / BBSR compliance flow |
+| `SCMI Compliance` | Boots ACS Linux with SCMI mode and runs SCMI compliance tests |
 
 ---
 

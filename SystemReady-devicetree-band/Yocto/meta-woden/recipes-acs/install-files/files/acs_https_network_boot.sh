@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2025-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,24 +38,20 @@ detect_system_esp() {
     # GPT partition type GUID for EFI System Partition (ESP)
     ESP_GUID="c12a7328-f81f-11d2-ba4b-00a0c93ec93b"
 
-    # Return 0 if at least one system ESP is detected
-    if command -v lsblk >/dev/null 2>&1; then
-        ESP_LINES="$(lsblk -rno NAME,PARTTYPE,PARTLABEL,MOUNTPOINT 2>/dev/null \
-            | awk 'tolower($0) !~ /boot_acs/ && (tolower($2) ~ /'"$ESP_GUID"'/ || tolower($3) ~ /efi system partition/ || tolower($4) ~ /\/boot\/efi|\/efi/ )')"
-        if [ -n "${ESP_LINES}" ]; then
-            echo "Detected potential system ESP partition(s):"
-            echo "${ESP_LINES}"
-            return 0
-        fi
-    fi
+    # Strict: ESP exists only if a GPT partition has PARTTYPE == ESP_GUID
+    command -v lsblk >/dev/null 2>&1 || return 1
 
-    if command -v blkid >/dev/null 2>&1; then
-        ESP_BLKID="$(blkid 2>/dev/null | grep -vi 'BOOT_ACS' | grep -Ei "EFI System Partition|PARTUUID=.*$ESP_GUID")"
-        if [ -n "${ESP_BLKID}" ]; then
-            echo "Detected potential system ESP via blkid:"
-            echo "${ESP_BLKID}"
-            return 0
-        fi
+    ESP_LINES="$(lsblk -rpn -o NAME,TYPE,PARTTYPE 2>/dev/null \
+        | awk -v g="$ESP_GUID" '
+            tolower($0) !~ /boot_acs/ &&
+            $2=="part" &&
+            tolower($3)==tolower(g)
+        ')"
+
+    if [ -n "$ESP_LINES" ]; then
+        echo "Detected system ESP partition(s) by GPT type GUID:"
+        echo "$ESP_LINES"
+        return 0
     fi
 
     return 1
