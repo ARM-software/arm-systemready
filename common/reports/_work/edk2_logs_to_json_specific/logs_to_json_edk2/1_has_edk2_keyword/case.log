@@ -1,4 +1,0 @@
-================================================================================
-TEST CASE: edk2_logs_to_json_specific::logs_to_json_edk2.py::has_edk2_keyword
-STATUS: PASS
-MESSAGE: All patterns matched

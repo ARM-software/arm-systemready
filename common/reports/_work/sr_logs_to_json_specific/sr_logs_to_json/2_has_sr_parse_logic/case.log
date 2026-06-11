@@ -1,4 +1,0 @@
-================================================================================
-TEST CASE: sr_logs_to_json_specific::sr_logs_to_json.py::has_sr_parse_logic
-STATUS: PASS
-MESSAGE: All patterns matched

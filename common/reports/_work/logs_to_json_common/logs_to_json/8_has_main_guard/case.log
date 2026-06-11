@@ -1,4 +1,0 @@
-================================================================================
-TEST CASE: logs_to_json_common::logs_to_json.py::has_main_guard
-STATUS: PASS
-MESSAGE: Main guard found

@@ -1,9 +1,0 @@
-[
-    {
-        "Test Entry Point GUID": "AAAA-BBBB",
-        "sub_Test_GUID": "1111-2222",
-        "result": "PASS",
-        "reason": "parser",
-        "sub_Test_Description": "TestA"
-    }
-]

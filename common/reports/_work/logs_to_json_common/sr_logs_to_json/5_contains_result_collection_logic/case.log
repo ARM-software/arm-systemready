@@ -1,6 +1,0 @@
-================================================================================
-TEST CASE: logs_to_json_common::sr_logs_to_json.py::contains_result_collection_logic
-STATUS: PASS
-MESSAGE: At least one pattern matched
-
-Matched patterns: subtest, test_results, results

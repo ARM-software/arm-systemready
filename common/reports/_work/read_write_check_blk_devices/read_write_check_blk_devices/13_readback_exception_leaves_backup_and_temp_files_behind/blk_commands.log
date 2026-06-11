@@ -1,5 +1,0 @@
-findmnt -n /dev/sda1
-df -B 512 /dev/sda1 --output=used,avail
-dd if=/dev/sda1 of=sda1_backup.bin bs=512 count=1 skip=10
-dd if=hello.txt of=/dev/sda1 bs=512 count=1 seek=10
-dd if=/dev/sda1 of=read_hello.txt bs=512 count=1 skip=10

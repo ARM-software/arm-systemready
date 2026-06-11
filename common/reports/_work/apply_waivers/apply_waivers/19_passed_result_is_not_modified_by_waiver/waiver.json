@@ -1,8 +1,0 @@
-{
-  "Suites": [
-    {
-      "Suite": "FWTS",
-      "Reason": "Should not affect passed results"
-    }
-  ]
-}

@@ -1,9 +1,0 @@
-================================================================================
-TEST CASE: capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::status_true_returns_passed
-STATUS: PASS
-MESSAGE: Function returned 'PASSED'
-
-Work dir: /home/vepav01/arm-systemready/common/reports/_work/capsule_ondisk_reporting_vars_check/capsule_ondisk_reporting_vars_check/4_status_true_returns_passed
---- STDOUT ---
-
---- STDERR ---

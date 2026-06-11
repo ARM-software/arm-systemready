@@ -1,9 +1,0 @@
-================================================================================
-TEST CASE: capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::decode_valid_utf16le_returns_capsule_name
-STATUS: PASS
-MESSAGE: Function returned 'Capsule0001'
-
-Work dir: /home/vepav01/arm-systemready/common/reports/_work/capsule_ondisk_reporting_vars_check/capsule_ondisk_reporting_vars_check/6_decode_valid_utf16le_returns_capsule_name
---- STDOUT ---
-
---- STDERR ---
