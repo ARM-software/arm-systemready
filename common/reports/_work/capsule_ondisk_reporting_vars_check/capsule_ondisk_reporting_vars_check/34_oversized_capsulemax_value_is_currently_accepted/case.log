@@ -1,0 +1,17 @@
+================================================================================
+TEST CASE: capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::oversized_capsulemax_value_is_currently_accepted
+STATUS: PASS
+MESSAGE: Module main() check passed
+
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/log.txt'
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/log.txt contains 'CapsuleMax - Found, Value - Capsule0001' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/log.txt contains 'Overall Capsule On-Disk Update Reporting Variables Result: PASSED' -> PASS

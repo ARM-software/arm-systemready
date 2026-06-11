@@ -1,0 +1,12 @@
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_mock_yaml_safe_load_raises_on_event_log
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/8_cli_mock_yaml_safe_load_raises_on_event_log
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/8_cli_mock_yaml_safe_load_raises_on_event_log/pcr.yaml /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/8_cli_mock_yaml_safe_load_raises_on_event_log/event.yaml
+Exit code: 1
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : FAIL
+    ERROR: mocked event parse failure
+--- STDERR ---

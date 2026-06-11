@@ -1,0 +1,18 @@
+================================================================================
+TEST CASE: merge_summary::merge_summary.py::cli_overwrites_existing_output_file
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/bsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/fwts_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/acs_summary.html contains 'BSA fresh marker' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/acs_summary.html contains 'FWTS fresh marker' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/acs_summary.html contains 'stale ACS summary content' -> PASS

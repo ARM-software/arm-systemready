@@ -1,0 +1,60 @@
+====================================================================================================
+RUN START: 2026-06-11 09:32:27
+YAML: common/test_yaml/json-to-html.yaml
+SUITE: scmi_json_to_html_specific
+TARGETS: common/log_parser/scmi/json_to_html.py
+====================================================================================================
+
+================================================================================
+TEST CASE: scmi_json_to_html_specific::json_to_html.py::scmi_invalid_json_input
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/scmi/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/1_scmi_invalid_json_input/scmi.json /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/1_scmi_invalid_json_input/detail.html /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/1_scmi_invalid_json_input/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "/home/vepav01/arm-systemready/common/log_parser/scmi/json_to_html.py", line 230, in <module>
+    main(sys.argv[1], sys.argv[2], sys.argv[3])
+  File "/home/vepav01/arm-systemready/common/log_parser/scmi/json_to_html.py", line 214, in main
+    data = json.loads(Path(inp_json).read_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+
+================================================================================
+TEST CASE: scmi_json_to_html_specific::json_to_html.py::scmi_summary_is_tallied_from_testcase_results
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/scmi/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/scmi.json /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/detail.html /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/detail.html -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/detail.html contains 'SCMI' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/detail.html contains 'Case 1' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/detail.html contains 'PASSED' -> PASS
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/summary.html -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/summary.html contains 'Result Summary' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/2_scmi_summary_is_tallied_from_testcase_results/summary.html contains '<td class="pass">1</td>' -> PASS
+

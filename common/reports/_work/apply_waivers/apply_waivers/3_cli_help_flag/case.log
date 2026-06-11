@@ -1,0 +1,26 @@
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::cli_help_flag
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py --help
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+usage: apply_waivers.py [-h] [--quiet]
+                        suite_name json_file [waiver_file] [output_json_file]
+
+Apply waivers to test suite JSON results.
+
+positional arguments:
+  suite_name        Name of the test suite
+  json_file         Path to the JSON file
+  waiver_file       Path to the waiver file (default: waiver.json)
+  output_json_file  Path to the test category file (default: None)
+
+options:
+  -h, --help        show this help message and exit
+  --quiet           Suppress detailed output
+--- STDERR ---

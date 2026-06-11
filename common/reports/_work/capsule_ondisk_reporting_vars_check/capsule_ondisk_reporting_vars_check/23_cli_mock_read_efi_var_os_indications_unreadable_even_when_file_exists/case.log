@@ -1,0 +1,17 @@
+================================================================================
+TEST CASE: capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::cli_mock_read_efi_var_os_indications_unreadable_even_when_file_exists
+STATUS: PASS
+MESSAGE: Module main() check passed
+
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/capsule.log'
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/capsule.log contains 'OsIndicationsSupported not found or unreadable' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED' -> PASS

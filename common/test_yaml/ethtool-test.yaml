@@ -1,0 +1,486 @@
+suites:
+  - name: ethtool_test
+    files:
+      - common/linux_scripts/ethtool-test.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+        description: Verify the ethtool test script is present
+
+      - name: python_compiles
+        type: py_compile
+        description: Verify the script has no Python syntax errors
+
+      - name: has_main_guard
+        type: main_guard
+        description: Verify the script can run as a standalone CLI entry point
+
+      - name: expected_test_order_keywords_exist
+        type: source_contains_all
+        description: Verify the source includes all expected Ethernet validation stages
+        patterns:
+          - "Detect interface"
+          - "Bring up"
+          - "ethtool present"
+          - "Self-test supported"
+          - "ethtool self tests"
+          - "Link detected"
+          - "IPv4 address present"
+          - "Gateway Address present"
+          - "Ping gateway (IPv4)"
+          - "Ping www.arm.com (IPv4)"
+          - "wget and curl"
+          - "IPv6 address present"
+          - "Ping ipv6.google.com (IPv6)"
+
+      - name: cli_no_ethernet_interfaces_exits_nonzero
+        type: module_cli
+        description: Verify the script exits with failure when no usable Ethernet interface is detected
+        scenario:
+          kind: ethtool
+          interfaces: []
+          tools:
+            ethtool: absent
+            ping: absent
+            wget: absent
+            curl: absent
+            dhclient: absent
+            udhcpc: absent
+        expect_exit_nonzero: true
+        expect_stdout_or_stderr_contains:
+          - "No ethernet interfaces detected via ip linux command, Exiting"
+
+      - name: cli_virtual_interface_only
+        type: module_cli
+        description: Verify virtual interfaces alone are not treated as compliant physical NICs
+        scenario:
+          kind: ethtool
+          required_compliant_interfaces: 0
+          interfaces:
+            - name: docker0
+              kind: virtual
+              state: down
+              mtu: 1500
+              device: /sys/devices/virtual/net/docker0
+          tools:
+            ethtool: /usr/sbin/ethtool
+            ping: absent
+            wget: absent
+            curl: absent
+            dhclient: absent
+            udhcpc: absent
+        text_files:
+          system_config.txt: |
+            total_number_of_network_controllers: 0
+        args:
+          - "{dir}/system_config.txt"
+        expect_stdout_or_stderr_contains:
+          - "docker0"
+
+      - name: cli_sysfs_link_only
+        type: module_cli
+        description: Verify sysfs carrier and operstate can identify a healthy physical NIC without ethtool
+        scenario:
+          kind: ethtool
+          required_compliant_interfaces: 1
+          interfaces:
+            - name: eth0
+              kind: physical
+              state: up
+              carrier: 1
+              operstate: up
+              device: /sys/devices/pci0000:00/0000:00:01.0/net/eth0
+          tools:
+            ethtool: absent
+            ping: absent
+            wget: absent
+            curl: absent
+            dhclient: absent
+            udhcpc: absent
+        text_files:
+          system_config.txt: |
+            total_number_of_network_controllers: 1
+        args:
+          - "{dir}/system_config.txt"
+        expect_stdout_or_stderr_contains:
+          - "eth0"
+
+      - name: cli_full_success
+        type: module_cli
+        description: Verify the end-to-end happy path for one healthy physical interface
+        scenario:
+          kind: ethtool
+          required_compliant_interfaces: 1
+          interfaces:
+            - name: eth1
+              kind: physical
+              state: up
+              carrier: 1
+              operstate: up
+              device: /sys/devices/pci0000:00/0000:00:02.0/net/eth1
+              ipv4:
+                - address: 192.0.2.10/24
+                  dynamic: true
+              ipv6:
+                - address: 2001:db8::10/64
+              routes:
+                default: default via 192.0.2.1 dev eth1 proto dhcp
+                route_get: 8.8.8.8 via 192.0.2.1 dev eth1 src 192.0.2.10
+              ethtool:
+                link_detected: true
+                self_test_supported: true
+                self_test:
+                  returncode: 1
+                  stdout: "self-test failed\n"
+                  stderr: ""
+              connectivity:
+                gateway_ping: pass
+                arm_ping: pass
+                ipv6_ping: pass
+                curl: pass
+                wget: pass
+          tools:
+            ethtool: /usr/bin/ethtool
+            ping: /usr/bin/ping
+            wget: /usr/bin/wget
+            curl: /usr/bin/curl
+            dhclient: absent
+            udhcpc: absent
+        text_files:
+          system_config.txt: |
+            total_number_of_network_controllers: 1
+        args:
+          - "{dir}/system_config.txt"
+        expect_stdout_or_stderr_contains:
+          - "eth1"
+
+      - name: cli_required_compliant_ifaces_fail_when_not_enough_pass
+        type: module_cli
+        description: Verify compliance fails when detected interfaces exist but too few actually pass validation
+        scenario:
+          kind: ethtool
+          required_compliant_interfaces: 2
+          interfaces:
+            - name: eth0
+              kind: physical
+              state: up
+              carrier: 1
+              operstate: up
+              device: /sys/devices/pci0000:00/0000:00:03.0/net/eth0
+              ipv4:
+                - address: 192.0.2.20/24
+                  dynamic: true
+              routes:
+                default: default via 192.0.2.1 dev eth0 proto dhcp
+                route_get: 8.8.8.8 via 192.0.2.1 dev eth0 src 192.0.2.20
+              ethtool:
+                link_detected: true
+                self_test_supported: false
+              connectivity:
+                gateway_ping: pass
+                arm_ping: pass
+                curl: pass
+                wget: pass
+            - name: eth1
+              kind: physical
+              state: down
+              carrier: 0
+              operstate: down
+              device: /sys/devices/pci0000:00/0000:00:04.0/net/eth1
+              ethtool:
+                link_detected: false
+                self_test_supported: false
+          tools:
+            ethtool: /usr/bin/ethtool
+            ping: /usr/bin/ping
+            wget: /usr/bin/wget
+            curl: /usr/bin/curl
+            dhclient: absent
+            udhcpc: absent
+        text_files:
+          system_config.txt: |
+            total_number_of_network_controllers: 2
+        args:
+          - "{dir}/system_config.txt"
+        expect_stdout_or_stderr_contains:
+          - "eth0"
+          - "eth1"
+
+      - name: external_connectivity_failures_do_not_override_local_interface_health
+        type: module_cli
+        description: Verify external internet failures do not automatically mark a locally healthy NIC as unhealthy
+        warn_only: true
+        scenario:
+          kind: ethtool
+          required_compliant_interfaces: 1
+          interfaces:
+            - name: eth0
+              kind: physical
+              state: up
+              carrier: 1
+              operstate: up
+              device: /sys/devices/pci0000:00/0000:00:01.0/net/eth0
+              ipv4:
+                - address: 192.0.2.10/24
+                  dynamic: true
+              ipv6:
+                - address: 2001:db8::10/64
+              routes:
+                default: default via 192.0.2.1 dev eth0 proto dhcp
+                route_get: 8.8.8.8 via 192.0.2.1 dev eth0 src 192.0.2.10
+              ethtool:
+                link_detected: true
+                self_test_supported: false
+              connectivity:
+                gateway_ping: pass
+                arm_ping: fail
+                ipv6_ping: fail
+                curl: fail
+                wget: fail
+          tools:
+            ethtool: /usr/bin/ethtool
+            ping: /usr/bin/ping
+            wget: /usr/bin/wget
+            curl: /usr/bin/curl
+            dhclient: absent
+            udhcpc: absent
+        text_files:
+          system_config.txt: |
+            total_number_of_network_controllers: 1
+        args:
+          - "{dir}/system_config.txt"
+        expect_stdout_or_stderr_contains:
+          - "Ethtool Compliance :"
+          - "PASSED"
+
+      - name: route_validation_does_not_depend_on_public_ip_probe
+        type: module_cli
+        description: Verify default-route validation still works even when public route probing fails
+        warn_only: true
+        scenario:
+          kind: ethtool
+          required_compliant_interfaces: 1
+          interfaces:
+            - name: eth0
+              kind: physical
+              state: up
+              carrier: 1
+              operstate: up
+              device: /sys/devices/pci0000:00/0000:00:01.0/net/eth0
+              ipv4:
+                - address: 10.0.0.10/24
+                  dynamic: true
+              routes:
+                default: default via 10.0.0.1 dev eth0 proto dhcp
+                route_get:
+                  returncode: 1
+                  stdout: ""
+                  stderr: "network unreachable\n"
+              ethtool:
+                link_detected: true
+                self_test_supported: false
+          tools:
+            ethtool: /usr/bin/ethtool
+            ping: /usr/bin/ping
+            wget: absent
+            curl: absent
+            dhclient: absent
+            udhcpc: absent
+        text_files:
+          system_config.txt: |
+            total_number_of_network_controllers: 1
+        args:
+          - "{dir}/system_config.txt"
+        expect_stdout_or_stderr_contains:
+          - "Ping gateway (IPv4)"
+          - "PASSED"
+
+      - name: compliance_requires_more_than_link_when_external_checks_degrade
+        type: module_cli
+        description: Verify overall compliance can fail even when link is up if higher-level connectivity checks degrade
+        warn_only: true
+        scenario:
+          kind: ethtool
+          required_compliant_interfaces: 1
+          interfaces:
+            - name: eth0
+              kind: physical
+              state: up
+              carrier: 1
+              operstate: up
+              device: /sys/devices/pci0000:00/0000:00:01.0/net/eth0
+              ipv4:
+                - address: 192.0.2.10/24
+                  dynamic: true
+              ipv6:
+                - address: 2001:db8::10/64
+              routes:
+                default: default via 192.0.2.1 dev eth0 proto dhcp
+                route_get: 8.8.8.8 via 192.0.2.1 dev eth0 src 192.0.2.10
+              ethtool:
+                link_detected: true
+                self_test_supported: false
+              connectivity:
+                gateway_ping: pass
+                arm_ping: fail
+                ipv6_ping: fail
+                curl: fail
+                wget: fail
+          tools:
+            ethtool: /usr/bin/ethtool
+            ping: /usr/bin/ping
+            wget: /usr/bin/wget
+            curl: /usr/bin/curl
+            dhclient: absent
+            udhcpc: absent
+        text_files:
+          system_config.txt: |
+            total_number_of_network_controllers: 1
+        args:
+          - "{dir}/system_config.txt"
+        expect_stdout_or_stderr_contains:
+          - "Ethtool Compliance :"
+          - "FAILED"
+
+      - name: connectivity_checks_wait_for_interface_state_recovery
+        type: module_cli
+        description: Verify the script tolerates delayed route recovery after interface bring-up
+        warn_only: true
+        scenario:
+          kind: ethtool
+          required_compliant_interfaces: 1
+          interfaces:
+            - name: eth0
+              kind: physical
+              state: up
+              carrier: 1
+              operstate: up
+              device: /sys/devices/pci0000:00/0000:00:01.0/net/eth0
+              ipv4:
+                - address: 192.0.2.10/24
+                  dynamic: true
+              ipv6:
+                - address: 2001:db8::10/64
+              routes: {}
+              ethtool:
+                link_detected: true
+                self_test_supported: false
+              connectivity:
+                gateway_ping: pass
+                arm_ping: pass
+                ipv6_ping: pass
+                curl: pass
+                wget: pass
+          tools:
+            ethtool: /usr/bin/ethtool
+            ping: /usr/bin/ping
+            wget: /usr/bin/wget
+            curl: /usr/bin/curl
+            dhclient: /usr/bin/dhclient
+            udhcpc: absent
+        text_files:
+          system_config.txt: |
+            total_number_of_network_controllers: 1
+        args:
+          - "{dir}/system_config.txt"
+        mocks:
+          subprocess.run:
+            factory: mock_helpers.run_router
+            kwargs:
+              responses:
+                "ip link show eth0":
+                  returncode: 0
+                  stdout: "2: eth0: <BROADCAST,MULTICAST> mtu 1500 state DOWN\n"
+                  stderr: ""
+                "ip link set dev eth0 down":
+                  returncode: 0
+                  stdout: ""
+                  stderr: ""
+                "ip link set dev eth0 up":
+                  returncode: 0
+                  stdout: ""
+                  stderr: ""
+                "ethtool eth0":
+                  returncode: 0
+                  stdout: "Settings for eth0\n\tLink detected: yes\n"
+                  stderr: ""
+                "ethtool -i eth0":
+                  returncode: 0
+                  stdout: "driver: fake\nsupports-test: no\n"
+                  stderr: ""
+                "ip address show dev eth0":
+                  - returncode: 0
+                    stdout: |
+                      2: eth0: <BROADCAST,MULTICAST,UP> mtu 1500
+                          inet 192.0.2.10/24 brd 192.0.2.255 scope global dynamic eth0
+                          inet6 2001:db8::10/64 scope global
+                    stderr: ""
+                "ip route show default":
+                  - returncode: 0
+                    stdout: ""
+                    stderr: ""
+                  - returncode: 0
+                    stdout: ""
+                    stderr: ""
+                  - returncode: 0
+                    stdout: "default via 192.0.2.1 dev eth0 proto dhcp\n"
+                    stderr: ""
+                "ip -o route show table all default":
+                  - returncode: 0
+                    stdout: ""
+                    stderr: ""
+                  - returncode: 0
+                    stdout: ""
+                    stderr: ""
+                  - returncode: 0
+                    stdout: "default via 192.0.2.1 dev eth0 proto dhcp\n"
+                    stderr: ""
+                "ip route get 8.8.8.8":
+                  - returncode: 1
+                    stdout: ""
+                    stderr: "network unreachable\n"
+                  - returncode: 1
+                    stdout: ""
+                    stderr: "network unreachable\n"
+                  - returncode: 0
+                    stdout: "8.8.8.8 via 192.0.2.1 dev eth0 src 192.0.2.10\n"
+                    stderr: ""
+                "ping -c 3 -W 10 -I eth0 192.0.2.1":
+                  returncode: 0
+                  stdout: "3 packets transmitted, 3 received, 0% packet loss\n"
+                  stderr: ""
+                "ping -c 3 -W 10 -I eth0 www.arm.com":
+                  returncode: 0
+                  stdout: "3 packets transmitted, 3 received, 0% packet loss\n"
+                  stderr: ""
+                "ping -6 -c 3 -I eth0 ipv6.google.com":
+                  returncode: 0
+                  stdout: "3 packets transmitted, 3 received, 0% packet loss\n"
+                  stderr: ""
+                "wget --spider --timeout=10 https://www.arm.com":
+                  returncode: 0
+                  stdout: ""
+                  stderr: ""
+                "curl -Is --connect-timeout 20 --interface eth0 https://www.arm.com":
+                  returncode: 0
+                  stdout: "HTTP/2 200\n"
+                  stderr: ""
+                "dhclient -r eth0":
+                  returncode: 0
+                  stdout: ""
+                  stderr: ""
+                "dhclient -1 eth0":
+                  returncode: 0
+                  stdout: ""
+                  stderr: ""
+              default_returncode: 1
+              use_contains: false
+              unmatched_stderr_template: "UNMOCKED COMMAND: {cmd}\n"
+        expect_stdout_or_stderr_contains:
+          - "Gateway Address present"
+          - "PASSED"
+          - "Ping gateway (IPv4)"
+          - "PASSED"
+          - "Ping www.arm.com (IPv4)"
+          - "PASSED"

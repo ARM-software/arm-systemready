@@ -1,0 +1,16 @@
+================================================================================
+TEST CASE: acs_info::acs_info.py::cli_config_value_with_extra_colon_is_preserved
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/acs_info.py --dmidecode_log /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/12_cli_config_value_with_extra_colon_is_preserved/dmidecode.log --system_config_path /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/12_cli_config_value_with_extra_colon_is_preserved/system_config.txt --output_dir /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/12_cli_config_value_with_extra_colon_is_preserved/out
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/12_cli_config_value_with_extra_colon_is_preserved/out/acs_info.json contains '"Firmware Notes": "build:nightly:123"' -> PASS

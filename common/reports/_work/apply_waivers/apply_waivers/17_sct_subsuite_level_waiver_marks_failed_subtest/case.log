@@ -1,0 +1,19 @@
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::sct_subsuite_level_waiver_marks_failed_subtest
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py SCT /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+SubSuite-level waiver applied to subtest 'subsuite failure' with reason: SCT subsuite waiver
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json contains 'WITH WAIVER' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json contains 'SCT subsuite waiver' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json contains '(WITH WAIVER) (WITH WAIVER)' -> PASS

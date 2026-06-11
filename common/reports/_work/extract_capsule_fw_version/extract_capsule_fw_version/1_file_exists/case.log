@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: extract_capsule_fw_version::extract_capsule_fw_version.py::file_exists
+STATUS: PASS
+MESSAGE: File exists

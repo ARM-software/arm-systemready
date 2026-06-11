@@ -1,0 +1,14 @@
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_missing_files_fail_nonzero
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: python3 /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/5_cli_missing_files_fail_nonzero/missing_pcr.yaml /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/5_cli_missing_files_fail_nonzero/missing_event.yaml
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : FAIL
+    ERROR: [Errno 2] No such file or directory: '/home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/5_cli_missing_files_fail_nonzero/missing_pcr.yaml'
+--- STDERR ---

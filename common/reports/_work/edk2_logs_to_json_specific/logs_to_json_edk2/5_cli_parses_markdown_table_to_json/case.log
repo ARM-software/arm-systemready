@@ -1,0 +1,17 @@
+================================================================================
+TEST CASE: edk2_logs_to_json_specific::logs_to_json_edk2.py::cli_parses_markdown_table_to_json
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/log_parser/bbr/sct/logs_to_json_edk2.py
+Shell mode: no
+Timeout seconds: 5
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_empty: /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/5_cli_parses_markdown_table_to_json/out.json -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/5_cli_parses_markdown_table_to_json/out.json contains 'AAAA-BBBB' -> PASS

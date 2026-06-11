@@ -1,0 +1,585 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="capsule-ondisk-reporting-vars-check" tests="36" failures="0" errors="0" skipped="0"><properties><property name="yaml_file" value="common/test_yaml/capsule-ondisk-reporting-vars-check.yaml" /><property name="passed" value="36" /><property name="warnings" value="0" /></properties><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::file_exists" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::python_compiles" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::has_main_guard" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::status_true_returns_passed" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=py_function
+warning=False
+message=Function returned 'PASSED'
+details:
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/capsule_ondisk_reporting_vars_check/capsule_ondisk_reporting_vars_check/4_status_true_returns_passed
+--- STDOUT ---
+
+--- STDERR ---</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::status_false_returns_warning" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=py_function
+warning=False
+message=Function returned 'WARNING'
+details:
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/capsule_ondisk_reporting_vars_check/capsule_ondisk_reporting_vars_check/5_status_false_returns_warning
+--- STDOUT ---
+
+--- STDERR ---</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::decode_valid_utf16le_returns_capsule_name" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=py_function
+warning=False
+message=Function returned 'Capsule0001'
+details:
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/capsule_ondisk_reporting_vars_check/capsule_ondisk_reporting_vars_check/6_decode_valid_utf16le_returns_capsule_name
+--- STDOUT ---
+
+--- STDERR ---</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::missing_efivarfs_returns_1_and_logs_warning" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_88dc7714
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_88dc7714/missing_efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_88dc7714/capsule.log'
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_88dc7714/capsule.log -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_88dc7714/capsule.log contains 'Please ensure efivarfs is enabled and mounted' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_88dc7714/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::missing_os_indications_returns_2_and_skips" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8dd3a5aa
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8dd3a5aa/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8dd3a5aa/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8dd3a5aa/capsule.log'
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8dd3a5aa/capsule.log -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8dd3a5aa/capsule.log contains 'OsIndicationsSupported not found or unreadable' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8dd3a5aa/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::os_indications_without_capsule_support_bit_returns_2" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/capsule.log'
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/capsule.log contains 'INFO: OsIndicationsSupported value: 0x0' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/capsule.log contains 'INFO: Capsule on-disk reporting variables test is not applicable - SKIPPED' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::os_indications_short_data_treated_as_unreadable" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_91c8272d
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_91c8272d/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_91c8272d/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_91c8272d/capsule.log'
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_91c8272d/capsule.log contains 'OsIndicationsSupported not found or unreadable' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_91c8272d/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::support_claimed_but_missing_capsule_variables_returns_3" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_860fac3f
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_860fac3f/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_860fac3f/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_860fac3f/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_860fac3f/capsule.log contains 'CapsuleMax Variable - Not Found or Not Accessible' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_860fac3f/capsule.log contains 'CapsuleLast Variable - Not Found or Not Accessible' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_860fac3f/capsule.log contains 'No CapsuleNNNN reporting variables found - WARNING' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_860fac3f/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::capsulemax_wrong_attributes_returns_3" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_31b9841b
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_31b9841b/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_31b9841b/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_31b9841b/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_31b9841b/capsule.log contains 'CapsuleMax Variable Attribute Test' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_31b9841b/capsule.log contains 'actual attributes Value:0x7' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_31b9841b/capsule.log contains 'Status - WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::capsulelast_wrong_attributes_returns_3" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3259da37
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3259da37/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3259da37/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3259da37/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3259da37/capsule.log contains 'CapsuleLast Variable Attribute Test' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3259da37/capsule.log contains 'actual attributes Value:0x6' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3259da37/capsule.log contains 'Status - WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::malformed_capsulelast_value_returns_3" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1bd605c7
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1bd605c7/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1bd605c7/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1bd605c7/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1bd605c7/capsule.log contains 'CapsuleLast Variable Test: WARNING' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1bd605c7/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::capsulemax_too_short_returns_3" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_01da8e3a
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_01da8e3a/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_01da8e3a/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_01da8e3a/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_01da8e3a/capsule.log contains 'CapsuleMax Variable Test: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::missing_capsulelast_returns_3" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8240013a
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8240013a/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8240013a/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8240013a/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_8240013a/capsule.log contains 'CapsuleLast Variable - Not Found or Not Accessible' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::inaccessible_capsule_nnnn_variable_returns_3" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1445ffc5
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1445ffc5/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1445ffc5/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1445ffc5/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_1445ffc5/capsule.log contains 'CapsuleNNNN Variable Test: Capsule0001 Variable Test: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::capsule_nnnn_wrong_attributes_returns_3" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_4c76164f
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_4c76164f/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_4c76164f/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_4c76164f/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_4c76164f/capsule.log contains 'CapsuleNNNN Variable Test: Capsule0001 Variable Test: PASSED' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_4c76164f/capsule.log contains 'actual attributes Value:0x6' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_4c76164f/capsule.log contains 'Status - WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::multiple_capsule_nnnn_one_bad_one_good_returns_3" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_f1d340bd
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_f1d340bd/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_f1d340bd/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_f1d340bd/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_f1d340bd/capsule.log contains 'CapsuleNNNN Variable Test: Capsule0001 Variable Test: PASSED' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_f1d340bd/capsule.log contains 'CapsuleNNNN Variable Test: Capsule0002 Variable Test: PASSED' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_f1d340bd/capsule.log contains 'actual attributes Value:0x6' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_f1d340bd/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::all_valid_variables_return_0_and_pass" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_650db795
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_650db795/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_650db795/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_650db795/capsule.log'
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check ordered_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_650db795/capsule.log -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::cli_mock_open_raises_oserror_for_existing_capsulelast" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c9f01457
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c9f01457/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c9f01457/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c9f01457/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c9f01457/capsule.log contains 'CapsuleLast Variable - Not Found or Not Accessible' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c9f01457/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::cli_mock_listdir_failure_for_existing_efivarfs" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_fd744778
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_fd744778/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_fd744778/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_fd744778/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_fd744778/capsule.log contains 'efivarfs not accessible - WARNING' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_fd744778/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::cli_mock_read_efi_var_os_indications_unreadable_even_when_file_exists" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/capsule.log'
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/capsule.log contains 'OsIndicationsSupported not found or unreadable' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2f77014c/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::cli_mock_read_efi_var_capsulemax_missing_even_when_file_exists" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_40abb504
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_40abb504/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_40abb504/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_40abb504/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_40abb504/capsule.log contains 'CapsuleMax Variable - Not Found or Not Accessible' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_40abb504/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::ondisk_supported_without_capsule_entries_currently_passes_overall" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2956a380
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2956a380/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2956a380/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2956a380/capsule.log'
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2956a380/capsule.log contains 'No CapsuleNNNN reporting variables found - WARNING' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_2956a380/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: PASSED' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::capsulemax_exact_char16_11_length_should_be_enforced" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3884162d
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3884162d/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3884162d/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3884162d/capsule.log'
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3884162d/capsule.log contains 'CapsuleMax - Found, Value - Capsule0001' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_3884162d/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: PASSED' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::capsule_nnnn_payload_structure_should_not_be_ignored" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_feb1c809
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_feb1c809/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_feb1c809/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_feb1c809/capsule.log'
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_feb1c809/capsule.log contains 'CapsuleNNNN Variable Test: Capsule0001 - Found' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_feb1c809/capsule.log contains 'CapsuleNNNN Variable Test: Capsule0001 Variable Test: PASSED' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_feb1c809/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: PASSED' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::missing_os_indications_is_reported_as_not_found" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_e078ac49
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_e078ac49/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_e078ac49/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_e078ac49/capsule.log'
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_e078ac49/capsule.log contains 'OsIndicationsSupported not found or unreadable' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::logging_failure_silently_skips_log_creation" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_594c532c
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_594c532c/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_594c532c/capsule.log'
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check not_exists: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_594c532c/capsule.log -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::unreadable_os_indications_is_reported_as_unreadable" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_208068e0
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_208068e0/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_208068e0/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_208068e0/capsule.log'
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_208068e0/capsule.log contains 'OsIndicationsSupported not found or unreadable' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::capsulemax_with_additional_attribute_bits_is_rejected" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291/log.txt'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291/log.txt contains 'Status - WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::permission_denied_during_capsule_enumeration_is_identified" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c566a3dd
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c566a3dd/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c566a3dd/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c566a3dd/capsule.log'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c566a3dd/capsule.log contains 'efivarfs not accessible - WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::malformed_capsule_entry_content_is_rejected" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_e7eaaf42
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_e7eaaf42/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_e7eaaf42/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_e7eaaf42/log.txt'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::oversized_capsulemax_value_is_currently_accepted" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/log.txt'
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/log.txt contains 'CapsuleMax - Found, Value - Capsule0001' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_82a3bfca/log.txt contains 'Overall Capsule On-Disk Update Reporting Variables Result: PASSED' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::invalid_utf16_in_capsulelast_is_reported" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c7011670
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c7011670/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c7011670/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c7011670/log.txt'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c7011670/log.txt contains 'CapsuleLast Variable Test: WARNING' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_c7011670/log.txt contains 'Overall Capsule On-Disk Update Reporting Variables Result: WARNING' -&gt; PASS</system-out></testcase><testcase classname="common_linux_scripts_capsule_ondisk_reporting_vars_check.py" name="capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::capsulelast_is_not_cross_checked_against_discovered_entry" file="common/linux_scripts/capsule_ondisk_reporting_vars_check.py"><system-out>file=common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+suite=capsule_ondisk_reporting_vars_check
+phase=case
+type=module_main_with_env
+warning=False
+message=Module main() check passed
+details:
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_ccbb0e9e
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_ccbb0e9e/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_ccbb0e9e/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_ccbb0e9e/log.txt'
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_ccbb0e9e/log.txt contains 'CapsuleLast Variable Test: PASSED' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_ccbb0e9e/log.txt contains 'Overall Capsule On-Disk Update Reporting Variables Result: PASSED' -&gt; PASS</system-out></testcase></testsuite>

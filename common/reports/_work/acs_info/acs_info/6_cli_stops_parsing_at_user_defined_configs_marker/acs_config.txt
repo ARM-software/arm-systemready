@@ -1,0 +1,4 @@
+Band: SystemReady Band
+ACS version: 7.0
+# User-defined configs
+Secret Field: should_not_appear

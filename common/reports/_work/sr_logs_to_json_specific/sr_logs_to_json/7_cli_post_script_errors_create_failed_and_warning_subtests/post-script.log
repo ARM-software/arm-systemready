@@ -1,0 +1,2 @@
+ERROR os-logs rhel: failure on required OS: fatal issue
+ERROR os-logs ubuntu: issue on extra OS: non-fatal issue

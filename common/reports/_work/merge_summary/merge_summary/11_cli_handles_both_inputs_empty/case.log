@@ -1,0 +1,16 @@
+================================================================================
+TEST CASE: merge_summary::merge_summary.py::cli_handles_both_inputs_empty
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/11_cli_handles_both_inputs_empty/empty_bsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/11_cli_handles_both_inputs_empty/empty_fwts_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/11_cli_handles_both_inputs_empty/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/11_cli_handles_both_inputs_empty/acs_summary.html -> PASS

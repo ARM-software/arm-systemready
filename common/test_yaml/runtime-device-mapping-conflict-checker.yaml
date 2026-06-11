@@ -1,0 +1,975 @@
+# Safe scenario-based runtime-device-mapping YAML.
+#
+# Requires mock_loader support for:
+#
+# scenario:
+#   kind: runtime_device_mapping
+#   dts: |
+#     ...
+#   memmap: |
+#     ...
+#   memmap_hex: "..."
+#
+# The mock_loader should materialize:
+#   dts       -> text_files.device_tree.dts
+#   memmap    -> text_files.memmap.log
+#   memmap_hex -> bin_files.memmap.log.hex
+#
+# IMPORTANT:
+# The main scenario corpus still uses the proven CLI case_runner.py path.
+# Native fault-injection cases may use in-process handlers when that is the
+# cleaner seam.
+
+x_case_runner: &case_runner |
+  #!/usr/bin/env python3
+  from __future__ import annotations
+
+  import importlib.util
+  import sys
+  from pathlib import Path
+
+  def main() -> int:
+      if len(sys.argv) != 2:
+          print("usage: case_runner.py <target_script>", file=sys.stderr)
+          return 2
+
+      work_dir = Path.cwd()
+      target = Path(sys.argv[1]).resolve()
+
+      spec = importlib.util.spec_from_file_location(
+          "runtime_checker_under_test",
+          target,
+      )
+      if spec is None or spec.loader is None:
+          print(f"failed to load target: {{target}}", file=sys.stderr)
+          return 2
+
+      module = importlib.util.module_from_spec(spec)
+      sys.modules[spec.name] = module
+      spec.loader.exec_module(module)
+
+      module.DTS_PATH = work_dir / "device_tree.dts"
+      module.MEMMAP_PATH = work_dir / "memmap.log"
+      module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+      module._LOG_FH = None
+
+      try:
+          module.main()
+      except SystemExit as exc:
+          code = exc.code
+          if isinstance(code, int):
+              return code
+          return 1
+
+      log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+      if log_path.exists():
+          print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+      return 0
+
+  if __name__ == "__main__":
+      raise SystemExit(main())
+
+x_cli_case_base: &cli_case_base
+  type: cli
+  command: "{dir}/case_runner.py"
+  args:
+    - "{file}"
+  expect_exit_code: 0
+  scripts:
+    case_runner.py: *case_runner
+
+suites:
+  - name: runtime_device_mapping_conflict_checker
+    files:
+      - common/linux_scripts/runtime_device_mapping_conflict_checker.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+        description: "Verify that the runtime device mapping conflict checker script exists."
+
+      - name: python_compiles
+        type: py_compile
+        description: "Ensure that the script compiles successfully as valid Python."
+
+      - name: has_main_guard
+        type: main_guard
+        description: "Check that the script contains a standard __main__ guard."
+
+      - name: cli_missing_both_inputs_warns
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+        expect_output:
+          - "DEBUG: DTS file not found"
+          - "RESULTS: WARNINGS"
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+
+      - name: cli_missing_memmap_warns
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+        expect_output:
+          - "DEBUG: Memmap file not found"
+          - "RESULTS: WARNINGS"
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+
+      - name: cli_non_overlapping_regions_pass
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x1000-0x1fff 1 0
+            RT_Data 0x5000-0x5fff 1 0
+        expect_output:
+          - "All UEFI Memmap segments CHECKED"
+          - "All DTS MMIO ranges CHECKED"
+          - "Total segments checked: 2"
+          - "Total DTS ranges checked: 1"
+          - "No overlaps found between UEFI runtime regions and DTS MMIO ranges"
+          - "RESULTS: PASSED"
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+
+      - name: cli_overlapping_regions_fail
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "RESULTS: FAILED"
+          - "overlaps DTS /soc/uart@3000"
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+
+      - name: cli_disabled_node_is_ignored
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  status = "disabled";
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+
+      - name: cli_disabled_ancestor_is_ignored
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                status = "disabled";
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                uart@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_mmap_reg_name_is_ignored
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                flash@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>;
+                  reg-names = "mmap";
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+
+      - name: cli_reg_names_with_mmap_and_register_block_skips_only_mmap
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                flash@3000 {
+                  reg = <0x0 0x3000 0x0 0x100  0x0 0x4000 0x0 0x100>;
+                  reg-names = "ctrl\0mmap";
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "Total DTS ranges checked: 1"
+          - "/soc/flash@3000<ctrl>"
+          - "RESULTS: FAILED"
+
+      - name: cli_parent_offset_translation_detects_conflict
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                syscon@4000 {
+                  reg = <0x0 0x4000 0x0 0x1000>;
+
+                  efuse@100 {
+                    reg = <0x0 0x100 0x0 0x20>;
+                  };
+                };
+              };
+            };
+          memmap: |
+            RT_Data 0x4100-0x411f 1 0
+        expect_output:
+          - "RESULTS: FAILED"
+          - "/soc/syscon@4000/efuse@100"
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+
+      - name: cli_ranges_translation_detects_conflict
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                bus@0 {
+                  #address-cells = <2>;
+                  #size-cells = <2>;
+                  ranges = <0x0 0x0 0x0 0x8000 0x0 0x10000>;
+
+                  uart@2000 {
+                    reg = <0x0 0x2000 0x0 0x100>;
+                  };
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0xA000-0xA0FF 1 0
+        expect_output:
+          - "RESULTS: FAILED"
+          - "[T] /soc/bus@0/uart@2000"
+
+      - name: cli_no_matching_range_skips_node_and_passes
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                bus@0 {
+                  #address-cells = <2>;
+                  #size-cells = <2>;
+                  ranges = <0x0 0x0 0x0 0x8000 0x0 0x1000>;
+
+                  uart@3000 {
+                    reg = <0x0 0x3000 0x0 0x100>;
+                  };
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0xB000-0xB0FF 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_reserved_memory_is_ignored
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              reserved-memory {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                carveout@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_memory_node_is_ignored
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              memory@80000000 {
+                device_type = "memory";
+                reg = <0x0 0x80000000 0x0 0x100000>;
+              };
+            };
+          memmap: |
+            RT_Code 0x80000000-0x80000fff 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_storage_like_node_is_ignored
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              spi@3000 {
+                compatible = "jedec,spi-nor";
+                reg = <0x0 0x3000 0x0 0x100>;
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_utf16_memmap_is_parsed
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+          memmap_hex: "fffe520054005f0043006f006400650020003000780031003000300030002d0030007800310066006600660020003100200030000a00"
+        expect_output:
+          - "Total segments checked: 1"
+          - "RESULTS: PASSED"
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+
+      - name: cli_malformed_memmap_line_is_logged
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@9000 {
+                  reg = <0x0 0x9000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code badline
+            RT_Data 0x1000-0x1fff 1 0
+        expect_output:
+          - "Skipped malformed memmap line"
+          - "Skipped 1 malformed lines from memmap"
+          - "RESULTS: PASSED"
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+
+      - name: cli_deduplicates_identical_memmap_entries
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@9000 {
+                  reg = <0x0 0x9000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Data 0x1000-0x1fff 1 0
+            RT_Data 0x1000-0x1fff 1 0
+        expect_output:
+          - "Total segments checked: 1"
+          - "RESULTS: PASSED"
+
+      - name: cli_hex_without_0x_in_memmap_is_accepted
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@4096 {
+                  reg = <0x0 0x4096 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 1000-10ff 1 0
+        expect_output:
+          - "Total segments checked: 1"
+          - "RESULTS: PASSED"
+
+      - name: cli_symbolic_reg_cells_known_limitation
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  reg = <BASE_HI BASE_LO 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_multiline_reg_property_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  reg = <
+                    0x0 0x3000
+                    0x0 0x100
+                  >;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "INFO: No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_multiline_ranges_property_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                bus@0 {
+                  #address-cells = <2>;
+                  #size-cells = <2>;
+                  ranges = <
+                    0x0 0x0
+                    0x0 0x8000
+                    0x0 0x10000
+                  >;
+
+                  uart@2000 {
+                    reg = <0x0 0x2000 0x0 0x100>;
+                  };
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0xA000-0xA0FF 1 0
+        expect_output:
+          - "Total DTS ranges checked: 1"
+          - "INFO: [T] /soc/bus@0/uart@2000"
+          - "RESULTS: PASSED"
+
+      - name: cli_multiline_reg_names_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                flash@3000 {
+                  reg = <0x0 0x3000 0x0 0x100 0x0 0x4000 0x0 0x100>;
+                  reg-names =
+                    "ctrl\0mmap";
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "Total DTS ranges checked: 2"
+          - "Detected 1 conflict(s)"
+          - "RESULTS: FAILED"
+
+      - name: cli_multiline_quoted_compatible_property_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              spi@3000 {
+                compatible =
+                  "jedec,spi-nor";
+                reg = <0x0 0x3000 0x0 0x100>;
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "Total DTS ranges checked: 1"
+          - "Detected 1 conflict(s)"
+          - "RESULTS: FAILED"
+
+      - name: cli_multiline_status_property_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  status =
+                    "disabled";
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "Total DTS ranges checked: 1"
+          - "Detected 1 conflict(s)"
+          - "RESULTS: FAILED"
+
+      - name: cli_multiline_device_type_memory_property_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              memory@80000000 {
+                device_type =
+                  "memory";
+                reg = <0x0 0x80000000 0x0 0x100000>;
+              };
+            };
+          memmap: |
+            RT_Code 0x80000000-0x80000fff 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_ranges_with_incomplete_cell_tuple_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                bus@0 {
+                  #address-cells = <2>;
+                  #size-cells = <2>;
+                  ranges = <0x0 0x0 0x0 0x8000 0x0>;
+
+                  uart@2000 {
+                    reg = <0x0 0x2000 0x0 0x100>;
+                  };
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0xA000-0xA0FF 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_ranges_with_extra_trailing_cells_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                bus@0 {
+                  #address-cells = <2>;
+                  #size-cells = <2>;
+                  ranges = <0x0 0x0 0x0 0x8000 0x0 0x10000 0xdeadbeef>;
+
+                  uart@2000 {
+                    reg = <0x0 0x2000 0x0 0x100>;
+                  };
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0xA000-0xA0FF 1 0
+        expect_output:
+          - "Total DTS ranges checked: 1"
+          - "Detected 1 conflict(s)"
+          - "RESULTS: FAILED"
+
+      - name: cli_parent_reg_multiple_windows_offset_heuristic_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                syscon@4000 {
+                  reg = <0x0 0x4000 0x0 0x100 0x0 0x8000 0x0 0x100>;
+
+                  efuse@80 {
+                    reg = <0x0 0x80 0x0 0x20>;
+                  };
+                };
+              };
+            };
+          memmap: |
+            RT_Data 0x4080-0x409f 1 0
+        expect_output:
+          - "/soc/syscon@4000/efuse@80"
+          - "Detected 2 conflict(s)"
+          - "RESULTS: FAILED"
+
+      - name: cli_reg_names_count_mismatch_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                flash@3000 {
+                  reg = <0x0 0x3000 0x0 0x100 0x0 0x4000 0x0 0x100>;
+                  reg-names = "mmap";
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x4000-0x40ff 1 0
+        expect_output:
+          - "Total DTS ranges checked: 1"
+          - "Detected 1 conflict(s)"
+          - "RESULTS: FAILED"
+
+      - name: cli_uppercase_disabled_status_value_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  status = "DISABLED";
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "No DTS MMIO ranges extracted."
+          - "RESULTS: PASSED"
+
+      - name: cli_ranges_present_but_empty_cells_warning
+        <<: *cli_case_base
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+
+                bus@0 {
+                  #address-cells = <2>;
+                  #size-cells = <2>;
+                  ranges = <>;
+
+                  uart@2000 {
+                    reg = <0x0 0x2000 0x0 0x100>;
+                  };
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0xA000-0xA0FF 1 0
+        expect_output:
+          - "Total DTS ranges checked: 1"
+          - "INFO: [T] /soc/bus@0/uart@2000"
+          - "RESULTS: PASSED"
+
+      - name: cli_comments_are_stripped_before_parse
+        <<: *cli_case_base
+        scenario:
+          kind: runtime_device_mapping
+          dts: |
+            /dts-v1/;
+            /* block comment */
+            / {
+              soc {
+                #address-cells = <2>; // inline comment
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>; // end of line comment
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x3000-0x30ff 1 0
+        expect_output:
+          - "Total DTS ranges checked: 1"
+          - "RESULTS: FAILED"
+
+      # Native fault-injection cases stay declarative through scenario flags.
+
+      - name: cli_missing_dts_file_is_warned_natively
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          missing_dts: true
+          memmap: |
+            RT_Code 0x1000-0x1fff 1 0
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+          - type: file_contains
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+            text: "DEBUG: DTS file not found:"
+          - type: file_contains
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+            text: "RESULTS: WARNINGS"
+
+      - name: cli_missing_memmap_file_is_warned_natively
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: runtime_device_mapping
+          missing_memmap: true
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+        post_checks:
+          - type: exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+          - type: file_contains
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+            text: "DEBUG: Memmap file not found:"
+          - type: file_contains
+            path: "{dir}/runtime_device_mapping_conflict_test.log"
+            text: "RESULTS: WARNINGS"
+
+      - name: cli_mock_log_open_failure_warning
+        type: py_function
+        warn_only: true
+        function: main
+        description: "Document the current behavior where opening the runtime checker log aborts the run before any warning summary is written."
+        scenario:
+          kind: runtime_device_mapping
+          log_open_error: mocked log open failure
+          dts: |
+            /dts-v1/;
+            / {
+              soc {
+                #address-cells = <2>;
+                #size-cells = <2>;
+                ranges;
+                uart@3000 {
+                  reg = <0x0 0x3000 0x0 0x100>;
+                };
+              };
+            };
+          memmap: |
+            RT_Code 0x1000-0x1fff 1 0
+        expect_exception: OSError
+        post_checks:
+          - type: not_exists
+            path: "{dir}/runtime_device_mapping_conflict_test.log"

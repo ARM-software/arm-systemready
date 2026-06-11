@@ -1,0 +1,2 @@
+NAME="Ubuntu"
+VERSION_ID="22.04"

@@ -1,0 +1,2 @@
+NAME="SUSE Linux Enterprise Server"
+VERSION_ID="15"

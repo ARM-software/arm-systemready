@@ -1,0 +1,26 @@
+================================================================================
+TEST CASE: merge_jsons::merge_jsons.py::sbmr_ib_presence_promotes_missing_oob_to_mandatory_in_sr
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_jsons.py /home/vepav01/arm-systemready/common/reports/_work/merge_jsons/merge_jsons/15_sbmr_ib_presence_promotes_missing_oob_to_mandatory_in_sr/merged.json /home/vepav01/arm-systemready/common/reports/_work/merge_jsons/merge_jsons/15_sbmr_ib_presence_promotes_missing_oob_to_mandatory_in_sr/acs_info.json /home/vepav01/arm-systemready/common/reports/_work/merge_jsons/merge_jsons/15_sbmr_ib_presence_promotes_missing_oob_to_mandatory_in_sr/sbmr_ib.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+[91mSuite: Mandatory  : OS_TEST: Not Compliant: not run[0m
+[91mSuite: Mandatory  : SBMR-OOB: Not Compliant: not run[0m
+Suite: Recommended: SBSA: Not Run
+Suite: Mandatory  : SBMR-IB: Compliant
+[91mSuite: Mandatory  : SCT: Not Compliant: not run[0m
+Suite: Extension  : BBSR-SCT: Not Run
+Suite: Extension  : BBSR-TPM: Not Run
+Suite: Extension  : BBSR-FWTS: Not Run
+[91mSuite: Mandatory  : BSA: Not Compliant: not run[0m
+[91mSuite: Mandatory  : FWTS: Not Compliant: not run[0m
+
+[91mSRS requirements compliance result: Not Compliant : Mandatory - (not run: OS_TEST, SBMR-OOB, SCT, BSA, FWTS) : Recommended - (not run: SBSA)[0m
+
+BBSR compliance results: Not run
+--- STDERR ---

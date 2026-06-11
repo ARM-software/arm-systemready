@@ -1,0 +1,16 @@
+{
+    "System Info": {
+        "Firmware Version": "FW-3.0",
+        "SoC Family": "FamilyC",
+        "System Name": "BoardC",
+        "Vendor": "VendorC",
+        "Summary Generated On": "2026-06-11 09:32:19",
+        "Band": "SystemReady Band",
+        "ACS version": "7.0",
+        "BMC Firmware Version": "Unknown"
+    },
+    "ACS Results Summary": {
+        "Band": "SystemReady Band",
+        "Date": "2026-06-11 09:32:19"
+    }
+}

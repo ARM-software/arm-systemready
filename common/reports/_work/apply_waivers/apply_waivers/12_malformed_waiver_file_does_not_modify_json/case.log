@@ -1,0 +1,16 @@
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::malformed_waiver_file_does_not_modify_json
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/12_malformed_waiver_file_does_not_modify_json/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/12_malformed_waiver_file_does_not_modify_json/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+INFO: Failed to read or parse /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/12_malformed_waiver_file_does_not_modify_json/waiver.json: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/12_malformed_waiver_file_does_not_modify_json/fwts.json contains 'WITH WAIVER' -> PASS

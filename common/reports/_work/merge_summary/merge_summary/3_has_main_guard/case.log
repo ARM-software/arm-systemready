@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: merge_summary::merge_summary.py::has_main_guard
+STATUS: PASS
+MESSAGE: Main guard found

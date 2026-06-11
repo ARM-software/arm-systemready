@@ -1,0 +1,6 @@
+================================================================================
+TEST CASE: logs_to_json_common::logs_to_json_edk2.py::contains_output_logic
+STATUS: PASS
+MESSAGE: At least one pattern matched
+
+Matched patterns: json.dump

@@ -1,0 +1,343 @@
+suites:
+  - name: parser_common
+    files:
+      - common/parser/Parser.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: has_main_guard
+        type: main_guard
+
+      - name: cli_help_flag_shows_usage_and_flags
+        type: cli
+        args:
+          - --help
+        expect_exit_code: 0
+        expect_output:
+          - "usage:"
+          - "-bsa"
+          - "-sbsa"
+          - "-fwts"
+          - "-automation"
+          - "--config"
+
+      - name: cli_no_args_prints_invalid_command_message
+        type: cli
+        args: []
+        scripts:
+          config.ini: |
+            [AUTOMATION]
+            config_enabled_for_automation_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "Please specify a valid command or use --help for more information."
+
+      - name: cli_bsa_disabled_or_missing_section_returns_message
+        type: cli
+        args:
+          - -bsa
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [AUTOMATION]
+            config_enabled_for_automation_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "BSA section is disabled or missing."
+
+      - name: cli_bsa_enabled_builds_full_command
+        type: cli
+        args:
+          - -bsa
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [BSA]
+            automation_bsa_run = true
+            bsa_level = 3
+            bsa_skip_rules = rule1,rule2
+            bsa_verbose = 1
+        expect_exit_code: 0
+        expect_output:
+          - "/bin/bsa"
+          - "-l 3"
+          - "--skip rule1,rule2"
+          - "-v 1"
+
+      - name: cli_bsa_enabled_with_only_required_flag_prints_base_command
+        type: cli
+        args:
+          - -bsa
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [BSA]
+            automation_bsa_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "/bin/bsa"
+
+      - name: cli_sbsa_disabled_or_missing_section_returns_message
+        type: cli
+        args:
+          - -sbsa
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [AUTOMATION]
+            config_enabled_for_automation_run = false
+        expect_exit_code: 0
+        expect_output:
+          - "SBSA section is disabled or missing."
+
+      - name: cli_sbsa_enabled_builds_full_command
+        type: cli
+        args:
+          - -sbsa
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [SBSA]
+            automation_sbsa_run = true
+            sbsa_level = 4
+            sbsa_skip_rules = skip_a,skip_b
+            sbsa_verbose = 2
+        expect_exit_code: 0
+        expect_output:
+          - "/bin/sbsa"
+          - "-l 4"
+          - "--skip skip_a,skip_b"
+          - "-v 2"
+
+      - name: cli_sbsa_enabled_with_only_required_flag_prints_base_command
+        type: cli
+        args:
+          - -sbsa
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [SBSA]
+            automation_sbsa_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "/bin/sbsa"
+
+      - name: cli_fwts_disabled_or_missing_section_returns_message
+        type: cli
+        args:
+          - -fwts
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [AUTOMATION]
+            config_enabled_for_automation_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "FWTS section is disabled or missing."
+
+      - name: cli_fwts_enabled_builds_module_command
+        type: cli
+        args:
+          - -fwts
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [FWTS]
+            automation_fwts_run = true
+            fwts_modules = acpi
+        expect_exit_code: 0
+        expect_output:
+          - "fwts acpi"
+
+      - name: cli_fwts_enabled_without_module_prints_base_command
+        type: cli
+        args:
+          - -fwts
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [FWTS]
+            automation_fwts_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "fwts"
+
+      - name: cli_automation_true_prints_true
+        type: cli
+        args:
+          - -automation
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [AUTOMATION]
+            config_enabled_for_automation_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "True"
+
+      - name: cli_automation_false_prints_false
+        type: cli
+        args:
+          - -automation
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [AUTOMATION]
+            config_enabled_for_automation_run = false
+        expect_exit_code: 0
+        expect_output:
+          - "False"
+
+      - name: cli_automation_missing_section_reports_missing_and_false
+        type: cli
+        args:
+          - -automation
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [BSA]
+            automation_bsa_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "Section AUTOMATION is missing in the configuration file."
+          - "False"
+
+      - name: cli_automation_bsa_run_true_prints_true
+        type: cli
+        args:
+          - -automation_bsa_run
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [BSA]
+            automation_bsa_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "True"
+
+      - name: cli_automation_bsa_run_missing_section_reports_missing_and_false
+        type: cli
+        args:
+          - -automation_bsa_run
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [AUTOMATION]
+            config_enabled_for_automation_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "Section BSA is missing in the configuration file."
+          - "False"
+
+      - name: cli_automation_sbsa_run_false_prints_false
+        type: cli
+        args:
+          - -automation_sbsa_run
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [SBSA]
+            automation_sbsa_run = false
+        expect_exit_code: 0
+        expect_output:
+          - "False"
+
+      - name: cli_automation_fwts_run_true_prints_true
+        type: cli
+        args:
+          - -automation_fwts_run
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [FWTS]
+            automation_fwts_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "True"
+
+      - name: cli_automation_bbsr_fwts_run_true_prints_true
+        type: cli
+        args:
+          - -automation_bbsr_fwts_run
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [BBSR_FWTS]
+            automation_bbsr_fwts_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "True"
+
+      - name: cli_automation_bbsr_tpm_run_false_prints_false
+        type: cli
+        args:
+          - -automation_bbsr_tpm_run
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [BBSR_TPM]
+            automation_bbsr_tpm_run = false
+        expect_exit_code: 0
+        expect_output:
+          - "False"
+
+      - name: cli_automation_sbmr_in_band_run_true_prints_true
+        type: cli
+        args:
+          - -automation_sbmr_in_band_run
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [SBMR]
+            automation_sbmr_in_band_run = true
+        expect_exit_code: 0
+        expect_output:
+          - "True"
+
+      - name: cli_invalid_boolean_in_bsa_section_fails
+        type: cli
+        args:
+          - -bsa
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [BSA]
+            automation_bsa_run = maybe
+        expect_exit_nonzero: true
+
+      - name: cli_invalid_boolean_in_automation_check_fails
+        type: cli
+        args:
+          - -automation
+          - --config
+          - "{dir}/config.ini"
+        scripts:
+          config.ini: |
+            [AUTOMATION]
+            config_enabled_for_automation_run = maybe
+        expect_exit_nonzero: true

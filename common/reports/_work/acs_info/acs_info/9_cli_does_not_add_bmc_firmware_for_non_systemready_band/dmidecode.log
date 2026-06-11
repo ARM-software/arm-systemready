@@ -1,0 +1,9 @@
+Handle 0x0000, DMI type 0, 24 bytes
+BIOS Information
+    Version: FW-6.0
+
+Handle 0x0001, DMI type 1, 27 bytes
+System Information
+    Manufacturer: VendorF
+    Product Name: BoardF
+    Family: FamilyF

@@ -1,0 +1,2 @@
+Band: SystemReady Band
+ACS version: 6.1

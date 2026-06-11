@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::has_main_guard
+STATUS: PASS
+MESSAGE: Main guard found

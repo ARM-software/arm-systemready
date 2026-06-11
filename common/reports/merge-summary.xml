@@ -1,0 +1,252 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="merge-summary" tests="15" failures="0" errors="0" skipped="0"><properties><property name="yaml_file" value="common/test_yaml/merge-summary.yaml" /><property name="passed" value="15" /><property name="warnings" value="0" /></properties><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::file_exists" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::python_compiles" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::has_main_guard" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_no_args_fails" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+usage: merge_summary.py [-h]
+                        input_file_paths [input_file_paths ...]
+                        merged_file_path
+merge_summary.py: error: the following arguments are required: input_file_paths, merged_file_path</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_one_arg_fails" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/5_cli_one_arg_fails/bsa_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+usage: merge_summary.py [-h]
+                        input_file_paths [input_file_paths ...]
+                        merged_file_path
+merge_summary.py: error: the following arguments are required: merged_file_path</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_missing_input_file_fails" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/6_cli_missing_input_file_fails/missing_bsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/6_cli_missing_input_file_fails/missing_fwts_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/6_cli_missing_input_file_fails/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 51, in &lt;module&gt;
+    merge_files(args.input_file_paths, args.merged_file_path)
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 29, in merge_files
+    file_extension, content = read_file(file_path)
+                              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 22, in read_file
+    with open(file_path, "r") as file:
+         ^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/6_cli_missing_input_file_fails/missing_bsa_summary.html'</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_merges_two_files_into_output" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/7_cli_merges_two_files_into_output/bsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/7_cli_merges_two_files_into_output/fwts_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/7_cli_merges_two_files_into_output/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_empty: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/7_cli_merges_two_files_into_output/acs_summary.html -&gt; PASS
+post_check ordered_contains: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/7_cli_merges_two_files_into_output/acs_summary.html -&gt; PASS</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_preserves_blank_lines_during_merge" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/8_cli_preserves_blank_lines_during_merge/acs_results.log /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/8_cli_preserves_blank_lines_during_merge/extensions.log /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/8_cli_preserves_blank_lines_during_merge/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check regex: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/8_cli_preserves_blank_lines_during_merge/acs_summary.html matches 'Suite_Name: acs_info\\n\\nOverall Compliance Result: Compliant' -&gt; PASS</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_output_file_is_created_when_inputs_exist" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/9_cli_output_file_is_created_when_inputs_exist/sbsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/9_cli_output_file_is_created_when_inputs_exist/scmi_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/9_cli_output_file_is_created_when_inputs_exist/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/9_cli_output_file_is_created_when_inputs_exist/acs_summary.html -&gt; PASS</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_handles_empty_first_input" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/10_cli_handles_empty_first_input/empty_bsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/10_cli_handles_empty_first_input/os_tests_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/10_cli_handles_empty_first_input/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/10_cli_handles_empty_first_input/acs_summary.html contains 'OS tests payload marker' -&gt; PASS</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_handles_both_inputs_empty" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/11_cli_handles_both_inputs_empty/empty_bsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/11_cli_handles_both_inputs_empty/empty_fwts_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/11_cli_handles_both_inputs_empty/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/11_cli_handles_both_inputs_empty/acs_summary.html -&gt; PASS</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_missing_second_input_fails_even_if_first_exists" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/12_cli_missing_second_input_fails_even_if_first_exists/bsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/12_cli_missing_second_input_fails_even_if_first_exists/fwts_summary_missing.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/12_cli_missing_second_input_fails_even_if_first_exists/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 51, in &lt;module&gt;
+    merge_files(args.input_file_paths, args.merged_file_path)
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 29, in merge_files
+    file_extension, content = read_file(file_path)
+                              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 22, in read_file
+    with open(file_path, "r") as file:
+         ^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/12_cli_missing_second_input_fails_even_if_first_exists/fwts_summary_missing.html'</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_overwrites_existing_output_file" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/bsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/fwts_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/acs_summary.html contains 'BSA fresh marker' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/acs_summary.html contains 'FWTS fresh marker' -&gt; PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/13_cli_overwrites_existing_output_file/acs_summary.html contains 'stale ACS summary content' -&gt; PASS</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_binary_or_non_utf8_input_fails_cleanly" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/14_cli_binary_or_non_utf8_input_fails_cleanly/corrupt_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/14_cli_binary_or_non_utf8_input_fails_cleanly/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 51, in &lt;module&gt;
+    merge_files(args.input_file_paths, args.merged_file_path)
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 29, in merge_files
+    file_extension, content = read_file(file_path)
+                              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 23, in read_file
+    return file_extension, file.read()
+                           ^^^^^^^^^^^
+  File "&lt;frozen codecs&gt;", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte</system-out></testcase><testcase classname="common_log_parser_merge_summary.py" name="merge_summary::merge_summary.py::cli_output_parent_directory_missing_fails" file="common/log_parser/merge_summary.py"><system-out>file=common/log_parser/merge_summary.py
+suite=merge_summary
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/15_cli_output_parent_directory_missing_fails/bsa_summary.html /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/15_cli_output_parent_directory_missing_fails/missing_dir/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 51, in &lt;module&gt;
+    merge_files(args.input_file_paths, args.merged_file_path)
+  File "/home/vepav01/arm-systemready/common/log_parser/merge_summary.py", line 33, in merge_files
+    with open(merged_file_path, "w") as merged_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/15_cli_output_parent_directory_missing_fails/missing_dir/acs_summary.html'</system-out></testcase></testsuite>

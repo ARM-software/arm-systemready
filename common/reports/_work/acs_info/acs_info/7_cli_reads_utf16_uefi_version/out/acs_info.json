@@ -1,0 +1,14 @@
+{
+    "System Info": {
+        "Firmware Version": "FW-4.0",
+        "SoC Family": "FamilyD",
+        "System Name": "BoardD",
+        "Vendor": "VendorD",
+        "Summary Generated On": "2026-06-11 09:32:19",
+        "UEFI Version": "UEFI v2.9"
+    },
+    "ACS Results Summary": {
+        "Band": "Unknown",
+        "Date": "2026-06-11 09:32:19"
+    }
+}

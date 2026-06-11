@@ -1,0 +1,18 @@
+================================================================================
+TEST CASE: capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::os_indications_without_capsule_support_bit_returns_2
+STATUS: PASS
+MESSAGE: Module main() check passed
+
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/capsule.log'
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/capsule.log contains 'INFO: OsIndicationsSupported value: 0x0' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/capsule.log contains 'INFO: Capsule on-disk reporting variables test is not applicable - SKIPPED' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_febeaab0/capsule.log contains 'Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED' -> PASS

@@ -1,0 +1,20 @@
+================================================================================
+TEST CASE: acs_info::acs_info.py::cli_generates_json_from_dmidecode_only
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/acs_info.py --dmidecode_log /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/4_cli_generates_json_from_dmidecode_only/dmidecode.log --output_dir /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/4_cli_generates_json_from_dmidecode_only/out
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/4_cli_generates_json_from_dmidecode_only/out/acs_info.json -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/4_cli_generates_json_from_dmidecode_only/out/acs_info.json contains '"Vendor": "VendorA"' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/4_cli_generates_json_from_dmidecode_only/out/acs_info.json contains '"System Name": "BoardA"' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/4_cli_generates_json_from_dmidecode_only/out/acs_info.json contains '"SoC Family": "FamilyA"' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/4_cli_generates_json_from_dmidecode_only/out/acs_info.json contains '"Firmware Version": "FW-1.2.3"' -> PASS

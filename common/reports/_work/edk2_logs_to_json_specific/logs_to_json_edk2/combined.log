@@ -1,0 +1,66 @@
+====================================================================================================
+RUN START: 2026-06-11 09:32:28
+YAML: common/test_yaml/logs-to-json.yaml
+SUITE: edk2_logs_to_json_specific
+TARGETS: common/log_parser/bbr/sct/logs_to_json_edk2.py
+====================================================================================================
+
+================================================================================
+TEST CASE: edk2_logs_to_json_specific::logs_to_json_edk2.py::has_edk2_parse_logic
+STATUS: PASS
+MESSAGE: All patterns matched
+
+================================================================================
+TEST CASE: edk2_logs_to_json_specific::logs_to_json_edk2.py::has_edk2_keyword
+STATUS: PASS
+MESSAGE: All patterns matched
+
+================================================================================
+TEST CASE: edk2_logs_to_json_specific::logs_to_json_edk2.py::cli_missing_input_file_fails
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/bbr/sct/logs_to_json_edk2.py /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/4_cli_missing_input_file_fails/missing.log /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/4_cli_missing_input_file_fails/out.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Error: File not found: /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/4_cli_missing_input_file_fails/missing.log
+
+================================================================================
+TEST CASE: edk2_logs_to_json_specific::logs_to_json_edk2.py::cli_requires_two_args
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/bbr/sct/logs_to_json_edk2.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+usage: logs_to_json_edk2.py [-h] input_file output_file
+logs_to_json_edk2.py: error: the following arguments are required: input_file, output_file
+
+================================================================================
+TEST CASE: edk2_logs_to_json_specific::logs_to_json_edk2.py::cli_parses_markdown_table_to_json
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/log_parser/bbr/sct/logs_to_json_edk2.py
+Shell mode: no
+Timeout seconds: 5
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_empty: /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/5_cli_parses_markdown_table_to_json/out.json -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/5_cli_parses_markdown_table_to_json/out.json contains 'AAAA-BBBB' -> PASS
+

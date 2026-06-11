@@ -1,0 +1,20 @@
+{
+  "Suites": [
+    {
+      "Suite": "FWTS",
+      "TestSuites": [
+        {
+          "TestSuite": "DemoSuite",
+          "TestCase": {
+            "SubTests": [
+              {
+                "sub_Test_Description": "something",
+                "Reason": "Description-based waiver"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

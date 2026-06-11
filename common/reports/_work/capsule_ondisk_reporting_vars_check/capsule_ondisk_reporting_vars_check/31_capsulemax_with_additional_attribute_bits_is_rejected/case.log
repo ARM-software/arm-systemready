@@ -1,0 +1,16 @@
+================================================================================
+TEST CASE: capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::capsulemax_with_additional_attribute_bits_is_rejected
+STATUS: PASS
+MESSAGE: Module main() check passed
+
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291
+Created directory: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291/efivars
+Patched constant: EFIVAR_PATH='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291/efivars'
+Patched constant: LOG_FILE='/home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291/log.txt'
+Exit code: 3
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_32486291/log.txt contains 'Status - WARNING' -> PASS

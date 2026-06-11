@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::file_exists
+STATUS: PASS
+MESSAGE: File exists

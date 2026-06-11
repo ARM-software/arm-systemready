@@ -1,0 +1,13 @@
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_no_args_fails
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: python3 /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Usage: python3 verify_tpm_measurements.py <path to pcr.log> <path to eventlog.log>
+--- STDERR ---

@@ -1,0 +1,1 @@
+findmnt -n /dev/sda1

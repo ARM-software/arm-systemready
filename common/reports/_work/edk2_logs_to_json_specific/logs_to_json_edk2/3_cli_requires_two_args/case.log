@@ -1,0 +1,15 @@
+================================================================================
+TEST CASE: edk2_logs_to_json_specific::logs_to_json_edk2.py::cli_requires_two_args
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/bbr/sct/logs_to_json_edk2.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+usage: logs_to_json_edk2.py [-h] input_file output_file
+logs_to_json_edk2.py: error: the following arguments are required: input_file, output_file

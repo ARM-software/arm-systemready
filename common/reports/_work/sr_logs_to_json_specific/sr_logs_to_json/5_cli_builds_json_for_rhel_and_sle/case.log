@@ -1,0 +1,18 @@
+================================================================================
+TEST CASE: sr_logs_to_json_specific::sr_logs_to_json.py::cli_builds_json_for_rhel_and_sle
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/log_parser/os_tests/sr_logs_to_json.py
+Shell mode: no
+Timeout seconds: 5
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_empty: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/5_cli_builds_json_for_rhel_and_sle/out.json -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/5_cli_builds_json_for_rhel_and_sle/out.json contains 'Red Hat Enterprise Linux 9.3' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/5_cli_builds_json_for_rhel_and_sle/out.json contains 'SLES 15' -> PASS

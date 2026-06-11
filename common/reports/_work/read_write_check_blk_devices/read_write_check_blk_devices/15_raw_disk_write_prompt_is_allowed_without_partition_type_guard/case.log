@@ -1,0 +1,44 @@
+================================================================================
+TEST CASE: read_write_check_blk_devices::read_write_check_blk_devices.py::raw_disk_write_prompt_is_allowed_without_partition_type_guard
+STATUS: PASS
+MESSAGE: Module main() check passed
+
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_5fc5fca9
+Exit code: 0
+--- STDOUT ---
+
+********************************************************************************************************************************
+
+                                                    Read block devices tool
+
+********************************************************************************************************************************
+
+INFO: Detected following block devices with lsblk command :
+0: sda
+
+********************************************************************************************************************************
+
+INFO: Block device : /dev/sda
+INFO: No valid partition table found for sda, treating as raw device.
+INFO: Partition table type : RAW
+
+INFO: No partitions detected for sda, treating as raw device.
+INFO: Performing block read on /dev/sda
+INFO: Block read on /dev/sda successful
+INFO: Creating backup of the current block before write check...
+INFO: Writing test data to the device for write check...
+INFO: Reading back the test data for verification...
+Original SHA256: 5ba5b889a62d98368222cef5e53305af9da2960ad6ecab48271a293d3337fb92
+Read-back SHA256: 5ba5b889a62d98368222cef5e53305af9da2960ad6ecab48271a293d3337fb92
+INFO: write check passed on /dev/sda.
+INFO: Restoring the backup to the device after write check...
+INFO: Backup restored for /dev/sda.
+
+********************************************************************************************************************************
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check ordered_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_5fc5fca9/blk_commands.log -> PASS
+post_check not_exists: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_5fc5fca9/hello.txt -> PASS
+post_check not_exists: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_5fc5fca9/read_hello.txt -> PASS
+post_check not_exists: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_5fc5fca9/sda_backup.bin -> PASS

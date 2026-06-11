@@ -1,0 +1,16 @@
+================================================================================
+TEST CASE: merge_summary::merge_summary.py::cli_preserves_blank_lines_during_merge
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_summary.py /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/8_cli_preserves_blank_lines_during_merge/acs_results.log /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/8_cli_preserves_blank_lines_during_merge/extensions.log /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/8_cli_preserves_blank_lines_during_merge/acs_summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check regex: /home/vepav01/arm-systemready/common/reports/_work/merge_summary/merge_summary/8_cli_preserves_blank_lines_during_merge/acs_summary.html matches 'Suite_Name: acs_info\\n\\nOverall Compliance Result: Compliant' -> PASS

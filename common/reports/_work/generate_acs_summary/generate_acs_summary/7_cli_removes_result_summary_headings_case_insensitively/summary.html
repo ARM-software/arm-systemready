@@ -1,0 +1,444 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>ACS Summary</title>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                background-color: #f5f5f5;
+                color: #333;
+                margin: 0;
+                padding: 0;
+            }
+            .header {
+                background-color: #2c3e50;
+                color: white;
+                padding: 20px;
+                text-align: center;
+                font-size: 24px;
+            }
+            .container {
+                width: 80%;
+                margin: 40px auto;
+                padding: 20px;
+                background-color: #fff;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+            }
+            h1, h2 {
+                color: #2c3e50;
+                text-align: left;
+            }
+            .system-info, .acs-results-summary {
+                margin-bottom: 40px;
+                padding: 20px;
+                border-bottom: 1px solid #ddd;
+                text-align: left;
+            }
+            .system-info h2, .acs-results-summary h2 {
+                text-align: left;
+                color: #2c3e50;
+            }
+            .acs-results-summary table, .system-info table {
+                width: 100%;
+                table-layout: fixed;
+            }
+            .acs-results-summary table th, .system-info table th {
+                width: 320px;        /* set your fixed left column width */
+                vertical-align: top;
+                white-space: normal;
+            }
+            .summary-section {
+                margin-bottom: 40px;
+            }
+            .summary {
+                margin-bottom: 40px;
+                padding: 20px;
+                border-bottom: 1px solid #ddd;
+            }
+            .details-link {
+                text-align: center;
+                margin-top: 10px;
+            }
+            .details-link a {
+                color: #3498db;
+                text-decoration: none;
+                font-weight: bold;
+                padding: 10px 20px;
+                border: 2px solid #3498db;
+                border-radius: 5px;
+                display: inline-block;
+                transition: background-color 0.3s, color 0.3s;
+            }
+            .details-link a:hover {
+                background-color: #3498db;
+                color: white;
+            }
+            .dropdown {
+                text-align: center;
+                margin-bottom: 40px;
+                position: relative;
+                display: inline-block;
+            }
+            .dropdown button {
+                background-color: #3498db;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                background-color: #f9f9f9;
+                min-width: 220px;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 1;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+                text-align: left;
+            }
+            .dropdown-content a:hover {
+                background-color: #f1f1f1;
+            }
+            .dropdown:hover .dropdown-content {
+                display: block;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+            table, th, td {
+                border: 1px solid #ddd;
+            }
+            th, td {
+                padding: 12px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            ACS Summary
+        </div>
+        <div class="container">
+            <div class="system-info">
+                <h2>System Information</h2>
+                <table>
+                    <tr>
+                        <th>Vendor</th>
+                        <td>Unknown</td>
+                    </tr>
+                    <tr>
+                        <th>System</th>
+                        <td>Unknown</td>
+                    </tr>
+                    <tr>
+                        <th>SoC Family</th>
+                        <td>Unknown</td>
+                    </tr>
+                    <tr>
+                        <th>Firmware Version</th>
+                        <td>Unknown</td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <tr>
+                        <th>UEFI Version</th>
+                        <td>Not provided</td>
+                    </tr>
+                    
+                    
+                </table>
+            </div>
+            <div class="acs-results-summary">
+                <h2>ACS Results Summary</h2>
+                <table>
+                    <tr>
+                        <th>Band</th>
+                        <td>Unknown</td>
+                    </tr>
+                    <tr>
+                        <th>Date</th>
+                        <td>2026-06-11 09:32:20</td>
+                    </tr>
+                    <tr>
+                        <th rowspan="3">SRS requirements compliance results</th>
+                        <td style="
+                            color:
+                            
+                                black
+                            
+                        ">
+                            
+                            
+                                Unknown
+                            
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                </table>
+            </div>
+            <div class="acs-results-summary">
+                <h2>Extensions</h2>
+                <table>
+                    
+                    
+                    <tr>
+                        <th rowspan="1">BBSR compliance results</th>
+                        <td style="
+                            color:
+                            
+                                black
+                            
+                        ">
+                            
+                            
+                                Unknown
+                            
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                    
+                    <tr>
+                        <th rowspan="1">SCMI compliance results</th>
+                        <td style="
+                            color:
+                            
+                                black
+                            
+                        ">
+                            
+                            
+                                Unknown
+                            
+                        </td>
+                    </tr>
+                    
+                    
+                </table>
+            </div>
+            <div class="dropdown">
+                <button>Go to Summary</button>
+                <div class="dropdown-content">
+                    
+                    <a href="#bsa_summary">BSA Summary</a>
+                    
+                    
+                    <a href="#sbsa_summary">SBSA Summary</a>
+                    
+                    
+                    <a href="#fwts_summary">FWTS Summary</a>
+                    
+                    
+                    <a href="#sct_summary">SCT Summary</a>
+                    
+                    
+                    <a href="#scmi_summary">SCMI Summary</a>
+                    
+                    
+                    <a href="#sbmr_ib_summary">SBMR-IB Summary</a>
+                    
+                    
+                    <a href="#sbmr_oob_summary">SBMR-OOB Summary</a>
+                    
+                    
+                    <a href="#post_script_summary">POST-SCRIPT Summary</a>
+                    
+                    
+                    <a href="#standalone_summary">Standalone tests Summary</a>
+                    
+                    
+                    <a href="#bbsr_fwts_summary">BBSR-FWTS Summary</a>
+                    
+                    
+                    <a href="#bbsr_sct_summary">BBSR-SCT Summary</a>
+                    
+                    
+                    <a href="#pfdi_summary">PFDI Summary</a>
+                    
+                    
+                    <a href="#bbsr_tpm_summary">BBSR-TPM Summary</a>
+                    
+                    
+                    <a href="#OS_tests_summary">OS tests Summary</a>
+                    
+                </div>
+            </div>
+            <div class="summary-section">
+                <h2>Test Summaries</h2>
+                
+                <div class="summary" id="bsa_summary">
+                    <!DOCTYPE html>
+<html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BSA</div></body></html>
+
+                    <div class="details-link">
+                        <a href="bsa_detailed.html" target="_blank">Click here to go to the detailed summary for BSA</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="sbsa_summary">
+                    <!DOCTYPE html>
+<html><head><title>SBSA Test Summary</title></head><body><h1>SBSA Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sbsa</div></body></html>
+
+                    <div class="details-link">
+                        <a href="sbsa_detailed.html" target="_blank">Click here to go to the detailed summary for SBSA</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="fwts_summary">
+                    <!DOCTYPE html>
+<html><head><title>FWTS Test Summary</title></head><body><h1>FWTS Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>fwts</div></body></html>
+
+                    <div class="details-link">
+                        <a href="fwts_detailed.html" target="_blank">Click here to go to the detailed summary for FWTS</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="sct_summary">
+                    <!DOCTYPE html>
+<html><head><title>SCT Test Summary</title></head><body><h1>SCT Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sct</div></body></html>
+
+                    <div class="details-link">
+                        <a href="sct_detailed.html" target="_blank">Click here to go to the detailed summary for SCT</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="scmi_summary">
+                    <!DOCTYPE html>
+<html><head><title>SCMI Test Summary</title></head><body><h1>SCMI Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>scmi</div></body></html>
+
+                    <div class="details-link">
+                        <a href="scmi_detailed.html" target="_blank">Click here to go to the detailed summary for SCMI</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="sbmr_ib_summary">
+                    <!DOCTYPE html>
+<html><head><title>SBMR-IB Test Summary</title></head><body><h1>SBMR-IB Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sbmr_ib</div></body></html>
+
+                    <div class="details-link">
+                        <a href="sbmr_ib_detailed.html" target="_blank">Click here to go to the detailed summary for SBMR-IB</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="sbmr_oob_summary">
+                    <!DOCTYPE html>
+<html><head><title>SBMR-OOB Test Summary</title></head><body><h1>SBMR-OOB Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sbmr_oob</div></body></html>
+
+                    <div class="details-link">
+                        <a href="sbmr_oob_detailed.html" target="_blank">Click here to go to the detailed summary for SBMR-OOB</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="post_script_summary">
+                    <!DOCTYPE html>
+<html><head><title>Post-Script Test Summary</title></head><body><h1>POST-SCRIPT Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>post_script</div></body></html>
+
+                    <div class="details-link">
+                        <a href="post_script_detailed.html" target="_blank">Click here to go to the detailed summary for POST-SCRIPT</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="standalone_summary">
+                    <!DOCTYPE html>
+<html><head><title>Standalone Test Summary</title></head><body><h1>Standalone Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>standalone</div></body></html>
+
+                    <div class="details-link">
+                        <a href="standalone_tests_detailed.html" target="_blank">Click here to go to the detailed summary for Standalone tests</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="bbsr_fwts_summary">
+                    <!DOCTYPE html>
+<html><head><title>FWTS Test Summary</title></head><body><h1>BBSR-FWTS Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bbsr_fwts</div></body></html>
+
+                    <div class="details-link">
+                        <a href="bbsr_fwts_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-FWTS</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="bbsr_sct_summary">
+                    <!DOCTYPE html>
+<html><head><title>SCT Test Summary</title></head><body><h1>BBSR-SCT Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bbsr_sct</div></body></html>
+
+                    <div class="details-link">
+                        <a href="bbsr_sct_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-SCT</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="bbsr_tpm_summary">
+                    <!DOCTYPE html>
+<html><head><title>TPM Test Summary</title></head><body><h1>BBSR-TPM Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bbsr_tpm</div></body></html>
+
+                    <div class="details-link">
+                        <a href="bbsr_tpm_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-TPM</a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="pfdi_summary">
+                    <!DOCTYPE html>
+<html><head><title>PFDI Test Summary</title></head><body><h1>PFDI Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>pfdi</div></body></html>
+
+                    <div class="details-link">
+                        <a href="pfdi_detailed.html" target="_blank">
+                            Click here to go to the detailed summary for PFDI
+                        </a>
+                    </div>
+                </div>
+                
+                
+                <div class="summary" id="OS_tests_summary">
+                    <!DOCTYPE html>
+<html><head><title>OS Tests Test Summary</title></head><body><h1>OS Test Summary</h1><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>os_tests</div></body></html>
+
+                    <div class="details-link">
+                        <a href="os_tests_detailed.html" target="_blank">Click here to go to the detailed summary for OS Tests</a>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </body>
+    </html>
+    

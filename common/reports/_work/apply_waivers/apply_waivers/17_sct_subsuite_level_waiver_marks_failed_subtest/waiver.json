@@ -1,0 +1,16 @@
+{
+  "Suites": [
+    {
+      "Suite": "SCT",
+      "TestSuites": [
+        {
+          "TestSuite": "MainSuite",
+          "SubSuite": {
+            "SubSuite": "TargetSubSuite",
+            "Reason": "SCT subsuite waiver"
+          }
+        }
+      ]
+    }
+  ]
+}

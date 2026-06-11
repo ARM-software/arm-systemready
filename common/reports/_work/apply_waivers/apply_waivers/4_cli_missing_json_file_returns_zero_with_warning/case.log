@@ -1,0 +1,13 @@
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::cli_missing_json_file_returns_zero_with_warning
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/4_cli_missing_json_file_returns_zero_with_warning/missing.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+WARNING: Failed to read or parse /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/4_cli_missing_json_file_returns_zero_with_warning/missing.json: [Errno 2] No such file or directory: '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/4_cli_missing_json_file_returns_zero_with_warning/missing.json'
+--- STDERR ---

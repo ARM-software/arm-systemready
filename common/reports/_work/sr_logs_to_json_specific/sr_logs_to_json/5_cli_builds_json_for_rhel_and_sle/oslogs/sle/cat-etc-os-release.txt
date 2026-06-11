@@ -1,0 +1,2 @@
+NAME="SLES"
+VERSION_ID="15"

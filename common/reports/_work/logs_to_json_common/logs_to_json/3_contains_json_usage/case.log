@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: logs_to_json_common::logs_to_json.py::contains_json_usage
+STATUS: PASS
+MESSAGE: Found pattern: json

@@ -1,0 +1,8 @@
+{
+  "Suites": [
+    {
+      "Suite": "FWTS",
+      "Reason": "Known FWTS issue"
+    }
+  ]
+}

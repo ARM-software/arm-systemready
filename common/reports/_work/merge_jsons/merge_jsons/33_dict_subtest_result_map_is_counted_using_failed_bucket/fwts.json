@@ -1,0 +1,34 @@
+{
+    "test_results": [
+        {
+            "Test_suite": "uefivar",
+            "Test_suite_description": "FWTS UEFI variable service checks",
+            "subtests": [
+                {
+                    "sub_test_name": "uefivar_set",
+                    "sub_test_description": "SetVariable write path",
+                    "sub_test_result": {
+                        "FAILED": 1,
+                        "FAILED_WITH_WAIVER": 2
+                    }
+                }
+            ],
+            "test_suite_summary": {
+                "total_passed": 0,
+                "total_failed": 1,
+                "total_failed_with_waiver": 2,
+                "total_aborted": 0,
+                "total_skipped": 0,
+                "total_warnings": 0
+            }
+        }
+    ],
+    "suite_summary": {
+        "total_passed": 0,
+        "total_failed": 1,
+        "total_failed_with_waiver": 2,
+        "total_aborted": 0,
+        "total_skipped": 0,
+        "total_warnings": 0
+    }
+}

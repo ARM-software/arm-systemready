@@ -1,0 +1,13 @@
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::minimal_valid_structure_generates_or_exits_cleanly
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/standalone_tests/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/7_minimal_valid_structure_generates_or_exits_cleanly/minimal.json /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/7_minimal_valid_structure_generates_or_exits_cleanly/detail.html /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/7_minimal_valid_structure_generates_or_exits_cleanly/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---

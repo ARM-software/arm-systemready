@@ -1,0 +1,2851 @@
+====================================================================================================
+RUN AT: 2026-06-11 07:03:45
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module case_runner
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/10_cli_mmap_reg_name_is_ignored/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/10_cli_mmap_reg_name_is_ignored/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/10_cli_mmap_reg_name_is_ignored/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/10_cli_mmap_reg_name_is_ignored/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/11_cli_reg_names_with_mmap_and_register_block_skips_only_mmap/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/11_cli_reg_names_with_mmap_and_register_block_skips_only_mmap/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/11_cli_reg_names_with_mmap_and_register_block_skips_only_mmap/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/11_cli_reg_names_with_mmap_and_register_block_skips_only_mmap/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/12_cli_parent_offset_translation_detects_conflict/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/12_cli_parent_offset_translation_detects_conflict/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/12_cli_parent_offset_translation_detects_conflict/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/12_cli_parent_offset_translation_detects_conflict/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/13_cli_ranges_translation_detects_conflict/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/13_cli_ranges_translation_detects_conflict/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/13_cli_ranges_translation_detects_conflict/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/13_cli_ranges_translation_detects_conflict/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/14_cli_no_matching_range_skips_node_and_passes/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/14_cli_no_matching_range_skips_node_and_passes/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/14_cli_no_matching_range_skips_node_and_passes/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/14_cli_no_matching_range_skips_node_and_passes/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/15_cli_reserved_memory_is_ignored/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/15_cli_reserved_memory_is_ignored/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/15_cli_reserved_memory_is_ignored/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/15_cli_reserved_memory_is_ignored/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/16_cli_memory_node_is_ignored/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/16_cli_memory_node_is_ignored/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/16_cli_memory_node_is_ignored/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/16_cli_memory_node_is_ignored/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/17_cli_storage_like_node_is_ignored/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/17_cli_storage_like_node_is_ignored/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/17_cli_storage_like_node_is_ignored/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/17_cli_storage_like_node_is_ignored/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/18_cli_utf16_memmap_is_parsed/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/18_cli_utf16_memmap_is_parsed/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/18_cli_utf16_memmap_is_parsed/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/18_cli_utf16_memmap_is_parsed/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/19_cli_malformed_memmap_line_is_logged/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/19_cli_malformed_memmap_line_is_logged/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/19_cli_malformed_memmap_line_is_logged/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/19_cli_malformed_memmap_line_is_logged/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/20_cli_deduplicates_identical_memmap_entries/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/20_cli_deduplicates_identical_memmap_entries/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/20_cli_deduplicates_identical_memmap_entries/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/20_cli_deduplicates_identical_memmap_entries/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/21_cli_hex_without_0x_in_memmap_is_accepted/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/21_cli_hex_without_0x_in_memmap_is_accepted/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/21_cli_hex_without_0x_in_memmap_is_accepted/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/21_cli_hex_without_0x_in_memmap_is_accepted/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/22_cli_symbolic_reg_cells_known_limitation/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/22_cli_symbolic_reg_cells_known_limitation/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/22_cli_symbolic_reg_cells_known_limitation/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/22_cli_symbolic_reg_cells_known_limitation/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/23_cli_multiline_reg_property_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/23_cli_multiline_reg_property_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/23_cli_multiline_reg_property_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/23_cli_multiline_reg_property_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/24_cli_multiline_ranges_property_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/24_cli_multiline_ranges_property_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/24_cli_multiline_ranges_property_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/24_cli_multiline_ranges_property_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/25_cli_multiline_reg_names_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/25_cli_multiline_reg_names_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/25_cli_multiline_reg_names_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/25_cli_multiline_reg_names_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/26_cli_multiline_quoted_compatible_property_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/26_cli_multiline_quoted_compatible_property_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/26_cli_multiline_quoted_compatible_property_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/26_cli_multiline_quoted_compatible_property_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/27_cli_multiline_status_property_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/27_cli_multiline_status_property_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/27_cli_multiline_status_property_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/27_cli_multiline_status_property_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/29_cli_ranges_with_incomplete_cell_tuple_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/29_cli_ranges_with_incomplete_cell_tuple_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/29_cli_ranges_with_incomplete_cell_tuple_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/29_cli_ranges_with_incomplete_cell_tuple_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/30_cli_ranges_with_extra_trailing_cells_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/30_cli_ranges_with_extra_trailing_cells_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/30_cli_ranges_with_extra_trailing_cells_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/30_cli_ranges_with_extra_trailing_cells_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/32_cli_reg_names_count_mismatch_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/32_cli_reg_names_count_mismatch_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/32_cli_reg_names_count_mismatch_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/32_cli_reg_names_count_mismatch_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/33_cli_uppercase_disabled_status_value_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/33_cli_uppercase_disabled_status_value_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/33_cli_uppercase_disabled_status_value_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/33_cli_uppercase_disabled_status_value_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/34_cli_ranges_present_but_empty_cells_warning/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/34_cli_ranges_present_but_empty_cells_warning/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/34_cli_ranges_present_but_empty_cells_warning/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/34_cli_ranges_present_but_empty_cells_warning/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/35_cli_comments_are_stripped_before_parse/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/35_cli_comments_are_stripped_before_parse/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/35_cli_comments_are_stripped_before_parse/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/35_cli_comments_are_stripped_before_parse/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/4_cli_missing_both_inputs_warns/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/4_cli_missing_both_inputs_warns/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/4_cli_missing_both_inputs_warns/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/4_cli_missing_both_inputs_warns/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/5_cli_missing_memmap_warns/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/5_cli_missing_memmap_warns/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/5_cli_missing_memmap_warns/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/5_cli_missing_memmap_warns/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/6_cli_non_overlapping_regions_pass/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/6_cli_non_overlapping_regions_pass/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/6_cli_non_overlapping_regions_pass/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/6_cli_non_overlapping_regions_pass/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/7_cli_overlapping_regions_fail/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/7_cli_overlapping_regions_fail/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/7_cli_overlapping_regions_fail/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/7_cli_overlapping_regions_fail/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/8_cli_disabled_node_is_ignored/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/8_cli_disabled_node_is_ignored/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/8_cli_disabled_node_is_ignored/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/8_cli_disabled_node_is_ignored/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/case_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/case_runner.py:8: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/case_runner.py:21: [W1309(f-string-without-interpolation), main] Using an f-string that does not have any interpolated variables
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/case_runner.py:31: [W0212(protected-access), main] Access to a protected member _LOG_FH of a client class
+************* Module case_data_builders
+common/yaml_test_harness/case_data_builders.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/yaml_test_harness/case_data_builders.py:11: [C0116(missing-function-docstring), expand_template] Missing function or method docstring
+common/yaml_test_harness/case_data_builders.py:19: [C0116(missing-function-docstring), replace_dir_tokens] Missing function or method docstring
+common/yaml_test_harness/case_data_builders.py:34: [C0116(missing-function-docstring), build_runtime_case_for_tempdir] Missing function or method docstring
+common/yaml_test_harness/case_data_builders.py:62: [C0116(missing-function-docstring), render_post_check_path] Missing function or method docstring
+common/yaml_test_harness/case_data_builders.py:76: [W0718(broad-exception-caught), _write_text_if_changed] Catching too general exception Exception
+common/yaml_test_harness/case_data_builders.py:92: [W0718(broad-exception-caught), _write_bytes_if_changed] Catching too general exception Exception
+common/yaml_test_harness/case_data_builders.py:98: [C0116(missing-function-docstring), prepare_case_files] Missing function or method docstring
+common/yaml_test_harness/case_data_builders.py:98: [R0912(too-many-branches), prepare_case_files] Too many branches (18/12)
+common/yaml_test_harness/case_data_builders.py:155: [C0116(missing-function-docstring), materialize_case_workspace] Missing function or method docstring
+************* Module mock_helpers
+common/yaml_test_harness/mock_helpers.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/yaml_test_harness/mock_helpers.py:619: [R0915(too-many-statements), passthrough_router] Too many statements (56/50)
+************* Module mock_loader
+common/yaml_test_harness/mock_loader.py:1: [C0302(too-many-lines), ] Too many lines in module (2745/1000)
+common/yaml_test_harness/mock_loader.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/yaml_test_harness/mock_loader.py:102: [R0914(too-many-locals), stateful_run_router._mock_run] Too many local variables (16/15)
+common/yaml_test_harness/mock_loader.py:102: [R0912(too-many-branches), stateful_run_router._mock_run] Too many branches (16/12)
+common/yaml_test_harness/mock_loader.py:70: [R0915(too-many-statements), stateful_run_router] Too many statements (60/50)
+common/yaml_test_harness/mock_loader.py:313: [R0912(too-many-branches), build_mock_from_spec] Too many branches (20/12)
+common/yaml_test_harness/mock_loader.py:579: [R0914(too-many-locals), build_ethtool_scenario_case] Too many local variables (28/15)
+common/yaml_test_harness/mock_loader.py:579: [R0912(too-many-branches), build_ethtool_scenario_case] Too many branches (19/12)
+common/yaml_test_harness/mock_loader.py:579: [R0915(too-many-statements), build_ethtool_scenario_case] Too many statements (71/50)
+common/yaml_test_harness/mock_loader.py:929: [R0914(too-many-locals), _build_blk_write_check_stateful_rules] Too many local variables (23/15)
+common/yaml_test_harness/mock_loader.py:929: [R0912(too-many-branches), _build_blk_write_check_stateful_rules] Too many branches (22/12)
+common/yaml_test_harness/mock_loader.py:929: [R0915(too-many-statements), _build_blk_write_check_stateful_rules] Too many statements (69/50)
+common/yaml_test_harness/mock_loader.py:1403: [R0914(too-many-locals), build_blk_devices_scenario_case] Too many local variables (31/15)
+common/yaml_test_harness/mock_loader.py:1403: [R0912(too-many-branches), build_blk_devices_scenario_case] Too many branches (29/12)
+common/yaml_test_harness/mock_loader.py:1403: [R0915(too-many-statements), build_blk_devices_scenario_case] Too many statements (99/50)
+common/yaml_test_harness/mock_loader.py:1885: [C0116(missing-function-docstring), build_merge_jsons_scenario_case] Missing function or method docstring
+common/yaml_test_harness/mock_loader.py:1885: [R0914(too-many-locals), build_merge_jsons_scenario_case] Too many local variables (17/15)
+common/yaml_test_harness/mock_loader.py:1885: [R0912(too-many-branches), build_merge_jsons_scenario_case] Too many branches (18/12)
+common/yaml_test_harness/mock_loader.py:2080: [R0914(too-many-locals), build_verify_tpm_events] Too many local variables (17/15)
+common/yaml_test_harness/mock_loader.py:2455: [R0914(too-many-locals), build_capsule_vars_scenario_case] Too many local variables (18/15)
+common/yaml_test_harness/mock_loader.py:2539: [R0912(too-many-branches), build_runtime_device_mapping_scenario_case] Too many branches (14/12)
+************* Module pytest_runner
+common/yaml_test_harness/pytest_runner.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/yaml_test_harness/pytest_runner.py:44: [C0116(missing-function-docstring), detect_project_root] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:57: [C0116(missing-function-docstring), discover_yaml_files] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:67: [C0116(missing-function-docstring), get_group_name] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:73: [C0116(missing-function-docstring), get_file_work_dir] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:82: [C0116(missing-function-docstring), requires_serial_case_execution] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:89: [C0116(missing-function-docstring), run_case] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:89: [R0914(too-many-locals), run_case] Too many local variables (24/15)
+common/yaml_test_harness/pytest_runner.py:213: [C0116(missing-function-docstring), git_changed_paths_for_query] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:233: [C0116(missing-function-docstring), get_recently_changed_paths] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:243: [C0116(missing-function-docstring), normalize_target_for_matching] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:247: [C0116(missing-function-docstring), format_yaml_config_warning] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:252: [C0116(missing-function-docstring), load_yaml_suites_for_selection] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:263: [C0116(missing-function-docstring), get_yaml_target_entries] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:275: [C0116(missing-function-docstring), yaml_targets_changed_files] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:292: [C0116(missing-function-docstring), select_yaml_runs] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:321: [C0116(missing-function-docstring), select_yaml_runs_for_target] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:349: [C0116(missing-function-docstring), run_yaml] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:349: [R0914(too-many-locals), run_yaml] Too many local variables (29/15)
+common/yaml_test_harness/pytest_runner.py:349: [R0912(too-many-branches), run_yaml] Too many branches (14/12)
+common/yaml_test_harness/pytest_runner.py:484: [C0116(missing-function-docstring), main] Missing function or method docstring
+common/yaml_test_harness/pytest_runner.py:484: [R0912(too-many-branches), main] Too many branches (14/12)
+************* Module report
+common/yaml_test_harness/report.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/yaml_test_harness/report.py:16: [C0116(missing-function-docstring), detect_project_root] Missing function or method docstring
+common/yaml_test_harness/report.py:39: [C0115(missing-class-docstring), Color] Missing class docstring
+common/yaml_test_harness/report.py:39: [R0903(too-few-public-methods), Color] Too few public methods (0/2)
+common/yaml_test_harness/report.py:47: [C0116(missing-function-docstring), color_text] Missing function or method docstring
+common/yaml_test_harness/report.py:51: [C0116(missing-function-docstring), ensure_reports_dir] Missing function or method docstring
+common/yaml_test_harness/report.py:55: [C0116(missing-function-docstring), append_log_history] Missing function or method docstring
+common/yaml_test_harness/report.py:89: [C0116(missing-function-docstring), run_git_command] Missing function or method docstring
+common/yaml_test_harness/report.py:100: [C0116(missing-function-docstring), get_commit_info] Missing function or method docstring
+common/yaml_test_harness/report.py:126: [C0116(missing-function-docstring), resolve_manual_target] Missing function or method docstring
+common/yaml_test_harness/report.py:136: [C0116(missing-function-docstring), get_manual_python_target] Missing function or method docstring
+common/yaml_test_harness/report.py:158: [C0116(missing-function-docstring), sanitize_name] Missing function or method docstring
+common/yaml_test_harness/report.py:165: [C0116(missing-function-docstring), run_pytest] Missing function or method docstring
+common/yaml_test_harness/report.py:201: [C0116(missing-function-docstring), collect_pytest_case_logs] Missing function or method docstring
+common/yaml_test_harness/report.py:260: [C0116(missing-function-docstring), print_pytest_summary] Missing function or method docstring
+common/yaml_test_harness/report.py:260: [R0914(too-many-locals), print_pytest_summary] Too many local variables (18/15)
+common/yaml_test_harness/report.py:331: [C0116(missing-function-docstring), get_recently_changed_python_files] Missing function or method docstring
+common/yaml_test_harness/report.py:359: [C0116(missing-function-docstring), extract_pylint_score] Missing function or method docstring
+common/yaml_test_harness/report.py:373: [C0116(missing-function-docstring), run_pylint_command] Missing function or method docstring
+common/yaml_test_harness/report.py:383: [C0116(missing-function-docstring), run_pylint] Missing function or method docstring
+common/yaml_test_harness/report.py:486: [C0116(missing-function-docstring), write_pylint_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:486: [R0914(too-many-locals), write_pylint_xml] Too many local variables (19/15)
+common/yaml_test_harness/report.py:552: [C0116(missing-function-docstring), create_empty_pylint_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:580: [C0116(missing-function-docstring), get_pylint_score_from_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:595: [C0116(missing-function-docstring), print_pylint_summary] Missing function or method docstring
+common/yaml_test_harness/report.py:595: [R0914(too-many-locals), print_pylint_summary] Too many local variables (19/15)
+common/yaml_test_harness/report.py:609: [W0718(broad-exception-caught), print_pylint_summary] Catching too general exception Exception
+common/yaml_test_harness/report.py:660: [C0116(missing-function-docstring), run_mypy_command] Missing function or method docstring
+common/yaml_test_harness/report.py:670: [C0116(missing-function-docstring), run_mypy] Missing function or method docstring
+common/yaml_test_harness/report.py:744: [C0116(missing-function-docstring), write_mypy_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:744: [R0914(too-many-locals), write_mypy_xml] Too many local variables (18/15)
+common/yaml_test_harness/report.py:807: [C0116(missing-function-docstring), create_empty_mypy_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:831: [C0116(missing-function-docstring), print_mypy_summary] Missing function or method docstring
+common/yaml_test_harness/report.py:845: [W0718(broad-exception-caught), print_mypy_summary] Catching too general exception Exception
+common/yaml_test_harness/report.py:888: [C0116(missing-function-docstring), main] Missing function or method docstring
+************* Module runner_checks
+common/yaml_test_harness/runner_checks.py:1: [C0302(too-many-lines), ] Too many lines in module (2299/1000)
+common/yaml_test_harness/runner_checks.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/yaml_test_harness/runner_checks.py:39: [C0116(missing-function-docstring), detect_project_root] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:54: [C0103(invalid-name), ] Variable name "REAL_SUBPROCESS_RUN" doesn't conform to snake_case naming style
+common/yaml_test_harness/runner_checks.py:58: [C0115(missing-class-docstring), TestMeta] Missing class docstring
+common/yaml_test_harness/runner_checks.py:65: [C0115(missing-class-docstring), TestOutcome] Missing class docstring
+common/yaml_test_harness/runner_checks.py:81: [C0116(missing-function-docstring), TestOutcome.error] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:85: [C0116(missing-function-docstring), TestOutcome.skipped] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:89: [C0116(missing-function-docstring), TestOutcome.warning] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:102: [C0115(missing-class-docstring), CommandRunResult] Missing class docstring
+common/yaml_test_harness/runner_checks.py:113: [C0115(missing-class-docstring), RunCaseOptions] Missing class docstring
+common/yaml_test_harness/runner_checks.py:117: [C0116(missing-function-docstring), create_runner_temp_dir] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:129: [C0116(missing-function-docstring), load_yaml_config] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:142: [C0116(missing-function-docstring), ensure_list] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:148: [C0116(missing-function-docstring), ensure_list_of_strings] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:154: [C0116(missing-function-docstring), ensure_string_or_list_of_strings] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:177: [C0116(missing-function-docstring), sanitize_name] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:184: [C0116(missing-function-docstring), is_valid_xml_char] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:193: [C0116(missing-function-docstring), sanitize_xml_text] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:206: [C0116(missing-function-docstring), normalize_suite_files] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:225: [C0116(missing-function-docstring), validate_post_checks] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:277: [C0116(missing-function-docstring), validate_env_mapping] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:297: [C0116(missing-function-docstring), validate_command_probe_list] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:335: [C0116(missing-function-docstring), validate_common_case_controls] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:421: [C0116(missing-function-docstring), validate_case_schema] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:421: [R0914(too-many-locals), validate_case_schema] Too many local variables (34/15)
+common/yaml_test_harness/runner_checks.py:421: [R0912(too-many-branches), validate_case_schema] Too many branches (66/12)
+common/yaml_test_harness/runner_checks.py:421: [R0915(too-many-statements), validate_case_schema] Too many statements (145/50)
+common/yaml_test_harness/runner_checks.py:675: [C0116(missing-function-docstring), normalize_cases] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:700: [C0116(missing-function-docstring), normalize_suites] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:745: [C0116(missing-function-docstring), resolve_target_path] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:752: [C0116(missing-function-docstring), read_source] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:756: [C0116(missing-function-docstring), parse_ast] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:760: [C0116(missing-function-docstring), collect_function_names] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:771: [C0116(missing-function-docstring), format_outcome_message] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:776: [C0116(missing-function-docstring), create_outcome] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:799: [C0116(missing-function-docstring), run_post_checks] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:799: [R0914(too-many-locals), run_post_checks] Too many local variables (20/15)
+common/yaml_test_harness/runner_checks.py:799: [R0912(too-many-branches), run_post_checks] Too many branches (25/12)
+common/yaml_test_harness/runner_checks.py:799: [R0915(too-many-statements), run_post_checks] Too many statements (83/50)
+common/yaml_test_harness/runner_checks.py:940: [C0116(missing-function-docstring), build_runner_module_name] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:944: [C0116(missing-function-docstring), load_module_from_path] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:962: [C0116(missing-function-docstring), normalize_completed_stream] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:972: [C0116(missing-function-docstring), format_output_block] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:979: [C0116(missing-function-docstring), append_log_file_details] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1002: [C0116(missing-function-docstring), format_expectation_failure] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1026: [C0116(missing-function-docstring), build_command_from_spec] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1050: [C0116(missing-function-docstring), build_runtime_env] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1070: [C0116(missing-function-docstring), execute_command_spec] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1070: [R0914(too-many-locals), execute_command_spec] Too many local variables (17/15)
+common/yaml_test_harness/runner_checks.py:1128: [C0116(missing-function-docstring), normalize_probe_spec] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1141: [C0116(missing-function-docstring), apply_skip_controls] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1141: [R0914(too-many-locals), apply_skip_controls] Too many local variables (17/15)
+common/yaml_test_harness/runner_checks.py:1141: [R0912(too-many-branches), apply_skip_controls] Too many branches (17/12)
+common/yaml_test_harness/runner_checks.py:1211: [C0116(missing-function-docstring), check_file_exists] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1221: [C0116(missing-function-docstring), check_py_compile] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1233: [C0116(missing-function-docstring), check_source_contains] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1248: [C0116(missing-function-docstring), check_source_contains_any] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1262: [C0116(missing-function-docstring), check_source_contains_all] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1276: [C0116(missing-function-docstring), check_function_exists] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1295: [C0116(missing-function-docstring), check_function_exists_any] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1309: [C0116(missing-function-docstring), check_main_guard] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1324: [C0116(missing-function-docstring), check_py_function] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1324: [R0914(too-many-locals), check_py_function] Too many local variables (38/15)
+common/yaml_test_harness/runner_checks.py:1324: [R0912(too-many-branches), check_py_function] Too many branches (24/12)
+common/yaml_test_harness/runner_checks.py:1324: [R0915(too-many-statements), check_py_function] Too many statements (102/50)
+common/yaml_test_harness/runner_checks.py:1486: [C0116(missing-function-docstring), check_module_main_with_env] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1486: [R0914(too-many-locals), check_module_main_with_env] Too many local variables (24/15)
+common/yaml_test_harness/runner_checks.py:1486: [R0915(too-many-statements), check_module_main_with_env] Too many statements (56/50)
+common/yaml_test_harness/runner_checks.py:1617: [C0116(missing-function-docstring), validate_output_expectations] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1617: [R0914(too-many-locals), validate_output_expectations] Too many local variables (18/15)
+common/yaml_test_harness/runner_checks.py:1617: [R0912(too-many-branches), validate_output_expectations] Too many branches (23/12)
+common/yaml_test_harness/runner_checks.py:1617: [R0915(too-many-statements), validate_output_expectations] Too many statements (57/50)
+common/yaml_test_harness/runner_checks.py:1789: [C0116(missing-function-docstring), check_path_exists] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1803: [C0116(missing-function-docstring), check_path_not_exists] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1821: [C0116(missing-function-docstring), run_command_assertion] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1849: [C0116(missing-function-docstring), check_command_success] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1871: [C0116(missing-function-docstring), check_command_exit_code] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1896: [C0116(missing-function-docstring), check_command_output_contains] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1922: [C0116(missing-function-docstring), check_command_output_regex] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1948: [C0116(missing-function-docstring), build_cli_command] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1972: [C0116(missing-function-docstring), build_cli_env] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1993: [C0116(missing-function-docstring), check_cli] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:1993: [R0914(too-many-locals), check_cli] Too many local variables (27/15)
+common/yaml_test_harness/runner_checks.py:1993: [R0915(too-many-statements), check_cli] Too many statements (54/50)
+common/yaml_test_harness/runner_checks.py:2104: [C0116(missing-function-docstring), check_module_cli] Missing function or method docstring
+common/yaml_test_harness/runner_checks.py:2104: [R0914(too-many-locals), check_module_cli] Too many local variables (33/15)
+common/yaml_test_harness/runner_checks.py:2104: [R0912(too-many-branches), check_module_cli] Too many branches (14/12)
+common/yaml_test_harness/runner_checks.py:2104: [R0915(too-many-statements), check_module_cli] Too many statements (79/50)
+common/yaml_test_harness/runner_checks.py:2284: [C0116(missing-function-docstring), run_single_check] Missing function or method docstring
+************* Module runner_reporting
+common/yaml_test_harness/runner_reporting.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/yaml_test_harness/runner_reporting.py:15: [C0116(missing-function-docstring), detect_project_root] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:28: [C0116(missing-function-docstring), is_valid_xml_char] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:37: [C0116(missing-function-docstring), sanitize_xml_text] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:50: [C0116(missing-function-docstring), append_run_header] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:80: [C0116(missing-function-docstring), build_report_path] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:88: [C0116(missing-function-docstring), create_placeholder_xml] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:118: [C0116(missing-function-docstring), remove_placeholder_xml] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:123: [C0116(missing-function-docstring), cleanup_old_pytest_xml_reports] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:135: [C0116(missing-function-docstring), build_case_log_lines] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:154: [C0116(missing-function-docstring), append_combined_case_log] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:171: [C0116(missing-function-docstring), write_case_log] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:189: [C0116(missing-function-docstring), write_junit_xml] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:189: [R0914(too-many-locals), write_junit_xml] Too many local variables (22/15)
+common/yaml_test_harness/runner_reporting.py:278: [C0116(missing-function-docstring), print_group_summary] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:330: [C0116(missing-function-docstring), build_config_error_outcome] Missing function or method docstring
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==mock_helpers:[127:142]
+==mock_loader:[77:92]
+    default_stdout = str(options.pop("default_stdout", ""))
+    default_stderr = str(options.pop("default_stderr", ""))
+    default_returncode = int(options.pop("default_returncode", 0))
+    unmatched_stderr_template = options.pop("unmatched_stderr_template", None)
+    if unmatched_stderr_template is not None and not isinstance(
+        unmatched_stderr_template,
+        str,
+    ):
+        raise TypeError("'unmatched_stderr_template' must be a string")
+    use_contains = bool(options.pop("use_contains", True))
+    call_log_path = options.pop("call_log_path", None)
+    if call_log_path is not None and not isinstance(call_log_path, str):
+        raise TypeError("'call_log_path' must be a string")
+    if options:
+        unsupported = ", ".join(sorted(options))
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==runner_checks:[184:206]
+==runner_reporting:[28:55]
+    return (
+        code in {0x9, 0xA, 0xD}
+        or 0x20 <= code <= 0xD7FF
+        or 0xE000 <= code <= 0xFFFD
+        or 0x10000 <= code <= 0x10FFFF
+    )
+
+
+def sanitize_xml_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        value = str(value)
+
+    cleaned: list[str] = []
+    for char in value:
+        if is_valid_xml_char(ord(char)):
+            cleaned.append(char)
+    return "".join(cleaned)
+
+
+def append_run_header(
+    file_work_dir: Path,
+    suite_name: str,
+    yaml_file: Path,
+    targets: list[str],
+) -> None:
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==mock_helpers:[173:200]
+==mock_loader:[171:188]
+                )
+
+        stderr_text = default_stderr
+        if unmatched_stderr_template is not None:
+            stderr_text = unmatched_stderr_template.format(cmd=cmd_text)
+
+        return CompletedProcess(
+            args=cmd,
+            returncode=default_returncode,
+            stdout=default_stdout,
+            stderr=stderr_text,
+        )
+
+    return _mock_run
+
+
+def path_read_text_router(
+    responses: dict[str, str] | None = None,
+    default_text: str = "",
+    use_contains: bool = True,
+):
+    """
+    Router for Path.read_text() based on path string.
+
+    responses:
+      "/sys/class/net/eth0/speed": "1000"
+    """
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==mock_helpers:[149:163]
+==mock_loader:[97:111]
+        if use_contains:
+            return pattern in cmd_text
+        return pattern == cmd_text
+
+    def _mock_run(cmd, *args, **kwargs):
+        del args, kwargs
+        cmd_text = " ".join(cmd) if isinstance(cmd, (list, tuple)) else str(cmd)
+
+        if call_log_path is not None:
+            log_path = Path(call_log_path)
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            with log_path.open("a", encoding="utf-8") as handle:
+                handle.write(f"{cmd_text}\n")
+
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==pytest_runner:[490:499]
+==report:[895:904]
+    )
+    parser.add_argument(
+        "--jobs",
+        type=int,
+        default=4,
+        help="Number of YAML test cases to run in parallel (default: 4)",
+    )
+    args = parser.parse_args()
+
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==pytest_runner:[213:220]
+==report:[89:96]
+    result = subprocess.run(
+        ["git", *args],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==pytest_runner:[40:52]
+==runner_checks:[35:47]
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def detect_project_root(script_dir: Path) -> Path:
+    if script_dir.parent.name == "common":
+        return script_dir.parent.parent
+    return script_dir.parent
+
+
+PROJECT_ROOT = detect_project_root(SCRIPT_DIR)
+TEST_YAML_DIR = PROJECT_ROOT / "common" / "test_yaml"
+REPORTS_DIR = PROJECT_ROOT / "common" / "reports"
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==mock_helpers:[92:100]
+==mock_loader:[97:105]
+        if use_contains:
+            return pattern in cmd_text
+        return pattern == cmd_text
+
+    def _mock_run(cmd, *args, **kwargs):
+        del args, kwargs
+        cmd_text = " ".join(cmd) if isinstance(cmd, (list, tuple)) else str(cmd)
+
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==pytest_runner:[40:50]
+==report:[12:23]
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def detect_project_root(script_dir: Path) -> Path:
+    if script_dir.parent.name == "common":
+        return script_dir.parent.parent
+    return script_dir.parent
+
+
+PROJECT_ROOT = detect_project_root(SCRIPT_DIR)
+common/yaml_test_harness/runner_reporting.py:1: [R0801(duplicate-code), ] Similar lines in 2 files
+==runner_checks:[35:45]
+==runner_reporting:[11:21]
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def detect_project_root(script_dir: Path) -> Path:
+    if script_dir.parent.name == "common":
+        return script_dir.parent.parent
+    return script_dir.parent
+
+
+PROJECT_ROOT = detect_project_root(SCRIPT_DIR)
+
+------------------------------------------------------------------
+Your code has been rated at 9.29/10 (previous run: 9.29/10, +0.00)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module case_runner
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/10_cli_mmap_reg_name_is_ignored/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/10_cli_mmap_reg_name_is_ignored/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/10_cli_mmap_reg_name_is_ignored/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/10_cli_mmap_reg_name_is_ignored/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/11_cli_reg_names_with_mmap_and_register_block_skips_only_mmap/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/11_cli_reg_names_with_mmap_and_register_block_skips_only_mmap/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/11_cli_reg_names_with_mmap_and_register_block_skips_only_mmap/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/11_cli_reg_names_with_mmap_and_register_block_skips_only_mmap/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/12_cli_parent_offset_translation_detects_conflict/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/12_cli_parent_offset_translation_detects_conflict/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/12_cli_parent_offset_translation_detects_conflict/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/12_cli_parent_offset_translation_detects_conflict/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/13_cli_ranges_translation_detects_conflict/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/13_cli_ranges_translation_detects_conflict/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/13_cli_ranges_translation_detects_conflict/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/13_cli_ranges_translation_detects_conflict/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/14_cli_no_matching_range_skips_node_and_passes/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/14_cli_no_matching_range_skips_node_and_passes/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/14_cli_no_matching_range_skips_node_and_passes/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/14_cli_no_matching_range_skips_node_and_passes/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/15_cli_reserved_memory_is_ignored/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/15_cli_reserved_memory_is_ignored/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/15_cli_reserved_memory_is_ignored/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/15_cli_reserved_memory_is_ignored/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/16_cli_memory_node_is_ignored/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/16_cli_memory_node_is_ignored/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/16_cli_memory_node_is_ignored/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/16_cli_memory_node_is_ignored/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/17_cli_storage_like_node_is_ignored/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/17_cli_storage_like_node_is_ignored/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/17_cli_storage_like_node_is_ignored/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/17_cli_storage_like_node_is_ignored/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/18_cli_utf16_memmap_is_parsed/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/18_cli_utf16_memmap_is_parsed/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/18_cli_utf16_memmap_is_parsed/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/18_cli_utf16_memmap_is_parsed/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/19_cli_malformed_memmap_line_is_logged/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/19_cli_malformed_memmap_line_is_logged/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/19_cli_malformed_memmap_line_is_logged/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/19_cli_malformed_memmap_line_is_logged/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/20_cli_deduplicates_identical_memmap_entries/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/20_cli_deduplicates_identical_memmap_entries/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/20_cli_deduplicates_identical_memmap_entries/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/20_cli_deduplicates_identical_memmap_entries/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/21_cli_hex_without_0x_in_memmap_is_accepted/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/21_cli_hex_without_0x_in_memmap_is_accepted/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/21_cli_hex_without_0x_in_memmap_is_accepted/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/21_cli_hex_without_0x_in_memmap_is_accepted/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/22_cli_symbolic_reg_cells_known_limitation/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/22_cli_symbolic_reg_cells_known_limitation/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/22_cli_symbolic_reg_cells_known_limitation/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/22_cli_symbolic_reg_cells_known_limitation/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/23_cli_multiline_reg_property_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/23_cli_multiline_reg_property_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/23_cli_multiline_reg_property_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/23_cli_multiline_reg_property_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/24_cli_multiline_ranges_property_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/24_cli_multiline_ranges_property_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/24_cli_multiline_ranges_property_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/24_cli_multiline_ranges_property_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/25_cli_multiline_reg_names_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/25_cli_multiline_reg_names_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/25_cli_multiline_reg_names_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/25_cli_multiline_reg_names_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/26_cli_multiline_quoted_compatible_property_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/26_cli_multiline_quoted_compatible_property_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/26_cli_multiline_quoted_compatible_property_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/26_cli_multiline_quoted_compatible_property_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/27_cli_multiline_status_property_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/27_cli_multiline_status_property_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/27_cli_multiline_status_property_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/27_cli_multiline_status_property_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/29_cli_ranges_with_incomplete_cell_tuple_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/29_cli_ranges_with_incomplete_cell_tuple_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/29_cli_ranges_with_incomplete_cell_tuple_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/29_cli_ranges_with_incomplete_cell_tuple_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/30_cli_ranges_with_extra_trailing_cells_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/30_cli_ranges_with_extra_trailing_cells_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/30_cli_ranges_with_extra_trailing_cells_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/30_cli_ranges_with_extra_trailing_cells_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/32_cli_reg_names_count_mismatch_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/32_cli_reg_names_count_mismatch_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/32_cli_reg_names_count_mismatch_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/32_cli_reg_names_count_mismatch_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/33_cli_uppercase_disabled_status_value_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/33_cli_uppercase_disabled_status_value_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/33_cli_uppercase_disabled_status_value_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/33_cli_uppercase_disabled_status_value_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/34_cli_ranges_present_but_empty_cells_warning/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/34_cli_ranges_present_but_empty_cells_warning/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/34_cli_ranges_present_but_empty_cells_warning/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/34_cli_ranges_present_but_empty_cells_warning/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/35_cli_comments_are_stripped_before_parse/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/35_cli_comments_are_stripped_before_parse/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/35_cli_comments_are_stripped_before_parse/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/35_cli_comments_are_stripped_before_parse/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/4_cli_missing_both_inputs_warns/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/4_cli_missing_both_inputs_warns/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/4_cli_missing_both_inputs_warns/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/4_cli_missing_both_inputs_warns/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/5_cli_missing_memmap_warns/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/5_cli_missing_memmap_warns/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/5_cli_missing_memmap_warns/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/5_cli_missing_memmap_warns/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/6_cli_non_overlapping_regions_pass/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/6_cli_non_overlapping_regions_pass/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/6_cli_non_overlapping_regions_pass/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/6_cli_non_overlapping_regions_pass/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/7_cli_overlapping_regions_fail/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/7_cli_overlapping_regions_fail/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/7_cli_overlapping_regions_fail/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/7_cli_overlapping_regions_fail/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/8_cli_disabled_node_is_ignored/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/8_cli_disabled_node_is_ignored/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/8_cli_disabled_node_is_ignored/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/8_cli_disabled_node_is_ignored/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/case_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/case_runner.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/case_runner.py:21:14: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/case_runner.py:31:4: W0212: Access to a protected member _LOG_FH of a client class (protected-access)
+************* Module case_data_builders
+common/yaml_test_harness/case_data_builders.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/yaml_test_harness/case_data_builders.py:11:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/case_data_builders.py:19:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/case_data_builders.py:34:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/case_data_builders.py:62:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/case_data_builders.py:76:15: W0718: Catching too general exception Exception (broad-exception-caught)
+common/yaml_test_harness/case_data_builders.py:92:15: W0718: Catching too general exception Exception (broad-exception-caught)
+common/yaml_test_harness/case_data_builders.py:98:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/case_data_builders.py:98:0: R0912: Too many branches (18/12) (too-many-branches)
+common/yaml_test_harness/case_data_builders.py:155:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module mock_helpers
+common/yaml_test_harness/mock_helpers.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/yaml_test_harness/mock_helpers.py:619:0: R0915: Too many statements (56/50) (too-many-statements)
+************* Module mock_loader
+common/yaml_test_harness/mock_loader.py:1:0: C0302: Too many lines in module (2745/1000) (too-many-lines)
+common/yaml_test_harness/mock_loader.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/yaml_test_harness/mock_loader.py:102:4: R0914: Too many local variables (16/15) (too-many-locals)
+common/yaml_test_harness/mock_loader.py:102:4: R0912: Too many branches (16/12) (too-many-branches)
+common/yaml_test_harness/mock_loader.py:70:0: R0915: Too many statements (60/50) (too-many-statements)
+common/yaml_test_harness/mock_loader.py:313:0: R0912: Too many branches (20/12) (too-many-branches)
+common/yaml_test_harness/mock_loader.py:579:0: R0914: Too many local variables (28/15) (too-many-locals)
+common/yaml_test_harness/mock_loader.py:579:0: R0912: Too many branches (19/12) (too-many-branches)
+common/yaml_test_harness/mock_loader.py:579:0: R0915: Too many statements (71/50) (too-many-statements)
+common/yaml_test_harness/mock_loader.py:929:0: R0914: Too many local variables (23/15) (too-many-locals)
+common/yaml_test_harness/mock_loader.py:929:0: R0912: Too many branches (22/12) (too-many-branches)
+common/yaml_test_harness/mock_loader.py:929:0: R0915: Too many statements (69/50) (too-many-statements)
+common/yaml_test_harness/mock_loader.py:1403:0: R0914: Too many local variables (31/15) (too-many-locals)
+common/yaml_test_harness/mock_loader.py:1403:0: R0912: Too many branches (29/12) (too-many-branches)
+common/yaml_test_harness/mock_loader.py:1403:0: R0915: Too many statements (99/50) (too-many-statements)
+common/yaml_test_harness/mock_loader.py:1885:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/mock_loader.py:1885:0: R0914: Too many local variables (17/15) (too-many-locals)
+common/yaml_test_harness/mock_loader.py:1885:0: R0912: Too many branches (18/12) (too-many-branches)
+common/yaml_test_harness/mock_loader.py:2080:0: R0914: Too many local variables (17/15) (too-many-locals)
+common/yaml_test_harness/mock_loader.py:2455:0: R0914: Too many local variables (18/15) (too-many-locals)
+common/yaml_test_harness/mock_loader.py:2539:0: R0912: Too many branches (14/12) (too-many-branches)
+************* Module pytest_runner
+common/yaml_test_harness/pytest_runner.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/yaml_test_harness/pytest_runner.py:44:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:57:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:67:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:73:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:82:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:89:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:89:0: R0914: Too many local variables (24/15) (too-many-locals)
+common/yaml_test_harness/pytest_runner.py:213:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:233:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:243:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:247:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:252:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:263:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:275:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:292:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:321:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:349:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:349:0: R0914: Too many local variables (29/15) (too-many-locals)
+common/yaml_test_harness/pytest_runner.py:349:0: R0912: Too many branches (14/12) (too-many-branches)
+common/yaml_test_harness/pytest_runner.py:484:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/pytest_runner.py:484:0: R0912: Too many branches (14/12) (too-many-branches)
+************* Module report
+common/yaml_test_harness/report.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/yaml_test_harness/report.py:16:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:39:0: C0115: Missing class docstring (missing-class-docstring)
+common/yaml_test_harness/report.py:39:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+common/yaml_test_harness/report.py:47:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:51:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:55:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:89:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:100:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:126:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:136:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:158:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:165:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:201:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:260:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:260:0: R0914: Too many local variables (18/15) (too-many-locals)
+common/yaml_test_harness/report.py:331:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:359:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:373:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:383:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:486:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:486:0: R0914: Too many local variables (19/15) (too-many-locals)
+common/yaml_test_harness/report.py:552:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:580:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:595:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:595:0: R0914: Too many local variables (19/15) (too-many-locals)
+common/yaml_test_harness/report.py:609:11: W0718: Catching too general exception Exception (broad-exception-caught)
+common/yaml_test_harness/report.py:660:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:670:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:744:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:744:0: R0914: Too many local variables (18/15) (too-many-locals)
+common/yaml_test_harness/report.py:807:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:831:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:845:11: W0718: Catching too general exception Exception (broad-exception-caught)
+common/yaml_test_harness/report.py:888:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module runner_checks
+common/yaml_test_harness/runner_checks.py:1:0: C0302: Too many lines in module (2299/1000) (too-many-lines)
+common/yaml_test_harness/runner_checks.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/yaml_test_harness/runner_checks.py:39:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:54:0: C0103: Variable name "REAL_SUBPROCESS_RUN" doesn't conform to snake_case naming style (invalid-name)
+common/yaml_test_harness/runner_checks.py:58:0: C0115: Missing class docstring (missing-class-docstring)
+common/yaml_test_harness/runner_checks.py:65:0: C0115: Missing class docstring (missing-class-docstring)
+common/yaml_test_harness/runner_checks.py:81:4: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:85:4: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:89:4: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:102:0: C0115: Missing class docstring (missing-class-docstring)
+common/yaml_test_harness/runner_checks.py:113:0: C0115: Missing class docstring (missing-class-docstring)
+common/yaml_test_harness/runner_checks.py:117:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:129:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:142:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:148:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:154:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:177:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:184:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:193:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:206:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:225:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:277:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:297:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:335:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:421:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:421:0: R0914: Too many local variables (34/15) (too-many-locals)
+common/yaml_test_harness/runner_checks.py:421:0: R0912: Too many branches (66/12) (too-many-branches)
+common/yaml_test_harness/runner_checks.py:421:0: R0915: Too many statements (145/50) (too-many-statements)
+common/yaml_test_harness/runner_checks.py:675:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:700:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:745:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:752:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:756:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:760:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:771:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:776:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:799:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:799:0: R0914: Too many local variables (20/15) (too-many-locals)
+common/yaml_test_harness/runner_checks.py:799:0: R0912: Too many branches (25/12) (too-many-branches)
+common/yaml_test_harness/runner_checks.py:799:0: R0915: Too many statements (83/50) (too-many-statements)
+common/yaml_test_harness/runner_checks.py:940:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:944:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:962:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:972:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:979:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1002:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1026:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1050:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1070:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1070:0: R0914: Too many local variables (17/15) (too-many-locals)
+common/yaml_test_harness/runner_checks.py:1128:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1141:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1141:0: R0914: Too many local variables (17/15) (too-many-locals)
+common/yaml_test_harness/runner_checks.py:1141:0: R0912: Too many branches (17/12) (too-many-branches)
+common/yaml_test_harness/runner_checks.py:1211:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1221:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1233:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1248:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1262:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1276:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1295:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1309:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1324:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1324:0: R0914: Too many local variables (38/15) (too-many-locals)
+common/yaml_test_harness/runner_checks.py:1324:0: R0912: Too many branches (24/12) (too-many-branches)
+common/yaml_test_harness/runner_checks.py:1324:0: R0915: Too many statements (102/50) (too-many-statements)
+common/yaml_test_harness/runner_checks.py:1486:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1486:0: R0914: Too many local variables (24/15) (too-many-locals)
+common/yaml_test_harness/runner_checks.py:1486:0: R0915: Too many statements (56/50) (too-many-statements)
+common/yaml_test_harness/runner_checks.py:1617:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1617:0: R0914: Too many local variables (18/15) (too-many-locals)
+common/yaml_test_harness/runner_checks.py:1617:0: R0912: Too many branches (23/12) (too-many-branches)
+common/yaml_test_harness/runner_checks.py:1617:0: R0915: Too many statements (57/50) (too-many-statements)
+common/yaml_test_harness/runner_checks.py:1789:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1803:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1821:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1849:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1871:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1896:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1922:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1948:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1972:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1993:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:1993:0: R0914: Too many local variables (27/15) (too-many-locals)
+common/yaml_test_harness/runner_checks.py:1993:0: R0915: Too many statements (54/50) (too-many-statements)
+common/yaml_test_harness/runner_checks.py:2104:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_checks.py:2104:0: R0914: Too many local variables (33/15) (too-many-locals)
+common/yaml_test_harness/runner_checks.py:2104:0: R0912: Too many branches (14/12) (too-many-branches)
+common/yaml_test_harness/runner_checks.py:2104:0: R0915: Too many statements (79/50) (too-many-statements)
+common/yaml_test_harness/runner_checks.py:2284:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module runner_reporting
+common/yaml_test_harness/runner_reporting.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/yaml_test_harness/runner_reporting.py:15:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:28:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:37:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:50:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:80:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:88:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:118:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:123:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:135:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:154:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:171:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:189:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:189:0: R0914: Too many local variables (22/15) (too-many-locals)
+common/yaml_test_harness/runner_reporting.py:278:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:330:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==case_runner:[8:48]
+==case_runner:[8:48]
+    if len(sys.argv) != 2:
+        print("usage: case_runner.py <target_script>", file=sys.stderr)
+        return 2
+
+    work_dir = Path.cwd()
+    target = Path(sys.argv[1]).resolve()
+
+    spec = importlib.util.spec_from_file_location(
+        "runtime_checker_under_test",
+        target,
+    )
+    if spec is None or spec.loader is None:
+        print(f"failed to load target: {{target}}", file=sys.stderr)
+        return 2
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    module.DTS_PATH = work_dir / "device_tree.dts"
+    module.MEMMAP_PATH = work_dir / "memmap.log"
+    module.OUT_LOG_PATH = work_dir / "runtime_device_mapping_conflict_test.log"
+    module._LOG_FH = None
+
+    try:
+        module.main()
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        return 1
+
+    log_path = work_dir / "runtime_device_mapping_conflict_test.log"
+    if log_path.exists():
+        print(log_path.read_text(encoding="utf-8", errors="replace"), end="")
+
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main()) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==mock_helpers:[127:142]
+==mock_loader:[77:92]
+    default_stdout = str(options.pop("default_stdout", ""))
+    default_stderr = str(options.pop("default_stderr", ""))
+    default_returncode = int(options.pop("default_returncode", 0))
+    unmatched_stderr_template = options.pop("unmatched_stderr_template", None)
+    if unmatched_stderr_template is not None and not isinstance(
+        unmatched_stderr_template,
+        str,
+    ):
+        raise TypeError("'unmatched_stderr_template' must be a string")
+    use_contains = bool(options.pop("use_contains", True))
+    call_log_path = options.pop("call_log_path", None)
+    if call_log_path is not None and not isinstance(call_log_path, str):
+        raise TypeError("'call_log_path' must be a string")
+    if options:
+        unsupported = ", ".join(sorted(options)) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==runner_checks:[184:206]
+==runner_reporting:[28:55]
+    return (
+        code in {0x9, 0xA, 0xD}
+        or 0x20 <= code <= 0xD7FF
+        or 0xE000 <= code <= 0xFFFD
+        or 0x10000 <= code <= 0x10FFFF
+    )
+
+
+def sanitize_xml_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        value = str(value)
+
+    cleaned: list[str] = []
+    for char in value:
+        if is_valid_xml_char(ord(char)):
+            cleaned.append(char)
+    return "".join(cleaned)
+
+
+def append_run_header(
+    file_work_dir: Path,
+    suite_name: str,
+    yaml_file: Path,
+    targets: list[str],
+) -> None: (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==mock_helpers:[173:200]
+==mock_loader:[171:188]
+                )
+
+        stderr_text = default_stderr
+        if unmatched_stderr_template is not None:
+            stderr_text = unmatched_stderr_template.format(cmd=cmd_text)
+
+        return CompletedProcess(
+            args=cmd,
+            returncode=default_returncode,
+            stdout=default_stdout,
+            stderr=stderr_text,
+        )
+
+    return _mock_run
+
+
+def path_read_text_router(
+    responses: dict[str, str] | None = None,
+    default_text: str = "",
+    use_contains: bool = True,
+):
+    """
+    Router for Path.read_text() based on path string.
+
+    responses:
+      "/sys/class/net/eth0/speed": "1000"
+    """ (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==mock_helpers:[149:163]
+==mock_loader:[97:111]
+        if use_contains:
+            return pattern in cmd_text
+        return pattern == cmd_text
+
+    def _mock_run(cmd, *args, **kwargs):
+        del args, kwargs
+        cmd_text = " ".join(cmd) if isinstance(cmd, (list, tuple)) else str(cmd)
+
+        if call_log_path is not None:
+            log_path = Path(call_log_path)
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            with log_path.open("a", encoding="utf-8") as handle:
+                handle.write(f"{cmd_text}\n")
+ (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==pytest_runner:[490:499]
+==report:[895:904]
+    )
+    parser.add_argument(
+        "--jobs",
+        type=int,
+        default=4,
+        help="Number of YAML test cases to run in parallel (default: 4)",
+    )
+    args = parser.parse_args()
+ (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==pytest_runner:[213:220]
+==report:[89:96]
+    result = subprocess.run(
+        ["git", *args],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    ) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==pytest_runner:[40:52]
+==runner_checks:[35:47]
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def detect_project_root(script_dir: Path) -> Path:
+    if script_dir.parent.name == "common":
+        return script_dir.parent.parent
+    return script_dir.parent
+
+
+PROJECT_ROOT = detect_project_root(SCRIPT_DIR)
+TEST_YAML_DIR = PROJECT_ROOT / "common" / "test_yaml"
+REPORTS_DIR = PROJECT_ROOT / "common" / "reports" (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==mock_helpers:[92:100]
+==mock_loader:[97:105]
+        if use_contains:
+            return pattern in cmd_text
+        return pattern == cmd_text
+
+    def _mock_check_output(cmd, *args, **kwargs):
+        del args, kwargs
+        cmd_text = " ".join(cmd) if isinstance(cmd, (list, tuple)) else str(cmd)
+ (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==pytest_runner:[40:50]
+==report:[12:23]
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def detect_project_root(script_dir: Path) -> Path:
+    if script_dir.parent.name == "common":
+        return script_dir.parent.parent
+    return script_dir.parent
+
+
+PROJECT_ROOT = detect_project_root(SCRIPT_DIR) (duplicate-code)
+common/yaml_test_harness/runner_reporting.py:1:0: R0801: Similar lines in 2 files
+==runner_checks:[35:45]
+==runner_reporting:[11:21]
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def detect_project_root(script_dir: Path) -> Path:
+    if script_dir.parent.name == "common":
+        return script_dir.parent.parent
+    return script_dir.parent
+
+
+PROJECT_ROOT = detect_project_root(SCRIPT_DIR) (duplicate-code)
+
+------------------------------------------------------------------
+Your code has been rated at 9.29/10 (previous run: 9.29/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+9.29/10
+
+====================================================================================================
+RUN AT: 2026-06-11 07:29:00
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module report
+common/yaml_test_harness/report.py:1: [C0114(missing-module-docstring), ] Missing module docstring
+common/yaml_test_harness/report.py:16: [C0116(missing-function-docstring), detect_project_root] Missing function or method docstring
+common/yaml_test_harness/report.py:39: [C0115(missing-class-docstring), Color] Missing class docstring
+common/yaml_test_harness/report.py:39: [R0903(too-few-public-methods), Color] Too few public methods (0/2)
+common/yaml_test_harness/report.py:47: [C0116(missing-function-docstring), color_text] Missing function or method docstring
+common/yaml_test_harness/report.py:51: [C0116(missing-function-docstring), ensure_reports_dir] Missing function or method docstring
+common/yaml_test_harness/report.py:55: [C0116(missing-function-docstring), append_log_history] Missing function or method docstring
+common/yaml_test_harness/report.py:89: [C0116(missing-function-docstring), run_git_command] Missing function or method docstring
+common/yaml_test_harness/report.py:100: [C0116(missing-function-docstring), get_commit_info] Missing function or method docstring
+common/yaml_test_harness/report.py:126: [C0116(missing-function-docstring), resolve_manual_target] Missing function or method docstring
+common/yaml_test_harness/report.py:136: [C0116(missing-function-docstring), get_manual_python_target] Missing function or method docstring
+common/yaml_test_harness/report.py:158: [C0116(missing-function-docstring), sanitize_name] Missing function or method docstring
+common/yaml_test_harness/report.py:165: [C0116(missing-function-docstring), run_pytest] Missing function or method docstring
+common/yaml_test_harness/report.py:201: [C0116(missing-function-docstring), collect_pytest_case_logs] Missing function or method docstring
+common/yaml_test_harness/report.py:260: [C0116(missing-function-docstring), print_pytest_summary] Missing function or method docstring
+common/yaml_test_harness/report.py:260: [R0914(too-many-locals), print_pytest_summary] Too many local variables (18/15)
+common/yaml_test_harness/report.py:331: [C0116(missing-function-docstring), get_recently_changed_python_files] Missing function or method docstring
+common/yaml_test_harness/report.py:359: [C0116(missing-function-docstring), extract_pylint_score] Missing function or method docstring
+common/yaml_test_harness/report.py:373: [C0116(missing-function-docstring), run_pylint_command] Missing function or method docstring
+common/yaml_test_harness/report.py:383: [C0116(missing-function-docstring), run_pylint] Missing function or method docstring
+common/yaml_test_harness/report.py:486: [C0116(missing-function-docstring), write_pylint_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:486: [R0914(too-many-locals), write_pylint_xml] Too many local variables (19/15)
+common/yaml_test_harness/report.py:552: [C0116(missing-function-docstring), create_empty_pylint_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:580: [C0116(missing-function-docstring), get_pylint_score_from_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:595: [C0116(missing-function-docstring), print_pylint_summary] Missing function or method docstring
+common/yaml_test_harness/report.py:595: [R0914(too-many-locals), print_pylint_summary] Too many local variables (19/15)
+common/yaml_test_harness/report.py:609: [W0718(broad-exception-caught), print_pylint_summary] Catching too general exception Exception
+common/yaml_test_harness/report.py:660: [C0116(missing-function-docstring), run_mypy_command] Missing function or method docstring
+common/yaml_test_harness/report.py:670: [C0116(missing-function-docstring), run_mypy] Missing function or method docstring
+common/yaml_test_harness/report.py:744: [C0116(missing-function-docstring), write_mypy_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:744: [R0914(too-many-locals), write_mypy_xml] Too many local variables (18/15)
+common/yaml_test_harness/report.py:807: [C0116(missing-function-docstring), create_empty_mypy_xml] Missing function or method docstring
+common/yaml_test_harness/report.py:831: [C0116(missing-function-docstring), print_mypy_summary] Missing function or method docstring
+common/yaml_test_harness/report.py:845: [W0718(broad-exception-caught), print_mypy_summary] Catching too general exception Exception
+common/yaml_test_harness/report.py:888: [C0116(missing-function-docstring), main] Missing function or method docstring
+
+-------------------------------------------------------------------
+Your code has been rated at 9.30/10 (previous run: 10.00/10, -0.70)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module report
+common/yaml_test_harness/report.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+common/yaml_test_harness/report.py:16:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:39:0: C0115: Missing class docstring (missing-class-docstring)
+common/yaml_test_harness/report.py:39:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+common/yaml_test_harness/report.py:47:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:51:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:55:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:89:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:100:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:126:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:136:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:158:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:165:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:201:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:260:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:260:0: R0914: Too many local variables (18/15) (too-many-locals)
+common/yaml_test_harness/report.py:331:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:359:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:373:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:383:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:486:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:486:0: R0914: Too many local variables (19/15) (too-many-locals)
+common/yaml_test_harness/report.py:552:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:580:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:595:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:595:0: R0914: Too many local variables (19/15) (too-many-locals)
+common/yaml_test_harness/report.py:609:11: W0718: Catching too general exception Exception (broad-exception-caught)
+common/yaml_test_harness/report.py:660:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:670:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:744:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:744:0: R0914: Too many local variables (18/15) (too-many-locals)
+common/yaml_test_harness/report.py:807:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:831:0: C0116: Missing function or method docstring (missing-function-docstring)
+common/yaml_test_harness/report.py:845:11: W0718: Catching too general exception Exception (broad-exception-caught)
+common/yaml_test_harness/report.py:888:0: C0116: Missing function or method docstring (missing-function-docstring)
+
+------------------------------------------------------------------
+Your code has been rated at 9.30/10 (previous run: 9.30/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+9.30/10
+
+====================================================================================================
+RUN AT: 2026-06-11 07:31:26
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module ethtool-test
+common/linux_scripts/ethtool-test.py:1: [C0103(invalid-name), ] Module name "ethtool-test" doesn't conform to snake_case naming style
+common/linux_scripts/ethtool-test.py:130: [R0914(too-many-locals), print_summary] Too many local variables (30/15)
+common/linux_scripts/ethtool-test.py:130: [R0912(too-many-branches), print_summary] Too many branches (30/12)
+common/linux_scripts/ethtool-test.py:130: [R0915(too-many-statements), print_summary] Too many statements (84/50)
+common/linux_scripts/ethtool-test.py:411: [R0914(too-many-locals), main] Too many local variables (62/15)
+common/linux_scripts/ethtool-test.py:844: [W0718(broad-exception-caught), main] Catching too general exception Exception
+common/linux_scripts/ethtool-test.py:413: [R1702(too-many-nested-blocks), main] Too many nested blocks (6/5)
+common/linux_scripts/ethtool-test.py:413: [R1702(too-many-nested-blocks), main] Too many nested blocks (6/5)
+common/linux_scripts/ethtool-test.py:411: [R0912(too-many-branches), main] Too many branches (65/12)
+common/linux_scripts/ethtool-test.py:411: [R0915(too-many-statements), main] Too many statements (285/50)
+
+------------------------------------------------------------------
+Your code has been rated at 9.80/10 (previous run: 8.84/10, +0.97)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module ethtool-test
+common/linux_scripts/ethtool-test.py:1:0: C0103: Module name "ethtool-test" doesn't conform to snake_case naming style (invalid-name)
+common/linux_scripts/ethtool-test.py:130:0: R0914: Too many local variables (30/15) (too-many-locals)
+common/linux_scripts/ethtool-test.py:130:0: R0912: Too many branches (30/12) (too-many-branches)
+common/linux_scripts/ethtool-test.py:130:0: R0915: Too many statements (84/50) (too-many-statements)
+common/linux_scripts/ethtool-test.py:411:0: R0914: Too many local variables (62/15) (too-many-locals)
+common/linux_scripts/ethtool-test.py:844:11: W0718: Catching too general exception Exception (broad-exception-caught)
+common/linux_scripts/ethtool-test.py:413:4: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+common/linux_scripts/ethtool-test.py:413:4: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+common/linux_scripts/ethtool-test.py:411:0: R0912: Too many branches (65/12) (too-many-branches)
+common/linux_scripts/ethtool-test.py:411:0: R0915: Too many statements (285/50) (too-many-statements)
+
+------------------------------------------------------------------
+Your code has been rated at 9.80/10 (previous run: 9.80/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+9.80/10
+
+====================================================================================================
+RUN AT: 2026-06-11 07:37:50
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1: [E0015(unrecognized-option), ] Unrecognized option found: suggestion-mode
+
+-------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 9.30/10, +0.70)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1:0: E0015: Unrecognized option found: suggestion-mode (unrecognized-option)
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+10.00/10
+
+====================================================================================================
+RUN AT: 2026-06-11 08:41:04
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1: [E0015(unrecognized-option), ] Unrecognized option found: suggestion-mode
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1:0: E0015: Unrecognized option found: suggestion-mode (unrecognized-option)
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+10.00/10
+
+====================================================================================================
+RUN AT: 2026-06-11 08:47:58
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1: [E0015(unrecognized-option), ] Unrecognized option found: suggestion-mode
+************* Module verify_tpm_measurements
+common/linux_scripts/verify_tpm_measurements.py:159: [W0311(bad-indentation), ] Bad indentation. Found 23 spaces, expected 24
+common/linux_scripts/verify_tpm_measurements.py:160: [W0311(bad-indentation), ] Bad indentation. Found 23 spaces, expected 24
+common/linux_scripts/verify_tpm_measurements.py:185: [C0301(line-too-long), ] Line too long (101/100)
+common/linux_scripts/verify_tpm_measurements.py:196: [C0325(superfluous-parens), ] Unnecessary parens after 'if' keyword
+common/linux_scripts/verify_tpm_measurements.py:62: [R1722(consider-using-sys-exit), compare_measurements] Consider using 'sys.exit' instead
+common/linux_scripts/verify_tpm_measurements.py:118: [R1722(consider-using-sys-exit), parse_eventlog_data] Consider using 'sys.exit' instead
+common/linux_scripts/verify_tpm_measurements.py:121: [R1722(consider-using-sys-exit), parse_eventlog_data] Consider using 'sys.exit' instead
+common/linux_scripts/verify_tpm_measurements.py:168: [W1309(f-string-without-interpolation), check_events] Using an f-string that does not have any interpolated variables
+common/linux_scripts/verify_tpm_measurements.py:124: [R1702(too-many-nested-blocks), check_events] Too many nested blocks (6/5)
+common/linux_scripts/verify_tpm_measurements.py:203: [W1309(f-string-without-interpolation), check_events] Using an f-string that does not have any interpolated variables
+common/linux_scripts/verify_tpm_measurements.py:222: [W1309(f-string-without-interpolation), check_events] Using an f-string that does not have any interpolated variables
+common/linux_scripts/verify_tpm_measurements.py:124: [R1702(too-many-nested-blocks), check_events] Too many nested blocks (6/5)
+common/linux_scripts/verify_tpm_measurements.py:281: [E1102(not-callable), check_events] print_buffer is not callable
+common/linux_scripts/verify_tpm_measurements.py:124: [R1702(too-many-nested-blocks), check_events] Too many nested blocks (6/5)
+common/linux_scripts/verify_tpm_measurements.py:351: [R1722(consider-using-sys-exit), check_events] Consider using 'sys.exit' instead
+common/linux_scripts/verify_tpm_measurements.py:358: [R1722(consider-using-sys-exit), ] Consider using 'sys.exit' instead
+common/linux_scripts/verify_tpm_measurements.py:375: [R1722(consider-using-sys-exit), ] Consider using 'sys.exit' instead
+common/linux_scripts/verify_tpm_measurements.py:20: [C0411(wrong-import-order), ] standard import "re" should be placed before third party import "yaml"
+
+------------------------------------------------------------------
+Your code has been rated at 8.98/10 (previous run: 8.98/10, +0.00)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1:0: E0015: Unrecognized option found: suggestion-mode (unrecognized-option)
+************* Module verify_tpm_measurements
+common/linux_scripts/verify_tpm_measurements.py:159:0: W0311: Bad indentation. Found 23 spaces, expected 24 (bad-indentation)
+common/linux_scripts/verify_tpm_measurements.py:160:0: W0311: Bad indentation. Found 23 spaces, expected 24 (bad-indentation)
+common/linux_scripts/verify_tpm_measurements.py:185:0: C0301: Line too long (101/100) (line-too-long)
+common/linux_scripts/verify_tpm_measurements.py:196:0: C0325: Unnecessary parens after 'if' keyword (superfluous-parens)
+common/linux_scripts/verify_tpm_measurements.py:62:8: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+common/linux_scripts/verify_tpm_measurements.py:118:8: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+common/linux_scripts/verify_tpm_measurements.py:121:8: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+common/linux_scripts/verify_tpm_measurements.py:168:32: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/linux_scripts/verify_tpm_measurements.py:124:4: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+common/linux_scripts/verify_tpm_measurements.py:203:32: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/linux_scripts/verify_tpm_measurements.py:222:48: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+common/linux_scripts/verify_tpm_measurements.py:124:4: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+common/linux_scripts/verify_tpm_measurements.py:281:12: E1102: print_buffer is not callable (not-callable)
+common/linux_scripts/verify_tpm_measurements.py:124:4: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+common/linux_scripts/verify_tpm_measurements.py:351:8: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+common/linux_scripts/verify_tpm_measurements.py:358:8: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+common/linux_scripts/verify_tpm_measurements.py:375:8: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+common/linux_scripts/verify_tpm_measurements.py:20:0: C0411: standard import "re" should be placed before third party import "yaml" (wrong-import-order)
+
+------------------------------------------------------------------
+Your code has been rated at 8.98/10 (previous run: 8.98/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+8.98/10
+
+====================================================================================================
+RUN AT: 2026-06-11 08:57:00
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1: [E0015(unrecognized-option), ] Unrecognized option found: suggestion-mode
+
+-------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 9.29/10, +0.71)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1:0: E0015: Unrecognized option found: suggestion-mode (unrecognized-option)
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+10.00/10
+
+====================================================================================================
+RUN AT: 2026-06-11 09:20:29
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1: [E0015(unrecognized-option), ] Unrecognized option found: suggestion-mode
+************* Module report
+common/yaml_test_harness/report.py:192: [R1732(consider-using-with), run_pytest] Consider using 'with' for resource-allocating operations
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, -0.00)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1:0: E0015: Unrecognized option found: suggestion-mode (unrecognized-option)
+************* Module report
+common/yaml_test_harness/report.py:192:14: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+10.00/10
+
+====================================================================================================
+RUN AT: 2026-06-11 09:25:55
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1: [E0015(unrecognized-option), ] Unrecognized option found: suggestion-mode
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1:0: E0015: Unrecognized option found: suggestion-mode (unrecognized-option)
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+10.00/10
+
+====================================================================================================
+RUN AT: 2026-06-11 09:32:35
+====================================================================================================
+PARSEABLE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1: [E0015(unrecognized-option), ] Unrecognized option found: suggestion-mode
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+
+
+
+PARSEABLE STDERR
+================================================================================
+
+
+SCORE STDOUT
+================================================================================
+************* Module /home/vepav01/arm-systemready/.pylintrc
+.pylintrc:1:0: E0015: Unrecognized option found: suggestion-mode (unrecognized-option)
+
+--------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+
+
+
+SCORE STDERR
+================================================================================
+
+
+EXTRACTED SCORE
+================================================================================
+10.00/10

@@ -1,0 +1,25 @@
+{
+    "test_results": [
+        {
+            "Test_suite": "RuleGroupA",
+            "testcases": [
+                {
+                    "Test_case": "RULE_001",
+                    "Test_result": "FAILED (WITH WAIVER)",
+                    "waiver_reason": "BSA waiver"
+                }
+            ],
+            "test_suite_summary": {
+                "Total Rules Run": 1,
+                "Passed": 0,
+                "Passed (Partial)": 0,
+                "Warnings": 0,
+                "Skipped": 0,
+                "Failed": 0,
+                "PAL Not Supported": 0,
+                "Not Implemented": 0,
+                "Total_failed_with_waiver": 1
+            }
+        }
+    ]
+}

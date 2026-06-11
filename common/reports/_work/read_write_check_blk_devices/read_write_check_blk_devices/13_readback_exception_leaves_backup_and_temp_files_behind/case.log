@@ -1,0 +1,30 @@
+================================================================================
+TEST CASE: read_write_check_blk_devices::read_write_check_blk_devices.py::readback_exception_leaves_backup_and_temp_files_behind
+STATUS: PASS
+MESSAGE: Raised expected exception: CalledProcessError
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/13_readback_exception_leaves_backup_and_temp_files_behind
+Traceback (most recent call last):
+  File "/home/vepav01/arm-systemready/common/yaml_test_harness/runner_checks.py", line 1392, in check_py_function
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vepav01/arm-systemready/common/linux_scripts/read_write_check_blk_devices.py", line 194, in perform_write_check
+    run_command(["dd", f"if={device_path}", f"of={read_back_file}",
+  File "/home/vepav01/arm-systemready/common/linux_scripts/read_write_check_blk_devices.py", line 56, in run_command
+    return subprocess.run(
+           ^^^^^^^^^^^^^^^
+  File "/home/vepav01/arm-systemready/common/yaml_test_harness/mock_loader.py", line 143, in _mock_run
+    raise build_exception_from_spec(rule["raise"])
+subprocess.CalledProcessError: Command 'dd if=/dev/sda1 of=read_hello.txt bs=512 count=1 skip=10' returned non-zero exit status 1.
+
+--- STDOUT ---
+INFO: Creating backup of the current block before write check...
+INFO: Writing test data to the device for write check...
+INFO: Reading back the test data for verification...
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/13_readback_exception_leaves_backup_and_temp_files_behind/hello.txt -> PASS
+post_check not_exists: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/13_readback_exception_leaves_backup_and_temp_files_behind/read_hello.txt -> PASS
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/13_readback_exception_leaves_backup_and_temp_files_behind/sda1_backup.bin -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/13_readback_exception_leaves_backup_and_temp_files_behind/blk_commands.log contains 'dd if=sda1_backup.bin of=/dev/sda1 bs=512 count=1 seek=10' -> PASS

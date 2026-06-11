@@ -1,0 +1,16 @@
+================================================================================
+TEST CASE: acs_info::acs_info.py::cli_adds_bmc_firmware_only_for_systemready_band
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/acs_info.py --dmidecode_log /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/8_cli_adds_bmc_firmware_only_for_systemready_band/dmidecode.log --acs_config_path /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/8_cli_adds_bmc_firmware_only_for_systemready_band/acs_config.txt --ipmitool_log /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/8_cli_adds_bmc_firmware_only_for_systemready_band/ipmitool.log --output_dir /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/8_cli_adds_bmc_firmware_only_for_systemready_band/out
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/8_cli_adds_bmc_firmware_only_for_systemready_band/out/acs_info.json contains '"BMC Firmware Version": "1.45"' -> PASS

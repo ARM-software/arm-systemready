@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: edk2_logs_to_json_specific::logs_to_json_edk2.py::has_edk2_parse_logic
+STATUS: PASS
+MESSAGE: All patterns matched

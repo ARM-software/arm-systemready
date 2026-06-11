@@ -1,0 +1,680 @@
+====================================================================================================
+RUN START: 2026-06-11 09:32:20
+YAML: common/test_yaml/ethtool-test.yaml
+SUITE: ethtool_test
+TARGETS: common/linux_scripts/ethtool-test.py
+====================================================================================================
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::file_exists
+STATUS: PASS
+MESSAGE: File exists
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::python_compiles
+STATUS: PASS
+MESSAGE: Python compilation succeeded
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::has_main_guard
+STATUS: PASS
+MESSAGE: Main guard found
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::expected_test_order_keywords_exist
+STATUS: PASS
+MESSAGE: All patterns matched
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::cli_no_ethernet_interfaces_exits_nonzero
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/5_cli_no_ethernet_interfaces_exits_nonzero
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/5_cli_no_ethernet_interfaces_exits_nonzero/system_config.txt
+Exit code: 1
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[93mWARN: No ethernet interfaces detected via ip linux command, Exiting ...[0m
+--- STDERR ---
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::cli_virtual_interface_only
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/6_cli_virtual_interface_only
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/6_cli_virtual_interface_only/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: docker0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (docker0)
+
+Interface docker0
+Bring up                    :  [93mSKIPPED[0m  (Virtual interface — skipped all tests)
+
+Ethtool Compliance : [91mFAILED[0m (No testable interfaces)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::cli_sysfs_link_only
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/7_cli_sysfs_link_only
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/7_cli_sysfs_link_only/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[93mWARN: ethtool not found; using sysfs for link detection[0m
+[96mCHECK: Link detected on eth0 (sysfs)[0m
+[92mINFO: Running ip address show dev eth0[0m
+1: eth0: <BROADCAST,MULTICAST,UP> mtu 1500
+
+[92mINFO: Default route via eth0 is missing; attempting DHCP restore[0m
+[93mWARN: No DHCP client found (udhcpc/dhclient). Skipping restore.[0m
+1: eth0: <BROADCAST,MULTICAST,UP> mtu 1500
+
+[92mINFO: No IPv6 address found on eth0, skipping IPv6 test[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [91mNO[0m  (ethtool not found; using sysfs)
+Link detected               :  [92mPASSED[0m
+IPv4 address present        :  [91mFAILED[0m  (No IPv4 address)
+IPv6 address present        :  [93mSKIPPED[0m  (No global IPv6)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::cli_full_success
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/8_cli_full_success
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/8_cli_full_success/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth1
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth1 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth1[0m
+[92mINFO: Running "ethtool eth1"[0m
+
+
+[93mWARN: Ethernet interface eth1 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth1[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth1)
+
+Interface eth1
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth1)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::cli_required_compliant_ifaces_fail_when_not_enough_pass
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/9_cli_required_compliant_ifaces_fail_when_not_enough_pass
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/9_cli_required_compliant_ifaces_fail_when_not_enough_pass/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+1: eth1
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+ip link set dev eth1 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[92mINFO: Running "ethtool eth0"[0m
+
+
+[93mWARN: Ethernet interface eth0 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth0[0m
+
+****************************************************************
+
+[92mINFO: Bringing down ethernet interface: eth0[0m
+[92mINFO: Bringing up ethernet interface: eth1[0m
+[92mINFO: Running "ethtool eth1"[0m
+
+
+[93mWARN: Ethernet interface eth1 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth1[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0, eth1)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Interface eth1
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 2, but only 0 passed; failed: eth0, eth1)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::external_connectivity_failures_do_not_override_local_interface_health
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/10_external_connectivity_failures_do_not_override_local_interface_health
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/10_external_connectivity_failures_do_not_override_local_interface_health/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[92mINFO: Running "ethtool eth0"[0m
+
+
+[93mWARN: Ethernet interface eth0 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth0[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::route_validation_does_not_depend_on_public_ip_probe
+STATUS: WARNING
+MESSAGE: 
+
+PHASE: expectation_check
+CHECK TYPE: expect_stdout_or_stderr_contains
+
+EXPECTED:
+  Ping gateway (IPv4)
+
+ACTUAL STDOUT:
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[92mINFO: Running "ethtool eth0"[0m
+
+
+[93mWARN: Ethernet interface eth0 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth0[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+
+ACTUAL STDERR:
+<empty>
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/11_route_validation_does_not_depend_on_public_ip_probe
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/11_route_validation_does_not_depend_on_public_ip_probe/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[92mINFO: Running "ethtool eth0"[0m
+
+
+[93mWARN: Ethernet interface eth0 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth0[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::compliance_requires_more_than_link_when_external_checks_degrade
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/12_compliance_requires_more_than_link_when_external_checks_degrade
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/12_compliance_requires_more_than_link_when_external_checks_degrade/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[92mINFO: Running "ethtool eth0"[0m
+
+
+[93mWARN: Ethernet interface eth0 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth0[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---
+
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::connectivity_checks_wait_for_interface_state_recovery
+STATUS: WARNING
+MESSAGE: 
+
+PHASE: expectation_check
+CHECK TYPE: expect_stdout_or_stderr_contains
+
+EXPECTED:
+  Gateway Address present
+
+ACTUAL STDOUT:
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[92mINFO: Running "ethtool eth0"[0m
+
+
+[93mWARN: Ethernet interface eth0 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth0[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+
+ACTUAL STDERR:
+<empty>
+--------------------------------------------------------------------------------
+PHASE: expectation_check
+CHECK TYPE: expect_stdout_or_stderr_contains
+
+EXPECTED:
+  Ping gateway (IPv4)
+
+ACTUAL STDOUT:
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[92mINFO: Running "ethtool eth0"[0m
+
+
+[93mWARN: Ethernet interface eth0 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth0[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+
+ACTUAL STDERR:
+<empty>
+--------------------------------------------------------------------------------
+PHASE: expectation_check
+CHECK TYPE: expect_stdout_or_stderr_contains
+
+EXPECTED:
+  Ping www.arm.com (IPv4)
+
+ACTUAL STDOUT:
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[92mINFO: Running "ethtool eth0"[0m
+
+
+[93mWARN: Ethernet interface eth0 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth0[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+
+ACTUAL STDERR:
+<empty>
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/13_connectivity_checks_wait_for_interface_state_recovery
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/13_connectivity_checks_wait_for_interface_state_recovery/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[92mINFO: Running "ethtool eth0"[0m
+
+
+[93mWARN: Ethernet interface eth0 does not support ethtool self test[0m
+[93mWARN: Link not detected for eth0[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [92mYES[0m
+Self-test supported         :  [93mNO[0m  (supports-test: no)
+Link detected               :  [91mFAILED[0m  (No carrier)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---
+

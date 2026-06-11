@@ -1,0 +1,17 @@
+{
+    "System Info": {
+        "Firmware Version": "FW-2.0",
+        "SoC Family": "FamilyB",
+        "System Name": "BoardB",
+        "Vendor": "VendorB",
+        "Summary Generated On": "2026-06-11 09:32:19",
+        "Band": "SystemReady Band",
+        "ACS version": "6.1",
+        "Board Revision": "RevC",
+        "BMC Firmware Version": "Unknown"
+    },
+    "ACS Results Summary": {
+        "Band": "SystemReady Band",
+        "Date": "2026-06-11 09:32:19"
+    }
+}
