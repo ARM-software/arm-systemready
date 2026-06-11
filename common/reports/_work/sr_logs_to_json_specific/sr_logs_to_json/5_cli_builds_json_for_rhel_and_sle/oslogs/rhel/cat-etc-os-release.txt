@@ -1,2 +1,0 @@
-NAME="Red Hat Enterprise Linux"
-VERSION_ID="9.3"

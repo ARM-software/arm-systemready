@@ -1,6 +1,0 @@
-================================================================================
-TEST CASE: logs_to_json_common::sr_logs_to_json.py::contains_parse_logic
-STATUS: PASS
-MESSAGE: At least one pattern matched
-
-Matched patterns: parse, parse_

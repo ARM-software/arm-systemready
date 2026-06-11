@@ -1,7 +1,0 @@
-/dts-v1/;
-/ {
-  spi@3000 {
-    compatible = "jedec,spi-nor";
-    reg = <0x0 0x3000 0x0 0x100>;
-  };
-};

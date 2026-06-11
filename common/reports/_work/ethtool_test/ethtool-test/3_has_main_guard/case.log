@@ -1,4 +1,0 @@
-================================================================================
-TEST CASE: ethtool_test::ethtool-test.py::has_main_guard
-STATUS: PASS
-MESSAGE: Main guard found

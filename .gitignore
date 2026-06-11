@@ -1,3 +1,10 @@
 
 __pycache__/
 *.py[cod]
+
+common/reports/
+reports/
+__pycache__/
+*.py[cod]
+
+pylint_recent.log

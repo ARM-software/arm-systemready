@@ -1,4 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<testsuite name="mypy" tests="7" failures="0" errors="0" skipped="0"><testcase classname="mypy" name="common/yaml_test_harness/case_data_builders.py" /><testcase classname="mypy" name="common/yaml_test_harness/mock_helpers.py" /><testcase classname="mypy" name="common/yaml_test_harness/mock_loader.py" /><testcase classname="mypy" name="common/yaml_test_harness/pytest_runner.py" /><testcase classname="mypy" name="common/yaml_test_harness/report.py" /><testcase classname="mypy" name="common/yaml_test_harness/runner_checks.py" /><testcase classname="mypy" name="common/yaml_test_harness/runner_reporting.py" /><system-out>branch=yaml-test-harness-scenarios
-commit=4d809c2eca4e70633b00f9f4fbb7f09cbceee574
-git_status=COMMIT_FOUND</system-out></testsuite>

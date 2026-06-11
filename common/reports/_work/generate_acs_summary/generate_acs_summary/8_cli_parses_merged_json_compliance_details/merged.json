@@ -1,9 +1,0 @@
-{
-  "Suite_Name: acs_info": {
-    "ACS Results Summary": {
-      "Overall Compliance Result": "Not Compliant : Mandatory - (not run: BSA, FWTS; failed: SCT) : Recommended - (not run: SBSA; failed: PFDI)",
-      "BBSR compliance results": "Not Compliant : Mandatory - (not run: BBSR-FWTS; failed: BBSR-SCT)",
-      "SCMI compliance results": "Not Compliant"
-    }
-  }
-}
