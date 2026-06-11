@@ -1,0 +1,23 @@
+================================================================================
+TEST CASE: read_write_check_blk_devices::read_write_check_blk_devices.py::cleanup_runs_even_when_restore_is_not_reached
+STATUS: PASS
+MESSAGE: Function returned None
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/8_cleanup_runs_even_when_restore_is_not_reached
+--- STDOUT ---
+INFO: Creating backup of the current block before write check...
+INFO: Writing test data to the device for write check...
+INFO: Reading back the test data for verification...
+Original SHA256: 5ba5b889a62d98368222cef5e53305af9da2960ad6ecab48271a293d3337fb92
+Read-back SHA256: 6d1658a92a0c35551c1e935c4c616b3d1876f2129300aa0e042e62608889cc4b
+INFO: write check failed on /dev/sda1.
+WARNING: Data integrity check failed for /dev/sda1. Possible data corruption.
+INFO: Restoring the backup to the device after write check...
+INFO: Backup restored for /dev/sda1.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/8_cleanup_runs_even_when_restore_is_not_reached/blk_commands.log contains 'dd if=sda1_backup.bin of=/dev/sda1 bs=512 count=1 seek=10' -> PASS
+post_check not_exists: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/8_cleanup_runs_even_when_restore_is_not_reached/hello.txt -> PASS
+post_check not_exists: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/8_cleanup_runs_even_when_restore_is_not_reached/read_hello.txt -> PASS
+post_check not_exists: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/8_cleanup_runs_even_when_restore_is_not_reached/sda1_backup.bin -> PASS

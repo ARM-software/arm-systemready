@@ -1,0 +1,38 @@
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::cli_virtual_interface_only
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/6_cli_virtual_interface_only
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/6_cli_virtual_interface_only/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: docker0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (docker0)
+
+Interface docker0
+Bring up                    :  [93mSKIPPED[0m  (Virtual interface — skipped all tests)
+
+Ethtool Compliance : [91mFAILED[0m (No testable interfaces)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---

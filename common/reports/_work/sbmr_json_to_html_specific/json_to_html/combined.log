@@ -1,0 +1,96 @@
+====================================================================================================
+RUN START: 2026-06-11 09:32:27
+YAML: common/test_yaml/json-to-html.yaml
+SUITE: sbmr_json_to_html_specific
+TARGETS: common/log_parser/sbmr/json_to_html.py
+====================================================================================================
+
+================================================================================
+TEST CASE: sbmr_json_to_html_specific::json_to_html.py::sbmr_invalid_json_input_with_report_path
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/sbmr/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/2_sbmr_invalid_json_input_with_report_path/sbmr.json /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/2_sbmr_invalid_json_input_with_report_path/detail.html /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/2_sbmr_invalid_json_input_with_report_path/summary.html /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/2_sbmr_invalid_json_input_with_report_path/report.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "/home/vepav01/arm-systemready/common/log_parser/sbmr/json_to_html.py", line 466, in <module>
+    main()
+  File "/home/vepav01/arm-systemready/common/log_parser/sbmr/json_to_html.py", line 425, in main
+    data = json.load(jf)
+           ^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+
+================================================================================
+TEST CASE: sbmr_json_to_html_specific::json_to_html.py::sbmr_invalid_json_input
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/sbmr/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/1_sbmr_invalid_json_input/sbmr.json /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/1_sbmr_invalid_json_input/detail.html /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/1_sbmr_invalid_json_input/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "/home/vepav01/arm-systemready/common/log_parser/sbmr/json_to_html.py", line 466, in <module>
+    main()
+  File "/home/vepav01/arm-systemready/common/log_parser/sbmr/json_to_html.py", line 425, in main
+    data = json.load(jf)
+           ^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+
+================================================================================
+TEST CASE: sbmr_json_to_html_specific::json_to_html.py::sbmr_recomputes_summary_when_top_level_summary_missing
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/sbmr/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/sbmr.json /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/detail.html /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/detail.html -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/detail.html contains 'SBMR IB' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/detail.html contains 'Passed case' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/detail.html contains 'PASSED' -> PASS
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/summary.html -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/summary.html contains 'Overall Summary' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sbmr_json_to_html_specific/json_to_html/3_sbmr_recomputes_summary_when_top_level_summary_missing/summary.html contains '<td class="pass">1</td>' -> PASS
+

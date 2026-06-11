@@ -1,0 +1,252 @@
+====================================================================================================
+RUN START: 2026-06-11 09:32:30
+YAML: common/test_yaml/verify-tpm-measurements.yaml
+SUITE: verify_tpm_measurements
+TARGETS: common/linux_scripts/verify_tpm_measurements.py
+====================================================================================================
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::file_exists
+STATUS: PASS
+MESSAGE: File exists
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::python_compiles
+STATUS: PASS
+MESSAGE: Python compilation succeeded
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_no_args_fails
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: python3 /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Usage: python3 verify_tpm_measurements.py <path to pcr.log> <path to eventlog.log>
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_one_arg_fails
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: python3 /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/4_cli_one_arg_fails/pcr.yaml
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Usage: python3 verify_tpm_measurements.py <path to pcr.log> <path to eventlog.log>
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_missing_files_fail_nonzero
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: python3 /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/5_cli_missing_files_fail_nonzero/missing_pcr.yaml /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/5_cli_missing_files_fail_nonzero/missing_event.yaml
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : FAIL
+    ERROR: [Errno 2] No such file or directory: '/home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/5_cli_missing_files_fail_nonzero/missing_pcr.yaml'
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_invalid_event_yaml_fails
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: python3 /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/6_cli_invalid_event_yaml_fails/pcr.yaml /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/6_cli_invalid_event_yaml_fails/event.yaml
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : FAIL
+    ERROR: while parsing a flow sequence
+  in "/home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/6_cli_invalid_event_yaml_fails/event.yaml", line 1, column 6
+expected ',' or ']', but got '<stream end>'
+  in "/home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/6_cli_invalid_event_yaml_fails/event.yaml", line 2, column 1
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_mock_open_raises_on_event_log
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/7_cli_mock_open_raises_on_event_log
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/7_cli_mock_open_raises_on_event_log/pcr.yaml /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/7_cli_mock_open_raises_on_event_log/event.yaml
+Exit code: 1
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : FAIL
+    ERROR: mocked read failure
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_mock_yaml_safe_load_raises_on_event_log
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/8_cli_mock_yaml_safe_load_raises_on_event_log
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/8_cli_mock_yaml_safe_load_raises_on_event_log/pcr.yaml /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/8_cli_mock_yaml_safe_load_raises_on_event_log/event.yaml
+Exit code: 1
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : FAIL
+    ERROR: mocked event parse failure
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_all_required_measurements_pass
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : PASS
+Verify the first event is the EV_NO_ACTION for the Specification ID version                                   : PASS
+Verify EV_POST_CODE events for measurements of firmware to PCR[0] with recommended strings                    : PASS
+Verify EV_POST_CODE events for measurements of signed critical data to PCR[0].                                : PASS
+Verify secure boot policy measurements are made into PCR[7] with EV_EFI_VARIABLE_DRIVER_CONFIG                : PASS
+Verify BootOrder and Boot#### variables are measured in PCR[1] withEV_EFI_VARIABLE_BOOT/EV_EFI_VARIABLE_BOOT2 : PASS
+Verify boot attempts measured in PCR[4] with EV_EFI_ACTION event type                                         : PASS
+Verify security relevant configuration data are measured in into PCR[1] with EV_EFI_HANDOFF_TABLES            : PASS
+Verify presence of EV_SEPARATOR event for each PCR                                                            : PASS
+Verify EV_TABLE_OF_DEVICES events for measurements of config data to PCR[1] with recommended strings          : PASS
+Verify presence of “Exit Boot Services Invocation” event with EV_EFI_ACTION type                              : PASS
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_pcr_mismatch_reports_fail_but_runs
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : FAIL
+    PCR[1] measurements does not match for sha256
+    TPM      PCR[1] : good1
+    Eventlog PCR[1] : bad1
+Verify the first event is the EV_NO_ACTION for the Specification ID version                                   : PASS
+Verify EV_POST_CODE events for measurements of firmware to PCR[0] with recommended strings                    : PASS
+Verify EV_POST_CODE events for measurements of signed critical data to PCR[0].                                : PASS
+Verify secure boot policy measurements are made into PCR[7] with EV_EFI_VARIABLE_DRIVER_CONFIG                : PASS
+Verify BootOrder and Boot#### variables are measured in PCR[1] withEV_EFI_VARIABLE_BOOT/EV_EFI_VARIABLE_BOOT2 : PASS
+Verify boot attempts measured in PCR[4] with EV_EFI_ACTION event type                                         : PASS
+Verify security relevant configuration data are measured in into PCR[1] with EV_EFI_HANDOFF_TABLES            : PASS
+Verify presence of EV_SEPARATOR event for each PCR                                                            : PASS
+Verify EV_TABLE_OF_DEVICES events for measurements of config data to PCR[1] with recommended strings          : PASS
+Verify presence of “Exit Boot Services Invocation” event with EV_EFI_ACTION type                              : PASS
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_boot_variable_missing_reports_fail_but_runs
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : PASS
+Verify the first event is the EV_NO_ACTION for the Specification ID version                                   : PASS
+Verify EV_POST_CODE events for measurements of firmware to PCR[0] with recommended strings                    : PASS
+Verify EV_POST_CODE events for measurements of signed critical data to PCR[0].                                : PASS
+Verify secure boot policy measurements are made into PCR[7] with EV_EFI_VARIABLE_DRIVER_CONFIG                : PASS
+Verify BootOrder and Boot#### variables are measured in PCR[1] withEV_EFI_VARIABLE_BOOT/EV_EFI_VARIABLE_BOOT2 : FAIL
+    BootOrder/Boot#### variable measurements not found
+Verify boot attempts measured in PCR[4] with EV_EFI_ACTION event type                                         : PASS
+Verify security relevant configuration data are measured in into PCR[1] with EV_EFI_HANDOFF_TABLES            : PASS
+Verify presence of EV_SEPARATOR event for each PCR                                                            : PASS
+Verify EV_TABLE_OF_DEVICES events for measurements of config data to PCR[1] with recommended strings          : PASS
+Verify presence of “Exit Boot Services Invocation” event with EV_EFI_ACTION type                              : PASS
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::pcr_comparison_requires_at_least_one_supported_algorithm_match
+STATUS: WARNING
+MESSAGE: 
+
+PHASE: expectation_check
+CHECK TYPE: expect_exit_code
+
+EXPECTED:
+  exit code = 0
+
+ACTUAL:
+  exit code = 1
+--------------------------------------------------------------------------------
+PHASE: expectation_check
+CHECK TYPE: expect_stdout_or_stderr_contains
+
+EXPECTED:
+  FAIL
+
+ACTUAL STDOUT:
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : PASS
+    ERROR: list index out of range
+
+ACTUAL STDERR:
+<empty>
+
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : PASS
+    ERROR: list index out of range
+--- STDERR ---
+
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::truncated_pcr_arrays_are_reported_cleanly
+STATUS: WARNING
+MESSAGE: 
+
+PHASE: expectation_check
+CHECK TYPE: expect_exit_code
+
+EXPECTED:
+  exit code = 0
+
+ACTUAL:
+  exit code = 1
+--------------------------------------------------------------------------------
+PHASE: expectation_check
+CHECK TYPE: expect_stdout_or_stderr_contains
+
+EXPECTED:
+  FAIL
+
+ACTUAL STDOUT:
+ERROR: list index out of range
+
+ACTUAL STDERR:
+<empty>
+
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+ERROR: list index out of range
+--- STDERR ---
+

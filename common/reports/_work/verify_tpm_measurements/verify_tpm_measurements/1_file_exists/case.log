@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::file_exists
+STATUS: PASS
+MESSAGE: File exists

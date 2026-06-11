@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: read_write_check_blk_devices::read_write_check_blk_devices.py::file_exists
+STATUS: PASS
+MESSAGE: File exists

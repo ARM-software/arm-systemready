@@ -1,0 +1,29 @@
+============================================================
+Testing Runtime Device Mapping Conflict Test
+============================================================
+INFO: Using DTS: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/device_tree.dts
+INFO: Using memmap: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/memmap.log
+INFO: Writing log to: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/31_cli_parent_reg_multiple_windows_offset_heuristic_warning/runtime_device_mapping_conflict_test.log
+
+INFO: ============================================================
+INFO: All UEFI Memmap segments CHECKED (RT_Code/RT_Data/MMIO/MMIO_Port)
+INFO: ============================================================
+INFO: Total segments checked: 1
+INFO: RT_Data   0x0000000000004080-0x000000000000409f size=0x20
+
+INFO: ============================================================
+INFO: All DTS MMIO ranges CHECKED (extracted from reg + ranges translation)
+INFO: ============================================================
+INFO: Total DTS ranges checked: 3
+INFO: [T] /soc/syscon@4000                                             0x0000000000004000-0x00000000000040ff size=0x100
+INFO: [T] /soc/syscon@4000/efuse@80                                    0x0000000000004080-0x000000000000409f size=0x20
+INFO: [T] /soc/syscon@4000                                             0x0000000000008000-0x00000000000080ff size=0x100
+
+=====================================================================
+       Runtime Device Mapping Conflict Test Summary    
+=====================================================================
+DEBUG: Conflicting regions:
+DEBUG: UEFI RT_Data 0x0000000000004080-0x000000000000409f overlaps DTS /soc/syscon@4000 0x0000000000004000-0x00000000000040ff (RT size=0x20, DTS size=0x100)
+DEBUG: UEFI RT_Data 0x0000000000004080-0x000000000000409f overlaps DTS /soc/syscon@4000/efuse@80 0x0000000000004080-0x000000000000409f (RT size=0x20, DTS size=0x20)
+DEBUG: Detected 2 conflict(s)
+RESULTS: FAILED

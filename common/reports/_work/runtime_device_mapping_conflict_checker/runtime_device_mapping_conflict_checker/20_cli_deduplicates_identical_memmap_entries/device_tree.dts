@@ -1,0 +1,11 @@
+/dts-v1/;
+/ {
+  soc {
+    #address-cells = <2>;
+    #size-cells = <2>;
+    ranges;
+    uart@9000 {
+      reg = <0x0 0x9000 0x0 0x100>;
+    };
+  };
+};

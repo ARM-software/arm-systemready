@@ -1,0 +1,17 @@
+================================================================================
+TEST CASE: acs_info::acs_info.py::cli_stops_parsing_at_user_defined_configs_marker
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/acs_info.py --dmidecode_log /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/6_cli_stops_parsing_at_user_defined_configs_marker/dmidecode.log --acs_config_path /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/6_cli_stops_parsing_at_user_defined_configs_marker/acs_config.txt --output_dir /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/6_cli_stops_parsing_at_user_defined_configs_marker/out
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+[1;93mWARNING: ipmitool log path not provided for BMC firmware extraction.[0m
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/6_cli_stops_parsing_at_user_defined_configs_marker/out/acs_info.json contains '"ACS version": "7.0"' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/6_cli_stops_parsing_at_user_defined_configs_marker/out/acs_info.json contains 'should_not_appear' -> PASS

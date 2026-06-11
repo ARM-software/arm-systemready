@@ -1,0 +1,213 @@
+suites:
+  - name: merge_summary
+    files:
+      - common/log_parser/merge_summary.py
+    # This richer manifest uses repo-like artifact names so the fixtures resemble
+    # real log_parser outputs: per-suite summary pages go in, and acs_summary.html
+    # is the merged destination that merge_summary.py produces.
+
+    defaults:
+      type: cli
+      args:
+        - "{file}"
+      expect_exit_code: 0
+      timeout_sec: 20
+      shell: false
+
+    cases:
+      - name: file_exists
+        type: file_exists
+        description: "Verify that the merge_summary script exists at the expected repository path so that subsequent structural and runtime tests operate on a real target file."
+
+      - name: python_compiles
+        type: py_compile
+        description: "Ensure the script compiles successfully as valid Python, catching syntax and parser-level regressions before runtime execution."
+
+      - name: has_main_guard
+        type: main_guard
+        description: "Check that the script contains a standard __main__ guard so it can be executed directly as a command-line tool."
+
+      - name: cli_no_args_fails
+        description: "Validate that invoking the script without any required arguments triggers a failure path, ensuring the CLI enforces its mandatory input and output parameters."
+        args: []
+        expect_exit_nonzero: true
+
+      - name: cli_one_arg_fails
+        description: "Validate that the script rejects partial invocation when only one argument is supplied instead of the full expected set of input and output file paths."
+        args:
+          - "{dir}/bsa_summary.html"
+        expect_exit_nonzero: true
+
+      - name: cli_missing_input_file_fails
+        description: "Verify that the script exits through a failure path when one or more required input files are missing, ensuring missing upstream artifacts are detected explicitly."
+        args:
+          - "{dir}/missing_bsa_summary.html"
+          - "{dir}/missing_fwts_summary.html"
+          - "{dir}/acs_summary.html"
+        expect_exit_nonzero: true
+
+      - name: cli_merges_two_files_into_output
+        description: "Validate the core merge behavior by combining two populated repo-like summary files into a single output file and confirming that their sections appear in the expected order."
+        text_files:
+          # Small but realistic suite summaries. The marker strings are stable
+          # anchors for ordered post-checks without needing large HTML fixtures.
+          bsa_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><h2>Result Summary</h2><table><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BSA merge marker</div></body></html>
+          fwts_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>FWTS Test Summary</title></head><body><h1>FWTS Test Summary</h1><h2>Result Summary</h2><table><tr><th>Status</th><th>Total</th></tr><tr><td>Failed</td><td>1</td></tr></table><div>FWTS merge marker</div></body></html>
+        args:
+          - "{dir}/bsa_summary.html"
+          - "{dir}/fwts_summary.html"
+          - "{dir}/acs_summary.html"
+        post_checks:
+          - type: file_not_empty
+            path: "{dir}/acs_summary.html"
+          - type: ordered_contains
+            path: "{dir}/acs_summary.html"
+            texts:
+              - "BSA Test Summary"
+              - "BSA merge marker"
+              - "FWTS Test Summary"
+              - "FWTS merge marker"
+
+      - name: cli_preserves_blank_lines_during_merge
+        description: "Verify that blank lines present in repo-like log content are preserved in the merged output, ensuring formatting-sensitive diagnostic text is not unintentionally normalized or collapsed."
+        text_files:
+          # Simulate a plain-text ACS info fragment where an intentional blank line
+          # separates sections and must survive the merge unchanged.
+          acs_results.log: |
+            Suite_Name: acs_info
+
+            Overall Compliance Result: Compliant
+          extensions.log: |
+            SCMI compliance results: Compliant
+        args:
+          - "{dir}/acs_results.log"
+          - "{dir}/extensions.log"
+          - "{dir}/acs_summary.html"
+        post_checks:
+          - type: regex
+            path: "{dir}/acs_summary.html"
+            pattern: "Suite_Name: acs_info\\n\\nOverall Compliance Result: Compliant"
+
+      - name: cli_output_file_is_created_when_inputs_exist
+        description: "Verify that the script creates the requested output file when valid repo-like summary inputs are supplied, even in a minimal merge scenario."
+        text_files:
+          # Two minimal summary pages are enough here because the test only cares
+          # that a merged artifact is written, not about exact merged ordering.
+          sbsa_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBSA Test Summary</title></head><body><h1>SBSA Test Summary</h1><h2>Result Summary</h2><table><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>SBSA marker</div></body></html>
+          scmi_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCMI Test Summary</title></head><body><h1>SCMI Test Summary</h1><h2>Result Summary</h2><table><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>SCMI marker</div></body></html>
+        args:
+          - "{dir}/sbsa_summary.html"
+          - "{dir}/scmi_summary.html"
+          - "{dir}/acs_summary.html"
+        post_checks:
+          - type: exists
+            path: "{dir}/acs_summary.html"
+
+      - name: cli_handles_empty_first_input
+        description: "Verify that the script handles an empty first summary input file gracefully and still merges content from the remaining non-empty summary into the output."
+        text_files:
+          # Empty string means "existing but empty file", which is different from a
+          # missing path and exercises a different branch in the merge flow.
+          empty_bsa_summary.html: ""
+          os_tests_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>OS Tests Test Summary</title></head><body><h1>OS Tests Test Summary</h1><h2>Result Summary</h2><table><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>OS tests payload marker</div></body></html>
+        args:
+          - "{dir}/empty_bsa_summary.html"
+          - "{dir}/os_tests_summary.html"
+          - "{dir}/acs_summary.html"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/acs_summary.html"
+            text: "OS tests payload marker"
+
+      - name: cli_handles_both_inputs_empty
+        description: "Verify that the script handles the case where both summary input files are empty, completing cleanly and still producing an output artifact."
+        text_files:
+          empty_bsa_summary.html: ""
+          empty_fwts_summary.html: ""
+        args:
+          - "{dir}/empty_bsa_summary.html"
+          - "{dir}/empty_fwts_summary.html"
+          - "{dir}/acs_summary.html"
+        post_checks:
+          - type: exists
+            path: "{dir}/acs_summary.html"
+
+      - name: cli_missing_second_input_fails_even_if_first_exists
+        description: "Verify that the script fails when the second summary input file is missing even if the first summary input file exists, ensuring partial input availability is not treated as sufficient."
+        text_files:
+          # Keep the first file valid so the failure is isolated to the missing
+          # second input rather than a generic all-inputs-missing condition.
+          bsa_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><h2>Result Summary</h2><table><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BSA missing-second marker</div></body></html>
+        args:
+          - "{dir}/bsa_summary.html"
+          - "{dir}/fwts_summary_missing.html"
+          - "{dir}/acs_summary.html"
+        expect_exit_nonzero: true
+
+      - name: cli_overwrites_existing_output_file
+        description: "Verify that an already-existing ACS summary output file is overwritten with fresh merged summary content rather than appended to or left unchanged."
+        text_files:
+          # Seed the destination with stale content to prove merge_summary.py
+          # overwrites the old artifact instead of appending to it.
+          bsa_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><h2>Result Summary</h2><table><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BSA fresh marker</div></body></html>
+          fwts_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>FWTS Test Summary</title></head><body><h1>FWTS Test Summary</h1><h2>Result Summary</h2><table><tr><th>Status</th><th>Total</th></tr><tr><td>Failed</td><td>1</td></tr></table><div>FWTS fresh marker</div></body></html>
+          acs_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>Old ACS Summary</title></head><body>stale ACS summary content</body></html>
+        args:
+          - "{dir}/bsa_summary.html"
+          - "{dir}/fwts_summary.html"
+          - "{dir}/acs_summary.html"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/acs_summary.html"
+            text: "BSA fresh marker"
+          - type: file_contains
+            path: "{dir}/acs_summary.html"
+            text: "FWTS fresh marker"
+          - type: file_not_contains
+            path: "{dir}/acs_summary.html"
+            text: "stale ACS summary content"
+
+      - name: cli_binary_or_non_utf8_input_fails_cleanly
+        description: "Verify that the script exits non-zero when a summary input file contains bytes that are invalid under the active text decoding mode."
+        env:
+          # Force deterministic UTF-8 decoding so 0xff is always undecodable,
+          # regardless of the host environment's default text codec.
+          PYTHONUTF8: "1"
+        bin_files:
+          corrupt_summary.html:
+            hex: "ff"
+        args:
+          - "{dir}/corrupt_summary.html"
+          - "{dir}/acs_summary.html"
+        expect_exit_nonzero: true
+
+      - name: cli_output_parent_directory_missing_fails
+        description: "Verify that the script fails when the requested ACS summary output path points into a parent directory that does not exist."
+        text_files:
+          # The input summary is valid here; only the destination directory is
+          # deliberately invalid so the failure reason stays narrow and obvious.
+          bsa_summary.html: |
+            <!DOCTYPE html>
+            <html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><h2>Result Summary</h2><table><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BSA output-path marker</div></body></html>
+        args:
+          - "{dir}/bsa_summary.html"
+          - "{dir}/missing_dir/acs_summary.html"
+        expect_exit_nonzero: true

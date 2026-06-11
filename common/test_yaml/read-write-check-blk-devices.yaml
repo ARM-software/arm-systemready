@@ -1,0 +1,430 @@
+x_module_case: &module_case
+  type: module_main_with_env
+  expect_exit_code: 0
+
+suites:
+  - name: read_write_check_blk_devices
+    files:
+      - common/linux_scripts/read_write_check_blk_devices.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+        description: "Verify that read_write_check_blk_devices.py exists at the expected repository path before any deeper structural or runtime checks are executed."
+
+      - name: python_compiles
+        type: py_compile
+        description: "Ensure that the script compiles successfully as valid Python so syntax-level regressions are caught before runtime behavior is exercised."
+
+      - name: cli_no_disks_runs_cleanly
+        <<: *module_case
+        description: "Verify that when no block devices are detected, the script still runs cleanly and only performs the top-level discovery command."
+        scenario:
+          kind: blk_devices
+          prompt: no
+          disks: []
+        expect_stdout_or_stderr_contains:
+          - "INFO: Detected following block devices with lsblk command :"
+        post_checks:
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "gdisk -l /dev/"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=/dev/"
+
+      - name: cli_skips_mtd_and_ram_disks
+        <<: *module_case
+        description: "Verify that MTD block devices and RAM disks are surfaced by discovery but no later disk-processing commands are run for them."
+        scenario:
+          kind: blk_devices
+          prompt: no
+          disks:
+            - name: mtdblock0
+              kind: mtdblock
+            - name: ram0
+              kind: ram
+        expect_stdout_or_stderr_contains:
+          - "INFO: Skipping MTD block device /dev/mtdblock0"
+          - "INFO: Skipping RAM disk /dev/ram0"
+        post_checks:
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "timeout 10 gdisk -l /dev/mtdblock0"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "timeout 10 gdisk -l /dev/ram0"
+
+      - name: cli_raw_disk_block_read_success_and_no_write_prompt
+        <<: *module_case
+        description: "Verify that a disk without a valid partition table is treated as a raw device, receives only the initial read and mount check, and does not enter free-space or write-side operations when the user declines."
+        scenario:
+          kind: blk_devices
+          prompt: no
+          disks:
+            - name: sda
+              table: raw
+              block_read: pass
+              write_check:
+                mounted: false
+        expect_stdout_or_stderr_contains:
+          - "INFO: No valid partition table found for sda, treating as raw device."
+          - "INFO: No partitions detected for sda, treating as raw device."
+          - "INFO: Performing block read on /dev/sda"
+          - "INFO: Block read on /dev/sda successful"
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/blk_commands.log"
+            texts:
+              - "timeout 10 gdisk -l /dev/sda"
+              - "dd if=/dev/sda of=/dev/null bs=1M count=1"
+              - "findmnt -n /dev/sda"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "df -B 512 /dev/sda --output=used,avail"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=/dev/sda of=sda_backup.bin"
+
+      - name: cli_mbr_precious_partition_is_skipped
+        <<: *module_case
+        description: "Verify that an MBR EFI System partition is classified as precious metadata and skipped for block read/write activity."
+        scenario:
+          kind: blk_devices
+          prompt: no
+          disks:
+            - name: sda
+              table: mbr
+              partitions:
+                - name: sda1
+                  boot: true
+                  start: 2048
+                  sectors: 204800
+                  size: 100M
+                  id: ef
+                  type_name: EFI System
+                  used_blocks: 10
+                  available_blocks: 20
+        expect_stdout_or_stderr_contains:
+          - "INFO: Partition table type : MBR"
+          - "INFO: sda1 partition is PRECIOUS"
+          - "Skipping block read/write"
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/blk_commands.log"
+            texts:
+              - "fdisk -l /dev/sda"
+              - "df -B 512 /dev/sda1 --output=used,avail"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=/dev/sda1 of=/dev/null bs=1M count=1"
+
+      - name: write_check_restores_original_block_after_successful_verification
+        type: py_function
+        warn_only: true
+        function: perform_write_check
+        description: "Verify that a successful write verification restores the original block and removes the temporary artifacts."
+        scenario:
+          kind: blk_write_check
+          device: sda1
+          partition_id: "0x83"
+          prompt: yes
+          used_blocks: 10
+          available_blocks: 20
+          write_flow:
+            readback: match
+        expect_stdout_or_stderr_contains:
+          - "INFO: Creating backup of the current block before write check..."
+          - "INFO: Writing test data to the device for write check..."
+          - "INFO: Reading back the test data for verification..."
+          - "INFO: write check passed on /dev/sda1."
+          - "INFO: Backup restored for /dev/sda1."
+        post_checks:
+          - type: file_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=sda1_backup.bin of=/dev/sda1 bs=512 count=1 seek=10"
+          - type: not_exists
+            path: "{dir}/hello.txt"
+          - type: not_exists
+            path: "{dir}/read_hello.txt"
+          - type: not_exists
+            path: "{dir}/sda1_backup.bin"
+
+      - name: cleanup_runs_even_when_restore_is_not_reached
+        type: py_function
+        warn_only: true
+        function: perform_write_check
+        description: "Verify that verification failure still restores the backup and removes the temporary artifacts."
+        scenario:
+          kind: blk_write_check
+          device: sda1
+          partition_id: "0x83"
+          prompt: yes
+          used_blocks: 10
+          available_blocks: 20
+          write_flow:
+            readback: mismatch
+            restore: skip
+        expect_stdout_or_stderr_contains:
+          - "INFO: Creating backup of the current block before write check..."
+          - "INFO: Writing test data to the device for write check..."
+          - "INFO: Reading back the test data for verification..."
+          - "WARNING: Data integrity check failed for /dev/sda1. Possible data corruption."
+        post_checks:
+          - type: file_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=sda1_backup.bin of=/dev/sda1 bs=512 count=1 seek=10"
+          - type: not_exists
+            path: "{dir}/hello.txt"
+          - type: not_exists
+            path: "{dir}/read_hello.txt"
+          - type: not_exists
+            path: "{dir}/sda1_backup.bin"
+
+      - name: mbr_parser_limitation_missing_required_columns_is_warned_and_block_io_is_skipped
+        type: module_main_with_env
+        warn_only: true
+        expect_exit_code: 0
+        description: "Document the current MBR parser limitation when required fdisk columns are missing and verify that block I/O is skipped safely."
+        scenario:
+          kind: blk_devices
+          prompt: no
+          disks:
+            - name: sda
+              table: mbr
+              partitions:
+                - name: sda1
+              fdisk_output: |
+                Disk /dev/sda: 16 GiB
+                Device        Start    End Sectors  Size Type
+                /dev/sda1     2048 206847 204800 100M EFI System
+        expect_stdout_or_stderr_contains:
+          - "INFO: Partition table type : MBR"
+          - "WARNING: Could not parse enough MBR partition IDs."
+        post_checks:
+          - type: file_contains
+            path: "{dir}/blk_commands.log"
+            text: "fdisk -l /dev/sda"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=/dev/sda1 of=/dev/null bs=1M count=1"
+
+      - name: gpt_partition_metadata_parsing_skips_partition_when_sgdisk_output_is_incomplete
+        type: module_main_with_env
+        warn_only: true
+        expect_exit_code: 0
+        description: "Document the current GPT metadata parsing limitation when sgdisk output is incomplete and verify that block I/O is skipped safely."
+        scenario:
+          kind: blk_devices
+          prompt: yes
+          disks:
+            - name: sda
+              table: gpt
+              partitions:
+                - name: sda1
+                  sgdisk_output: |
+                    Partition GUID code: C12A7328-F81F-11D2-BA4B-00A0C93EC93B (EFI System partition)
+                    First sector: 2048
+                    Last sector: 206847
+                    Partition size: 204800 sectors
+        expect_stdout_or_stderr_contains:
+          - "INFO: Partition table type : GPT"
+          - "INFO: Unable to parse sgdisk info for sda1. Skipping."
+        post_checks:
+          - type: file_contains
+            path: "{dir}/blk_commands.log"
+            text: "sgdisk -i=1 /dev/sda"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=/dev/sda1 of=/dev/null bs=1M count=1"
+
+      - name: mounted_partition_skips_write_check_and_never_queries_space
+        <<: *module_case
+        warn_only: true
+        description: "Verify that mounted partitions are skipped before free-space checks and any write-side dd operations."
+        scenario:
+          kind: blk_devices
+          prompt: yes
+          disks:
+            - name: sda
+              table: mbr
+              partitions:
+                - name: sda1
+                  start: 2048
+                  sectors: 204800
+                  size: 100M
+                  id: 83
+                  type_name: Linux
+                  mounted: true
+        expect_stdout_or_stderr_contains:
+          - "INFO: Performing block read on /dev/sda1 mbr_part_id = 0x83"
+          - "INFO: Block read on /dev/sda1 mbr_part_id = 0x83 successful"
+          - "INFO: /dev/sda1 is mounted, skipping write test."
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/blk_commands.log"
+            texts:
+              - "dd if=/dev/sda1 of=/dev/null bs=1M count=1"
+              - "findmnt -n /dev/sda1"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "df -B 512 /dev/sda1 --output=used,avail"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=/dev/sda1 of=sda1_backup.bin"
+
+      - name: raw_disk_path_never_reaches_write_side_dd_when_user_declines
+        <<: *module_case
+        warn_only: true
+        description: "Verify that the raw-disk path stops before any write-side operations when the user declines the write prompt."
+        scenario:
+          kind: blk_devices
+          prompt: no
+          disks:
+            - name: sda
+              table: raw
+              block_read: pass
+              write_check:
+                mounted: false
+        expect_stdout_or_stderr_contains:
+          - "INFO: No valid partition table found for sda, treating as raw device."
+          - "INFO: Performing block read on /dev/sda"
+          - "INFO: Block read on /dev/sda successful"
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/blk_commands.log"
+            texts:
+              - "dd if=/dev/sda of=/dev/null bs=1M count=1"
+              - "findmnt -n /dev/sda"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "df -B 512 /dev/sda --output=used,avail"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=/dev/sda of=sda_backup.bin"
+
+      - name: readback_exception_leaves_backup_and_temp_files_behind
+        type: py_function
+        warn_only: true
+        function: perform_write_check
+        description: "Document the current behavior where a readback exception aborts cleanup and leaves the helper artifacts behind."
+        scenario:
+          kind: blk_write_check
+          device: sda1
+          partition_id: "0x83"
+          prompt: yes
+          used_blocks: 10
+          available_blocks: 20
+          write_flow:
+            readback: error
+            readback_error: mocked readback failure
+            restore: skip
+        expect_exception: CalledProcessError
+        expect_stdout_or_stderr_contains:
+          - "INFO: Creating backup of the current block before write check..."
+          - "INFO: Writing test data to the device for write check..."
+          - "INFO: Reading back the test data for verification..."
+        post_checks:
+          - type: exists
+            path: "{dir}/hello.txt"
+          - type: not_exists
+            path: "{dir}/read_hello.txt"
+          - type: exists
+            path: "{dir}/sda1_backup.bin"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=sda1_backup.bin of=/dev/sda1 bs=512 count=1 seek=10"
+
+      - name: write_prompt_timeout_defaults_to_safe_decline
+        type: py_function
+        warn_only: true
+        function: perform_write_check
+        description: "Verify that a safe-decline response from the write prompt prevents any write-side operations from starting."
+        scenario:
+          kind: blk_write_check
+          device: sda1
+          partition_id: "0x83"
+          prompt: timeout
+        post_checks:
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=/dev/sda1 of=sda1_backup.bin"
+
+      - name: raw_disk_write_prompt_is_allowed_without_partition_type_guard
+        type: module_main_with_env
+        warn_only: true
+        expect_exit_code: 0
+        description: "Document the current behavior that allows a raw disk to enter the write path once the user explicitly agrees."
+        scenario:
+          kind: blk_devices
+          prompt: yes
+          disks:
+            - name: sda
+              table: raw
+              block_read: pass
+              write_check:
+                mounted: false
+                used_blocks: 10
+                available_blocks: 20
+                write_flow:
+                  readback: match
+        expect_stdout_or_stderr_contains:
+          - "INFO: No valid partition table found for sda, treating as raw device."
+          - "INFO: Performing block read on /dev/sda"
+          - "INFO: Block read on /dev/sda successful"
+          - "INFO: Creating backup of the current block before write check..."
+          - "INFO: write check passed on /dev/sda."
+          - "INFO: Backup restored for /dev/sda."
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/blk_commands.log"
+            texts:
+              - "findmnt -n /dev/sda"
+              - "df -B 512 /dev/sda --output=used,avail"
+              - "dd if=/dev/sda of=sda_backup.bin bs=512 count=1 skip=10"
+              - "dd if=hello.txt of=/dev/sda bs=512 count=1 seek=10"
+              - "dd if=/dev/sda of=read_hello.txt bs=512 count=1 skip=10"
+              - "dd if=sda_backup.bin of=/dev/sda bs=512 count=1 seek=10"
+          - type: not_exists
+            path: "{dir}/hello.txt"
+          - type: not_exists
+            path: "{dir}/read_hello.txt"
+          - type: not_exists
+            path: "{dir}/sda_backup.bin"
+
+      - name: mounted_guard_applies_only_to_write_phase_not_initial_block_read
+        <<: *module_case
+        warn_only: true
+        description: "Verify that mounted partitions still undergo the initial safe block read while the write phase is skipped."
+        scenario:
+          kind: blk_devices
+          prompt: yes
+          disks:
+            - name: sda
+              table: mbr
+              partitions:
+                - name: sda1
+                  boot: true
+                  start: 2048
+                  sectors: 204800
+                  size: 100M
+                  id: 83
+                  type_name: Linux
+                  mounted: true
+        expect_stdout_or_stderr_contains:
+          - "INFO: Performing block read on /dev/sda1 mbr_part_id = 0x83"
+          - "INFO: Block read on /dev/sda1 mbr_part_id = 0x83 successful"
+          - "INFO: /dev/sda1 is mounted, skipping write test."
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/blk_commands.log"
+            texts:
+              - "dd if=/dev/sda1 of=/dev/null bs=1M count=1"
+              - "findmnt -n /dev/sda1"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "df -B 512 /dev/sda1 --output=used,avail"
+          - type: file_not_contains
+            path: "{dir}/blk_commands.log"
+            text: "dd if=/dev/sda1 of=sda1_backup.bin"
+

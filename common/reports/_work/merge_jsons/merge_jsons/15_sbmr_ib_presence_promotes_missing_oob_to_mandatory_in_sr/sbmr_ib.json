@@ -1,0 +1,43 @@
+{
+    "test_results": [
+        {
+            "Test_suite": "In-band management",
+            "Test_cases": [
+                {
+                    "Test_case": "Redfish service root",
+                    "subtests": [
+                        {
+                            "sub_Test_Number": "1",
+                            "sub_Test_Description": "Query service root",
+                            "sub_test_result": "PASSED"
+                        }
+                    ],
+                    "test_case_summary": {
+                        "total_passed": 1,
+                        "total_failed": 0,
+                        "total_failed_with_waiver": 0,
+                        "total_aborted": 0,
+                        "total_skipped": 0,
+                        "total_warnings": 0
+                    }
+                }
+            ],
+            "test_suite_summary": {
+                "total_passed": 1,
+                "total_failed": 0,
+                "total_failed_with_waiver": 0,
+                "total_aborted": 0,
+                "total_skipped": 0,
+                "total_warnings": 0
+            }
+        }
+    ],
+    "suite_summary": {
+        "total_passed": 1,
+        "total_failed": 0,
+        "total_failed_with_waiver": 0,
+        "total_aborted": 0,
+        "total_skipped": 0,
+        "total_warnings": 0
+    }
+}

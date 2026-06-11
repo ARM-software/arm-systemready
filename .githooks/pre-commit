@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+set -u
+
+echo "===== PRE-COMMIT CHECKS ====="
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+    echo "Pre-commit hook requires a real git clone/worktree."
+    exit 1
+}
+
+cd "$REPO_ROOT" || exit 1
+
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON_BIN="python3"
+elif command -v python >/dev/null 2>&1; then
+    PYTHON_BIN="python"
+else
+    echo "Python not found in PATH."
+    exit 1
+fi
+
+if [ -f "$REPO_ROOT/common/yaml_test_harness/report.py" ]; then
+    REPORT_SCRIPT="$REPO_ROOT/common/yaml_test_harness/report.py"
+
+else
+    echo "report.py not found."
+    echo "Checked:"
+    echo "  - $REPO_ROOT/common/yaml_test_harness/report.py"
+    echo "  - $REPO_ROOT/report.py"
+    exit 1
+fi
+
+HOOK_LOG_DIR="$REPO_ROOT/common/reports"
+HOOK_LOG="$HOOK_LOG_DIR/precommit_report.log"
+
+mkdir -p "$HOOK_LOG_DIR"
+
+"$PYTHON_BIN" "$REPORT_SCRIPT" 2>&1 | tee "$HOOK_LOG"
+STATUS=${PIPESTATUS[0]}
+
+
+if [ "$STATUS" -ne 0 ]; then
+    echo "Pre-commit checks failed."
+    echo "Log saved at: $HOOK_LOG"
+    exit 1
+fi
+
+echo "All checks passed. Proceeding with commit."
+exit 0

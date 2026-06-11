@@ -1,0 +1,16 @@
+{
+  "test_results": [
+    {
+      "Test_suite": "SCMI",
+      "reason": "Suite reason",
+      "testcases": [
+        {
+          "Test_case": "Case 1",
+          "Test_case_description": "One passed testcase",
+          "Test_result": "PASSED",
+          "reason": "ok"
+        }
+      ]
+    }
+  ]
+}

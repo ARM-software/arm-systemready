@@ -1,0 +1,13 @@
+{
+  "Suites": [
+    {
+      "Suite": "FWTS",
+      "TestSuites": [
+        {
+          "TestSuite": "DemoSuite",
+          "Reason": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: logs_to_json_common::logs_to_json.py::file_exists
+STATUS: PASS
+MESSAGE: File exists

@@ -1,0 +1,13 @@
+{
+  "Suites": [
+    {
+      "Suite": "FWTS",
+      "TestSuites": [
+        {
+          "TestSuite": "MatchSuite",
+          "Reason": "Specific suite waiver"
+        }
+      ]
+    }
+  ]
+}

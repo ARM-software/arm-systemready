@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::file_exists
+STATUS: PASS
+MESSAGE: File exists

@@ -1,0 +1,14 @@
+================================================================================
+TEST CASE: os_tests_json_to_html_specific::json_to_html.py::os_tests_invalid_json_input
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/os_tests/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/os_tests_json_to_html_specific/json_to_html/1_os_tests_invalid_json_input/os_test.json /home/vepav01/arm-systemready/common/reports/_work/os_tests_json_to_html_specific/json_to_html/1_os_tests_invalid_json_input/detail.html /home/vepav01/arm-systemready/common/reports/_work/os_tests_json_to_html_specific/json_to_html/1_os_tests_invalid_json_input/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Error decoding JSON from file /home/vepav01/arm-systemready/common/reports/_work/os_tests_json_to_html_specific/json_to_html/1_os_tests_invalid_json_input/os_test.json: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+No valid JSON data found in input files.
+--- STDERR ---

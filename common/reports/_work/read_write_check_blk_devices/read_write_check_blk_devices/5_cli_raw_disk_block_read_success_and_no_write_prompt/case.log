@@ -1,0 +1,35 @@
+================================================================================
+TEST CASE: read_write_check_blk_devices::read_write_check_blk_devices.py::cli_raw_disk_block_read_success_and_no_write_prompt
+STATUS: PASS
+MESSAGE: Module main() check passed
+
+Temp dir: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_a8c49d99
+Exit code: 0
+--- STDOUT ---
+
+********************************************************************************************************************************
+
+                                                    Read block devices tool
+
+********************************************************************************************************************************
+
+INFO: Detected following block devices with lsblk command :
+0: sda
+
+********************************************************************************************************************************
+
+INFO: Block device : /dev/sda
+INFO: No valid partition table found for sda, treating as raw device.
+INFO: Partition table type : RAW
+
+INFO: No partitions detected for sda, treating as raw device.
+INFO: Performing block read on /dev/sda
+INFO: Block read on /dev/sda successful
+
+********************************************************************************************************************************
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check ordered_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_a8c49d99/blk_commands.log -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_a8c49d99/blk_commands.log contains 'df -B 512 /dev/sda --output=used,avail' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_runner_work/runner_env_a8c49d99/blk_commands.log contains 'dd if=/dev/sda of=sda_backup.bin' -> PASS

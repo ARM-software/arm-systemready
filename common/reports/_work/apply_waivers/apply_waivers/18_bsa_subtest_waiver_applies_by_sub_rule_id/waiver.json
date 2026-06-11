@@ -1,0 +1,24 @@
+{
+  "Suites": [
+    {
+      "Suite": "BSA",
+      "TestSuites": [
+        {
+          "TestSuite": "RuleGroupA",
+          "TestCases": [
+            {
+              "Test_case": "RULE_001",
+              "Reason": "Case waiver placeholder",
+              "SubTests": [
+                {
+                  "sub_Rule_ID": "SUB_01",
+                  "Reason": "BSA subtest waiver"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

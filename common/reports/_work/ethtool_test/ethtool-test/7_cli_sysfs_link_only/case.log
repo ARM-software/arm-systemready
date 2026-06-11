@@ -1,0 +1,57 @@
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::cli_sysfs_link_only
+STATUS: PASS
+MESSAGE: Module CLI check passed
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/7_cli_sysfs_link_only
+Command: python /home/vepav01/arm-systemready/common/linux_scripts/ethtool-test.py /home/vepav01/arm-systemready/common/reports/_work/ethtool_test/ethtool-test/7_cli_sysfs_link_only/system_config.txt
+Exit code: 0
+--- STDOUT ---
+
+****************************************************************
+
+                      [92mRunning Networking Checks[0m
+
+****************************************************************
+[92mINFO: Detected following ethernet interfaces via ip command :[0m
+0: eth0
+[92mINFO: Capturing original interface states[0m
+[92mINFO: Bringing down all ethernet interfaces using ip[0m
+ip link set dev eth0 down
+
+****************************************************************
+
+[92mINFO: Bringing up ethernet interface: eth0[0m
+[93mWARN: ethtool not found; using sysfs for link detection[0m
+[96mCHECK: Link detected on eth0 (sysfs)[0m
+[92mINFO: Running ip address show dev eth0[0m
+1: eth0: <BROADCAST,MULTICAST,UP> mtu 1500
+
+[92mINFO: Default route via eth0 is missing; attempting DHCP restore[0m
+[93mWARN: No DHCP client found (udhcpc/dhclient). Skipping restore.[0m
+1: eth0: <BROADCAST,MULTICAST,UP> mtu 1500
+
+[92mINFO: No IPv6 address found on eth0, skipping IPv6 test[0m
+
+****************************************************************
+
+
+================================================================
+                         SUMMARY
+================================================================
+
+Detected Interfaces :  [92mPASSED[0m (eth0)
+
+Interface eth0
+Bring up                    :  [92mPASSED[0m
+ethtool present             :  [91mNO[0m  (ethtool not found; using sysfs)
+Link detected               :  [92mPASSED[0m
+IPv4 address present        :  [91mFAILED[0m  (No IPv4 address)
+IPv6 address present        :  [93mSKIPPED[0m  (No global IPv6)
+
+Ethtool Compliance : [91mFAILED[0m (Required compliant interfaces = 1, but only 0 passed; failed: eth0)
+
+[91mPlease update 'system_config.txt' with the correct value for total_number_of_network_controllers[0m
+[92mINFO: Cleaning up... restoring interface states[0m
+[92mINFO: Cleanup complete.[0m
+--- STDERR ---

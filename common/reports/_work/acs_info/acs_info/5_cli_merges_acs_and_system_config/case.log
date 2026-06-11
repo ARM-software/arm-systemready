@@ -1,0 +1,18 @@
+================================================================================
+TEST CASE: acs_info::acs_info.py::cli_merges_acs_and_system_config
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/acs_info.py --dmidecode_log /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/5_cli_merges_acs_and_system_config/dmidecode.log --acs_config_path /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/5_cli_merges_acs_and_system_config/acs_config.txt --system_config_path /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/5_cli_merges_acs_and_system_config/system_config.txt --output_dir /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/5_cli_merges_acs_and_system_config/out
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+[1;93mWARNING: ipmitool log path not provided for BMC firmware extraction.[0m
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/5_cli_merges_acs_and_system_config/out/acs_info.json contains '"ACS version": "6.1"' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/5_cli_merges_acs_and_system_config/out/acs_info.json contains '"Board Revision": "RevC"' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/acs_info/acs_info/5_cli_merges_acs_and_system_config/out/acs_info.json contains '"Band": "SystemReady Band"' -> PASS

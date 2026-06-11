@@ -1,0 +1,13 @@
+{
+    "System Info": {
+        "Firmware Version": "FW-1.2.3",
+        "SoC Family": "FamilyA",
+        "System Name": "BoardA",
+        "Vendor": "VendorA",
+        "Summary Generated On": "2026-06-11 09:32:19"
+    },
+    "ACS Results Summary": {
+        "Band": "Unknown",
+        "Date": "2026-06-11 09:32:19"
+    }
+}

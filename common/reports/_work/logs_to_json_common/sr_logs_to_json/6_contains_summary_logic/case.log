@@ -1,0 +1,6 @@
+================================================================================
+TEST CASE: logs_to_json_common::sr_logs_to_json.py::contains_summary_logic
+STATUS: PASS
+MESSAGE: At least one pattern matched
+
+Matched patterns: summary, suite_summary, total_

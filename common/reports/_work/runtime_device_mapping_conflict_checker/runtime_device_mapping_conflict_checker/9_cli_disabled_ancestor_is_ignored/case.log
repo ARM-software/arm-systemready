@@ -1,0 +1,35 @@
+================================================================================
+TEST CASE: runtime_device_mapping_conflict_checker::runtime_device_mapping_conflict_checker.py::cli_disabled_ancestor_is_ignored
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/case_runner.py /home/vepav01/arm-systemready/common/linux_scripts/runtime_device_mapping_conflict_checker.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+============================================================
+Testing Runtime Device Mapping Conflict Test
+============================================================
+INFO: Using DTS: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/device_tree.dts
+INFO: Using memmap: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/memmap.log
+INFO: Writing log to: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/9_cli_disabled_ancestor_is_ignored/runtime_device_mapping_conflict_test.log
+
+INFO: ============================================================
+INFO: All UEFI Memmap segments CHECKED (RT_Code/RT_Data/MMIO/MMIO_Port)
+INFO: ============================================================
+INFO: Total segments checked: 1
+INFO: RT_Code   0x0000000000003000-0x00000000000030ff size=0x100
+
+INFO: ============================================================
+INFO: All DTS MMIO ranges CHECKED (extracted from reg + ranges translation)
+INFO: ============================================================
+INFO: No DTS MMIO ranges extracted.
+
+=====================================================================
+       Runtime Device Mapping Conflict Test Summary    
+=====================================================================
+DEBUG: No overlaps found between UEFI runtime regions and DTS MMIO ranges
+RESULTS: PASSED
+--- STDERR ---

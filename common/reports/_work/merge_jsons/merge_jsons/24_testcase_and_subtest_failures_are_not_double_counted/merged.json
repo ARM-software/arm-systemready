@@ -1,0 +1,72 @@
+{
+    "Suite_Name: acs_info": {
+        "ACS Results Summary": {
+            "BBSR compliance results": "Not run",
+            "Overall Compliance Result": "Not Compliant : Mandatory - (not run: SCT, OS_TEST, FWTS; failed: BSA) : Recommended - (not run: SBSA, SBMR-OOB, SBMR-IB)",
+            "Suite_Name: Extension  : BBSR-FWTS_compliance": "Not Run",
+            "Suite_Name: Extension  : BBSR-SCT_compliance": "Not Run",
+            "Suite_Name: Extension  : BBSR-TPM_compliance": "Not Run",
+            "Suite_Name: Mandatory  : BSA_compliance": "Not Compliant: Failed 1",
+            "Suite_Name: Mandatory  : FWTS_compliance": "Not Compliant: not run",
+            "Suite_Name: Mandatory  : OS_TEST_compliance": "Not Compliant: not run",
+            "Suite_Name: Mandatory  : SCT_compliance": "Not Compliant: not run",
+            "Suite_Name: Recommended  : SBMR-IB_compliance": "Not Run",
+            "Suite_Name: Recommended  : SBMR-OOB_compliance": "Not Run",
+            "Suite_Name: Recommended  : SBSA_compliance": "Not Run"
+        }
+    },
+    "Suite_Name: BSA": {
+        "suite_summary": {
+            "Failed": 1,
+            "Not Implemented": 0,
+            "PAL Not Supported": 0,
+            "Passed": 0,
+            "Passed (Partial)": 0,
+            "Skipped": 0,
+            "Total Rules Run": 1,
+            "Total_failed_with_waiver": 0,
+            "Warnings": 0
+        },
+        "test_results": [
+            {
+                "Test_suite": "PE",
+                "test_suite_summary": {
+                    "Failed": 1,
+                    "Not Implemented": 0,
+                    "PAL Not Supported": 0,
+                    "Passed": 0,
+                    "Passed (Partial)": 0,
+                    "Skipped": 0,
+                    "Total Rules Run": 1,
+                    "Total_failed_with_waiver": 0,
+                    "Warnings": 0
+                },
+                "testcases": [
+                    {
+                        "Test_case": "PE_001",
+                        "Test_case_description": "Processing Element architectural compliance",
+                        "Test_case_summary": {
+                            "Failed": 1,
+                            "Not Implemented": 0,
+                            "PAL Not Supported": 0,
+                            "Passed": 0,
+                            "Passed (Partial)": 0,
+                            "Skipped": 0,
+                            "Total Rules Run": 1,
+                            "Total_failed_with_waiver": 0,
+                            "Warnings": 0
+                        },
+                        "Test_result": "FAILED"
+                    }
+                ],
+                "subtests": [
+                    {
+                        "sub_test_description": "Synthetic suite-level failure used to test precedence",
+                        "sub_test_name": "synthetic_suite_level_probe",
+                        "sub_test_result": "FAILED"
+                    }
+                ]
+            }
+        ]
+    }
+}

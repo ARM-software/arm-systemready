@@ -1,0 +1,725 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="logs-to-json" tests="108" failures="0" errors="0" skipped="0"><properties><property name="yaml_file" value="common/test_yaml/logs-to-json.yaml" /><property name="passed" value="108" /><property name="warnings" value="0" /></properties><testcase classname="common_log_parser_bbr_fwts_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/bbr/fwts/logs_to_json.py"><system-out>file=common/log_parser/bbr/fwts/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_bbr_fwts_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/bbr/fwts/logs_to_json.py"><system-out>file=common/log_parser/bbr/fwts/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_bbr_fwts_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/bbr/fwts/logs_to_json.py"><system-out>file=common/log_parser/bbr/fwts/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_bbr_fwts_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/bbr/fwts/logs_to_json.py"><system-out>file=common/log_parser/bbr/fwts/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parse_</system-out></testcase><testcase classname="common_log_parser_bbr_fwts_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/bbr/fwts/logs_to_json.py"><system-out>file=common/log_parser/bbr/fwts/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, test_results, results</system-out></testcase><testcase classname="common_log_parser_bbr_fwts_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/bbr/fwts/logs_to_json.py"><system-out>file=common/log_parser/bbr/fwts/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_</system-out></testcase><testcase classname="common_log_parser_bbr_fwts_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/bbr/fwts/logs_to_json.py"><system-out>file=common/log_parser/bbr/fwts/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump</system-out></testcase><testcase classname="common_log_parser_bbr_fwts_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/bbr/fwts/logs_to_json.py"><system-out>file=common/log_parser/bbr/fwts/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/bbr/sct/logs_to_json.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/bbr/sct/logs_to_json.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/bbr/sct/logs_to_json.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/bbr/sct/logs_to_json.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parser, parse_</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/bbr/sct/logs_to_json.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, test_results, results</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/bbr/sct/logs_to_json.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_, "result", "reason"</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/bbr/sct/logs_to_json.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump, write</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/bbr/sct/logs_to_json.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_bbr_tpm_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/bbr/tpm/logs_to_json.py"><system-out>file=common/log_parser/bbr/tpm/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_bbr_tpm_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/bbr/tpm/logs_to_json.py"><system-out>file=common/log_parser/bbr/tpm/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_bbr_tpm_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/bbr/tpm/logs_to_json.py"><system-out>file=common/log_parser/bbr/tpm/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_bbr_tpm_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/bbr/tpm/logs_to_json.py"><system-out>file=common/log_parser/bbr/tpm/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parser, parse_</system-out></testcase><testcase classname="common_log_parser_bbr_tpm_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/bbr/tpm/logs_to_json.py"><system-out>file=common/log_parser/bbr/tpm/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, test_results, results</system-out></testcase><testcase classname="common_log_parser_bbr_tpm_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/bbr/tpm/logs_to_json.py"><system-out>file=common/log_parser/bbr/tpm/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_, "reason"</system-out></testcase><testcase classname="common_log_parser_bbr_tpm_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/bbr/tpm/logs_to_json.py"><system-out>file=common/log_parser/bbr/tpm/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump</system-out></testcase><testcase classname="common_log_parser_bbr_tpm_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/bbr/tpm/logs_to_json.py"><system-out>file=common/log_parser/bbr/tpm/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_bsa_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/bsa/logs_to_json.py"><system-out>file=common/log_parser/bsa/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_bsa_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/bsa/logs_to_json.py"><system-out>file=common/log_parser/bsa/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_bsa_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/bsa/logs_to_json.py"><system-out>file=common/log_parser/bsa/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_bsa_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/bsa/logs_to_json.py"><system-out>file=common/log_parser/bsa/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parser, parse_</system-out></testcase><testcase classname="common_log_parser_bsa_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/bsa/logs_to_json.py"><system-out>file=common/log_parser/bsa/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, test_results, results</system-out></testcase><testcase classname="common_log_parser_bsa_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/bsa/logs_to_json.py"><system-out>file=common/log_parser/bsa/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_</system-out></testcase><testcase classname="common_log_parser_bsa_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/bsa/logs_to_json.py"><system-out>file=common/log_parser/bsa/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump, write</system-out></testcase><testcase classname="common_log_parser_bsa_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/bsa/logs_to_json.py"><system-out>file=common/log_parser/bsa/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_os_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/os_tests/logs_to_json.py"><system-out>file=common/log_parser/os_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_os_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/os_tests/logs_to_json.py"><system-out>file=common/log_parser/os_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_os_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/os_tests/logs_to_json.py"><system-out>file=common/log_parser/os_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_os_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/os_tests/logs_to_json.py"><system-out>file=common/log_parser/os_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parse_</system-out></testcase><testcase classname="common_log_parser_os_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/os_tests/logs_to_json.py"><system-out>file=common/log_parser/os_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, test_results, results</system-out></testcase><testcase classname="common_log_parser_os_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/os_tests/logs_to_json.py"><system-out>file=common/log_parser/os_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_</system-out></testcase><testcase classname="common_log_parser_os_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/os_tests/logs_to_json.py"><system-out>file=common/log_parser/os_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump</system-out></testcase><testcase classname="common_log_parser_os_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/os_tests/logs_to_json.py"><system-out>file=common/log_parser/os_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_pfdi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/pfdi/logs_to_json.py"><system-out>file=common/log_parser/pfdi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_pfdi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/pfdi/logs_to_json.py"><system-out>file=common/log_parser/pfdi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_pfdi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/pfdi/logs_to_json.py"><system-out>file=common/log_parser/pfdi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_pfdi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/pfdi/logs_to_json.py"><system-out>file=common/log_parser/pfdi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parser, parse_</system-out></testcase><testcase classname="common_log_parser_pfdi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/pfdi/logs_to_json.py"><system-out>file=common/log_parser/pfdi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, results</system-out></testcase><testcase classname="common_log_parser_pfdi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/pfdi/logs_to_json.py"><system-out>file=common/log_parser/pfdi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_, "reason"</system-out></testcase><testcase classname="common_log_parser_pfdi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/pfdi/logs_to_json.py"><system-out>file=common/log_parser/pfdi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump</system-out></testcase><testcase classname="common_log_parser_pfdi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/pfdi/logs_to_json.py"><system-out>file=common/log_parser/pfdi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_post_script_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/post_script/logs_to_json.py"><system-out>file=common/log_parser/post_script/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_post_script_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/post_script/logs_to_json.py"><system-out>file=common/log_parser/post_script/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_post_script_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/post_script/logs_to_json.py"><system-out>file=common/log_parser/post_script/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_post_script_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/post_script/logs_to_json.py"><system-out>file=common/log_parser/post_script/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parser, parse_</system-out></testcase><testcase classname="common_log_parser_post_script_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/post_script/logs_to_json.py"><system-out>file=common/log_parser/post_script/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, test_results, results</system-out></testcase><testcase classname="common_log_parser_post_script_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/post_script/logs_to_json.py"><system-out>file=common/log_parser/post_script/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_</system-out></testcase><testcase classname="common_log_parser_post_script_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/post_script/logs_to_json.py"><system-out>file=common/log_parser/post_script/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump</system-out></testcase><testcase classname="common_log_parser_post_script_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/post_script/logs_to_json.py"><system-out>file=common/log_parser/post_script/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_sbmr_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/sbmr/logs_to_json.py"><system-out>file=common/log_parser/sbmr/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_sbmr_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/sbmr/logs_to_json.py"><system-out>file=common/log_parser/sbmr/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_sbmr_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/sbmr/logs_to_json.py"><system-out>file=common/log_parser/sbmr/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_sbmr_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/sbmr/logs_to_json.py"><system-out>file=common/log_parser/sbmr/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parser, parse_</system-out></testcase><testcase classname="common_log_parser_sbmr_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/sbmr/logs_to_json.py"><system-out>file=common/log_parser/sbmr/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, test_results, results</system-out></testcase><testcase classname="common_log_parser_sbmr_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/sbmr/logs_to_json.py"><system-out>file=common/log_parser/sbmr/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_, "reason"</system-out></testcase><testcase classname="common_log_parser_sbmr_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/sbmr/logs_to_json.py"><system-out>file=common/log_parser/sbmr/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump, write</system-out></testcase><testcase classname="common_log_parser_sbmr_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/sbmr/logs_to_json.py"><system-out>file=common/log_parser/sbmr/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_scmi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/scmi/logs_to_json.py"><system-out>file=common/log_parser/scmi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_scmi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/scmi/logs_to_json.py"><system-out>file=common/log_parser/scmi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_scmi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/scmi/logs_to_json.py"><system-out>file=common/log_parser/scmi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_scmi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/scmi/logs_to_json.py"><system-out>file=common/log_parser/scmi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parser, parse_</system-out></testcase><testcase classname="common_log_parser_scmi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/scmi/logs_to_json.py"><system-out>file=common/log_parser/scmi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: test_results, results</system-out></testcase><testcase classname="common_log_parser_scmi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/scmi/logs_to_json.py"><system-out>file=common/log_parser/scmi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_, "reason"</system-out></testcase><testcase classname="common_log_parser_scmi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/scmi/logs_to_json.py"><system-out>file=common/log_parser/scmi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump, write</system-out></testcase><testcase classname="common_log_parser_scmi_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/scmi/logs_to_json.py"><system-out>file=common/log_parser/scmi/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_standalone_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::file_exists" file="common/log_parser/standalone_tests/logs_to_json.py"><system-out>file=common/log_parser/standalone_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_standalone_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::python_compiles" file="common/log_parser/standalone_tests/logs_to_json.py"><system-out>file=common/log_parser/standalone_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_standalone_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_json_usage" file="common/log_parser/standalone_tests/logs_to_json.py"><system-out>file=common/log_parser/standalone_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_standalone_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_parse_logic" file="common/log_parser/standalone_tests/logs_to_json.py"><system-out>file=common/log_parser/standalone_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parser, parse_</system-out></testcase><testcase classname="common_log_parser_standalone_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_result_collection_logic" file="common/log_parser/standalone_tests/logs_to_json.py"><system-out>file=common/log_parser/standalone_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, test_results, results</system-out></testcase><testcase classname="common_log_parser_standalone_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_summary_logic" file="common/log_parser/standalone_tests/logs_to_json.py"><system-out>file=common/log_parser/standalone_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_</system-out></testcase><testcase classname="common_log_parser_standalone_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::contains_output_logic" file="common/log_parser/standalone_tests/logs_to_json.py"><system-out>file=common/log_parser/standalone_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump, write</system-out></testcase><testcase classname="common_log_parser_standalone_tests_logs_to_json.py" name="logs_to_json_common::logs_to_json.py::has_main_guard" file="common/log_parser/standalone_tests/logs_to_json.py"><system-out>file=common/log_parser/standalone_tests/logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="logs_to_json_common::sr_logs_to_json.py::file_exists" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="logs_to_json_common::sr_logs_to_json.py::python_compiles" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="logs_to_json_common::sr_logs_to_json.py::contains_json_usage" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="logs_to_json_common::sr_logs_to_json.py::contains_parse_logic" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parse_</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="logs_to_json_common::sr_logs_to_json.py::contains_result_collection_logic" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: subtest, test_results, results</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="logs_to_json_common::sr_logs_to_json.py::contains_summary_logic" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: summary, suite_summary, total_</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="logs_to_json_common::sr_logs_to_json.py::contains_output_logic" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="logs_to_json_common::sr_logs_to_json.py::has_main_guard" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="logs_to_json_common::logs_to_json_edk2.py::file_exists" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=logs_to_json_common
+phase=case
+type=file_exists
+warning=False
+message=File exists</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="logs_to_json_common::logs_to_json_edk2.py::python_compiles" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=logs_to_json_common
+phase=case
+type=py_compile
+warning=False
+message=Python compilation succeeded</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="logs_to_json_common::logs_to_json_edk2.py::contains_json_usage" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=logs_to_json_common
+phase=case
+type=source_contains
+warning=False
+message=Found pattern: json</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="logs_to_json_common::logs_to_json_edk2.py::contains_parse_logic" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: parse, parser, parse_</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="logs_to_json_common::logs_to_json_edk2.py::contains_result_collection_logic" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: results</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="logs_to_json_common::logs_to_json_edk2.py::contains_summary_logic" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: "result", "reason"</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="logs_to_json_common::logs_to_json_edk2.py::contains_output_logic" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=logs_to_json_common
+phase=case
+type=source_contains_any
+warning=False
+message=At least one pattern matched
+details:
+Matched patterns: json.dump</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="logs_to_json_common::logs_to_json_edk2.py::has_main_guard" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=logs_to_json_common
+phase=case
+type=main_guard
+warning=False
+message=Main guard found</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="sr_logs_to_json_specific::sr_logs_to_json.py::has_sr_keyword" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=sr_logs_to_json_specific
+phase=case
+type=source_contains_all
+warning=False
+message=All patterns matched</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="sr_logs_to_json_specific::sr_logs_to_json.py::has_sr_parse_logic" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=sr_logs_to_json_specific
+phase=case
+type=source_contains_all
+warning=False
+message=All patterns matched</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="sr_logs_to_json_specific::sr_logs_to_json.py::has_sr_status_handling" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=sr_logs_to_json_specific
+phase=case
+type=source_contains_all
+warning=False
+message=All patterns matched</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="sr_logs_to_json_specific::sr_logs_to_json.py::cli_requires_three_args" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=sr_logs_to_json_specific
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/os_tests/sr_logs_to_json.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Usage: /home/vepav01/arm-systemready/common/log_parser/os_tests/sr_logs_to_json.py &lt;os-logs-path&gt; &lt;post-script.log&gt; &lt;output JSON file path&gt;
+--- STDERR ---</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="sr_logs_to_json_specific::sr_logs_to_json.py::cli_builds_json_for_rhel_and_sle" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=sr_logs_to_json_specific
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/log_parser/os_tests/sr_logs_to_json.py
+Shell mode: no
+Timeout seconds: 5
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_empty: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/5_cli_builds_json_for_rhel_and_sle/out.json -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/5_cli_builds_json_for_rhel_and_sle/out.json contains 'Red Hat Enterprise Linux 9.3' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/5_cli_builds_json_for_rhel_and_sle/out.json contains 'SLES 15' -&gt; PASS</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="sr_logs_to_json_specific::sr_logs_to_json.py::cli_marks_missing_post_script_as_failed" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=sr_logs_to_json_specific
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/log_parser/os_tests/sr_logs_to_json.py
+Shell mode: no
+Timeout seconds: 5
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_empty: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/6_cli_marks_missing_post_script_as_failed/out.json -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/6_cli_marks_missing_post_script_as_failed/out.json contains 'post-script.log missing' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/6_cli_marks_missing_post_script_as_failed/out.json contains '"total_failed": 2' -&gt; PASS</system-out></testcase><testcase classname="common_log_parser_os_tests_sr_logs_to_json.py" name="sr_logs_to_json_specific::sr_logs_to_json.py::cli_post_script_errors_create_failed_and_warning_subtests" file="common/log_parser/os_tests/sr_logs_to_json.py"><system-out>file=common/log_parser/os_tests/sr_logs_to_json.py
+suite=sr_logs_to_json_specific
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/log_parser/os_tests/sr_logs_to_json.py
+Shell mode: no
+Timeout seconds: 5
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_empty: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/7_cli_post_script_errors_create_failed_and_warning_subtests/out.json -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/7_cli_post_script_errors_create_failed_and_warning_subtests/out.json contains 'fatal issue' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/7_cli_post_script_errors_create_failed_and_warning_subtests/out.json contains 'non-fatal issue' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/7_cli_post_script_errors_create_failed_and_warning_subtests/out.json contains '"total_failed": 1' -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/sr_logs_to_json_specific/sr_logs_to_json/7_cli_post_script_errors_create_failed_and_warning_subtests/out.json contains '"total_warnings": 1' -&gt; PASS</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="edk2_logs_to_json_specific::logs_to_json_edk2.py::has_edk2_keyword" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=edk2_logs_to_json_specific
+phase=case
+type=source_contains_all
+warning=False
+message=All patterns matched</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="edk2_logs_to_json_specific::logs_to_json_edk2.py::has_edk2_parse_logic" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=edk2_logs_to_json_specific
+phase=case
+type=source_contains_all
+warning=False
+message=All patterns matched</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="edk2_logs_to_json_specific::logs_to_json_edk2.py::cli_requires_two_args" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=edk2_logs_to_json_specific
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/bbr/sct/logs_to_json_edk2.py
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 2
+--- STDOUT ---
+
+--- STDERR ---
+usage: logs_to_json_edk2.py [-h] input_file output_file
+logs_to_json_edk2.py: error: the following arguments are required: input_file, output_file</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="edk2_logs_to_json_specific::logs_to_json_edk2.py::cli_missing_input_file_fails" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=edk2_logs_to_json_specific
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/bbr/sct/logs_to_json_edk2.py /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/4_cli_missing_input_file_fails/missing.log /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/4_cli_missing_input_file_fails/out.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Error: File not found: /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/4_cli_missing_input_file_fails/missing.log</system-out></testcase><testcase classname="common_log_parser_bbr_sct_logs_to_json_edk2.py" name="edk2_logs_to_json_specific::logs_to_json_edk2.py::cli_parses_markdown_table_to_json" file="common/log_parser/bbr/sct/logs_to_json_edk2.py"><system-out>file=common/log_parser/bbr/sct/logs_to_json_edk2.py
+suite=edk2_logs_to_json_specific
+phase=case
+type=cli
+warning=False
+message=CLI check passed
+details:
+Command: ./run_case.sh /home/vepav01/arm-systemready/common/log_parser/bbr/sct/logs_to_json_edk2.py
+Shell mode: no
+Timeout seconds: 5
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_empty: /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/5_cli_parses_markdown_table_to_json/out.json -&gt; PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/edk2_logs_to_json_specific/logs_to_json_edk2/5_cli_parses_markdown_table_to_json/out.json contains 'AAAA-BBBB' -&gt; PASS</system-out></testcase></testsuite>

@@ -1,0 +1,47 @@
+{
+    "test_results": [
+        {
+            "Test_suite": "PE",
+            "testcases": [
+                {
+                    "Test_case": "PE_001",
+                    "Test_case_description": "Processing Element architectural compliance",
+                    "Test_result": "PASSED",
+                    "Test_case_summary": {
+                        "Total Rules Run": 1,
+                        "Passed": 1,
+                        "Passed (Partial)": 0,
+                        "Warnings": 0,
+                        "Skipped": 0,
+                        "Failed": 0,
+                        "PAL Not Supported": 0,
+                        "Not Implemented": 0,
+                        "Total_failed_with_waiver": 0
+                    }
+                }
+            ],
+            "test_suite_summary": {
+                "Total Rules Run": 1,
+                "Passed": 1,
+                "Passed (Partial)": 0,
+                "Warnings": 0,
+                "Skipped": 0,
+                "Failed": 0,
+                "PAL Not Supported": 0,
+                "Not Implemented": 0,
+                "Total_failed_with_waiver": 0
+            }
+        }
+    ],
+    "suite_summary": {
+        "Total Rules Run": 1,
+        "Passed": 1,
+        "Passed (Partial)": 0,
+        "Warnings": 0,
+        "Skipped": 0,
+        "Failed": 0,
+        "PAL Not Supported": 0,
+        "Not Implemented": 0,
+        "Total_failed_with_waiver": 0
+    }
+}

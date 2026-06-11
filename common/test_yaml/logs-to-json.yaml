@@ -1,0 +1,284 @@
+suites:
+
+  - name: logs_to_json_common
+    files:
+      - common/log_parser/bbr/fwts/logs_to_json.py
+      - common/log_parser/bbr/sct/logs_to_json.py
+      - common/log_parser/bbr/tpm/logs_to_json.py
+      - common/log_parser/bsa/logs_to_json.py
+      - common/log_parser/os_tests/logs_to_json.py
+      - common/log_parser/pfdi/logs_to_json.py
+      - common/log_parser/post_script/logs_to_json.py
+      - common/log_parser/sbmr/logs_to_json.py
+      - common/log_parser/scmi/logs_to_json.py
+      - common/log_parser/standalone_tests/logs_to_json.py
+      - common/log_parser/os_tests/sr_logs_to_json.py
+      - common/log_parser/bbr/sct/logs_to_json_edk2.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: contains_json_usage
+        type: source_contains
+        pattern: "json"
+
+      - name: contains_parse_logic
+        type: source_contains_any
+        patterns:
+          - "parse"
+          - "parser"
+          - "parse_"
+
+      - name: contains_result_collection_logic
+        type: source_contains_any
+        patterns:
+          - "subtest"
+          - "test_results"
+          - "results"
+
+      # 🔧 FIXED: works for edk2 also
+      - name: contains_summary_logic
+        type: source_contains_any
+        patterns:
+          - "summary"
+          - "suite_summary"
+          - "total_"
+          - "\"result\""
+          - "\"reason\""
+
+      - name: contains_output_logic
+        type: source_contains_any
+        patterns:
+          - "json.dump"
+          - "write"
+
+      - name: has_main_guard
+        type: main_guard
+
+
+# =========================
+# SR LOGS TO JSON
+# =========================
+
+  - name: sr_logs_to_json_specific
+    files:
+      - common/log_parser/os_tests/sr_logs_to_json.py
+
+    cases:
+      - name: has_sr_keyword
+        type: source_contains_all
+        patterns:
+          - "OS_RELEASE_FILE_NAME"
+          - "cat-etc-os-release.txt"
+          - "\"os_test\""
+
+      - name: has_sr_parse_logic
+        type: source_contains_all
+        patterns:
+          - "def build_results("
+          - "def parse_os_release("
+          - "def parse_post_script_errors("
+
+      - name: has_sr_status_handling
+        type: source_contains_all
+        patterns:
+          - "\"PASSED\""
+          - "\"FAILED\""
+          - "\"WARNINGS\""
+
+      - name: cli_requires_three_args
+        type: cli
+        args: []
+        expect_exit_nonzero: true
+        expect_stdout_or_stderr_contains:
+          - "Usage:"
+
+      - name: cli_builds_json_for_rhel_and_sle
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+
+            mkdir -p oslogs/rhel oslogs/sle
+
+            cat > oslogs/rhel/cat-etc-os-release.txt <<EOF
+            NAME="Red Hat Enterprise Linux"
+            VERSION_ID="9.3"
+            EOF
+
+            cat > oslogs/sle/cat-etc-os-release.txt <<EOF
+            NAME="SLES"
+            VERSION_ID="15"
+            EOF
+
+            cat > post-script.log <<EOF
+            INFO ok
+            EOF
+
+            python3 "$1" "$PWD/oslogs" "$PWD/post-script.log" "$PWD/out.json"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_empty
+            path: "{dir}/out.json"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "Red Hat Enterprise Linux 9.3"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "SLES 15"
+
+      # 🔧 FIXED COUNTS
+      - name: cli_marks_missing_post_script_as_failed
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+            mkdir -p oslogs/rhel
+
+            cat > oslogs/rhel/cat-etc-os-release.txt <<EOF
+            NAME="Red Hat Enterprise Linux"
+            VERSION_ID="9.2"
+            EOF
+
+            python3 "$1" "$PWD/oslogs" "$PWD/missing-post-script.log" "$PWD/out.json"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_empty
+            path: "{dir}/out.json"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "post-script.log missing"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "\"total_failed\": 2"
+
+      # 🔧 FIXED ASSERTIONS
+      - name: cli_post_script_errors_create_failed_and_warning_subtests
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+
+            mkdir -p oslogs/rhel oslogs/sle oslogs/ubuntu
+
+            cat > oslogs/rhel/cat-etc-os-release.txt <<EOF
+            NAME="Red Hat Enterprise Linux"
+            VERSION_ID="9.1"
+            EOF
+
+            cat > oslogs/sle/cat-etc-os-release.txt <<EOF
+            NAME="SUSE Linux Enterprise Server"
+            VERSION_ID="15"
+            EOF
+
+            cat > oslogs/ubuntu/cat-etc-os-release.txt <<EOF
+            NAME="Ubuntu"
+            VERSION_ID="22.04"
+            EOF
+
+            cat > post-script.log <<EOF
+            ERROR os-logs rhel: failure on required OS: fatal issue
+            ERROR os-logs ubuntu: issue on extra OS: non-fatal issue
+            EOF
+
+            python3 "$1" "$PWD/oslogs" "$PWD/post-script.log" "$PWD/out.json"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_empty
+            path: "{dir}/out.json"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "fatal issue"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "non-fatal issue"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "\"total_failed\": 1"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "\"total_warnings\": 1"
+
+
+# =========================
+# EDK2 LOGS TO JSON
+# =========================
+
+  - name: edk2_logs_to_json_specific
+    files:
+      - common/log_parser/bbr/sct/logs_to_json_edk2.py
+
+    cases:
+      - name: has_edk2_keyword
+        type: source_contains_all
+        patterns:
+          - "Test Entry Point GUID"
+          - "sub_Test_GUID"
+          - "updated by"
+          - "chardet"
+
+      - name: has_edk2_parse_logic
+        type: source_contains_all
+        patterns:
+          - "def detect_file_encoding("
+          - "def parse_edk2_log("
+
+      - name: cli_requires_two_args
+        type: cli
+        args: []
+        expect_exit_nonzero: true
+        expect_stdout_or_stderr_contains:
+          - "usage:"
+
+      - name: cli_missing_input_file_fails
+        type: cli
+        args:
+          - "{dir}/missing.log"
+          - "{dir}/out.json"
+        expect_exit_nonzero: true
+        expect_stderr_contains: "Error: File not found:"
+
+      - name: cli_parses_markdown_table_to_json
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+
+            cat > edk2-test-parser.log <<EOF
+            | name | set guid | guid | result | updated by |
+            |------|----------|------|--------|------------|
+            | TestA | AAAA-BBBB | 1111-2222 | PASS | parser |
+            EOF
+
+            python3 "$1" "$PWD/edk2-test-parser.log" "$PWD/out.json"
+        args:
+          - "{file}"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_empty
+            path: "{dir}/out.json"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "AAAA-BBBB"

@@ -1,0 +1,867 @@
+suites:
+  - name: json_to_html_common
+
+    # Run the common json_to_html sanity checks against every implementation.
+    files:
+      - common/log_parser/bbr/fwts/json_to_html.py
+      - common/log_parser/bbr/sct/json_to_html.py
+      - common/log_parser/bbr/tpm/json_to_html.py
+      - common/log_parser/bsa/json_to_html.py
+      - common/log_parser/os_tests/json_to_html.py
+      - common/log_parser/pfdi/json_to_html.py
+      - common/log_parser/post_script/json_to_html.py
+      - common/log_parser/sbmr/json_to_html.py
+      - common/log_parser/scmi/json_to_html.py
+      - common/log_parser/standalone_tests/json_to_html.py
+
+    # Shared defaults for the generic CLI-based json_to_html checks.
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+
+    cases:
+      # Basic file-level checks.
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: has_main_guard
+        type: main_guard
+
+      # Empty JSON should be handled gracefully.
+      # Some implementations may exit 0, others 1, so keep this warning-only.
+      - name: empty_json_input
+        warn_only: true
+        scripts:
+          empty.json: |
+            {}
+        args:
+          - "{dir}/empty.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [0, 1]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(no valid data|error|missing|invalid|usage)"
+
+      # Missing top-level test_results key should not crash the script.
+      - name: missing_test_results_key
+        warn_only: true
+        scripts:
+          missing_key.json: |
+            {
+              "random_field": []
+            }
+        args:
+          - "{dir}/missing_key.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [0, 1]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(no valid data|missing|error|usage)"
+
+      # Test case exists but subtests field is missing.
+      - name: missing_subtests_in_test_case
+        warn_only: true
+        scripts:
+          missing_subtests.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "Test",
+                  "Test_case": "Case without subtests"
+                }
+              ]
+            }
+        args:
+          - "{dir}/missing_subtests.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [0, 1]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(no valid data|error|missing|warning|^$)"
+
+      # Minimal structurally valid input. Some implementations may still warn or exit early.
+      - name: minimal_valid_structure_generates_or_exits_cleanly
+        warn_only: true
+        scripts:
+          minimal.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "Minimal",
+                  "Test_case": "Basic",
+                  "subtests": []
+                }
+              ]
+            }
+        args:
+          - "{dir}/minimal.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [0, 1]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(no valid data|error|warning|^$)"
+
+  - name: fwts_json_to_html_specific
+
+    # FWTS-specific validation.
+    files:
+      - common/log_parser/bbr/fwts/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+      expect_exit_code_in: [1, 2]
+      expect_stdout_or_stderr_regex:
+        - "(?i)(error|exception|traceback|json)"
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: fwts_invalid_json_input
+        scripts:
+          fwts.json: |
+            { invalid json
+        args:
+          - "{dir}/fwts.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+
+  - name: sct_json_to_html_specific
+
+    # SCT-specific validation.
+    files:
+      - common/log_parser/bbr/sct/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+      expect_exit_code_in: [1, 2]
+      expect_stdout_or_stderr_regex:
+        - "(?i)(error|exception|traceback|json)"
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: sct_invalid_json_input
+        scripts:
+          sct.json: |
+            { invalid json
+        args:
+          - "{dir}/sct.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+
+  - name: tpm_json_to_html_specific
+
+    # TPM-specific validation.
+    files:
+      - common/log_parser/bbr/tpm/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+      expect_exit_code_in: [1, 2]
+      expect_stdout_or_stderr_regex:
+        - "(?i)(error|exception|traceback|json)"
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: tpm_invalid_json_input
+        scripts:
+          tpm.json: |
+            { invalid json
+        args:
+          - "{dir}/tpm.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+
+  - name: bsa_json_to_html_specific
+
+    # BSA-specific validation.
+    files:
+      - common/log_parser/bsa/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: bsa_invalid_json_input
+        scripts:
+          bsa.json: |
+            { invalid json
+        args:
+          - "{dir}/bsa.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+      # Confirms that the summary page trusts the top-level suite_summary,
+      # even if a detailed testcase row would imply a different result.
+      - name: bsa_top_level_summary_is_used_even_if_detailed_results_differ
+        warn_only: true
+        scripts:
+          bsa.json: |
+            {
+              "suite_summary": {
+                "Passed": 5,
+                "Failed": 0,
+                "Total_failed_with_waiver": 0,
+                "Aborted": 0,
+                "Skipped": 0,
+                "Warnings": 0,
+                "Not Implemented": 0,
+                "PAL Not Supported": 0,
+                "Passed (Partial)": 0,
+                "Total Rules Run": 5
+              },
+              "test_results": [
+                {
+                  "Test_suite": "BSA",
+                  "testcases": [
+                    {
+                      "Test_case": "Rule 1",
+                      "Test_case_description": "Detailed row says failed",
+                      "Test_result": "FAILED"
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/bsa.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/detail.html"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "BSA"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Rule 1"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "FAILED"
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="pass">5</td>'
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="fail">0</td>'
+
+  - name: os_tests_json_to_html_specific
+
+    # OS tests specific validation.
+    files:
+      - common/log_parser/os_tests/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: os_tests_invalid_json_input
+        scripts:
+          os_test.json: |
+            { invalid json
+        args:
+          - "{dir}/os_test.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|usage|json)"
+
+      # Verifies the handling of an unsupported sub_test_result shape.
+      # Outside SR-single mode, the summary should count it as failed.
+      - name: os_tests_unknown_subtest_is_treated_as_failed_outside_sr_single_mode
+        warn_only: true
+        scripts:
+          os_custom.json: |
+            {
+              "os_name": "DemoOS",
+              "test_results": [
+                {
+                  "Test_suite_name": "OS Tests",
+                  "Test_suite_description": "Unknown status handling",
+                  "Test_case": "Case 1",
+                  "Test_case_description": "Unknown subtest result",
+                  "subtests": [
+                    {
+                      "sub_Test_Number": "1",
+                      "sub_Test_Description": "Unknown result object",
+                      "sub_test_result": {}
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/os_custom.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/detail.html"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Case 1"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "INFO"
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="fail">1</td>'
+
+  - name: pfdi_json_to_html_specific
+
+    # PFDI-specific validation.
+    files:
+      - common/log_parser/pfdi/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: pfdi_invalid_json_input
+        scripts:
+          pfdi.json: |
+            { invalid json
+        args:
+          - "{dir}/pfdi.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+      # Nested waiver_reason should be promoted and displayed at subtest level.
+      - name: pfdi_nested_waiver_reason_is_promoted_to_subtest
+        warn_only: true
+        scripts:
+          pfdi.json: |
+            [
+              {
+                "Test_suite": "PFDI",
+                "subtests": [
+                  {
+                    "sub_Test_Number": "1",
+                    "sub_Test_Description": "Nested waiver reason",
+                    "sub_test_result": {
+                      "waiver_reason": "nested waiver detail"
+                    }
+                  }
+                ],
+                "test_suite_summary": {
+                  "total_passed": 1,
+                  "total_failed": 0,
+                  "total_failed_with_waiver": 0,
+                  "total_aborted": 0,
+                  "total_skipped": 0,
+                  "total_warnings": 0
+                }
+              },
+              {
+                "Suite_summary": "overall"
+              }
+            ]
+        args:
+          - "{dir}/pfdi.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/detail.html"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "PFDI"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Nested waiver reason"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "nested waiver detail"
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="pass">1</td>'
+
+  - name: post_script_json_to_html_specific
+
+    # Post-script specific validation.
+    files:
+      - common/log_parser/post_script/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: post_script_invalid_json_input
+        scripts:
+          post.json: |
+            { invalid json
+        args:
+          - "{dir}/post.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+      # FAILED_WITH_WAIVER should be rendered distinctly in both detail and summary output.
+      - name: post_script_failed_with_waiver_is_rendered_separately
+        warn_only: true
+        scripts:
+          post.json: |
+            {
+              "suite_summary": {
+                "total_passed": 0,
+                "total_failed": 0,
+                "total_failed_with_waiver": 1,
+                "total_aborted": 0,
+                "total_skipped": 0,
+                "total_warnings": 0
+              },
+              "test_results": [
+                {
+                  "Test_suite": "Post Script",
+                  "Test_suite_description": "Waiver handling",
+                  "subtests": [
+                    {
+                      "sub_Test_Number": "1",
+                      "sub_Test_Description": "Waived failure",
+                      "sub_test_result": {
+                        "FAILED_WITH_WAIVER": 1,
+                        "waiver_reason": "approved"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/post.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/detail.html"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Post Script"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Waived failure"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "FAILED WITH WAIVER"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "approved"
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="fail-waiver">1</td>'
+
+  - name: sbmr_json_to_html_specific
+
+    # SBMR-specific validation.
+    files:
+      - common/log_parser/sbmr/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: sbmr_invalid_json_input
+        scripts:
+          sbmr.json: |
+            { invalid json
+        args:
+          - "{dir}/sbmr.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+      # Same malformed-input check, but with an extra report path argument.
+      - name: sbmr_invalid_json_input_with_report_path
+        scripts:
+          sbmr.json: |
+            { invalid json
+          report.html: |
+            <html><body>report</body></html>
+        args:
+          - "{dir}/sbmr.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+          - "{dir}/report.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+      # When top-level summary is missing, the implementation should recompute it from testcase data.
+      - name: sbmr_recomputes_summary_when_top_level_summary_missing
+        warn_only: true
+        scripts:
+          sbmr.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "SBMR IB",
+                  "test_suite_summary": {
+                    "total_passed": 1,
+                    "total_failed": 0,
+                    "total_failed_with_waiver": 0,
+                    "total_aborted": 0,
+                    "total_skipped": 0,
+                    "total_warnings": 0
+                  },
+                  "subtests": [
+                    {
+                      "sub_Test_Number": "1",
+                      "sub_Test_Description": "Passed case",
+                      "sub_test_result": "PASSED"
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/sbmr.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/detail.html"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "SBMR IB"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Passed case"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "PASSED"
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Overall Summary"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="pass">1</td>'
+
+  - name: scmi_json_to_html_specific
+
+    # SCMI-specific validation.
+    files:
+      - common/log_parser/scmi/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: scmi_invalid_json_input
+        scripts:
+          scmi.json: |
+            { invalid json
+        args:
+          - "{dir}/scmi.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|json)"
+
+      # Summary should be tallied from testcase-level results when that is the source of truth.
+      - name: scmi_summary_is_tallied_from_testcase_results
+        warn_only: true
+        scripts:
+          scmi.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "SCMI",
+                  "reason": "Suite reason",
+                  "testcases": [
+                    {
+                      "Test_case": "Case 1",
+                      "Test_case_description": "One passed testcase",
+                      "Test_result": "PASSED",
+                      "reason": "ok"
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/scmi.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/detail.html"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "SCMI"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Case 1"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "PASSED"
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="pass">1</td>'
+
+  - name: standalone_tests_json_to_html_specific
+
+    # Standalone-tests specific validation.
+    files:
+      - common/log_parser/standalone_tests/json_to_html.py
+
+    defaults:
+      type: cli
+      env:
+        MPLBACKEND: Agg
+
+    cases:
+      # Malformed JSON must fail loudly.
+      - name: standalone_invalid_json_input
+        scripts:
+          standalone.json: |
+            { invalid json
+        args:
+          - "{dir}/standalone.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code_in: [1, 2]
+        expect_stdout_or_stderr_regex:
+          - "(?i)(error|exception|traceback|usage|json)"
+
+      # Unknown subtest result shape should still render in detail,
+      # while summary currently counts the testcase as passed.
+      - name: unknown_subtest_status_appears_in_detail_but_summary_counts_test_as_passed
+        warn_only: true
+        scripts:
+          standalone.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "Standalone",
+                  "Test_suite_description": "Unknown status handling",
+                  "Test_case": "Case 1",
+                  "Test_case_description": "Unsupported status shape",
+                  "subtests": [
+                    {
+                      "sub_Test_Number": "1",
+                      "sub_Test_Description": "Status is empty dict",
+                      "sub_test_result": {}
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/standalone.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/detail.html"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Standalone"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Case 1"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "UNKNOWN"
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="pass">1</td>'
+
+      # WARNING should take priority over FAILED_WITH_WAIVER in summary classification.
+      - name: warning_status_takes_priority_over_failed_with_waiver
+        warn_only: true
+        scripts:
+          standalone.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "Standalone",
+                  "Test_suite_description": "Priority handling",
+                  "Test_case": "Case 1",
+                  "Test_case_description": "Warnings and waiver together",
+                  "subtests": [
+                    {
+                      "sub_Test_Number": "1",
+                      "sub_Test_Description": "Warning subtest",
+                      "sub_test_result": {
+                        "WARNINGS": 1,
+                        "warning_reasons": ["warning path"]
+                      }
+                    },
+                    {
+                      "sub_Test_Number": "2",
+                      "sub_Test_Description": "Waiver subtest",
+                      "sub_test_result": {
+                        "FAILED_WITH_WAIVER": 1,
+                        "waiver_reason": "accepted waiver"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/standalone.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/detail.html"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Warning subtest"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Waiver subtest"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "FAILED WITH WAIVER"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "accepted waiver"
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="warning">1</td>'
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="waiver">0</td>'
+
+      # Nested reason lists should be flattened into a single rendered reason column.
+      - name: nested_reason_lists_are_flattened_into_single_reason_column
+        warn_only: true
+        scripts:
+          standalone.json: |
+            {
+              "test_results": [
+                {
+                  "Test_suite": "Standalone",
+                  "Test_suite_description": "Reason flattening",
+                  "Test_case": "Case 1",
+                  "Test_case_description": "Nested reasons",
+                  "subtests": [
+                    {
+                      "sub_Test_Number": "1",
+                      "sub_Test_Description": "Nested fail reasons",
+                      "sub_test_result": {
+                        "FAILED": 1,
+                        "fail_reasons": [["reason A", "reason B"], ["reason C"]]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        args:
+          - "{dir}/standalone.json"
+          - "{dir}/detail.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/detail.html"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "Nested fail reasons"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "FAILED"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "reason A"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "reason B"
+          - type: file_contains
+            path: "{dir}/detail.html"
+            text: "reason C"
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: '<td class="fail">1</td>'

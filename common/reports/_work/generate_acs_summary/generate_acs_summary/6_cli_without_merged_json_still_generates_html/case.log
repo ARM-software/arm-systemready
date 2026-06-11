@@ -1,0 +1,19 @@
+================================================================================
+TEST CASE: generate_acs_summary::generate_acs_summary.py::cli_without_merged_json_still_generates_html
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/generate_acs_summary.py /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/bsa.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/sbsa.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/fwts.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/sct.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/bbsr_fwts.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/bbsr_sct.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/bbsr_tpm.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/pfdi.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/post_script.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/standalone.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/os_tests.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/capsule.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/sbmr_ib.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/sbmr_oob.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/scmi.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Config file  not provided or does not exist.
+Config file  not provided or does not exist.
+Warning: merged JSON not provided or does not exist => Overall compliance unknown
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check exists: /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/summary.html -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/6_cli_without_merged_json_still_generates_html/summary.html contains 'standalone' -> PASS

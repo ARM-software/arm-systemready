@@ -1,0 +1,23 @@
+============================================================
+Testing Runtime Device Mapping Conflict Test
+============================================================
+INFO: Using DTS: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/device_tree.dts
+INFO: Using memmap: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/memmap.log
+INFO: Writing log to: /home/vepav01/arm-systemready/common/reports/_work/runtime_device_mapping_conflict_checker/runtime_device_mapping_conflict_checker/28_cli_multiline_device_type_memory_property_warning/runtime_device_mapping_conflict_test.log
+
+INFO: ============================================================
+INFO: All UEFI Memmap segments CHECKED (RT_Code/RT_Data/MMIO/MMIO_Port)
+INFO: ============================================================
+INFO: Total segments checked: 1
+INFO: RT_Code   0x0000000080000000-0x0000000080000fff size=0x1000
+
+INFO: ============================================================
+INFO: All DTS MMIO ranges CHECKED (extracted from reg + ranges translation)
+INFO: ============================================================
+INFO: No DTS MMIO ranges extracted.
+
+=====================================================================
+       Runtime Device Mapping Conflict Test Summary    
+=====================================================================
+DEBUG: No overlaps found between UEFI runtime regions and DTS MMIO ranges
+RESULTS: PASSED

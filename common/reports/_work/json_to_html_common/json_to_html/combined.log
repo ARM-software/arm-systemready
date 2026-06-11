@@ -1,0 +1,78 @@
+====================================================================================================
+RUN START: 2026-06-11 09:32:24
+YAML: common/test_yaml/json-to-html.yaml
+SUITE: json_to_html_common
+TARGETS: common/log_parser/standalone_tests/json_to_html.py
+====================================================================================================
+
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::file_exists
+STATUS: PASS
+MESSAGE: File exists
+
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::has_main_guard
+STATUS: PASS
+MESSAGE: Main guard found
+
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::python_compiles
+STATUS: PASS
+MESSAGE: Python compilation succeeded
+
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::missing_test_results_key
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/standalone_tests/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/5_missing_test_results_key/missing_key.json /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/5_missing_test_results_key/detail.html /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/5_missing_test_results_key/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+No valid data found in input JSON(s).
+--- STDERR ---
+
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::empty_json_input
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/standalone_tests/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/4_empty_json_input/empty.json /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/4_empty_json_input/detail.html /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/4_empty_json_input/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+No valid data found in input JSON(s).
+--- STDERR ---
+
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::missing_subtests_in_test_case
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/standalone_tests/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/6_missing_subtests_in_test_case/missing_subtests.json /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/6_missing_subtests_in_test_case/detail.html /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/6_missing_subtests_in_test_case/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+
+================================================================================
+TEST CASE: json_to_html_common::json_to_html.py::minimal_valid_structure_generates_or_exits_cleanly
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/standalone_tests/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/7_minimal_valid_structure_generates_or_exits_cleanly/minimal.json /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/7_minimal_valid_structure_generates_or_exits_cleanly/detail.html /home/vepav01/arm-systemready/common/reports/_work/json_to_html_common/json_to_html/7_minimal_valid_structure_generates_or_exits_cleanly/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+
+--- STDERR ---
+

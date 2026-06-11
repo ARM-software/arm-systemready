@@ -1,0 +1,61 @@
+{
+    "Suite_Name: acs_info": {
+        "ACS Results Summary": {
+            "BBSR compliance results": "Not run",
+            "Overall Compliance Result": "Not Compliant : Mandatory - (not run: OS_TEST, SBMR-OOB, SCT, BSA, FWTS) : Recommended - (not run: SBSA)",
+            "Suite_Name: Extension  : BBSR-FWTS_compliance": "Not Run",
+            "Suite_Name: Extension  : BBSR-SCT_compliance": "Not Run",
+            "Suite_Name: Extension  : BBSR-TPM_compliance": "Not Run",
+            "Suite_Name: Mandatory  : BSA_compliance": "Not Compliant: not run",
+            "Suite_Name: Mandatory  : FWTS_compliance": "Not Compliant: not run",
+            "Suite_Name: Mandatory  : OS_TEST_compliance": "Not Compliant: not run",
+            "Suite_Name: Mandatory  : SBMR-IB_compliance": "Compliant",
+            "Suite_Name: Mandatory  : SBMR-OOB_compliance": "Not Compliant: not run",
+            "Suite_Name: Mandatory  : SCT_compliance": "Not Compliant: not run",
+            "Suite_Name: Recommended  : SBSA_compliance": "Not Run"
+        }
+    },
+    "Suite_Name: SBMR-IB": {
+        "suite_summary": {
+            "total_aborted": 0,
+            "total_failed": 0,
+            "total_failed_with_waiver": 0,
+            "total_passed": 1,
+            "total_skipped": 0,
+            "total_warnings": 0
+        },
+        "test_results": [
+            {
+                "Test_suite": "In-band management",
+                "Test_cases": [
+                    {
+                        "Test_case": "Redfish service root",
+                        "test_case_summary": {
+                            "total_aborted": 0,
+                            "total_failed": 0,
+                            "total_failed_with_waiver": 0,
+                            "total_passed": 1,
+                            "total_skipped": 0,
+                            "total_warnings": 0
+                        },
+                        "subtests": [
+                            {
+                                "sub_Test_Description": "Query service root",
+                                "sub_Test_Number": "1",
+                                "sub_test_result": "PASSED"
+                            }
+                        ]
+                    }
+                ],
+                "test_suite_summary": {
+                    "total_aborted": 0,
+                    "total_failed": 0,
+                    "total_failed_with_waiver": 0,
+                    "total_passed": 1,
+                    "total_skipped": 0,
+                    "total_warnings": 0
+                }
+            }
+        ]
+    }
+}

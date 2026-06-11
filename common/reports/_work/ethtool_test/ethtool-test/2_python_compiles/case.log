@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: ethtool_test::ethtool-test.py::python_compiles
+STATUS: PASS
+MESSAGE: Python compilation succeeded

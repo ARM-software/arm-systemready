@@ -1,0 +1,29 @@
+================================================================================
+TEST CASE: scmi_json_to_html_specific::json_to_html.py::scmi_invalid_json_input
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/scmi/json_to_html.py /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/1_scmi_invalid_json_input/scmi.json /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/1_scmi_invalid_json_input/detail.html /home/vepav01/arm-systemready/common/reports/_work/scmi_json_to_html_specific/json_to_html/1_scmi_invalid_json_input/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+
+--- STDERR ---
+Traceback (most recent call last):
+  File "/home/vepav01/arm-systemready/common/log_parser/scmi/json_to_html.py", line 230, in <module>
+    main(sys.argv[1], sys.argv[2], sys.argv[3])
+  File "/home/vepav01/arm-systemready/common/log_parser/scmi/json_to_html.py", line 214, in main
+    data = json.loads(Path(inp_json).read_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)

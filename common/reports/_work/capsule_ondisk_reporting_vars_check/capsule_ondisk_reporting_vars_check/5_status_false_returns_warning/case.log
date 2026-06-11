@@ -1,0 +1,9 @@
+================================================================================
+TEST CASE: capsule_ondisk_reporting_vars_check::capsule_ondisk_reporting_vars_check.py::status_false_returns_warning
+STATUS: PASS
+MESSAGE: Function returned 'WARNING'
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/capsule_ondisk_reporting_vars_check/capsule_ondisk_reporting_vars_check/5_status_false_returns_warning
+--- STDOUT ---
+
+--- STDERR ---

@@ -1,0 +1,1333 @@
+suites:
+  - name: merge_jsons
+
+    # Target script under test.
+    files:
+      - common/log_parser/merge_jsons.py
+
+    # Shared defaults for the ordinary CLI cases in this suite.
+    # Cases that use a custom command or non-default behavior still override explicitly.
+    defaults:
+      type: cli
+      expect_exit_code: 0
+
+    cases:
+      # -------------------------
+      # BASIC STRUCTURE CHECKS
+      # -------------------------
+
+      # Verify the target file exists at the expected repository path.
+      - name: file_exists
+        type: file_exists
+
+      # Verify the script has valid Python syntax.
+      - name: python_compiles
+        type: py_compile
+
+      # Verify the script exposes a normal CLI entry point.
+      - name: has_main_guard
+        type: main_guard
+
+      # -------------------------
+      # BASIC CLI VALIDATION
+      # -------------------------
+
+      # Running with no arguments should fail because the output path and inputs are required.
+      - name: cli_no_args_fails
+        args: []
+        expect_exit_code: null
+        expect_exit_nonzero: true
+
+      # Help flag should succeed and print usage text.
+      - name: cli_help_flag
+        args:
+          - --help
+        expect_stdout_or_stderr_contains:
+          - "usage"
+
+      # Supplying only the output file but no input JSONs should fail.
+      - name: cli_only_output_arg_fails
+        args:
+          - merged.json
+        expect_exit_code: null
+        expect_exit_nonzero: true
+
+      # -------------------------
+      # INPUT FILE HANDLING
+      # -------------------------
+
+      # Missing input files are skipped rather than causing a hard failure.
+      # The script should emit a clear warning-style message for each missing file.
+      - name: cli_missing_input_files_returns_zero
+        scenario:
+          kind: merge_jsons
+          missing_input_files:
+            - missing1.json
+            - missing2.json
+        expect_stdout_or_stderr_contains:
+          - "not found. Skipping."
+
+      # A syntactically valid but empty JSON object should not crash the script.
+      - name: cli_with_empty_valid_json_input_returns_zero
+        scenario:
+          kind: merge_jsons
+          input_files:
+            one.json: {}
+
+      # One bad JSON and one missing file should both be reported and skipped cleanly.
+      - name: cli_with_invalid_json_and_missing_file_returns_zero
+        scenario:
+          kind: merge_jsons
+          invalid_files:
+            bad.json: |
+              {invalid
+          missing_input_files:
+            - missing.json
+        expect_stdout_or_stderr_contains:
+          - "is invalid JSON. Skipping."
+          - "not found. Skipping."
+
+      # -------------------------
+      # ACS / SUITE CLASSIFICATION PATHS
+      # -------------------------
+
+      # ACS info alone should be accepted and merged cleanly.
+      - name: cli_with_acs_info_only_returns_zero
+        scenario:
+          kind: merge_jsons
+          acs_info:
+            Overall Compliance Result: Compliant
+
+      # ACS info combined with FWTS results should still merge cleanly.
+      - name: cli_with_acs_info_and_fwts_json_returns_zero
+        scenario:
+          kind: merge_jsons
+          acs_info:
+            Overall Compliance Result: Unknown
+          input_files:
+            fwts.json:
+              test_results:
+                - Test_suite: uefivar
+                  Test_suite_description: FWTS UEFI variable service checks
+                  subtests:
+                    - sub_test_name: uefivar_set
+                      sub_test_description: SetVariable write path
+                      sub_test_result: FAILED
+                      reason: SetVariable returned an EFI error
+                  test_suite_summary:
+                    total_passed: 0
+                    total_failed: 1
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 0
+                total_failed: 1
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+
+      # BSA testcase-style results should be handled correctly.
+      - name: cli_with_bsa_json_returns_zero
+        scenario:
+          kind: merge_jsons
+          input_files:
+            bsa.json:
+              test_results:
+                - Test_suite: PE
+                  testcases:
+                    - Test_case: PE_001
+                      Test_case_description: Processing Element architectural compliance
+                      Test_result: FAILED
+                      Test_case_summary:
+                        Total Rules Run: 1
+                        Passed: 0
+                        Passed (Partial): 0
+                        Warnings: 0
+                        Skipped: 0
+                        Failed: 1
+                        PAL Not Supported: 0
+                        Not Implemented: 0
+                        Total_failed_with_waiver: 0
+                  test_suite_summary:
+                    Total Rules Run: 1
+                    Passed: 0
+                    Passed (Partial): 0
+                    Warnings: 0
+                    Skipped: 0
+                    Failed: 1
+                    PAL Not Supported: 0
+                    Not Implemented: 0
+                    Total_failed_with_waiver: 0
+              suite_summary:
+                Total Rules Run: 1
+                Passed: 0
+                Passed (Partial): 0
+                Warnings: 0
+                Skipped: 0
+                Failed: 1
+                PAL Not Supported: 0
+                Not Implemented: 0
+                Total_failed_with_waiver: 0
+
+      # Multi-suite merge path covering ACS info plus multiple suite formats.
+      - name: cli_with_multiple_suite_jsons_returns_zero
+        scenario:
+          kind: merge_jsons
+          acs_info:
+            Overall Compliance Result: Unknown
+          input_files:
+            bsa.json:
+              test_results:
+                - Test_suite: PE
+                  testcases:
+                    - Test_case: PE_001
+                      Test_case_description: Processing Element architectural compliance
+                      Test_result: PASSED
+                      Test_case_summary:
+                        Total Rules Run: 1
+                        Passed: 1
+                        Passed (Partial): 0
+                        Warnings: 0
+                        Skipped: 0
+                        Failed: 0
+                        PAL Not Supported: 0
+                        Not Implemented: 0
+                        Total_failed_with_waiver: 0
+                  test_suite_summary:
+                    Total Rules Run: 1
+                    Passed: 1
+                    Passed (Partial): 0
+                    Warnings: 0
+                    Skipped: 0
+                    Failed: 0
+                    PAL Not Supported: 0
+                    Not Implemented: 0
+                    Total_failed_with_waiver: 0
+              suite_summary:
+                Total Rules Run: 1
+                Passed: 1
+                Passed (Partial): 0
+                Warnings: 0
+                Skipped: 0
+                Failed: 0
+                PAL Not Supported: 0
+                Not Implemented: 0
+                Total_failed_with_waiver: 0
+            fwts.json:
+              test_results:
+                - Test_suite: uefivar
+                  Test_suite_description: FWTS UEFI variable service checks
+                  subtests:
+                    - sub_test_name: uefivar_set
+                      sub_test_description: SetVariable write path
+                      sub_test_result: FAILED (WITH WAIVER)
+                      waiver_reason: Firmware variable waiver
+                  test_suite_summary:
+                    total_passed: 0
+                    total_failed: 0
+                    total_failed_with_waiver: 1
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 0
+                total_failed: 0
+                total_failed_with_waiver: 1
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+            scmi.json:
+              test_results:
+                - Test_suite: base
+                  reason: N/A
+                  testcases:
+                    - Test_case: "1"
+                      Test_case_description: Discover vendor command
+                      Test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+
+      # -------------------------
+      # WARNING / LIMITATION / EDGE CASES
+      # -------------------------
+
+      # In SR flow, SBSA starts as recommended but is promoted to mandatory
+      # whenever an sbsa.json result is present.
+      - name: sbsa_present_is_promoted_to_mandatory_in_sr
+        scenario:
+          kind: merge_jsons
+          acs_info:
+            Overall Compliance Result: Unknown
+          input_files:
+            sbsa.json:
+              test_results:
+                - Test_suite: PE
+                  testcases:
+                    - Test_case: PE_001
+                      Test_case_description: Processing Element architectural compliance
+                      Test_result: FAILED
+                      Test_case_summary:
+                        Total Rules Run: 1
+                        Passed: 0
+                        Passed (Partial): 0
+                        Warnings: 0
+                        Skipped: 0
+                        Failed: 1
+                        PAL Not Supported: 0
+                        Not Implemented: 0
+                        Total_failed_with_waiver: 0
+                  test_suite_summary:
+                    Total Rules Run: 1
+                    Passed: 0
+                    Passed (Partial): 0
+                    Warnings: 0
+                    Skipped: 0
+                    Failed: 1
+                    PAL Not Supported: 0
+                    Not Implemented: 0
+                    Total_failed_with_waiver: 0
+              suite_summary:
+                Total Rules Run: 1
+                Passed: 0
+                Passed (Partial): 0
+                Warnings: 0
+                Skipped: 0
+                Failed: 1
+                PAL Not Supported: 0
+                Not Implemented: 0
+                Total_failed_with_waiver: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Mandatory  : SBSA: Not Compliant: Failed 1"
+
+      # In SR flow, seeing one SBMR flavor promotes both IB and OOB variants to
+      # mandatory, so the missing peer is reported as mandatory not run.
+      - name: sbmr_ib_presence_promotes_missing_oob_to_mandatory_in_sr
+        scenario:
+          kind: merge_jsons
+          acs_info:
+            Overall Compliance Result: Unknown
+          input_files:
+            sbmr_ib.json:
+              test_results:
+                - Test_suite: In-band management
+                  Test_cases:
+                    - Test_case: Redfish service root
+                      subtests:
+                        - sub_Test_Number: "1"
+                          sub_Test_Description: Query service root
+                          sub_test_result: PASSED
+                      test_case_summary:
+                        total_passed: 1
+                        total_failed: 0
+                        total_failed_with_waiver: 0
+                        total_aborted: 0
+                        total_skipped: 0
+                        total_warnings: 0
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Mandatory  : SBMR-IB: Compliant"
+          - "Suite: Mandatory  : SBMR-OOB: Not Compliant: not run"
+
+      # DT flow can emit one ethtool JSON per OS image. When the filenames match
+      # the schema-listed OS variants, merge_jsons.py should create matching
+      # pattern-based OS Tests sections and the corresponding explicit compliance
+      # keys without leaving the generic OS_TEST key behind.
+      - name: dt_three_per_os_ethtool_jsons_get_separate_mandatory_labels
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            ethtool_test_linux-Fedora-40.json:
+              test_results:
+                - Test_suite: Network
+                  Test_suite_description: Network validation
+                  Test_case: ethtool_test_linux-Fedora-40
+                  Test_case_description: Ethernet Tool Tests
+                  subtests:
+                    - sub_Test_Number: "1"
+                      sub_Test_Description: Bring interface up
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+            ethtool_test_linux-Tumbleweed.json:
+              test_results:
+                - Test_suite: Network
+                  Test_suite_description: Network validation
+                  Test_case: ethtool_test_linux-Tumbleweed
+                  Test_case_description: Ethernet Tool Tests
+                  subtests:
+                    - sub_Test_Number: "1"
+                      sub_Test_Description: Acquire DHCP lease
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+            ethtool_test_linux-ubuntu-24.json:
+              test_results:
+                - Test_suite: Network
+                  Test_suite_description: Network validation
+                  Test_case: ethtool_test_linux-ubuntu-24
+                  Test_case_description: Ethernet Tool Tests
+                  subtests:
+                    - sub_Test_Number: "1"
+                      sub_Test_Description: Ping default gateway
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+          output_file: merged.json
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_empty
+            path: "{dir}/merged.json"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: OS Tests - ethtool_test_linux-Fedora-40"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: OS Tests - ethtool_test_linux-Tumbleweed"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: OS Tests - ethtool_test_linux-ubuntu-24"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Mandatory  : OS_ethtool_test_linux-Fedora-40_compliance"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Mandatory  : OS_ethtool_test_linux-Tumbleweed_compliance"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Mandatory  : OS_ethtool_test_linux-ubuntu-24_compliance"
+          - type: file_not_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Mandatory  : OS_TEST_compliance"
+
+      # Standalone DT suites are enriched from test_categoryDT-derived metadata
+      # before they are later collapsed under the shared Standalone section.
+      - name: dt_standalone_entry_is_enriched_from_test_categorydt
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            dt_validate.json:
+              test_results:
+                - Test_suite: DTValidation
+                  Test_suite_description: Validation for device tree
+                  Test_case: dt_validate
+                  Test_case_description: Device Tree Validation
+                  subtests:
+                    - sub_Test_Number: "1"
+                      sub_Test_Description: dt-schema validation
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+          output_file: merged.json
+        mocks:
+          "{module}.test_cat_dict":
+            value:
+              standalone:
+                dtvalidation:
+                  Waivable: "yes"
+                  SRS scope: "Required"
+                  Main Readiness Grouping: "boot readiness"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Waivable\": \"yes\""
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"SRS scope\": \"Required\""
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Main Readiness Grouping\": \"boot readiness\""
+          - type: file_not_contains
+            path: "{dir}/merged.json"
+            text: "\"Test_suite_info\""
+
+      # The exact standalone ethtool_test.json filename should classify through
+      # the ETHTOOL_TEST path and still be collapsed into the shared Standalone section.
+      - name: dt_ethtool_test_json_is_collapsed_under_standalone
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            ethtool_test.json:
+              test_results:
+                - Test_suite: Network
+                  Test_suite_description: Network validation
+                  Test_case: ethtool_test
+                  Test_case_description: Ethernet Tool Tests
+                  subtests:
+                    - sub_Test_Number: "1"
+                      sub_Test_Description: Bring interface up
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+          output_file: merged.json
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Standalone"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Test_case\": \"ethtool_test\""
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Mandatory  : ETHTOOL_TEST_compliance"
+          - type: file_not_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Ethtool Test"
+
+      # In DT mode, a missing recommended suite is still reported as not run
+      # and the overall result becomes Not Compliant.
+      - name: dt_missing_recommended_suite_makes_overall_not_compliant
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            fwts.json:
+              test_results:
+                - Test_suite: smccc
+                  Test_suite_description: SMCCC interface checks
+                  subtests:
+                    - sub_test_name: smccc_version
+                      sub_test_description: Query SMCCC version
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+          output_file: merged.json
+        mocks:
+          "{module}.DT_SRS_SCOPE_TABLE":
+            factory: builtins.eval
+            args:
+              - "(('FWTS', 'M'), ('BSA', 'R'))"
+          "{module}._REQUIREMENT_MAP":
+            value: {}
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Recommended: BSA: Not Compliant: not run"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Suite_Name: Recommended  : BSA_compliance\": \"Not Compliant: not run\""
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Overall Compliance Result\": \"Not Compliant : Recommended - (not run: BSA)\""
+
+      # Recommended DT suites can fail without changing the overall result as
+      # long as all mandatory suites still pass.
+      - name: dt_recommended_failure_does_not_change_overall_compliance
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            fwts.json:
+              test_results:
+                - Test_suite: smccc
+                  Test_suite_description: SMCCC interface checks
+                  subtests:
+                    - sub_test_name: smccc_version
+                      sub_test_description: Query SMCCC version
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+            bsa.json:
+              test_results:
+                - Test_suite: PE
+                  testcases:
+                    - Test_case: PE_001
+                      Test_case_description: Processing Element architectural compliance
+                      Test_result: FAILED
+                      Test_case_summary:
+                        Total Rules Run: 1
+                        Passed: 0
+                        Passed (Partial): 0
+                        Warnings: 0
+                        Skipped: 0
+                        Failed: 1
+                        PAL Not Supported: 0
+                        Not Implemented: 0
+                        Total_failed_with_waiver: 0
+                  test_suite_summary:
+                    Total Rules Run: 1
+                    Passed: 0
+                    Passed (Partial): 0
+                    Warnings: 0
+                    Skipped: 0
+                    Failed: 1
+                    PAL Not Supported: 0
+                    Not Implemented: 0
+                    Total_failed_with_waiver: 0
+              suite_summary:
+                Total Rules Run: 1
+                Passed: 0
+                Passed (Partial): 0
+                Warnings: 0
+                Skipped: 0
+                Failed: 1
+                PAL Not Supported: 0
+                Not Implemented: 0
+                Total_failed_with_waiver: 0
+          output_file: merged.json
+        mocks:
+          "{module}.DT_SRS_SCOPE_TABLE":
+            factory: builtins.eval
+            args:
+              - "(('FWTS', 'M'), ('BSA', 'R'))"
+          "{module}._REQUIREMENT_MAP":
+            value: {}
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Recommended: BSA: Not Compliant: Failed 1"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Suite_Name: Recommended  : BSA_compliance\": \"Not Compliant: Failed 1\""
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Overall Compliance Result\": \"Compliant\""
+
+      # In SR mode, a missing recommended suite is reported as Not Run but does
+      # not change the overall result when mandatory suites pass.
+      - name: sr_missing_recommended_suite_is_reported_not_run_without_failing_overall
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: SR
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            fwts.json:
+              test_results:
+                - Test_suite: smccc
+                  Test_suite_description: SMCCC interface checks
+                  subtests:
+                    - sub_test_name: smccc_version
+                      sub_test_description: Query SMCCC version
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+          output_file: merged.json
+        mocks:
+          "{module}.SR_SRS_SCOPE_TABLE":
+            factory: builtins.eval
+            args:
+              - "(('FWTS', 'M'), ('SBSA', 'R'))"
+          "{module}._REQUIREMENT_MAP":
+            value: {}
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Recommended: SBSA: Not Run"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Suite_Name: Recommended  : SBSA_compliance\": \"Not Run\""
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Overall Compliance Result\": \"Compliant\""
+
+      # In DT mode, a missing conditional-mandatory suite is reported as Not Run
+      # without changing the overall result.
+      - name: dt_missing_conditional_mandatory_suite_is_reported_not_run_without_failing_overall
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            fwts.json:
+              test_results:
+                - Test_suite: smccc
+                  Test_suite_description: SMCCC interface checks
+                  subtests:
+                    - sub_test_name: smccc_version
+                      sub_test_description: Query SMCCC version
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+          output_file: merged.json
+        mocks:
+          "{module}.DT_SRS_SCOPE_TABLE":
+            factory: builtins.eval
+            args:
+              - "(('FWTS', 'M'), ('PFDI', 'CM'))"
+          "{module}._REQUIREMENT_MAP":
+            value: {}
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Conditional-Mandatory  : PFDI: Not Run"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Suite_Name: Conditional-Mandatory  : PFDI_compliance\": \"Not Run\""
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"Overall Compliance Result\": \"Compliant\""
+
+      # DT standalone outputs are intentionally collapsed into a single Standalone
+      # section in merged_results.json.
+      - name: standalone_entries_are_collapsed_under_single_standalone_section
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            dt_validate.json:
+              test_results:
+                - Test_suite: DTValidation
+                  Test_suite_description: Validation for device tree
+                  Test_case: dt_validate
+                  Test_case_description: Device Tree Validation
+                  subtests:
+                    - sub_test_name: schema_validation
+                      sub_test_description: dt-schema validation
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+            runtime_dev_map.json:
+              test_results:
+                - Test_suite: EBBR requirements
+                  Test_suite_description: Coverage of EBBR requirements
+                  Test_case: runtime_dev_map
+                  Test_case_description: Checks runtime device mapping conflict
+                  subtests:
+                    - sub_test_name: mapping_conflict
+                      sub_test_description: Runtime mapping conflict check
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+          output_file: merged.json
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Standalone"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "DTValidation"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "EBBR requirements"
+          - type: file_not_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: DT Validate"
+          - type: file_not_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Runtime device mapping"
+
+      # If both testcase-level and subtest-level failures are present for the same suite,
+      # they should not be double-counted into the final failure total.
+      # This mixed shape is intentionally synthetic: real BSA parser output does not
+      # place suite-level subtests beside testcase lists, but merge_jsons.py has a
+      # branch to prefer testcase counting and this case documents that behavior.
+      - name: testcase_and_subtest_failures_are_not_double_counted
+        warn_only: true
+        scenario:
+          kind: merge_jsons
+          input_files:
+            bsa.json:
+              test_results:
+                - Test_suite: PE
+                  testcases:
+                    - Test_case: PE_001
+                      Test_case_description: Processing Element architectural compliance
+                      Test_result: FAILED
+                      Test_case_summary:
+                        Total Rules Run: 1
+                        Passed: 0
+                        Passed (Partial): 0
+                        Warnings: 0
+                        Skipped: 0
+                        Failed: 1
+                        PAL Not Supported: 0
+                        Not Implemented: 0
+                        Total_failed_with_waiver: 0
+                  subtests:
+                    - sub_test_name: synthetic_suite_level_probe
+                      sub_test_description: Synthetic suite-level failure used to test precedence
+                      sub_test_result: FAILED
+                  test_suite_summary:
+                    Total Rules Run: 1
+                    Passed: 0
+                    Passed (Partial): 0
+                    Warnings: 0
+                    Skipped: 0
+                    Failed: 1
+                    PAL Not Supported: 0
+                    Not Implemented: 0
+                    Total_failed_with_waiver: 0
+              suite_summary:
+                Total Rules Run: 1
+                Passed: 0
+                Passed (Partial): 0
+                Warnings: 0
+                Skipped: 0
+                Failed: 1
+                PAL Not Supported: 0
+                Not Implemented: 0
+                Total_failed_with_waiver: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Mandatory  : BSA: Not Compliant: Failed 1"
+
+      # In DT flow, SCMI has its own dedicated compliance summary derived from the
+      # suite-level SCMI result.
+      - name: dt_scmi_failure_populates_scmi_compliance_results
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            scmi.json:
+              test_results:
+                - Test_suite: base
+                  reason: N/A
+                  testcases:
+                    - Test_case: "1"
+                      Test_case_description: Discover vendor command
+                      Test_result: FAILED
+                      reason: SCMI command failed
+                  test_suite_summary:
+                    total_passed: 0
+                    total_failed: 1
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 0
+                total_failed: 1
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+          output_file: merged.json
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "SCMI compliance results"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Not Compliant : Mandatory - (SCMI)"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Extension  : SCMI_compliance"
+
+      # DT mode derives an aggregate BBSR compliance summary from the three
+      # underlying extension suites, including missing and failing members.
+      - name: dt_bbsr_compliance_results_are_derived_correctly
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            bbsr_fwts.json:
+              test_results:
+                - Test_suite: rtservices
+                  Test_suite_description: Runtime services checks
+                  subtests:
+                    - sub_test_name: getvariable
+                      sub_test_description: GetVariable runtime path
+                      sub_test_result: FAILED
+                      reason: Runtime service failure
+                  test_suite_summary:
+                    total_passed: 0
+                    total_failed: 1
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 0
+                total_failed: 1
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+            bbsr_sct.json:
+              test_results:
+                - Test_suite: SecureBootServices
+                  Test_case: CASE_001
+                  subtests:
+                    - sub_Test_GUID: GUID-1
+                      sub_Test_Description: Verify secure boot service
+                      sub_test_result: PASSED
+                  test_case_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+                    total_ignored: 0
+          output_file: merged.json
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "BBSR compliance results"
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Not Compliant : Mandatory - (not run: BBSR-TPM; failed: BBSR-FWTS)"
+
+      # If no BBSR suite runs at all, the derived BBSR summary currently reports
+      # the aggregate status as Not run.
+      - name: dt_bbsr_all_missing_reports_not_run
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+          output_file: merged.json
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"BBSR compliance results\": \"Not run\""
+
+      # If all BBSR suite failures are waived and none are missing, the derived
+      # BBSR summary currently collapses to Compliant with waivers.
+      - name: dt_bbsr_waiver_only_reports_compliant_with_waivers
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            bbsr_fwts.json:
+              test_results:
+                - Test_suite: rtservices
+                  Test_suite_description: Runtime services checks
+                  subtests:
+                    - sub_test_name: getvariable
+                      sub_test_description: GetVariable runtime path
+                      sub_test_result: FAILED (WITH WAIVER)
+                      waiver_reason: Runtime service waiver
+                  test_suite_summary:
+                    total_passed: 0
+                    total_failed: 0
+                    total_failed_with_waiver: 1
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 0
+                total_failed: 0
+                total_failed_with_waiver: 1
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+            bbsr_sct.json:
+              test_results:
+                - Test_suite: SecureBootServices
+                  Test_case: CASE_001
+                  subtests:
+                    - sub_Test_GUID: GUID-1
+                      sub_Test_Description: Verify secure boot service
+                      sub_test_result: PASSED
+                  test_case_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+                    total_ignored: 0
+            bbsr_tpm.json:
+              test_results:
+                - Test_suite: TPM
+                  Test_case: TPM
+                  subtests:
+                    - sub_Test_Number: "1"
+                      sub_Test_Description: Verify TPM measurement
+                      sub_test_result: PASSED
+                  test_case_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+                    total_ignored: 0
+          output_file: merged.json
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "\"BBSR compliance results\": \"Compliant with waivers\""
+
+      # Invalid JSON warning should appear once for each bad file, not be silently swallowed.
+      - name: invalid_json_warning_is_emitted_once_per_bad_file
+        warn_only: true
+        scenario:
+          kind: merge_jsons
+          invalid_files:
+            bad.json: |
+              {invalid
+        expect_stdout_or_stderr_contains:
+          - "is invalid JSON. Skipping."
+
+      # Alternate ethtool filenames are currently grouped under OS Tests buckets
+      # instead of the primary Ethtool Test suite bucket.
+      - name: alternate_ethtool_filename_is_bucketed_under_os_tests
+        warn_only: true
+        scenario:
+          kind: merge_jsons
+          acs_info:
+            Overall Compliance Result: Unknown
+          input_files:
+            ethtool_test_a.json:
+              test_results:
+                - Test_suite: Network
+                  Test_suite_description: Network validation
+                  Test_case: ethtool_test_a
+                  Test_case_description: Ethernet Tool Tests
+                  subtests:
+                    - sub_test_name: link_up
+                      sub_test_description: Bring interface up
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: OS Tests - ethtool_test_a"
+
+      # In DT mode, missing recommended BSA is still reported explicitly as
+      # not run and contributes to the overall not-compliant result.
+      - name: dt_missing_recommended_bsa_is_reported_not_run
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            fwts.json:
+              test_results:
+                - Test_suite: smccc
+                  Test_suite_description: SMCCC interface checks
+                  subtests:
+                    - sub_test_name: smccc_version
+                      sub_test_description: Query SMCCC version
+                      sub_test_result: PASSED
+                  test_suite_summary:
+                    total_passed: 1
+                    total_failed: 0
+                    total_failed_with_waiver: 0
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 1
+                total_failed: 0
+                total_failed_with_waiver: 0
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+          output_file: merged.json
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Recommended: BSA: Not Compliant: not run"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Recommended  : BSA_compliance"
+
+      # PFDI is conditional-mandatory in DT mode and should be labeled that way
+      # when a real pfdi.json result is present.
+      - name: dt_pfdi_conditional_mandatory_path_is_reported_correctly
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            pfdi.json:
+              - Test_suite: PFDI
+                subtests:
+                  - sub_Test_Number: "1"
+                    sub_Test_Description: Firmware fault interface probe
+                    sub_test_result: FAILED
+                    reason: Fault detection interface returned failure
+                test_suite_summary:
+                  total_passed: 0
+                  total_failed: 1
+                  total_aborted: 0
+                  total_skipped: 0
+                  total_warnings: 0
+              - Suite_summary:
+                  total_passed: 0
+                  total_failed: 1
+                  total_aborted: 0
+                  total_skipped: 0
+                  total_warnings: 0
+          output_file: merged.json
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Conditional-Mandatory  : PFDI: Not Compliant: Failed 1"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "Suite_Name: Conditional-Mandatory  : PFDI_compliance"
+
+      # Dictionary-form subtest result counters are currently treated as real
+      # failures when a FAILED bucket is present, even alongside waiver counts.
+      - name: dict_subtest_result_map_is_counted_using_failed_bucket
+        warn_only: true
+        scenario:
+          kind: merge_jsons
+          input_files:
+            fwts.json:
+              test_results:
+                - Test_suite: uefivar
+                  Test_suite_description: FWTS UEFI variable service checks
+                  subtests:
+                    - sub_test_name: uefivar_set
+                      sub_test_description: SetVariable write path
+                      sub_test_result:
+                        FAILED: 1
+                        FAILED_WITH_WAIVER: 2
+                  test_suite_summary:
+                    total_passed: 0
+                    total_failed: 1
+                    total_failed_with_waiver: 2
+                    total_aborted: 0
+                    total_skipped: 0
+                    total_warnings: 0
+              suite_summary:
+                total_passed: 0
+                total_failed: 1
+                total_failed_with_waiver: 2
+                total_aborted: 0
+                total_skipped: 0
+                total_warnings: 0
+        expect_stdout_or_stderr_contains:
+          - "Suite: Mandatory  : FWTS: Not Compliant: Failed 1"

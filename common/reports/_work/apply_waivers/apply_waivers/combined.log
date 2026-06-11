@@ -1,0 +1,338 @@
+====================================================================================================
+RUN START: 2026-06-11 09:32:19
+YAML: common/test_yaml/apply_waivers.yaml
+SUITE: apply_waivers
+TARGETS: common/log_parser/apply_waivers.py
+====================================================================================================
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::file_exists
+STATUS: PASS
+MESSAGE: File exists
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::python_compiles
+STATUS: PASS
+MESSAGE: Python compilation succeeded
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::cli_help_flag
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py --help
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+usage: apply_waivers.py [-h] [--quiet]
+                        suite_name json_file [waiver_file] [output_json_file]
+
+Apply waivers to test suite JSON results.
+
+positional arguments:
+  suite_name        Name of the test suite
+  json_file         Path to the JSON file
+  waiver_file       Path to the waiver file (default: waiver.json)
+  output_json_file  Path to the test category file (default: None)
+
+options:
+  -h, --help        show this help message and exit
+  --quiet           Suppress detailed output
+--- STDERR ---
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::fwts_suite_level_waiver_marks_failed_subtest
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/5_fwts_suite_level_waiver_marks_failed_subtest/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/5_fwts_suite_level_waiver_marks_failed_subtest/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Suite-level waiver applied to subtest 'failure one' with reason: Known FWTS issue
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/5_fwts_suite_level_waiver_marks_failed_subtest/fwts.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/5_fwts_suite_level_waiver_marks_failed_subtest/fwts.json contains 'WITH WAIVER' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/5_fwts_suite_level_waiver_marks_failed_subtest/fwts.json contains '(WITH WAIVER) (WITH WAIVER)' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::testsuite_level_waiver_applies_only_to_matching_testsuite
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+TestSuite-level waiver applied to subtest 'alpha' in TestSuite 'MatchSuite' with reason: Specific suite waiver
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/fwts.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/fwts.json contains 'Specific suite waiver' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/fwts.json contains '"Test_suite": "OtherSuite"' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::cli_missing_json_file_returns_zero_with_warning
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/4_cli_missing_json_file_returns_zero_with_warning/missing.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+WARNING: Failed to read or parse /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/4_cli_missing_json_file_returns_zero_with_warning/missing.json: [Errno 2] No such file or directory: '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/4_cli_missing_json_file_returns_zero_with_warning/missing.json'
+--- STDERR ---
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::category_non_waivable_blocks_waiver_application
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/7_category_non_waivable_blocks_waiver_application/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/7_category_non_waivable_blocks_waiver_application/waiver.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/7_category_non_waivable_blocks_waiver_application/category.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/7_category_non_waivable_blocks_waiver_application/fwts.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/7_category_non_waivable_blocks_waiver_application/fwts.json contains 'WITH WAIVER' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::category_waivable_yes_allows_waiver_application
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/8_category_waivable_yes_allows_waiver_application/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/8_category_waivable_yes_allows_waiver_application/waiver.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/8_category_waivable_yes_allows_waiver_application/category.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Suite-level waiver applied to subtest 'failure one' with reason: Known FWTS issue
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/8_category_waivable_yes_allows_waiver_application/fwts.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/8_category_waivable_yes_allows_waiver_application/fwts.json contains 'WITH WAIVER' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/8_category_waivable_yes_allows_waiver_application/fwts.json contains '(WITH WAIVER) (WITH WAIVER)' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::fwts_subtest_description_waiver_applies
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/9_fwts_subtest_description_waiver_applies/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/9_fwts_subtest_description_waiver_applies/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Subtest-level waiver applied to subtest 'something' with reason: Description-based waiver
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/9_fwts_subtest_description_waiver_applies/fwts.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/9_fwts_subtest_description_waiver_applies/fwts.json contains 'WITH WAIVER' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/9_fwts_subtest_description_waiver_applies/fwts.json contains 'Description-based waiver' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::standalone_subtest_description_waiver_applies
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py Standalone /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/10_standalone_subtest_description_waiver_applies/standalone.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/10_standalone_subtest_description_waiver_applies/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+ERROR: Waiver for Test_case 'ethtool_test' is missing 'Reason'. Skipping Test_case-level waiver.
+Subtest-level waiver applied to subtest 'Ping to www.arm.com on eth0' with reason: Network stack excluded for this SKU
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/10_standalone_subtest_description_waiver_applies/standalone.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check regex: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/10_standalone_subtest_description_waiver_applies/standalone.json matches '"sub_test_result": "[^"]*WITH WAIVER[^"]*"' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/10_standalone_subtest_description_waiver_applies/standalone.json contains 'Network stack excluded for this SKU' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/10_standalone_subtest_description_waiver_applies/standalone.json contains '"total_failed": 0' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/10_standalone_subtest_description_waiver_applies/standalone.json contains '"total_failed_with_waiver": 1' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::fwts_does_not_duplicate_existing_with_waiver_marker
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/11_fwts_does_not_duplicate_existing_with_waiver_marker/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/11_fwts_does_not_duplicate_existing_with_waiver_marker/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/11_fwts_does_not_duplicate_existing_with_waiver_marker/fwts.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/11_fwts_does_not_duplicate_existing_with_waiver_marker/fwts.json contains 'WITH WAIVER' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/11_fwts_does_not_duplicate_existing_with_waiver_marker/fwts.json contains '(WITH WAIVER) (WITH WAIVER)' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::bsa_testcase_waiver_marks_failed_case
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py BSA /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/13_bsa_testcase_waiver_marks_failed_case/bsa.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/13_bsa_testcase_waiver_marks_failed_case/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Test_case-level waiver applied to testcase 'RULE_001' with reason: BSA waiver
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/13_bsa_testcase_waiver_marks_failed_case/bsa.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/13_bsa_testcase_waiver_marks_failed_case/bsa.json contains 'WITH WAIVER' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/13_bsa_testcase_waiver_marks_failed_case/bsa.json contains '(WITH WAIVER) (WITH WAIVER)' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::malformed_waiver_file_does_not_modify_json
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/12_malformed_waiver_file_does_not_modify_json/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/12_malformed_waiver_file_does_not_modify_json/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+INFO: Failed to read or parse /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/12_malformed_waiver_file_does_not_modify_json/waiver.json: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/12_malformed_waiver_file_does_not_modify_json/fwts.json contains 'WITH WAIVER' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::quiet_mode_runs_and_updates_json
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/14_quiet_mode_runs_and_updates_json/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/14_quiet_mode_runs_and_updates_json/waiver.json --quiet
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/14_quiet_mode_runs_and_updates_json/fwts.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/14_quiet_mode_runs_and_updates_json/fwts.json contains 'WITH WAIVER' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::no_matching_suite_in_waiver_file_leaves_json_unchanged
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/15_no_matching_suite_in_waiver_file_leaves_json_unchanged/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/15_no_matching_suite_in_waiver_file_leaves_json_unchanged/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+No valid waivers found for suite 'FWTS'. No changes applied.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/15_no_matching_suite_in_waiver_file_leaves_json_unchanged/fwts.json contains 'WITH WAIVER' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::missing_reason_in_waiver_is_ignored
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/16_missing_reason_in_waiver_is_ignored/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/16_missing_reason_in_waiver_is_ignored/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+ERROR: Waiver for TestSuite 'DemoSuite' is missing 'Reason'. Skipping TestSuite-level waiver.
+No valid waivers found for suite 'FWTS'. No changes applied.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/16_missing_reason_in_waiver_is_ignored/fwts.json contains 'WITH WAIVER' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::sct_subsuite_level_waiver_marks_failed_subtest
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py SCT /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+SubSuite-level waiver applied to subtest 'subsuite failure' with reason: SCT subsuite waiver
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json contains 'WITH WAIVER' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json contains 'SCT subsuite waiver' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/17_sct_subsuite_level_waiver_marks_failed_subtest/sct.json contains '(WITH WAIVER) (WITH WAIVER)' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::bsa_subtest_waiver_applies_by_sub_rule_id
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py BSA /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/18_bsa_subtest_waiver_applies_by_sub_rule_id/bsa.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/18_bsa_subtest_waiver_applies_by_sub_rule_id/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Test_case-level waiver applied to testcase 'RULE_001' with reason: Case waiver placeholder
+Subtest-level waiver applied to subtest 'SUB_01' (first subtest) in testcase 'RULE_001' with reason: BSA subtest waiver
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/18_bsa_subtest_waiver_applies_by_sub_rule_id/bsa.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/18_bsa_subtest_waiver_applies_by_sub_rule_id/bsa.json contains 'BSA subtest waiver' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/18_bsa_subtest_waiver_applies_by_sub_rule_id/bsa.json contains 'WITH WAIVER' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/18_bsa_subtest_waiver_applies_by_sub_rule_id/bsa.json contains '"sub_Rule_ID": "SUB_02"' -> PASS
+
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::passed_result_is_not_modified_by_waiver
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/19_passed_result_is_not_modified_by_waiver/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/19_passed_result_is_not_modified_by_waiver/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/19_passed_result_is_not_modified_by_waiver/fwts.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/19_passed_result_is_not_modified_by_waiver/fwts.json contains '"sub_test_result": "PASSED"' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/19_passed_result_is_not_modified_by_waiver/fwts.json contains 'WITH WAIVER' -> PASS
+

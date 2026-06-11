@@ -1,0 +1,4 @@
+================================================================================
+TEST CASE: generate_acs_summary::generate_acs_summary.py::file_exists
+STATUS: PASS
+MESSAGE: File exists

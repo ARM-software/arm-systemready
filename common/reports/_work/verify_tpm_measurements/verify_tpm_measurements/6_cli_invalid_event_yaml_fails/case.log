@@ -1,0 +1,17 @@
+================================================================================
+TEST CASE: verify_tpm_measurements::verify_tpm_measurements.py::cli_invalid_event_yaml_fails
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: python3 /home/vepav01/arm-systemready/common/linux_scripts/verify_tpm_measurements.py /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/6_cli_invalid_event_yaml_fails/pcr.yaml /home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/6_cli_invalid_event_yaml_fails/event.yaml
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 1
+--- STDOUT ---
+Verify that the cumulative SHA256 measurements from the event log match the TPM PCRs 0-7                      : FAIL
+    ERROR: while parsing a flow sequence
+  in "/home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/6_cli_invalid_event_yaml_fails/event.yaml", line 1, column 6
+expected ',' or ']', but got '<stream end>'
+  in "/home/vepav01/arm-systemready/common/reports/_work/verify_tpm_measurements/verify_tpm_measurements/6_cli_invalid_event_yaml_fails/event.yaml", line 2, column 1
+--- STDERR ---

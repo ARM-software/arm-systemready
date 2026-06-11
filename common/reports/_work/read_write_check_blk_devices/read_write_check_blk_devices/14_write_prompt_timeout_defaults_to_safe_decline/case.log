@@ -1,0 +1,12 @@
+================================================================================
+TEST CASE: read_write_check_blk_devices::read_write_check_blk_devices.py::write_prompt_timeout_defaults_to_safe_decline
+STATUS: PASS
+MESSAGE: Function returned None
+
+Work dir: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/14_write_prompt_timeout_defaults_to_safe_decline
+--- STDOUT ---
+
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/read_write_check_blk_devices/read_write_check_blk_devices/14_write_prompt_timeout_defaults_to_safe_decline/blk_commands.log contains 'dd if=/dev/sda1 of=sda1_backup.bin' -> PASS

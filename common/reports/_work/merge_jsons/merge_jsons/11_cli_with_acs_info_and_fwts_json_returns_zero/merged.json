@@ -1,0 +1,50 @@
+{
+    "Suite_Name: acs_info": {
+        "ACS Results Summary": {
+            "BBSR compliance results": "Not run",
+            "Overall Compliance Result": "Not Compliant : Mandatory - (not run: SCT, BSA, OS_TEST; failed: FWTS) : Recommended - (not run: SBSA, SBMR-OOB, SBMR-IB)",
+            "Suite_Name: Extension  : BBSR-FWTS_compliance": "Not Run",
+            "Suite_Name: Extension  : BBSR-SCT_compliance": "Not Run",
+            "Suite_Name: Extension  : BBSR-TPM_compliance": "Not Run",
+            "Suite_Name: Mandatory  : BSA_compliance": "Not Compliant: not run",
+            "Suite_Name: Mandatory  : FWTS_compliance": "Not Compliant: Failed 1",
+            "Suite_Name: Mandatory  : OS_TEST_compliance": "Not Compliant: not run",
+            "Suite_Name: Mandatory  : SCT_compliance": "Not Compliant: not run",
+            "Suite_Name: Recommended  : SBMR-IB_compliance": "Not Run",
+            "Suite_Name: Recommended  : SBMR-OOB_compliance": "Not Run",
+            "Suite_Name: Recommended  : SBSA_compliance": "Not Run"
+        }
+    },
+    "Suite_Name: FWTS": {
+        "suite_summary": {
+            "total_aborted": 0,
+            "total_failed": 1,
+            "total_failed_with_waiver": 0,
+            "total_passed": 0,
+            "total_skipped": 0,
+            "total_warnings": 0
+        },
+        "test_results": [
+            {
+                "Test_suite": "uefivar",
+                "Test_suite_description": "FWTS UEFI variable service checks",
+                "test_suite_summary": {
+                    "total_aborted": 0,
+                    "total_failed": 1,
+                    "total_failed_with_waiver": 0,
+                    "total_passed": 0,
+                    "total_skipped": 0,
+                    "total_warnings": 0
+                },
+                "subtests": [
+                    {
+                        "reason": "SetVariable returned an EFI error",
+                        "sub_test_description": "SetVariable write path",
+                        "sub_test_name": "uefivar_set",
+                        "sub_test_result": "FAILED"
+                    }
+                ]
+            }
+        ]
+    }
+}

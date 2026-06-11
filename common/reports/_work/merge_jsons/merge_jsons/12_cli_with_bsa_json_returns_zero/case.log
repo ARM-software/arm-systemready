@@ -1,0 +1,26 @@
+================================================================================
+TEST CASE: merge_jsons::merge_jsons.py::cli_with_bsa_json_returns_zero
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/merge_jsons.py /home/vepav01/arm-systemready/common/reports/_work/merge_jsons/merge_jsons/12_cli_with_bsa_json_returns_zero/merged.json /home/vepav01/arm-systemready/common/reports/_work/merge_jsons/merge_jsons/12_cli_with_bsa_json_returns_zero/bsa.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Suite: Extension  : BBSR-TPM: Not Run
+Suite: Extension  : BBSR-FWTS: Not Run
+Suite: Recommended: SBMR-OOB: Not Run
+[91mSuite: Mandatory  : BSA: Not Compliant: Failed 1[0m
+[91mSuite: Mandatory  : FWTS: Not Compliant: not run[0m
+[91mSuite: Mandatory  : SCT: Not Compliant: not run[0m
+Suite: Extension  : BBSR-SCT: Not Run
+[91mSuite: Mandatory  : OS_TEST: Not Compliant: not run[0m
+Suite: Recommended: SBMR-IB: Not Run
+Suite: Recommended: SBSA: Not Run
+
+[91mSRS requirements compliance result: Not Compliant : Mandatory - (not run: FWTS, SCT, OS_TEST; failed: BSA) : Recommended - (not run: SBMR-OOB, SBMR-IB, SBSA)[0m
+
+BBSR compliance results: Not run
+--- STDERR ---

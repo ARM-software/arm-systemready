@@ -1,0 +1,18 @@
+{
+  "Suites": [
+    {
+      "Suite": "BSA",
+      "TestSuites": [
+        {
+          "TestSuite": "RuleGroupA",
+          "TestCases": [
+            {
+              "Test_case": "RULE_001",
+              "Reason": "BSA waiver"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

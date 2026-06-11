@@ -1,0 +1,19 @@
+================================================================================
+TEST CASE: generate_acs_summary::generate_acs_summary.py::cli_removes_result_summary_headings_case_insensitively
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/generate_acs_summary.py /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/bsa.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/sbsa.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/fwts.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/sct.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/bbsr_fwts.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/bbsr_sct.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/bbsr_tpm.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/pfdi.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/post_script.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/standalone.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/os_tests.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/capsule.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/sbmr_ib.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/sbmr_oob.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/scmi.html /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/summary.html
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+Config file  not provided or does not exist.
+Config file  not provided or does not exist.
+Warning: merged JSON not provided or does not exist => Overall compliance unknown
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/summary.html contains 'BSA' -> PASS
+post_check file_not_contains: /home/vepav01/arm-systemready/common/reports/_work/generate_acs_summary/generate_acs_summary/7_cli_removes_result_summary_headings_case_insensitively/summary.html contains 'RESULT SUMMARY' -> PASS

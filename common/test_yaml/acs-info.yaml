@@ -1,0 +1,283 @@
+suites:
+  - name: acs_info
+    files:
+      - common/log_parser/acs_info.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: cli_help_flag
+        type: cli
+        args:
+          - --help
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "Collect ACS-like system info"
+
+      - name: cli_generates_json_from_dmidecode_only
+        type: cli
+        scenario:
+          kind: acs_info
+          dmidecode:
+            vendor: VendorA
+            product: BoardA
+            family: FamilyA
+            firmware: FW-1.2.3
+        args:
+          - --dmidecode_log
+          - "{dir}/dmidecode.log"
+          - --output_dir
+          - "{dir}/out"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/out/acs_info.json"
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Vendor\": \"VendorA\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"System Name\": \"BoardA\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"SoC Family\": \"FamilyA\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Firmware Version\": \"FW-1.2.3\""
+
+      - name: cli_merges_acs_and_system_config
+        type: cli
+        scenario:
+          kind: acs_info
+          dmidecode:
+            vendor: VendorB
+            product: BoardB
+            family: FamilyB
+            firmware: FW-2.0
+          acs_config:
+            Band: SystemReady Band
+            ACS version: "6.1"
+          system_config:
+            Board Revision: RevC
+        args:
+          - --dmidecode_log
+          - "{dir}/dmidecode.log"
+          - --acs_config_path
+          - "{dir}/acs_config.txt"
+          - --system_config_path
+          - "{dir}/system_config.txt"
+          - --output_dir
+          - "{dir}/out"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"ACS version\": \"6.1\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Board Revision\": \"RevC\""
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Band\": \"SystemReady Band\""
+
+      - name: cli_stops_parsing_at_user_defined_configs_marker
+        type: cli
+        scenario:
+          kind: acs_info
+          dmidecode:
+            vendor: VendorC
+            product: BoardC
+            family: FamilyC
+            firmware: FW-3.0
+        text_files:
+          acs_config.txt: |
+            Band: SystemReady Band
+            ACS version: 7.0
+            # User-defined configs
+            Secret Field: should_not_appear
+        args:
+          - --dmidecode_log
+          - "{dir}/dmidecode.log"
+          - --acs_config_path
+          - "{dir}/acs_config.txt"
+          - --output_dir
+          - "{dir}/out"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"ACS version\": \"7.0\""
+          - type: file_not_contains
+            path: "{dir}/out/acs_info.json"
+            text: "should_not_appear"
+
+      - name: cli_reads_utf16_uefi_version
+        type: cli
+        scenario:
+          kind: acs_info
+          dmidecode:
+            vendor: VendorD
+            product: BoardD
+            family: FamilyD
+            firmware: FW-4.0
+        args:
+          - --dmidecode_log
+          - "{dir}/dmidecode.log"
+          - --uefi_version_log
+          - "{dir}/uefi_version.log"
+          - --output_dir
+          - "{dir}/out"
+        bin_files:
+          uefi_version.log:
+            hex: "fffe55004500460049002000760032002e0039000a00"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"UEFI Version\": \"UEFI v2.9\""
+
+      - name: cli_adds_bmc_firmware_only_for_systemready_band
+        type: cli
+        scenario:
+          kind: acs_info
+          dmidecode:
+            vendor: VendorE
+            product: BoardE
+            family: FamilyE
+            firmware: FW-5.0
+          acs_config:
+            Band: SystemReady Band
+        text_files:
+          ipmitool.log: |
+            Device ID                 : 32
+            Firmware Revision         : 1.45
+        args:
+          - --dmidecode_log
+          - "{dir}/dmidecode.log"
+          - --acs_config_path
+          - "{dir}/acs_config.txt"
+          - --ipmitool_log
+          - "{dir}/ipmitool.log"
+          - --output_dir
+          - "{dir}/out"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"BMC Firmware Version\": \"1.45\""
+
+      - name: cli_does_not_add_bmc_firmware_for_non_systemready_band
+        type: cli
+        scenario:
+          kind: acs_info
+          dmidecode:
+            vendor: VendorF
+            product: BoardF
+            family: FamilyF
+            firmware: FW-6.0
+          acs_config:
+            Band: DeviceTree Band
+        text_files:
+          ipmitool.log: |
+            Firmware Revision         : 9.99
+        args:
+          - --dmidecode_log
+          - "{dir}/dmidecode.log"
+          - --acs_config_path
+          - "{dir}/acs_config.txt"
+          - --ipmitool_log
+          - "{dir}/ipmitool.log"
+          - --output_dir
+          - "{dir}/out"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"BMC Firmware Version\""
+
+      - name: cli_uses_first_dmidecode_values_not_later_duplicates
+        type: cli
+        text_files:
+          dmidecode.log: |
+            Handle 0x0000, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-FIRST
+            Handle 0x0001, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorFirst
+                Product Name: ProductFirst
+                Family: FamilyFirst
+            Handle 0x0002, DMI type 0, 24 bytes
+            BIOS Information
+                Version: FW-SECOND
+            Handle 0x0003, DMI type 1, 27 bytes
+            System Information
+                Manufacturer: VendorSecond
+                Product Name: ProductSecond
+                Family: FamilySecond
+        args:
+          - --dmidecode_log
+          - "{dir}/dmidecode.log"
+          - --output_dir
+          - "{dir}/out"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Vendor\": \"VendorFirst\""
+          - type: file_not_contains
+            path: "{dir}/out/acs_info.json"
+            text: "VendorSecond"
+
+      - name: cli_systemready_band_is_case_and_space_insensitive
+        type: cli
+        scenario:
+          kind: acs_info
+          dmidecode:
+            vendor: V
+            product: P
+            family: F
+            firmware: FW-1
+        text_files:
+          acs_config.txt: |
+            Band:   systemready band
+        args:
+          - --dmidecode_log
+          - "{dir}/dmidecode.log"
+          - --acs_config_path
+          - "{dir}/acs_config.txt"
+          - --output_dir
+          - "{dir}/out"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"BMC Firmware Version\": \"Unknown\""
+
+      - name: cli_config_value_with_extra_colon_is_preserved
+        type: cli
+        scenario:
+          kind: acs_info
+          dmidecode:
+            vendor: V
+            product: P
+            family: F
+            firmware: FW-1
+          system_config:
+            Firmware Notes: build:nightly:123
+        args:
+          - --dmidecode_log
+          - "{dir}/dmidecode.log"
+          - --system_config_path
+          - "{dir}/system_config.txt"
+          - --output_dir
+          - "{dir}/out"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/out/acs_info.json"
+            text: "\"Firmware Notes\": \"build:nightly:123\""

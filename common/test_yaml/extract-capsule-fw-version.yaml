@@ -1,0 +1,153 @@
+suites:
+  - name: extract_capsule_fw_version
+    files:
+      - common/linux_scripts/extract_capsule_fw_version.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+        description: "Verify that the firmware version extraction script exists at the expected repository path."
+
+      - name: python_compiles
+        type: py_compile
+        description: "Ensure the script is syntactically valid Python before executing runtime tests."
+
+      - name: cli_no_args_fails
+        type: cli
+        description: "Validate that the script enforces required CLI arguments and fails when none are provided."
+        args: []
+        expect_exit_code: 1
+        expect_stdout_or_stderr_contains:
+          - "Usage: python3 extract_capsule_fw_version.py"
+
+      - name: cli_one_arg_fails
+        type: cli
+        description: "Ensure the script rejects execution when only the regex pattern is provided without the input file."
+        args:
+          - "Capsule=([0-9A-F]+)"
+        expect_exit_code: 1
+        expect_stdout_or_stderr_contains:
+          - "Usage: python3 extract_capsule_fw_version.py"
+
+      - name: cli_missing_file_is_nonzero
+        type: cli
+        description: "Verify that the script exits with failure when the input file does not exist."
+        args:
+          - "Capsule=([0-9A-F]{4})"
+          - "{dir}/missing.log"
+        expect_exit_nonzero: true
+
+      - name: cli_extracts_two_matching_values_in_order
+        type: cli
+        description: "Validate that the script correctly extracts multiple matching firmware version values in the order they appear in the input file."
+        args:
+          - "Capsule=([0-9A-F]{4})"
+          - "{dir}/input.log"
+        text_files:
+          input.log: |
+            Start
+            Capsule=1A2B
+            Noise
+            Capsule=00FF
+            End
+        expect_exit_code: 0
+        expect_stdout_or_stderr_regex:
+          - "(?s)1A2B.*00FF"
+
+      - name: cli_no_matches_returns_zero_cleanly
+        type: cli
+        description: "Ensure the script handles input with no matching patterns gracefully and still exits successfully."
+        args:
+          - "Capsule=([0-9A-F]{4})"
+          - "{dir}/input.log"
+        text_files:
+          input.log: |
+            Alpha
+            Beta
+            Gamma
+        expect_exit_code: 0
+
+      - name: cli_pattern_without_group_returns_zero_cleanly
+        type: cli
+        description: "Verify behavior when regex pattern has no capture group; script should still run without failure."
+        args:
+          - "Capsule=[0-9A-F]{4}"
+          - "{dir}/input.log"
+        text_files:
+          input.log: |
+            Capsule=ABCD
+            Capsule=EF01
+        expect_exit_code: 0
+
+      - name: cli_only_prints_group_1_not_full_match
+        type: cli
+        description: "Ensure only the captured group is printed and not the full regex match string."
+        args:
+          - "Capsule=([0-9A-F]{4})"
+          - "{dir}/input.log"
+        text_files:
+          input.log: |
+            build Capsule=DEAD done
+        expect_exit_code: 0
+        expect_stdout_or_stderr_regex:
+          - "(?m)^DEAD$"
+
+      - name: cli_multiple_matches_same_line_prints_first_search_per_line
+        type: cli
+        description: "Validate that only the first match per line is captured when multiple matches exist in a single line."
+        args:
+          - "Capsule=([0-9A-F]{4})"
+          - "{dir}/input.log"
+        text_files:
+          input.log: |
+            Capsule=AAAA Capsule=BBBB
+        expect_exit_code: 0
+        expect_stdout_or_stderr_regex:
+          - "(?m)^AAAA$"
+
+      - name: cli_mixed_case_hex_matches
+        type: cli
+        description: "Ensure the regex can match both uppercase and lowercase hexadecimal values."
+        args:
+          - "Capsule=([0-9A-Fa-f]{4})"
+          - "{dir}/input.log"
+        text_files:
+          input.log: |
+            Capsule=AbCd
+        expect_exit_code: 0
+        expect_stdout_or_stderr_contains:
+          - "AbCd"
+
+      - name: cli_two_capture_groups_prints_only_first_group
+        type: cli
+        description: "Ensure that when multiple capture groups are present, only the first group is printed."
+        args:
+          - "Capsule=([0-9A-F]{4}) status=(OK)"
+          - "{dir}/input.log"
+        text_files:
+          input.log: |
+            Capsule=ABCD status=OK
+        expect_exit_code: 0
+        expect_stdout_or_stderr_regex:
+          - "(?m)^ABCD$"
+
+      - name: cli_invalid_regex_fails
+        type: cli
+        description: "Validate that invalid regex patterns are detected and cause script failure."
+        args:
+          - "Capsule=([0-9A-F]{4}"
+          - "{dir}/input.log"
+        text_files:
+          input.log: |
+            Capsule=ABCD
+        expect_exit_nonzero: true
+
+      - name: cli_empty_file_returns_zero
+        type: cli
+        description: "Ensure the script handles empty input files gracefully without crashing."
+        args:
+          - "Capsule=([0-9A-F]{4})"
+          - "{dir}/empty.log"
+        text_files:
+          empty.log: ""
+        expect_exit_code: 0

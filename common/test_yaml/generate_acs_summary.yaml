@@ -1,0 +1,436 @@
+suites:
+  - name: generate_acs_summary
+    files:
+      - common/log_parser/generate_acs_summary.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: has_main_guard
+        type: main_guard
+
+      - name: cli_requires_many_inputs
+        type: cli
+        args: []
+        expect_exit_nonzero: true
+
+      - name: cli_generates_html_with_summary_sections
+        type: cli
+        text_files:
+          bsa.html: |
+            <!DOCTYPE html>
+            <html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BSA content</div></body></html>
+          sbsa.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBSA Test Summary</title></head><body><h1>SBSA Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>SBSA content</div></body></html>
+          fwts.html: |
+            <!DOCTYPE html>
+            <html><head><title>FWTS Test Summary</title></head><body><h1>FWTS Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>FWTS content</div></body></html>
+          sct.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCT Test Summary</title></head><body><h1>SCT Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>SCT content</div></body></html>
+          bbsr_fwts.html: |
+            <!DOCTYPE html>
+            <html><head><title>FWTS Test Summary</title></head><body><h1>FWTS Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BBSR FWTS content</div></body></html>
+          bbsr_sct.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCT Test Summary</title></head><body><h1>SCT Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BBSR SCT content</div></body></html>
+          bbsr_tpm.html: |
+            <!DOCTYPE html>
+            <html><head><title>TPM Test Summary</title></head><body><h1>TPM Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BBSR TPM content</div></body></html>
+          pfdi.html: |
+            <!DOCTYPE html>
+            <html><head><title>PFDI Test Summary</title></head><body><h1>PFDI Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>PFDI content</div></body></html>
+          post_script.html: |
+            <!DOCTYPE html>
+            <html><head><title>Post-Script Test Summary</title></head><body><h1>Post-Script Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>POST content</div></body></html>
+          standalone.html: |
+            <!DOCTYPE html>
+            <html><head><title>Standalone Test Summary</title></head><body><h1>Standalone Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>Standalone content</div></body></html>
+          os_tests.html: |
+            <!DOCTYPE html>
+            <html><head><title>OS Tests Test Summary</title></head><body><h1>OS Tests Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>OS Tests content</div></body></html>
+          capsule.html: |
+            <!DOCTYPE html>
+            <html><head><title>Capsule Update Test Summary</title></head><body><h1>Capsule Update Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>Capsule content</div></body></html>
+          sbmr_ib.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBMR-IB Test Summary</title></head><body><h1>SBMR-IB Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>SBMR IB content</div></body></html>
+          sbmr_oob.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBMR-OOB Test Summary</title></head><body><h1>SBMR-OOB Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>SBMR OOB content</div></body></html>
+          scmi.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCMI Test Summary</title></head><body><h1>SCMI Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>SCMI content</div></body></html>
+          acs_info.json: |
+            {
+              "System Info": {
+                "Vendor": "VendorZ",
+                "System Name": "SystemZ",
+                "SoC Family": "FamilyZ",
+                "Firmware Version": "FW-Z",
+                "BMC Firmware Version": "BMC-1"
+              }
+            }
+          merged.json: |
+            {
+              "ACS Results Summary": {
+                "Overall Compliance Result": "Compliant",
+                "BBSR compliance results": "Compliant",
+                "SCMI compliance results": "Compliant"
+              }
+            }
+        args:
+          - --merged_json
+          - "{dir}/merged.json"
+          - "{dir}/bsa.html"
+          - "{dir}/sbsa.html"
+          - "{dir}/fwts.html"
+          - "{dir}/sct.html"
+          - "{dir}/bbsr_fwts.html"
+          - "{dir}/bbsr_sct.html"
+          - "{dir}/bbsr_tpm.html"
+          - "{dir}/pfdi.html"
+          - "{dir}/post_script.html"
+          - "{dir}/standalone.html"
+          - "{dir}/os_tests.html"
+          - "{dir}/capsule.html"
+          - "{dir}/sbmr_ib.html"
+          - "{dir}/sbmr_oob.html"
+          - "{dir}/scmi.html"
+          - "{dir}/summary.html"
+          - --acs_info_json
+          - "{dir}/acs_info.json"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_not_empty
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "BSA content"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "FWTS content"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "SCMI content"
+          - type: file_not_contains
+            path: "{dir}/summary.html"
+            text: "Result Summary"
+
+      - name: cli_without_merged_json_still_generates_html
+        type: cli
+        text_files:
+          bsa.html: |
+            <!DOCTYPE html>
+            <html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bsa</div></body></html>
+          sbsa.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBSA Test Summary</title></head><body><h1>SBSA Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sbsa</div></body></html>
+          fwts.html: |
+            <!DOCTYPE html>
+            <html><head><title>FWTS Test Summary</title></head><body><h1>FWTS Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>fwts</div></body></html>
+          sct.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCT Test Summary</title></head><body><h1>SCT Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sct</div></body></html>
+          bbsr_fwts.html: |
+            <!DOCTYPE html>
+            <html><head><title>FWTS Test Summary</title></head><body><h1>FWTS Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bbsr_fwts</div></body></html>
+          bbsr_sct.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCT Test Summary</title></head><body><h1>SCT Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bbsr_sct</div></body></html>
+          bbsr_tpm.html: |
+            <!DOCTYPE html>
+            <html><head><title>TPM Test Summary</title></head><body><h1>TPM Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bbsr_tpm</div></body></html>
+          pfdi.html: |
+            <!DOCTYPE html>
+            <html><head><title>PFDI Test Summary</title></head><body><h1>PFDI Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>pfdi</div></body></html>
+          post_script.html: |
+            <!DOCTYPE html>
+            <html><head><title>Post-Script Test Summary</title></head><body><h1>Post-Script Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>post_script</div></body></html>
+          standalone.html: |
+            <!DOCTYPE html>
+            <html><head><title>Standalone Test Summary</title></head><body><h1>Standalone Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>standalone</div></body></html>
+          os_tests.html: |
+            <!DOCTYPE html>
+            <html><head><title>OS Tests Test Summary</title></head><body><h1>OS Tests Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>os_tests</div></body></html>
+          capsule.html: |
+            <!DOCTYPE html>
+            <html><head><title>Capsule Update Test Summary</title></head><body><h1>Capsule Update Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>capsule</div></body></html>
+          sbmr_ib.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBMR-IB Test Summary</title></head><body><h1>SBMR-IB Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sbmr_ib</div></body></html>
+          sbmr_oob.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBMR-OOB Test Summary</title></head><body><h1>SBMR-OOB Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sbmr_oob</div></body></html>
+          scmi.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCMI Test Summary</title></head><body><h1>SCMI Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>scmi</div></body></html>
+        args:
+          - "{dir}/bsa.html"
+          - "{dir}/sbsa.html"
+          - "{dir}/fwts.html"
+          - "{dir}/sct.html"
+          - "{dir}/bbsr_fwts.html"
+          - "{dir}/bbsr_sct.html"
+          - "{dir}/bbsr_tpm.html"
+          - "{dir}/pfdi.html"
+          - "{dir}/post_script.html"
+          - "{dir}/standalone.html"
+          - "{dir}/os_tests.html"
+          - "{dir}/capsule.html"
+          - "{dir}/sbmr_ib.html"
+          - "{dir}/sbmr_oob.html"
+          - "{dir}/scmi.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "standalone"
+
+
+      - name: cli_removes_result_summary_headings_case_insensitively
+        type: cli
+        text_files:
+          bsa.html: |
+            <!DOCTYPE html>
+            <html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><h3>RESULT SUMMARY</h3><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BSA</div></body></html>
+          sbsa.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBSA Test Summary</title></head><body><h1>SBSA Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sbsa</div></body></html>
+          fwts.html: |
+            <!DOCTYPE html>
+            <html><head><title>FWTS Test Summary</title></head><body><h1>FWTS Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>fwts</div></body></html>
+          sct.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCT Test Summary</title></head><body><h1>SCT Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sct</div></body></html>
+          bbsr_fwts.html: |
+            <!DOCTYPE html>
+            <html><head><title>FWTS Test Summary</title></head><body><h1>FWTS Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bbsr_fwts</div></body></html>
+          bbsr_sct.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCT Test Summary</title></head><body><h1>SCT Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bbsr_sct</div></body></html>
+          bbsr_tpm.html: |
+            <!DOCTYPE html>
+            <html><head><title>TPM Test Summary</title></head><body><h1>TPM Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>bbsr_tpm</div></body></html>
+          pfdi.html: |
+            <!DOCTYPE html>
+            <html><head><title>PFDI Test Summary</title></head><body><h1>PFDI Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>pfdi</div></body></html>
+          post_script.html: |
+            <!DOCTYPE html>
+            <html><head><title>Post-Script Test Summary</title></head><body><h1>Post-Script Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>post_script</div></body></html>
+          standalone.html: |
+            <!DOCTYPE html>
+            <html><head><title>Standalone Test Summary</title></head><body><h1>Standalone Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>standalone</div></body></html>
+          os_tests.html: |
+            <!DOCTYPE html>
+            <html><head><title>OS Tests Test Summary</title></head><body><h1>OS Tests Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>os_tests</div></body></html>
+          capsule.html: |
+            <!DOCTYPE html>
+            <html><head><title>Capsule Update Test Summary</title></head><body><h1>Capsule Update Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>capsule</div></body></html>
+          sbmr_ib.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBMR-IB Test Summary</title></head><body><h1>SBMR-IB Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sbmr_ib</div></body></html>
+          sbmr_oob.html: |
+            <!DOCTYPE html>
+            <html><head><title>SBMR-OOB Test Summary</title></head><body><h1>SBMR-OOB Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>sbmr_oob</div></body></html>
+          scmi.html: |
+            <!DOCTYPE html>
+            <html><head><title>SCMI Test Summary</title></head><body><h1>SCMI Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>scmi</div></body></html>
+        args:
+          - "{dir}/bsa.html"
+          - "{dir}/sbsa.html"
+          - "{dir}/fwts.html"
+          - "{dir}/sct.html"
+          - "{dir}/bbsr_fwts.html"
+          - "{dir}/bbsr_sct.html"
+          - "{dir}/bbsr_tpm.html"
+          - "{dir}/pfdi.html"
+          - "{dir}/post_script.html"
+          - "{dir}/standalone.html"
+          - "{dir}/os_tests.html"
+          - "{dir}/capsule.html"
+          - "{dir}/sbmr_ib.html"
+          - "{dir}/sbmr_oob.html"
+          - "{dir}/scmi.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "BSA"
+          - type: file_not_contains
+            path: "{dir}/summary.html"
+            text: "RESULT SUMMARY"
+
+      - name: cli_parses_merged_json_compliance_details
+        type: cli
+        text_files:
+          bsa.html: |
+            <!DOCTYPE html>
+            <html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BSA detail parsing content</div></body></html>
+          merged.json: |
+            {
+              "Suite_Name: acs_info": {
+                "ACS Results Summary": {
+                  "Overall Compliance Result": "Not Compliant : Mandatory - (not run: BSA, FWTS; failed: SCT) : Recommended - (not run: SBSA; failed: PFDI)",
+                  "BBSR compliance results": "Not Compliant : Mandatory - (not run: BBSR-FWTS; failed: BBSR-SCT)",
+                  "SCMI compliance results": "Not Compliant"
+                }
+              }
+            }
+        args:
+          - --merged_json
+          - "{dir}/merged.json"
+          - "{dir}/bsa.html"
+          - "{dir}/sbsa_missing.html"
+          - "{dir}/fwts_missing.html"
+          - "{dir}/sct_missing.html"
+          - "{dir}/bbsr_fwts_missing.html"
+          - "{dir}/bbsr_sct_missing.html"
+          - "{dir}/bbsr_tpm_missing.html"
+          - "{dir}/pfdi_missing.html"
+          - "{dir}/post_script_missing.html"
+          - "{dir}/standalone_missing.html"
+          - "{dir}/os_tests_missing.html"
+          - "{dir}/capsule_missing.html"
+          - "{dir}/sbmr_ib_missing.html"
+          - "{dir}/sbmr_oob_missing.html"
+          - "{dir}/scmi_missing.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "not run: BSA, FWTS"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "failed: SCT"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "not run: SBSA"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "failed: PFDI"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "not run: BBSR-FWTS"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "failed: BBSR-SCT"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "failed: SCMI"
+
+      - name: cli_injects_test_suite_info_into_detailed_html
+        type: cli
+        text_files:
+          bsa.html: |
+            <!DOCTYPE html>
+            <html><head><title>BSA Test Summary</title></head><body><h1>BSA Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>BSA suite info content</div></body></html>
+          bsa_detailed.html: |
+            <!DOCTYPE html>
+            <html><body><div class="test-suite-header">Test Suite: PE</div><div>details body</div></body></html>
+          merged.json: |
+            {
+              "Suite_Name: acs_info": {
+                "ACS Results Summary": {
+                  "Overall Compliance Result": "Compliant"
+                }
+              },
+              "Suite_Name: BSA": {
+                "test_results": [
+                  {
+                    "Test_suite": "PE",
+                    "Test_suite_info": [
+                      "PCIe root complex present",
+                      "BAR sizing checked"
+                    ]
+                  }
+                ]
+              }
+            }
+        args:
+          - --merged_json
+          - "{dir}/merged.json"
+          - "{dir}/bsa.html"
+          - "{dir}/sbsa_missing.html"
+          - "{dir}/fwts_missing.html"
+          - "{dir}/sct_missing.html"
+          - "{dir}/bbsr_fwts_missing.html"
+          - "{dir}/bbsr_sct_missing.html"
+          - "{dir}/bbsr_tpm_missing.html"
+          - "{dir}/pfdi_missing.html"
+          - "{dir}/post_script_missing.html"
+          - "{dir}/standalone_missing.html"
+          - "{dir}/os_tests_missing.html"
+          - "{dir}/capsule_missing.html"
+          - "{dir}/sbmr_ib_missing.html"
+          - "{dir}/sbmr_oob_missing.html"
+          - "{dir}/scmi_missing.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/bsa_detailed.html"
+            text: "Test_suite_info:"
+          - type: file_contains
+            path: "{dir}/bsa_detailed.html"
+            text: "PCIe root complex present"
+          - type: file_contains
+            path: "{dir}/bsa_detailed.html"
+            text: "BAR sizing checked"
+          - type: file_contains
+            path: "{dir}/bsa_detailed.html"
+            text: "<ul"
+
+      - name: capsule_summary_is_merged_into_standalone_section
+        type: cli
+        warn_only: true
+        text_files:
+          standalone.html: |
+            <!DOCTYPE html>
+            <html><head><title>Standalone Test Summary</title></head><body><h1>Standalone Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>Standalone-only marker</div></body></html>
+          capsule.html: |
+            <!DOCTYPE html>
+            <html><head><title>Capsule Update Test Summary</title></head><body><h1>Capsule Update Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table><div>Capsule-only marker</div></body></html>
+        args:
+          - "{dir}/bsa_missing.html"
+          - "{dir}/sbsa_missing.html"
+          - "{dir}/fwts_missing.html"
+          - "{dir}/sct_missing.html"
+          - "{dir}/bbsr_fwts_missing.html"
+          - "{dir}/bbsr_sct_missing.html"
+          - "{dir}/bbsr_tpm_missing.html"
+          - "{dir}/pfdi_missing.html"
+          - "{dir}/post_script_missing.html"
+          - "{dir}/standalone.html"
+          - "{dir}/os_tests_missing.html"
+          - "{dir}/capsule.html"
+          - "{dir}/sbmr_ib_missing.html"
+          - "{dir}/sbmr_oob_missing.html"
+          - "{dir}/scmi_missing.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: exists
+            path: "{dir}/summary.html"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Standalone-only marker"
+          - type: file_contains
+            path: "{dir}/summary.html"
+            text: "Capsule-only marker"

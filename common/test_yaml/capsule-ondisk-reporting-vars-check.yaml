@@ -1,0 +1,839 @@
+suites:
+  - name: capsule_ondisk_reporting_vars_check
+    files:
+      - common/linux_scripts/capsule_ondisk_reporting_vars_check.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+        description: "Verify that the capsule on-disk reporting variables checker script exists."
+
+      - name: python_compiles
+        type: py_compile
+        description: "Ensure that the script compiles successfully as valid Python."
+
+      - name: has_main_guard
+        type: main_guard
+        description: "Check that the script contains a standard __main__ guard."
+
+      - name: status_true_returns_passed
+        type: py_function
+        function: status
+        args: [true]
+        expect_return: "PASSED"
+
+      - name: status_false_returns_warning
+        type: py_function
+        function: status
+        args: [false]
+        expect_return: "WARNING"
+
+      - name: decode_valid_utf16le_returns_capsule_name
+        type: py_function
+        function: decode_char16_11_no_nul
+        args:
+          - !!binary |
+            QwBhAHAAcwB1AGwAZQAwADAAMAAxAA==
+        expect_return: "Capsule0001"
+
+      - name: missing_efivarfs_returns_1_and_logs_warning
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          efivarfs_present: false
+          efivar_dir: missing_efivars
+          log_file: capsule.log
+        expect_exit_code: 1
+        post_checks:
+          - type: exists
+            path: "{dir}/capsule.log"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Please ensure efivarfs is enabled and mounted"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: WARNING"
+
+      - name: missing_os_indications_returns_2_and_skips
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+        expect_exit_code: 2
+        post_checks:
+          - type: exists
+            path: "{dir}/capsule.log"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "OsIndicationsSupported not found or unreadable"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED"
+
+      - name: os_indications_without_capsule_support_bit_returns_2
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            value: 0
+            attrs: 0x07
+        expect_exit_code: 2
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "INFO: OsIndicationsSupported value: 0x0"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "INFO: Capsule on-disk reporting variables test is not applicable - SKIPPED"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED"
+
+      - name: os_indications_short_data_treated_as_unreadable
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            hex: "070000000400"
+        expect_exit_code: 2
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "OsIndicationsSupported not found or unreadable"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED"
+
+      - name: support_claimed_but_missing_capsule_variables_returns_3
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleMax Variable - Not Found or Not Accessible"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleLast Variable - Not Found or Not Accessible"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "No CapsuleNNNN reporting variables found - WARNING"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: WARNING"
+
+      - name: capsulemax_wrong_attributes_returns_3
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleMax Variable Attribute Test"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "actual attributes Value:0x7"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Status - WARNING"
+
+      - name: capsulelast_wrong_attributes_returns_3
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleLast Variable Attribute Test"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "actual attributes Value:0x6"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Status - WARNING"
+
+      - name: malformed_capsulelast_value_returns_3
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            hex: "07000000420061006400560061006c0075006500000000000000"
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleLast Variable Test: WARNING"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: WARNING"
+
+      - name: capsulemax_too_short_returns_3
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            hex: "0600000041004200"
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleMax Variable Test: WARNING"
+
+      - name: missing_capsulelast_returns_3
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleLast Variable - Not Found or Not Accessible"
+
+      - name: inaccessible_capsule_nnnn_variable_returns_3
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              hex: "01"
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleNNNN Variable Test: Capsule0001 Variable Test: WARNING"
+
+      - name: capsule_nnnn_wrong_attributes_returns_3
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x06
+              payload_hex: "AA"
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleNNNN Variable Test: Capsule0001 Variable Test: PASSED"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "actual attributes Value:0x6"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Status - WARNING"
+
+      - name: multiple_capsule_nnnn_one_bad_one_good_returns_3
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0002
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0002
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+            - name: Capsule0002
+              attrs: 0x06
+              payload_hex: "BB"
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleNNNN Variable Test: Capsule0001 Variable Test: PASSED"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleNNNN Variable Test: Capsule0002 Variable Test: PASSED"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "actual attributes Value:0x6"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: WARNING"
+
+      - name: all_valid_variables_return_0_and_pass
+        type: module_main_with_env
+        patch_constants:
+          EFIVAR_PATH: "{dir}/efivars"
+          LOG_FILE: "{dir}/capsule.log"
+        dir_structure:
+          - path: efivars
+        bin_files:
+          efivars/OsIndicationsSupported-8be4df61-93ca-11d2-aa0d-00e098032b8c:
+            hex: "070000000400000000000000"
+          efivars/CapsuleMax-39b68c46-f7fb-441b-b6ec-16b0f69821f3:
+            hex: "06000000430061007000730075006c0065003000300030003100"
+          efivars/CapsuleLast-39b68c46-f7fb-441b-b6ec-16b0f69821f3:
+            hex: "07000000430061007000730075006c0065003000300030003100"
+          efivars/Capsule0001-39b68c46-f7fb-441b-b6ec-16b0f69821f3:
+            hex: "07000000AA"
+        expect_exit_code: 0
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/capsule.log"
+            texts:
+              - "Testing Capsule On-Disk Update Reporting Variables"
+              - "CapsuleMax Variable Test: PASSED"
+              - "CapsuleLast Variable Test: PASSED"
+              - "CapsuleNNNN Variable Test: Capsule0001 Variable Test: PASSED"
+              - "Overall Capsule On-Disk Update Reporting Variables Result: PASSED"
+
+      - name: cli_mock_open_raises_oserror_for_existing_capsulelast
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        mocks:
+          builtins.open:
+            factory: mock_helpers.passthrough_router
+            inject_original_as: real
+            kwargs:
+              rules:
+                - label: capsulelast-read-failure
+                  required: true
+                  when:
+                    args:
+                      0:
+                        contains: "CapsuleLast-39b68c46-f7fb-441b-b6ec-16b0f69821f3"
+                      1:
+                        contains: "rb"
+                  raise:
+                    type: py:builtins.OSError
+                    args: ["mocked read failure"]
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleLast Variable - Not Found or Not Accessible"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: WARNING"
+
+      - name: cli_mock_listdir_failure_for_existing_efivarfs
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+        mocks:
+          "{module}.os.listdir":
+            factory: mock_helpers.passthrough_router
+            inject_original_as: real
+            kwargs:
+              rules:
+                - label: efivarfs-listdir-failure
+                  required: true
+                  when:
+                    args:
+                      0:
+                        contains: "efivars"
+                  raise:
+                    type: py:builtins.OSError
+                    args: ["mocked listdir failure"]
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "efivarfs not accessible - WARNING"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: WARNING"
+
+      - name: cli_mock_read_efi_var_os_indications_unreadable_even_when_file_exists
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+        mocks:
+          "{module}.read_efi_var":
+            factory: mock_helpers.passthrough_router
+            inject_original_as: real
+            kwargs:
+              rules:
+                - label: os-indications-read-returns-none
+                  required: true
+                  when:
+                    args:
+                      0:
+                        equals: "OsIndicationsSupported"
+                  return: [null, null]
+        expect_exit_code: 2
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "OsIndicationsSupported not found or unreadable"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: SKIPPED"
+
+      - name: cli_mock_read_efi_var_capsulemax_missing_even_when_file_exists
+        type: module_main_with_env
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        mocks:
+          "{module}.read_efi_var":
+            factory: mock_helpers.passthrough_router
+            inject_original_as: real
+            kwargs:
+              rules:
+                - label: capsulemax-read-returns-none
+                  required: true
+                  when:
+                    args:
+                      0:
+                        equals: "CapsuleMax"
+                  return: [null, null]
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleMax Variable - Not Found or Not Accessible"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: WARNING"
+
+      - name: ondisk_supported_without_capsule_entries_currently_passes_overall
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x06
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "No CapsuleNNNN reporting variables found - WARNING"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: PASSED"
+
+      - name: capsulemax_exact_char16_11_length_should_be_enforced
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x06
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+            extra_utf16: EXTRA
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleMax - Found, Value - Capsule0001"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: PASSED"
+
+      - name: capsule_nnnn_payload_structure_should_not_be_ignored
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x06
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              hex: "07000000"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleNNNN Variable Test: Capsule0001 - Found"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "CapsuleNNNN Variable Test: Capsule0001 Variable Test: PASSED"
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: PASSED"
+
+      - name: missing_os_indications_is_reported_as_not_found
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+        expect_exit_code: 2
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "OsIndicationsSupported not found or unreadable"
+
+      - name: logging_failure_silently_skips_log_creation
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          efivarfs_present: false
+          log_file: capsule.log
+        mocks:
+          builtins.open:
+            factory: mock_helpers.passthrough_router
+            inject_original_as: real
+            kwargs:
+              rules:
+                - label: log-write-failure
+                  required: true
+                  when:
+                    args:
+                      0:
+                        contains: "capsule.log"
+                      1:
+                        contains: "a"
+                  raise:
+                    type: py:builtins.OSError
+                    args: ["mocked log write failure"]
+        expect_exit_code: 1
+        post_checks:
+          - type: not_exists
+            path: "{dir}/capsule.log"
+
+      - name: unreadable_os_indications_is_reported_as_unreadable
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+        mocks:
+          builtins.open:
+            factory: mock_helpers.passthrough_router
+            inject_original_as: real
+            kwargs:
+              rules:
+                - label: os-indications-open-failure
+                  required: true
+                  when:
+                    args:
+                      0:
+                        contains: "OsIndicationsSupported-8be4df61-93ca-11d2-aa0d-00e098032b8c"
+                      1:
+                        contains: "rb"
+                  raise:
+                    type: py:builtins.OSError
+                    args: ["mocked read failure"]
+        expect_exit_code: 2
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "OsIndicationsSupported not found or unreadable"
+
+      - name: capsulemax_with_additional_attribute_bits_is_rejected
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          log_file: log.txt
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x0E
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        expect_exit_code: 3
+        description: "Document the current behavior that requires an exact CapsuleMax attribute match and rejects additional bits."
+        post_checks:
+          - type: file_contains
+            path: "{dir}/log.txt"
+            text: "Status - WARNING"
+
+      - name: permission_denied_during_capsule_enumeration_is_identified
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          log_file: capsule.log
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            name: Capsule0001
+            attrs: 0x07
+        mocks:
+          os.listdir:
+            factory: mock_helpers.passthrough_router
+            inject_original_as: real
+            kwargs:
+              rules:
+                - label: permission-denied-listdir
+                  required: true
+                  when:
+                    args:
+                      0:
+                        contains: "efivars"
+                  raise:
+                    type: py:builtins.PermissionError
+                    args: ["denied"]
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/capsule.log"
+            text: "efivarfs not accessible - WARNING"
+
+      - name: malformed_capsule_entry_content_is_rejected
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          log_file: log.txt
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_entries:
+            - name: Capsule0001
+              hex: "FFFFFFFFFFFFFFFF"
+        expect_exit_code: 3
+
+      - name: oversized_capsulemax_value_is_currently_accepted
+        type: module_main_with_env
+        warn_only: true
+        patch_constants:
+          EFIVAR_PATH: "{dir}/efivars"
+          LOG_FILE: "{dir}/log.txt"
+        dir_structure:
+          - path: efivars
+        bin_files:
+          efivars/OsIndicationsSupported-8be4df61-93ca-11d2-aa0d-00e098032b8c:
+            hex: "070000000400000000000000"
+          efivars/CapsuleMax-39b68c46-f7fb-441b-b6ec-16b0f69821f3:
+            hex: "06000000430061007000730075006c006500300030003000310058005800"
+          efivars/CapsuleLast-39b68c46-f7fb-441b-b6ec-16b0f69821f3:
+            hex: "07000000430061007000730075006c0065003000300030003100"
+          efivars/Capsule0001-39b68c46-f7fb-441b-b6ec-16b0f69821f3:
+            hex: "07000000AA"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/log.txt"
+            text: "CapsuleMax - Found, Value - Capsule0001"
+          - type: file_contains
+            path: "{dir}/log.txt"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: PASSED"
+
+      - name: invalid_utf16_in_capsulelast_is_reported
+        type: module_main_with_env
+        warn_only: true
+        scenario:
+          kind: capsule_vars
+          log_file: log.txt
+          os_indications:
+            supported: true
+            attrs: 0x07
+          capsule_max:
+            name: Capsule0001
+            attrs: 0x06
+          capsule_last:
+            hex: "07000000FFFF"
+          capsule_entries:
+            - name: Capsule0001
+              attrs: 0x07
+              payload_hex: "AA"
+        expect_exit_code: 3
+        post_checks:
+          - type: file_contains
+            path: "{dir}/log.txt"
+            text: "CapsuleLast Variable Test: WARNING"
+          - type: file_contains
+            path: "{dir}/log.txt"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: WARNING"
+
+      - name: capsulelast_is_not_cross_checked_against_discovered_entry
+        type: module_main_with_env
+        warn_only: true
+        patch_constants:
+          EFIVAR_PATH: "{dir}/efivars"
+          LOG_FILE: "{dir}/log.txt"
+        dir_structure:
+          - path: efivars
+        bin_files:
+          efivars/OsIndicationsSupported-8be4df61-93ca-11d2-aa0d-00e098032b8c:
+            hex: "070000000400000000000000"
+          efivars/CapsuleMax-39b68c46-f7fb-441b-b6ec-16b0f69821f3:
+            hex: "06000000430061007000730075006c0065003000300030003100"
+          efivars/CapsuleLast-39b68c46-f7fb-441b-b6ec-16b0f69821f3:
+            hex: "07000000430061007000730075006c0065003000300030003900"
+          efivars/Capsule0001-39b68c46-f7fb-441b-b6ec-16b0f69821f3:
+            hex: "07000000AA"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/log.txt"
+            text: "CapsuleLast Variable Test: PASSED"
+          - type: file_contains
+            path: "{dir}/log.txt"
+            text: "Overall Capsule On-Disk Update Reporting Variables Result: PASSED"

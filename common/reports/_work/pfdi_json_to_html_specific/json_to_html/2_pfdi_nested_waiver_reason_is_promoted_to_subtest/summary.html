@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>PFDI Test Summary</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:20px;background:#f4f4f4;}
+    h1,h2{color:#2c3e50;text-align:center;}
+    table{width:100%;border-collapse:collapse;margin:20px 0;}
+    th,td{padding:12px;border:1px solid #ddd;font-size:16px;}
+    th{background:#3498db;color:#fff;font-weight:bold;text-align:left;}
+
+    .pass{background:#d4edda;font-weight:bold;text-align:center;}
+    .fail{background:#f8d7da;font-weight:bold;text-align:center;}
+    .fail-waiver{background:#f39c12;font-weight:bold;text-align:center;}
+    .aborted{background:#9e9e9e;font-weight:bold;text-align:center;}
+    .skipped{background:#ffe0b2;font-weight:bold;text-align:center;}
+    .warning{background:#fff3cd;font-weight:bold;text-align:center;}
+
+    .summary-table{margin:0 auto;width:80%;}
+    .summary-table td.total-tests{text-align:center;}
+    .chart-container{display:flex;justify-content:center;}
+
+    .result-summary,.detailed-summary{
+        margin-top:40px;padding:20px;background:#fff;border-radius:10px;
+        box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+    .result-summary h2{border-bottom:2px solid #27ae60;padding-bottom:10px;margin-bottom:20px;}
+
+    .test-suite-header{font-size:22px;font-weight:bold;color:#34495e;margin-top:30px;}
+    .waiver-reason{text-align:center;}
+    .reason { text-align: center; }
+  </style>
+</head><body>
+<h1>PFDI Test Summary</h1>
+
+
+
+<div class="result-summary">
+  <h2>Result Summary</h2>
+  <table class="summary-table">
+    <tr><th>Status</th><th>Total</th></tr>
+    <tr><td>Total Tests</td><td class="total-tests">1</td></tr>
+    <tr><td>Passed</td><td class="pass">1</td></tr>
+    <tr><td>Failed</td><td class="fail">0</td></tr>
+    <tr><td>Failed with Waiver</td><td class="fail-waiver">0</td></tr>
+    <tr><td>Aborted</td><td class="aborted">0</td></tr>
+    <tr><td>Skipped</td><td class="skipped">0</td></tr>
+    <tr><td>Warnings</td><td class="warning">0</td></tr>
+  </table>
+</div>
+
+
+</body></html>

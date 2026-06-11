@@ -1,0 +1,18 @@
+================================================================================
+TEST CASE: apply_waivers::apply_waivers.py::testsuite_level_waiver_applies_only_to_matching_testsuite
+STATUS: PASS
+MESSAGE: CLI check passed
+
+Command: /usr/bin/python3 /home/vepav01/arm-systemready/common/log_parser/apply_waivers.py FWTS /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/fwts.json /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/waiver.json
+Shell mode: no
+Timeout seconds: 20
+Timed out: no
+Exit code: 0
+--- STDOUT ---
+TestSuite-level waiver applied to subtest 'alpha' in TestSuite 'MatchSuite' with reason: Specific suite waiver
+Waivers successfully applied and '/home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/fwts.json' has been updated.
+--- STDERR ---
+
+--- POST CHECKS ---
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/fwts.json contains 'Specific suite waiver' -> PASS
+post_check file_contains: /home/vepav01/arm-systemready/common/reports/_work/apply_waivers/apply_waivers/6_testsuite_level_waiver_applies_only_to_matching_testsuite/fwts.json contains '"Test_suite": "OtherSuite"' -> PASS

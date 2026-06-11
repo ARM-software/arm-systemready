@@ -1,0 +1,20 @@
+{
+  "test_results": [
+    {
+      "Test_suite": "Standalone",
+      "Test_suite_description": "Reason flattening",
+      "Test_case": "Case 1",
+      "Test_case_description": "Nested reasons",
+      "subtests": [
+        {
+          "sub_Test_Number": "1",
+          "sub_Test_Description": "Nested fail reasons",
+          "sub_test_result": {
+            "FAILED": 1,
+            "fail_reasons": [["reason A", "reason B"], ["reason C"]]
+          }
+        }
+      ]
+    }
+  ]
+}
