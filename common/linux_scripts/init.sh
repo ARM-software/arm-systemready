@@ -82,6 +82,7 @@ if [ "$automation_enabled" == "True" ]; then
   sbsa_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_sbsa_run`"
 
   sbmr_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_sbmr_in_band_run`"
+  sbmr_level="`python3 /mnt/acs_tests/parser/Parser.py -sbmr_level`"
 fi
 
 if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
@@ -150,7 +151,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
       cd /usr/bin
       python redfish-finder
       cd sbmr-acs
-      ./run-sbmr-acs.sh linux
+      if [ -n "$sbmr_level" ]; then
+        ./run-sbmr-acs.sh linux --level "$sbmr_level"
+      else
+        ./run-sbmr-acs.sh linux
+      fi
       mkdir -p ${LOG_DIR}/sbmr
       cp -r logs ${LOG_DIR}/sbmr/sbmr_in_band_logs
       cd /

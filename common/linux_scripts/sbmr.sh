@@ -20,24 +20,29 @@
 LOG_DIR="/mnt/acs_results_template/acs_results"
 
 automation_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation`"
-if [ "$automation_enabled" == "True" ]; then
-    sbmr_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_sbmr_in_band_run`"
-fi
+sbmr_enabled="`python3 /mnt/acs_tests/parser/Parser.py -automation_sbmr_in_band_run`"
+sbmr_level="`python3 /mnt/acs_tests/parser/Parser.py -sbmr_level`"
 
 run_sbmr_in_band(){
     echo "Call SBMR ACS in-band test"
     cd /usr/bin
     python redfish-finder
     cd sbmr-acs
-    ./run-sbmr-acs.sh linux
+    if [ -n "$sbmr_level" ]; then
+        ./run-sbmr-acs.sh linux --level "$sbmr_level"
+    else
+        ./run-sbmr-acs.sh linux
+    fi
     mkdir -p ${LOG_DIR}/sbmr
     cp -r logs ${LOG_DIR}/sbmr/sbmr_in_band_logs
     cd /
     echo "SBMR ACS in-band run is completed\n"
 }
 
-  # Run SBMR-ACS In-Band Tests if run with grub option
-if [ "$automation_enabled" == "True" ] &&  [ "$sbmr_enabled" == "False" ]; then
+  # Run SBMR-ACS In-Band Tests if automation and SBMR are enabled in config file
+if [ "$automation_enabled" == "False" ]; then
+    echo "********* Automation run is disabled in config file**************"
+elif [ "$sbmr_enabled" == "False" ]; then
     echo "********* SBMR in-band test is disabled in config file**************"
 else
     run_sbmr_in_band
