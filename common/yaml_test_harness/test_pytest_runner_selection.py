@@ -9,15 +9,19 @@ HARNESS_DIR = Path(__file__).resolve().parent
 if str(HARNESS_DIR) not in sys.path:
     sys.path.insert(0, str(HARNESS_DIR))
 
-_SPEC = importlib.util.spec_from_file_location(
-    "yaml_harness_pytest_runner",
-    HARNESS_DIR / "pytest_runner.py",
-)
-assert _SPEC is not None
-assert _SPEC.loader is not None
-pytest_runner = importlib.util.module_from_spec(_SPEC)
-sys.modules[_SPEC.name] = pytest_runner
-_SPEC.loader.exec_module(pytest_runner)
+
+def load_harness_module(module_name: str, filename: str):
+    spec = importlib.util.spec_from_file_location(module_name, HARNESS_DIR / filename)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+pytest_runner = load_harness_module("yaml_harness_pytest_runner", "pytest_runner.py")
+report = load_harness_module("yaml_harness_report", "report.py")
 
 
 def test_harness_sources_changed_ignores_pycache() -> None:
@@ -92,3 +96,53 @@ def test_select_yaml_runs_preserves_target_only_selection(monkeypatch) -> None:
     assert get_yaml_target_entries_called is False
     assert selected_runs == [(yaml_files[0], {"target.py"})]
 
+
+def test_report_changed_yaml_adds_python_targets_for_static_checks(monkeypatch) -> None:
+    yaml_path = report.PROJECT_ROOT / "common" / "test_yaml" / "group_one.yaml"
+    yaml_target = report.PROJECT_ROOT / "common" / "linux_scripts" / "target.py"
+    direct_python_change = report.PROJECT_ROOT / "common" / "linux_scripts" / "direct.py"
+
+    monkeypatch.setattr(
+        report,
+        "get_recently_changed_paths",
+        lambda: [yaml_path, direct_python_change],
+    )
+    monkeypatch.setattr(
+        report,
+        "is_yaml_suite_file",
+        lambda changed_path: changed_path == yaml_path,
+    )
+    monkeypatch.setattr(
+        report,
+        "get_python_targets_from_yaml_file",
+        lambda changed_yaml: {yaml_target} if changed_yaml == yaml_path else set(),
+    )
+
+    assert report.get_recently_changed_python_files() == [
+        direct_python_change,
+        yaml_target,
+    ]
+
+
+def test_report_yaml_target_filter_keeps_only_existing_python_files(monkeypatch) -> None:
+    yaml_path = report.PROJECT_ROOT / "common" / "test_yaml" / "group_one.yaml"
+    py_target = report.PROJECT_ROOT / "common" / "linux_scripts" / "target.py"
+    sh_target = report.PROJECT_ROOT / "common" / "linux_scripts" / "target.sh"
+
+    monkeypatch.setattr(report, "load_yaml_config", lambda _yaml_file: {"suites": []})
+    monkeypatch.setattr(
+        report,
+        "normalize_suites",
+        lambda _config: [{"files": ["common/linux_scripts/target.py", "common/linux_scripts/target.sh"]}],
+    )
+
+    def fake_exists(self) -> bool:
+        return self in {yaml_path, py_target, sh_target}
+
+    def fake_is_file(self) -> bool:
+        return self in {yaml_path, py_target, sh_target}
+
+    monkeypatch.setattr(Path, "exists", fake_exists)
+    monkeypatch.setattr(Path, "is_file", fake_is_file)
+
+    assert report.get_python_targets_from_yaml_file(yaml_path) == {py_target}

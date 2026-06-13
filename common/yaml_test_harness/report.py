@@ -9,6 +9,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 
+from runner_checks import ConfigError, load_yaml_config, normalize_suites, resolve_target_path
+
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 
@@ -23,6 +25,8 @@ PROJECT_ROOT = detect_project_root(SCRIPT_DIR)
 
 RUNNER_FILE = SCRIPT_DIR / "pytest_runner.py"
 REPORTS_DIR = PROJECT_ROOT / "common" / "reports"
+TEST_YAML_DIR = PROJECT_ROOT / "common" / "test_yaml"
+SUPPORTED_YAML_SUFFIXES = {".yaml", ".yml"}
 
 PYLINT_XML = REPORTS_DIR / "pylint-report.xml"
 PYLINT_LOG = REPORTS_DIR / "pylint.log"
@@ -177,6 +181,60 @@ def is_generated_report_artifact(path: Path) -> bool:
         return parts[1].startswith(("_", "tpm_check_"))
 
     return False
+
+
+def is_yaml_suite_file(path: Path) -> bool:
+    try:
+        path.relative_to(TEST_YAML_DIR)
+    except ValueError:
+        return False
+    return path.is_file() and path.suffix.lower() in SUPPORTED_YAML_SUFFIXES
+
+
+def get_python_targets_from_yaml_file(yaml_file: Path) -> set[Path]:
+    try:
+        config = load_yaml_config(yaml_file)
+        suites = normalize_suites(config)
+    except ConfigError:
+        return set()
+
+    targets: set[Path] = set()
+    for suite in suites:
+        for file_entry in suite["files"]:
+            target_path = resolve_target_path(file_entry)
+            if target_path.suffix != ".py":
+                continue
+            if target_path.exists() and target_path.is_file():
+                targets.add(target_path)
+    return targets
+
+
+def get_recently_changed_paths() -> list[Path]:
+    changed_files: set[str] = set()
+
+    git_queries = [
+        ["diff", "--name-only"],
+        ["diff", "--cached", "--name-only"],
+        ["ls-files", "--others", "--exclude-standard"],
+    ]
+
+    for query in git_queries:
+        code, stdout, _ = run_git_command(query)
+        if code != 0:
+            continue
+
+        for item in stdout.splitlines():
+            item = item.strip()
+            if item:
+                changed_files.add(item)
+
+    paths: list[Path] = []
+    for item in sorted(changed_files):
+        path = (PROJECT_ROOT / item).resolve()
+        if path.exists() and path.is_file() and not is_generated_report_artifact(path):
+            paths.append(path)
+
+    return paths
 
 
 def run_pytest(target: str | None = None, jobs: int = 4) -> tuple[int, str, str]:
@@ -346,31 +404,16 @@ def print_pytest_summary(commit_info: dict[str, str], target: str | None = None)
 
 
 def get_recently_changed_python_files() -> list[Path]:
-    changed_files: set[str] = set()
+    python_files: set[Path] = set()
 
-    git_queries = [
-        ["diff", "--name-only"],
-        ["diff", "--cached", "--name-only"],
-        ["ls-files", "--others", "--exclude-standard"],
-    ]
-
-    for query in git_queries:
-        code, stdout, _ = run_git_command(query)
-        if code != 0:
+    for path in get_recently_changed_paths():
+        if path.suffix == ".py":
+            python_files.add(path)
             continue
+        if is_yaml_suite_file(path):
+            python_files.update(get_python_targets_from_yaml_file(path))
 
-        for item in stdout.splitlines():
-            item = item.strip()
-            if item.endswith(".py"):
-                changed_files.add(item)
-
-    paths = []
-    for item in sorted(changed_files):
-        path = (PROJECT_ROOT / item).resolve()
-        if path.exists() and path.is_file() and not is_generated_report_artifact(path):
-            paths.append(path)
-
-    return paths
+    return sorted(python_files)
 
 
 def extract_pylint_score(output: str) -> str:
