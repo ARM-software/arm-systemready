@@ -48,6 +48,7 @@ def detect_project_root(script_dir: Path) -> Path:
 
 
 PROJECT_ROOT = detect_project_root(SCRIPT_DIR)
+HARNESS_DIR = PROJECT_ROOT / "common" / "yaml_test_harness"
 TEST_YAML_DIR = PROJECT_ROOT / "common" / "test_yaml"
 REPORTS_DIR = PROJECT_ROOT / "common" / "reports"
 SUPPORTED_SUFFIXES = {".yaml", ".yml"}
@@ -240,6 +241,24 @@ def get_recently_changed_paths() -> set[Path]:
     return changed
 
 
+def path_is_within(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+    except ValueError:
+        return False
+    return True
+
+
+def harness_sources_changed(changed_paths: set[Path]) -> bool:
+    for changed_path in changed_paths:
+        if not path_is_within(changed_path, HARNESS_DIR):
+            continue
+        if "__pycache__" in changed_path.parts:
+            continue
+        return True
+    return False
+
+
 def normalize_target_for_matching(file_entry: str) -> Path:
     return resolve_target_path(file_entry)
 
@@ -297,6 +316,7 @@ def select_yaml_runs(
     if not changed_paths:
         return [], []
 
+    run_all_yaml_groups = harness_sources_changed(changed_paths)
     selected_map: dict[Path, set[str]] = {}
     config_warnings: list[str] = []
 
@@ -306,7 +326,7 @@ def select_yaml_runs(
         if warning is not None:
             config_warnings.append(warning)
 
-        if yaml_abs in changed_paths:
+        if run_all_yaml_groups or yaml_abs in changed_paths:
             yaml_targets, target_warning = get_yaml_target_entries(yaml_file)
             if target_warning is not None and target_warning not in config_warnings:
                 config_warnings.append(target_warning)
