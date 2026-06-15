@@ -5,46 +5,32 @@ import xml.etree.ElementTree as xml_et
 from datetime import datetime
 from pathlib import Path
 from threading import Lock
-from typing import Any
 
-from runner_checks import TestMeta, TestOutcome, create_outcome, sanitize_name
+try:  # Support package imports and direct harness module loading.
+    from .runner_checks import (
+        TestMeta,
+        TestOutcome,
+        create_outcome,
+        detect_project_root,
+        sanitize_name,
+        sanitize_xml_text,
+    )
+except ImportError:  # pragma: no cover - exercised by flat-module harness imports.
+    from runner_checks import (
+        TestMeta,
+        TestOutcome,
+        create_outcome,
+        detect_project_root,
+        sanitize_name,
+        sanitize_xml_text,
+    )
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-
-
-def detect_project_root(script_dir: Path) -> Path:
-    if script_dir.parent.name == "common":
-        return script_dir.parent.parent
-    return script_dir.parent
-
-
 PROJECT_ROOT = detect_project_root(SCRIPT_DIR)
 REPORTS_DIR = PROJECT_ROOT / "common" / "reports"
 PLACEHOLDER_XML = REPORTS_DIR / "pytest-placeholder.xml"
 LOG_SEPARATOR = "=" * 100
 LOG_WRITE_LOCK = Lock()
-
-
-def is_valid_xml_char(code: int) -> bool:
-    return (
-        code in {0x9, 0xA, 0xD}
-        or 0x20 <= code <= 0xD7FF
-        or 0xE000 <= code <= 0xFFFD
-        or 0x10000 <= code <= 0x10FFFF
-    )
-
-
-def sanitize_xml_text(value: Any) -> str:
-    if value is None:
-        return ""
-    if not isinstance(value, str):
-        value = str(value)
-
-    cleaned: list[str] = []
-    for char in value:
-        if is_valid_xml_char(ord(char)):
-            cleaned.append(char)
-    return "".join(cleaned)
 
 
 def append_run_header(
@@ -137,13 +123,26 @@ def build_case_log_lines(
     status: str,
     message: str,
     details: str,
+    description: str | None = None,
 ) -> list[str]:
+    normalized_description = ""
+    if description is not None:
+        normalized_description = " ".join(
+            line.strip()
+            for line in sanitize_xml_text(description).splitlines()
+            if line.strip()
+        )
+
     lines = [
         "=" * 80,
         f"TEST CASE: {testcase_name}",
+    ]
+    if normalized_description:
+        lines.append(f"DESCRIPTION: {normalized_description}")
+    lines.extend([
         f"STATUS: {status}",
         f"MESSAGE: {message}",
-    ]
+    ])
 
     if details:
         lines.extend(["", details.rstrip()])
@@ -157,10 +156,17 @@ def append_combined_case_log(
     status: str,
     message: str,
     details: str,
+    description: str | None = None,
 ) -> None:
     file_work_dir.mkdir(parents=True, exist_ok=True)
     log_path = file_work_dir / "combined.log"
-    lines = build_case_log_lines(testcase_name, status, message, details)
+    lines = build_case_log_lines(
+        testcase_name,
+        status,
+        message,
+        details,
+        description=description,
+    )
 
     with LOG_WRITE_LOCK:
         with log_path.open("a", encoding="utf-8") as handle:
@@ -174,10 +180,17 @@ def write_case_log(
     status: str,
     message: str,
     details: str,
+    description: str | None = None,
 ) -> None:
     case_work_dir.mkdir(parents=True, exist_ok=True)
     log_path = case_work_dir / "case.log"
-    lines = build_case_log_lines(testcase_name, status, message, details)
+    lines = build_case_log_lines(
+        testcase_name,
+        status,
+        message,
+        details,
+        description=description,
+    )
 
     with LOG_WRITE_LOCK:
         log_path.write_text(

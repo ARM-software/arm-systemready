@@ -9,47 +9,71 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
-from case_data_builders import CaseBuildError
-from runner_checks import (
-    ConfigError,
-    RunCaseOptions,
-    SkipCase,
-    TestMeta,
-    TestOutcome,
-    create_outcome,
-    format_outcome_message,
-    load_yaml_config,
-    normalize_suites,
-    resolve_target_path,
-    run_single_check,
-    sanitize_name,
-)
-from runner_reporting import (
-    append_combined_case_log,
-    append_run_header,
-    build_config_error_outcome,
-    build_report_path,
-    cleanup_old_pytest_xml_reports,
-    create_placeholder_xml,
-    print_group_summary,
-    remove_placeholder_xml,
-    sanitize_xml_text,
-    write_case_log,
-    write_junit_xml,
-)
+try:  # Support package imports and direct harness module loading.
+    from .case_data_builders import CaseBuildError
+    from .runner_checks import (
+        ConfigError,
+        RunCaseOptions,
+        SkipCase,
+        TestMeta,
+        TestOutcome,
+        create_outcome,
+        detect_project_root,
+        format_outcome_message,
+        load_yaml_config,
+        normalize_suites,
+        resolve_target_path,
+        run_single_check,
+        sanitize_name,
+    )
+    from .runner_reporting import (
+        append_combined_case_log,
+        append_run_header,
+        build_config_error_outcome,
+        build_report_path,
+        cleanup_old_pytest_xml_reports,
+        create_placeholder_xml,
+        print_group_summary,
+        remove_placeholder_xml,
+        sanitize_xml_text,
+        write_case_log,
+        write_junit_xml,
+    )
+except ImportError:  # pragma: no cover - exercised by flat-module harness imports.
+    from case_data_builders import CaseBuildError
+    from runner_checks import (
+        ConfigError,
+        RunCaseOptions,
+        SkipCase,
+        TestMeta,
+        TestOutcome,
+        create_outcome,
+        detect_project_root,
+        format_outcome_message,
+        load_yaml_config,
+        normalize_suites,
+        resolve_target_path,
+        run_single_check,
+        sanitize_name,
+    )
+    from runner_reporting import (
+        append_combined_case_log,
+        append_run_header,
+        build_config_error_outcome,
+        build_report_path,
+        cleanup_old_pytest_xml_reports,
+        create_placeholder_xml,
+        print_group_summary,
+        remove_placeholder_xml,
+        sanitize_xml_text,
+        write_case_log,
+        write_junit_xml,
+    )
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-
-
-def detect_project_root(script_dir: Path) -> Path:
-    if script_dir.parent.name == "common":
-        return script_dir.parent.parent
-    return script_dir.parent
-
-
 PROJECT_ROOT = detect_project_root(SCRIPT_DIR)
-HARNESS_DIR = PROJECT_ROOT / "common" / "yaml_test_harness"
-TEST_YAML_DIR = PROJECT_ROOT / "common" / "test_yaml"
+HARNESS_DIR = PROJECT_ROOT / "common" / "acs_test_framework_runner"
+TEST_YAML_DIR = PROJECT_ROOT / "common" / "acs_test_framework_manifests"
 REPORTS_DIR = PROJECT_ROOT / "common" / "reports"
 SUPPORTED_SUFFIXES = {".yaml", ".yml"}
 IN_PROCESS_CASE_TYPES = {"py_function", "module_main_with_env", "module_cli"}
@@ -117,12 +141,14 @@ def run_case(
     )
 
     def persist_case_logs(status: str, outcome: TestOutcome) -> None:
+        case_description = effective_case.get("description")
         append_combined_case_log(
             file_work_dir=file_work_dir,
             testcase_name=testcase_name,
             status=status,
             message=outcome.message,
             details=outcome.details,
+            description=case_description,
         )
         write_case_log(
             case_work_dir=work_dir,
@@ -130,6 +156,7 @@ def run_case(
             status=status,
             message=outcome.message,
             details=outcome.details,
+            description=case_description,
         )
 
     try:

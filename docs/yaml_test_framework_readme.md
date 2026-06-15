@@ -519,10 +519,4 @@ Recommended workflow:
 6. Add `post_checks` when the script's output is file-based.
 7. Run `python3 common/yaml_test_harness/report.py <target>` and inspect `common/reports/` if the case fails.
 
-## Maintenance Notes
-
-- Several suites exist in both hyphenated and underscored YAML filenames, for example `verify-tpm-measurements.yaml` and `verify_tpm_measurements.yaml`. Treat those as compatibility aliases and keep them synchronized when both are still required.
-- Use `warn_only: true` for known current behavior that should remain visible in reports without blocking the run.
-- Use `requires_destructive: true` only for cases that really touch hardware state, and gate them with `RUN_DESTRUCTIVE_HW_TESTS=1`.
-- If a new domain starts accumulating repeated mocks and generated fixtures, add a proper scenario builder in `mock_loader.py` instead of duplicating low-level setup across many YAML cases.
 

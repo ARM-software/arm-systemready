@@ -9,23 +9,32 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 
-from runner_checks import ConfigError, load_yaml_config, normalize_suites, resolve_target_path
+try:  # Support package imports and direct harness module loading.
+    from .runner_checks import (
+        ConfigError,
+        detect_project_root,
+        load_yaml_config,
+        normalize_suites,
+        resolve_target_path,
+        sanitize_name,
+    )
+except ImportError:  # pragma: no cover - exercised by flat-module harness imports.
+    from runner_checks import (
+        ConfigError,
+        detect_project_root,
+        load_yaml_config,
+        normalize_suites,
+        resolve_target_path,
+        sanitize_name,
+    )
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-
-
-def detect_project_root(script_dir: Path) -> Path:
-    if script_dir.parent.name == "common":
-        return script_dir.parent.parent
-    return script_dir.parent
-
-
 PROJECT_ROOT = detect_project_root(SCRIPT_DIR)
 
 RUNNER_FILE = SCRIPT_DIR / "pytest_runner.py"
 REPORTS_DIR = PROJECT_ROOT / "common" / "reports"
-TEST_YAML_DIR = PROJECT_ROOT / "common" / "test_yaml"
+TEST_YAML_DIR = PROJECT_ROOT / "common" / "acs_test_framework_manifests"
 SUPPORTED_YAML_SUFFIXES = {".yaml", ".yml"}
 
 PYLINT_XML = REPORTS_DIR / "pylint-report.xml"
@@ -157,13 +166,6 @@ def get_manual_python_target(target: str | None, tool_name: str) -> list[Path] |
         return []
 
     return [resolved_target]
-
-
-def sanitize_name(value: str) -> str:
-    return "".join(
-        char if char.isalnum() or char in {"-", "_", "."} else "_"
-        for char in value
-    )
 
 
 def is_generated_report_artifact(path: Path) -> bool:
