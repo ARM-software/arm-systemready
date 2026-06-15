@@ -590,6 +590,7 @@ suites:
             text: "WITH WAIVER"
 
 
+
       - name: bsa_subtest_waiver_applies_by_sub_rule_id
         type: cli
         text_files:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import shutil
 import sys
 from pathlib import Path
 
@@ -22,6 +23,10 @@ def load_harness_module(module_name: str, filename: str):
 
 pytest_runner = load_harness_module("yaml_harness_pytest_runner", "pytest_runner.py")
 report = load_harness_module("yaml_harness_report", "report.py")
+runner_reporting = load_harness_module(
+    "yaml_harness_runner_reporting",
+    "runner_reporting.py",
+)
 
 
 def test_harness_sources_changed_ignores_pycache() -> None:
@@ -34,8 +39,8 @@ def test_harness_sources_changed_ignores_pycache() -> None:
 
 def test_select_yaml_runs_runs_all_groups_when_harness_changes(monkeypatch) -> None:
     yaml_files = [
-        pytest_runner.PROJECT_ROOT / "common" / "test_yaml" / "group_one.yaml",
-        pytest_runner.PROJECT_ROOT / "common" / "test_yaml" / "group_two.yaml",
+        pytest_runner.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_one.yaml",
+        pytest_runner.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_two.yaml",
     ]
     changed_paths = {pytest_runner.HARNESS_DIR / "mock_loader.py"}
 
@@ -65,7 +70,7 @@ def test_select_yaml_runs_runs_all_groups_when_harness_changes(monkeypatch) -> N
 
 
 def test_select_yaml_runs_preserves_target_only_selection(monkeypatch) -> None:
-    yaml_files = [pytest_runner.PROJECT_ROOT / "common" / "test_yaml" / "group_one.yaml"]
+    yaml_files = [pytest_runner.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_one.yaml"]
 
     monkeypatch.setattr(
         pytest_runner,
@@ -98,7 +103,7 @@ def test_select_yaml_runs_preserves_target_only_selection(monkeypatch) -> None:
 
 
 def test_report_changed_yaml_adds_python_targets_for_static_checks(monkeypatch) -> None:
-    yaml_path = report.PROJECT_ROOT / "common" / "test_yaml" / "group_one.yaml"
+    yaml_path = report.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_one.yaml"
     yaml_target = report.PROJECT_ROOT / "common" / "linux_scripts" / "target.py"
     direct_python_change = report.PROJECT_ROOT / "common" / "linux_scripts" / "direct.py"
 
@@ -125,7 +130,7 @@ def test_report_changed_yaml_adds_python_targets_for_static_checks(monkeypatch) 
 
 
 def test_report_yaml_target_filter_keeps_only_existing_python_files(monkeypatch) -> None:
-    yaml_path = report.PROJECT_ROOT / "common" / "test_yaml" / "group_one.yaml"
+    yaml_path = report.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_one.yaml"
     py_target = report.PROJECT_ROOT / "common" / "linux_scripts" / "target.py"
     sh_target = report.PROJECT_ROOT / "common" / "linux_scripts" / "target.sh"
 
@@ -146,3 +151,58 @@ def test_report_yaml_target_filter_keeps_only_existing_python_files(monkeypatch)
     monkeypatch.setattr(Path, "is_file", fake_is_file)
 
     assert report.get_python_targets_from_yaml_file(yaml_path) == {py_target}
+
+
+def test_collect_pytest_case_logs_reads_persisted_case_description(
+    monkeypatch,
+) -> None:
+    temp_path = HARNESS_DIR / "_case_log_test_reports"
+    shutil.rmtree(temp_path, ignore_errors=True)
+    try:
+        runner_reporting.append_combined_case_log(
+            file_work_dir=temp_path / "_work" / "suite" / "target",
+            testcase_name="suite::target.py::case_with_description",
+            status="PASS",
+            message="case passed",
+            details="",
+            description="First line of description\nSecond line of description",
+        )
+        monkeypatch.setattr(report, "REPORTS_DIR", temp_path)
+
+        assert report.collect_pytest_case_logs() == [
+            {
+                "name": "suite::target.py::case_with_description",
+                "description": "First line of description Second line of description",
+                "status": "passed",
+                "details": "case passed",
+            }
+        ]
+    finally:
+        shutil.rmtree(temp_path, ignore_errors=True)
+
+
+def test_collect_pytest_case_logs_skips_missing_case_description(
+    monkeypatch,
+) -> None:
+    temp_path = HARNESS_DIR / "_case_log_test_reports"
+    shutil.rmtree(temp_path, ignore_errors=True)
+    try:
+        runner_reporting.append_combined_case_log(
+            file_work_dir=temp_path / "_work" / "suite" / "target",
+            testcase_name="suite::target.py::case_without_description",
+            status="PASS",
+            message="case passed",
+            details="",
+        )
+        monkeypatch.setattr(report, "REPORTS_DIR", temp_path)
+
+        assert report.collect_pytest_case_logs() == [
+            {
+                "name": "suite::target.py::case_without_description",
+                "description": "",
+                "status": "passed",
+                "details": "case passed",
+            }
+        ]
+    finally:
+        shutil.rmtree(temp_path, ignore_errors=True)

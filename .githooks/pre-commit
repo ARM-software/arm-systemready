@@ -20,14 +20,13 @@ else
     exit 1
 fi
 
-if [ -f "$REPO_ROOT/common/yaml_test_harness/report.py" ]; then
-    REPORT_SCRIPT="$REPO_ROOT/common/yaml_test_harness/report.py"
+if [ -f "$REPO_ROOT/common/acs_test_framework_runner/report.py" ]; then
+    REPORT_SCRIPT="$REPO_ROOT/common/acs_test_framework_runner/report.py"
 
 else
     echo "report.py not found."
     echo "Checked:"
-    echo "  - $REPO_ROOT/common/yaml_test_harness/report.py"
-    echo "  - $REPO_ROOT/report.py"
+    echo "  - $REPO_ROOT/common/acs_test_framework_runner/report.py"
     exit 1
 fi
 
