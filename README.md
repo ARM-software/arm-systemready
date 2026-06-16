@@ -32,6 +32,66 @@ The SystemReady BBSR tests if the firmware meets the requirements specified by t
 
 For further details on BBSR ACS, please refer to [BBSR ACS Verification Guide](./docs/BBSR_ACS_Verification.md).
 
+### BBSR Linux TPM Measured-Boot: Manual Integration Steps
+
+Brief consolidated guidance for partners integrating TPM measured-boot logging:
+
+- Prerequisites:
+	- Install `tpm2-tools` (provides `tpm2_eventlog` and `tpm2_pcrread`):
+
+```bash
+sudo apt-get update
+sudo apt-get install -y tpm2-tools python3
+```
+
+- Kernel configuration (recommended to enable at build time):
+
+```
+CONFIG_TCG_TPM=y
+CONFIG_TCG_TIS=y
+CONFIG_TCG_TIS_SPI=y    # if TPM exposed over SPI
+CONFIG_TCG_CRB=y        # if platform uses CRB
+CONFIG_TCG_FTPM_TEE=y   # if using firmware TPM via TEE
+CONFIG_TEE=y
+CONFIG_OPTEE=y
+```
+
+- Drivers: prefer built-in; if not, ensure modules are available for runtime insertion (examples): `tpm_tis`, `tpm_tis_spi`, `tpm_tis_i2c_cr50`, `spi-tegra210-quad`.
+
+- Runtime steps to produce logs:
+
+1. Mount securityfs:
+
+```bash
+mount -t securityfs securityfs /sys/kernel/security
+```
+
+2. Copy TPM binary measurements and dump event log:
+
+```bash
+cp /sys/kernel/security/tpm0/binary_bios_measurements /tmp/
+tpm2_eventlog /tmp/binary_bios_measurements > eventlog.log
+```
+
+3. Dump PCRs:
+
+```bash
+tpm2_pcrread > pcr.log
+```
+
+4. Verify measurements:
+
+```bash
+python3 /bin/verify_tpm_measurements.py pcr.log eventlog.log | tee verify_tpm_measurements.log
+```
+
+- Generated logs (stored in current working directory):
+	- `./eventlog.log`
+	- `./pcr.log`
+	- `./verify_tpm_measurements.log`
+
+- Reference: kernel Kconfig enforcement and driver staging are implemented in `SystemReady-band/build-scripts/build-linux.sh` (use as a build-time reference).
+
 ## License
 
 Arm SystemReady ACS is distributed under Apache v2.0 License.
