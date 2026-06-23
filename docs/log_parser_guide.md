@@ -339,7 +339,8 @@ Suite Level
               "Reason": "Required: TestCase-level waiver",
               "SubTests": [
                 {
-                  "sub_Rule_ID": "<SubTestID>",
+                  "sub_Test_Path": "<Exact BSA/SBSA nested path>",
+                  "sub_Test_Number": "<BSA/SBSA subtest number>",
                   "sub_Test_Description": "<Description>",
                   "Reason": "Required: SubTest-level waiver"
                 }
@@ -352,6 +353,8 @@ Suite Level
   ]
 }
 ```
+
+For BSA/SBSA nested subtests, prefer `sub_Test_Path`. It uniquely identifies the branch when the same rule or subtest number appears under multiple parents. The waiver parser also accepts `sub_Test_Number`, legacy `sub_Rule_ID`, and exact `sub_Test_Description` for compatibility.
 
 ### Waiver Examples
 
@@ -402,18 +405,16 @@ Suite Level
 #### 4. SubTest-Level Waiver
 ```json
 {
-  "Suite": "BSA",
+  "Suite": "SBSA",
   "TestSuites": [
     {
       "TestSuite": "PCIE",
       "TestCases": [
         {
-          "Test_case": "B_PER_08",
-          "Reason": "Root complex behavior varies by board implementation",
+          "Test_case": "S_L6PCI_1",
           "SubTests": [
             {
-              "sub_Rule_ID": "PCI_MM_01",
-              "sub_Test_Description": "PCIe Device Memory mapping support",
+              "sub_Test_Path": "S_L6PCI_1 : - / B_REP_1 : - / JKZMT : - / PCI_MM_01 : -",
               "Reason": "Device memory decode not supported on this platform"
             }
           ]
@@ -423,6 +424,8 @@ Suite Level
   ]
 }
 ```
+
+BSA/SBSA waivers using `sub_Test_Number` or legacy `sub_Rule_ID` still work, but they can match every nested occurrence of that number or rule under the testcase. Use `sub_Test_Path` when only one branch should be waived.
 
 #### 5. Standalone/OS Tests Waiver Format
 ```json
@@ -462,7 +465,7 @@ Suite Level
               "Test_case": "B_PER_08",
               "SubTests": [
                 {
-                  "sub_Rule_ID": "PCI_MM_01",
+                  "sub_Test_Path": "B_PER_08 : - / PCI_MM_01 : -",
                   "Reason": "Device memory decode not supported"
                 }
               ]
@@ -512,8 +515,8 @@ Suite Level
 3. **Apply waivers**:
    - Suite-level: Applies to ALL failed tests in suite
    - TestSuite-level: Applies to ALL failed tests in that TestSuite
-   - TestCase-level: Applies to specific TestCase and its SubTests
-   - SubTest-level: Applies only to specific SubTest
+   - TestCase-level: Applies to the specific TestCase and its nested failed SubTests
+   - SubTest-level: Applies only to specific SubTests; BSA/SBSA matching uses `sub_Test_Path`, then `sub_Test_Number`, then legacy `sub_Rule_ID`, then exact description
 
 4. **Mark results**:
    - Original: `FAILED`
@@ -529,6 +532,7 @@ Suite Level
 - **Reason is REQUIRED** for each waiver entry; missing reasons are skipped (quietly unless verbose)
 - Waivers cascade down (Suite → TestSuite → TestCase → SubTest)
 - Waivers only apply to **failed** tests (passing tests are not affected)
+- For nested BSA/SBSA failures, if all failed nested children under a failed parent are waived, the parent subtest/testcase is also marked `FAILED (WITH WAIVER)`
 - Waiver reasons appear in both detailed HTML and summary reports
 - Multiple waivers can be applied to the same suite
 
@@ -668,36 +672,65 @@ if not waivable:
 {
   "test_results": [
     {
-      "Test_suite": "TIMER",
+      "Test_suite": "PCIE",
       "testcases": [
         {
-          "Test_case": "B_TIMER_01",
-          "Test_case_description": "Check generic timer implementation",
-          "Test_result": "PASSED"
-        },
-        {
-          "Test_case": "B_TIMER_02",
-          "Test_case_description": "Verify timer interrupt",
-          "Test_result": "FAILED (WITH WAIVER)",
-          "waiver_reason": "Timer interrupt not supported on this platform"
+          "Test_case": "S_L6PCI_1 : -",
+          "Test_case_description": "Check PCIe On-chip Peripherals",
+          "Test_result": "FAILED",
+          "subtests": [
+            {
+              "sub_Test_Number": "B_REP_1 : -",
+              "sub_Test_Description": "Check RCiEP Devices",
+              "sub_test_result": "FAILED",
+              "sub_Test_Level": 1,
+              "sub_Test_Path": "S_L6PCI_1 : - / B_REP_1 : -",
+              "subtests": [
+                {
+                  "sub_Test_Number": "JKZMT : -",
+                  "sub_Test_Description": "",
+                  "sub_test_result": "FAILED",
+                  "sub_Test_Level": 2,
+                  "sub_Test_Path": "S_L6PCI_1 : - / B_REP_1 : - / JKZMT : -",
+                  "subtests": [
+                    {
+                      "sub_Test_Number": "PCI_MM_01 : -",
+                      "sub_Test_Description": "PCIe Device Memory mapping support",
+                      "sub_test_result": "FAILED",
+                      "sub_Test_Level": 3,
+                      "sub_Test_Path": "S_L6PCI_1 : - / B_REP_1 : - / JKZMT : - / PCI_MM_01 : -"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "Test_case_summary": {
+            "Total Rules Run": 1,
+            "Passed": 0,
+            "Failed": 1,
+            "Total_failed_with_waiver": 0
+          }
         }
       ],
       "test_suite_summary": {
-        "Total Rules Run": 2,
-        "Passed": 1,
-        "Failed": 0,
-        "Total_failed_with_waiver": 1
+        "Total Rules Run": 1,
+        "Passed": 0,
+        "Failed": 1,
+        "Total_failed_with_waiver": 0
       }
     }
   ],
   "suite_summary": {
-    "Total Rules Run": 2,
-    "Passed": 1,
-    "Failed": 0,
-    "Total_failed_with_waiver": 1
+    "Total Rules Run": 1,
+    "Passed": 0,
+    "Failed": 1,
+    "Total_failed_with_waiver": 0
   }
 }
 ```
+
+BSA/SBSA `subtests` can recurse to any depth. `sub_Test_Path` is built from the visible log nesting and is intended for partners to compare directly with the log and for precise waiver matching. New BSA/SBSA JSON does not emit `sub_Rule_ID`; waiver files may still use it as a legacy matcher.
 
 #### FWTS/SCT JSON Structure
 ```json
@@ -892,7 +925,7 @@ python3 apply_waivers.py <suite_name> <json_file> <waiver_json> <test_category> 
 1. Load waiver.json
 2. Extract suite-specific waivers
 3. Load test results JSON
-4. Match waivers to failed tests (hierarchy-based)
+4. Match waivers to failed tests (hierarchy-based; recursive for BSA/SBSA nested subtests)
 5. Update test status to "FAILED (WITH WAIVER)"
 6. Add waiver_reason field
 7. Save updated JSON
@@ -903,6 +936,8 @@ python3 apply_waivers.py <suite_name> <json_file> <waiver_json> <test_category> 
 - SubSuite-level (SCT/Standalone)
 - TestCase-level
 - SubTest-level
+
+For BSA/SBSA subtest-level waivers, matching priority is `sub_Test_Path`, `sub_Test_Number`, legacy `sub_Rule_ID`, then exact `sub_Test_Description`.
 
 ### 4. logs_to_json.py (per suite)
 **Purpose**: Parse raw log files into structured JSON
@@ -930,12 +965,20 @@ python3 apply_waivers.py <suite_name> <json_file> <waiver_json> <test_category> 
 6. Write to output JSON
 ```
 
+**BSA/SBSA nested rules**:
+- The BSA/SBSA parser uses a rule stack so any number of nested rule groups can be represented.
+- A top-level rule is emitted as a testcase. Rules that run inside it are emitted under recursive `subtests`.
+- Each BSA/SBSA subtest contains `sub_Test_Number`, `sub_Test_Description`, `sub_test_result`, `sub_Test_Level`, and `sub_Test_Path`.
+- `sub_Test_Path` mirrors the log nesting and is stable for comparison with the log and precise waiver matching.
+- Only rules with a completed `Result:` line are emitted as completed JSON entries.
+
 ### 5. json_to_html.py (per suite)
 **Purpose**: Generate HTML reports from JSON
 
 **Outputs**:
 - Detailed HTML: Complete test breakdown
 - Summary HTML: Pass/Fail counts, embedded in main summary
+- BSA/SBSA HTML renders nested `subtests` recursively with indentation.
 
 **Template Variables**:
 - Test suite name

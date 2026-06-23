@@ -14,23 +14,152 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Apply waiver files to parsed ACS JSON results."""
+
 import json
-import sys
 import re
 import argparse
 
 def clean_description(desc):
+    """Normalize a description string for older description-based waiver matching."""
     desc = desc.strip().lower()
     desc = re.sub(r'\s+', ' ', desc)  # Replace multiple spaces with a single space
     desc = re.sub(r'[^\w\s-]', '', desc)  # Remove special characters except hyphens
     return desc
 
-def _as_list(v):
-    if v is None:
+def _as_list(value):
+    """Return a value as a list so callers can handle one or many entries."""
+    if value is None:
         return []
-    return v if isinstance(v, list) else [v]
+    return value if isinstance(value, list) else [value]
+
+# New BSA/SBSA JSON no longer needs a separate sub_Rule_ID field. When only
+# sub_Test_Number is present, the rule id is the text before the first ':'.
+def _rule_id_from_test_number(test_number):
+    """Extract the rule id from a visible test number such as 'ITS_04 : 1535'."""
+    if not isinstance(test_number, str):
+        return ''
+    return test_number.split(':', 1)[0].strip()
+
+def _subtest_rule_id(subtest):
+    """Return the best available rule id for old and new subtest JSON."""
+    return subtest.get('sub_Rule_ID') or _rule_id_from_test_number(subtest.get('sub_Test_Number'))
+
+# Walk waiver input and parser output the same way. Both "SubTests" from waiver
+# files and "subtests" from parsed JSON can now contain children at any depth.
+def _iter_nested_subtests(subtests):
+    """Yield every subtest from a recursive subtest tree."""
+    for subtest in subtests or []:
+        yield subtest
+        yield from _iter_nested_subtests(
+            subtest.get('subtests', []) or subtest.get('SubTests', [])
+        )
+
+def _is_failed_result(result):
+    """Return True when a result string represents any failed status."""
+    if not isinstance(result, str):
+        return False
+    result_upper = result.upper()
+    return 'FAILED' in result_upper or 'FAILURE' in result_upper or 'FAIL' in result_upper
+
+def _has_waiver_result(result):
+    """Return True when a result string is already marked with waiver status."""
+    return isinstance(result, str) and 'WITH WAIVER' in result.upper()
+
+def _append_waiver_to_result(result):
+    """Add the waiver suffix once to an existing result string."""
+    if not isinstance(result, str) or _has_waiver_result(result):
+        return result
+    return result + ' (WITH WAIVER)'
+
+# BSA/SBSA use Test_result, while some older parsers use test_result. Keep the
+# marking in one place so suite/testsuite/testcase waivers behave consistently.
+def _mark_failed_case_waived(testcase, reason):
+    """Mark a failed testcase as waived when it is not already waived."""
+    result_key = 'Test_result' if 'Test_result' in testcase else 'test_result'
+    test_result = testcase.get(result_key, '')
+    if _is_failed_result(test_result) and not _has_waiver_result(test_result):
+        testcase[result_key] = _append_waiver_to_result(test_result)
+        testcase['waiver_reason'] = reason
+        return True
+    return False
+
+# Suite, testsuite, and testcase waivers apply to the whole failed branch. Mark
+# every failed nested child so HTML and JSON show the waiver at the exact rule.
+def _mark_failed_subtests_waived(subtests, reason):
+    """Mark every failed subtest in a nested branch as waived."""
+    marked = False
+    for subtest in _iter_nested_subtests(subtests):
+        sub_result = subtest.get('sub_test_result')
+        if _is_failed_result(sub_result) and not _has_waiver_result(sub_result):
+            subtest['sub_test_result'] = _append_waiver_to_result(sub_result)
+            subtest['waiver_reason'] = reason
+            marked = True
+    return marked
+
+# If a failed parent only contains waived failed children, mark that parent as
+# failed-with-waiver too. Passing/skipped/not-implemented children do not block
+# this because they are not unwaived failures.
+def _propagate_nested_bsa_waivers(testcase):
+    """Move waiver state upward through failed BSA/SBSA nested parents."""
+    def propagate_subtest(subtest):
+        """Return failed, unwaived failed, and waived failed state for one branch."""
+        child_has_failed = False
+        child_has_unwaived_failed = False
+        child_has_waived_failed = False
+
+        for child in subtest.get('subtests', []) or []:
+            child_failed, child_unwaived, child_waived = propagate_subtest(child)
+            child_has_failed = child_has_failed or child_failed
+            child_has_unwaived_failed = child_has_unwaived_failed or child_unwaived
+            child_has_waived_failed = child_has_waived_failed or child_waived
+
+        result = subtest.get('sub_test_result', '')
+        is_failed = _is_failed_result(result)
+        has_waiver = _has_waiver_result(result)
+
+        if (
+            is_failed
+            and not has_waiver
+            and subtest.get('subtests')
+            and child_has_waived_failed
+            and not child_has_unwaived_failed
+        ):
+            subtest['sub_test_result'] = _append_waiver_to_result(result)
+            subtest.setdefault('waiver_reason', 'All failed nested subtests were waived.')
+            has_waiver = True
+
+        return (
+            is_failed or child_has_failed,
+            (is_failed and not has_waiver) or child_has_unwaived_failed,
+            (is_failed and has_waiver) or child_has_waived_failed
+        )
+
+    has_failed = False
+    has_unwaived_failed = False
+    has_waived_failed = False
+
+    for subtest in testcase.get('subtests', []) or []:
+        sub_failed, sub_unwaived, sub_waived = propagate_subtest(subtest)
+        has_failed = has_failed or sub_failed
+        has_unwaived_failed = has_unwaived_failed or sub_unwaived
+        has_waived_failed = has_waived_failed or sub_waived
+
+    test_result = testcase.get('Test_result', testcase.get('test_result', ''))
+    if (
+        _is_failed_result(test_result)
+        and not _has_waiver_result(test_result)
+        and has_failed
+        and has_waived_failed
+        and not has_unwaived_failed
+    ):
+        _mark_failed_case_waived(
+            testcase,
+            'All failed nested subtests were waived.'
+        )
 
 def load_waivers(waiver_data, suite_name):
+    """Collect waiver entries by scope for the requested suite."""
     suite_level_waivers = []
     testsuite_level_waivers = []
     subsuite_level_waivers = []  # Added for SubSuite-level waivers
@@ -80,20 +209,26 @@ def load_waivers(waiver_data, suite_name):
 
                             # Also load SubTest-level waivers for this testcase
                             if 'SubTests' in testcase_entry:
-                                for subtest_entry in testcase_entry['SubTests']:
+                                # Nested waiver entries are flattened here, but
+                                # each entry still keeps its testcase scope.
+                                for subtest_entry in _iter_nested_subtests(testcase_entry['SubTests']):
                                     subtest_id = subtest_entry.get('sub_Rule_ID')
+                                    subtest_number = subtest_entry.get('sub_Test_Number')
+                                    subtest_path = subtest_entry.get('sub_Test_Path')
                                     subtest_desc = subtest_entry.get('sub_Test_Description')
                                     subtest_reason = subtest_entry.get('Reason')
-                                    if (subtest_id or subtest_desc) and subtest_reason:
+                                    if (subtest_id or subtest_number or subtest_path or subtest_desc) and subtest_reason:
                                         subtest_level_waivers.append({
                                             'Test_case': testcase_name,
                                             'sub_Rule_ID': subtest_id,
+                                            'sub_Test_Number': subtest_number,
+                                            'sub_Test_Path': subtest_path,
                                             'sub_Test_Description': subtest_desc,
                                             'Reason': subtest_reason
                                         })
-                                    elif (subtest_id or subtest_desc) and not subtest_reason:
+                                    elif (subtest_id or subtest_number or subtest_path or subtest_desc) and not subtest_reason:
                                         if verbose:
-                                            subtest_key = subtest_id or subtest_desc
+                                            subtest_key = subtest_path or subtest_number or subtest_id or subtest_desc
                                             print(f"ERROR: Waiver for SubTest '{subtest_key}' under Test_case '{testcase_name}' is missing 'Reason'. Skipping SubTest-level waiver.")
                 if suite_name.upper() == 'SCMI':
                     if 'TestCases' in test_suite:
@@ -143,7 +278,7 @@ def load_waivers(waiver_data, suite_name):
 
                 # Collect SubTest-level waivers
                 subtests = test_suite.get('TestCase', {}).get('SubTests', []) or test_suite.get('SubSuite', {}).get('TestCase', {}).get('SubTests', [])
-                for subtest in subtests:
+                for subtest in _iter_nested_subtests(subtests):
                     if 'Reason' not in subtest or not subtest['Reason']:
                         subtest_id_or_desc = subtest.get('SubTestID') or subtest.get('sub_Test_Description') or 'Unknown'
                         if verbose:
@@ -175,19 +310,17 @@ def load_waivers(waiver_data, suite_name):
     return suite_level_waivers, testsuite_level_waivers, subsuite_level_waivers, testcase_level_waivers, subtest_level_waivers
 
 def apply_suite_level_waivers(test_suite_entry, suite_waivers):
+    """Apply suite-level waivers to failed results below a suite."""
     # Apply waivers to all applicable failed subtests in the suite
     for waiver in suite_waivers:
         reason = waiver['Reason']
 
         # Apply to testcases (BSA/SBSA/SCMI)
         for testcase in test_suite_entry.get('testcases', []):
-            test_result = testcase.get('test_result', '')
-            if isinstance(test_result, str):
-                if 'FAILED' in test_result.upper() and '(WITH WAIVER)' not in test_result.upper():
-                    testcase['test_result'] = test_result + ' (WITH WAIVER)'
-                    testcase['waiver_reason'] = reason
-                    if verbose:
-                        print(f"Suite-level waiver applied to testcase '{testcase.get('Test_case')}' with reason: {reason}")
+            if _mark_failed_case_waived(testcase, reason):
+                _mark_failed_subtests_waived(testcase.get('subtests', []), reason)
+                if verbose:
+                    print(f"Suite-level waiver applied to testcase '{testcase.get('Test_case')}' with reason: {reason}")
 
         # For other structures: apply to subtests
         for subtest in test_suite_entry.get('subtests', []):
@@ -229,13 +362,14 @@ def apply_suite_level_waivers(test_suite_entry, suite_waivers):
                             updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                             sub_test_result['fail_reasons'] = updated_fail_reasons
                     elif isinstance(sub_test_result, str):
-                        ru = sub_test_result.upper()
-                        if 'FAILED' in ru or 'FAILURE' in ru or 'FAIL' in ru:
-                            if '(WITH WAIVER)' not in ru:
+                        result_upper = sub_test_result.upper()
+                        if 'FAILED' in result_upper or 'FAILURE' in result_upper or 'FAIL' in result_upper:
+                            if '(WITH WAIVER)' not in result_upper:
                                 subtest['sub_test_result'] += ' (WITH WAIVER)'
                                 subtest['waiver_reason'] = reason
 
 def apply_testsuite_level_waivers(test_suite_entry, testsuite_waivers):
+    """Apply testsuite-level waivers to matching failed testcases or subtests."""
     # Get the test_suite_name considering different keys
     test_suite_name = test_suite_entry.get('Test_suite') or test_suite_entry.get('Test_suite_name')
     # Apply waivers to all applicable failed tests within specific TestSuites
@@ -245,13 +379,10 @@ def apply_testsuite_level_waivers(test_suite_entry, testsuite_waivers):
         if test_suite_name == target_testsuite:
             # For BSA/SBSA: apply to testcases
             for testcase in test_suite_entry.get('testcases', []):
-                test_result = testcase.get('Test_result', '')
-                if isinstance(test_result, str):
-                    if 'FAILED' in test_result.upper() and '(WITH WAIVER)' not in test_result.upper():
-                        testcase['Test_result'] = test_result + ' (WITH WAIVER)'
-                        testcase['waiver_reason'] = reason
-                        if verbose:
-                            print(f"TestSuite-level waiver applied to testcase '{testcase.get('Test_case')}' in TestSuite '{target_testsuite}' with reason: {reason}")
+                if _mark_failed_case_waived(testcase, reason):
+                    _mark_failed_subtests_waived(testcase.get('subtests', []), reason)
+                    if verbose:
+                        print(f"TestSuite-level waiver applied to testcase '{testcase.get('Test_case')}' in TestSuite '{target_testsuite}' with reason: {reason}")
 
             # For other structures: apply to subtests
             for subtest in test_suite_entry.get('subtests', []):
@@ -295,13 +426,14 @@ def apply_testsuite_level_waivers(test_suite_entry, testsuite_waivers):
                                 updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                                 sub_test_result['fail_reasons'] = updated_fail_reasons
                         elif isinstance(sub_test_result, str):
-                            ru = sub_test_result.upper()
-                            if 'FAILED' in ru or 'FAILURE' in ru:
-                                if '(WITH WAIVER)' not in ru:
+                            result_upper = sub_test_result.upper()
+                            if 'FAILED' in result_upper or 'FAILURE' in result_upper:
+                                if '(WITH WAIVER)' not in result_upper:
                                     subtest['sub_test_result'] += ' (WITH WAIVER)'
                                     subtest['waiver_reason'] = reason
 
 def apply_subsuite_level_waivers(test_suite_entry, subsuite_waivers):
+    """Apply subsuite-level waivers where the parsed JSON has subsuite results."""
     # Apply waivers to all applicable failed subtests within specific SubSuites
     for waiver in subsuite_waivers:
         target_subsuite = waiver['SubSuite']
@@ -331,6 +463,7 @@ def apply_subsuite_level_waivers(test_suite_entry, subsuite_waivers):
                                 print(f"SubSuite-level waiver applied to subtest '{subtest.get('sub_Test_Description')}' with reason: {reason}")
 
 def apply_testcase_level_waivers(test_suite_entry, testcase_waivers):
+    """Apply testcase-level waivers to matching failed testcases."""
     # Apply waivers to all applicable failed subtests within specific Test_cases
     for waiver in testcase_waivers:
         target_testcase = waiver['Test_case']
@@ -343,13 +476,10 @@ def apply_testcase_level_waivers(test_suite_entry, testcase_waivers):
             test_case_id = test_case_name.split(':')[0].strip() if ':' in test_case_name else test_case_name
 
             if test_case_id == target_testcase or test_case_name == target_testcase:
-                test_result = testcase.get('Test_result', '')
-                if isinstance(test_result, str):
-                    if 'FAILED' in test_result.upper() and '(WITH WAIVER)' not in test_result.upper():
-                        testcase['Test_result'] = test_result + ' (WITH WAIVER)'
-                        testcase['waiver_reason'] = reason
-                        if verbose:
-                            print(f"Test_case-level waiver applied to testcase '{test_case_name}' with reason: {reason}")
+                if _mark_failed_case_waived(testcase, reason):
+                    _mark_failed_subtests_waived(testcase.get('subtests', []), reason)
+                    if verbose:
+                        print(f"Test_case-level waiver applied to testcase '{test_case_name}' with reason: {reason}")
 
         # For other structures: apply to subtests
         if test_suite_entry.get('Test_case') == target_testcase:
@@ -394,21 +524,26 @@ def apply_testcase_level_waivers(test_suite_entry, testcase_waivers):
                                 updated_fail_reasons = [fr + ' (WITH WAIVER)' for fr in existing_fail_reasons]
                                 sub_test_result['fail_reasons'] = updated_fail_reasons
                         elif isinstance(sub_test_result, str):
-                            ru = sub_test_result.upper()
-                            if 'FAILED' in ru or 'FAILURE' in ru:
-                                if '(WITH WAIVER)' not in ru:
+                            result_upper = sub_test_result.upper()
+                            if 'FAILED' in result_upper or 'FAILURE' in result_upper:
+                                if '(WITH WAIVER)' not in result_upper:
                                     subtest['sub_test_result'] += ' (WITH WAIVER)'
                                     subtest['waiver_reason'] = reason
 
 def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
+    """Apply subtest-level waivers, including nested BSA/SBSA subtests."""
     # For BSA/SBSA: apply waivers to subtests within testcases
     if suite_name.upper() in ['BSA', 'SBSA']:
         for testcase in test_suite_entry.get('testcases', []):
             testcase_name = testcase.get('Test_case', '')
             testcase_id = testcase_name.split(':')[0].strip() if ':' in testcase_name else testcase_name
 
-            for subtest in testcase.get('subtests', []):
-                sub_rule_id = subtest.get('sub_Rule_ID', '')
+            # Check every nested subtest, not only direct children of the
+            # testcase, so deeper SBSA/BSA rule failures can be waived.
+            for subtest in _iter_nested_subtests(testcase.get('subtests', [])):
+                sub_rule_id = _subtest_rule_id(subtest)
+                sub_test_number = subtest.get('sub_Test_Number', '')
+                sub_test_path = subtest.get('sub_Test_Path', '')
                 sub_test_desc = subtest.get('sub_Test_Description', '')
                 sub_test_result = subtest.get('sub_test_result', '')
 
@@ -421,13 +556,22 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
                     if waiver_testcase_id != testcase_id and waiver_testcase != testcase_id:
                         continue
 
-                    # Match by sub_Rule_ID or sub_Test_Description
+                    # sub_Test_Path is safest for nested logs because the same
+                    # sub_Test_Number can appear in different parent branches.
+                    # Number, rule id, and description are kept as fallbacks for
+                    # old waiver files and hand-written waivers.
                     waiver_id = waiver.get('sub_Rule_ID', '')
+                    waiver_number = waiver.get('sub_Test_Number', '')
+                    waiver_path = waiver.get('sub_Test_Path', '')
                     waiver_desc = waiver.get('sub_Test_Description', '')
                     reason = waiver.get('Reason', '')
 
                     match = False
-                    if waiver_id and waiver_id == sub_rule_id:
+                    if waiver_path and waiver_path == sub_test_path:
+                        match = True
+                    elif waiver_number and waiver_number == sub_test_number:
+                        match = True
+                    elif waiver_id and waiver_id == sub_rule_id:
                         match = True
                     elif waiver_desc and waiver_desc == sub_test_desc:
                         match = True
@@ -627,32 +771,33 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
                         break
 
 def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_file=None):
+    """Apply all matching waivers to one parsed JSON file."""
     # Load the JSON data
     try:
-        with open(json_file, 'r') as f:
-            json_data = json.load(f)
-    except Exception as e:
+        with open(json_file, 'r', encoding='utf-8') as json_handle:
+            json_data = json.load(json_handle)
+    except Exception as err:
         if verbose:
-            print(f"WARNING: Failed to read or parse {json_file}: {e}")
+            print(f"WARNING: Failed to read or parse {json_file}: {err}")
         return
 
     # Load waiver.json
     try:
-        with open(waiver_file, 'r') as f:
-            waiver_data = json.load(f)
-    except Exception as e:
+        with open(waiver_file, 'r', encoding='utf-8') as waiver_handle:
+            waiver_data = json.load(waiver_handle)
+    except Exception as err:
         if verbose:
-            print(f"INFO: Failed to read or parse {waiver_file}: {e}")
+            print(f"INFO: Failed to read or parse {waiver_file}: {err}")
         return
 
     # Load test_category.json if provided
     if output_json_file:
         try:
-            with open(output_json_file, 'r') as f:
-                output_json_data = json.load(f)
-        except Exception as e:
+            with open(output_json_file, 'r', encoding='utf-8') as output_handle:
+                output_json_data = json.load(output_handle)
+        except Exception as err:
             if verbose:
-                print(f"WARNING: Failed to read or parse {output_json_file}: {e}")
+                print(f"WARNING: Failed to read or parse {output_json_file}: {err}")
             output_json_data = None
     else:
         output_json_data = None
@@ -692,9 +837,9 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
         else:
             # Check if the test suite is waivable according to test_category.json
             waivable = False
-            for catID, catData in output_json_data.items():
-                # catData is a list
-                for row in catData:
+            for _category_id, category_rows in output_json_data.items():
+                # category_rows is a list from test_category.json.
+                for row in category_rows:
                     if row.get("Suite", "").lower() == suite_name.lower() and row.get("Test Suite", "").lower() == test_suite_name.lower():
                         if row.get("Waivable", "").lower() == "yes":
                             waivable = True
@@ -741,36 +886,12 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
         if subtest_level_waivers:
             apply_subtest_level_waivers(test_suite_entry, subtest_level_waivers, suite_name)
 
-        # === FIX: Recompute testcase-level Test_result based on subtests (BSA/SBSA) ===
-        # After waivers are applied to subtests, testcase result must reflect the actual status
+        # Subtest waivers are applied at the leaf/branch where they match. This
+        # pass then updates failed parents only when no failed child remains
+        # unwaived, keeping mixed waived/unwaived failures visible.
         if suite_name.upper() in ('BSA', 'SBSA'):
             for testcase in test_suite_entry.get('testcases', []):
-                subtests = testcase.get('subtests', [])
-                if not subtests:
-                    continue  # No subtests to check, keep original
-
-                # Check subtest results to determine testcase result
-                has_non_waivered_failed = False
-                has_waivered_failed = False
-                has_passed = False
-                has_skipped = False
-
-                for subtest in subtests:
-                    sub_result = subtest.get('sub_test_result', '')
-                    if isinstance(sub_result, str):
-                        sub_upper = sub_result.upper()
-                        if 'FAILED' in sub_upper:
-                            if '(WITH WAIVER)' in sub_upper:
-                                has_waivered_failed = True
-                            else:
-                                has_non_waivered_failed = True
-                        elif 'PASSED' in sub_upper:
-                            has_passed = True
-                        elif 'SKIPPED' in sub_upper:
-                            has_skipped = True
-
-                # Keep the original Test_result from the log file
-                # Parent testcase result is always set by the parser from the END line
+                _propagate_nested_bsa_waivers(testcase)
 
         # Update test suite summary
         # Determine the summary field based on suite name
@@ -797,25 +918,25 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
 
             # Process results from testcases only
             for testcase in testcases:
-                test_result = testcase.get('test_result', '')
+                test_result = testcase.get('Test_result', testcase.get('test_result', ''))
                 if isinstance(test_result, str):
-                    r = test_result.upper()
-                    if 'FAILED' in r:
-                        if 'WITH WAIVER' in r:
+                    result_upper = test_result.upper()
+                    if 'FAILED' in result_upper:
+                        if 'WITH WAIVER' in result_upper:
                             waived += 1
                         else:
                             failed += 1
-                    elif 'PAL NOT SUPPORTED' in r:
+                    elif 'PAL NOT SUPPORTED' in result_upper:
                         pal += 1
-                    elif 'TEST NOT IMPLEMENTED' in r:
+                    elif 'TEST NOT IMPLEMENTED' in result_upper:
                         notimpl += 1
-                    elif 'SKIPPED' in r:
+                    elif 'SKIPPED' in result_upper:
                         skipped += 1
-                    elif 'STATUS' in r:
+                    elif 'STATUS' in result_upper:
                         warnings += 1
-                    elif 'PARTIAL' in r:
+                    elif 'PARTIAL' in result_upper:
                         partial += 1
-                    elif 'PASS' in r:
+                    elif 'PASS' in result_upper:
                         passed += 1
 
             test_suite_entry['test_suite_summary'] = {
@@ -841,19 +962,19 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                 for testcase in test_suite_entry.get('testcases', []):
                     test_result = testcase.get('Test_result', '')
                     if isinstance(test_result, str):
-                        r = test_result.upper()
-                        if 'FAILED' in r:
-                            if '(WITH WAIVER)' in r:
+                        result_upper = test_result.upper()
+                        if 'FAILED' in result_upper:
+                            if '(WITH WAIVER)' in result_upper:
                                 total_failed_with_waiver += 1
                             else:
                                 total_failed += 1
-                        elif 'ABORTED' in r:
+                        elif 'ABORTED' in result_upper:
                             total_aborted += 1
-                        elif 'SKIPPED' in r:
+                        elif 'SKIPPED' in result_upper:
                             total_skipped += 1
-                        elif 'WARNING' in r:
+                        elif 'WARNING' in result_upper:
                             total_warnings += 1
-                        elif 'PASS' in r:
+                        elif 'PASS' in result_upper:
                             total_passed += 1
 
                 test_suite_entry['test_suite_summary'] = {
@@ -884,19 +1005,19 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
                         total_skipped += sub_test_result.get('SKIPPED', 0)
                         total_warnings += sub_test_result.get('WARNINGS', 0)
                     elif isinstance(sub_test_result, str):
-                        r = sub_test_result.upper()
-                        if 'PASS' in r:
+                        result_upper = sub_test_result.upper()
+                        if 'PASS' in result_upper:
                             total_passed += 1
-                        elif 'FAIL' in r:
-                            if '(WITH WAIVER)' in r:
+                        elif 'FAIL' in result_upper:
+                            if '(WITH WAIVER)' in result_upper:
                                 total_failed_with_waiver += 1
                             else:
                                 total_failed += 1
-                        elif 'ABORTED' in r:
+                        elif 'ABORTED' in result_upper:
                             total_aborted += 1
-                        elif 'SKIPPED' in r:
+                        elif 'SKIPPED' in result_upper:
                             total_skipped += 1
-                        elif 'WARNING' in r:
+                        elif 'WARNING' in result_upper:
                             total_warnings += 1
                         else:
                             # anything else (IGNORED, NOT SUPPORTED, etc.)
@@ -1123,15 +1244,16 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
 
     # Write the updated JSON data back to the file
     try:
-        with open(json_file, 'w') as f:
-            json.dump(json_data, f, indent=4)
+        with open(json_file, 'w', encoding='utf-8') as json_handle:
+            json.dump(json_data, json_handle, indent=4)
         print(f"Waivers successfully applied and '{json_file}' has been updated.")
-    except Exception as e:
+    except Exception as err:
         if verbose:
-            print(f"ERROR: Failed to write updated data to {json_file}: {e}")
+            print(f"ERROR: Failed to write updated data to {json_file}: {err}")
         return
 
 def main():
+    """Parse command line arguments and apply waivers."""
     parser = argparse.ArgumentParser(description='Apply waivers to test suite JSON results.')
     parser.add_argument('suite_name', help='Name of the test suite')
     parser.add_argument('json_file', help='Path to the JSON file')
