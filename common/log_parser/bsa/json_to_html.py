@@ -14,22 +14,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import matplotlib.pyplot as plt
+"""Generate BSA/SBSA HTML reports from parsed JSON results."""
+
 import base64
-from io import BytesIO
-from jinja2 import Template
+import json
 import os
+import sys
+from io import BytesIO
+
+from jinja2 import Template
+import matplotlib.pyplot as plt  # pylint: disable=import-error
 
 # Helper function to retrieve dictionary values in a case-insensitive manner
-def get_case_insensitive(d, key, default=0):
-    for k, v in d.items():
-        if k.lower() == key.lower():
-            return v
+def get_case_insensitive(data, key, default=0):
+    """Return a dictionary value by key without requiring exact key casing."""
+    for dict_key, value in data.items():
+        if dict_key.lower() == key.lower():
+            return value
     return default
+
+def has_nested_subtests(subtests):
+    """Return True when any subtest contains child subtests."""
+    for subtest in subtests or []:
+        child_subtests = subtest.get("subtests", [])
+        if child_subtests or has_nested_subtests(child_subtests):
+            return True
+    return False
+
+def annotate_nested_subtests(test_results):
+    """Mark each testcase that needs expand/collapse controls in HTML."""
+    for test_suite in test_results:
+        for testcase in test_suite.get("testcases", []):
+            testcase["has_nested_subtests"] = has_nested_subtests(
+                testcase.get("subtests", [])
+            )
 
 # Function to generate bar chart for test results
 def generate_bar_chart(suite_summary):
+    """Build a base64 encoded bar chart image for suite summary counts."""
     labels = [
         'Passed',
         'Failed',
@@ -69,11 +91,11 @@ def generate_bar_chart(suite_summary):
 
     # Add percentage labels on top of the bars
     total_tests = suite_summary.get('total_rules_run', 0) or sum(sizes)
-    for bar, size in zip(bars, sizes):
-        yval = bar.get_height()
+    for chart_bar, size in zip(bars, sizes):
+        yval = chart_bar.get_height()
         percentage = (size / total_tests) * 100 if total_tests > 0 else 0
         plt.text(
-            bar.get_x() + bar.get_width()/2,
+            chart_bar.get_x() + chart_bar.get_width()/2,
             yval + max(sizes)*0.01,
             f'{percentage:.2f}%',
             ha='center',
@@ -95,7 +117,16 @@ def generate_bar_chart(suite_summary):
     return base64.b64encode(buffer.getvalue()).decode('utf-8')
 
 # Function to generate HTML content for both summary and detailed pages
-def generate_html(suite_summary, test_results, chart_data, output_html_path, test_suite_name, is_summary_page=True):
+def generate_html(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        suite_summary,
+        test_results,
+        chart_data,
+        output_html_path,
+        test_suite_name,
+        is_summary_page=True):
+    """Render either the detailed or summary BSA/SBSA HTML report."""
+    annotate_nested_subtests(test_results)
+
     # Template for both summary and detailed pages
     template = Template("""
     <!DOCTYPE html>
@@ -225,9 +256,186 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                 text-align: center;
                 font-weight: normal;
             }
+            /* Keep rule numbers readable while indentation shows nesting. */
+            .subtest-number {
+                white-space: nowrap;
+            }
+            .testcase-toggle,
+            .subtest-toggle,
+            .subtest-control {
+                border: 1px solid #6c7a89;
+                cursor: pointer;
+                font-weight: 600;
+                transition: background-color 0.15s ease, border-color 0.15s ease,
+                            box-shadow 0.15s ease, color 0.15s ease;
+            }
+            .testcase-toggle,
+            .subtest-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 22px;
+                height: 22px;
+                margin-right: 8px;
+                border-radius: 50%;
+                background: #f7fbff;
+                border-color: #6fa8dc;
+                color: #1f5f99;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                line-height: 1;
+                box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+            }
+            .testcase-toggle:hover,
+            .subtest-toggle:hover {
+                background: #e8f3ff;
+                border-color: #2f80c7;
+            }
+            .testcase-toggle[aria-expanded="true"],
+            .subtest-toggle[aria-expanded="true"] {
+                background: #edf7ed;
+                border-color: #58a55c;
+                color: #256b2a;
+            }
+            .testcase-toggle[aria-expanded="false"],
+            .subtest-toggle[aria-expanded="false"] {
+                background: #fff7e6;
+                border-color: #d89614;
+                color: #8a5a00;
+            }
+            .testcase-toggle-placeholder,
+            .subtest-toggle-placeholder {
+                display: inline-block;
+                width: 22px;
+                height: 22px;
+                margin-right: 8px;
+            }
+            .testcase-number {
+                white-space: nowrap;
+            }
+            .subtest-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 8px;
+            }
+            .subtest-title {
+                color: #2c3e50;
+                font-weight: bold;
+            }
+            .subtest-controls {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                gap: 8px;
+            }
+            .subtest-control {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-size: 12px;
+                line-height: 1.2;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            }
+            .expand-subtests {
+                background: #2f80c7;
+                border-color: #2878b5;
+                color: #fff;
+            }
+            .expand-subtests:hover:not(:disabled) {
+                background: #236a9f;
+                border-color: #1f5f99;
+            }
+            .collapse-subtests {
+                background: #fff;
+                border-color: #9aa9b5;
+                color: #2c3e50;
+            }
+            .collapse-subtests:hover:not(:disabled) {
+                background: #eef3f7;
+                border-color: #6c7a89;
+            }
+            .subtest-control:disabled {
+                cursor: default;
+                opacity: 0.45;
+                box-shadow: none;
+            }
+            .control-symbol {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.25);
+                font-weight: bold;
+                line-height: 1;
+            }
+            .collapse-subtests .control-symbol {
+                background: #edf2f7;
+                color: #34495e;
+            }
+            .testcase-toggle:focus-visible,
+            .subtest-toggle:focus-visible,
+            .subtest-control:focus-visible {
+                outline: 2px solid #1f77b4;
+                outline-offset: 2px;
+            }
+            @media (max-width: 700px) {
+                .subtest-header {
+                    align-items: flex-start;
+                    flex-direction: column;
+                }
+                .subtest-controls {
+                    justify-content: flex-start;
+                }
+            }
+            .subtest-row-hidden {
+                display: none;
+            }
         </style>
     </head>
     <body>
+        {# Render BSA/SBSA subtests recursively so the HTML follows the same
+           parent-child order as the JSON and original nested log. #}
+        {% macro render_subtest_rows(subtests, parent_path='') %}
+            {% for subtest in subtests %}
+            {% set nesting_level = subtest.sub_Test_Level | default(1) | int %}
+            {% set subtest_path = subtest.sub_Test_Path | default(subtest.sub_Test_Number) %}
+            {% set has_children = subtest.subtests is defined and subtest.subtests %}
+            {# The row tooltip contains the full sub_Test_Path for comparison
+               with logs and for precise waiver targeting. #}
+            <tr class="subtest-row" title="{{ subtest_path }}" data-path="{{ subtest_path }}" data-parent="{{ parent_path }}">
+                <td class="subtest-number" style="padding-left: {{ 12 + ((nesting_level - 1) * 24) }}px;">
+                    {% if has_children %}
+                    <button type="button" class="subtest-toggle" aria-expanded="true" aria-label="Collapse nested subtests" title="Collapse nested subtests">-</button>
+                    {% else %}
+                    <span class="subtest-toggle-placeholder"></span>
+                    {% endif %}
+                    {{ subtest.sub_Test_Number }}
+                </td>
+                <td>{{ subtest.sub_Test_Description }}</td>
+                <td class="{% if subtest.sub_test_result == 'PASSED' %}pass{% elif subtest.sub_test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif subtest.sub_test_result == 'FAILED' %}fail{% elif subtest.sub_test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in subtest.sub_test_result %}passed-partial{% elif subtest.sub_test_result == 'SKIPPED' %}skipped{% elif subtest.sub_test_result in ['PAL NOT SUPPORTED', 'NOT TESTED (PAL NOT SUPPORTED)'] %}pal-not-supported{% elif subtest.sub_test_result in ['TEST NOT IMPLEMENTED', 'NOT TESTED (TEST NOT IMPLEMENTED)'] %}not-implemented{% elif 'NOT TESTED' in subtest.sub_test_result %}not-tested{% endif %}">
+                    {{ subtest.sub_test_result }}
+                </td>
+                <td class="waiver-reason">
+                    {% if 'FAILED (WITH WAIVER)' in subtest.sub_test_result %}
+                        {{ subtest.waiver_reason | default("N/A") }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+            </tr>
+            {% if has_children %}
+                {# Child rows are printed immediately after their parent with
+                   additional indentation from sub_Test_Level. #}
+                {{ render_subtest_rows(subtest.subtests, subtest_path) }}
+            {% endif %}
+            {% endfor %}
+        {% endmacro %}
         <h1>{{ test_suite_name }} Test Summary</h1>
 
         {% if not is_summary_page %}
@@ -298,8 +506,9 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
         </div>
 
         {% if not is_summary_page %}
-        <div class="detailed-summary">
+            <div class="detailed-summary">
             {% for test in test_results %}
+            {% set suite_index = loop.index0 %}
             <div class="test-suite-header">Test Suite: {{ test.Test_suite }}</div>
             <table>
                 <thead>
@@ -312,8 +521,16 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                 </thead>
                 <tbody>
                     {% for testcase in test.testcases %}
+                    {% set subtest_table_id = "subtests-" ~ suite_index ~ "-" ~ loop.index0 %}
                     <tr>
-                        <td>{{ testcase.Test_case }}</td>
+                        <td class="testcase-number">
+                            {% if testcase.subtests %}
+                            <button type="button" class="testcase-toggle" aria-expanded="true" aria-controls="{{ subtest_table_id }}-row" aria-label="Collapse subtests" title="Collapse subtests">-</button>
+                            {% else %}
+                            <span class="testcase-toggle-placeholder"></span>
+                            {% endif %}
+                            {{ testcase.Test_case }}
+                        </td>
                         <td>{{ testcase.Test_case_description }}</td>
                         <td class="{% if testcase.Test_result == 'PASSED' %}pass{% elif testcase.Test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif testcase.Test_result == 'FAILED' %}fail{% elif testcase.Test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in testcase.Test_result %}passed-partial{% elif testcase.Test_result == 'SKIPPED' %}skipped{% elif testcase.Test_result in ['PAL NOT SUPPORTED', 'NOT TESTED (PAL NOT SUPPORTED)'] %}pal-not-supported{% elif testcase.Test_result in ['TEST NOT IMPLEMENTED', 'NOT TESTED (TEST NOT IMPLEMENTED)'] %}not-implemented{% elif 'NOT TESTED' in testcase.Test_result %}not-tested{% endif %}">
                             {{ testcase.Test_result }}
@@ -327,10 +544,24 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                         </td>
                     </tr>
                     {% if testcase.subtests %}
-                    <tr style="background-color: #f9f9f9;">
+                    <tr id="{{ subtest_table_id }}-row" style="background-color: #f9f9f9;">
                         <td colspan="4">
-                            <strong>Subtests:</strong>
-                            <table style="width: 100%; margin-top: 10px;">
+                            <div class="subtest-header">
+                                <span class="subtest-title">Subtests:</span>
+                                {% if testcase.has_nested_subtests %}
+                                <div class="subtest-controls" aria-label="Nested subtest display controls">
+                                    <button type="button" class="subtest-control expand-subtests" data-table-id="{{ subtest_table_id }}" title="Show every nested row in this testcase">
+                                        <span class="control-symbol">+</span>
+                                        <span>Expand all</span>
+                                    </button>
+                                    <button type="button" class="subtest-control collapse-subtests" data-table-id="{{ subtest_table_id }}" title="Hide nested rows and keep top-level subtests visible">
+                                        <span class="control-symbol">-</span>
+                                        <span>Collapse all</span>
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <table id="{{ subtest_table_id }}" class="subtest-table" style="width: 100%; margin-top: 10px;">
                                 <thead>
                                     <tr style="background-color: #ecf0f1;">
                                         <th>Sub Test Number</th>
@@ -340,22 +571,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for subtest in testcase.subtests %}
-                                    <tr>
-                                        <td>{{ subtest.sub_Test_Number }}</td>
-                                        <td>{{ subtest.sub_Test_Description }}</td>
-                                        <td class="{% if subtest.sub_test_result == 'PASSED' %}pass{% elif subtest.sub_test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif subtest.sub_test_result == 'FAILED' %}fail{% elif subtest.sub_test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in subtest.sub_test_result %}passed-partial{% elif subtest.sub_test_result == 'SKIPPED' %}skipped{% elif subtest.sub_test_result in ['PAL NOT SUPPORTED', 'NOT TESTED (PAL NOT SUPPORTED)'] %}pal-not-supported{% elif subtest.sub_test_result in ['TEST NOT IMPLEMENTED', 'NOT TESTED (TEST NOT IMPLEMENTED)'] %}not-implemented{% elif 'NOT TESTED' in subtest.sub_test_result %}not-tested{% endif %}">
-                                            {{ subtest.sub_test_result }}
-                                        </td>
-                                        <td class="waiver-reason">
-                                            {% if 'FAILED (WITH WAIVER)' in subtest.sub_test_result %}
-                                                {{ subtest.waiver_reason | default("N/A") }}
-                                            {% else %}
-                                                N/A
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
+                                    {{ render_subtest_rows(testcase.subtests) }}
                                 </tbody>
                             </table>
                         </td>
@@ -367,6 +583,201 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
             {% endfor %}
         </div>
         {% endif %}
+        <script>
+            (function () {
+                function hasClass(element, className) {
+                    return element && element.classList && element.classList.contains(className);
+                }
+
+                function closestElement(element, matcher) {
+                    while (element && element.nodeType === 1) {
+                        if (matcher(element)) {
+                            return element;
+                        }
+                        element = element.parentElement;
+                    }
+                    return null;
+                }
+
+                function getChildRows(row) {
+                    var table = closestElement(row, function (element) {
+                        return element.tagName === 'TABLE' && hasClass(element, 'subtest-table');
+                    });
+                    if (!table) {
+                        return [];
+                    }
+
+                    // Each row stores its full sub_Test_Path. Children point to
+                    // their parent path, so lookup works at any nesting depth.
+                    var path = row.getAttribute('data-path');
+                    return Array.prototype.filter.call(
+                        table.querySelectorAll('tr.subtest-row'),
+                        function (candidate) {
+                            return candidate.getAttribute('data-parent') === path;
+                        }
+                    );
+                }
+
+                function getTableControls(table) {
+                    var holder = table ? table.parentElement : null;
+                    if (!holder) {
+                        return {};
+                    }
+                    return {
+                        expand: holder.querySelector('.expand-subtests'),
+                        collapse: holder.querySelector('.collapse-subtests')
+                    };
+                }
+
+                function syncTableControls(table) {
+                    var controls = getTableControls(table);
+                    if (!controls.expand || !controls.collapse) {
+                        return;
+                    }
+
+                    var hideableRows = table.querySelectorAll(
+                        'tr.subtest-row[data-parent]:not([data-parent=""])'
+                    );
+                    var hiddenRows = table.querySelectorAll('tr.subtest-row-hidden');
+                    controls.expand.disabled = hiddenRows.length === 0;
+                    controls.collapse.disabled = (
+                        hideableRows.length > 0 && hiddenRows.length === hideableRows.length
+                    );
+                }
+
+                function setToggleState(button, expanded) {
+                    var isTestcaseToggle = hasClass(button, 'testcase-toggle');
+                    button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                    button.setAttribute(
+                        'aria-label',
+                        expanded ? 'Collapse subtests' : 'Expand subtests'
+                    );
+                    button.setAttribute(
+                        'title',
+                        isTestcaseToggle
+                            ? (expanded ? 'Collapse subtests' : 'Expand subtests')
+                            : (expanded ? 'Collapse nested subtests' : 'Expand nested subtests')
+                    );
+                    button.textContent = expanded ? '-' : '+';
+                }
+
+                function setTestcaseExpanded(button, expanded) {
+                    var controlledRow = document.getElementById(
+                        button.getAttribute('aria-controls')
+                    );
+                    if (!controlledRow) {
+                        return;
+                    }
+                    controlledRow.classList.toggle('subtest-row-hidden', !expanded);
+                    setToggleState(button, expanded);
+                }
+
+                function hideDescendants(row) {
+                    getChildRows(row).forEach(function (childRow) {
+                        childRow.classList.add('subtest-row-hidden');
+                        var childToggle = childRow.querySelector('.subtest-toggle');
+                        if (childToggle) {
+                            setToggleState(childToggle, false);
+                        }
+                        hideDescendants(childRow);
+                    });
+                }
+
+                function showChildren(row) {
+                    getChildRows(row).forEach(function (childRow) {
+                        childRow.classList.remove('subtest-row-hidden');
+                        var childToggle = childRow.querySelector('.subtest-toggle');
+                        if (childToggle && childToggle.getAttribute('aria-expanded') === 'true') {
+                            showChildren(childRow);
+                        }
+                    });
+                }
+
+                function setRowExpanded(row, expanded) {
+                    if (!row) {
+                        return;
+                    }
+                    var toggle = row.querySelector('.subtest-toggle');
+                    if (toggle) {
+                        setToggleState(toggle, expanded);
+                    }
+
+                    if (expanded) {
+                        showChildren(row);
+                    } else {
+                        hideDescendants(row);
+                    }
+
+                    syncTableControls(closestElement(row, function (element) {
+                        return element.tagName === 'TABLE' && hasClass(element, 'subtest-table');
+                    }));
+                }
+
+                function setTableExpanded(table, expanded) {
+                    if (!table) {
+                        return;
+                    }
+                    // Expand/collapse all works inside one testcase table. This
+                    // keeps controls from one testcase from changing another.
+                    var rows = Array.prototype.slice.call(table.querySelectorAll('tr.subtest-row'));
+                    rows.forEach(function (row) {
+                        row.classList.remove('subtest-row-hidden');
+                        var toggle = row.querySelector('.subtest-toggle');
+                        if (toggle) {
+                            setToggleState(toggle, expanded);
+                        }
+                    });
+
+                    if (!expanded) {
+                        rows.forEach(function (row) {
+                            if (row.getAttribute('data-parent')) {
+                                row.classList.add('subtest-row-hidden');
+                            }
+                        });
+                    }
+                    syncTableControls(table);
+                }
+
+                Array.prototype.forEach.call(
+                    document.querySelectorAll('table.subtest-table'),
+                    syncTableControls
+                );
+
+                document.addEventListener('click', function (event) {
+                    // One delegated handler covers every generated subtest row
+                    // and the per-testcase Expand all / Collapse all buttons.
+                    var button = closestElement(event.target, function (element) {
+                        return element.tagName === 'BUTTON';
+                    });
+                    if (!button) {
+                        return;
+                    }
+
+                    if (hasClass(button, 'testcase-toggle')) {
+                        setTestcaseExpanded(
+                            button,
+                            button.getAttribute('aria-expanded') !== 'true'
+                        );
+                    } else if (hasClass(button, 'subtest-toggle')) {
+                        var row = closestElement(button, function (element) {
+                            return element.tagName === 'TR' && hasClass(element, 'subtest-row');
+                        });
+                        var expanded = button.getAttribute('aria-expanded') === 'true';
+                        setRowExpanded(row, !expanded);
+                    } else if (hasClass(button, 'expand-subtests')) {
+                        setTableExpanded(
+                            document.getElementById(button.getAttribute('data-table-id')),
+                            true
+                        );
+                    } else if (hasClass(button, 'collapse-subtests')) {
+                        setTableExpanded(
+                            document.getElementById(button.getAttribute('data-table-id')),
+                            false
+                        );
+                    }
+                });
+            }());
+        </script>
     </body>
     </html>
     """)
@@ -415,13 +826,14 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, tes
     )
 
     # Save to HTML file
-    with open(output_html_path, "w") as file:
+    with open(output_html_path, "w", encoding="utf-8") as file:
         file.write(html_content)
 
 # Main function to process the JSON file and generate the HTML report
 def main(input_json_file, detailed_html_file, summary_html_file):
+    """Load parsed JSON and generate detailed and summary HTML files."""
     # Load JSON data
-    with open(input_json_file, 'r') as json_file:
+    with open(input_json_file, 'r', encoding="utf-8") as json_file:
         data = json.load(json_file)
 
     # Extract the test results
@@ -445,25 +857,43 @@ def main(input_json_file, detailed_html_file, summary_html_file):
     }
 
     # Get the test suite name from the input JSON file name
-    test_suite_name = os.path.splitext(os.path.basename(input_json_file))[0].upper()
+    test_suite_name = os.path.splitext(
+        os.path.basename(input_json_file)
+    )[0].upper()
 
     # Generate bar chart
     chart_data = generate_bar_chart(suite_summary)
 
     # Generate the detailed summary page
-    generate_html(suite_summary, test_results, chart_data, detailed_html_file, test_suite_name, is_summary_page=False)
+    generate_html(
+        suite_summary,
+        test_results,
+        chart_data,
+        detailed_html_file,
+        test_suite_name,
+        is_summary_page=False
+    )
 
     # Generate the summary page with the bar chart
-    generate_html(suite_summary, test_results, chart_data, summary_html_file, test_suite_name, is_summary_page=True)
+    generate_html(
+        suite_summary,
+        test_results,
+        chart_data,
+        summary_html_file,
+        test_suite_name,
+        is_summary_page=True
+    )
 
 if __name__ == "__main__":
-    import sys
     if len(sys.argv) != 4:
-        print("Usage: python json_to_html.py <input_json_file> <detailed_html_file> <summary_html_file>")
+        print(
+            "Usage: python json_to_html.py <input_json_file> "
+            "<detailed_html_file> <summary_html_file>"
+        )
         sys.exit(1)
 
-    input_json_file = sys.argv[1]
-    detailed_html_file = sys.argv[2]  # This will be the detailed HTML report
-    summary_html_file = sys.argv[3]  # This will be the summary HTML report
+    input_path = sys.argv[1]
+    detailed_path = sys.argv[2]  # This will be the detailed HTML report
+    summary_path = sys.argv[3]  # This will be the summary HTML report
 
-    main(input_json_file, detailed_html_file, summary_html_file)
+    main(input_path, detailed_path, summary_path)

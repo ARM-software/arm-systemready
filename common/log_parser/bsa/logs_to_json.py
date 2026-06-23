@@ -73,9 +73,9 @@ def classify_status(status_text):
         summary_category = "Skipped"
         return formatted_result, summary_category
 
-    # STATUS → warnings
-    if up.startswith("STATUS:"):
-        formatted_result = "STATUS"
+    # Warnings
+    if up.startswith("STATUS:") or up in ("WARNING", "WARN") or up.startswith("WARNING"):
+        formatted_result = "WARNING" if "WARN" in up else "STATUS"
         summary_category = "Warnings"
         return formatted_result, summary_category
 
@@ -121,6 +121,133 @@ def update_summary_counts(summary, summary_category, formatted_result):
     elif summary_category == "Warnings":
         summary["Warnings"] += 1
 
+def make_test_number(rule_id, test_index):
+    return f"{rule_id} : {test_index or '-'}"
+
+# A frame is one rule that has started but has not reached its Result/END line.
+# Keeping these frames on a stack lets the parser attach each completed child
+# rule to the nearest still-open parent rule.
+def make_rule_frame(suite, rule_id, test_index, description, parent, current_source):
+    test_number = make_test_number(rule_id, test_index)
+    if parent:
+        child_counts = parent.setdefault("_child_counts", defaultdict(int))
+        child_counts[test_number] += 1
+        occurrence = child_counts[test_number]
+        # If the same rule appears twice under one parent, keep both paths unique
+        # without changing the visible sub_Test_Number used by old waivers.
+        display_number = test_number if occurrence == 1 else f"{test_number} [{occurrence}]"
+        root = parent.get("root") or parent
+        level = parent.get("level", 0) + 1
+        path = parent.get("path", [parent.get("number", "")]) + [display_number]
+    else:
+        occurrence = 1
+        root = None
+        level = 0
+        path = [test_number]
+
+    frame = {
+        "suite": suite,
+        "rule_id": rule_id,
+        "index": test_index or "-",
+        "description": description,
+        "number": test_number,
+        "path": path,
+        "level": level,
+        "parent": parent,
+        "root": root,
+        "source": current_source,
+        "subtests": [],
+        "occurrence": occurrence
+    }
+    if parent is None:
+        frame["root"] = frame
+    return frame
+
+def subtest_entry_from_frame(frame, formatted_result):
+    # Completed child rules become recursive subtests. sub_Test_Path mirrors the
+    # log branch so a partner can compare JSON/HTML directly with the log.
+    entry = {
+        "sub_Test_Number": frame.get("number", make_test_number(frame.get("rule_id"), frame.get("index"))),
+        "sub_Test_Description": frame.get("description", ""),
+        "sub_test_result": formatted_result,
+        "sub_Test_Level": frame.get("level", 1),
+        "sub_Test_Path": " / ".join(frame.get("path", []))
+    }
+    subtests = frame.get("subtests", [])
+    if subtests:
+        entry["subtests"] = subtests
+    return entry
+
+def testcase_from_frame(frame, formatted_result):
+    testcase = {
+        "Test_case": frame.get("number", make_test_number(frame.get("rule_id"), frame.get("index"))),
+        "Test_case_description": frame.get("description", ""),
+        "Test_result": formatted_result,
+        "_source": frame.get("source", "unknown")
+    }
+    subtests = frame.get("subtests", [])
+    if subtests:
+        testcase["subtests"] = subtests
+    return testcase
+
+def find_frame_from_top(rule_stack, rule_id):
+    # END lines only carry the rule id. If the same id appears more than once
+    # in nested logs, the nearest open frame is the one that should close.
+    for idx in range(len(rule_stack) - 1, -1, -1):
+        if rule_stack[idx].get("rule_id") == rule_id:
+            return idx
+    return None
+
+def complete_rule_frame(frame, formatted_result, summary_category,
+                        testcases_per_suite, suite_summaries, total_summary):
+    if frame.get("parent") is not None:
+        # Nested rules are stored under their parent. Suite totals count only
+        # completed top-level rules, matching the old BSA/SBSA behavior.
+        parent = frame.get("parent")
+        if parent is not None:
+            parent.setdefault("subtests", []).append(
+                subtest_entry_from_frame(frame, formatted_result)
+            )
+        return
+
+    testcase = testcase_from_frame(frame, formatted_result)
+
+    tcs = init_summary()
+    update_summary_counts(tcs, summary_category, formatted_result)
+    testcase["Test_case_summary"] = tcs
+
+    suite = frame.get("suite", "")
+    testcases_per_suite[suite].append(testcase)
+    update_summary_counts(suite_summaries[suite], summary_category, formatted_result)
+    update_summary_counts(total_summary, summary_category, formatted_result)
+
+def iter_subtests(subtests):
+    # Flatten a nested subtest tree for matching/merging, without changing the
+    # recursive JSON structure that partners see in the final output.
+    for subtest in subtests or []:
+        yield subtest
+        yield from iter_subtests(subtest.get("subtests", []))
+
+def subtest_key(subtest):
+    # Use the full nested path when available. The visible rule number is kept
+    # as a fallback so old flat logs still merge as before.
+    return subtest.get("sub_Test_Path") or subtest.get("sub_Test_Number")
+
+def merge_matching_subtests(existing_subtests, override_subtests):
+    # When UEFI and Linux logs contain the same testcase, keep the UEFI tree as
+    # the base and overlay Linux results only on matching subtests. Prefer the
+    # full path so repeated nested rule numbers do not overwrite each other.
+    existing_by_key = {
+        subtest_key(st): st
+        for st in iter_subtests(existing_subtests)
+        if subtest_key(st)
+    }
+    for override in iter_subtests(override_subtests):
+        key = subtest_key(override)
+        if key in existing_by_key:
+            existing_by_key[key].clear()
+            existing_by_key[key].update(override)
+
 def main(input_files, output_file):
     # Per-suite list of testcases
     testcases_per_suite = defaultdict(list)
@@ -129,14 +256,9 @@ def main(input_files, output_file):
     # Global summary
     total_summary = init_summary()
 
-    # Active main testcases (B_* rules etc.)
-    # key: rule_id -> metadata
-    active_main = {}
-    # Active subtests
-    # key: rule_id -> metadata
-    active_sub = {}
-    # Stack of currently open main test IDs (for nesting)
-    parent_stack = []
+    # Stack of currently open rule instances. Nested BSA/SBSA logs can reuse
+    # the same rule ID in different branches, so this must be instance based.
+    rule_stack = []
 
     current_suite = ""
 
@@ -188,16 +310,28 @@ def main(input_files, output_file):
                 continue
 
             # ---------------- New log format support ----------------
-            # Newer BSA logs can look like:
-            #   *** Running <SUITE> tests ***
-            #   <RULE_ID> : <index> : <description>
+            # Newer BSA/SBSA logs can nest rule groups:
+            #   <PARENT_RULE> : <index> : <description>
+            #     === Start tests for rules referenced by <PARENT_RULE> ===
+            #     <CHILD_RULE> : <index> : <description>
+            #       Result: <status text>
+            #     === End tests for rules referenced by <PARENT_RULE> ===
             #   Result: <status text>
             suite_hdr = re.match(r'^\*\*\*\s+Running\s+(.+?)\s+tests\s+\*\*\*$', line)
             if suite_hdr:
                 current_suite = suite_hdr.group(1).strip().replace(" ", "_")
                 continue
 
-            # RULE line (main or subtest, determined by indentation)
+            referenced_rules_marker = re.match(
+                r'^===\s+(?:Start|End)\s+tests\s+for\s+rules\s+referenced\s+by\s+([A-Za-z0-9_]+)\s+===$',
+                line
+            )
+            if referenced_rules_marker:
+                continue
+
+            # RULE line. A rule is top-level only when it starts without
+            # indentation. Indented rule lines become children of the last
+            # still-open frame on the stack.
             rule_line = re.match(r'^([A-Za-z0-9_]+)\s*:\s*(-|\d+)\s*:\s*(.*)$', line)
             if rule_line:
                 rule_id = rule_line.group(1).strip()
@@ -205,101 +339,41 @@ def main(input_files, output_file):
                 desc = (rule_line.group(3) or "").strip()
                 suite = current_suite or ""
 
-                if not is_indented:
-                    # Main rule: start a new parent context
-                    meta = {
-                        "suite": suite,
-                        "rule_id": rule_id,
-                        "index": test_index,
-                        "description": desc,
-                        "subtests": []
-                    }
-                    active_main[rule_id] = meta
-                    # reset stack to this main rule (prevents accidental nesting across rules)
-                    parent_stack[:] = [rule_id]
-                else:
-                    # Subtest: attach to nearest main rule in the stack (if any)
-                    parent_id = None
-                    for rid in reversed(parent_stack):
-                        if rid in active_main:
-                            parent_id = rid
-                            break
-                    meta = {
-                        "suite": suite,
-                        "rule_id": rule_id,
-                        "index": test_index,
-                        "description": desc,
-                        "parent": parent_id,
-                        "is_indented": is_indented
-                    }
-                    active_sub[rule_id] = meta
-                    parent_stack.append(rule_id)
+                parent = rule_stack[-1] if (is_indented and rule_stack) else None
+                if not is_indented and rule_stack:
+                    # A new top-level rule should only appear after the
+                    # previous top-level result. If a malformed log leaves
+                    # frames open, avoid attaching the new testcase to them.
+                    rule_stack.clear()
 
+                rule_stack.append(
+                    make_rule_frame(suite, rule_id, test_index, desc, parent, current_source)
+                )
                 continue
 
-            # Result line (belongs to the last opened rule in new-format logs)
+            # In the new log format, Result closes the most recently opened rule.
+            # That rule is either emitted as a testcase or attached to its parent.
             if line.upper().startswith("RESULT:"):
                 status_text = line.split(":", 1)[1].strip()
-                if not parent_stack:
+                if not rule_stack:
                     continue
 
-                rule_id = parent_stack[-1]
+                frame = rule_stack.pop()
                 formatted_result, summary_category = classify_status(status_text)
-
-                # Subtest completion
-                if rule_id in active_sub:
-                    sub_meta = active_sub.pop(rule_id)
-                    parent_id = sub_meta.get("parent")
-                    if parent_id and parent_id in active_main:
-                        parent_meta = active_main[parent_id]
-                        sub_entry = {
-                            "sub_Test_Number": f"{rule_id} : {sub_meta.get('index', '-')}",
-                            "sub_Rule_ID": rule_id,
-                            "sub_Test_Description": sub_meta.get("description", ""),
-                            "sub_test_result": formatted_result
-                        }
-                        parent_meta["subtests"].append(sub_entry)
-
-                    # Pop this subtest from the stack
-                    parent_stack.pop()
-                    continue
-
-                # Main testcase completion
-                if rule_id in active_main:
-                    meta = active_main.pop(rule_id)
-
-                    # Pop main from stack
-                    if parent_stack and parent_stack[-1] == rule_id:
-                        parent_stack.pop()
-
-                    suite = meta.get("suite", "")
-                    desc = meta.get("description", "")
-                    index = meta.get("index", "-")
-                    subtests = meta.get("subtests", [])
-
-                    testcase = {
-                        "Test_case": f"{rule_id} : {index}",
-                        "Test_case_description": desc,
-                        "Test_result": formatted_result
-                    }
-                    testcase["_source"] = current_source
-                    if subtests:
-                        testcase["subtests"] = subtests
-
-                    tcs = init_summary()
-                    update_summary_counts(tcs, summary_category, formatted_result)
-                    testcase["Test_case_summary"] = tcs
-
-                    testcases_per_suite[suite].append(testcase)
-                    update_summary_counts(suite_summaries[suite], summary_category, formatted_result)
-                    update_summary_counts(total_summary, summary_category, formatted_result)
-
-                    continue
-
+                complete_rule_frame(
+                    frame,
+                    formatted_result,
+                    summary_category,
+                    testcases_per_suite,
+                    suite_summaries,
+                    total_summary
+                )
                 continue
             # -------------- End new log format support --------------
 
             #   START <suite_or_dash> <RULE_ID> <index_or_dash> : <description...>
+            # Old-format START/END logs use the same stack. Flat old logs stay
+            # flat, while any indented old-format child rules can still nest.
             start_match = re.match(
                 r'^START\s+([^\s:]+)\s+([A-Za-z0-9_]+)\s+([^\s:]+)\s*:\s*(.*)$',
                 line
@@ -321,35 +395,13 @@ def main(input_files, output_file):
                 # Normalize index
                 test_index = index_tok if index_tok != "" else "-"
 
-                # Decide if this is a main testcase or a subtest based on indentation:
-                # - Non-indented lines = main testcases (B_*, S_*, GPU_*, PCI_ER_*, etc.)
-                # - Indented lines = subtests (nested under current parent)
-                is_main = not is_indented
+                parent = rule_stack[-1] if (is_indented and rule_stack) else None
+                if not is_indented and rule_stack:
+                    rule_stack.clear()
 
-                if is_main:
-                    # Main rule
-                    meta = {
-                        "suite": current_suite,
-                        "rule_id": rule_id,
-                        "index": test_index,
-                        "description": desc,
-                        "subtests": []
-                    }
-                    active_main[rule_id] = meta
-                    parent_stack.append(rule_id)
-                else:
-                    # Subrule / subtest under current parent (if indented or non-B_ rule)
-                    parent_id = parent_stack[-1] if parent_stack else None
-                    meta = {
-                        "suite": current_suite,
-                        "rule_id": rule_id,
-                        "index": test_index,
-                        "description": desc,
-                        "parent": parent_id,
-                        "is_indented": is_indented
-                    }
-                    active_sub[rule_id] = meta
-
+                rule_stack.append(
+                    make_rule_frame(current_suite, rule_id, test_index, desc, parent, current_source)
+                )
                 continue
 
             # END line:
@@ -361,61 +413,21 @@ def main(input_files, output_file):
 
                 formatted_result, summary_category = classify_status(status_text)
 
-                # Check if this is a subtest (in active_sub)
-                if rule_id in active_sub:
-                    sub_meta = active_sub.pop(rule_id)
-                    parent_id = sub_meta.get("parent")
-                    if parent_id and parent_id in active_main:
-                        parent_meta = active_main[parent_id]
-                        sub_entry = {
-                            "sub_Test_Number": f"{rule_id} : {sub_meta.get('index', '-')}",
-                            "sub_Rule_ID": rule_id,
-                            "sub_Test_Description": sub_meta.get("description", ""),
-                            "sub_test_result": formatted_result
-                        }
-                        parent_meta["subtests"].append(sub_entry)
-                    # No summary update for subtests
+                # END names the rule being closed. Search from the top of the
+                # stack so repeated rule IDs close the nearest matching instance.
+                frame_idx = find_frame_from_top(rule_stack, rule_id)
+                if frame_idx is None:
                     continue
 
-                # Check if this is a main testcase (in active_main)
-                if rule_id in active_main:
-                    meta = active_main.pop(rule_id)
-
-                    # Pop from parent stack if this was the last main opened
-                    if parent_stack and parent_stack[-1] == rule_id:
-                        parent_stack.pop()
-
-                    suite = meta.get("suite", "")
-                    desc = meta.get("description", "")
-                    index = meta.get("index", "-")
-                    subtests = meta.get("subtests", [])
-
-                    # Build testcase object
-                    testcase = {
-                        "Test_case": f"{rule_id} : {index}",
-                        "Test_case_description": desc,
-                        "Test_result": formatted_result
-                    }
-                    testcase["_source"] = current_source
-                    if subtests:
-                        testcase["subtests"] = subtests
-
-                    # Per-testcase summary (one-hot)
-                    tcs = init_summary()
-                    update_summary_counts(tcs, summary_category, formatted_result)
-                    testcase["Test_case_summary"] = tcs
-
-                    # Append to suite
-                    testcases_per_suite[suite].append(testcase)
-
-                    # Update per-suite summary
-                    update_summary_counts(suite_summaries[suite], summary_category, formatted_result)
-                    # Update global summary
-                    update_summary_counts(total_summary, summary_category, formatted_result)
-
-                    continue
-
-                # Ignore END lines for unknown rule IDs (not in active_sub or active_main)
+                frame = rule_stack.pop(frame_idx)
+                complete_rule_frame(
+                    frame,
+                    formatted_result,
+                    summary_category,
+                    testcases_per_suite,
+                    suite_summaries,
+                    total_summary
+                )
                 continue
 
             # Ignore all other lines (debug, informational, etc.)
@@ -448,18 +460,18 @@ def main(input_files, output_file):
                 linux_tc = tc if src == "linux" else None
 
             if linux_tc:
-                # For B_PER_08, keep UEFI testcase result. For others, overwrite testcase result from Linux.
+                # For B_PER_08, keep UEFI testcase result. For other duplicate
+                # testcases, Linux has the final testcase-level result.
                 if key != "B_PER_08 : -":
                     existing_tc["Test_result"] = linux_tc.get("Test_result")
                     existing_tc["Test_case_summary"] = linux_tc.get("Test_case_summary")
 
-                # Override only matching subtests (do not add Linux-only subtests).
-                uefi_subtests = {st.get("sub_Test_Number"): st for st in existing_tc.get("subtests", [])}
-                for st in linux_tc.get("subtests", []) or []:
-                    sub_key = st.get("sub_Test_Number")
-                    if sub_key in uefi_subtests:
-                        uefi_subtests[sub_key] = st
-                existing_tc["subtests"] = list(uefi_subtests.values())
+                # Override only matching subtests. Linux-only subtests are not
+                # appended because the UEFI tree is the report structure.
+                merge_matching_subtests(
+                    existing_tc.get("subtests", []),
+                    linux_tc.get("subtests", []) or []
+                )
             continue
 
     testcases_per_suite = processed_testcases

@@ -85,6 +85,8 @@ Each `bsa_test_case`:
 - `Test_case`, `Test_case_description`, `Test_result`, `Test_case_summary`
 - Optional: `subtests`, `waiver_reason`
 - If `Test_result` is `FAILED (WITH WAIVER)`, `waiver_reason` is required
+- BSA/SBSA `subtests` may be nested recursively. Nested subtests use `sub_Test_Number`, `sub_Test_Description`, `sub_test_result`, `sub_Test_Level`, `sub_Test_Path`, and optional child `subtests`.
+- New BSA/SBSA JSON does not emit `sub_Rule_ID`; waiver files may still use `sub_Rule_ID` as a legacy matcher.
 
 ### 4.2 FWTS / BBSR-FWTS
 
