@@ -43,6 +43,7 @@ the firmware correctly implemented capsule on-disk update reporting.
 import os
 import re
 import struct
+import uuid
 import sys
 
 # Attribute bits (UEFI Specification 8.2 - GetVariable and SetVariable)
@@ -212,6 +213,9 @@ def _parse_ebbr_profile_table_hexdump(text):
 
     return bytes(data)
 
+def efi_guid_from_string(guid_string):
+    """Return canonical GUID string as raw EFI_GUID bytes for comparison."""
+    return uuid.UUID(guid_string).bytes_le
 
 def _read_ebbr_profile_table_bytes(path=EBBR_PROFILE_TABLE_DUMP):
     """Read the EBBR profile table dump from the current text hexdump file."""
@@ -498,9 +502,9 @@ def main():
         log(f"INFO: EBBR profile table Version: {version}")
         log(f"INFO: EBBR profile table NumberOfProfiles: {number_of_profiles}")
     # Known EBBR GUIDs encoded as raw 16-byte EFI_GUID in-memory layout (little-endian for Data1/2/3)
-    EBBR_2_1 = bytes.fromhex('353ce3ccac748740bce78b29b02eeb27')
-    EBBR_2_2 = bytes.fromhex('d4ee73900de5ee11b8b08b68da62fc80')
-    EBBR_2_3 = bytes.fromhex('77fc217724a7ef118eaaf7c9b194ba75')
+    EBBR_2_1 = efi_guid_from_string('CCE33C35-74AC-4087-BCE7-8B29B02EEB27')
+    EBBR_2_2 = efi_guid_from_string('9073EED4-E50D-11EE-B8B0-8B68DA62FC80')
+    EBBR_2_3 = efi_guid_from_string('7721FC77-A724-11EF-8EAA-F7C9B194BA75')
     EBBR_VERSION_BY_GUID = {
         EBBR_2_1: (2, 1),
         EBBR_2_2: (2, 2),
@@ -509,7 +513,7 @@ def main():
 
     log(f"INFO: Extracted {len(guids)} GUID(s) from EBBR profile table")
     for index, guid in enumerate(guids):
-        log(f"INFO: EBBR profile table GUID[{index}]: {guid.hex()}")
+        log(f"INFO: EBBR profile table GUID[{index}] : {str(uuid.UUID(bytes_le=guid)).upper()}")
         version_tuple = EBBR_VERSION_BY_GUID.get(guid)
         if version_tuple is not None:
             log(f"INFO: EFI Conformance Profile Table indicates platform compliance with EBBR {version_tuple[0]}.{version_tuple[1]}")
