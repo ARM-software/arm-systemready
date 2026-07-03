@@ -244,6 +244,18 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         sleep 5
         echo "PSCI command output - Completed"
 
+        # Spin-table / PSCI device-tree method checker
+        echo "Running Spin-table checker"
+        if [ -x /usr/bin/spin_table_checker.sh ]; then
+          /usr/bin/spin_table_checker.sh /mnt/acs_results_template/acs_results/uefi_dump/ebbr_profile_table.log
+          ret=$?
+          echo "spin_table_checker.sh returned $ret" | tee -a /mnt/acs_results_template/acs_results/linux_tools/spin_table_checker.log
+        else
+          echo "ERROR: /usr/bin/spin_table_checker.sh not found or not executable" | tee /mnt/acs_results_template/acs_results/linux_tools/spin_table_checker.log
+        fi
+        sync
+        sleep 5
+        echo "Spin-table checker run - Completed"
 
         # DT Kernel Self test run
         echo "Running DT Kernel Self Test"
