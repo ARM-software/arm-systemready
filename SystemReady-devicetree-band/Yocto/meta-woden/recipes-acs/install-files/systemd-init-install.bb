@@ -6,6 +6,7 @@ SYSTEMD_SERVICE:${PN} = "acs_run-before-login-prompt.service"
 
 SRC_URI:append = " file://acs_run-before-login-prompt.service \
                    file://init.sh \
+                   file://negative_capsule_generation.sh \
                    file://secure_init.sh \
                    file://scmi_init.sh \
                    file://verify_tpm_measurements.py \
@@ -31,6 +32,7 @@ do_install:append() {
   install -d ${D}${systemd_unitdir}/system
   install -d ${D}${bindir}
   install -m 0770 ${WORKDIR}/init.sh                             ${D}${bindir}
+  install -m 0770 ${WORKDIR}/negative_capsule_generation.sh      ${D}${bindir}
   install -m 0770 ${WORKDIR}/../../ebbr-sct/1.0/bbr-acs/ebbr/config/ir_bbr_fwts_tests.ini ${D}${bindir}
   install -m 0770 ${WORKDIR}/secure_init.sh                      ${D}${bindir}
   install -m 0770 ${WORKDIR}/scmi_init.sh                        ${D}${bindir}
