@@ -112,20 +112,11 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     fi
 
     check_flag=0
-    if [ -f /mnt/acs_tests/app/capsule_update_done.flag ] || [ -f /mnt/acs_tests/app/capsule_update_ignore.flag ] || [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
+    if [ -f /mnt/acs_tests/app/capsule_update_done.flag ] || [ -f /mnt/acs_tests/app/capsule_update_ignore.flag ] || [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ] || [ -f /mnt/acs_tests/app/capsule_update_error.flag ]; then
       check_flag=1
     fi
 
     if [ $check_flag -eq 0 ]; then
-      capsule_update_check=0
-      touch /mnt/acs_tests/app/capsule_update_check.flag
-      if [ $? -eq 0 ]; then
-        echo "Successfully created capsule update check flag"
-        capsule_update_check=1
-      else
-        echo "Failed to create capsule update check flag"
-      fi
-
       if [ ! -f /mnt/acs_tests/app/linux_run_complete.flag ]; then
         touch /mnt/acs_tests/app/linux_run_complete.flag
       
@@ -351,13 +342,28 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         sync
         sleep 5
       fi      
-      if [ $capsule_update_check -eq 1 ]; then
-        sync
-        sleep 5
-        umount /mnt
-        sleep 5
+
+      # Generate negative capsule variants before rebooting for capsule update.
+      /usr/bin/negative_capsule_generation.sh
+      capsule_variant_status=$?
+      capsule_failure_persisted=0
+      if [ "$capsule_variant_status" -ne 0 ] && { [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ] || [ -f /mnt/acs_tests/app/capsule_update_error.flag ]; }; then
+        capsule_failure_persisted=1
+      fi
+
+      sync
+      sleep 5
+      umount /mnt
+      sleep 5
+      if [ "$capsule_variant_status" -eq 0 ]; then
         echo "System is rebooting for Capsule update"
         reboot
+      elif [ "$capsule_failure_persisted" -eq 1 ]; then
+        echo "System is rebooting to report Capsule update failure"
+        reboot
+      else
+        echo "Capsule update failure could not be persisted; not rebooting"
+        exit 1
       fi
     else
       if [ -f /mnt/acs_tests/app/capsule_update_done.flag ]; then
@@ -372,12 +378,6 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         i=0
         for val in $(python3 "$extract_script_path" "$fw_class_pattern" "$before_update_log" | tr '\n' ' '); do
           eval "fw_class_$i='$val'"
-          i=$((i+1))
-        done
-
-        i=0
-        for val in $(python3 "$extract_script_path" "$fw_guid" "$before_update_log" | tr '\n' ' '); do
-          eval "fw_guid_$i='$val'"
           i=$((i+1))
         done
 
@@ -400,7 +400,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
           i=$((i+1))
         done
 
-        echo "Testing ESRT FW version update" > /mnt/acs_results_template/fw/capsule_test_results.log
+        printf '\n\nTesting ESRT FW version update\n' >> /mnt/acs_results_template/fw/capsule_test_results.log
         overall_result="PASSED"
         i=0
         while [ $i -lt $entry_count ]; do
@@ -429,6 +429,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         # Capsule On-Disk Update Reporting Variables check
         if [ -f /usr/bin/capsule_ondisk_reporting_vars_check.py ]; then
           echo "INFO: Running Capsule On-Disk Update Reporting Variables check"
+          printf '\n\nTesting Capsule On-Disk Update Reporting Variables\n' >> /mnt/acs_results_template/fw/capsule_test_results.log
           python3 /usr/bin/capsule_ondisk_reporting_vars_check.py
           ret=$?
           echo "INFO: capsule_ondisk_reporting_vars_check.py returned $ret"
@@ -437,9 +438,13 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         fi
         rm /mnt/acs_tests/app/capsule_update_done.flag
       elif [ -f /mnt/acs_tests/app/capsule_update_unsupport.flag ]; then
-        echo "Capsule update has failed"
-        echo "Capsule update has failed ..." >> /mnt/acs_results_template/fw/capsule_test_results.log
+        echo "Capsule update is unsupported on this platform"
+        echo "Capsule update is unsupported on this platform" >> /mnt/acs_results_template/fw/capsule_test_results.log
         rm /mnt/acs_tests/app/capsule_update_unsupport.flag
+      elif [ -f /mnt/acs_tests/app/capsule_update_error.flag ]; then
+        echo "Capsule update setup has failed"
+        echo "Capsule update setup has failed" >> /mnt/acs_results_template/fw/capsule_test_results.log
+        rm /mnt/acs_tests/app/capsule_update_error.flag
       else
         echo "Capsule update has ignored..."
         rm /mnt/acs_tests/app/capsule_update_ignore.flag

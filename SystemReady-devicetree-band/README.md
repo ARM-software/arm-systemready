@@ -203,6 +203,38 @@ This image comprises of 2 FAT file system partition recognized by UEFI: <br />
   - /usr/bin/log_parser - directory containing results post processing script
 - core-image-initramfs-boot-genericarm64.cpio.gz - ram disk file
 
+### Negative capsule generation
+
+Before the capsule-update reboot, Linux generates the negative capsule variants
+`unauth.bin` and `tampered.bin` from `acs_tests/app/signed_capsule.bin` (the
+partner-provided signed capsule). The variants are written to `acs_tests/app`
+and the generation result is recorded in
+`acs_results_template/fw/capsule_test_results.log`.
+
+Generation uses a conservative memory estimate of twice the capsule size plus
+192 MiB for Python and parsing overhead, with a minimum requirement of 256 MiB.
+These are engineering safety defaults rather than values derived from a
+platform-specific benchmark. Partners should validate them for their platforms
+and, when necessary, override them through the
+`CAPSULE_MEMORY_OVERHEAD_KIB` and `CAPSULE_MIN_MEMORY_KIB` service environment
+variables. Insufficient memory or storage is reported as unsupported with
+offline-generation instructions; tool, input, and other setup failures are
+reported as test errors.
+
+If the partner already provides non-empty `unauth.bin` and `tampered.bin`, they
+are reused without running on-device generation. Place them beside
+`signed_capsule.bin` before the run; the signed capsule is still required. The
+partner or operator is responsible for ensuring that both variants were
+generated from that same signed capsule; the script cannot verify provenance.
+Generated variants are first written to temporary files and are published only
+after both generation commands complete successfully. A controlled generation
+failure before publication clears its transaction marker so offline-generated
+variants can be supplied on the next run. A marker inherited from an unexpected
+interruption causes the old variants to be discarded before regeneration. If
+that regeneration then fails before publication, the marker is cleared as a
+clean controlled failure. Partial publication retains the marker so an
+incomplete pair is never trusted.
+
 ## Details and Functionalities of the Image
 
 ### Grub Menu & Compliance Run
