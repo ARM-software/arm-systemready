@@ -42,7 +42,8 @@ KBRANCH:class-devupstream = "v6.18/base"
 
 SRC_URI = "git://git.yoctoproject.org/linux-yocto.git;name=machine;branch=${KBRANCH};protocol=https \
            git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-6.18;destsuffix=${KMETA};protocol=https \
-           file://0001-disable-psci-checker.patch;patch=1 "
+           file://0001-disable-psci-checker.patch;patch=1 \
+           file://0001-dt-ignore-compatibles.patch;patch=1 "
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 LINUX_VERSION ?= "6.18.6"

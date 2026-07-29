@@ -1,0 +1,27 @@
+From 91d6b1cc31959340b8651348587ed35e198e3818 Mon Sep 17 00:00:00 2001
+From: Abhishek Talavara <abhishek.talavara@arm.com>
+Date: Wed, 29 Jul 2026 00:00:00 +0000
+Subject: [PATCH] add DT kselftest ignore list and platform drivers
+
+Add known bus/container compatible strings to the Devicetree kselftest
+ignore list. These nodes are not expected to bind to standalone device
+drivers and should not be reported as unprobed devices.
+
+Signed-off-by: Abhishek Talavara <abhishek.talavara@arm.com>
+---
+ tools/testing/selftests/dt/compatible_ignore_list | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/tools/testing/selftests/dt/compatible_ignore_list b/tools/testing/selftests/dt/compatible_ignore_list
+index e14afde401b4..51dfd5bde2cf 100644
+--- a/tools/testing/selftests/dt/compatible_ignore_list
++++ b/tools/testing/selftests/dt/compatible_ignore_list
+@@ -1 +1,6 @@
++fsl,aips-bus
++fsl,spba-bus
++qemu,platform
+ simple-mfd
++simple-bus
++virtio,mmio
+-- 
+2.25.1
