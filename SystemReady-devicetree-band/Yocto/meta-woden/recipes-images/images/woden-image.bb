@@ -220,6 +220,7 @@ IMAGE_INSTALL:append = "systemd-init-install \
                         python3-webencodings \
                         tar \
                         scmi-acs \
+                        dosfstools \
 "
 
 addtask dir_deploy before do_populate_lic_deploy after do_image_complete
