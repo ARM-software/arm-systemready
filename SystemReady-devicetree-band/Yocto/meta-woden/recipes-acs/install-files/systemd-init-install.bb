@@ -19,6 +19,7 @@ SRC_URI:append = " file://acs_run-before-login-prompt.service \
                    file://log_parser \
                    file://capsule_ondisk_reporting_vars_check.py \
                    file://runtime_device_mapping_conflict_checker.py \
+                   file://reserved_memory_map_checker.py \
                  "
 
 FILES:${PN} += "${systemd_unitdir}/system"
@@ -38,6 +39,7 @@ do_install:append() {
   install -m 0770 ${WORKDIR}/extract_capsule_fw_version.py       ${D}${bindir}
   install -m 0770 ${WORKDIR}/ethtool-test.py                     ${D}${bindir}
   install -m 0770 ${WORKDIR}/read_write_check_blk_devices.py     ${D}${bindir}
+  install -m 0770 ${WORKDIR}/reserved_memory_map_checker.py      ${D}${bindir}
   install -m 0770 ${WORKDIR}/device_driver_info.sh               ${D}${bindir}
   install -m 0770 ${WORKDIR}/spin_table_checker.sh               ${D}${bindir}
   install -m 0770 ${WORKDIR}/acs_https_network_boot.sh           ${D}${bindir}
