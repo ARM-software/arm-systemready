@@ -130,6 +130,12 @@ for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
         echo " "
         echo "Running debug dump"
         FS%p:\acs_tests\debug\debug_dump.nsh
+
+        # Run the Standalone PCIe option ROM architecture audit app
+        if exist FS%p:\acs_tests\app\PcieOptionRomArchAudit.efi then
+            echo "Running PcieOptionRomArchAudit standalone app"
+            FS%p:\acs_tests\app\PcieOptionRomArchAudit.efi
+        endif
         goto DoneDebug
     endif
 endfor
