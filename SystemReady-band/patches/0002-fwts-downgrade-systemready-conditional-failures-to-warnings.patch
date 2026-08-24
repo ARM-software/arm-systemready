@@ -1,0 +1,96 @@
+diff --git a/src/dmi/dmicheck/dmicheck.c b/src/dmi/dmicheck/dmicheck.c
+index 1eab8360..033705c8 100644
+--- a/src/dmi/dmicheck/dmicheck.c
++++ b/src/dmi/dmicheck/dmicheck.c
+@@ -895,6 +895,11 @@ static uint16_t dmi_remap_version(fwts_framework *fw, const uint16_t old)
+ 	return old;
+ }
+ 
++static bool dmi_systemready_manufacturing_type(uint8_t type)
++{
++	return type == 1 || type == 2 || type == 3 || type == 4 || type == 45;
++}
++
+ static void dmi_out_of_range_advice(
+ 	fwts_framework *fw,
+ 	const uint8_t type,
+@@ -1184,13 +1189,22 @@ static void dmi_str_check_index(fwts_framework *fw,
+ 		if (failed != -1) {
+ 			int level = used_by_kernel ? LOG_LEVEL_MEDIUM : LOG_LEVEL_LOW;
+ 
+-			fwts_failed(fw, level, dmi_patterns[j].label,
+-				"String index 0x%2.2" PRIx8
+-				" in table entry '%s' @ 0x%8.8" PRIx32
+-				", field '%s', offset 0x%2.2" PRIx8
+-				" has a default value '%s' and probably has "
+-				"not been updated by the BIOS vendor.",
+-				index, table, addr, field, offset, data);
++			if (dmi_systemready_manufacturing_type(hdr->type))
++				fwts_warning(fw,
++					"String index 0x%2.2" PRIx8
++					" in table entry '%s' @ 0x%8.8" PRIx32
++					", field '%s', offset 0x%2.2" PRIx8
++					" has a default value '%s' and probably has "
++					"not been updated by the BIOS vendor.",
++					index, table, addr, field, offset, data);
++			else
++				fwts_failed(fw, level, dmi_patterns[j].label,
++					"String index 0x%2.2" PRIx8
++					" in table entry '%s' @ 0x%8.8" PRIx32
++					", field '%s', offset 0x%2.2" PRIx8
++					" has a default value '%s' and probably has "
++					"not been updated by the BIOS vendor.",
++					index, table, addr, field, offset, data);
+ 
+ 			if (used_by_kernel) {
+ 				fwts_advice(fw,
+@@ -1241,12 +1255,20 @@ static void dmi_uuid_check(fwts_framework *fw,
+ 
+ 	for (i = 0; uuid_patterns[i] != NULL; i++) {
+ 		if (strcmp(guid_str, uuid_patterns[i]) == 0) {
+-			fwts_failed(fw, LOG_LEVEL_LOW, DMI_BAD_UUID,
+-				"UUID in table entry '%s' @ 0x%8.8" PRIx32
+-				" field '%s', offset 0x%2.2" PRIx8
+-				" has a default value '%s' and probably has "
+-				"not been updated by the BIOS vendor.",
+-				table, addr, field, offset, guid_str);
++			if (dmi_systemready_manufacturing_type(hdr->type))
++				fwts_warning(fw,
++					"UUID in table entry '%s' @ 0x%8.8" PRIx32
++					" field '%s', offset 0x%2.2" PRIx8
++					" has a default value '%s' and probably has "
++					"not been updated by the BIOS vendor.",
++					table, addr, field, offset, guid_str);
++			else
++				fwts_failed(fw, LOG_LEVEL_LOW, DMI_BAD_UUID,
++					"UUID in table entry '%s' @ 0x%8.8" PRIx32
++					" field '%s', offset 0x%2.2" PRIx8
++					" has a default value '%s' and probably has "
++					"not been updated by the BIOS vendor.",
++					table, addr, field, offset, guid_str);
+ 			fwts_advice(fw,
+ 				"The DMI table contains a UUID which is clearly been "
+ 				"left in a default setting and not been configured "
+diff --git a/src/sbbr/acpitables/acpitables.c b/src/sbbr/acpitables/acpitables.c
+index 2831803a..db724237 100644
+--- a/src/sbbr/acpitables/acpitables.c
++++ b/src/sbbr/acpitables/acpitables.c
+@@ -268,8 +268,17 @@ static int acpi_table_sbbr_check_test3(fwts_framework *fw)
+ 
+ 		info = sbbr_search_acpi_tables(fw, mandatory_acpi_tables[i]);
+ 		if (info == NULL) {
+-			fwts_failed(fw, LOG_LEVEL_CRITICAL, "SBBRTableNotFound",
++			if (strcmp(mandatory_acpi_tables[i], "DBG2") == 0) {
++				fwts_warning(fw,
++				    "SBBR mandatory ACPI table \"%s\" not found. "
++				    "DBG2 may be omitted when a single UART is used for the SPCR OS "
++				    "console, or when debug UART support is enabled through firmware "
++				    "setup when required.",
++				    mandatory_acpi_tables[i]);
++			} else {
++				fwts_failed(fw, LOG_LEVEL_CRITICAL, "SBBRTableNotFound",
+ 				    "SBBR mandatory ACPI table \"%s\" not found.", mandatory_acpi_tables[i]);
++			}
+ 		} else {
+ 			fwts_passed(fw, "SBBR mandatory ACPI table \"%s\" found.",
+ 			            mandatory_acpi_tables[i]);
