@@ -18,7 +18,18 @@ import json
 import os
 import sys
 
+STANDALONE_PARSER_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "standalone_tests")
+)
+
+if STANDALONE_PARSER_PATH not in sys.path:
+    sys.path.insert(0, STANDALONE_PARSER_PATH)
+from logs_to_json import parse_single_log
 OS_RELEASE_FILE_NAME = "cat-etc-os-release.txt"
+OS_TOOL_LOGS = (
+    "ethtool-test.log",
+    "read_write_check_blk_devices.log",
+)
 
 def create_subtest(subtest_number, description, status, reason=""):
     result = {
@@ -99,6 +110,64 @@ def parse_post_script_errors(log_path, tokens):
             if any(token in lower_line for token in tokens_lower):
                 errors.append(line.strip())
     return errors
+
+def add_summary(dst, src):
+    dst["total_passed"] += src.get("total_passed", 0)
+    dst["total_failed"] += src.get("total_failed", 0)
+    dst["total_skipped"] += src.get("total_skipped", 0)
+    dst["total_aborted"] += src.get("total_aborted", 0)
+    dst["total_warnings"] += src.get("total_warnings", 0)
+    dst["total_failed_with_waivers"] += src.get("total_failed_with_waivers", 0)
+    dst["total_failed_with_waivers"] += src.get("total_failed_with_waiver", 0)
+
+def make_test_case_unique(parsed_json, suffix):
+    for test in parsed_json.get("test_results", []):
+        test_case = test.get("Test_case")
+        if test_case:
+            test["Test_case"] = f"{test_case}_{suffix}"
+        desc = test.get("Test_case_description", "")
+        test["Test_case_description"] = f"{desc} ({suffix})" if desc else suffix
+
+def mark_recommended_test_case(parsed_json):
+    for test in parsed_json.get("test_results", []):
+        test["SRS scope"] = "Recommended"
+
+def append_parsed_log(test_results, suite_summary, log_path, suffix):
+    if not os.path.isfile(log_path):
+        return
+    try:
+        parsed_json = parse_single_log(log_path)
+    except Exception as exc:
+        print(f"WARNING: Failed to parse OS test log {log_path}: {exc}")
+        return
+    make_test_case_unique(parsed_json, suffix)
+    mark_recommended_test_case(parsed_json)
+    test_results.extend(parsed_json.get("test_results", []))
+    add_summary(suite_summary, parsed_json.get("suite_summary", {}))
+
+def os_log_dirs(os_logs_path):
+    if not os.path.isdir(os_logs_path):
+        return []
+    dirs = []
+    for entry in sorted(os.listdir(os_logs_path)):
+        os_dir = os.path.join(os_logs_path, entry)
+        if os.path.isdir(os_dir) and entry.startswith("linux"):
+            dirs.append((entry, os_dir))
+    return dirs
+
+def append_os_tool_logs(test_results, suite_summary, os_logs_path):
+    for os_name, os_dir in os_log_dirs(os_logs_path):
+        log_base = os.path.join(os_dir, "systemready-band-compliance-logs")
+        if not os.path.isdir(log_base):
+            log_base = os_dir
+        suffix = os_name.replace("/", "_")
+        for log_file in OS_TOOL_LOGS:
+            append_parsed_log(
+                test_results,
+                suite_summary,
+                os.path.join(log_base, log_file),
+                suffix
+            )
 
 def build_results(os_logs_path, post_script_log):
     suite_summary = {
@@ -190,17 +259,12 @@ def build_results(os_logs_path, post_script_log):
             update_suite_summary(test_suite["test_suite_summary"], status)
             subtest_number += 1
 
-    suite_summary = {
-        "total_passed": test_suite["test_suite_summary"]["total_passed"],
-        "total_failed": test_suite["test_suite_summary"]["total_failed"],
-        "total_failed_with_waivers": test_suite["test_suite_summary"]["total_failed_with_waivers"],
-        "total_aborted": test_suite["test_suite_summary"]["total_aborted"],
-        "total_skipped": test_suite["test_suite_summary"]["total_skipped"],
-        "total_warnings": test_suite["test_suite_summary"]["total_warnings"]
-    }
+    test_results = [test_suite]
+    suite_summary = test_suite["test_suite_summary"].copy()
+    append_os_tool_logs(test_results, suite_summary, os_logs_path)
 
     return {
-        "test_results": [test_suite],
+        "test_results": test_results,
         "suite_summary": suite_summary
     }
 

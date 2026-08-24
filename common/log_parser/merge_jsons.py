@@ -114,6 +114,10 @@ def reformat_json(json_file_path):
     except json.JSONDecodeError:
         print(f"Warning: {json_file_path} is invalid JSON. Skipping.")
 
+def is_recommended_test_case(suite_entry):
+    srs_scope = str(suite_entry.get("SRS scope", "")).strip().lower()
+    return srs_scope == "recommended"
+
 def count_fails_in_json(data):
     """
     Inspect JSON data and count how many tests are 'FAILED' vs 'FAILED_WITH_WAIVER'.
@@ -137,6 +141,8 @@ def count_fails_in_json(data):
         return (0, 0)
 
     for suite_entry in test_results:
+        if is_recommended_test_case(suite_entry):
+            continue
         # If testcases exist, count only testcase-level results to avoid double counting.
         testcases = suite_entry.get("testcases", [])
         if testcases:
