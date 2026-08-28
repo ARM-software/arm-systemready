@@ -8,7 +8,7 @@ WKS_FILE = "woden.wks.in"
 IMAGE_INSTALL = "packagegroup-core-boot \
                  python3 \
                  fwts \
-                 linux-firmware \
+                 linux-firmware-qcom-x1e80100 \
                  bsa-acs-drv \
                  bsa-acs-app \
                  mokutil \
