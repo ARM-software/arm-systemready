@@ -23,15 +23,7 @@ import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-TOOLS_CANDIDATES = (
-    BASE_DIR.parent / "tools",
-    BASE_DIR / "tools",
-)
-TOOLS_DIR = next(
-    (path for path in TOOLS_CANDIDATES if (path / "suite_registry.py").is_file()),
-    TOOLS_CANDIDATES[0],
-)
-sys.path.insert(0, str(TOOLS_DIR))
+sys.path.insert(0, str(BASE_DIR))
 
 from suite_registry import REGISTRY_PATH, load_registry
 

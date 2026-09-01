@@ -35,6 +35,7 @@ except ImportError:
     sys.exit(2)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
 
 from suite_registry import expand_selected_suites, load_registry
 

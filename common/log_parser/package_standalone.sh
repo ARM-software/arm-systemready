@@ -20,24 +20,18 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 REPO_ROOT=$(realpath "$SCRIPT_DIR/../..")
 OUTPUT_PATH=${1:-"$PWD/systemready-log-parser-standalone.tar.gz"}
 
-required_paths=(
-    "common/log_parser/main_log_parser.sh"
-    "common/log_parser/standalone_runner.py"
-    "common/log_parser/requirements.txt"
-    "common/log_parser/test_category.json"
-    "common/log_parser/test_categoryDT.json"
-    "common/tools/acs-results-schema.json"
-    "common/tools/suite_registry.json"
-    "common/tools/suite_registry.py"
-    "common/tools/validate.py"
+# Package the complete parser directory so every suite parser and support file
+# is included automatically. The remaining paths are partner documentation.
+package_paths=(
+    "common/log_parser"
     "docs/acs_schema_guide.md"
     "docs/log_parser_guide.md"
     "LICENSE.md"
 )
 
-for relative_path in "${required_paths[@]}"; do
-    if [ ! -f "$REPO_ROOT/$relative_path" ]; then
-        echo "ERROR: Required package file is missing: $REPO_ROOT/$relative_path" >&2
+for relative_path in "${package_paths[@]}"; do
+    if [ ! -e "$REPO_ROOT/$relative_path" ]; then
+        echo "ERROR: Required package path is missing: $REPO_ROOT/$relative_path" >&2
         exit 1
     fi
 done
@@ -63,14 +57,7 @@ tar \
     --transform='s,^,systemready-log-parser/,' \
     -czf "$TEMP_ARCHIVE" \
     -C "$REPO_ROOT" \
-    common/log_parser \
-    common/tools/acs-results-schema.json \
-    common/tools/suite_registry.json \
-    common/tools/suite_registry.py \
-    common/tools/validate.py \
-    docs/acs_schema_guide.md \
-    docs/log_parser_guide.md \
-    LICENSE.md
+    "${package_paths[@]}"
 
 mv "$TEMP_ARCHIVE" "$OUTPUT_PATH"
 output_dir=$(dirname "$OUTPUT_PATH")

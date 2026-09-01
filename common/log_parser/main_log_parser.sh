@@ -24,11 +24,6 @@ BASE_DIR=$(dirname "$(realpath "$0")")
 
 # Determine paths
 SCRIPTS_PATH="$BASE_DIR"
-if [ -f "$BASE_DIR/../tools/suite_registry.json" ]; then
-    TOOLS_PATH=$(realpath "$BASE_DIR/../tools")
-else
-    TOOLS_PATH="$BASE_DIR/tools"
-fi
 
 # Update this parser release version when publishing a new log parser release.
 LOG_PARSER_VERSION="1.0.0"
@@ -70,9 +65,9 @@ WAIVER_JSON=$4
 POST_SCRIPT_LOG="$LOGS_PATH/post-script/post-script.log"
 
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
-    test_category="/usr/bin/log_parser/test_categoryDT.json"
+    test_category="$BASE_DIR/test_categoryDT.json"
 else
-    test_category="/usr/bin/log_parser/test_category.json"
+    test_category="$BASE_DIR/test_category.json"
 fi
 
 # Check if ACS_CONFIG_PATH is provided
@@ -865,7 +860,7 @@ fi
 
 if [ ${#JSON_FILES[@]} -gt 0 ]; then
     python3 "$SCRIPTS_PATH/enrich_suite_json.py" \
-        --registry "$TOOLS_PATH/suite_registry.json" \
+        --registry "$SCRIPTS_PATH/suite_registry.json" \
         --test-category "$test_category" \
         "${JSON_FILES[@]}"
     python3 "$SCRIPTS_PATH/merge_jsons.py" "$MERGED_JSON" "${JSON_FILES[@]}"

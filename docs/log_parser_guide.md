@@ -88,6 +88,39 @@ Confirm that the entry point is available:
 ./main_log_parser.sh --standalone --help
 ```
 
+### Copy Only the Log-Parser Directory
+
+`common/log_parser` is self-contained for parser execution. The suite registry,
+registry helper, schema validator, merged-results schema, category files, parser
+scripts, and Python requirements are all stored in this directory. A CI job may
+copy or download only `common/log_parser`; it does not need `common/tools`.
+
+Update existing CI commands to use these paths:
+
+| Previous path | Current path |
+|---|---|
+| `common/tools/suite_registry.json` | `common/log_parser/suite_registry.json` |
+| `common/tools/suite_registry.py` | `common/log_parser/suite_registry.py` |
+| `common/tools/validate.py` | `common/log_parser/validate.py` |
+| `common/tools/acs-results-schema.json` | `common/log_parser/acs-results-schema.json` |
+
+The previous `common/tools` paths are no longer installed or packaged.
+
+After copying the directory, verify the isolated layout from outside the source
+repository:
+
+```bash
+cd /path/to/copied/log_parser
+python3 -m pip install -r requirements.txt
+./main_log_parser.sh --version
+./main_log_parser.sh --standalone --list-suites
+./validate.py --help
+```
+
+These commands load the entry point, registry, and validator directly from the
+copied directory. A real parse should then use the same copied directory and the
+required Python packages from `requirements.txt`.
+
 ## Choose an Execution Mode
 
 | Requirement | Normal parser | Standalone parser |
@@ -192,12 +225,13 @@ The normal parser is the original main-branch behavior. It accepts positional
 arguments, auto-detects mode, and considers every suite applicable to that
 mode.
 
-The normal flow in `main_log_parser.sh` uses host state and hard-coded suite
-paths and does not use the standalone suite registry. The important boundaries
-are:
+The normal flow in `main_log_parser.sh` uses host state and fixed suite log
+paths rather than the registry's standalone input-discovery paths. It still uses
+the bundled registry for metadata enrichment and compliance mapping. The
+important boundaries are:
 
-- `/mnt/yocto_image.flag` selects normal DT or SR behavior and the installed
-  category file;
+- `/mnt/yocto_image.flag` selects normal DT or SR behavior and the matching
+  category file bundled beside `main_log_parser.sh`;
 - the ACS config `Band`, not the host flag by itself, controls whether
   `acs_info.py` adds BMC firmware or PSCI version metadata;
 - compliance is calculated for the full requirement set of the detected mode,
@@ -279,11 +313,11 @@ The normal parser checks the parser machine:
 /mnt/yocto_image.flag is absent  -> SR mode
 ```
 
-It then uses the installed category file:
+It then uses the matching category file beside `main_log_parser.sh`:
 
 ```text
-DT -> /usr/bin/log_parser/test_categoryDT.json
-SR -> /usr/bin/log_parser/test_category.json
+DT -> <log_parser_directory>/test_categoryDT.json
+SR -> <log_parser_directory>/test_category.json
 ```
 
 Check what the normal parser will select before running it:
@@ -423,8 +457,8 @@ sibling directories in the collected run layout.
 If one suite's logs use a different layout, supply those files directly. If
 several suites use a different layout, either arrange them in the registered
 layout or update their standalone paths in
-`common/tools/suite_registry.json` before packaging the parser. The normal
-parser does not read this registry.
+`common/log_parser/suite_registry.json` before packaging the parser. These input
+discovery paths do not change the normal parser's fixed log locations.
 
 #### Form 2: Direct Log Files
 
@@ -745,7 +779,8 @@ linux/BsaResultsKernel.log
 
 ### How the Registry Is Used
 
-`common/tools/suite_registry.json` is the standalone runner's suite directory.
+`common/log_parser/suite_registry.json` is the standalone runner's suite
+directory.
 For each suite it defines:
 
 - canonical name, accepted aliases, and DT/SR availability;
@@ -891,7 +926,7 @@ Use `--test-category` when logs belong to a release with a different category
 file. The selected file is used by waiver handling, raw metadata enrichment,
 and merged compliance generation.
 
-The normal parser uses the installed category file selected by its auto-detected
+The normal parser uses the bundled category file selected by its auto-detected
 mode. That file is also applied to individual suite JSON files before they are
 merged.
 
@@ -1066,8 +1101,8 @@ compliance output.
 
 ## Schema Validation
 
-The repository has one schema command, `common/tools/validate.py`. Select what
-you are validating with its first argument:
+The repository has one schema command, `common/log_parser/validate.py`. Select
+what you are validating with its first argument:
 
 - `merged` validates a complete normal-parser `merged_results.json`.
 - `raw` validates one or more individual suite JSON files.
@@ -1119,20 +1154,20 @@ registered for their filename.
 From `common/log_parser`, validate a completed normal-parser merged result with:
 
 ```bash
-../tools/validate.py merged \
+./validate.py merged \
   /path/to/acs_summary/acs_jsons/merged_results.json
 ```
 
 Validate one raw suite JSON, or several raw suite JSON files, with:
 
 ```bash
-../tools/validate.py raw /path/to/acs_summary/acs_jsons/bsa.json
+./validate.py raw /path/to/acs_summary/acs_jsons/bsa.json
 
-../tools/validate.py raw /path/to/acs_summary/acs_jsons/*.json
+./validate.py raw /path/to/acs_summary/acs_jsons/*.json
 ```
 
-The validator uses `common/tools/acs-results-schema.json` and
-`common/tools/suite_registry.json` by default. In `merged` mode, use
+The validator uses `common/log_parser/acs-results-schema.json` and
+`common/log_parser/suite_registry.json` by default. In `merged` mode, use
 `--schema PATH` only when intentionally testing an alternate schema. In `raw`
 mode, use `--registry PATH` only when intentionally testing alternate raw-file
 mappings and schema references. The glob form may report `merged_results.json`
@@ -1171,10 +1206,15 @@ python3 -m pip install -r requirements.txt
 
 The package includes parser scripts, the suite registry, schema validator,
 category files, schema, the log-parser and schema guides, requirements, and the
-license.
+license. All runtime support files remain under
+`common/log_parser` in the archive; no `common/tools` directory is required.
+The complete `common/log_parser` directory is archived as one unit, so
+suite-specific `logs_to_json.py` and `json_to_html.py` files do not need a
+second, manually maintained package list.
 
 The archive is intended for standalone execution. Its normal parser path still
-expects the original installed ACS environment and category files.
+expects the original ACS runtime environment; category files are resolved from
+the extracted `common/log_parser` directory.
 
 ## Main Components
 
@@ -1182,12 +1222,12 @@ expects the original installed ACS environment and category files.
 |---|---|
 | `main_log_parser.sh` | Owns the parser release version, dispatches standalone, or runs the original normal flow |
 | `standalone_runner.py` | Portable orchestration and validation |
-| `common/tools/suite_registry.json` | Suite names, aliases, modes, paths, inputs, outputs, and schemas |
-| `common/tools/suite_registry.py` | Shared registry loading, alias resolution, and suite lookup helpers |
+| `common/log_parser/suite_registry.json` | Suite names, aliases, modes, paths, inputs, outputs, and schemas |
+| `common/log_parser/suite_registry.py` | Shared registry loading, alias resolution, and suite lookup helpers |
 | `logs_to_json.py` | Suite-specific log parsing |
 | `apply_waivers.py` | Existing waiver application |
 | `enrich_suite_json.py` | Adds category metadata to raw suite JSON |
-| `common/tools/validate.py` | Validates merged or raw suite JSON and formats grouped schema errors |
+| `common/log_parser/validate.py` | Validates merged or raw suite JSON and formats grouped schema errors |
 | `json_to_html.py` | Suite-specific HTML generation |
 | `merge_jsons.py` | Merges results and calculates compliance |
 | `generate_acs_summary.py` | Generates combined HTML summary |

@@ -29,15 +29,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-TOOLS_CANDIDATES = (
-    BASE_DIR.parent / "tools",
-    BASE_DIR / "tools",
-)
-TOOLS_DIR = next(
-    (path for path in TOOLS_CANDIDATES if (path / "suite_registry.py").is_file()),
-    TOOLS_CANDIDATES[0],
-)
-sys.path.insert(0, str(TOOLS_DIR))
+sys.path.insert(0, str(BASE_DIR))
 
 from suite_registry import (
     expand_selected_suites,
@@ -49,8 +41,8 @@ from suite_registry import (
 )
 
 
-DEFAULT_REGISTRY = TOOLS_DIR / "suite_registry.json"
-SCHEMA_VALIDATOR = TOOLS_DIR / "validate.py"
+DEFAULT_REGISTRY = BASE_DIR / "suite_registry.json"
+SCHEMA_VALIDATOR = BASE_DIR / "validate.py"
 DEFAULT_MODE = "SR"
 MINIMUM_PYTHON = (3, 8)
 MINIMUM_OUTPUT_FREE_BYTES = 10 * 1024 * 1024
@@ -1325,7 +1317,8 @@ def main():
         json_dir = stage / "acs_jsons"
         html_dir = stage / "html_detailed_summaries"
         json_dir.mkdir(parents=True)
-        html_dir.mkdir(parents=True)
+        if "html" in outputs:
+            html_dir.mkdir(parents=True)
         copy_run_configs(stage, args)
 
         results = []

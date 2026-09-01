@@ -17,21 +17,22 @@ suite JSON files with the single SystemReady schema validator.
 
 ## Files and Prerequisites
 
-The schema tools are kept together:
+The schema tools are kept beside the parser so a copied `common/log_parser`
+directory remains self-contained:
 
 | File | Purpose |
 |---|---|
-| `common/tools/validate.py` | Validates merged or raw JSON and formats errors |
-| `common/tools/acs-results-schema.json` | Draft 2020-12 merged and suite contracts |
-| `common/tools/suite_registry.json` | Maps raw filenames and suites to schema definitions |
-| `common/tools/suite_registry.py` | Shared registry lookup helpers |
+| `common/log_parser/validate.py` | Validates merged or raw JSON and formats errors |
+| `common/log_parser/acs-results-schema.json` | Draft 2020-12 merged and suite contracts |
+| `common/log_parser/suite_registry.json` | Maps raw filenames and suites to schema definitions |
+| `common/log_parser/suite_registry.py` | Shared registry lookup helpers |
 
 Run commands in this guide from the repository root. Python 3 and the
 `jsonschema` package are required:
 
 ```bash
 python3 -m pip install -r common/log_parser/requirements.txt
-common/tools/validate.py --help
+common/log_parser/validate.py --help
 ```
 
 Paths containing spaces must be quoted.
@@ -60,11 +61,11 @@ contract.
 ### Standard Command
 
 ```bash
-common/tools/validate.py merged \
+common/log_parser/validate.py merged \
   "/path/to/acs_results/acs_summary/acs_jsons/merged_results.json"
 ```
 
-The default schema is `common/tools/acs-results-schema.json`.
+The default schema is `common/log_parser/acs-results-schema.json`.
 
 Merged FWTS/SCT wrapper names are band-specific. SystemReady DT uses
 `Suite_Name: EBBR-FWTS` and `Suite_Name: EBBR-SCT`; SystemReady SR uses
@@ -74,7 +75,7 @@ Merged FWTS/SCT wrapper names are band-specific. SystemReady DT uses
 ### Use a Different Schema
 
 ```bash
-common/tools/validate.py merged \
+common/log_parser/validate.py merged \
   "/path/to/merged_results.json" \
   --schema "/path/to/candidate-schema.json"
 ```
@@ -85,26 +86,26 @@ The complete error count is always retained. This option changes only how many
 example locations are printed for each grouped issue:
 
 ```bash
-common/tools/validate.py merged \
+common/log_parser/validate.py merged \
   "/path/to/merged_results.json" \
   --max-paths 2
 ```
 
 ## Validate Raw Suite JSON
 
-Raw validation uses `common/tools/suite_registry.json` to choose the schema
+Raw validation uses `common/log_parser/suite_registry.json` to choose the schema
 definition from each file's basename.
 
 ### One Suite
 
 ```bash
-common/tools/validate.py raw "/path/to/acs_jsons/bsa.json"
+common/log_parser/validate.py raw "/path/to/acs_jsons/bsa.json"
 ```
 
 ### Multiple Suites
 
 ```bash
-common/tools/validate.py raw \
+common/log_parser/validate.py raw \
   "/path/to/acs_jsons/bsa.json" \
   "/path/to/acs_jsons/fwts.json" \
   "/path/to/acs_jsons/sct.json"
@@ -113,7 +114,7 @@ common/tools/validate.py raw \
 ### Discover Selected Suites in a Directory
 
 ```bash
-common/tools/validate.py raw \
+common/log_parser/validate.py raw \
   --json-dir "/path/to/acs_jsons" \
   --selected-suites BSA,FWTS,SCT
 ```
@@ -125,13 +126,13 @@ error.
 List the accepted canonical names with:
 
 ```bash
-common/tools/suite_registry.py list
+common/log_parser/suite_registry.py list
 ```
 
 ### Validate Every JSON in a Directory
 
 ```bash
-common/tools/validate.py raw "/path/to/acs_jsons/"*.json
+common/log_parser/validate.py raw "/path/to/acs_jsons/"*.json
 ```
 
 Only filenames registered as raw suite outputs are validated. Files such as
@@ -270,14 +271,14 @@ Use the exit code in automation; do not search terminal text for `PASS`.
 When adding or renaming a suite output:
 
 1. Define or update the suite contract in
-   `common/tools/acs-results-schema.json`.
+   `common/log_parser/acs-results-schema.json`.
 2. Update the suite entry, output filename, and schema fragment in
-   `common/tools/suite_registry.json`.
+   `common/log_parser/suite_registry.json`.
 3. Keep parser script paths in the registry relative to
    `common/log_parser`.
 4. Test the raw file with `validate.py raw`.
 5. Test a complete merged artifact with `validate.py merged`.
-6. Test the standalone package and the installed `log_parser/tools` layout.
+6. Test the standalone package and the installed `log_parser` layout.
 
 Do not add a second validator for a new suite. Extend the schema and registry so
 the single validator handles it.

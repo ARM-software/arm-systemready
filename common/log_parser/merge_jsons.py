@@ -22,15 +22,7 @@ import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-TOOLS_CANDIDATES = (
-    BASE_DIR.parent / "tools",
-    BASE_DIR / "tools",
-)
-TOOLS_DIR = next(
-    (path for path in TOOLS_CANDIDATES if (path / "suite_registry.py").is_file()),
-    TOOLS_CANDIDATES[0],
-)
-sys.path.insert(0, str(TOOLS_DIR))
+sys.path.insert(0, str(BASE_DIR))
 
 from suite_registry import (
     normalize_suite_name as registry_normalize_suite_name,
@@ -246,9 +238,9 @@ def load_test_category_data(mode, test_category_path=None):
     """
     if not test_category_path:
         if mode == "DT":
-            test_category_path = "/usr/bin/log_parser/test_categoryDT.json"
+            test_category_path = BASE_DIR / "test_categoryDT.json"
         else:
-            test_category_path = "/usr/bin/log_parser/test_category.json"
+            test_category_path = BASE_DIR / "test_category.json"
 
     try:
         with open(test_category_path, "r") as catf:
@@ -858,7 +850,7 @@ def main():
     parser.add_argument("--selected-suites", default="",
                         help="Comma-separated suite names to include in compliance reporting")
     parser.add_argument("--test-category", default="",
-                        help="Explicit test category JSON path; legacy installed paths remain the default")
+                        help="Explicit test category JSON path; defaults to the bundled mode-specific file")
     parser.add_argument("output_file", help="Output merged JSON file")
     parser.add_argument("json_files", nargs='+',
                         help="List of JSON files to merge (including acs_info.json if present)")

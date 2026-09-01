@@ -159,12 +159,6 @@ copy_recipes()
     cp $TOP_DIR/../../common/linux_scripts/read_write_check_blk_devices.py $TOP_DIR/meta-woden/recipes-acs/install-files/files
 
     cp -r $TOP_DIR/../../common/log_parser $TOP_DIR/meta-woden/recipes-acs/install-files/files/
-    mkdir -p $TOP_DIR/meta-woden/recipes-acs/install-files/files/log_parser/tools
-    cp $TOP_DIR/../../common/tools/acs-results-schema.json \
-       $TOP_DIR/../../common/tools/suite_registry.json \
-       $TOP_DIR/../../common/tools/suite_registry.py \
-       $TOP_DIR/../../common/tools/validate.py \
-       $TOP_DIR/meta-woden/recipes-acs/install-files/files/log_parser/tools/
     popd
     # copy any patches to linux src files directory
     cp $COMMON_DIR_PATH/patches/tpm-tis-spi-Add-hardware-wait-polling.patch $TOP_DIR/meta-woden/recipes-kernel/linux/files

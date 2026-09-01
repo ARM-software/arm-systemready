@@ -65,12 +65,6 @@ do_build ()
         cp -r $TOP_DIR/edk2-test-parser root_fs_overlay/usr/bin/
     fi
     cp -r $TOP_DIR/../common/log_parser root_fs_overlay/usr/bin
-    mkdir -p root_fs_overlay/usr/bin/log_parser/tools
-    cp $TOP_DIR/../common/tools/acs-results-schema.json \
-       $TOP_DIR/../common/tools/suite_registry.json \
-       $TOP_DIR/../common/tools/suite_registry.py \
-       $TOP_DIR/../common/tools/validate.py \
-       root_fs_overlay/usr/bin/log_parser/tools/
     cp -r $TOP_DIR/systemready-scripts root_fs_overlay/usr/bin
     cp  $TOP_DIR/ramdisk/linux-bsa/bsa root_fs_overlay/bin/
     cp  $TOP_DIR/ramdisk/linux-bsa/bsa_acs.ko root_fs_overlay/lib/modules/
