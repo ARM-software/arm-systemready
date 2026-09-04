@@ -17,13 +17,17 @@
 """Generate BSA/SBSA HTML reports from parsed JSON results."""
 
 import base64
+import importlib
 import json
 import os
 import sys
 from io import BytesIO
 
 from jinja2 import Template
-import matplotlib.pyplot as plt  # pylint: disable=import-error
+
+plt = importlib.import_module("matplotlib.pyplot")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+enhance_html_report = importlib.import_module("report_ui").enhance_html_report
 
 # Helper function to retrieve dictionary values in a case-insensitive manner
 def get_case_insensitive(data, key, default=0):
@@ -108,6 +112,7 @@ def generate_bar_chart(suite_summary):
     plt.xticks(fontsize=11, rotation=30, ha='right')
     plt.yticks(fontsize=12)
     plt.tight_layout()
+    importlib.import_module("report_ui").center_matplotlib_plot(plt.gca())
 
     # Save the figure to a buffer
     buffer = BytesIO()
@@ -117,7 +122,7 @@ def generate_bar_chart(suite_summary):
     return base64.b64encode(buffer.getvalue()).decode('utf-8')
 
 # Function to generate HTML content for both summary and detailed pages
-def generate_html(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+def generate_html(
         suite_summary,
         test_results,
         chart_data,
@@ -824,6 +829,8 @@ def generate_html(  # pylint: disable=too-many-arguments,too-many-positional-arg
         is_summary_page=is_summary_page,
         test_suite_name=test_suite_name.upper()  # Ensure uppercase for consistency
     )
+
+    html_content = enhance_html_report(html_content, suite_type="bsa")
 
     # Save to HTML file
     with open(output_html_path, "w", encoding="utf-8") as file:

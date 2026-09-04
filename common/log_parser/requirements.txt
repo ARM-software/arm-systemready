@@ -1,0 +1,5 @@
+chardet
+Jinja2
+matplotlib
+jsonschema
+weasyprint

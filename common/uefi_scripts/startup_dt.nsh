@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@
 echo -off
 connect -r
 
-for %x in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %x in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
   if exist FS%x:\acs_tests\bbr\boot_tolinuxprompt.flag then
       echo "Secure Boot just cleared. Skipping ACS tests and booting Linux..."
       goto BootLinux
@@ -27,7 +27,7 @@ for %x in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 
 #Start HTTPs Boot from uefi shell
-for %h in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %h in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
   if exist FS%h:\acs_tests\app\https_boot_pending.flag then
     FS%h:
     echo "HTTPS/HTTP network boot requested, launching https_boot.nsh..."
@@ -45,21 +45,21 @@ for %h in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 :DoneHTTPSBootCheck
 
-for %f in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %f in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
   if exist FS%f:\acs_tests\app\network_boot_failed.flag then
     echo "HTTPS network boot previously failed. Cleaning flag and booting Linux..."
     goto BootLinux
   endif
 endfor
 
-for %x in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %x in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
   if exist FS%x:\acs_tests\app\network_boot_success.flag then
     echo "HTTPS network boot previously completed. Skipping ACS tests and booting Linux..."
     goto BootLinux
   endif
 endfor
 
-for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %y in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
   if exist FS%y:\acs_tests\app\network_boot_in_progress.flag then
     echo "WARNING: network_boot_in_progress flag found. Network boot failed,  please check logs, booting Linux..."
     goto BootLinux
@@ -67,7 +67,7 @@ for %y in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 
 # Clearing Secure Boot Key
-for %d in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %d in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%d:\acs_tests\bbr\clear_secureboot.flag then
         FS%d:
         cd \acs_tests\app
@@ -107,7 +107,7 @@ for %d in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 
 # check if BBSR SCT in progress, if yes resume the run.
-for %b in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %b in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%b:\acs_tests\bbr\bbsr_inprogress.flag then
         echo "BBSR compliance testing in progress, Resuming ..."
         echo " "
@@ -116,7 +116,7 @@ for %b in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
 endfor
 
 # Run the SCT test
-for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %i in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%i:\acs_tests\bbr\SctStartup.nsh then
         echo " "
         echo "Running SCT test"
@@ -127,7 +127,7 @@ endfor
 :DoneSCT
 
 # Run the Capsule dump
-for %e in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %e in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%e:\acs_results_template\acs_results then
         FS%e:
         cd FS%e:\acs_results_template\acs_results
@@ -150,7 +150,7 @@ endfor
 :DoneApp
 
 # Run the DebugDump 
-for %p in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %p in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%p:\acs_tests\debug\debug_dump.nsh then
         echo " "
         echo "Running debug dump"
@@ -161,7 +161,7 @@ endfor
 :DoneDebug
 
 # Run the BSA test
-for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %j in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%j:\acs_tests\bsa\bsa.nsh then
         echo " "
         echo "Running BSA test"
@@ -172,7 +172,7 @@ endfor
 :Donebsa
 
 # Run the PFDI test
-for %k in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %k in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%k:\acs_tests\pfdi\pfdi.nsh then
         echo " "
         echo "Running pfdi test"
@@ -183,7 +183,7 @@ endfor
 :Donepfdi
 
 # Run the pingtest
-for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %m in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%m:\acs_tests\debug\pingtest.nsh then
         FS%m:
         cd FS%m:\acs_results_template\acs_results
@@ -212,7 +212,7 @@ endfor
 :DonePing
 
 # Run the capsule update test
-for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %r in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%r:\acs_tests\app\capsule_update.nsh then
         echo " "
         echo "Running capsule update test"
@@ -225,7 +225,7 @@ endfor
 goto BootLinux
 
 :BootLinux
-for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %l in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%l:\Image and exist FS%l:\yocto_image.flag then
         FS%l:
         cd FS%l:\

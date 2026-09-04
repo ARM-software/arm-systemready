@@ -1,0 +1,516 @@
+{
+  "suites": [
+    {
+      "canonical": "BSA",
+      "aliases": ["BSA"],
+      "modes": ["SR", "DT"],
+      "requirement_key": "BSA",
+      "requirements": {"SR": "M", "DT": "R"},
+      "waiver_suite": "BSA",
+      "logs_to_json": "bsa/logs_to_json.py",
+      "json_to_html": "bsa/json_to_html.py",
+      "json_output": "bsa.json",
+      "schema": "acs-results-schema.json#/definitions/bsa_suite",
+      "detailed_html": "bsa_detailed.html",
+      "summary_html": "bsa_summary.html"
+    },
+    {
+      "canonical": "SBSA",
+      "aliases": ["SBSA"],
+      "modes": ["SR"],
+      "requirement_key": "SBSA",
+      "requirements": {"SR": "R"},
+      "waiver_suite": "SBSA",
+      "logs_to_json": "bsa/logs_to_json.py",
+      "json_to_html": "bsa/json_to_html.py",
+      "json_output": "sbsa.json",
+      "schema": "acs-results-schema.json#/definitions/bsa_suite",
+      "detailed_html": "sbsa_detailed.html",
+      "summary_html": "sbsa_summary.html"
+    },
+    {
+      "canonical": "FWTS",
+      "aliases": ["FWTS"],
+      "modes": ["SR", "DT"],
+      "requirement_key": "FWTS",
+      "requirements": {"SR": "M", "DT": "M"},
+      "waiver_suite": "FWTS",
+      "logs_to_json": "bbr/fwts/logs_to_json.py",
+      "json_to_html": "bbr/fwts/json_to_html.py",
+      "json_output": "fwts.json",
+      "schema": "acs-results-schema.json#/definitions/fwts_suite",
+      "detailed_html": "fwts_detailed.html",
+      "summary_html": "fwts_summary.html"
+    },
+    {
+      "canonical": "SCT",
+      "aliases": ["SCT"],
+      "modes": ["SR", "DT"],
+      "requirement_key": "SCT",
+      "requirements": {"SR": "M", "DT": "M"},
+      "waiver_suite": "SCT",
+      "logs_to_json": "bbr/sct/logs_to_json.py",
+      "supporting_logs_to_json": ["bbr/sct/logs_to_json_edk2.py"],
+      "json_to_html": "bbr/sct/json_to_html.py",
+      "json_output": "sct.json",
+      "schema": "acs-results-schema.json#/definitions/sct_suite",
+      "detailed_html": "sct_detailed.html",
+      "summary_html": "sct_summary.html"
+    },
+    {
+      "canonical": "BBSR-FWTS",
+      "aliases": ["BBSR-FWTS", "BBSRFWTS"],
+      "modes": ["SR", "DT"],
+      "requirement_key": "BBSR-FWTS",
+      "requirements": {"SR": "EM", "DT": "EM"},
+      "waiver_suite": "BBSR-FWTS",
+      "logs_to_json": "bbr/fwts/logs_to_json.py",
+      "json_to_html": "bbr/fwts/json_to_html.py",
+      "json_output": "bbsr_fwts.json",
+      "schema": "acs-results-schema.json#/definitions/bbsr_fwts_suite",
+      "detailed_html": "bbsr_fwts_detailed.html",
+      "summary_html": "bbsr_fwts_summary.html"
+    },
+    {
+      "canonical": "BBSR-SCT",
+      "aliases": ["BBSR-SCT", "BBSRSCT"],
+      "modes": ["SR", "DT"],
+      "requirement_key": "BBSR-SCT",
+      "requirements": {"SR": "EM", "DT": "EM"},
+      "waiver_suite": "BBSR-SCT",
+      "logs_to_json": "bbr/sct/logs_to_json.py",
+      "supporting_logs_to_json": ["bbr/sct/logs_to_json_edk2.py"],
+      "json_to_html": "bbr/sct/json_to_html.py",
+      "json_output": "bbsr_sct.json",
+      "schema": "acs-results-schema.json#/definitions/bbsr_sct_suite",
+      "detailed_html": "bbsr_sct_detailed.html",
+      "summary_html": "bbsr_sct_summary.html"
+    },
+    {
+      "canonical": "BBSR-TPM",
+      "aliases": ["BBSR-TPM", "BBSRTPM"],
+      "modes": ["SR", "DT"],
+      "requirement_key": "BBSR-TPM",
+      "requirements": {"SR": "EM", "DT": "EM"},
+      "waiver_suite": "BBSR-TPM",
+      "logs_to_json": "bbr/tpm/logs_to_json.py",
+      "json_to_html": "bbr/tpm/json_to_html.py",
+      "json_output": "bbsr_tpm.json",
+      "schema": "acs-results-schema.json#/definitions/tpm_suite",
+      "detailed_html": "bbsr_tpm_detailed.html",
+      "summary_html": "bbsr_tpm_summary.html"
+    },
+    {
+      "canonical": "PFDI",
+      "aliases": ["PFDI"],
+      "modes": ["DT"],
+      "requirement_key": "PFDI",
+      "requirements": {"DT": "CM"},
+      "waiver_suite": "PFDI",
+      "logs_to_json": "bsa/logs_to_json.py",
+      "json_to_html": "bsa/json_to_html.py",
+      "json_output": "pfdi.json",
+      "schema": "acs-results-schema.json#/definitions/pfdi_suite",
+      "detailed_html": "pfdi_detailed.html",
+      "summary_html": "pfdi_summary.html"
+    },
+    {
+      "canonical": "SCMI",
+      "aliases": ["SCMI"],
+      "modes": ["DT"],
+      "requirement_key": "SCMI",
+      "requirements": {"DT": "EM"},
+      "waiver_suite": "SCMI",
+      "logs_to_json": "scmi/logs_to_json.py",
+      "json_to_html": "scmi/json_to_html.py",
+      "json_output": "scmi.json",
+      "schema": "acs-results-schema.json#/definitions/scmi_suite",
+      "detailed_html": "scmi_detailed.html",
+      "summary_html": "scmi_summary.html"
+    },
+    {
+      "canonical": "SBMR",
+      "aliases": ["SBMR"],
+      "modes": ["SR"],
+      "requirement_key": "SBMR",
+      "requirements": {},
+      "waiver_suite": "SBMR",
+      "included_suites": ["SBMR-IB", "SBMR-OOB"]
+    },
+    {
+      "canonical": "SBMR-IB",
+      "aliases": ["SBMR-IB", "SBMRIB", "SBMR-IN-BAND", "SBMR-INBAND"],
+      "modes": ["SR"],
+      "requirement_key": "SBMR-IB",
+      "requirements": {"SR": "R"},
+      "waiver_suite": "SBMR",
+      "logs_to_json": "sbmr/logs_to_json.py",
+      "json_to_html": "sbmr/json_to_html.py",
+      "json_output": "sbmr_ib.json",
+      "schema": "acs-results-schema.json#/definitions/sbmr_suite",
+      "detailed_html": "sbmr_ib_detailed.html",
+      "summary_html": "sbmr_ib_summary.html"
+    },
+    {
+      "canonical": "SBMR-OOB",
+      "aliases": ["SBMR-OOB", "SBMROOB", "SBMR-OUT-OF-BAND", "SBMR-OUTOFBAND"],
+      "modes": ["SR"],
+      "requirement_key": "SBMR-OOB",
+      "requirements": {"SR": "R"},
+      "waiver_suite": "SBMR",
+      "logs_to_json": "sbmr/logs_to_json.py",
+      "json_to_html": "sbmr/json_to_html.py",
+      "json_output": "sbmr_oob.json",
+      "schema": "acs-results-schema.json#/definitions/sbmr_suite",
+      "detailed_html": "sbmr_oob_detailed.html",
+      "summary_html": "sbmr_oob_summary.html"
+    },
+    {
+      "canonical": "POST-SCRIPT",
+      "aliases": ["POST-SCRIPT", "POSTSCRIPT", "POST_SCRIPT"],
+      "modes": ["DT"],
+      "requirement_key": "POST_SCRIPT",
+      "requirements": {"DT": "R"},
+      "waiver_suite": "POST_SCRIPT",
+      "logs_to_json": "post_script/logs_to_json.py",
+      "json_to_html": "post_script/json_to_html.py",
+      "json_output": "post_script.json",
+      "schema": "acs-results-schema.json#/definitions/post_script_suite",
+      "detailed_html": "post_script_detailed.html",
+      "summary_html": "post_script_summary.html"
+    },
+    {
+      "canonical": "STANDALONE",
+      "aliases": ["STANDALONE", "STANDALONE-TEST", "STANDALONE-TESTS", "STANDALONE_TEST", "STANDALONE_TESTS"],
+      "modes": ["DT"],
+      "requirement_key": "STANDALONE",
+      "requirements": {},
+      "waiver_suite": "Standalone",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html",
+      "included_suites": [
+        "DT-KSELFTEST",
+        "DT-VALIDATE",
+        "ETHTOOL-TEST",
+        "READ-WRITE-CHECK-BLK-DEVICES",
+        "CAPSULE-UPDATE",
+        "PSCI",
+        "SMBIOS",
+        "NETWORK-BOOT",
+        "RUNTIME-DEV-MAP"
+      ]
+    },
+    {
+      "canonical": "DT-KSELFTEST",
+      "aliases": ["DT-KSELFTEST", "DTKSELFTEST", "DT_KSELFTEST"],
+      "modes": ["DT"],
+      "requirement_key": "DT_KSELFTEST",
+      "requirements": {"DT": "R"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "dt_kselftest.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "DT-VALIDATE",
+      "aliases": ["DT-VALIDATE", "DTVALIDATE", "DT_VALIDATE"],
+      "modes": ["DT"],
+      "requirement_key": "DT_VALIDATE",
+      "requirements": {"DT": "M"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "dt_validate.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "ETHTOOL-TEST",
+      "aliases": ["ETHTOOL-TEST", "ETHTOOLTEST", "ETHTOOL_TEST"],
+      "modes": ["DT"],
+      "requirement_key": "ETHTOOL_TEST",
+      "requirements": {"DT": "M"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "ethtool_test.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "READ-WRITE-CHECK-BLK-DEVICES",
+      "aliases": ["READ-WRITE-CHECK-BLK-DEVICES", "READWRITECHECKBLKDEVICES", "READ-WRITE-CHECK", "READ_WRITE_CHECK_BLK_DEVICES"],
+      "modes": ["DT"],
+      "requirement_key": "READ_WRITE_CHECK_BLK_DEVICES",
+      "requirements": {"DT": "M"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "read_write_check_blk_devices.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "CAPSULE-UPDATE",
+      "aliases": ["CAPSULE", "CAPSULE-UPDATE", "CAPSULEUPDATE", "CAPSULE_UPDATE"],
+      "modes": ["DT"],
+      "requirement_key": "Capsule Update",
+      "requirements": {"DT": "M"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "capsule_update.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "PSCI",
+      "aliases": ["PSCI", "PSCI-CHECK", "PSCICHECK"],
+      "modes": ["DT"],
+      "requirement_key": "PSCI",
+      "requirements": {"DT": "R"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "psci.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "SMBIOS",
+      "aliases": ["SMBIOS", "SMBIOS-CHECK", "SMBIOSCHECK"],
+      "modes": ["DT"],
+      "requirement_key": "SMBIOS",
+      "requirements": {"DT": "R"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "smbios_check.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "NETWORK-BOOT",
+      "aliases": ["NETWORK-BOOT", "NETWORKBOOT", "NETWORK_BOOT"],
+      "modes": ["DT"],
+      "requirement_key": "NETWORK_BOOT",
+      "requirements": {"DT": "R"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "network_boot.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "RUNTIME-DEV-MAP",
+      "aliases": ["RUNTIME-DEV-MAP", "RUNTIME-DEVICE-MAPPING", "RUNTIME-DEVICE-MAPPING-CHECK", "RUNTIMEDEVMAP", "RUNTIME_DEV_MAP"],
+      "modes": ["DT"],
+      "requirement_key": "RUNTIME_DEV_MAP",
+      "requirements": {"DT": "R"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "runtime_dev_map.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "OS-TESTS",
+      "aliases": ["OS", "OS-TEST", "OS-TESTS", "OSTEST", "OSTESTS", "OS_TEST"],
+      "modes": ["SR", "DT"],
+      "requirement_key": "OS_TEST",
+      "requirements": {"SR": "M", "DT": "M"},
+      "waiver_suite": "os Tests",
+      "logs_to_json": "os_tests/logs_to_json.py",
+      "sr_logs_to_json": "os_tests/sr_logs_to_json.py",
+      "json_to_html": "os_tests/json_to_html.py",
+      "json_output": "os_test.json",
+      "json_output_patterns": ["ethtool_test_*.json"],
+      "schema": "acs-results-schema.json#/definitions/os_tests_suite",
+      "detailed_html": "os_tests_detailed.html",
+      "summary_html": "os_tests_summary.html"
+    }
+  ],
+  "standalone": {
+    "default_outputs": ["json", "html", "summary"],
+    "dependency_modules": {
+      "html": ["jinja2", "matplotlib"],
+      "schema": ["jsonschema"],
+      "pdf": ["weasyprint"]
+    },
+    "summary_inputs": {
+      "uefi_version": {"root": "results", "candidates": ["uefi_dump/uefi_version.log"]},
+      "dmidecode": {"root": "results", "candidates": ["linux_dump/dmidecode.txt", "linux_dump/dmidecode.log"]},
+      "ipmitool": {"root": "results", "candidates": ["linux_dump/ipmitool.txt", "linux_dump/ipmitool.log"]},
+      "psci": {"root": "results", "candidates": ["linux_tools/psci/psci_kernel.log"]}
+    },
+    "suite_execution": {
+      "BSA": {
+        "handler": "multi_log",
+        "minimum_inputs": 1,
+        "json_dependencies": ["chardet"],
+        "inputs": [
+          {"name": "uefi", "root": "results", "candidates": ["uefi/BsaResults.log"]},
+          {"name": "kernel", "root": "results", "candidates": ["linux_acs/bsa_acs_app/BsaResultsKernel.log", "linux/BsaResultsKernel.log"]}
+        ]
+      },
+      "SBSA": {
+        "handler": "multi_log",
+        "minimum_inputs": 1,
+        "json_dependencies": ["chardet"],
+        "inputs": [
+          {"name": "uefi", "root": "results", "candidates": ["uefi/SbsaResults.log"]},
+          {"name": "kernel", "root": "results", "candidates": ["linux/SbsaResultsKernel.log"]}
+        ]
+      },
+      "FWTS": {
+        "handler": "single_log",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["fwts/FWTSResults.log"], "required": true}
+        ]
+      },
+      "SCT": {
+        "handler": "sct",
+        "json_dependencies": ["chardet"],
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["sct_results/Overall/Summary.log"], "required": true},
+          {"name": "edk2", "root": "results", "candidates": ["edk2-test-parser/edk2-test-parser.log"], "supporting": true, "output": "edk2_test_parser.json"}
+        ]
+      },
+      "BBSR-FWTS": {
+        "handler": "single_log",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["bbsr/fwts/FWTSResults.log"], "required": true}
+        ]
+      },
+      "BBSR-SCT": {
+        "handler": "sct",
+        "json_dependencies": ["chardet"],
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["bbsr/sct_results/Overall/Summary.log"], "required": true},
+          {"name": "edk2", "root": "results", "candidates": ["edk2-test-parser/edk2-test-parser-bbsr.log"], "supporting": true, "output": "edk2_test_parser-bbsr.json"}
+        ]
+      },
+      "BBSR-TPM": {
+        "handler": "single_log",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["bbsr/tpm2/verify_tpm_measurements.log"], "required": true}
+        ]
+      },
+      "PFDI": {
+        "handler": "single_log",
+        "json_dependencies": ["chardet"],
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["uefi/pfdiresults.log"], "required": true}
+        ]
+      },
+      "SCMI": {
+        "handler": "multi_log",
+        "minimum_inputs": 1,
+        "json_dependencies": ["chardet"],
+        "not_run_exit_codes": {
+          "2": "SCMI raw transport is unavailable"
+        },
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["linux_acs/scmi_acs_app/arm_scmi_test_log.txt"]}
+        ]
+      },
+      "SBMR-IB": {
+        "handler": "sbmr",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["sbmr/sbmr_in_band_logs/output.xml"], "required": true},
+          {"name": "report", "root": "results", "candidates": ["sbmr/sbmr_in_band_logs/report.html"], "supporting": true}
+        ]
+      },
+      "SBMR-OOB": {
+        "handler": "sbmr",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["sbmr/sbmr_out_of_band_logs/output.xml"], "required": true},
+          {"name": "report", "root": "results", "candidates": ["sbmr/sbmr_out_of_band_logs/report.html"], "supporting": true}
+        ]
+      },
+      "POST-SCRIPT": {
+        "handler": "single_log",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["post-script/post-script.log"], "required": true}
+        ]
+      },
+      "DT-KSELFTEST": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["linux_tools/dt_kselftest.log"], "required": true}
+        ]
+      },
+      "DT-VALIDATE": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["linux_tools/dt-validate-parser.log"], "required": true}
+        ]
+      },
+      "ETHTOOL-TEST": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["linux_tools/ethtool-test.log"], "required": true}
+        ]
+      },
+      "READ-WRITE-CHECK-BLK-DEVICES": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["linux_tools/read_write_check_blk_devices.log"], "required": true}
+        ]
+      },
+      "CAPSULE-UPDATE": {
+        "handler": "capsule",
+        "inputs": [
+          {"name": "update", "root": "firmware", "candidates": ["capsule-update.log"]},
+          {"name": "on_disk", "root": "firmware", "candidates": ["capsule-on-disk.log"]},
+          {"name": "results", "root": "firmware", "candidates": ["capsule_test_results.log"], "required": true}
+        ]
+      },
+      "PSCI": {
+        "handler": "psci",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["linux_tools/psci/psci_kernel.log"], "required": true}
+        ]
+      },
+      "SMBIOS": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["sct_results/Overall/Summary.log"], "required": true}
+        ]
+      },
+      "NETWORK-BOOT": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["network_boot/network_boot_results.log"], "required": true}
+        ]
+      },
+      "RUNTIME-DEV-MAP": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["linux_tools/runtime_device_mapping_conflict_test.log"], "required": true}
+        ]
+      },
+      "OS-TESTS": {
+        "handler": "os_tests",
+        "inputs": [
+          {"name": "os_logs", "root": "os_logs", "candidates": ["."], "kind": "directory", "required": true},
+          {"name": "post_script", "root": "results", "candidates": ["post-script/post-script.log"], "supporting": true}
+        ]
+      }
+    }
+  }
+}

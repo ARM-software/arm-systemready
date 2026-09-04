@@ -529,6 +529,33 @@ suites:
             path: "{dir}/merged.json"
             text: "\"Test_suite_info\""
 
+      - name: dt_bbsr_tpm_uses_measured_boot_log_category
+        type: module_main_with_env
+        scenario:
+          kind: merge_jsons
+          dt_or_sr_mode: DT
+          yocto_flag_path: yocto.flag
+          input_files:
+            acs_info.json:
+              ACS Results Summary:
+                Overall Compliance Result: Unknown
+            bbsr_tpm.json:
+              test_results:
+                - Test_suite: BBSR-TPM
+                  test_result: PASSED
+        mocks:
+          "{module}.test_cat_dict":
+            value:
+              bbsr-standalone:
+                measured boot log:
+                  Description:
+                    - BBSR measured boot category information
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/merged.json"
+            text: "BBSR measured boot category information"
+
       # The exact standalone ethtool_test.json filename should classify through
       # the ETHTOOL_TEST path and still be collapsed into the shared Standalone section.
       - name: dt_ethtool_test_json_is_collapsed_under_standalone
@@ -1330,4 +1357,4 @@ suites:
                 total_skipped: 0
                 total_warnings: 0
         expect_stdout_or_stderr_contains:
-          - "Suite: Mandatory  : FWTS: Not Compliant: Failed 1"
+          - "FWTS: Not Compliant: Failed 1"

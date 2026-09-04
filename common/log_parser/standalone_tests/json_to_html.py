@@ -14,13 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import matplotlib.pyplot as plt
-import base64
-from io import BytesIO
-from jinja2 import Template
-import sys
 import argparse
+import base64
+import importlib
+import json
+import os
+import sys
+from io import BytesIO
+
+from jinja2 import Template
+
+plt = importlib.import_module("matplotlib.pyplot")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+enhance_html_report = importlib.import_module("report_ui").enhance_html_report
 
 # 1) Detect which columns are used among all subtests in a given test
 def detect_columns_used(subtests):
@@ -95,6 +101,7 @@ def generate_bar_chart(suite_summary):
     plt.title('Standalone test Results', fontsize=16, fontweight='bold', pad=20)
     plt.ylabel('Number of Standalone tests', fontsize=14)
     plt.tight_layout()
+    importlib.import_module("report_ui").center_matplotlib_plot(plt.gca())
 
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
@@ -400,6 +407,7 @@ def generate_html(suite_summary, test_results_list, output_html_path,
         enumerate=enumerate
     )
 
+    html_content = enhance_html_report(html_content, suite_type="standalone")
     with open(output_html_path, "w") as f:
         f.write(html_content)
 

@@ -14,40 +14,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import matplotlib.pyplot as plt
-import base64
-from io import BytesIO
-from jinja2 import Environment, FileSystemLoader, Template
+"""Render BBSR SCT JSON results as detailed and summary HTML reports."""
 
-# Helper function to retrieve dictionary values in a case-insensitive manner
-def get_case_insensitive(d, key, default=0):
-    for k, v in d.items():
-        if k.lower() == key.lower():
-            return v
+import base64
+import importlib
+import json
+import os
+import sys
+from io import BytesIO
+
+from jinja2 import Environment
+
+plt = importlib.import_module("matplotlib.pyplot")
+sys.path.insert(
+    0,
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
+enhance_html_report = importlib.import_module("report_ui").enhance_html_report
+
+def get_case_insensitive(data, key, default=0):
+    """Return a dictionary value without requiring exact key casing."""
+    for candidate_key, value in data.items():
+        if candidate_key.lower() == key.lower():
+            return value
     return default
 
-# Helper function to determine CSS class based on subtest result
-def determine_css_class(subtest_result):
-    subtest_result_upper = subtest_result.upper()
-    if 'FAILED WITH WAIVER' in subtest_result_upper or 'FAILURE (WITH WAIVER)' in subtest_result_upper:
-        return 'fail-waiver'
-    elif 'FAILED' in subtest_result_upper:
-        return 'fail'
-    elif 'PASSED' in subtest_result_upper:
-        return 'pass'
-    elif 'WARNING' in subtest_result_upper:
-        return 'warning'
-    elif 'ABORTED' in subtest_result_upper:
-        return 'aborted'
-    elif 'SKIPPED' in subtest_result_upper:
-        return 'skipped'
-    else:
-        # Anything else (IGNORED, KNOWN U-BOOT LIMITATION, etc.) is 'unknown' in the detailed table
-        return 'unknown'
 
-# Function to generate bar chart for SCT results with 'Failed with Waiver' and 'Ignored'
+def determine_css_class(subtest_result):
+    """Return the CSS class associated with a rendered SCT result."""
+    subtest_result_upper = subtest_result.upper()
+    if (
+            'FAILED WITH WAIVER' in subtest_result_upper
+            or 'FAILURE (WITH WAIVER)' in subtest_result_upper):
+        return 'fail-waiver'
+    if 'FAILED' in subtest_result_upper:
+        return 'fail'
+    if 'PASSED' in subtest_result_upper:
+        return 'pass'
+    if 'WARNING' in subtest_result_upper:
+        return 'warning'
+    if 'ABORTED' in subtest_result_upper:
+        return 'aborted'
+    if 'SKIPPED' in subtest_result_upper:
+        return 'skipped'
+    # Anything else, including IGNORED, remains unknown in the detailed table.
+    return 'unknown'
+
+
 def generate_bar_chart_improved(suite_summary):
+    """Return a base64-encoded SCT result-distribution chart."""
     # Updated labels to include 'Failed with Waiver' AND 'Ignored'
     labels = [
         'Passed',
@@ -83,11 +98,11 @@ def generate_bar_chart_improved(suite_summary):
 
     # Add percentage labels on top of each bar
     total_tests = sum(sizes)
-    for bar, size in zip(bars, sizes):
-        yval = bar.get_height()
+    for chart_bar, size in zip(bars, sizes):
+        yval = chart_bar.get_height()
         percentage = (size / total_tests) * 100 if total_tests > 0 else 0
         plt.text(
-            bar.get_x() + bar.get_width()/2,
+            chart_bar.get_x() + chart_bar.get_width()/2,
             yval + max(sizes)*0.01,
             f'{percentage:.2f}%',
             ha='center',
@@ -100,6 +115,7 @@ def generate_bar_chart_improved(suite_summary):
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.tight_layout()
+    importlib.import_module("report_ui").center_matplotlib_plot(plt.gca())
 
     # Save the figure to a buffer
     buffer = BytesIO()
@@ -108,8 +124,13 @@ def generate_bar_chart_improved(suite_summary):
     buffer.seek(0)
     return base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-# Function to generate HTML content for both summary and detailed pages
-def generate_html_improved(suite_summary, test_results, chart_data, output_html_path, is_summary_page=True):
+def generate_html_improved(
+        suite_summary,
+        test_results,
+        chart_data,
+        output_html_path,
+        is_summary_page=True):
+    """Generate either the detailed or summary SCT HTML report."""
     # Initialize Jinja2 environment
     env = Environment(autoescape=True)
     env.filters['determine_css_class'] = determine_css_class
@@ -358,12 +379,15 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
         is_summary_page=is_summary_page
     )
 
-    with open(output_html_path, "w") as file:
+    html_content = enhance_html_report(html_content, suite_type="sct")
+    with open(output_html_path, "w", encoding="utf-8") as file:
         file.write(html_content)
 
-def main(input_json_file, detailed_html_file, summary_html_file):
+
+def main(input_path, detailed_path, summary_path):
+    """Load SCT JSON and write detailed and summary HTML reports."""
     # Load JSON data
-    with open(input_json_file, 'r') as json_file:
+    with open(input_path, "r", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
     # We DIRECTLY take the final suite_summary from the JSON
@@ -375,19 +399,29 @@ def main(input_json_file, detailed_html_file, summary_html_file):
     chart_data = generate_bar_chart_improved(suite_summary)
 
     # Generate the detailed summary page
-    generate_html_improved(suite_summary, test_results, chart_data, detailed_html_file, is_summary_page=False)
+    generate_html_improved(
+        suite_summary,
+        test_results,
+        chart_data,
+        detailed_path,
+        is_summary_page=False,
+    )
 
     # Generate the summary page with the bar chart
-    generate_html_improved(suite_summary, test_results, chart_data, summary_html_file, is_summary_page=True)
+    generate_html_improved(
+        suite_summary,
+        test_results,
+        chart_data,
+        summary_path,
+        is_summary_page=True,
+    )
 
 if __name__ == "__main__":
-    import sys
     if len(sys.argv) != 4:
-        print("Usage: python json_to_html.py <input_json_file> <detailed_html_file> <summary_html_file>")
+        print(
+            "Usage: python json_to_html.py <input_json_file> "
+            "<detailed_html_file> <summary_html_file>"
+        )
         sys.exit(1)
 
-    input_json_file = sys.argv[1]
-    detailed_html_file = sys.argv[2]
-    summary_html_file = sys.argv[3]
-
-    main(input_json_file, detailed_html_file, summary_html_file)
+    main(sys.argv[1], sys.argv[2], sys.argv[3])

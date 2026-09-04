@@ -1,0 +1,98 @@
+suites:
+  - name: shared_report_ui
+    files:
+      - common/log_parser/report_ui.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+
+      - name: python_compiles
+        type: py_compile
+
+      - name: injects_self_contained_ui
+        type: py_function
+        function: enhance_html_report
+        args:
+          - '<!DOCTYPE html><html><head><title>Test</title></head><body><h1>Test</h1></body></html>'
+        expect_return_contains: 'data-acs-report-ui="2026.4"'
+
+      - name: injects_suite_profile
+        type: py_function
+        function: enhance_html_report
+        args:
+          - '<!DOCTYPE html><html><head><title>SCT</title></head><body><h1>SCT</h1></body></html>'
+          - suite
+          - sct
+        expect_return_contains: 'data-acs-suite="sct"'
+
+      - name: labels_sct_category_metadata_as_test_suite_info
+        type: py_function
+        function: enhance_html_report
+        args:
+          - '<!DOCTYPE html><html><head><title>SCT</title></head><body><div class="detailed-summary"><div class="heading">Test Suite Name: <span>GenericTest</span></div><div class="test-suite-info"><strong>Test_suite_info:</strong>UEFI context</div><table></table></div></body></html>'
+          - suite
+          - sct
+        expect_return_contains: '"Test suite info"'
+
+      - name: discovers_status_columns_from_headers
+        type: py_function
+        function: enhance_html_report
+        args:
+          - '<!DOCTYPE html><html><head><title>Test</title></head><body><table><thead><tr><th>Test Result</th></tr></thead><tbody><tr><td>CUSTOM STATUS</td></tr></tbody></table></body></html>'
+        expect_return_contains: 'function statusColumnIndex(table)'
+
+      - name: supports_future_dynamic_statuses
+        type: py_function
+        function: enhance_html_report
+        args:
+          - '<!DOCTYPE html><html><head><title>Test</title></head><body><table><thead><tr><th>Result</th></tr></thead><tbody><tr><td>FUTURE STATUS</td></tr></tbody></table></body></html>'
+        expect_return_contains: 'allowDynamic ? statusSlug(text)'
+
+      - name: styles_every_status_row
+        type: py_function
+        function: enhance_html_report
+        args:
+          - '<!DOCTYPE html><html><head><title>Test</title></head><body><table><thead><tr><th>Outcome</th></tr></thead><tbody><tr><td>NEW OUTCOME</td></tr></tbody></table></body></html>'
+        expect_return_contains: 'data-acs-row-status'
+
+      - name: aligns_filter_counts_with_visible_results
+        type: py_function
+        function: enhance_html_report
+        args:
+          - '<!DOCTYPE html><html><head><title>Test</title></head><body><table><thead><tr><th>Outcome</th></tr></thead><tbody><tr><td>NEW OUTCOME</td></tr></tbody></table></body></html>'
+        expect_return_contains: 'record.match = (!activeStatus || record.status === activeStatus)'
+
+      - name: browser_executes_layout_navigation_collapse_filters_links_and_print_scope
+        type: command_success
+        command: python3
+        args:
+          - -c
+          - |
+            import pathlib, runpy, sys
+            project_root = pathlib.Path(sys.argv[1]).resolve().parents[2]
+            runpy.run_path(
+                str(project_root / "common/acs_test_framework_runner/report_ui_browser_smoke.py"),
+                run_name="__main__",
+            )
+          - "{file}"
+        timeout_sec: 45
+        skip_unless_commands_succeed:
+          - command -v chromium || command -v chromium-browser
+
+      - name: rejects_unknown_page_type
+        type: py_function
+        function: enhance_html_report
+        args:
+          - '<html><head></head><body></body></html>'
+          - unknown
+        expect_exception: ValueError
+
+      - name: rejects_unknown_suite_type
+        type: py_function
+        function: enhance_html_report
+        args:
+          - '<html><head></head><body></body></html>'
+          - suite
+          - unknown
+        expect_exception: ValueError

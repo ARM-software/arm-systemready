@@ -16,6 +16,9 @@
 
 """Generate the consolidated ACS summary HTML report."""
 
+# Legacy HTML/template strings are intentionally kept intact for readability.
+# pylint: disable=line-too-long
+
 import json
 import argparse
 import os
@@ -24,7 +27,101 @@ import re
 import html
 from jinja2 import Template
 
+from report_ui import enhance_html_report
+
+
+YOCTO_FLAG_PATH = "/mnt/yocto_image.flag"
+LEGACY_SUITE_KEYS = {"Suite_Name: FWTS", "Suite_Name: SCT"}
+OBSOLETE_DT_SUITE_KEYS = {"Suite_Name: BBR-FWTS", "Suite_Name: BBR-SCT"}
+
+
+def _prefix_from_band(band):
+    """Map an ACS band label to its specification prefix, if recognized."""
+    normalized_band = str(band).strip().lower()
+    if "devicetree" in normalized_band or "device tree" in normalized_band:
+        return "EBBR"
+    if "systemready" in normalized_band:
+        return "SBBR"
+    return ""
+
+
+def get_report_suite_prefix(merged_json_path="", config_band=""):
+    """Return the externally visible specification prefix for this report."""
+    if merged_json_path and os.path.isfile(merged_json_path):
+        try:
+            with open(merged_json_path, "r", encoding="utf-8") as merged_file:
+                merged_data = json.load(merged_file)
+        except (OSError, ValueError, AttributeError):
+            merged_data = {}
+
+        if isinstance(merged_data, dict):
+            legacy_keys = sorted(LEGACY_SUITE_KEYS.intersection(merged_data))
+            if legacy_keys:
+                raise ValueError(
+                    "Legacy merged suite keys are not supported: "
+                    + ", ".join(legacy_keys)
+                )
+
+            obsolete_dt_keys = sorted(
+                OBSOLETE_DT_SUITE_KEYS.intersection(merged_data)
+            )
+            if obsolete_dt_keys:
+                raise ValueError(
+                    "Obsolete DT merged suite keys are not supported; "
+                    "use EBBR: " + ", ".join(obsolete_dt_keys)
+                )
+
+            suite_keys = merged_data.keys()
+            wrapper_prefixes = {
+                prefix
+                for prefix in ("SBBR", "EBBR")
+                if any(
+                    f"Suite_Name: {prefix}-{suite}" in suite_keys
+                    for suite in ("FWTS", "SCT")
+                )
+            }
+            if len(wrapper_prefixes) > 1:
+                raise ValueError(
+                    "Mixed EBBR/SBBR merged suite keys are not supported"
+                )
+
+            acs_info = merged_data.get("Suite_Name: acs_info", {})
+            band_prefix = ""
+            for section_name in ("ACS Results Summary", "System Info"):
+                prefix = _prefix_from_band(
+                    acs_info.get(section_name, {}).get("Band", "")
+                )
+                if prefix:
+                    if band_prefix and band_prefix != prefix:
+                        raise ValueError(
+                            "Conflicting Band values in merged acs_info"
+                        )
+                    band_prefix = prefix
+
+            wrapper_prefix = next(iter(wrapper_prefixes), "")
+            if (
+                wrapper_prefix
+                and band_prefix
+                and wrapper_prefix != band_prefix
+            ):
+                raise ValueError(
+                    f"Merged {wrapper_prefix} suite keys do not match "
+                    f"the {band_prefix} Band"
+                )
+            if wrapper_prefix:
+                return wrapper_prefix
+            if band_prefix:
+                return band_prefix
+
+    prefix = _prefix_from_band(config_band)
+    if prefix:
+        return prefix
+
+    return "EBBR" if os.path.isfile(YOCTO_FLAG_PATH) else "SBBR"
+
+
 def get_system_info():
+    """Collect fallback firmware and platform information from the host."""
     system_info = {}
 
     # Get Firmware Version
@@ -89,10 +186,11 @@ def get_system_info():
     return system_info
 
 def parse_config(config_path):
+    """Read colon-separated values from an ACS configuration file."""
     config_info = {}
     try:
         if config_path and os.path.exists(config_path):
-            with open(config_path, 'r') as config_file:
+            with open(config_path, "r", encoding="utf-8") as config_file:
                 for line in config_file:
                     # Stop parsing at the user-defined configs section
                     if line.strip().startswith('# User-defined configs'):
@@ -102,11 +200,12 @@ def parse_config(config_path):
                         config_info[key.strip()] = value.strip()
         else:
             print(f"Config file {config_path} not provided or does not exist.")
-    except Exception as e:
-        print(f"Error reading {config_path}: {e}")
+    except Exception as error:
+        print(f"Error reading {config_path}: {error}")
     return config_info
 
 def get_uefi_version(uefi_version_log):
+    """Read the UEFI version from its UTF-16 log when available."""
     uefi_version = 'Unknown'
     try:
         if uefi_version_log and os.path.exists(uefi_version_log):
@@ -117,8 +216,8 @@ def get_uefi_version(uefi_version_log):
                         break
         else:
             uefi_version = 'Not provided'
-    except Exception as e:
-        print(f"Error reading UEFI version log: {e}")
+    except Exception as error:
+        print(f"Error reading UEFI version log: {error}")
     return uefi_version
 
 def read_acs_info_system_info(acs_info_json_path):
@@ -126,22 +225,68 @@ def read_acs_info_system_info(acs_info_json_path):
     if not acs_info_json_path or not os.path.exists(acs_info_json_path):
         return {}
     try:
-        with open(acs_info_json_path, "r") as jf:
-            data = json.load(jf)
+        with open(acs_info_json_path, "r", encoding="utf-8") as json_file:
+            data = json.load(json_file)
         return data.get("System Info", {}) if isinstance(data, dict) else {}
     except Exception:
         return {}
 
+def build_system_info(acs_config_path, system_config_path, uefi_version_log,
+                      acs_info_json_path, use_acs_info_system_info=False):
+    """Build summary system information without changing the legacy default path."""
+    acs_info_system = read_acs_info_system_info(acs_info_json_path)
+    if use_acs_info_system_info:
+        system_info = dict(acs_info_system) if isinstance(acs_info_system, dict) else {}
+        summary_generated_date = system_info.pop('Summary Generated On', None)
+        legacy_date = system_info.pop('Summary Generated On Date/time', None)
+        return (
+            system_info,
+            summary_generated_date or legacy_date or 'Unknown',
+            system_info.get('Band', 'Unknown'),
+        )
+
+    system_info = get_system_info()
+    acs_config_info = parse_config(acs_config_path)
+    system_info.update(acs_config_info)
+    system_info.update(parse_config(system_config_path))
+    system_info['UEFI Version'] = get_uefi_version(uefi_version_log)
+
+    if isinstance(acs_info_system, dict) and "BMC Firmware Version" in acs_info_system:
+        system_info["BMC Firmware Version"] = acs_info_system.get("BMC Firmware Version", "N/A")
+    if isinstance(acs_info_system, dict) and "PSCI version" in acs_info_system:
+        system_info["PSCI version"] = acs_info_system.get("PSCI version", "Unknown")
+
+    summary_generated_date = system_info.pop('Summary Generated On Date/time', 'Unknown')
+    return system_info, summary_generated_date, acs_config_info.get('Band', 'Unknown')
+
 def remove_result_summary_headings(content):
+    """Remove nested result-summary headings before suite HTML is embedded."""
     # Use regular expressions to remove any heading containing 'Result Summary'
     pattern = r'<h[1-6][^>]*>\s*Result Summary\s*</h[1-6]>'
     content = re.sub(pattern, '', content, flags=re.IGNORECASE)
     return content
 
 def read_html_content(file_path):
+    """Return sanitized body content from a generated suite summary."""
     if file_path and os.path.exists(file_path):
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
+            # Suite summaries are complete standalone documents.  Embed only
+            # their body markup in the consolidated report so nested <html>,
+            # CSS, and interaction scripts cannot leak into the parent page.
+            body_match = re.search(
+                r'<body\b[^>]*>(.*?)</body\s*>',
+                content,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+            if body_match:
+                content = body_match.group(1)
+            content = re.sub(
+                r'<script\b[^>]*>.*?</script\s*>',
+                '',
+                content,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
             # Remove 'Result Summary' headings
             content = remove_result_summary_headings(content)
             return content
@@ -149,28 +294,32 @@ def read_html_content(file_path):
         return None
 
 def inject_test_suite_info(merged_json_path, output_dir):
+    """Inject suite descriptions from merged JSON into detailed reports."""
     # Add Test_suite_info into detailed HTMLs after they are generated.
     if not merged_json_path or not os.path.isfile(merged_json_path):
         return
     try:
-        with open(merged_json_path, 'r') as jf:
-            data = json.load(jf)
+        with open(merged_json_path, "r", encoding="utf-8") as json_file:
+            data = json.load(json_file)
     except Exception:
         return
 
-    def entries(v):
+    def entries(value):
         # Always return a list of suite entries.
-        if isinstance(v, list):
-            return v
-        if isinstance(v, dict) and isinstance(v.get("test_results"), list):
-            return v["test_results"]
-        if isinstance(v, dict):
-            return [v]
+        if isinstance(value, list):
+            return value
+        if isinstance(value, dict) and isinstance(value.get("test_results"), list):
+            return value["test_results"]
+        if isinstance(value, dict):
+            return [value]
         return []
 
     suite_map = {}
     if isinstance(data, dict):
         for suite_key, suite_data in data.items():
+            map_key = suite_key
+            if suite_key.lower().startswith("suite_name: os tests -"):
+                map_key = "Suite_Name: OS Tests"
             for entry in entries(suite_data):
                 if not isinstance(entry, dict):
                     continue
@@ -178,7 +327,7 @@ def inject_test_suite_info(merged_json_path, output_dir):
                 info = entry.get("Test_suite_info")
                 if name and info is not None:
                     # Store by lowercase name so PCIe/PCIE still matches.
-                    suite_map.setdefault(suite_key, {})[name.lower()] = info
+                    suite_map.setdefault(map_key, {})[name.lower()] = info
 
     def fmt_info(info):
         # Format list info as bullets; otherwise keep as plain text.
@@ -198,8 +347,14 @@ def inject_test_suite_info(merged_json_path, output_dir):
         # All detailed HTML files that should get Test_suite_info.
         ("bsa_detailed.html", "Suite_Name: BSA"),
         ("sbsa_detailed.html", "Suite_Name: SBSA"),
-        ("fwts_detailed.html", "Suite_Name: FWTS"),
-        ("sct_detailed.html", "Suite_Name: SCT"),
+        ("fwts_detailed.html", (
+            "Suite_Name: SBBR-FWTS",
+            "Suite_Name: EBBR-FWTS",
+        )),
+        ("sct_detailed.html", (
+            "Suite_Name: SBBR-SCT",
+            "Suite_Name: EBBR-SCT",
+        )),
         ("bbsr_fwts_detailed.html", "Suite_Name: BBSR-FWTS"),
         ("bbsr_sct_detailed.html", "Suite_Name: BBSR-SCT"),
         ("bbsr_tpm_detailed.html", "Suite_Name: BBSR-TPM"),
@@ -212,16 +367,26 @@ def inject_test_suite_info(merged_json_path, output_dir):
         ("os_tests_detailed.html", "Suite_Name: OS Tests"),
     ]
 
-    for filename, suite_key in files:
-        info_map = suite_map.get(suite_key)
+    for filename, suite_keys in files:
+        if isinstance(suite_keys, str):
+            suite_keys = (suite_keys,)
+        info_map = next(
+            (suite_map[key] for key in suite_keys if suite_map.get(key)),
+            None,
+        )
         if not info_map:
             continue
         file_path = os.path.join(output_dir, filename)
         if not os.path.exists(file_path):
             continue
-        with open(file_path, 'r') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
-        updated = content
+        updated = re.sub(
+            r"(<strong>)Test_suite_info:(</strong>)",
+            r"\1Test suite info:\2",
+            content,
+            flags=re.IGNORECASE,
+        )
         for pattern, name_group in patterns:
             out = []
             last = 0
@@ -232,11 +397,11 @@ def inject_test_suite_info(merged_json_path, output_dir):
                 if info is not None:
                     # Avoid duplicating Test_suite_info in the same section.
                     lookahead = updated[match.end():match.end() + 300]
-                    if "Test_suite_info" not in lookahead:
+                    if not re.search(r"Test[_ ]suite[_ ]info", lookahead, re.IGNORECASE):
                         block = (
                             "<div class=\"test-suite-info\" "
                             "style=\"margin: 6px 0 16px 0; color: #7f8c8d; font-size: 16px;\">"
-                            "<strong>Test_suite_info:</strong>"
+                            "<strong>Test suite info:</strong>"
                             f"{fmt_info(info)}</div>"
                         )
                         out.append(block)
@@ -244,23 +409,75 @@ def inject_test_suite_info(merged_json_path, output_dir):
             out.append(updated[last:])
             updated = "".join(out)
         if updated != content:
-            with open(file_path, 'w') as file:
+            with open(file_path, "w", encoding="utf-8") as file:
                 file.write(updated)
 
 def adjust_bbsr_headings(content, suite_name):
+    """Replace a generic BBSR heading with the selected suite name."""
     if content:
         pattern = r'(<h[1-6][^>]*>)(.*? Test Summary)(</h[1-6]>)'
         replacement = r'\1' + suite_name + r' Test Summary\3'
         content = re.sub(pattern, replacement, content, count=1, flags=re.IGNORECASE)
     return content
 
-def adjust_detailed_summary_heading(file_path, suite_name):
+
+def adjust_suite_headings(content, suite_name):
+    """Update the first test-summary heading and document title."""
+    content = adjust_bbsr_headings(content, suite_name)
+    if content:
+        title_pattern = r'(<title>)(.*? Test Summary)(</title>)'
+        content = re.sub(
+            title_pattern,
+            r'\1' + suite_name + r' Test Summary\3',
+            content,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+    return content
+
+
+def adjust_detailed_summary_heading(file_path, suite_name, adjust_title=False):
+    """Update the first test-summary heading in an existing report."""
     if file_path and os.path.exists(file_path):
-        with open(file_path, 'r') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
-        content = adjust_bbsr_headings(content, suite_name)
-        with open(file_path, 'w') as file:
+        if adjust_title:
+            content = adjust_suite_headings(content, suite_name)
+        else:
+            content = adjust_bbsr_headings(content, suite_name)
+        with open(file_path, "w", encoding="utf-8") as file:
             file.write(content)
+
+
+def link_detailed_reports_to_main(output_html_path):
+    """Mark detailed reports that have a generated main summary page."""
+    output_dir = os.path.dirname(output_html_path) or "."
+    main_page = html.escape(os.path.basename(output_html_path), quote=True)
+    for filename in sorted(os.listdir(output_dir)):
+        if not filename.endswith("_detailed.html"):
+            continue
+        file_path = os.path.join(output_dir, filename)
+        with open(file_path, "r", encoding="utf-8") as html_file:
+            content = html_file.read()
+        main_page_attribute = re.compile(
+            r"\bdata-acs-main-page\s*=\s*([\"']).*?\1",
+            re.IGNORECASE,
+        )
+        if main_page_attribute.search(content):
+            content, replacements = main_page_attribute.subn(
+                f'data-acs-main-page="{main_page}"', content, count=1
+            )
+        else:
+            content, replacements = re.subn(
+                r"<body\b",
+                f'<body data-acs-main-page="{main_page}"',
+                content,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+        if replacements:
+            with open(file_path, "w", encoding="utf-8") as html_file:
+                html_file.write(content)
 
 def read_overall_compliance_from_merged_json(merged_json_path):
     """
@@ -279,8 +496,8 @@ def read_overall_compliance_from_merged_json(merged_json_path):
     scmi_result = "Unknown"
 
     try:
-        with open(merged_json_path, 'r') as jf:
-            data = json.load(jf)
+        with open(merged_json_path, "r", encoding="utf-8") as json_file:
+            data = json.load(json_file)
         acs_info_data = data.get("Suite_Name: acs_info", {})
         acs_summary = acs_info_data.get("ACS Results Summary", {})
         overall_result = acs_summary.get("Overall Compliance Result", "Unknown")
@@ -343,8 +560,11 @@ def read_overall_compliance_from_merged_json(merged_json_path):
         # Get SCMI compliance result from ACS Results Summary
         scmi_result = acs_summary.get("SCMI compliance results", "")
 
-    except Exception as e:
-        print(f"Warning: Could not read merged JSON or find 'Overall Compliance Result': {e}")
+    except Exception as error:
+        print(
+            "Warning: Could not read merged JSON or find "
+            f"'Overall Compliance Result': {error}"
+        )
 
     # Derive SCMI details for the Extensions table (without storing in merged JSON)
     scmi_details = {"not_run": [], "failed": []}
@@ -359,8 +579,12 @@ def generate_html(system_info, acs_results_summary,
                   sbmr_ib_summary_path, sbmr_oob_summary_path, scmi_summary_path,
                   bbsr_fwts_summary_path, bbsr_sct_summary_path, bbsr_tpm_summary_path, pfdi_summary_path,
                   post_script_summary_path,
-                  standalone_summary_path, OS_tests_summary_path,
-                  output_html_path):
+                  standalone_summary_path, os_tests_summary_path,
+                  output_html_path, suite_prefix="SBBR"):
+    """Generate the consolidated ACS summary from all suite summaries."""
+
+    fwts_suite_name = f"{suite_prefix}-FWTS"
+    sct_suite_name = f"{suite_prefix}-SCT"
 
     # Read the summary HTML content from each suite
     bsa_summary_content = read_html_content(bsa_summary_path)
@@ -376,14 +600,22 @@ def generate_html(system_info, acs_results_summary,
     pfdi_summary_content = read_html_content(pfdi_summary_path)
     post_script_summary_content = read_html_content(post_script_summary_path)
     standalone_summary_content = read_html_content(standalone_summary_path)
-    OS_tests_summary_content = read_html_content(OS_tests_summary_path)
+    os_tests_summary_content = read_html_content(os_tests_summary_path)
 
-    # Adjust headings in BBSR/Standalone/OS summaries
+    # Add the specification/recipe prefix to suite headings in the combined report.
+    fwts_summary_content = adjust_suite_headings(
+        fwts_summary_content, fwts_suite_name
+    )
+    sct_summary_content = adjust_suite_headings(
+        sct_summary_content, sct_suite_name
+    )
     bbsr_fwts_summary_content = adjust_bbsr_headings(bbsr_fwts_summary_content, 'BBSR-FWTS')
     bbsr_sct_summary_content = adjust_bbsr_headings(bbsr_sct_summary_content, 'BBSR-SCT')
     bbsr_tpm_summary_content = adjust_bbsr_headings(bbsr_tpm_summary_content, 'BBSR-TPM')
     post_script_summary_content = adjust_bbsr_headings(post_script_summary_content, 'POST-SCRIPT')
-    OS_tests_summary_content = adjust_bbsr_headings(OS_tests_summary_content, 'OS')
+    os_tests_summary_content = adjust_bbsr_headings(
+        os_tests_summary_content, 'OS'
+    )
     standalone_summary_content = adjust_bbsr_headings(standalone_summary_content, 'Standalone')
 
     # Jinja2 template for the final HTML page
@@ -718,10 +950,10 @@ def generate_html(system_info, acs_results_summary,
                     <a href="#sbsa_summary">SBSA Summary</a>
                     {% endif %}
                     {% if fwts_summary_content %}
-                    <a href="#fwts_summary">FWTS Summary</a>
+                    <a href="#fwts_summary">{{ fwts_suite_name }} Summary</a>
                     {% endif %}
                     {% if sct_summary_content %}
-                    <a href="#sct_summary">SCT Summary</a>
+                    <a href="#sct_summary">{{ sct_suite_name }} Summary</a>
                     {% endif %}
                     {% if scmi_summary_content %}
                     <a href="#scmi_summary">SCMI Summary</a>
@@ -761,7 +993,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="bsa_summary">
                     {{ bsa_summary_content | safe }}
                     <div class="details-link">
-                        <a href="bsa_detailed.html" target="_blank">Click here to go to the detailed summary for BSA</a>
+                        <a href="bsa_detailed.html">Click here to go to the detailed summary for BSA</a>
                     </div>
                 </div>
                 {% endif %}
@@ -769,7 +1001,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="sbsa_summary">
                     {{ sbsa_summary_content | safe }}
                     <div class="details-link">
-                        <a href="sbsa_detailed.html" target="_blank">Click here to go to the detailed summary for SBSA</a>
+                        <a href="sbsa_detailed.html">Click here to go to the detailed summary for SBSA</a>
                     </div>
                 </div>
                 {% endif %}
@@ -777,7 +1009,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="fwts_summary">
                     {{ fwts_summary_content | safe }}
                     <div class="details-link">
-                        <a href="fwts_detailed.html" target="_blank">Click here to go to the detailed summary for FWTS</a>
+                        <a href="fwts_detailed.html">Click here to go to the detailed summary for {{ fwts_suite_name }}</a>
                     </div>
                 </div>
                 {% endif %}
@@ -785,7 +1017,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="sct_summary">
                     {{ sct_summary_content | safe }}
                     <div class="details-link">
-                        <a href="sct_detailed.html" target="_blank">Click here to go to the detailed summary for SCT</a>
+                        <a href="sct_detailed.html">Click here to go to the detailed summary for {{ sct_suite_name }}</a>
                     </div>
                 </div>
                 {% endif %}
@@ -793,7 +1025,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="scmi_summary">
                     {{ scmi_summary_content | safe }}
                     <div class="details-link">
-                        <a href="scmi_detailed.html" target="_blank">Click here to go to the detailed summary for SCMI</a>
+                        <a href="scmi_detailed.html">Click here to go to the detailed summary for SCMI</a>
                     </div>
                 </div>
                 {% endif %}
@@ -801,7 +1033,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="sbmr_ib_summary">
                     {{ sbmr_ib_summary_content | safe }}
                     <div class="details-link">
-                        <a href="sbmr_ib_detailed.html" target="_blank">Click here to go to the detailed summary for SBMR-IB</a>
+                        <a href="sbmr_ib_detailed.html">Click here to go to the detailed summary for SBMR-IB</a>
                     </div>
                 </div>
                 {% endif %}
@@ -809,7 +1041,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="sbmr_oob_summary">
                     {{ sbmr_oob_summary_content | safe }}
                     <div class="details-link">
-                        <a href="sbmr_oob_detailed.html" target="_blank">Click here to go to the detailed summary for SBMR-OOB</a>
+                        <a href="sbmr_oob_detailed.html">Click here to go to the detailed summary for SBMR-OOB</a>
                     </div>
                 </div>
                 {% endif %}
@@ -817,7 +1049,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="post_script_summary">
                     {{ post_script_summary_content | safe }}
                     <div class="details-link">
-                        <a href="post_script_detailed.html" target="_blank">Click here to go to the detailed summary for POST-SCRIPT</a>
+                        <a href="post_script_detailed.html">Click here to go to the detailed summary for POST-SCRIPT</a>
                     </div>
                 </div>
                 {% endif %}
@@ -825,7 +1057,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="standalone_summary">
                     {{ standalone_summary_content | safe }}
                     <div class="details-link">
-                        <a href="standalone_tests_detailed.html" target="_blank">Click here to go to the detailed summary for Standalone tests</a>
+                        <a href="standalone_tests_detailed.html">Click here to go to the detailed summary for Standalone tests</a>
                     </div>
                 </div>
                 {% endif %}
@@ -833,7 +1065,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="bbsr_fwts_summary">
                     {{ bbsr_fwts_summary_content | safe }}
                     <div class="details-link">
-                        <a href="bbsr_fwts_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-FWTS</a>
+                        <a href="bbsr_fwts_detailed.html">Click here to go to the detailed summary for BBSR-FWTS</a>
                     </div>
                 </div>
                 {% endif %}
@@ -841,7 +1073,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="bbsr_sct_summary">
                     {{ bbsr_sct_summary_content | safe }}
                     <div class="details-link">
-                        <a href="bbsr_sct_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-SCT</a>
+                        <a href="bbsr_sct_detailed.html">Click here to go to the detailed summary for BBSR-SCT</a>
                     </div>
                 </div>
                 {% endif %}
@@ -849,7 +1081,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="bbsr_tpm_summary">
                     {{ bbsr_tpm_summary_content | safe }}
                     <div class="details-link">
-                        <a href="bbsr_tpm_detailed.html" target="_blank">Click here to go to the detailed summary for BBSR-TPM</a>
+                        <a href="bbsr_tpm_detailed.html">Click here to go to the detailed summary for BBSR-TPM</a>
                     </div>
                 </div>
                 {% endif %}
@@ -857,7 +1089,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="pfdi_summary">
                     {{ pfdi_summary_content | safe }}
                     <div class="details-link">
-                        <a href="pfdi_detailed.html" target="_blank">
+                        <a href="pfdi_detailed.html">
                             Click here to go to the detailed summary for PFDI
                         </a>
                     </div>
@@ -867,7 +1099,7 @@ def generate_html(system_info, acs_results_summary,
                 <div class="summary" id="OS_tests_summary">
                     {{ OS_tests_summary_content | safe }}
                     <div class="details-link">
-                        <a href="os_tests_detailed.html" target="_blank">Click here to go to the detailed summary for OS Tests</a>
+                        <a href="os_tests_detailed.html">Click here to go to the detailed summary for OS Tests</a>
                     </div>
                 </div>
                 {% endif %}
@@ -894,13 +1126,38 @@ def generate_html(system_info, acs_results_summary,
         pfdi_summary_content=pfdi_summary_content,
         post_script_summary_content=post_script_summary_content,
         standalone_summary_content=standalone_summary_content,
-        OS_tests_summary_content=OS_tests_summary_content
+        OS_tests_summary_content=os_tests_summary_content,
+        fwts_suite_name=fwts_suite_name,
+        sct_suite_name=sct_suite_name
     )
 
-    with open(output_html_path, 'w') as html_file:
+    html_output = enhance_html_report(html_output, page_type="acs-summary")
+    with open(output_html_path, 'w', encoding='utf-8') as html_file:
         html_file.write(html_output)
 
-    # Adjust headings in the *detailed* summary pages
+    # Keep the individual summary and detailed pages consistent with the
+    # headings embedded in acs_summary.html.
+    prefixed_summaries = [
+        (fwts_summary_path, fwts_suite_name),
+        (sct_summary_path, sct_suite_name),
+        (
+            os.path.join(
+                os.path.dirname(output_html_path), "fwts_detailed.html"
+            ),
+            fwts_suite_name,
+        ),
+        (
+            os.path.join(
+                os.path.dirname(output_html_path), "sct_detailed.html"
+            ),
+            sct_suite_name,
+        ),
+    ]
+    for file_path, suite_name in prefixed_summaries:
+        adjust_detailed_summary_heading(
+            file_path, suite_name, adjust_title=True
+        )
+
     detailed_summaries = [
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_fwts_detailed.html'), 'BBSR-FWTS'),
         (os.path.join(os.path.dirname(output_html_path), 'bbsr_sct_detailed.html'), 'BBSR-SCT'),
@@ -914,6 +1171,7 @@ def generate_html(system_info, acs_results_summary,
     ]
     for file_path, suite_name in detailed_summaries:
         adjust_detailed_summary_heading(file_path, suite_name)
+    link_detailed_reports_to_main(output_html_path)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate ACS Summary HTML page")
@@ -939,31 +1197,25 @@ if __name__ == "__main__":
     parser.add_argument("--uefi_version_log", default="", help="Path to the uefi_version.log file")
     parser.add_argument("--device_tree_dts", default="", help="Path to the device_tree.dts file")
     parser.add_argument("--acs_info_json", default="", help="Path to acs_info.json for System Info fields")
+    parser.add_argument(
+        "--use-acs-info-system-info",
+        action="store_true",
+        help="Use acs_info.json as the complete System Information source",
+    )
 
     args = parser.parse_args()
 
-    # 1) Basic system info
-    system_info = get_system_info()
-
-    # 2) Merge data from ACS config & system config
-    acs_config_info = parse_config(args.acs_config_path)
-    system_config_info = parse_config(args.system_config_path)
-    system_info.update(acs_config_info)
-    system_info.update(system_config_info)
-
-    # 3) UEFI version
-    uefi_version = get_uefi_version(args.uefi_version_log)
-    system_info['UEFI Version'] = uefi_version
-
-    # 3b) BMC firmware version from acs_info.json
-    acs_info_system = read_acs_info_system_info(args.acs_info_json)
-    if isinstance(acs_info_system, dict) and "BMC Firmware Version" in acs_info_system:
-        system_info["BMC Firmware Version"] = acs_info_system.get("BMC Firmware Version", "N/A")
-    if isinstance(acs_info_system, dict) and "PSCI version" in acs_info_system:
-        system_info["PSCI version"] = acs_info_system.get("PSCI version", "Unknown")
-
-    # 4) Extract summary date from system_info
-    summary_generated_date = system_info.pop('Summary Generated On Date/time', 'Unknown')
+    system_info, summary_generated_date, summary_band = build_system_info(
+        args.acs_config_path,
+        args.system_config_path,
+        args.uefi_version_log,
+        args.acs_info_json,
+        args.use_acs_info_system_info,
+    )
+    suite_prefix = get_report_suite_prefix(
+        args.merged_json,
+        summary_band,
+    )
 
     # 5) Read in the stand-alone & capsule summary, then combine them
     standalone_summary_content = read_html_content(args.standalone_summary_path)
@@ -979,8 +1231,8 @@ if __name__ == "__main__":
     suite_content_map = {
         "BSA": read_html_content(args.bsa_summary_path),
         "SBSA": read_html_content(args.sbsa_summary_path),
-        "FWTS": read_html_content(args.fwts_summary_path),
-        "SCT": read_html_content(args.sct_summary_path),
+        f"{suite_prefix}-FWTS": read_html_content(args.fwts_summary_path),
+        f"{suite_prefix}-SCT": read_html_content(args.sct_summary_path),
         "SCMI": read_html_content(args.scmi_summary_path),
         "SBMR-IB":  read_html_content(args.sbmr_ib_summary_path),
         "SBMR-OOB": read_html_content(args.sbmr_oob_summary_path),
@@ -1007,7 +1259,7 @@ if __name__ == "__main__":
 
     # 9) Prepare the dictionary that will be used in the final HTML
     acs_results_summary = {
-        'Band': acs_config_info.get('Band', 'Unknown'),
+        'Band': summary_band,
         'Date': summary_generated_date,
         'Overall Compliance Results': overall_compliance,
         'BBSR compliance results': bbsr_compliance,
@@ -1037,7 +1289,8 @@ if __name__ == "__main__":
         args.post_script_summary_path,
         args.standalone_summary_path,
         args.OS_tests_summary_path,
-        args.output_html_path
+        args.output_html_path,
+        suite_prefix
     )
 
     # Inject Test_suite_info into detailed HTMLs (no change to suite parsers)

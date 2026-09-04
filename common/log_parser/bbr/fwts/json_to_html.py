@@ -14,33 +14,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import matplotlib.pyplot as plt
-import base64
-from io import BytesIO
-from jinja2 import Template
-import os
+"""Render BBSR FWTS JSON results as detailed and summary HTML reports."""
 
-# Helper function to retrieve dictionary values in a case-insensitive manner
-def get_case_insensitive(d, key, default=0):
-    for k, v in d.items():
-        if k.lower() == key.lower():
-            return v
+import base64
+import importlib
+import json
+import os
+import sys
+from io import BytesIO
+
+from jinja2 import Template
+
+plt = importlib.import_module("matplotlib.pyplot")
+sys.path.insert(
+    0,
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
+enhance_html_report = importlib.import_module("report_ui").enhance_html_report
+
+def get_case_insensitive(data, key, default=0):
+    """Return a dictionary value without requiring exact key casing."""
+    for candidate_key, value in data.items():
+        if candidate_key.lower() == key.lower():
+            return value
     return default
 
+
 def detect_columns_used(subtests):
+    """Return whether any subtest contains a failed-with-waiver result."""
     show_waiver = False
     for subtest in subtests:
-        r = subtest.get("sub_test_result", {})
-        if r.get("FAILED_WITH_WAIVER", 0) > 0:
+        result = subtest.get("sub_test_result", {})
+        if result.get("FAILED_WITH_WAIVER", 0) > 0:
             show_waiver = True
             break
     return {
         "show_waiver": show_waiver
     }
 
-# Function to generate bar chart for FWTS results
 def generate_bar_chart_fwts(suite_summary):
+    """Return a base64-encoded result-distribution chart."""
     labels = ['Passed', 'Failed', 'Failed with Waiver', 'Aborted', 'Skipped', 'Warnings']
     sizes = [
         suite_summary['total_passed'],
@@ -57,11 +70,11 @@ def generate_bar_chart_fwts(suite_summary):
 
     total_tests = sum(sizes)
     max_size = max(sizes) if sizes else 0
-    for bar, size in zip(bars, sizes):
-        yval = bar.get_height()
+    for chart_bar, size in zip(bars, sizes):
+        yval = chart_bar.get_height()
         percentage = (size / total_tests) * 100 if total_tests > 0 else 0
         plt.text(
-            bar.get_x() + bar.get_width()/2,
+            chart_bar.get_x() + chart_bar.get_width()/2,
             yval + (0.01 * max_size if max_size > 0 else 0.05),
             f'{percentage:.2f}%',
             ha='center',
@@ -74,6 +87,7 @@ def generate_bar_chart_fwts(suite_summary):
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.tight_layout()
+    importlib.import_module("report_ui").center_matplotlib_plot(plt.gca())
 
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
@@ -81,8 +95,13 @@ def generate_bar_chart_fwts(suite_summary):
     buffer.seek(0)
     return base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-# Function to generate HTML content for both summary and detailed pages
-def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path, is_summary_page=True):
+def generate_html_fwts(
+        suite_summary,
+        test_results,
+        chart_data,
+        output_html_path,
+        is_summary_page=True):
+    """Generate either the detailed or summary FWTS HTML report."""
     # Jinja2 template with ONE "Reason" column + a fixed "Waiver Reason" column
     template = Template(r"""
     <!DOCTYPE html>
@@ -237,7 +256,13 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
         {% if not is_summary_page %}
         <div class="detailed-summary">
             {% for test in test_results %}
-            <div class="test-suite-header">Test Suite: {{ test.Test_suite }}</div>
+            {% set ui = test.report_ui_summary %}
+            <div class="test-suite-header"
+                 data-acs-summary-outcomes="{{ ui.total_outcomes }}"
+                 data-acs-summary-failed="{{ ui.total_failed }}"
+                 data-acs-summary-failed-with-waiver="{{ ui.total_failed_with_waiver }}">
+                Test Suite: {{ test.Test_suite }}
+            </div>
             <div class="test-suite-description">Description: {{ test.Test_suite_description }}</div>
 
             <table>
@@ -309,6 +334,7 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
     total_tests = (
         suite_summary["total_passed"]
         + suite_summary["total_failed"]
+        + suite_summary["total_failed_with_waiver"]
         + suite_summary["total_aborted"]
         + suite_summary["total_skipped"]
         + suite_summary["total_warnings"]
@@ -327,11 +353,14 @@ def generate_html_fwts(suite_summary, test_results, chart_data, output_html_path
         is_summary_page=is_summary_page
     )
 
-    with open(output_html_path, "w") as file:
+    html_content = enhance_html_report(html_content, suite_type="fwts")
+    with open(output_html_path, "w", encoding="utf-8") as file:
         file.write(html_content)
 
-def main(input_json_file, detailed_html_file, summary_html_file):
-    with open(input_json_file, 'r') as json_file:
+
+def main(input_path, detailed_path, summary_path):
+    """Load FWTS JSON and write detailed and summary HTML reports."""
+    with open(input_path, "r", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
     suite_summary = {
@@ -348,12 +377,18 @@ def main(input_json_file, detailed_html_file, summary_html_file):
     # Aggregate totals & detect columns for each suite
     for test_suite in test_results:
         ts_summary = test_suite.get('test_suite_summary', {})
-        suite_summary['total_passed'] += get_case_insensitive(ts_summary, 'total_passed', ts_summary.get('total_passed', 0))
-        suite_summary['total_failed'] += get_case_insensitive(ts_summary, 'total_failed', ts_summary.get('total_failed', 0))
-        suite_summary['total_failed_with_waiver'] += get_case_insensitive(ts_summary, 'total_failed_with_waiver', ts_summary.get('total_failed_with_waiver', 0))
-        suite_summary['total_aborted'] += get_case_insensitive(ts_summary, 'total_aborted', ts_summary.get('total_aborted', 0))
-        suite_summary['total_skipped'] += get_case_insensitive(ts_summary, 'total_skipped', ts_summary.get('total_skipped', 0))
-        suite_summary['total_warnings'] += get_case_insensitive(ts_summary, 'total_warnings', ts_summary.get('total_warnings', 0))
+        report_ui_summary = {}
+        for summary_key in suite_summary:
+            summary_value = get_case_insensitive(
+                ts_summary,
+                summary_key,
+                ts_summary.get(summary_key, 0),
+            )
+            suite_summary[summary_key] += summary_value
+            report_ui_summary[summary_key] = summary_value
+
+        report_ui_summary["total_outcomes"] = sum(report_ui_summary.values())
+        test_suite["report_ui_summary"] = report_ui_summary
 
         # Retain column detection for minimal code changes (but we always show Waiver anyway)
         subtests = test_suite.get("subtests", [])
@@ -363,19 +398,29 @@ def main(input_json_file, detailed_html_file, summary_html_file):
     chart_data = generate_bar_chart_fwts(suite_summary)
 
     # Generate the detailed summary page
-    generate_html_fwts(suite_summary, test_results, chart_data, detailed_html_file, is_summary_page=False)
+    generate_html_fwts(
+        suite_summary,
+        test_results,
+        chart_data,
+        detailed_path,
+        is_summary_page=False,
+    )
 
     # Generate the summary page
-    generate_html_fwts(suite_summary, test_results, chart_data, summary_html_file, is_summary_page=True)
+    generate_html_fwts(
+        suite_summary,
+        test_results,
+        chart_data,
+        summary_path,
+        is_summary_page=True,
+    )
 
 if __name__ == "__main__":
-    import sys
     if len(sys.argv) != 4:
-        print("Usage: python fwts_generate_html.py <input_json_file> <detailed_html_file> <summary_html_file>")
+        print(
+            "Usage: python fwts_generate_html.py <input_json_file> "
+            "<detailed_html_file> <summary_html_file>"
+        )
         sys.exit(1)
 
-    input_json_file = sys.argv[1]
-    detailed_html_file = sys.argv[2]
-    summary_html_file = sys.argv[3]
-
-    main(input_json_file, detailed_html_file, summary_html_file)
+    main(sys.argv[1], sys.argv[2], sys.argv[3])

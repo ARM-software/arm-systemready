@@ -802,7 +802,11 @@ def main(input_file, output_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse an SCT Log file and save results to a JSON file.")
+    parser.add_argument("--mode", choices=["DT", "SR"],
+                        help="Explicit parser mode; the legacy Yocto flag remains the default")
     parser.add_argument("input_file", help="Input Log file")
     parser.add_argument("output_file", help="Output JSON file")
     args = parser.parse_args()
+    if args.mode:
+        DT_OR_SR_MODE = args.mode
     main(args.input_file, args.output_file)

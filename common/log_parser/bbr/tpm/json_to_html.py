@@ -14,11 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import matplotlib.pyplot as plt
+"""Render BBSR TPM JSON results as detailed and summary HTML reports."""
+
 import base64
+import importlib
+import json
+import os
+import sys
 from io import BytesIO
+
 from jinja2 import Environment
+
+plt = importlib.import_module("matplotlib.pyplot")
+sys.path.insert(
+    0,
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+)
+enhance_html_report = importlib.import_module("report_ui").enhance_html_report
 
 def determine_css_class(subtest_result):
     subtest_result_upper = subtest_result.upper()
@@ -97,6 +109,7 @@ def generate_bar_chart_improved(suite_summary):
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.tight_layout()
+    importlib.import_module("report_ui").center_matplotlib_plot(plt.gca())
 
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
@@ -354,6 +367,7 @@ def generate_html_improved(suite_summary, test_results, chart_data, output_html_
         is_summary_page=is_summary_page
     )
 
+    html_content = enhance_html_report(html_content, suite_type="tpm")
     with open(output_html_path, "w", encoding="utf-8") as file:
         file.write(html_content)
 
@@ -386,8 +400,6 @@ def main(input_json_file, detailed_html_file, summary_html_file):
     )
 
 if __name__ == "__main__":
-    import sys
-
     if len(sys.argv) != 4:
         print("Usage: python tpm_json_to_html.py <input_json_file> <detailed_html_file> <summary_html_file>")
         sys.exit(1)

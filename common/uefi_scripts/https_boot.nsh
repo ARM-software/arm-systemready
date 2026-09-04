@@ -71,7 +71,7 @@ echo HOSTPATH=%HTTPS_IMAGE_HOSTPATH% >> %logfile%
 # locate ledge.efi and set in-progress flag
 set rc 1
 
-for %j in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %j in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
   if exist FS%j:\acs_tests\app\ledge.efi then
     FS%j:
     echo ledge.efi found at \acs_tests\app\ledge.efi >> %logfile%

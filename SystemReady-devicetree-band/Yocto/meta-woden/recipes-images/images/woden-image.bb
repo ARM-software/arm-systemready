@@ -8,6 +8,7 @@ WKS_FILE = "woden.wks.in"
 IMAGE_INSTALL = "packagegroup-core-boot \
                  python3 \
                  fwts \
+                 linux-firmware \
                  bsa-acs-drv \
                  bsa-acs-app \
                  mokutil \

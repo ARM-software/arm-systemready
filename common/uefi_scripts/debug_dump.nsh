@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 echo -off
-for %m in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %m in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%m:\acs_results_template\acs_results then
         FS%m:
         cd FS%m:\acs_results_template\acs_results

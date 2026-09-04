@@ -1,5 +1,5 @@
 #!/usr/bin/env python3i
-# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,10 @@ def parse_tpm_log(lines):
         }
     }
 
-    pattern = re.compile(r'^Verify\s+.*:\s+(PASS|FAIL|ABORTED|SKIPPED|WARNING)', re.IGNORECASE)
+    pattern = re.compile(
+        r'^Verify\s+.*:\s+(PASS|FAIL|ABORTED|SKIPPED|WARNING|WARN)\b',
+        re.IGNORECASE
+    )
     subtest_number = 0
 
     i = 0
@@ -53,7 +56,9 @@ def parse_tpm_log(lines):
             # We do a split by " : "
             parts = line.split(':')
             subtest_desc = parts[0].strip()  # e.g. "Verify EV_POST_CODE events ... recommended strings"
-            result_str = parts[-1].strip().upper()  # e.g. "FAIL"
+            result_str = match.group(1).upper()  # e.g. "FAIL"
+            if result_str == "WARN":
+                result_str = "WARNING"
 
             # Grab any indented lines as "reason"
             reason_lines = []
@@ -112,7 +117,10 @@ def main(input_file, output_file):
 
     # If we found zero subtests, you can optionally handle that
     if len(tpm_entry["subtests"]) == 0:
-        print(f"WARNING: No 'Verify ... : PASS|FAIL' patterns found in {input_file}.")
+        print(
+            "WARNING: No 'Verify ... : "
+            f"PASS|FAIL|WARN|WARNING|ABORTED|SKIPPED' patterns found in {input_file}."
+        )
 
     # Build the suite_summary from the single test_entry
     summary = tpm_entry["test_case_summary"]

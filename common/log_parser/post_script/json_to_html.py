@@ -14,12 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import matplotlib.pyplot as plt
+"""Render post-script JSON results as detailed and summary HTML reports."""
+
 import base64
-from io import BytesIO
-from jinja2 import Template
+import importlib
+import json
+import os
 import sys
+from io import BytesIO
+
+from jinja2 import Template
+
+plt = importlib.import_module("matplotlib.pyplot")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+enhance_html_report = importlib.import_module("report_ui").enhance_html_report
 
 # Helper function for case-insensitive dictionary get
 def get_case_insensitive(d, key, default=0):
@@ -67,6 +75,7 @@ def generate_bar_chart(suite_summary):
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.tight_layout()
+    importlib.import_module("report_ui").center_matplotlib_plot(plt.gca())
 
     # Convert plot to base64
     buffer = BytesIO()
@@ -329,6 +338,7 @@ def generate_html(suite_summary, test_results, chart_data, output_html_path, is_
         chart_data=chart_data
     )
 
+    html_content = enhance_html_report(html_content, suite_type="post-script")
     with open(output_html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
 

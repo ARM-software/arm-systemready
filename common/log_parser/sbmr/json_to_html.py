@@ -14,27 +14,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import matplotlib.pyplot as plt
+"""Render SBMR JSON results as detailed and summary HTML reports."""
+
 import base64
-from io import BytesIO
-from jinja2 import Template
+import importlib
+import json
 import os
 import sys
+from io import BytesIO
+
+from jinja2 import Template
+
+plt = importlib.import_module("matplotlib.pyplot")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+enhance_html_report = importlib.import_module("report_ui").enhance_html_report
 
 # ----------------------------
 # Helpers
 # ----------------------------
 
-def get_case_insensitive(d, key, default=0):
-    if not isinstance(d, dict):
+def get_case_insensitive(data, key, default=0):
+    """Return a dictionary value without requiring exact key casing."""
+    if not isinstance(data, dict):
         return default
-    for k, v in d.items():
-        if k.lower() == key.lower():
-            return v
+    for candidate_key, value in data.items():
+        if candidate_key.lower() == key.lower():
+            return value
     return default
 
-def summarize_subtests_list(subtests):
+
+def summarize_subtests(subtests):
+    """Calculate a suite summary from a flat subtest list."""
     total = {
         'total_passed': 0,
         'total_failed': 0,
@@ -44,36 +54,39 @@ def summarize_subtests_list(subtests):
         'total_warnings': 0,
         'total_ignored': 0,
     }
-    for st in subtests or []:
-        res = st.get('sub_test_result')
-        if isinstance(res, dict):
-            total['total_passed']             += res.get('PASSED', 0)
-            total['total_failed']             += res.get('FAILED', 0)
-            total['total_failed_with_waiver'] += res.get('FAILED_WITH_WAIVER', 0)
-            total['total_aborted']            += res.get('ABORTED', 0)
-            total['total_skipped']            += res.get('SKIPPED', 0)
-            total['total_warnings']           += res.get('WARNINGS', 0)
+    for subtest in subtests or []:
+        result = subtest.get('sub_test_result')
+        if isinstance(result, dict):
+            total['total_passed'] += result.get('PASSED', 0)
+            total['total_failed'] += result.get('FAILED', 0)
+            total['total_failed_with_waiver'] += result.get(
+                'FAILED_WITH_WAIVER', 0
+            )
+            total['total_aborted'] += result.get('ABORTED', 0)
+            total['total_skipped'] += result.get('SKIPPED', 0)
+            total['total_warnings'] += result.get('WARNINGS', 0)
         else:
-            u = (res or "").upper()
-            if 'PASS' in u:
+            normalized_result = (result or "").upper()
+            if 'PASS' in normalized_result:
                 total['total_passed'] += 1
-            elif 'FAIL' in u:
-                if '(WITH WAIVER)' in u:
+            elif 'FAIL' in normalized_result:
+                if '(WITH WAIVER)' in normalized_result:
                     total['total_failed_with_waiver'] += 1
                 else:
                     total['total_failed'] += 1
-            elif 'ABORT' in u:
+            elif 'ABORT' in normalized_result:
                 total['total_aborted'] += 1
-            elif 'SKIP' in u:
+            elif 'SKIP' in normalized_result:
                 total['total_skipped'] += 1
-            elif 'WARN' in u:
+            elif 'WARN' in normalized_result:
                 total['total_warnings'] += 1
             else:
                 total['total_ignored'] += 1
     return total
 
-def compute_suite_summary_from_results(test_results):
-    agg = {
+def compute_suite_summary(test_results):
+    """Return combined totals for all SBMR result formats."""
+    aggregate = {
         'total_passed': 0,
         'total_failed': 0,
         'total_failed_with_waiver': 0,
@@ -84,18 +97,22 @@ def compute_suite_summary_from_results(test_results):
     }
     for suite in test_results:
         if isinstance(suite, dict) and 'Test_cases' in suite:
-            ss = suite.get('test_suite_summary', {})
-            for k in agg:
-                agg[k] += get_case_insensitive(ss, k, 0)
+            summary = suite.get('test_suite_summary', {})
+            for summary_key in aggregate:
+                aggregate[summary_key] += get_case_insensitive(
+                    summary, summary_key, 0
+                )
         else:
-            ss = suite.get('test_suite_summary')
-            if not ss:
-                ss = summarize_subtests_list(suite.get('subtests', []))
-            for k in agg:
-                agg[k] += ss.get(k, 0)
-    return agg
+            summary = suite.get('test_suite_summary')
+            if not summary:
+                summary = summarize_subtests(suite.get('subtests', []))
+            for summary_key in aggregate:
+                aggregate[summary_key] += summary.get(summary_key, 0)
+    return aggregate
+
 
 def generate_bar_chart(suite_summary):
+    """Return a base64-encoded SBMR result-distribution chart."""
     labels = ['Passed', 'Failed', 'Failed with Waiver', 'Aborted', 'Skipped', 'Warnings']
     sizes = [
         suite_summary.get('total_passed', 0),
@@ -112,12 +129,12 @@ def generate_bar_chart(suite_summary):
 
     total_tests = sum(sizes)
     max_size = max(sizes) if sizes else 0
-    for bar, size in zip(bars, sizes):
-        y = bar.get_height()
+    for chart_bar, size in zip(bars, sizes):
+        height = chart_bar.get_height()
         pct = (size / total_tests) * 100 if total_tests > 0 else 0
         plt.text(
-            bar.get_x() + bar.get_width()/2,
-            y + (0.01 * max_size if max_size else 0.1),
+            chart_bar.get_x() + chart_bar.get_width()/2,
+            height + (0.01 * max_size if max_size else 0.1),
             f'{pct:.2f}%',
             ha='center',
             va='bottom',
@@ -129,6 +146,7 @@ def generate_bar_chart(suite_summary):
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.tight_layout()
+    importlib.import_module("report_ui").center_matplotlib_plot(plt.gca())
 
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
@@ -372,11 +390,18 @@ SUMMARY_TEMPLATE = Template("""
 # ----------------------------
 
 def render_detail_html(dataset, output_html_path, page_title, report_link=None):
-    html = DETAIL_TEMPLATE.render(ds=dataset, page_title=page_title.upper(), report_link=report_link)
-    with open(output_html_path, "w") as f:
-        f.write(html)
+    """Render the detailed SBMR report."""
+    html = DETAIL_TEMPLATE.render(
+        ds=dataset,
+        page_title=page_title.upper(),
+        report_link=report_link,
+    )
+    with open(output_html_path, "w", encoding="utf-8") as file_handle:
+        file_handle.write(enhance_html_report(html, suite_type="sbmr"))
+
 
 def render_summary_html(combined_summary, output_html_path, page_title):
+    """Render the SBMR summary report."""
     total_tests = (
         combined_summary.get("total_passed", 0)
         + combined_summary.get("total_failed", 0)
@@ -395,14 +420,15 @@ def render_summary_html(combined_summary, output_html_path, page_title):
         total_skipped=combined_summary.get("total_skipped", 0),
         total_warnings=combined_summary.get("total_warnings", 0),
     )
-    with open(output_html_path, "w") as f:
-        f.write(html)
+    with open(output_html_path, "w", encoding="utf-8") as file_handle:
+        file_handle.write(enhance_html_report(html, suite_type="sbmr"))
 
 # ----------------------------
 # Main
 # ----------------------------
 
 def friendly_label_from_filename(path):
+    """Return a readable report label derived from a JSON filename."""
     base = os.path.splitext(os.path.basename(path))[0].upper()
     # Aim for user-friendly labels:
     # sbmr_ib.json -> SBMR IB   |   sbmr_oob.json -> SBMR OOB
@@ -410,22 +436,27 @@ def friendly_label_from_filename(path):
     return base
 
 def uid_from_label(label):
+    """Return a stable lowercase HTML identifier for a report label."""
     # Safe id for HTML element ids
     return "".join(ch for ch in label if ch.isalnum()).lower()
 
 def main():
+    """Load SBMR JSON and write detailed and summary HTML reports."""
     if len(sys.argv) < 4:
-        print("Usage: python json_to_html.py <input_json> <detailed_html_file> <summary_html_file> [report_html_abs_path]")
+        print(
+            "Usage: python json_to_html.py <input_json> "
+            "<detailed_html_file> <summary_html_file> [report_html_abs_path]"
+        )
         sys.exit(1)
 
     input_json_file, detailed_html_file, summary_html_file = sys.argv[1:4]
     report_html_abs = sys.argv[4] if len(sys.argv) >= 5 else os.environ.get("SBMR_REPORT_HTML", "")
 
-    with open(input_json_file, "r") as jf:
-        data = json.load(jf)
+    with open(input_json_file, "r", encoding="utf-8") as json_file:
+        data = json.load(json_file)
 
     suites = data.get("test_results", [])
-    suite_summary = data.get("suite_summary") or compute_suite_summary_from_results(suites)
+    suite_summary = data.get("suite_summary") or compute_suite_summary(suites)
 
     total_tests = (
         suite_summary.get("total_passed", 0)
@@ -448,14 +479,16 @@ def main():
     }
 
     page_title = label  # keep simple
-    # If a report.html absolute path was provided, convert to a relative href from the detailed HTML dir
+    # Convert the report path into a link relative to the detailed HTML file.
     report_link = None
     if report_html_abs:
         try:
             report_html_abs = os.path.abspath(report_html_abs)
             if os.path.exists(report_html_abs):
                 detail_dir = os.path.dirname(os.path.abspath(detailed_html_file))
-                report_link = os.path.relpath(report_html_abs, start=detail_dir).replace(os.sep, "/")
+                report_link = os.path.relpath(
+                    report_html_abs, start=detail_dir
+                ).replace(os.sep, "/")
         except Exception:
             report_link = None
 

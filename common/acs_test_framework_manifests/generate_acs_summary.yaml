@@ -386,7 +386,7 @@ suites:
             path: "{dir}/summary.html"
           - type: file_contains
             path: "{dir}/bsa_detailed.html"
-            text: "Test_suite_info:"
+            text: "Test suite info:"
           - type: file_contains
             path: "{dir}/bsa_detailed.html"
             text: "PCIe root complex present"
@@ -397,3 +397,61 @@ suites:
             path: "{dir}/bsa_detailed.html"
             text: "<ul"
 
+      - name: cli_injects_os_test_suite_info_from_named_os_sections
+        type: cli
+        text_files:
+          os_tests.html: |
+            <!DOCTYPE html>
+            <html><head><title>OS Test Summary</title></head><body><h1>OS Test Summary</h1><h2>Result Summary</h2><table class="summary-table"><tr><th>Status</th><th>Total</th></tr><tr><td>Passed</td><td>1</td></tr></table></body></html>
+          os_tests_detailed.html: |
+            <!DOCTYPE html>
+            <html><body><div class="test-suite-header">Test Suite: Network</div><div>details body</div></body></html>
+          merged.json: |
+            {
+              "Suite_Name: acs_info": {
+                "ACS Results Summary": {
+                  "Overall Compliance Result": "Compliant"
+                }
+              },
+              "Suite_Name: OS Tests - ethtool_test_linux-debian": {
+                "test_results": [
+                  {
+                    "Test_suite": "Network",
+                    "Test_suite_info": [
+                      "OS network category information",
+                      "Linux operating-system validation"
+                    ]
+                  }
+                ]
+              }
+            }
+        args:
+          - --merged_json
+          - "{dir}/merged.json"
+          - "{dir}/bsa_missing.html"
+          - "{dir}/sbsa_missing.html"
+          - "{dir}/fwts_missing.html"
+          - "{dir}/sct_missing.html"
+          - "{dir}/bbsr_fwts_missing.html"
+          - "{dir}/bbsr_sct_missing.html"
+          - "{dir}/bbsr_tpm_missing.html"
+          - "{dir}/pfdi_missing.html"
+          - "{dir}/post_script_missing.html"
+          - "{dir}/standalone_missing.html"
+          - "{dir}/os_tests.html"
+          - "{dir}/capsule_missing.html"
+          - "{dir}/sbmr_ib_missing.html"
+          - "{dir}/sbmr_oob_missing.html"
+          - "{dir}/scmi_missing.html"
+          - "{dir}/summary.html"
+        expect_exit_code: 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/os_tests_detailed.html"
+            text: "Test suite info:"
+          - type: file_contains
+            path: "{dir}/os_tests_detailed.html"
+            text: "OS network category information"
+          - type: file_contains
+            path: "{dir}/os_tests_detailed.html"
+            text: "Linux operating-system validation"

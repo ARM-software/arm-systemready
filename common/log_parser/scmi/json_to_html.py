@@ -17,13 +17,17 @@
 """Render SCMI JSON results into detailed and summary HTML reports."""
 
 import base64
+import importlib
 import json
 import sys
 from io import BytesIO
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 from jinja2 import Template
+
+plt = importlib.import_module("matplotlib.pyplot")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+enhance_html_report = importlib.import_module("report_ui").enhance_html_report
 
 
 def generate_bar_chart(summary_dict):
@@ -59,6 +63,7 @@ def generate_bar_chart(summary_dict):
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.tight_layout()
+    importlib.import_module("report_ui").center_matplotlib_plot(plt.gca())
 
     buf = BytesIO()
     plt.savefig(buf, format="png")
@@ -178,7 +183,9 @@ def build_html(overall_summary, test_results, chart_b64, dest_html, suite_name, 
         **overall_summary,
     )
 
-    Path(dest_html).write_text(html, encoding="utf-8")
+    Path(dest_html).write_text(
+        enhance_html_report(html, suite_type="scmi"), encoding="utf-8"
+    )
 
 
 def _tally_from_testcases(test_results):

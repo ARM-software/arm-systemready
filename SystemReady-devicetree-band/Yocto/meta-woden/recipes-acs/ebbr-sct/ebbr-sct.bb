@@ -62,6 +62,7 @@ do_configure() {
     cp -r ${SBBR_TEST_DIR}/SbbrBootServices uefi-sct/SctPkg/TestCase/UEFI/EFI/BootServices/
     cp -r ${SBBR_TEST_DIR}/SbbrEfiSpecVerLvl ${SBBR_TEST_DIR}/SbbrRequiredUefiProtocols ${SBBR_TEST_DIR}/SbbrSysEnvConfig uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/
     cp -r ${EBBR_TEST_DIR}/EfiEbbrProfileTableTest  uefi-sct/SctPkg/TestCase/UEFI/EFI/Generic/EfiCompliant/
+    cp -r ${SBBR_TEST_DIR}/SBBRRuntimeServices uefi-sct/SctPkg/TestCase/UEFI/EFI/RuntimeServices
     cp ${SBBR_TEST_DIR}/BBR_SCT.dsc uefi-sct/SctPkg/UEFI/
     cp ${SBBR_TEST_DIR}/build_bbr.sh uefi-sct/SctPkg/
     cp ${S}/bbr-acs/ebbr/config/EfiCompliant_EBBR.ini uefi-sct/SctPkg/UEFI/

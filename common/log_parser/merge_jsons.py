@@ -18,6 +18,17 @@ import json
 from collections import OrderedDict
 import argparse
 import os
+import sys
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from suite_registry import (
+    normalize_suite_name as registry_normalize_suite_name,
+    requirement_table,
+    selected_requirement_keys,
+)
 
 # Define color codes
 RED = "\033[91m"
@@ -27,15 +38,35 @@ RESET = "\033[0m"
 
 # Requirement map for each suite
 _REQUIREMENT_MAP = {}
+_SELECTED_SUITE_FILTER = None
 
 ################################################################################
-# 1. Determine if we're in Device Tree (DT) mode or SR mode by checking yocto flag
+# 1. Determine if we're in Device Tree (DT) mode or SR mode.
+#    main_log_parser.sh passes this explicitly. The flag check remains only for
+#    direct legacy invocations of this helper.
 ################################################################################
 YOCTO_FLAG_PATH = "/mnt/yocto_image.flag"
 if os.path.isfile(YOCTO_FLAG_PATH):
     DT_OR_SR_MODE = "DT"
 else:
     DT_OR_SR_MODE = "SR"
+
+
+def get_report_suite_prefix():
+    """Return the externally visible specification prefix for the active mode."""
+    return "EBBR" if DT_OR_SR_MODE == "DT" else "SBBR"
+
+
+_BAND_COMPLIANCE_SUITES = ("FWTS", "SCT")
+_BAND_COMPLIANCE_PREFIXES = ("", "BBR-", "EBBR-", "SBBR-")
+
+
+def get_report_suite_name(suite_name: str) -> str:
+    """Return the band-aware display name while retaining canonical internals."""
+    if suite_name in _BAND_COMPLIANCE_SUITES:
+        return f"{get_report_suite_prefix()}-{suite_name}"
+    return suite_name
+
 
 ################################################################################
 # 2. Define Mandatory Suites based on your table
@@ -46,45 +77,14 @@ else:
 # BSA, Kselftest, PSCI, post script are recommendation
 
 # DT SRS scope table
-DT_SRS_SCOPE_TABLE = [
-    ("SCT", "M"),
-    ("FWTS", "M"),
-    ("Capsule Update", "M"),
-    ("DT_VALIDATE", "M"),
-    ("READ_WRITE_CHECK_BLK_DEVICES", "M"),
-    ("ETHTOOL_TEST", "M"),
-    ("SCMI", "EM"),
-    ("NETWORK_BOOT", "R"),
-    ("BSA", "R"),
-    ("BBSR-SCT", "EM"),
-    ("BBSR-TPM", "EM"),
-    ("BBSR-FWTS", "EM"),
-    ("DT_KSELFTEST", "R"),
-    ("SMBIOS", "R"),
-    ("PSCI", "R"),
-    ("RUNTIME_DEV_MAP","R"),
-    ("POST_SCRIPT", "R"),
-    ("OS_TEST", "M"),
-    ("PFDI", "CM")
-]
+DT_SRS_SCOPE_TABLE = requirement_table("DT")
 
 # SBSA is mandatory for servers only, default treat as recommended
 # if SBSA is run, treat as mandatory
 # BBSR is extension
 
 # SR SRS scope table
-SR_SRS_SCOPE_TABLE = [
-    ("SCT", "M"),
-    ("FWTS", "M"),
-    ("BSA", "M"),
-    ("OS_TEST", "M"),
-    ("BBSR-SCT", "EM"),
-    ("BBSR-FWTS", "EM"),
-    ("BBSR-TPM", "EM"),
-    ("SBMR-IB", "R"),
-    ("SBMR-OOB", "R"),
-    ("SBSA", "R")
-]
+SR_SRS_SCOPE_TABLE = requirement_table("SR")
 
 def compliance_label(suite_name: str) -> str:
     req = _REQUIREMENT_MAP.get(suite_name, "R")
@@ -96,8 +96,36 @@ def compliance_label(suite_name: str) -> str:
         tag = "Extension"
     else:
         tag = "Recommended"
+    label_suite_name = get_report_suite_name(suite_name)
     # Match the console ordering: “Suite: <tag>  : <suite> …”
-    return f"Suite_Name: {tag}  : {suite_name}_compliance"
+    return f"Suite_Name: {tag}  : {label_suite_name}_compliance"
+
+
+def clear_band_compliance_labels(acs_results_summary):
+    """Remove stale FWTS/SCT labels before rebuilding the active-band summary."""
+    suffixes = tuple(
+        f"  : {prefix}{suite_name}_compliance"
+        for prefix in _BAND_COMPLIANCE_PREFIXES
+        for suite_name in _BAND_COMPLIANCE_SUITES
+    )
+    for key in list(acs_results_summary):
+        if key.startswith("Suite_Name: ") and key.endswith(suffixes):
+            del acs_results_summary[key]
+
+def normalize_suite_name(suite_name: str) -> str:
+    return registry_normalize_suite_name(suite_name) or suite_name
+
+def build_selected_suite_filter(selected_suites):
+    selected = set(selected_requirement_keys(selected_suites))
+    return selected or None
+
+
+def suite_matches_selected_filter(suite_name):
+    if _SELECTED_SUITE_FILTER is None:
+        return True
+    if suite_name in _SELECTED_SUITE_FILTER:
+        return True
+    return "OS_TEST" in _SELECTED_SUITE_FILTER and suite_name.startswith("OS_")
 
 
 def reformat_json(json_file_path):
@@ -113,6 +141,10 @@ def reformat_json(json_file_path):
         raise
     except json.JSONDecodeError:
         print(f"Warning: {json_file_path} is invalid JSON. Skipping.")
+
+def is_recommended_test_case(suite_entry):
+    srs_scope = str(suite_entry.get("SRS scope", "")).strip().lower()
+    return srs_scope == "recommended"
 
 def count_fails_in_json(data):
     """
@@ -137,6 +169,8 @@ def count_fails_in_json(data):
         return (0, 0)
 
     for suite_entry in test_results:
+        if is_recommended_test_case(suite_entry):
+            continue
         # If testcases exist, count only testcase-level results to avoid double counting.
         testcases = suite_entry.get("testcases", [])
         if testcases:
@@ -197,22 +231,22 @@ def _sum_suite_summary(a, b):
     sa = _get_suite_summary(a); sb = _get_suite_summary(b)
     return {k: int(sa.get(k, 0)) + int(sb.get(k, 0)) for k in keys}
 
-################################################################################
-# We will load the test_categoryDT.json data here, so we can enrich the
-#        merged JSON with "Waivable", "SRS scope", and
-#        "Main Readiness Grouping" fields for each test suite.
-################################################################################
+def load_test_category_data(mode, test_category_path=None):
+    """
+    Load test category metadata for the selected mode, so merged JSON entries can
+    be enriched with waivable, SRS scope, and readiness grouping fields.
+    """
+    if not test_category_path:
+        if mode == "DT":
+            test_category_path = BASE_DIR / "test_categoryDT.json"
+        else:
+            test_category_path = BASE_DIR / "test_category.json"
 
-if DT_OR_SR_MODE == "DT":
-    TEST_CATEGORY_PATH = "/usr/bin/log_parser/test_categoryDT.json"
-else:
-    TEST_CATEGORY_PATH = "/usr/bin/log_parser/test_category.json"
-
-try:
-    with open(TEST_CATEGORY_PATH, "r") as catf:
-        test_category_data = json.load(catf)
-except Exception:
-    test_category_data = {}
+    try:
+        with open(test_category_path, "r") as catf:
+            return json.load(catf)
+    except Exception:
+        return {}
 
 def build_testcategory_dict(category_data):
     """
@@ -239,7 +273,16 @@ def build_testcategory_dict(category_data):
                 result[s_lower][ts_lower] = row
     return result
 
+test_category_data = load_test_category_data(DT_OR_SR_MODE)
 test_cat_dict = build_testcategory_dict(test_category_data)
+
+
+def set_run_mode(mode, test_category_path=None):
+    global DT_OR_SR_MODE, test_category_data, test_cat_dict
+
+    DT_OR_SR_MODE = mode
+    test_category_data = load_test_category_data(DT_OR_SR_MODE, test_category_path)
+    test_cat_dict = build_testcategory_dict(test_category_data)
 
 def recursive_sort(obj):
     if isinstance(obj, dict):
@@ -338,7 +381,7 @@ def merge_json_files(json_files, output_file):
             section_name = "Suite_Name: BBSR-FWTS"
             suite_key    = "BBSR-FWTS"
         elif "FWTS" in fn:
-            section_name = "Suite_Name: FWTS"
+            section_name = f"Suite_Name: {get_report_suite_prefix()}-FWTS"
             suite_key    = "FWTS"
         elif "BBSR" in fn and "SCT" in fn:
             section_name = "Suite_Name: BBSR-SCT"
@@ -347,7 +390,7 @@ def merge_json_files(json_files, output_file):
             section_name = "Suite_Name: BBSR-TPM"
             suite_key    = "BBSR-TPM"
         elif "SCT" in fn:
-            section_name = "Suite_Name: SCT"
+            section_name = f"Suite_Name: {get_report_suite_prefix()}-SCT"
             suite_key    = "SCT"
         elif "SBMR_IB" in fn or "SBMR-IB" in fn or "sbmr_ib" in base_lower:
             section_name = "Suite_Name: SBMR-IB"
@@ -433,6 +476,10 @@ def merge_json_files(json_files, output_file):
         }
         if lookup_suite_key in standalone_aliases or lookup_suite_key.startswith("os_"):
             lookup_suite_key = "standalone"
+        # The TPM event-log report is represented by the Measured boot log row
+        # under BBSR-Standalone in test_categoryDT.json.
+        if lookup_suite_key == "bbsr-tpm":
+            lookup_suite_key = "bbsr-standalone"
         if lookup_suite_key in ("sbmr-ib", "sbmr-oob"):
             lookup_suite_key = "sbmr"
         if lookup_suite_key in test_cat_dict:
@@ -442,7 +489,13 @@ def merge_json_files(json_files, output_file):
                     if not isinstance(ts_dict, dict):
                         continue
 
-                    ts_name_merged = (ts_dict.get("Test_suite") or ts_dict.get("Test_suite_name") or "").strip().lower()
+                    ts_name_merged = (
+                        ts_dict.get("Test_suite")
+                        or ts_dict.get("Test_suite_name")
+                        or ""
+                    ).strip().lower()
+                    if suite_key.lower() == "bbsr-tpm" and ts_name_merged == "bbsr-tpm":
+                        ts_name_merged = "measured boot log"
                     if ts_name_merged in test_cat_dict[lookup_suite_key]:
                         row_vals = test_cat_dict[lookup_suite_key][ts_name_merged]
                         if "Waivable" in row_vals:
@@ -494,16 +547,19 @@ def merge_json_files(json_files, output_file):
             }
     # --- ensure labels use the right Mandatory/Recommended tags for this mode ---
     base_table = DT_SRS_SCOPE_TABLE if DT_OR_SR_MODE == "DT" else SR_SRS_SCOPE_TABLE
+    if _SELECTED_SUITE_FILTER is not None:
+        base_table = [(n, r) for (n, r) in base_table if suite_matches_selected_filter(n)]
+
     for n, r in base_table:
         _REQUIREMENT_MAP.setdefault(n, r)
 
     # Step 3) Compute *per-suite* and overall compliance
     # Base mandatory set
     if DT_OR_SR_MODE == "DT":
-        mandatory_suites = set(DT_SRS_SCOPE_TABLE)
+        mandatory_suites = set(base_table)
         present = set(suite_fail_data.keys())
     else:
-        mandatory_suites = set(SR_SRS_SCOPE_TABLE)
+        mandatory_suites = set(base_table)
         present = set(suite_fail_data.keys())
 
         # Always consider SBSA mandatory if present (your existing rule)
@@ -529,32 +585,35 @@ def merge_json_files(json_files, output_file):
     else:
         acs_results_summary = merged_results["Suite_Name: acs_info"].get("ACS Results Summary", {})
 
+    clear_band_compliance_labels(acs_results_summary)
+
     for suite_name, requirement in mandatory_suites:
+        report_suite_name = get_report_suite_name(suite_name)
         if suite_name not in suite_fail_data:
             label = compliance_label(suite_name)
             if requirement == "M":
                 acs_results_summary[label] = "Not Compliant: not run"
-                print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
+                print(f"{RED}Suite: Mandatory  : {report_suite_name}: {acs_results_summary[label]}{RESET}")
                 overall_comp = "Not Compliant"
-                mandatory_missing_list.append(suite_name)
+                mandatory_missing_list.append(report_suite_name)
             elif requirement == "CM":
                 acs_results_summary[label] = "Not Run"
-                print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                print(f"Suite: Conditional-Mandatory  : {report_suite_name}: {acs_results_summary[label]}")
                 #overall_comp = "Not Compliant"
                 #mandatory_missing_list.append(suite_name)
             elif requirement == "EM":
                 acs_results_summary[label] = "Not Run"
-                print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
+                print(f"Suite: Extension  : {report_suite_name}: {acs_results_summary[label]}")
             else:
                 if DT_OR_SR_MODE == "DT":
                     acs_results_summary[label] = "Not Compliant: not run"
-                    print(f"{RED}Suite: Recommended: {suite_name}: {acs_results_summary[label]}{RESET}")
+                    print(f"{RED}Suite: Recommended: {report_suite_name}: {acs_results_summary[label]}{RESET}")
                     overall_comp = "Not Compliant"
-                    recommended_missing_list.append(suite_name)
+                    recommended_missing_list.append(report_suite_name)
                 else:
                     acs_results_summary[label] = "Not Run"
-                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
-                    recommended_missing_list.append(suite_name)
+                    print(f"Suite: Recommended: {report_suite_name}: {acs_results_summary[label]}")
+                    recommended_missing_list.append(report_suite_name)
         else:
             fail_info = suite_fail_data.get(suite_name)
             f = fail_info.get("Failed", 0)
@@ -564,40 +623,42 @@ def merge_json_files(json_files, output_file):
                 acs_results_summary[label] = "Compliant"
                 if requirement in ("M", "CM"):
                     if requirement == "M":
-                        print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                        print(f"Suite: Mandatory  : {report_suite_name}: {acs_results_summary[label]}")
                     else:
-                        print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                        print(f"Suite: Conditional-Mandatory  : {report_suite_name}: {acs_results_summary[label]}")
                 elif requirement == "EM":
-                    print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
+                    print(f"Suite: Extension  : {report_suite_name}: {acs_results_summary[label]}")
                 else:
-                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
+                    print(f"Suite: Recommended: {report_suite_name}: {acs_results_summary[label]}")
             elif f == 0 and fw > 0:
                 acs_results_summary[label] = f"Compliant with waivers: Waivers {fw}"
                 if requirement in ("M", "CM"):
                     if requirement == "M":
-                        print(f"Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                        print(f"Suite: Mandatory  : {report_suite_name}: {acs_results_summary[label]}")
                     else:
-                         print(f"Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}")
+                         print(f"Suite: Conditional-Mandatory  : {report_suite_name}: {acs_results_summary[label]}")
                 elif requirement == "EM":
-                    print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
+                    print(f"Suite: Extension  : {report_suite_name}: {acs_results_summary[label]}")
                 else:
-                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
+                    print(f"Suite: Recommended: {report_suite_name}: {acs_results_summary[label]}")
                 if requirement in ("M", "CM") and overall_comp != "Not Compliant":
                     overall_comp="Compliant with waivers"
             else:
                 acs_results_summary[label] = f"Not Compliant: Failed {f}"
                 if requirement in ("M", "CM"):
                     if requirement == "M":
-                        print(f"{RED}Suite: Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
+                        print(f"{RED}Suite: Mandatory  : {report_suite_name}: {acs_results_summary[label]}{RESET}")
                     else:
-                        print(f"{RED}Suite: Conditional-Mandatory  : {suite_name}: {acs_results_summary[label]}{RESET}")
+                        print(f"{RED}Suite: Conditional-Mandatory  : {report_suite_name}: {acs_results_summary[label]}{RESET}")
                     overall_comp="Not Compliant"
-                    mandatory_non_waived_list.append(suite_name)
+                    mandatory_non_waived_list.append(report_suite_name)
                 elif requirement == "EM":
-                    print(f"Suite: Extension  : {suite_name}: {acs_results_summary[label]}")
+                    print(f"Suite: Extension  : {report_suite_name}: {acs_results_summary[label]}")
                 else:
-                    print(f"Suite: Recommended: {suite_name}: {acs_results_summary[label]}")
-                    recommended_non_waived_list.append(suite_name)
+                    print(f"Suite: Recommended: {report_suite_name}: {acs_results_summary[label]}")
+                    if _SELECTED_SUITE_FILTER is not None:
+                        overall_comp = "Not Compliant"
+                    recommended_non_waived_list.append(report_suite_name)
 
     #Ensure suite-wise compliance lines for *all* discovered suites (including recommended)
     for skey, info in suite_fail_data.items():
@@ -653,6 +714,12 @@ def merge_json_files(json_files, output_file):
     if "Overall Compliance Results" in acs_results_summary:
         del acs_results_summary["Overall Compliance Results"]
 
+    bbsr_selected = (
+        _SELECTED_SUITE_FILTER is None
+        or bool({"BBSR-TPM", "BBSR-FWTS", "BBSR-SCT"} & _SELECTED_SUITE_FILTER)
+    )
+    scmi_selected = _SELECTED_SUITE_FILTER is None or "SCMI" in _SELECTED_SUITE_FILTER
+
     bbsr_tpm  = acs_results_summary.get(compliance_label("BBSR-TPM"), "")
     bbsr_fwts = acs_results_summary.get(compliance_label("BBSR-FWTS"), "")
     bbsr_sct  = acs_results_summary.get(compliance_label("BBSR-SCT"), "")
@@ -663,7 +730,9 @@ def merge_json_files(json_files, output_file):
         return (not val) or val.lower().startswith("not run")
 
     _no_bbsr_logs = all(_is_missing(x) for x in (bbsr_tpm, bbsr_fwts, bbsr_sct))
-    if _no_bbsr_logs:
+    if not bbsr_selected:
+        acs_results_summary.pop("BBSR compliance results", None)
+    elif _no_bbsr_logs:
         acs_results_summary["BBSR compliance results"] = "Not run"
     else:
         # Gather which suites didn’t run vs. which failed non-waived
@@ -700,18 +769,19 @@ def merge_json_files(json_files, output_file):
             acs_results_summary["BBSR compliance results"] = "Compliant"
 
     # Persist + print BBSR result with color
-    bbsr_comp_str = acs_results_summary["BBSR compliance results"]
-    if bbsr_comp_str.lower().startswith("compliant with waivers"):
-        print(f"{YELLOW}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
-    elif bbsr_comp_str.lower().startswith("compliant"):
-        print(f"{GREEN}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
-    elif bbsr_comp_str.lower().startswith("not run"):
-        print(f"BBSR compliance results: {bbsr_comp_str}\n")
-    else:
-        print(f"{RED}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
+    if bbsr_selected:
+        bbsr_comp_str = acs_results_summary["BBSR compliance results"]
+        if bbsr_comp_str.lower().startswith("compliant with waivers"):
+            print(f"{YELLOW}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
+        elif bbsr_comp_str.lower().startswith("compliant"):
+            print(f"{GREEN}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
+        elif bbsr_comp_str.lower().startswith("not run"):
+            print(f"BBSR compliance results: {bbsr_comp_str}\n")
+        else:
+            print(f"{RED}BBSR compliance results: {bbsr_comp_str}{RESET}\n")
 
     # --- handle SCMI result (DT only, separate from Overall Compliance) ---
-    if DT_OR_SR_MODE == "DT":
+    if DT_OR_SR_MODE == "DT" and scmi_selected:
         scmi_label = compliance_label("SCMI")
         scmi_status = acs_results_summary.get(scmi_label, "")
         if not scmi_status:
@@ -729,8 +799,9 @@ def merge_json_files(json_files, output_file):
             else:
                 acs_results_summary["SCMI compliance results"] = scmi_status
 
-    merged_results["Suite_Name: acs_info"]["ACS Results Summary"]["BBSR compliance results"] = (acs_results_summary.pop("BBSR compliance results", None))
-    if DT_OR_SR_MODE == "DT":
+    if bbsr_selected:
+        merged_results["Suite_Name: acs_info"]["ACS Results Summary"]["BBSR compliance results"] = (acs_results_summary.pop("BBSR compliance results", None))
+    if DT_OR_SR_MODE == "DT" and scmi_selected:
         merged_results["Suite_Name: acs_info"]["ACS Results Summary"]["SCMI compliance results"] = (acs_results_summary.pop("SCMI compliance results", None))
 
     RENAME_SUITES_TO_STANDALONE = {
@@ -769,13 +840,26 @@ def merge_json_files(json_files, output_file):
         json.dump(merged_results, outj, indent=4)
 
 def main():
+    global _SELECTED_SUITE_FILTER
+
     parser = argparse.ArgumentParser(
         description="Merge suite JSONs + acs_info.json, store compliance lines inside 'ACS Results Summary'"
     )
+    parser.add_argument("--mode", choices=["DT", "SR"], default=DT_OR_SR_MODE,
+                        help="Explicit parser mode used for compliance and test category selection")
+    parser.add_argument("--selected-suites", default="",
+                        help="Comma-separated suite names to include in compliance reporting")
+    parser.add_argument("--test-category", default="",
+                        help="Explicit test category JSON path; defaults to the bundled mode-specific file")
     parser.add_argument("output_file", help="Output merged JSON file")
     parser.add_argument("json_files", nargs='+',
                         help="List of JSON files to merge (including acs_info.json if present)")
     args = parser.parse_args()
+
+    set_run_mode(args.mode, args.test_category or None)
+
+    selected_suites = [s.strip() for s in args.selected_suites.split(",") if s.strip()]
+    _SELECTED_SUITE_FILTER = build_selected_suite_filter(selected_suites)
 
     merge_json_files(args.json_files, args.output_file)
 

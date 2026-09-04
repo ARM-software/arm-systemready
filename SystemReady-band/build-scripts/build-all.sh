@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +33,7 @@ source ./build-scripts/build-uefi.sh $@
 source ./build-scripts/build-bsaefi.sh $@
 source ./build-scripts/build-sbsaefi.sh $@
 source ./build-scripts/build-sct.sh SBBR $2
-source ./build-scripts/build-uefi-apps.sh $@
+source ./build-scripts/build-uefi-apps.sh SBBR $PACKAGE
 source ./build-scripts/build-linux.sh $@
 source ./build-scripts/build-linux-bsa.sh $@
 source ./build-scripts/build-grub.sh $@

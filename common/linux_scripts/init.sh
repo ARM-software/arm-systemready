@@ -276,7 +276,7 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
     else
       mkdir -p ${LOG_DIR}/post-script
     fi
-    python3 /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt > ${LOG_DIR}/post-script/post-script.log 2>&1
+    python3 /usr/bin/systemready-scripts/check-sr-results.py --dir /mnt/acs_results_template > ${LOG_DIR}/post-script/post-script.log 2>&1
     sync /mnt
     sleep 5
   else

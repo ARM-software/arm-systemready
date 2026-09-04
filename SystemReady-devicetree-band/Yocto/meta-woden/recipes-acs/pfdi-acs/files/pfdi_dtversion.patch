@@ -1,12 +1,12 @@
 diff --git a/apps/uefi/pfdi_main.c b/apps/uefi/pfdi_main.c
-index 04b4f71..149c4b9 100644
+index 771fee6..f0d00b5 100644
 --- a/apps/uefi/pfdi_main.c
 +++ b/apps/uefi/pfdi_main.c
-@@ -97,6 +97,7 @@ execute_tests()
+@@ -103,6 +103,7 @@ execute_tests()
        goto exit_close;
    }
  
 +  val_print(INFO, "\n\n SystemReady devicetree band ACS v3.1.2", 0);
    val_print(INFO, "\n\n PFDI Architecture Compliance Suite");
-   val_print(INFO, "\n          Version %d.", PFDI_ACS_MAJOR_VER);
+   val_print(INFO, "\n        Version %d.", PFDI_ACS_MAJOR_VER);
    val_print(INFO, "%d.", PFDI_ACS_MINOR_VER);

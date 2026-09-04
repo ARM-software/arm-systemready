@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2021-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2021-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@ echo -off
 
 #UpdateVars.efi is present only in the SystemReady-devicetree-band ACS image
 #The below block for UpdateVars shall be executed only for SystemReady-devicetree-band
-for %q in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %q in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%q:\acs_tests\app\UpdateVars.efi then
         FS%q:
         cp -q FS%q:\acs_tests\bbsr-keys\*.auth FS%q:\acs_tests\app\
@@ -68,7 +68,7 @@ endfor
 
 :StartTest
 # Run the config parser
-for %b in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %b in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%b:\acs_tests\parser\Parser.efi then
         if exist FS%b:\acs_tests\config\acs_run_config.ini then
             FS%b:
@@ -95,7 +95,7 @@ for %b in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
     endif
 endfor
 :DoneParser
-for %i in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %i in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%i:\acs_tests\bbr\bbsr_SctStartup.nsh then
         # flag BBSR compliance testing is in progress
         echo "" > FS%i:\acs_tests\bbr\bbsr_inprogress.flag
@@ -122,7 +122,7 @@ endfor
 
 # Boot Linux with SecureBoot enabled
 echo "Booting Linux (SecureBoot)"
-for %l in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %l in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     # Buildroot based build (SystemReady band)
     if exist FS%l:\Image and exist FS%l:\ramdisk-buildroot.img then
         FS%l:

@@ -42,7 +42,7 @@ Logs are stored at the following path:
 
 This script:
 
-- Scans filesystems `FS0:` through `FSF:`.
+- Scans filesystems `FS0:` through `FS20:`.
 - Looks for `pingtest.nsh` in `\acs_tests\debug\`.
 - Switches to the results directory and ensures `network_logs` exists.
 - Executes `ping 8.8.8.8` and saves output to `ping.log`.

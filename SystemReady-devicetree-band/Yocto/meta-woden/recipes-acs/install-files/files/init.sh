@@ -205,6 +205,18 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         sync
         sleep 5
 
+        # DTB ALIGNMENT TEST
+        echo "Running DTB alignment test"
+        if [ -f /usr/bin/dtb_alignment_test.py ]; then
+          python3 /usr/bin/dtb_alignment_test.py --dmem-log /mnt/acs_results_template/acs_results/uefi_dump/dmem.log --out /mnt/acs_results_template/acs_results/linux_tools/dtb_alignment_test.log
+          ret=$?
+          echo "INFO: dtb_alignment_test.py returned $ret"
+        else
+          echo "WARNING: /usr/bin/dtb_alignment_test.py not found"
+        fi
+        sync
+        sleep 5
+        echo "DTB alignment test - Completed"
 
         # DT VALIDATE RUN
         # Generate the .dts file and move it to /mnt/acs_results_template/acs_results/linux_tools

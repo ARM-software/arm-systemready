@@ -25,6 +25,23 @@ BASE_DIR=$(dirname "$(realpath "$0")")
 # Determine paths
 SCRIPTS_PATH="$BASE_DIR"
 
+# Update this parser release version when publishing a new log parser release.
+LOG_PARSER_VERSION="1.0.0"
+
+if [ "${1:-}" = "--version" ]; then
+    printf "SystemReady ACS Log Parser %s\n" "$LOG_PARSER_VERSION"
+    exit 0
+fi
+
+# Standalone execution is opt-in. Without --standalone, the unmodified legacy
+# parser flow below handles all arguments exactly as before.
+for argument in "$@"; do
+    if [ "$argument" = "--standalone" ]; then
+        LOG_PARSER_VERSION="$LOG_PARSER_VERSION" \
+            exec python3 "$SCRIPTS_PATH/standalone_runner.py" "$@"
+    fi
+done
+
 # Check for required arguments
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <acs_results_directory> [acs_config.txt] [system_config.txt] [waiver.json]"
@@ -48,9 +65,9 @@ WAIVER_JSON=$4
 POST_SCRIPT_LOG="$LOGS_PATH/post-script/post-script.log"
 
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
-    test_category="/usr/bin/log_parser/test_categoryDT.json"
+    test_category="$BASE_DIR/test_categoryDT.json"
 else
-    test_category="/usr/bin/log_parser/test_category.json"
+    test_category="$BASE_DIR/test_category.json"
 fi
 
 # Check if ACS_CONFIG_PATH is provided
@@ -842,6 +859,10 @@ else
 fi
 
 if [ ${#JSON_FILES[@]} -gt 0 ]; then
+    python3 "$SCRIPTS_PATH/enrich_suite_json.py" \
+        --registry "$SCRIPTS_PATH/suite_registry.json" \
+        --test-category "$test_category" \
+        "${JSON_FILES[@]}"
     python3 "$SCRIPTS_PATH/merge_jsons.py" "$MERGED_JSON" "${JSON_FILES[@]}"
     echo "ACS Merged JSON: $MERGED_JSON"
 else

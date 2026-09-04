@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @file
-# Copyright (c) 2024-2025, Arm Limited or its affiliates. All rights reserved.
+# Copyright (c) 2024-2026, Arm Limited or its affiliates. All rights reserved.
 # SPDX-License-Identifier : Apache-2.0
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@ echo -off
 
 #The below capsule update block shall be supported only for SystemReady-devicetree-band
 # check for capsule update
-for %r in 0 1 2 3 4 5 6 7 8 9 A B C D E F then
+for %r in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 then
     if exist FS%r:\acs_tests\app\capsule_update.nsh then
         if exist FS%r:\acs_tests\app\capsule_update_check.flag then
             echo "press any key to test capsule update"
