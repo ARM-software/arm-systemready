@@ -331,6 +331,16 @@ if [ $ADDITIONAL_CMD_OPTION != "noacs" ]; then
         else
           echo "WARNING: Skipping Runtime Device Mapping Conflict Test (missing checker/DTS/memmap)"
         fi
+        
+        # Run the Devicetree reserved-memory and Memory Reservation Block checker
+        echo "Running Devicetree Reserved Memory Map Compliance Test"
+        if [ -f "/usr/bin/reserved_memory_map_checker.py" ] ; then
+          python3 /usr/bin/reserved_memory_map_checker.py
+          ret=$?
+          echo "INFO: reserved_memory_map_checker.py returned $ret"
+        else
+          echo "WARNING: Skipping Devicetree Reserved Memory Map Compliance Test (missing checker)"
+        fi
 
         # NETWORK BOOT script
         pushd /usr/bin
