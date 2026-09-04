@@ -9,6 +9,7 @@ inherit module-base
 
 SRC_URI += "git://github.com/ARM-software/sysarch-acs;destsuffix=sysarch-acs;protocol=https;branch=main;name=sysarch-acs \
             git://git.gitlab.arm.com/linux-arm/linux-acs.git;destsuffix=linux-acs;protocol=https;branch=master;name=linux-acs \
+            file://0001-pal-linux-adapt-to-Linux-7.2-kernel-APIs.patch;patchdir=${WORKDIR}/linux-acs \
             "
 SRCREV_FORMAT = "sysarch-acs_linux-acs"
 SRCREV_sysarch-acs = "${AUTOREV}"

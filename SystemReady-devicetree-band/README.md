@@ -51,9 +51,9 @@ The SystemReady-devicetree band compliance and testing requirements are specifie
 
 | Component                                                                   | Version           |
 |-----------------------------------------------------------------------------|-------------------|
-| [Linux Kernel](https://git.yoctoproject.org/linux-yocto/)                   | v6.18             |
+| [Linux Kernel](https://git.yoctoproject.org/linux-yocto/)                   | v7.2.2             |
 | [EDK2](https://github.com/tianocore/edk2.git)                               | edk2-stable202511 |
-| [DT bindings source](https://cdn.kernel.org/pub/linux/kernel/v6.x/)         | v6.19             |
+| [DT bindings source](https://cdn.kernel.org/pub/linux/kernel/v7.x/)         | v7.2.3            |
 
 
 ### Prebuilt images

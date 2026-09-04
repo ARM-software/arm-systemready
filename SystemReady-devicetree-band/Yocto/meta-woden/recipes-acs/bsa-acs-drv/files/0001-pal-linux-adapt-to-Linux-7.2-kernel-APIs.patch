@@ -1,0 +1,67 @@
+From 35a7e9bc6b96621e28cb730693b512cfa55b8342 Mon Sep 17 00:00:00 2001
+From: Sathisha S <Sathisha.Shivaramappa@arm.com>
+Date: Fri, 4 Sep 2026 11:30:00 +0000
+Subject: [PATCH] pal_linux: adapt to Linux 7.2 kernel APIs
+
+Linux 7.2 removes strncpy and struct device::dma_coherent. Use the string
+and DMA helpers supported by the current kernel API.
+
+Signed-off-by: Sathisha S <Sathisha.Shivaramappa@arm.com>
+---
+ acs-drv/files/platform/pal_linux/files/src/pal_dma.c    | 3 ++-
+ acs-drv/files/platform/pal_linux/files/src/pal_iovirt.c | 5 +++--
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/acs-drv/files/platform/pal_linux/files/src/pal_iovirt.c b/acs-drv/files/platform/pal_linux/files/src/pal_iovirt.c
+index 9d49abc..541a0c7 100644
+--- a/acs-drv/files/platform/pal_linux/files/src/pal_iovirt.c
++++ b/acs-drv/files/platform/pal_linux/files/src/pal_iovirt.c
+@@ -22,6 +22,7 @@
+ #include <linux/acpi_iort.h>
+ #include <linux/kernel.h>
+ #include <linux/pci.h>
++#include <linux/string.h>
+ #include <linux/version.h>
+ 
+ #include "include/pal_linux.h"
+@@ -266,7 +267,7 @@ iovirt_add_block(struct acpi_table_iort *iort, struct acpi_iort_node *iort_node,
+             count = &iovirt_table->num_its_groups;
+             break;
+         case ACPI_IORT_NODE_NAMED_COMPONENT:
+-            strncpy((char*)(*data).named_comp.name, (char*)&((struct acpi_iort_named_component*)node_data)->device_name[0], 16);
++            strscpy((char*)(*data).named_comp.name, (char*)&((struct acpi_iort_named_component*)node_data)->device_name[0], 16);
+             (*data).named_comp.cca = (uint32_t)(((struct acpi_iort_named_component*)node_data)->memory_properties & IOVIRT_CCA_MASK);
+             count = &iovirt_table->num_named_components;
+             break;
+@@ -564,7 +565,7 @@ acpi_status user_function(acpi_handle handle, uint32_t level,
+ 
+   buffer.length = ACPI_ALLOCATE_BUFFER;
+   status = acpi_get_name(handle, ACPI_FULL_PATHNAME, &buffer);
+-  strncpy((char *)path_buffer[count++], (char *)(buffer.pointer), 16);
++  strscpy((char *)path_buffer[count++], (char *)(buffer.pointer), 16);
+   return status;
+ }
+ 
+diff --git a/acs-drv/files/platform/pal_linux/files/src/pal_dma.c b/acs-drv/files/platform/pal_linux/files/src/pal_dma.c
+index 50d9a32..a6f7ca8 100644
+--- a/acs-drv/files/platform/pal_linux/files/src/pal_dma.c
++++ b/acs-drv/files/platform/pal_linux/files/src/pal_dma.c
+@@ -20,6 +20,7 @@
+  */
+ 
++#include <linux/dma-map-ops.h>
+ #include <linux/init.h>
+ #include <linux/module.h>
+ #include <linux/pci.h>
+ #include <linux/string.h>
+@@ -218,7 +219,7 @@ void pal_dma_create_info_table(DMA_INFO_TABLE *dma_info_table)
+                     /* if we did not get coherence attribute from ACPI/PCI, get it from FDT */
+                     if (dma_info_table->info[j].flags == 0) {
+-#if LINUX_VERSION_CODE > KERNEL_VERSION(4,19,0)
+-                        dma_info_table->info[j].flags = shost->dma_dev->dma_coherent;
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(7,2,0)
++                        dma_info_table->info[j].flags = dev_is_dma_coherent(shost->dma_dev);
+ #else
+                         dma_info_table->info[j].flags = shost->dma_dev->archdata.dma_coherent;
+ #endif
+
