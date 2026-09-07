@@ -23,6 +23,11 @@ import os
 # Determine if we're in Device Tree (DT) mode or SR mode by checking yocto flag.
 YOCTO_FLAG_PATH = "/mnt/yocto_image.flag"
 DT_OR_SR_MODE = "DT" if os.path.isfile(YOCTO_FLAG_PATH) else "SR"
+# A second result token inside path/reason text proves SCT joined two records.
+FUSED_RESULT_PATTERN = re.compile(
+    r"\s+--\s*(?:PASS|FAIL(?:URE)?|WARNING|NOT SUPPORTED)\b",
+    re.IGNORECASE,
+)
 
 def normalize_result(r):
     r = r.strip().upper()
@@ -477,6 +482,212 @@ def clean_test_description(description):
         return cleaned_desc
     return description
 
+def find_ekl_description(payload, raw_description):
+    """Recover a description only when one EKL prefix is a unique raw suffix."""
+    # A fixed colon split is unsafe: descriptions, reasons, and Windows paths
+    # can all contain colons. In joined records the clean description remains
+    # at the end of the raw Summary description.
+    matches = [
+        payload[:index]
+        for index, character in enumerate(payload)
+        if character == ":"
+        and payload[:index]
+        and raw_description.endswith(payload[:index])
+    ]
+    return matches[0] if len(matches) == 1 else None
+
+def clean_sct_path_fallback(path):
+    """Remove a fused assertion from an incomplete SCT path."""
+    result_marker = FUSED_RESULT_PATTERN.search(path)
+    if result_marker:
+        prefix = path[:result_marker.start()]
+        path = prefix.rsplit("/", 1)[0] + "/" if "/" in prefix else ""
+    return path.strip() or "Path not recorded in SCT log"
+
+def split_sct_detail(payload, description):
+    """Separate SCT detail into its normalized checkout path and source."""
+    detail = payload[len(description) + 1:].replace("\\", "/").strip()
+    checkout = re.search(r"(?:^|/)edk2-test/", detail)
+    if checkout is None:
+        return detail, None, None
+
+    checkout_detail = detail[checkout.end():]
+    if checkout_detail.startswith("uefi-sct/"):
+        checkout_detail = checkout_detail[len("uefi-sct/"):]
+    relative_path = "edk2-test/" + checkout_detail
+    source_location = re.match(
+        r"^(edk2-test/SctPkg/TestCase/.+?\.[^/:]+:\d+)(?=$|[:,\s])",
+        relative_path,
+    )
+    return detail, relative_path, source_location
+
+def find_sct_path_and_reason(payload, description):
+    """Normalize one SCT detail and split its source path and reason."""
+    detail, relative_path, source_location = split_sct_detail(payload, description)
+    partial_checkout = None
+    if relative_path is None:
+        partial_checkout = re.search(r"(?:^|/)(edk2[^/]*)$", detail)
+        if partial_checkout:
+            path = partial_checkout.group(1)
+        else:
+            path = clean_sct_path_fallback(detail)
+    else:
+        path = (
+            source_location.group(1)
+            if source_location
+            else clean_sct_path_fallback(relative_path)
+        )
+
+    if source_location:
+        reason = relative_path[source_location.end():].lstrip(" :,\t")
+    elif relative_path is None and partial_checkout is None:
+        generic_source = re.search(
+            r"(?:^|/)[^/:]+\.[^/:]+:\d+(?=$|[:,\s])",
+            detail,
+        )
+        if generic_source:
+            reason = detail[generic_source.end():].lstrip(" :,\t")
+        elif "/" not in detail:
+            reason = detail
+        else:
+            reason = ""
+    else:
+        reason = ""
+
+    if description and description in reason:
+        reason = ""
+    if FUSED_RESULT_PATTERN.search(reason):
+        reason = ""
+    return detail, path, reason.strip()
+
+def read_ekl_description_records(input_file):
+    """Read ordered SCT assertion data from a sibling Summary.ekl file."""
+    ekl_file = os.path.splitext(input_file)[0] + ".ekl"
+    if not os.path.isfile(ekl_file):
+        return []
+
+    records = []
+    test_entry_guid = ""
+
+    try:
+        file_encoding = detect_file_encoding(ekl_file)
+        with open(ekl_file, "r", encoding=file_encoding) as file:
+            for raw_line in file:
+                line = raw_line.strip()
+
+                if line.startswith("|HEAD|"):
+                    fields = line.split("|")
+                    candidate = fields[8].strip() if len(fields) > 8 else ""
+                    test_entry_guid = candidate.upper()
+                    continue
+
+                record_header, record_separator, payload = line.partition("|")
+                subtest_guid, field_separator, result = record_header.partition(":")
+                if (
+                    not record_separator
+                    or not field_separator
+                    or not subtest_guid
+                    or not test_entry_guid
+                ):
+                    continue
+
+                normalized_result = normalize_result(result)
+                if normalized_result not in {"PASSED", "FAILED", "WARNING", "NOT SUPPORTED"}:
+                    continue
+                records.append((
+                    test_entry_guid,
+                    subtest_guid.upper(),
+                    normalized_result,
+                    payload,
+                ))
+    except (OSError, UnicodeError, LookupError):
+        return []
+
+    return records
+
+def build_sct_field_updates(results, input_file):
+    """Prefer Summary fields and use aligned EKL data only for faulty fields."""
+    log_records = []
+    for test in results:
+        test_entry_guid = test.get("Test Entry Point GUID", "").strip().upper()
+        for subtest in test.get("subtests", []):
+            log_records.append((
+                test_entry_guid,
+                subtest.get("sub_Test_GUID", "").strip().upper(),
+                normalize_result(subtest.get("sub_test_result", "")),
+                subtest,
+                subtest.pop("_raw_test_description", ""),
+                subtest.pop("_summary_detail_limit", None),
+            ))
+
+    ekl_records = read_ekl_description_records(input_file)
+    # GUIDs repeat, so occurrence order and result are part of the identity.
+    # If the complete streams do not align, keep the legacy Summary output.
+    if (
+        len(log_records) != len(ekl_records)
+        or any(log[:3] != ekl[:3] for log, ekl in zip(log_records, ekl_records))
+    ):
+        return []
+
+    updates = []
+    for log, ekl in zip(log_records, ekl_records):
+        subtest = log[3]
+        raw_description = log[4]
+        summary_description = subtest.get("sub_Test_Description", "")
+        summary_detail = subtest.get("sub_Test_Path", "")
+        summary_payload = f"{summary_description}:{summary_detail}"
+
+        description = summary_description
+        normalized_summary_detail, path, reason = find_sct_path_and_reason(
+            summary_payload,
+            summary_description,
+        )
+
+        ekl_description = find_ekl_description(ekl[3], raw_description)
+        if ekl_description is not None:
+            normalized_ekl_detail, ekl_path, ekl_reason = (
+                find_sct_path_and_reason(ekl[3], ekl_description)
+            )
+            description_is_faulty = raw_description != ekl_description
+            detail_limit = log[5]
+            if detail_limit is not None:
+                detail_limit += len(raw_description) - len(ekl_description)
+            # At the old 510-character boundary, accept EKL only when the
+            # surviving Summary prefix proves later diagnostic text was joined.
+            appended_detail = (
+                detail_limit is not None
+                and detail_limit >= 0
+                and len(normalized_summary_detail) > detail_limit
+                and not normalized_summary_detail.startswith(normalized_ekl_detail)
+                and normalized_ekl_detail.startswith(
+                    normalized_summary_detail[:detail_limit].rstrip()
+                )
+            )
+            # A result marker, strict prefix, or proven appended tail makes the
+            # Summary detail unsafe; arbitrary Summary/EKL differences do not.
+            detail_is_faulty = bool(FUSED_RESULT_PATTERN.search(
+                normalized_summary_detail
+            )) or (
+                normalized_summary_detail != normalized_ekl_detail
+                and (
+                    normalized_ekl_detail.startswith(normalized_summary_detail)
+                    or appended_detail
+                )
+            )
+
+            if description_is_faulty:
+                description = ekl_description
+            if detail_is_faulty:
+                path, reason = ekl_path, ekl_reason
+
+        updates.append((
+            log[3],
+            description,
+            path,
+            reason,
+        ))
+    return updates
+
 def find_test_suite_and_subsuite(test_case_name):
     for test_suite, sub_suites in test_mapping.items():
         for sub_suite, test_cases in sub_suites.items():
@@ -582,7 +793,8 @@ def main(input_file, output_file):
             # Sub-test detection from lines like "FooTest -- PASS"
             if re.search(r'--\s*(PASS|FAIL|FAILURE|WARNING|NOT SUPPORTED)', line, re.IGNORECASE):
                 parts = line.rsplit(' -- ', 1)
-                test_desc = clean_test_description(parts[0])
+                raw_test_desc = parts[0]
+                test_desc = clean_test_description(raw_test_desc)
                 result_str = normalize_result(parts[1])
 
                 # Tally in test_case_summary *before* overrides
@@ -606,6 +818,12 @@ def main(input_file, output_file):
                 test_guid = lines[i+1].strip() if i+1 < len(lines) else ""
                 file_path = lines[i+2].strip() if i+2 < len(lines) else ""
 
+                # Old SCT records keep at most 510 UTF-16 characters. Account
+                # for the result line, GUID, and their two CRLF separators so
+                # appended diagnostic text can be distinguished from a clean,
+                # longer Summary detail.
+                summary_detail_limit = 510 - len(line) - len(test_guid) - 4
+
                 sub_test_number += 1
 
                 reason = ""
@@ -620,13 +838,24 @@ def main(input_file, output_file):
                     "sub_Test_GUID": test_guid,
                     "sub_test_result": result_str,
                     "sub_Test_Path": file_path,
-                    "reason": reason
+                    "reason": reason,
+                    "_raw_test_description": raw_test_desc,
+                    "_summary_detail_limit": summary_detail_limit
                 }
                 test_entry["subtests"].append(sub_test)
 
         # End of loop: add last test entry
         if test_entry:
             results.append(test_entry)
+
+    field_updates = build_sct_field_updates(results, input_file)
+
+    # Track reasons validated through the aligned Summary/EKL stream. An empty
+    # EDK reason must not erase these; a non-empty EDK reason still wins.
+    trusted_reason_subtests = set()
+    for subtest, _, _, reason in field_updates:
+        subtest["reason"] = reason
+        trusted_reason_subtests.add(id(subtest))
 
     # Skip SMBIOS tests in DT mode
     if DT_OR_SR_MODE == "DT":
@@ -695,7 +924,13 @@ def main(input_file, output_file):
                     reason_val = match_record.get("reason", "").strip()
                     if result_val:
                         subtest["sub_test_result"] = normalize_result(result_val)
-                        subtest["reason"] = reason_val
+                        if reason_val or id(subtest) not in trusted_reason_subtests:
+                            subtest["reason"] = reason_val
+
+    # Apply canonical descriptions and paths after the existing EDK overrides.
+    for subtest, description, path, _ in field_updates:
+        subtest["sub_Test_Description"] = description
+        subtest["sub_Test_Path"] = path
 
     # Reorder final dictionary so "test_result" & "reason" appear after "Returned Status Code"
     for i, test_obj in enumerate(results):
