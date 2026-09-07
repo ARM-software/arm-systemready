@@ -559,7 +559,7 @@ def _summary_cards(merged_data, sources, output_dir):
     standalone_keys = {
         _compliance_identity(item.get("requirement_key", item["canonical"]))
         for item in registry
-        if item["canonical"] in get_suite("STANDALONE", registry)["included_suites"]
+        if item.get("summary_html") == "standalone_tests_summary.html"
     }
     cards = []
     for section_id, label, content, detail, candidates in sources:

@@ -1194,6 +1194,9 @@
             "Test_case_description": {
               "type": "string"
             },
+            "test_result": {
+              "$ref": "#/definitions/sub_test_result_string"
+            },
             "subtests": {
               "type": "array",
               "items": {
@@ -1685,6 +1688,9 @@
           "type": "string"
         },
         "Suite_Name: Recommended  : PSCI_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Recommended  : PCIE_OPTION_ROM_ARCH_AUDIT_compliance": {
           "type": "string"
         },
         "Suite_Name: Recommended  : RUNTIME_DEV_MAP_compliance": {

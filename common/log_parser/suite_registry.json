@@ -204,6 +204,20 @@
       ]
     },
     {
+      "canonical": "PCIE-OPTION-ROM-ARCH-AUDIT",
+      "aliases": ["PCIE-OPTION-ROM-AUDIT", "PCIEOPTIONROMARCHAUDIT", "PCIE_OPTION_ROM_ARCH_AUDIT"],
+      "modes": ["SR"],
+      "requirement_key": "PCIE_OPTION_ROM_ARCH_AUDIT",
+      "requirements": {"SR": "R"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "pcie_option_rom_arch_audit.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
       "canonical": "DT-KSELFTEST",
       "aliases": ["DT-KSELFTEST", "DTKSELFTEST", "DT_KSELFTEST"],
       "modes": ["DT"],
@@ -544,6 +558,12 @@
         "handler": "standalone_single",
         "inputs": [
           {"name": "log", "root": "results", "candidates": ["linux_tools/runtime_device_mapping_conflict_test.log"], "required": true}
+        ]
+      },
+      "PCIE-OPTION-ROM-ARCH-AUDIT": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["uefi_dump/PcieOptionRomArchAudit.log"], "required": true}
         ]
       },
       "OS-TESTS": {

@@ -284,5 +284,20 @@
       "FunctionID": 3,
       "Main Readiness Grouping": "security"
     }
+  ],
+  "catID: 32": [
+    {
+      "Suite": "Standalone",
+      "Test Suite": "PCIeOptionRomArchAudit",
+      "Description": [
+        "PCIe Option ROM architecture validation"
+      ],
+      "specName": "BBR",
+      "rel Import. to main readiness": "Minor",
+      "Waivable": "yes",
+      "SRS scope": "Recommended",
+      "FunctionID": 1,
+      "Main Readiness Grouping": "boot"
+    }
   ]
 }
