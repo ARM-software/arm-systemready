@@ -146,10 +146,11 @@ def is_recommended_test_case(suite_entry):
     srs_scope = str(suite_entry.get("SRS scope", "")).strip().lower()
     return srs_scope == "recommended"
 
-def count_fails_in_json(data):
+def count_fails_in_json(data, skip_recommended=False):
     """
     Inspect JSON data and count how many tests are 'FAILED' vs 'FAILED_WITH_WAIVER'.
     Returns (failed, failed_with_waiver).
+    Recommended entries are excluded only when requested for SR OS compliance.
 
     Expects a structure with top-level 'test_results' => [ {subtests: [...]} ]
     or a top-level list for subtests. If not recognized, returns (0,0).
@@ -169,7 +170,7 @@ def count_fails_in_json(data):
         return (0, 0)
 
     for suite_entry in test_results:
-        if is_recommended_test_case(suite_entry):
+        if skip_recommended and is_recommended_test_case(suite_entry):
             continue
         # If testcases exist, count only testcase-level results to avoid double counting.
         testcases = suite_entry.get("testcases", [])
@@ -536,7 +537,9 @@ def merge_json_files(json_files, output_file):
                         ts_dict.update(temp)
         merged_results[section_name] = data
 
-        f, fw = count_fails_in_json(data)
+        f, fw = count_fails_in_json(
+            data, skip_recommended=(DT_OR_SR_MODE == "SR" and suite_key == "OS_TEST")
+        )
         if suite_key in suite_fail_data:
             suite_fail_data[suite_key]["Failed"] += f
             suite_fail_data[suite_key]["Failed_with_Waiver"] += fw

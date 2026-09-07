@@ -662,6 +662,155 @@ body.acs-report-ui th {
 }
 body.acs-report-ui tr:last-child > td { border-bottom: 0 !important; }
 body.acs-report-ui tbody tr:hover > td { background-color: #f8fbff; }
+.acs-visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+.acs-detail-compliance {
+    min-width: 0;
+    margin: 0 0 14px;
+    overflow: hidden;
+    background: var(--acs-panel);
+    border: 1px solid var(--acs-line);
+    border-radius: 14px;
+    box-shadow: var(--acs-shadow);
+}
+.acs-compliance-tab {
+    display: flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 7px 13px;
+    background: var(--acs-panel-muted);
+    border-bottom: 1px solid var(--acs-line);
+}
+body.acs-report-ui .acs-compliance-tab h2 {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--acs-heading) !important;
+    font-size: 13px !important;
+    font-weight: 850;
+    line-height: 1.25;
+}
+body.acs-report-ui table.acs-compliance-table {
+    display: table !important;
+    width: 100% !important;
+    margin: 0 !important;
+    overflow: visible;
+    white-space: normal;
+    background: var(--acs-panel);
+    border: 0 !important;
+    border-radius: 0;
+    border-collapse: collapse !important;
+    table-layout: fixed;
+}
+.acs-compliance-component-column { width: 40%; }
+.acs-compliance-requirement-column { width: 20%; }
+.acs-compliance-status-column { width: 40%; }
+body.acs-report-ui .acs-compliance-table th,
+body.acs-report-ui .acs-compliance-table td {
+    padding: 8px 14px !important;
+    white-space: normal !important;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+}
+body.acs-report-ui .acs-compliance-table thead th {
+    color: var(--acs-muted) !important;
+    background: #f1f6fc !important;
+    border-bottom: 1px solid var(--acs-line) !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+body.acs-report-ui .acs-compliance-table thead th:nth-child(2),
+body.acs-report-ui .acs-compliance-table thead th:nth-child(3),
+body.acs-report-ui .acs-compliance-table tbody td {
+    text-align: center !important;
+}
+body.acs-report-ui .acs-compliance-table tbody th,
+body.acs-report-ui .acs-compliance-table tbody td {
+    color: var(--acs-text) !important;
+    background: #fff !important;
+    border-bottom: 1px solid var(--acs-line) !important;
+}
+body.acs-report-ui .acs-compliance-table tbody tr:nth-child(even) th,
+body.acs-report-ui .acs-compliance-table tbody tr:nth-child(even) td {
+    background: #fbfcfe !important;
+}
+body.acs-report-ui .acs-compliance-table tbody tr:last-child > th,
+body.acs-report-ui .acs-compliance-table tbody tr:last-child > td {
+    border-bottom: 0 !important;
+}
+body.acs-report-ui .acs-compliance-table tbody th {
+    font-size: 11.5px !important;
+    font-weight: 850 !important;
+    text-transform: uppercase;
+}
+.acs-compliance-table tbody tr[data-acs-compliance-tone="pass"] > th {
+    box-shadow: inset 3px 0 #16a34a;
+}
+.acs-compliance-table tbody tr[data-acs-compliance-tone="fail"] > th {
+    box-shadow: inset 3px 0 #dc2626;
+}
+.acs-compliance-table tbody tr[data-acs-compliance-tone="not-run"] > th,
+.acs-compliance-table tbody tr[data-acs-compliance-tone="unknown"] > th {
+    box-shadow: inset 3px 0 #64748b;
+}
+.acs-requirement-badge,
+.acs-compliance-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 23px;
+    max-width: 100%;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 9.5px;
+    font-weight: 850;
+    line-height: 1.25;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+.acs-requirement-mandatory {
+    color: #174f91;
+    background: #e7f0ff;
+}
+.acs-requirement-recommended {
+    color: #6840bd;
+    background: #f2ecff;
+}
+.acs-requirement-conditional-mandatory {
+    color: #92400e;
+    background: #ffedd5;
+}
+.acs-requirement-extension {
+    color: #0f766e;
+    background: #ccfbf1;
+}
+.acs-requirement-unknown {
+    color: var(--acs-neutral-text);
+    background: var(--acs-neutral-bg);
+}
+.acs-compliance-pass {
+    color: var(--acs-pass-text);
+    background: var(--acs-pass-bg);
+}
+.acs-compliance-fail {
+    color: var(--acs-fail-text);
+    background: var(--acs-fail-bg);
+}
+.acs-compliance-not-run,
+.acs-compliance-unknown {
+    color: var(--acs-neutral-text);
+    background: var(--acs-neutral-bg);
+}
 body.acs-report-ui .subtest-table {
     width: calc(100% - 20px) !important;
     margin: 8px 10px 12px !important;
@@ -853,6 +1002,8 @@ body[data-acs-suite="post-script"] .acs-flat-card {
     box-shadow: var(--acs-shadow) !important;
 }
 body[data-acs-suite="sbmr"] .case-header { padding-top: 5px; border-top: 1px solid var(--acs-line); }
+.acs-sbmr-sources { margin: 8px 0; }
+.acs-sbmr-source { display: inline-block; font-size: 13px; margin: 0 18px 8px 0; }
 
 .acs-toolbar {
     position: sticky;
@@ -1150,6 +1301,43 @@ body[data-acs-suite="sbmr"] .case-header { padding-top: 5px; border-top: 1px sol
 .acs-report-ui[data-acs-report-kind="acs-summary"] .summary > .details-link {
     margin-top: auto;
 }
+.acs-suite-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-bottom: 4px;
+    break-inside: avoid;
+    break-after: avoid;
+}
+body.acs-report-ui .acs-suite-heading > :is(h1, h2, h3) {
+    margin: 0 !important;
+    min-width: 0;
+}
+.acs-suite-compliance {
+    display: inline-block;
+    margin-left: auto;
+    max-width: 100%;
+    padding: 6px 10px;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.4;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+.acs-suite-empty {
+    flex: 1;
+    margin-top: 14px;
+    padding: 24px 16px;
+    border: 1px dashed var(--acs-line);
+    border-radius: 12px;
+    color: var(--acs-muted);
+    text-align: center;
+}
+.acs-suite-empty p { margin: 6px 0 0; font-size: 13px; }
 .acs-report-ui[data-acs-report-kind="acs-summary"] .summary h1 { font-size: 20px !important; }
 .acs-report-ui[data-acs-report-kind="acs-summary"] .summary .acs-summary-card { min-height: 62px; padding: 9px; }
 .acs-report-ui[data-acs-report-kind="acs-summary"] .summary .acs-summary-value { font-size: 20px; }
@@ -1270,6 +1458,19 @@ body[data-acs-suite="sbmr"] .case-header { padding-top: 5px; border-top: 1px sol
 }
 
 @media (max-width: 560px) {
+    .acs-compliance-component-column { width: 45%; }
+    .acs-compliance-requirement-column { width: 26%; }
+    .acs-compliance-status-column { width: 29%; }
+    body.acs-report-ui .acs-compliance-table th,
+    body.acs-report-ui .acs-compliance-table td { padding: 7px 8px !important; }
+    body.acs-report-ui .acs-compliance-table thead th { font-size: 8.5px !important; }
+    body.acs-report-ui .acs-compliance-table tbody th { font-size: 10px !important; }
+    .acs-requirement-badge,
+    .acs-compliance-badge {
+        padding: 3px 6px;
+        font-size: 8.5px;
+        white-space: normal;
+    }
     .result-summary.acs-compact-summary,
     .summary-container.acs-compact-summary,
     .card.acs-compact-summary { padding: 15px !important; }
@@ -1322,6 +1523,19 @@ body[data-acs-suite="sbmr"] .case-header { padding-top: 5px; border-top: 1px sol
     .system-info,
     .acs-results-summary,
     .summary { box-shadow: none !important; break-inside: avoid; }
+    .acs-detail-compliance {
+        box-shadow: none !important;
+        break-inside: auto;
+    }
+    .acs-detail-compliance[data-acs-compliance-row-count="1"] {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    .acs-compliance-table thead { display: table-header-group; }
+    .acs-compliance-table tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
     .acs-summary-overview > .acs-information-overview,
     .acs-overview-results > .acs-overview-result-card {
         padding: 12px !important;
@@ -1983,6 +2197,9 @@ REPORT_JS = r"""
             /^(?:Suite )?Description:\s*/i
         );
         var overview = caseOverview(suiteName, description, "Test suite", "");
+        if (suiteHeader.hasAttribute("data-acs-sbmr-channel")) {
+            group.setAttribute("data-acs-sbmr-channel", suiteHeader.getAttribute("data-acs-sbmr-channel"));
+        }
         overview.setAttribute("data-acs-test-suite", suiteName);
         [
             "data-acs-summary-outcomes",
@@ -2130,7 +2347,9 @@ REPORT_JS = r"""
     function upgradeTableColumns() {
         var suiteType = document.body.getAttribute("data-acs-suite");
         var collapseReasons = suiteType === "sct" || suiteType === "fwts";
-        Array.prototype.forEach.call(document.querySelectorAll("table:not(.summary-table)"), function (table) {
+        Array.prototype.forEach.call(document.querySelectorAll(
+            "table:not(.summary-table):not(.acs-compliance-table)"
+        ), function (table) {
             if (!table.tHead || !table.tHead.rows.length) {
                 return;
             }
@@ -2239,7 +2458,9 @@ REPORT_JS = r"""
     }
 
     function upgradeStatusCells() {
-        Array.prototype.forEach.call(document.querySelectorAll("table:not(.summary-table) tbody > tr"), function (row) {
+        Array.prototype.forEach.call(document.querySelectorAll(
+            "table:not(.summary-table):not(.acs-compliance-table) tbody > tr"
+        ), function (row) {
             if (row.querySelector("table") || row.closest(".system-info, .acs-results-summary")) {
                 return;
             }
@@ -2383,7 +2604,9 @@ REPORT_JS = r"""
 
     function statusRows() {
         var records = [];
-        Array.prototype.forEach.call(document.querySelectorAll("table:not(.summary-table) tbody > tr"), function (row) {
+        Array.prototype.forEach.call(document.querySelectorAll(
+            "table:not(.summary-table):not(.acs-compliance-table) tbody > tr"
+        ), function (row) {
             var table = row.closest("table");
             if (!table || table.closest(".system-info") || table.closest(".acs-results-summary") ||
                     row.querySelector("table")) {
@@ -2571,7 +2794,13 @@ REPORT_JS = r"""
             Array.prototype.forEach.call(
                 group.querySelectorAll("table tbody > tr"),
                 function (row) {
-                    if (row.closest(".acs-result-group") !== group || row.querySelector("table")) {
+                    // BSA/SBSA suite summaries count testcase rules. Keep their
+                    // nested subtests available to search and filters, but do
+                    // not count those rows again in the per-suite breakdown.
+                    if (row.closest(".acs-result-group") !== group ||
+                            row.querySelector("table") ||
+                            (suiteType === "bsa" &&
+                                row.closest("table.subtest-table"))) {
                         return;
                     }
                     leafRowCount += 1;
@@ -2747,6 +2976,32 @@ REPORT_JS = r"""
         searchControl.appendChild(search);
         toolbar.appendChild(searchControl);
 
+        var channelSelect = null;
+        if (document.body.hasAttribute("data-acs-sbmr-combined") &&
+                ["SBMR-IB", "SBMR-OOB"].every(function (channel) {
+                    return resultGroups.some(function (group) {
+                        return group.getAttribute("data-acs-sbmr-channel") === channel;
+                    });
+                })) {
+            var channelControl = document.createElement("label");
+            channelControl.className = "acs-control";
+            var channelLabel = document.createElement("span");
+            channelLabel.className = "acs-control-label";
+            channelLabel.textContent = "Interface";
+            channelSelect = document.createElement("select");
+            channelSelect.setAttribute("aria-label", "Filter SBMR interface");
+            [["", "All interfaces"], ["SBMR-IB", "SBMR-IB · In-band"], ["SBMR-OOB", "SBMR-OOB · Out-of-band"]].forEach(function (item) {
+                var option = document.createElement("option");
+                option.value = item[0];
+                option.textContent = item[1];
+                channelSelect.appendChild(option);
+            });
+            channelSelect.addEventListener("change", applyFilters);
+            channelControl.appendChild(channelLabel);
+            channelControl.appendChild(channelSelect);
+            toolbar.appendChild(channelControl);
+        }
+
         var navigation = navigationTargets();
         if (navigation.targets.length > 1) {
             var suiteControl = document.createElement("label");
@@ -2900,6 +3155,7 @@ REPORT_JS = r"""
             var visible = 0;
             records.forEach(function (record) {
                 record.match = (!activeStatus || record.status === activeStatus) &&
+                    (!channelSelect || !channelSelect.value || (record.group && record.group.getAttribute("data-acs-sbmr-channel") === channelSelect.value)) &&
                     (!query || record.text.indexOf(query) >= 0);
                 if (record.row) {
                     record.row.classList.toggle("acs-filter-hidden", !record.match);
@@ -2979,6 +3235,7 @@ REPORT_JS = r"""
         reset.addEventListener("click", function () {
             search.value = "";
             activeStatus = "";
+            if (channelSelect) { channelSelect.value = ""; }
             applyFilters();
             search.focus();
         });
@@ -3428,6 +3685,7 @@ REPORT_JS = r"""
             "scmi_summary": "SCMI",
             "sbmr_ib_summary": "SBMR-IB",
             "sbmr_oob_summary": "SBMR-OOB",
+            "sbmr_summary": "SBMR",
             "post_script_summary": "POST-SCRIPT",
             "standalone_summary": "Standalone",
             "bbsr_fwts_summary": "BBSR-FWTS",

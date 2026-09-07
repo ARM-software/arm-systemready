@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import html
 import importlib
+import json
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import os
@@ -40,6 +41,14 @@ def _load_enhancer():
     """Import the report enhancer from the repository under test."""
     sys.path.insert(0, str(LOG_PARSER_DIR))
     return importlib.import_module("report_ui").enhance_html_report
+
+
+def _load_compliance_injector():
+    """Import the merged-data compliance injector under test."""
+    sys.path.insert(0, str(LOG_PARSER_DIR))
+    return importlib.import_module(
+        "generate_acs_summary"
+    ).inject_detail_compliance
 
 
 def _chromium_binary() -> str:
@@ -281,16 +290,16 @@ BSA_PAGE = r"""<!doctype html>
 <h1>BSA compact summary smoke</h1>
 <div class="result-summary"><h2>Result Summary</h2>
   <table class="summary-table"><tbody>
-    <tr><td>Total Tests</td><td>116</td></tr>
-    <tr><td>Passed</td><td class="pass">22</td></tr>
-    <tr><td>Failed</td><td class="fail">47</td></tr>
-    <tr><td>Failed with Waiver</td><td class="fail-waiver">0</td></tr>
+    <tr><td>Total Tests</td><td>5</td></tr>
+    <tr><td>Passed</td><td class="pass">1</td></tr>
+    <tr><td>Failed</td><td class="fail">2</td></tr>
+    <tr><td>Failed with Waiver</td><td class="fail-waiver">1</td></tr>
     <tr><td>Aborted</td><td class="aborted">0</td></tr>
-    <tr><td>Skipped</td><td class="skipped">12</td></tr>
-    <tr><td>Warnings</td><td class="warning">12</td></tr>
-    <tr><td>Passed (Partial)</td><td class="passed-partial">3</td></tr>
-    <tr><td>Not implemented</td><td class="not-implemented">18</td></tr>
-    <tr><td>PAL not supported</td><td class="pal-not-supported">2</td></tr>
+    <tr><td>Skipped</td><td class="skipped">0</td></tr>
+    <tr><td>Warnings</td><td class="warning">0</td></tr>
+    <tr><td>Passed (Partial)</td><td class="passed-partial">1</td></tr>
+    <tr><td>Not implemented</td><td class="not-implemented">0</td></tr>
+    <tr><td>PAL not supported</td><td class="pal-not-supported">0</td></tr>
   </tbody></table>
 </div>
 <div class="chart-container"><div id="chart-probe" style="width:320px;height:80px">chart</div></div>
@@ -305,7 +314,7 @@ BSA_PAGE = r"""<!doctype html>
       <tr id="partial-row"><td>B_GIC_01</td><td>GIC version</td><td>PASSED(*PARTIAL)</td></tr>
       <tr id="gic-fail-1"><td>B_GIC_02</td><td>GIC failure one</td><td>FAILED</td></tr>
       <tr id="gic-fail-2"><td>B_GIC_03</td><td>GIC failure two</td><td>FAILED</td></tr>
-      <tr id="nested-container"><td colspan="3"><table><thead><tr>
+      <tr id="nested-container"><td colspan="3"><table class="subtest-table"><thead><tr>
         <th>Subtest</th><th>Description</th><th>Result</th>
       </tr></thead><tbody><tr id="gic-nested-fail">
         <td>B_GIC_04.1</td><td>Nested GIC failure</td><td>FAILED</td>
@@ -333,22 +342,66 @@ window.addEventListener("load", function () {
     var kicker = document.querySelector("body > .acs-report-kicker");
     var backLink = document.querySelector(".acs-back-to-main");
     var backRect = backLink && backLink.getBoundingClientRect();
+    var compliancePanel = document.querySelector(".acs-detail-compliance");
+    var complianceTable = compliancePanel && compliancePanel.querySelector(
+      ".acs-compliance-table");
+    var complianceRow = complianceTable && complianceTable.tBodies[0].rows[0];
     var rows = Array.prototype.slice.call(summary.querySelectorAll(".acs-progress-row"));
     var titleRect = summary.querySelector("h2").getBoundingClientRect();
     var totalRect = summary.querySelector(".acs-compact-summary-total").getBoundingClientRect();
     expect(!document.querySelector(".chart-container") && !document.querySelector("#chart-probe"),
       "BSA/SBSA legacy chart must be removed from the rendered report");
+    expect(compliancePanel && complianceTable &&
+      compliancePanel.querySelector(".acs-compliance-tab h2").textContent ===
+        "Compliance results" &&
+      Array.prototype.map.call(complianceTable.tHead.rows[0].cells, function (cell) {
+        return cell.textContent.trim();
+      }).join(" | ") === "Test suite | Requirement | Compliance",
+      "Single-suite compliance must use the labelled three-column table");
+    expect(complianceTable.tBodies[0].rows.length === 1 &&
+      Array.prototype.map.call(complianceRow.cells, function (cell) {
+        return cell.textContent.trim();
+      }).join(" | ") === "BSA | Mandatory | Not Compliant" &&
+      complianceRow.getAttribute("data-acs-compliance-tone") === "fail",
+      "Single-suite compliance must come from the merged run record");
+    expect(document.querySelector(".acs-report-subtitle").nextElementSibling ===
+      compliancePanel && compliancePanel.nextElementSibling === overview,
+      "Compliance results must sit between the subtitle and the two summary cards");
+    expect(!/Run compliance|Overall|Reason/.test(compliancePanel.textContent),
+      "Compliance results must not repeat overall status, reasons, or failure counts");
+    var complianceStyle = window.getComputedStyle(compliancePanel);
+    var complianceRail = window.getComputedStyle(complianceRow.cells[0]).boxShadow;
+    expect(complianceStyle.borderLeftWidth === "1px" &&
+      complianceStyle.borderLeftColor === complianceStyle.borderTopColor &&
+      complianceRail.indexOf("220, 38, 38") >= 0,
+      "The compliance panel must use a neutral border and only a red result rail");
+    if (window.innerWidth > 1100) {
+      var complianceCells = Array.prototype.map.call(
+        complianceRow.cells, function (cell) { return cell.getBoundingClientRect(); }
+      );
+      var requirementMidpoint = complianceCells[1].left + complianceCells[1].width / 2;
+      var overviewGapMidpoint = (summaryRect.right + breakdownRect.left) / 2;
+      expect(Math.abs(complianceCells[0].width / complianceTable.getBoundingClientRect().width - .4) < .02 &&
+        Math.abs(complianceCells[1].width / complianceTable.getBoundingClientRect().width - .2) < .02 &&
+        Math.abs(complianceCells[2].width / complianceTable.getBoundingClientRect().width - .4) < .02 &&
+        Math.abs(requirementMidpoint - overviewGapMidpoint) < 3,
+        "The 40/20/40 columns must center Requirement over the overview gap");
+    }
+    expect(complianceTable.getBoundingClientRect().right <=
+      compliancePanel.getBoundingClientRect().right + 1 &&
+      !complianceRow.hasAttribute("data-acs-row-status"),
+      "Compliance rows must fit the panel without entering result filters");
     expect(summary.querySelector("h2").textContent === "Test-result summary",
       "Compact summary must use the requested heading");
     expect(summary.querySelector(".acs-compact-summary-total").textContent ===
-      "116 suite-reported tests", "Compact summary must show the source total");
+      "5 suite-reported tests", "Compact summary must show the source total");
     expect(rows.length === 9, "Compact BSA/SBSA summary must preserve every status row");
     expect(rows.map(function (row) {
       return row.querySelector(".acs-progress-label").textContent + " " +
         row.querySelector(".acs-progress-count").textContent;
     }).join(" | ") ===
-      "Passed 22 | Failed 47 | Failed with Waiver 0 | Aborted 0 | Skipped 12 | " +
-      "Warnings 12 | Passed (Partial) 3 | Not implemented 18 | PAL not supported 2",
+      "Passed 1 | Failed 2 | Failed with Waiver 1 | Aborted 0 | Skipped 0 | " +
+      "Warnings 0 | Passed (Partial) 1 | Not implemented 0 | PAL not supported 0",
       "Moving the summary must preserve every status label and count");
     var partialSummary = document.querySelector('[data-acs-summary-status="passed-partial"]');
     expect(partialSummary && partialSummary.querySelector(".acs-progress-label").textContent ===
@@ -405,7 +458,7 @@ window.addEventListener("load", function () {
       "Every failure-summary row must remain visible without an internal scroll area");
     expect(breakdown.querySelector("h2").textContent === "Failures by test suite" &&
       breakdown.querySelector(".acs-compact-summary-total").textContent ===
-        "2 test suites · 3 failed · 1 waived",
+        "2 test suites · 2 failed · 1 waived",
       "Failure breakdown must declare its complete test-suite scope and totals");
     expect(failureRows.length === 2 &&
       failureRows.map(function (row) {
@@ -413,15 +466,20 @@ window.addEventListener("load", function () {
           row.getAttribute("data-acs-failed") + ":" +
           row.getAttribute("data-acs-failed-with-waiver") + ":" +
           row.getAttribute("data-acs-outcomes");
-      }).join(" | ") === "GIC:3:1:5 | MEM_MAP:0:0:1",
+      }).join(" | ") === "GIC:2:1:4 | MEM_MAP:0:0:1",
       "Every BSA test suite, including the zero-failure suite, must appear exactly once");
+    expect(Number(summary.querySelector(
+      '[data-acs-summary-status="fail"] .acs-progress-count').textContent) ===
+      failureRows.reduce(function (total, row) {
+        return total + Number(row.getAttribute("data-acs-failed"));
+      }, 0), "BSA suite failures must equal the suite-reported Failed total");
     expect(document.getElementById("nested-container").getAttribute("data-acs-row-status") === null &&
       document.getElementById("gic-nested-fail").getAttribute("data-acs-row-status") === "fail",
-      "Nested BSA leaf failures must count once without counting their container row");
-    expect(failureRows[0].querySelector(".acs-progress-track").getAttribute("aria-valuenow") === "4" &&
-      failureRows[0].querySelector(".acs-progress-track").getAttribute("aria-valuemax") === "5" &&
-      failureRows[0].querySelector(".acs-failure-fill").style.width === "60%" &&
-      failureRows[0].querySelector(".acs-failure-fill-waiver").style.width === "20%" &&
+      "Nested BSA failures must remain filterable without entering the suite breakdown");
+    expect(failureRows[0].querySelector(".acs-progress-track").getAttribute("aria-valuenow") === "3" &&
+      failureRows[0].querySelector(".acs-progress-track").getAttribute("aria-valuemax") === "4" &&
+      failureRows[0].querySelector(".acs-failure-fill").style.width === "50%" &&
+      failureRows[0].querySelector(".acs-failure-fill-waiver").style.width === "25%" &&
       failureRows[1].getAttribute("data-acs-zero") === "true",
       "Failure tracks must use per-suite outcome ratios and preserve waived failures separately");
     expect(document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
@@ -645,6 +703,55 @@ window.addEventListener("load", function () {
   window.setTimeout(function () {
     var failures = [];
     function expect(condition, message) { if (!condition) { failures.push(message); } }
+    var compliancePanel = document.querySelector(".acs-detail-compliance");
+    var complianceTable = compliancePanel && compliancePanel.querySelector(
+      ".acs-compliance-table");
+    var complianceRows = complianceTable ? Array.prototype.slice.call(
+      complianceTable.tBodies[0].rows
+    ) : [];
+    var complianceValues = complianceRows.map(function (row) {
+      return Array.prototype.map.call(row.cells, function (cell) {
+        return cell.textContent.trim();
+      }).join(" | ");
+    });
+    expect(compliancePanel &&
+      compliancePanel.querySelector(".acs-compliance-tab h2").textContent ===
+        "Compliance results" &&
+      Array.prototype.map.call(complianceTable.tHead.rows[0].cells, function (cell) {
+        return cell.textContent.trim();
+      }).join(" | ") === "Test case | Requirement | Compliance",
+      "Standalone compliance must use the same table with a Test case column");
+    expect(complianceValues.join(" || ") ===
+      "DT-KSELFTEST | Recommended | Compliant || " +
+      "DT-VALIDATE | Mandatory | Not Compliant || " +
+      "ETHTOOL-TEST | Mandatory | Compliant || " +
+      "READ-WRITE-CHECK-BLK-DEVICES | Mandatory | Compliant || " +
+      "CAPSULE-UPDATE | Mandatory | Not Compliant (Not Run) || " +
+      "PSCI | Recommended | Compliant || SMBIOS | Recommended | Compliant || " +
+      "Future component | Future requirement | " +
+      "Partner review pending: <keep this detail>",
+      "Standalone must add only missing Mandatory components to its compliance table");
+    expect(!complianceValues.some(function (value) {
+      return value.indexOf("NETWORK-BOOT") >= 0;
+    }),
+      "A missing Recommended component must remain in the SRS summary only");
+    expect(complianceRows.every(function (row) {
+      return !row.hasAttribute("data-acs-row-status");
+    }) && document.documentElement.scrollWidth <=
+      document.documentElement.clientWidth + 1,
+      "Standalone compliance rows must remain outside filters without overflow");
+    expect(window.getComputedStyle(compliancePanel).borderLeftColor ===
+      window.getComputedStyle(compliancePanel).borderTopColor &&
+      window.getComputedStyle(complianceRows[0].cells[0]).boxShadow.indexOf(
+        "22, 163, 74") >= 0 &&
+      window.getComputedStyle(complianceRows[1].cells[0]).boxShadow.indexOf(
+        "220, 38, 38") >= 0 &&
+      window.getComputedStyle(complianceRows[4].cells[0]).boxShadow.indexOf(
+        "220, 38, 38") >= 0 &&
+      window.getComputedStyle(complianceRows[7].cells[0]).boxShadow.indexOf(
+        "100, 116, 139") >= 0,
+      "Standalone must use red rails for failed and mandatory-not-run results, " +
+        "with a neutral future-status fallback");
     var select = document.querySelector(".acs-control select");
     expect(select && select.previousElementSibling.textContent === "Jump to test case" &&
       select.options[0].textContent === "Choose a test case…",
@@ -1240,6 +1347,7 @@ def main() -> int:
     """Generate synthetic reports and execute their interactions in Chromium."""
     browser = _chromium_binary()
     enhance_html_report = _load_enhancer()
+    inject_detail_compliance = _load_compliance_injector()
     image_chart = (
         '<!doctype html><html><head><title>Chart stripping</title></head><body>'
         '<div class="chart-container"><img src="data:image/png;base64,AA=="></div>'
@@ -1267,6 +1375,110 @@ def main() -> int:
         card_summary = enhance_html_report(CARD_SUMMARY_PAGE, suite_type="sbmr")
         summary = enhance_html_report(SUMMARY_PAGE, page_type="acs-summary")
         band_mismatch = enhance_html_report(BAND_MISMATCH_PAGE, page_type="acs-summary")
+        os_detail = enhance_html_report(DETAIL_PAGE, suite_type="os")
+
+        compliance_data = {
+            "Suite_Name: acs_info": {
+                "ACS Results Summary": {
+                    "Suite_Name: Mandatory  : BSA_compliance":
+                        "Not Compliant: Failed 2",
+                    "Suite_Name: Recommended  : DT_KSELFTEST_compliance":
+                        "Compliant",
+                    "Suite_Name: Mandatory  : DT_VALIDATE_compliance":
+                        "Not Compliant: Failed 8",
+                    "Suite_Name: Mandatory  : ETHTOOL_TEST_compliance":
+                        "Compliant",
+                    "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance":
+                        "Compliant",
+                    "Suite_Name: Mandatory  : Capsule Update_compliance":
+                        "Not Compliant: not run",
+                    "Suite_Name: Recommended  : NETWORK_BOOT_compliance":
+                        "Not Run",
+                    "Suite_Name: Recommended  : PSCI_compliance": "Compliant",
+                    "Suite_Name: Recommended  : SMBIOS_compliance": "Compliant",
+                    "Suite_Name: Future requirement  : Future component_compliance":
+                        "Partner review pending: <keep this detail>",
+                    "Suite_Name: Mandatory  : OS_linux-alpha_compliance":
+                        "Compliant with waivers: Waivers 1",
+                    "Suite_Name: Mandatory  : OS_linux-beta_compliance": "Not Run",
+                    "Suite_Name: Future requirement  : OS_linux-future_compliance":
+                        "Partner review pending: <keep this detail>",
+                }
+            },
+            "Suite_Name: Standalone": [
+                {"Test_case": "dt_kselftest", "Test_suite": "Peripherals"},
+                {"Test_case": "dt_validate", "Test_suite": "DTValidation"},
+                {"Test_case": "ethtool_test", "Test_suite": "Network"},
+                {
+                    "Test_case": "read_write_check_blk_devices",
+                    "Test_suite": "Boot sources",
+                },
+                {"Test_case": "psci_check", "Test_suite": "PSCI"},
+                {"Test_case": "SmbiosTable", "Test_suite": "SMBIOS"},
+                {"Test_case": "Future component", "Test_suite": "Future suite"},
+            ],
+        }
+        compliance_files = {
+            "bsa_detailed.html": bsa_detail,
+            "standalone_tests_detailed.html": case_navigation,
+            "os_tests_detailed.html": os_detail,
+        }
+        for filename, content in compliance_files.items():
+            (directory / filename).write_text(content, encoding="utf-8")
+        merged_path = directory / "merged_results.json"
+        merged_path.write_text(json.dumps(compliance_data), encoding="utf-8")
+
+        missing_only_directory = directory / "missing_only"
+        missing_only_directory.mkdir()
+        missing_only_detail = (
+            missing_only_directory / "standalone_tests_detailed.html"
+        )
+        missing_only_detail.write_text(case_navigation, encoding="utf-8")
+        missing_only_merged = missing_only_directory / "merged_results.json"
+        missing_only_merged.write_text(json.dumps({
+            "Suite_Name: acs_info": {
+                "ACS Results Summary": {
+                    "Suite_Name: Mandatory  : Capsule Update_compliance":
+                        "Not Compliant: not run",
+                }
+            }
+        }), encoding="utf-8")
+        inject_detail_compliance(
+            str(missing_only_merged), str(missing_only_directory)
+        )
+        missing_only_content = missing_only_detail.read_text(encoding="utf-8")
+        if 'data-acs-detail-compliance="true"' in missing_only_content:
+            raise RuntimeError(
+                "A missing-only Standalone run must not gain an empty detail table"
+            )
+
+        inject_detail_compliance(str(merged_path), str(directory))
+        first_injection = {
+            filename: (directory / filename).read_bytes()
+            for filename in compliance_files
+        }
+        inject_detail_compliance(str(merged_path), str(directory))
+        bsa_detail = (directory / "bsa_detailed.html").read_text(encoding="utf-8")
+        case_navigation = (
+            directory / "standalone_tests_detailed.html"
+        ).read_text(encoding="utf-8")
+        os_detail = (directory / "os_tests_detailed.html").read_text(encoding="utf-8")
+        if bsa_detail.count('data-acs-detail-compliance="true"') != 1 or \
+                case_navigation.count('data-acs-detail-compliance="true"') != 1:
+            raise RuntimeError("Compliance injection must be idempotent")
+        if any(
+                (directory / filename).read_bytes() != first_injection[filename]
+                for filename in compliance_files):
+            raise RuntimeError(
+                "Repeated compliance injection must be byte-identical"
+            )
+        if not all(value in os_detail for value in (
+                "OS-linux-alpha", "Compliant with waivers", "OS-linux-beta",
+                "Not Run", "OS-linux-future",
+                "Partner review pending: &lt;keep this detail&gt;")):
+            raise RuntimeError(
+                "Dynamic OS compliance values were omitted or not escaped"
+            )
         _run_page(browser, directory, "sct_detail", sct_detail)
         _run_page(browser, directory, "fwts_detail", fwts_detail)
         _run_page(browser, directory, "bsa_detail", bsa_detail)

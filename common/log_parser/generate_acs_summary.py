@@ -28,11 +28,40 @@ import html
 from jinja2 import Template
 
 from report_ui import enhance_html_report
+from suite_registry import get_suite, load_registry, normalize_suite_name
 
 
 YOCTO_FLAG_PATH = "/mnt/yocto_image.flag"
 LEGACY_SUITE_KEYS = {"Suite_Name: FWTS", "Suite_Name: SCT"}
 OBSOLETE_DT_SUITE_KEYS = {"Suite_Name: BBR-FWTS", "Suite_Name: BBR-SCT"}
+
+COMPLIANCE_KEY_PATTERN = re.compile(
+    r"^Suite_Name:\s*([^:]+?)\s*:\s*(.+?)_compliance\s*$",
+    re.IGNORECASE,
+)
+
+DETAIL_COMPLIANCE_TARGETS = (
+    ("bsa_detailed.html", ("BSA",), "BSA"),
+    ("sbsa_detailed.html", ("SBSA",), "SBSA"),
+    (
+        "fwts_detailed.html",
+        ("SBBR-FWTS", "EBBR-FWTS", "FWTS"),
+        "FWTS",
+    ),
+    (
+        "sct_detailed.html",
+        ("SBBR-SCT", "EBBR-SCT", "SCT"),
+        "SCT",
+    ),
+    ("bbsr_fwts_detailed.html", ("BBSR-FWTS",), "BBSR-FWTS"),
+    ("bbsr_sct_detailed.html", ("BBSR-SCT",), "BBSR-SCT"),
+    ("bbsr_tpm_detailed.html", ("BBSR-TPM",), "BBSR-TPM"),
+    ("pfdi_detailed.html", ("PFDI",), "PFDI"),
+    ("post_script_detailed.html", ("POST_SCRIPT",), "POST-SCRIPT"),
+    ("scmi_detailed.html", ("SCMI",), "SCMI"),
+    ("sbmr_ib_detailed.html", ("SBMR-IB",), "SBMR-IB"),
+    ("sbmr_oob_detailed.html", ("SBMR-OOB",), "SBMR-OOB"),
+)
 
 
 def _prefix_from_band(band):
@@ -412,6 +441,449 @@ def inject_test_suite_info(merged_json_path, output_dir):
             with open(file_path, "w", encoding="utf-8") as file:
                 file.write(updated)
 
+
+def _compliance_identity(value):
+    """Return a stable identifier for matching merged compliance entries."""
+    return re.sub(r"[^A-Z0-9]+", "", str(value or "").upper())
+
+
+def _compliance_display(value):
+    """Return the user-facing compliance value without its count/reason."""
+    raw_value = " ".join(str(value or "Unknown").split()) or "Unknown"
+    normalized = raw_value.lower()
+    if normalized.startswith("not compliant"):
+        return "Not Compliant", "fail"
+    if normalized.startswith("compliant with waiver"):
+        return "Compliant with waivers", "pass"
+    if normalized.startswith("compliant"):
+        return "Compliant", "pass"
+    if normalized.startswith("not run"):
+        return "Not Run", "not-run"
+    if normalized.startswith("unknown"):
+        return "Unknown", "unknown"
+    return raw_value, "unknown"
+
+
+def _requirement_display(value):
+    """Normalize known requirement labels while preserving future values."""
+    raw_value = " ".join(str(value or "Unknown").split())
+    normalized = raw_value.lower().replace("-", " ")
+    labels = {
+        "mandatory": "Mandatory",
+        "recommended": "Recommended",
+        "conditional mandatory": "Conditional-Mandatory",
+        "extension": "Extension",
+    }
+    return labels.get(normalized, raw_value or "Unknown")
+
+
+def _compliance_slug(value):
+    """Return a CSS-safe slug for a requirement or status label."""
+    slug = re.sub(r"[^a-z0-9]+", "-", str(value or "").lower()).strip("-")
+    return slug or "unknown"
+
+
+def _compliance_records(merged_data):
+    """Read run-specific suite compliance records from merged ACS data."""
+    if not isinstance(merged_data, dict):
+        return []
+    acs_info = merged_data.get("Suite_Name: acs_info", {})
+    if not isinstance(acs_info, dict):
+        return []
+    results = acs_info.get("ACS Results Summary", {})
+    if not isinstance(results, dict):
+        return []
+
+    records = []
+    for key, value in results.items():
+        match = COMPLIANCE_KEY_PATTERN.match(str(key))
+        if not match:
+            continue
+        requirement = _requirement_display(match.group(1))
+        component = " ".join(match.group(2).split())
+        compliance, tone = _compliance_display(value)
+        records.append({
+            "component": component,
+            "identity": _compliance_identity(component),
+            "requirement": requirement,
+            "requirement_slug": _compliance_slug(requirement),
+            "compliance": compliance,
+            "tone": tone,
+            "not_run": bool(re.search(
+                r"\bnot[\s_-]*run\b", str(value or "").lower()
+            )),
+        })
+    return records
+
+
+def _merged_entries(value):
+    """Return merged suite entries without changing their source order."""
+    if isinstance(value, list):
+        return value
+    if isinstance(value, dict) and isinstance(value.get("test_results"), list):
+        return value["test_results"]
+    if isinstance(value, dict):
+        return [value]
+    return []
+
+
+def _summary_compliance(rows):
+    """Summarize existing decisions for a card, without evaluating raw tests."""
+    if not rows:
+        return {"requirement": "Unknown", "compliance": "Unknown", "tone": "unknown"}
+    mandatory = [row for row in rows if row["requirement"] in (
+        "Mandatory", "Conditional-Mandatory"
+    )]
+    relevant = mandatory or rows
+    requirements = {row["requirement"] for row in relevant}
+    requirement = "Mandatory" if "Mandatory" in requirements else " / ".join(sorted(requirements))
+    if all(row.get("not_run") for row in rows):
+        status, tone = "Not Run", "fail" if "Mandatory" in requirements else "not-run"
+    elif any(row["tone"] == "fail" or
+             (row.get("not_run") and row["requirement"] == "Mandatory") for row in relevant):
+        status, tone = "Not Compliant", "fail"
+    elif any(row["tone"] == "unknown" for row in relevant):
+        status, tone = "Unknown", "unknown"
+    elif any("waiver" in row["compliance"].lower() for row in relevant):
+        status, tone = "Compliant with waivers", "pass"
+    else:
+        status, tone = "Compliant", "pass"
+    return {"requirement": requirement, "compliance": status, "tone": tone}
+
+
+def _summary_cards(merged_data, sources, output_dir):
+    """Decorate collected summaries and show missing applicable suites only."""
+    records = _compliance_records(merged_data)
+    by_identity = {row["identity"]: row for row in records}
+    registry = load_registry()
+    standalone_keys = {
+        _compliance_identity(item.get("requirement_key", item["canonical"]))
+        for item in registry
+        if item["canonical"] in get_suite("STANDALONE", registry)["included_suites"]
+    }
+    cards = []
+    for section_id, label, content, detail, candidates in sources:
+        if section_id == "standalone_summary":
+            rows = [row for row in records if row["identity"] in standalone_keys]
+        elif section_id == "OS_tests_summary":
+            rows = [row for row in records if row["identity"].startswith("OS")]
+        else:
+            rows = [by_identity[key] for key in map(_compliance_identity, candidates)
+                    if key in by_identity]
+        if not content and not rows:
+            continue
+        not_run = bool(rows) and all(row.get("not_run") for row in rows)
+        state = _summary_compliance(rows)
+        if not_run or not content:
+            message = "Not Run" if not_run else "Summary unavailable"
+            explanation = ("No results were collected for this suite." if not_run else
+                           "The summary report was not provided for this suite.")
+            content = (
+                f'<h1>{html.escape(label)} Test Summary</h1>'
+                '<div class="acs-suite-empty">'
+                f'<strong>{message}</strong><p>{explanation}</p></div>'
+            )
+        badge_text = f'{state["requirement"]} ({state["compliance"]})'
+        context = "; ".join(
+            f'{row["component"]}: {row["requirement"]} '
+            f'({row["compliance"]}{"; Not Run" if row.get("not_run") else ""})'
+            for row in rows
+        ) or "Run-specific compliance information was not provided."
+        badge = (
+            f'<span class="acs-suite-compliance acs-compliance-{state["tone"]}" '
+            f'title="{html.escape(context, quote=True)}">{html.escape(badge_text)}</span>'
+        )
+        content = re.sub(
+            r"(<h[1-6]\b[^>]*>.*?</h[1-6]\s*>)",
+            lambda match: '<div class="acs-suite-heading">' + match.group(1) + badge + '</div>',
+            content, count=1, flags=re.IGNORECASE | re.DOTALL,
+        )
+        cards.append({"id": section_id, "label": label, "content": content,
+                      "detail": detail if not not_run and
+                      os.path.isfile(os.path.join(output_dir, detail)) else ""})
+    return cards
+
+
+def _standalone_rows(merged_data, records):
+    """Return one compliance row for each Standalone component in this run."""
+    registry = load_registry()
+    standalone = get_suite("STANDALONE", registry) or {}
+    included_order = standalone.get("included_suites", [])
+    included = set(included_order)
+    registry_by_name = {
+        item.get("canonical"): item
+        for item in registry
+        if item.get("canonical") in included
+    }
+    records_by_identity = {record["identity"]: record for record in records}
+    special_cases = {
+        _compliance_identity("Runtime device mapping conflict test"):
+            "RUNTIME-DEV-MAP",
+        _compliance_identity("SmbiosTable"): "SMBIOS",
+    }
+
+    rows = []
+    seen = set()
+    standalone_data = merged_data.get("Suite_Name: Standalone", {})
+    for entry in _merged_entries(standalone_data):
+        if not isinstance(entry, dict) or not entry:
+            continue
+        candidates = [
+            entry.get("Test_case"),
+            entry.get("Test_suite"),
+            entry.get("Test_suite_name"),
+        ]
+        canonical = ""
+        for candidate in candidates:
+            normalized = normalize_suite_name(str(candidate or ""), registry)
+            if normalized in included:
+                canonical = normalized
+                break
+            special = special_cases.get(_compliance_identity(candidate))
+            if special:
+                canonical = special
+                break
+
+        record = None
+        display_name = ""
+        identity = ""
+        if canonical:
+            registry_entry = registry_by_name.get(canonical, {})
+            requirement_key = registry_entry.get("requirement_key", canonical)
+            identity = _compliance_identity(requirement_key)
+            record = records_by_identity.get(identity)
+            display_name = canonical
+        else:
+            for candidate in candidates:
+                candidate_identity = _compliance_identity(candidate)
+                if candidate_identity in records_by_identity:
+                    identity = candidate_identity
+                    record = records_by_identity[candidate_identity]
+                    break
+            display_name = (
+                record["component"] if record else
+                next((str(value).strip() for value in candidates if value),
+                     "Unknown component")
+            )
+            identity = identity or _compliance_identity(display_name)
+
+        if identity in seen:
+            continue
+        seen.add(identity)
+        if record:
+            rows.append({**record, "component": display_name})
+        else:
+            rows.append({
+                "component": display_name,
+                "identity": identity,
+                "requirement": "Unknown",
+                "requirement_slug": "unknown",
+                "compliance": "Unknown",
+                "tone": "unknown",
+            })
+
+    if not rows:
+        return rows
+
+    # Keep a missing Mandatory component visible in the existing Standalone
+    # compliance table without creating an empty result report for it.
+    for canonical in included_order:
+        registry_entry = registry_by_name.get(canonical, {})
+        requirement_key = registry_entry.get("requirement_key", canonical)
+        identity = _compliance_identity(requirement_key)
+        record = records_by_identity.get(identity)
+        if identity in seen or not record or not record.get("not_run"):
+            continue
+        if (
+            record["requirement"] != "Mandatory" or
+            record["compliance"] != "Not Compliant"
+        ):
+            continue
+        missing_record = {**record, "component": canonical}
+        if missing_record["compliance"] == "Not Compliant":
+            missing_record["compliance"] = "Not Compliant (Not Run)"
+        rows.append(missing_record)
+        seen.add(identity)
+
+    registry_position = {
+        _compliance_identity(
+            registry_by_name.get(canonical, {}).get(
+                "requirement_key", canonical
+            )
+        ): index
+        for index, canonical in enumerate(included_order)
+    }
+    rows.sort(key=lambda row: registry_position.get(
+        row["identity"], len(registry_position)
+    ))
+    return rows
+
+
+def _detail_compliance_markup(rows, unit_label):
+    """Build the shared semantic compliance table for a detailed report."""
+    body_rows = []
+    for row in rows:
+        component = html.escape(str(row["component"]), quote=True)
+        requirement = html.escape(str(row["requirement"]), quote=True)
+        compliance = html.escape(str(row["compliance"]), quote=True)
+        tone = html.escape(str(row["tone"]), quote=True)
+        requirement_slug = html.escape(
+            str(row["requirement_slug"]), quote=True
+        )
+        body_rows.append(
+            f'<tr data-acs-compliance-tone="{tone}">'
+            f'<th scope="row">{component}</th>'
+            '<td><span class="acs-requirement-badge '
+            f'acs-requirement-{requirement_slug}">{requirement}</span></td>'
+            '<td><span class="acs-compliance-badge '
+            f'acs-compliance-{tone}">{compliance}</span></td>'
+            '</tr>'
+        )
+    return (
+        '<section class="acs-detail-compliance" '
+        'data-acs-detail-compliance="true" '
+        f'data-acs-compliance-row-count="{len(rows)}" '
+        'aria-labelledby="acs-detail-compliance-title">'
+        '<div class="acs-compliance-tab">'
+        '<h2 id="acs-detail-compliance-title">Compliance results</h2></div>'
+        '<table class="acs-compliance-table">'
+        '<caption class="acs-visually-hidden">Run-specific requirement and '
+        f'compliance for each {html.escape(unit_label.lower())} in this '
+        'detailed report</caption>'
+        '<colgroup><col class="acs-compliance-component-column">'
+        '<col class="acs-compliance-requirement-column">'
+        '<col class="acs-compliance-status-column"></colgroup>'
+        f'<thead><tr><th scope="col">{html.escape(unit_label)}</th>'
+        '<th scope="col">Requirement</th>'
+        '<th scope="col">Compliance</th></tr></thead>'
+        f'<tbody>{"".join(body_rows)}</tbody></table></section>'
+    )
+
+
+def inject_detail_compliance(merged_json_path, output_dir):
+    """Inject run-specific requirement/compliance tables into detail pages."""
+    if not merged_json_path or not os.path.isfile(merged_json_path):
+        return
+    try:
+        with open(merged_json_path, "r", encoding="utf-8") as json_file:
+            merged_data = json.load(json_file)
+    except (OSError, ValueError, TypeError):
+        return
+
+    records = _compliance_records(merged_data)
+    records_by_identity = {record["identity"]: record for record in records}
+    targets = []
+    for filename, candidates, fallback_name in DETAIL_COMPLIANCE_TARGETS:
+        record = next(
+            (
+                records_by_identity.get(_compliance_identity(candidate))
+                for candidate in candidates
+                if records_by_identity.get(_compliance_identity(candidate))
+            ),
+            None,
+        )
+        display_name = (
+            record["component"]
+            if record and fallback_name in ("FWTS", "SCT")
+            else fallback_name
+        )
+        row = {**record, "component": display_name} if record else {
+            "component": display_name,
+            "identity": _compliance_identity(display_name),
+            "requirement": "Unknown",
+            "requirement_slug": "unknown",
+            "compliance": "Unknown",
+            "tone": "unknown",
+        }
+        targets.append((filename, [row], "Test suite"))
+
+    # Include applicable Not Run interfaces in the existing compliance table,
+    # without creating empty result sections or detailed pages.
+    sbmr_rows = []
+    for label in ("SBMR-IB", "SBMR-OOB"):
+        record = records_by_identity.get(_compliance_identity(label))
+        if not _merged_entries(merged_data.get(f"Suite_Name: {label}")) and not (
+            record and record.get("not_run")
+        ):
+            continue
+        row = {**record, "component": label} if record else {
+            "component": label, "requirement": "Unknown", "requirement_slug": "unknown",
+            "compliance": "Unknown", "tone": "unknown",
+        }
+        if row.get("not_run") and row["compliance"] != "Not Run":
+            row["compliance"] += " (Not Run)"
+        sbmr_rows.append(row)
+    if sbmr_rows:
+        targets.append(("sbmr_detailed.html", sbmr_rows, "Test suite"))
+
+    standalone_rows = _standalone_rows(merged_data, records)
+    if standalone_rows:
+        targets.append((
+            "standalone_tests_detailed.html", standalone_rows, "Test case"
+        ))
+
+    dynamic_os_rows = [
+        {**record, "component": record["component"].replace("_", "-")}
+        for record in records
+        if record["identity"].startswith("OS") and
+        record["identity"] != _compliance_identity("OS_TEST")
+    ]
+    if dynamic_os_rows:
+        targets.append(("os_tests_detailed.html", dynamic_os_rows, "Test case"))
+    else:
+        os_record = records_by_identity.get(_compliance_identity("OS_TEST"))
+        os_row = {**os_record, "component": "OS-TESTS"} if os_record else {
+            "component": "OS-TESTS",
+            "identity": _compliance_identity("OS_TEST"),
+            "requirement": "Unknown",
+            "requirement_slug": "unknown",
+            "compliance": "Unknown",
+            "tone": "unknown",
+        }
+        targets.append((
+            "os_tests_detailed.html", [os_row], "Test case"
+        ))
+
+    existing_table = re.compile(
+        r"<section\b[^>]*\bdata-acs-detail-compliance\s*=\s*"
+        r"([\"'])true\1[^>]*>.*?</section>",
+        re.IGNORECASE | re.DOTALL,
+    )
+    for filename, rows, unit_label in targets:
+        file_path = os.path.join(output_dir, filename)
+        if not os.path.isfile(file_path):
+            continue
+        try:
+            with open(file_path, "r", encoding="utf-8") as detail_file:
+                content = detail_file.read()
+        except OSError:
+            continue
+        markup = _detail_compliance_markup(rows, unit_label)
+        if existing_table.search(content):
+            updated, replacements = existing_table.subn(
+                markup, content, count=1
+            )
+        else:
+            updated, replacements = re.subn(
+                r"(</h1\s*>)",
+                lambda match: match.group(1) + "\n" + markup,
+                content,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+        if not replacements:
+            updated, replacements = re.subn(
+                r"(<div\b[^>]*class\s*=\s*([\"'])[^\"']*"
+                r"\bdetailed-(?:summary|container)\b[^\"']*\2[^>]*>)",
+                lambda match: markup + "\n" + match.group(1),
+                content,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+        if replacements and updated != content:
+            with open(file_path, "w", encoding="utf-8") as detail_file:
+                detail_file.write(updated)
+
 def adjust_bbsr_headings(content, suite_name):
     """Replace a generic BBSR heading with the selected suite name."""
     if content:
@@ -580,7 +1052,8 @@ def generate_html(system_info, acs_results_summary,
                   bbsr_fwts_summary_path, bbsr_sct_summary_path, bbsr_tpm_summary_path, pfdi_summary_path,
                   post_script_summary_path,
                   standalone_summary_path, os_tests_summary_path,
-                  output_html_path, suite_prefix="SBBR"):
+                  output_html_path, suite_prefix="SBBR", sbmr_combined_summary_path="",
+                  merged_json_path=""):
     """Generate the consolidated ACS summary from all suite summaries."""
 
     fwts_suite_name = f"{suite_prefix}-FWTS"
@@ -593,6 +1066,11 @@ def generate_html(system_info, acs_results_summary,
     sct_summary_content = read_html_content(sct_summary_path)
     sbmr_ib_summary_content  = read_html_content(sbmr_ib_summary_path)
     sbmr_oob_summary_content = read_html_content(sbmr_oob_summary_path)
+    sbmr_summary_content = read_html_content(sbmr_combined_summary_path)
+    if sbmr_combined_summary_path and not sbmr_summary_content:
+        raise ValueError("The requested combined SBMR summary was not generated")
+    if sbmr_summary_content:
+        sbmr_ib_summary_content = sbmr_oob_summary_content = None
     scmi_summary_content = read_html_content(scmi_summary_path)
     bbsr_fwts_summary_content = read_html_content(bbsr_fwts_summary_path)
     bbsr_sct_summary_content = read_html_content(bbsr_sct_summary_path)
@@ -617,6 +1095,35 @@ def generate_html(system_info, acs_results_summary,
         os_tests_summary_content, 'OS'
     )
     standalone_summary_content = adjust_bbsr_headings(standalone_summary_content, 'Standalone')
+
+    merged_data = {}
+    if merged_json_path and os.path.isfile(merged_json_path):
+        with open(merged_json_path, encoding="utf-8") as merged_file:
+            merged_data = json.load(merged_file)
+    sources = [
+        ("bsa_summary", "BSA", bsa_summary_content, "bsa_detailed.html", ("BSA",)),
+        ("sbsa_summary", "SBSA", sbsa_summary_content, "sbsa_detailed.html", ("SBSA",)),
+        ("fwts_summary", fwts_suite_name, fwts_summary_content, "fwts_detailed.html", (fwts_suite_name, "FWTS")),
+        ("sct_summary", sct_suite_name, sct_summary_content, "sct_detailed.html", (sct_suite_name, "SCT")),
+        ("scmi_summary", "SCMI", scmi_summary_content, "scmi_detailed.html", ("SCMI",)),
+    ]
+    if sbmr_summary_content or not (sbmr_ib_summary_content or sbmr_oob_summary_content):
+        sources.append(("sbmr_summary", "SBMR", sbmr_summary_content, "sbmr_detailed.html", ("SBMR-IB", "SBMR-OOB")))
+    else:
+        sources.extend([
+            ("sbmr_ib_summary", "SBMR-IB", sbmr_ib_summary_content, "sbmr_ib_detailed.html", ("SBMR-IB",)),
+            ("sbmr_oob_summary", "SBMR-OOB", sbmr_oob_summary_content, "sbmr_oob_detailed.html", ("SBMR-OOB",)),
+        ])
+    sources.extend([
+        ("post_script_summary", "POST-SCRIPT", post_script_summary_content, "post_script_detailed.html", ("POST_SCRIPT",)),
+        ("standalone_summary", "Standalone", standalone_summary_content, "standalone_tests_detailed.html", ()),
+        ("bbsr_fwts_summary", "BBSR-FWTS", bbsr_fwts_summary_content, "bbsr_fwts_detailed.html", ("BBSR-FWTS",)),
+        ("bbsr_sct_summary", "BBSR-SCT", bbsr_sct_summary_content, "bbsr_sct_detailed.html", ("BBSR-SCT",)),
+        ("bbsr_tpm_summary", "BBSR-TPM", bbsr_tpm_summary_content, "bbsr_tpm_detailed.html", ("BBSR-TPM",)),
+        ("pfdi_summary", "PFDI", pfdi_summary_content, "pfdi_detailed.html", ("PFDI",)),
+        ("OS_tests_summary", "OS Tests", os_tests_summary_content, "os_tests_detailed.html", ("OS_TEST",)),
+    ])
+    summary_cards = _summary_cards(merged_data, sources, os.path.dirname(output_html_path))
 
     # Jinja2 template for the final HTML page
     html_template = '''
@@ -943,166 +1450,23 @@ def generate_html(system_info, acs_results_summary,
             <div class="dropdown">
                 <button>Go to Summary</button>
                 <div class="dropdown-content">
-                    {% if bsa_summary_content %}
-                    <a href="#bsa_summary">BSA Summary</a>
-                    {% endif %}
-                    {% if sbsa_summary_content %}
-                    <a href="#sbsa_summary">SBSA Summary</a>
-                    {% endif %}
-                    {% if fwts_summary_content %}
-                    <a href="#fwts_summary">{{ fwts_suite_name }} Summary</a>
-                    {% endif %}
-                    {% if sct_summary_content %}
-                    <a href="#sct_summary">{{ sct_suite_name }} Summary</a>
-                    {% endif %}
-                    {% if scmi_summary_content %}
-                    <a href="#scmi_summary">SCMI Summary</a>
-                    {% endif %}
-                    {% if sbmr_ib_summary_content %}
-                    <a href="#sbmr_ib_summary">SBMR-IB Summary</a>
-                    {% endif %}
-                    {% if sbmr_oob_summary_content %}
-                    <a href="#sbmr_oob_summary">SBMR-OOB Summary</a>
-                    {% endif %}
-                    {% if post_script_summary_content %}
-                    <a href="#post_script_summary">POST-SCRIPT Summary</a>
-                    {% endif %}
-                    {% if standalone_summary_content %}
-                    <a href="#standalone_summary">Standalone tests Summary</a>
-                    {% endif %}
-                    {% if bbsr_fwts_summary_content %}
-                    <a href="#bbsr_fwts_summary">BBSR-FWTS Summary</a>
-                    {% endif %}
-                    {% if bbsr_sct_summary_content %}
-                    <a href="#bbsr_sct_summary">BBSR-SCT Summary</a>
-                    {% endif %}
-                    {% if pfdi_summary_content %}
-                    <a href="#pfdi_summary">PFDI Summary</a>
-                    {% endif %}
-                    {% if bbsr_tpm_summary_content %}
-                    <a href="#bbsr_tpm_summary">BBSR-TPM Summary</a>
-                    {% endif %}
-                    {% if OS_tests_summary_content %}
-                    <a href="#OS_tests_summary">OS tests Summary</a>
-                    {% endif %}
+                    {% for card in summary_cards %}
+                    <a href="#{{ card.id }}">{{ card.label }} Summary</a>
+                    {% endfor %}
                 </div>
             </div>
             <div class="summary-section">
                 <h2>Test Summaries</h2>
-                {% if bsa_summary_content %}
-                <div class="summary" id="bsa_summary">
-                    {{ bsa_summary_content | safe }}
+                {% for card in summary_cards %}
+                <div class="summary" id="{{ card.id }}">
+                    {{ card.content | safe }}
+                    {% if card.detail %}
                     <div class="details-link">
-                        <a href="bsa_detailed.html">Click here to go to the detailed summary for BSA</a>
+                        <a href="{{ card.detail }}">View {{ card.label }} detailed results</a>
                     </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-                {% if sbsa_summary_content %}
-                <div class="summary" id="sbsa_summary">
-                    {{ sbsa_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="sbsa_detailed.html">Click here to go to the detailed summary for SBSA</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if fwts_summary_content %}
-                <div class="summary" id="fwts_summary">
-                    {{ fwts_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="fwts_detailed.html">Click here to go to the detailed summary for {{ fwts_suite_name }}</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if sct_summary_content %}
-                <div class="summary" id="sct_summary">
-                    {{ sct_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="sct_detailed.html">Click here to go to the detailed summary for {{ sct_suite_name }}</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if scmi_summary_content %}
-                <div class="summary" id="scmi_summary">
-                    {{ scmi_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="scmi_detailed.html">Click here to go to the detailed summary for SCMI</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if sbmr_ib_summary_content %}
-                <div class="summary" id="sbmr_ib_summary">
-                    {{ sbmr_ib_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="sbmr_ib_detailed.html">Click here to go to the detailed summary for SBMR-IB</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if sbmr_oob_summary_content %}
-                <div class="summary" id="sbmr_oob_summary">
-                    {{ sbmr_oob_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="sbmr_oob_detailed.html">Click here to go to the detailed summary for SBMR-OOB</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if post_script_summary_content %}
-                <div class="summary" id="post_script_summary">
-                    {{ post_script_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="post_script_detailed.html">Click here to go to the detailed summary for POST-SCRIPT</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if standalone_summary_content %}
-                <div class="summary" id="standalone_summary">
-                    {{ standalone_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="standalone_tests_detailed.html">Click here to go to the detailed summary for Standalone tests</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if bbsr_fwts_summary_content %}
-                <div class="summary" id="bbsr_fwts_summary">
-                    {{ bbsr_fwts_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="bbsr_fwts_detailed.html">Click here to go to the detailed summary for BBSR-FWTS</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if bbsr_sct_summary_content %}
-                <div class="summary" id="bbsr_sct_summary">
-                    {{ bbsr_sct_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="bbsr_sct_detailed.html">Click here to go to the detailed summary for BBSR-SCT</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if bbsr_tpm_summary_content %}
-                <div class="summary" id="bbsr_tpm_summary">
-                    {{ bbsr_tpm_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="bbsr_tpm_detailed.html">Click here to go to the detailed summary for BBSR-TPM</a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if pfdi_summary_content %}
-                <div class="summary" id="pfdi_summary">
-                    {{ pfdi_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="pfdi_detailed.html">
-                            Click here to go to the detailed summary for PFDI
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
-                {% if OS_tests_summary_content %}
-                <div class="summary" id="OS_tests_summary">
-                    {{ OS_tests_summary_content | safe }}
-                    <div class="details-link">
-                        <a href="os_tests_detailed.html">Click here to go to the detailed summary for OS Tests</a>
-                    </div>
-                </div>
-                {% endif %}
+                {% endfor %}
             </div>
         </div>
     </body>
@@ -1113,22 +1477,7 @@ def generate_html(system_info, acs_results_summary,
     html_output = template.render(
         system_info=system_info,
         acs_results_summary=acs_results_summary,
-        bsa_summary_content=bsa_summary_content,
-        sbsa_summary_content=sbsa_summary_content,
-        fwts_summary_content=fwts_summary_content,
-        sct_summary_content=sct_summary_content,
-        scmi_summary_content=scmi_summary_content,
-        sbmr_ib_summary_content=sbmr_ib_summary_content,
-        sbmr_oob_summary_content=sbmr_oob_summary_content,
-        bbsr_fwts_summary_content=bbsr_fwts_summary_content,
-        bbsr_sct_summary_content=bbsr_sct_summary_content,
-        bbsr_tpm_summary_content=bbsr_tpm_summary_content,
-        pfdi_summary_content=pfdi_summary_content,
-        post_script_summary_content=post_script_summary_content,
-        standalone_summary_content=standalone_summary_content,
-        OS_tests_summary_content=os_tests_summary_content,
-        fwts_suite_name=fwts_suite_name,
-        sct_suite_name=sct_suite_name
+        summary_cards=summary_cards,
     )
 
     html_output = enhance_html_report(html_output, page_type="acs-summary")
@@ -1176,6 +1525,7 @@ def generate_html(system_info, acs_results_summary,
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate ACS Summary HTML page")
     parser.add_argument("--merged_json", default="", help="Path to merged_results.json if you want to pull final compliance from there")
+    parser.add_argument("--sbmr-combined-summary", default="", help="Combined SBMR summary retaining per-interface counts")
     parser.add_argument("bsa_summary_path", help="Path to the BSA summary HTML file")
     parser.add_argument("sbsa_summary_path", help="Path to the SBSA summary HTML file")
     parser.add_argument("fwts_summary_path", help="Path to the FWTS summary HTML file")
@@ -1290,8 +1640,12 @@ if __name__ == "__main__":
         args.standalone_summary_path,
         args.OS_tests_summary_path,
         args.output_html_path,
-        suite_prefix
+        suite_prefix,
+        args.sbmr_combined_summary,
+        args.merged_json,
     )
 
     # Inject Test_suite_info into detailed HTMLs (no change to suite parsers)
-    inject_test_suite_info(args.merged_json, os.path.dirname(args.output_html_path))
+    detail_output_dir = os.path.dirname(args.output_html_path)
+    inject_test_suite_info(args.merged_json, detail_output_dir)
+    inject_detail_compliance(args.merged_json, detail_output_dir)

@@ -17,6 +17,7 @@
 """Render SBMR JSON results as detailed and summary HTML reports."""
 
 import base64
+import argparse
 import importlib
 import json
 import os
@@ -162,7 +163,7 @@ DETAIL_TEMPLATE = Template("""
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ page_title }} Test Details</title>
+    <title>{{ page_title }} {% if ds.bands %}Detailed Results{% else %}Test Details{% endif %}</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
         h1, h2, h3 { color: #2c3e50; text-align: center; }
@@ -245,8 +246,8 @@ DETAIL_TEMPLATE = Template("""
         }
     </style>
 </head>
-<body>
-    <h1>{{ page_title }} Test Details</h1>
+<body{% if ds.bands %} data-acs-sbmr-combined="true"{% endif %}>
+    <h1>{{ page_title }} {% if ds.bands %}Detailed Results{% else %}Test Details{% endif %}</h1>
 
     <div class="chart-container">
         <img src="data:image/png;base64,{{ ds.chart_data }}" alt="Test Results Distribution">
@@ -264,13 +265,23 @@ DETAIL_TEMPLATE = Template("""
                 <tr><td>Aborted</td><td class="aborted">{{ ds.summary.total_aborted }}</td></tr>
                 <tr><td>Skipped</td><td class="skipped">{{ ds.summary.total_skipped }}</td></tr>
                 <tr><td>Warnings</td><td class="warning">{{ ds.summary.total_warnings }}</td></tr>
+                {% if ds.summary.total_ignored %}<tr><td>Ignored</td><td>{{ ds.summary.total_ignored }}</td></tr>{% endif %}
             </tbody>
         </table>
     </div>
 
+    {% if ds.bands %}<div class="acs-sbmr-sources">
+    {% for band in ds.bands %}{% if band.report_link %}
+    <a class="acs-sbmr-source" href="{{ band.report_link }}">{{ band.label }} original Robot report</a>
+    {% endif %}{% endfor %}</div>{% endif %}
     <div class="detailed-summary">
         {% for suite in ds.suites %}
-            <div class="suite-header">Test Suite: {{ suite.Test_suite }}</div>
+            <div class="suite-header"{% if suite.report_channel %} data-acs-sbmr-channel="{{ suite.report_channel }}"{% endif %}>Test Suite: {{ suite.report_label | default(suite.Test_suite) }}</div>
+            {% if suite.report_channel and suite.Test_suite_info %}
+            <div class="test-suite-info"><strong>Test suite info:</strong>
+            {% if suite.Test_suite_info is string %}{{ suite.Test_suite_info }}{% else %}
+            <ul>{% for info in suite.Test_suite_info %}<li>{{ info }}</li>{% endfor %}</ul>{% endif %}</div>
+            {% endif %}
 
             {% if suite.Test_cases is defined and suite.Test_cases %}
                 {% for case in suite.Test_cases %}
@@ -339,7 +350,7 @@ DETAIL_TEMPLATE = Template("""
     </div>
 </body>
 </html>
-""")
+""", autoescape=True)
 
 SUMMARY_TEMPLATE = Template("""
 <!DOCTYPE html>
@@ -378,12 +389,14 @@ SUMMARY_TEMPLATE = Template("""
                 <tr><td>Aborted</td><td class="aborted">{{ total_aborted }}</td></tr>
                 <tr><td>Skipped</td><td class="skipped">{{ total_skipped }}</td></tr>
                 <tr><td>Warnings</td><td class="warning">{{ total_warnings }}</td></tr>
+                {% if total_ignored %}<tr><td>Ignored</td><td>{{ total_ignored }}</td></tr>{% endif %}
             </tbody>
         </table>
     </div>
 </body>
 </html>
-""")
+""", autoescape=True)
+
 
 # ----------------------------
 # Rendering
@@ -409,6 +422,7 @@ def render_summary_html(combined_summary, output_html_path, page_title):
         + combined_summary.get("total_skipped", 0)
         + combined_summary.get("total_warnings", 0)
         + combined_summary.get("total_failed_with_waiver", 0)
+        + combined_summary.get("total_ignored", 0)
     )
     html = SUMMARY_TEMPLATE.render(
         page_title=page_title.upper(),
@@ -419,6 +433,7 @@ def render_summary_html(combined_summary, output_html_path, page_title):
         total_aborted=combined_summary.get("total_aborted", 0),
         total_skipped=combined_summary.get("total_skipped", 0),
         total_warnings=combined_summary.get("total_warnings", 0),
+        total_ignored=combined_summary.get("total_ignored", 0),
     )
     with open(output_html_path, "w", encoding="utf-8") as file_handle:
         file_handle.write(enhance_html_report(html, suite_type="sbmr"))
@@ -440,8 +455,68 @@ def uid_from_label(label):
     # Safe id for HTML element ids
     return "".join(ch for ch in label if ch.isalnum()).lower()
 
+
+def render_combined_reports(inputs, detailed_html_file, summary_html_file):
+    """Combine explicitly selected IB/OOB inputs for display, never for JSON."""
+    bands = []
+    suites = []
+    aggregate = compute_suite_summary([])
+    seen = set()
+    for label, input_path, report_path in inputs:
+        if label not in {"SBMR-IB", "SBMR-OOB"} or label in seen:
+            raise ValueError(f"Invalid or duplicate SBMR interface: {label}")
+        seen.add(label)
+        with open(input_path, encoding="utf-8") as handle:
+            data = json.load(handle)
+        entries = data.get("test_results", [])
+        if not entries:
+            continue
+        summary = data.get("suite_summary") or compute_suite_summary(entries)
+        summary = {key: summary.get(key, 0) for key in aggregate}
+        for key, value in summary.items():
+            aggregate[key] += value
+        report_link = None
+        if report_path and os.path.isfile(report_path):
+            report_link = os.path.relpath(
+                os.path.abspath(report_path), os.path.dirname(os.path.abspath(detailed_html_file))
+            ).replace(os.sep, "/")
+        bands.append({"label": label, "report_link": report_link})
+        # Display-only metadata disambiguates identical suite/case names without
+        # modifying IDs, source names, statuses, reasons, waiver data or JSON.
+        suites.extend({**entry, "report_channel": label,
+                       "report_label": f"{label} · {entry.get('Test_suite', '')}"} for entry in entries)
+    if not bands:
+        return False
+    dataset = {"label": "SBMR", "bands": bands, "suites": suites, "summary": aggregate,
+               "total_tests": sum(aggregate.values()), "chart_data": generate_bar_chart(aggregate)}
+    render_detail_html(dataset, detailed_html_file, "SBMR")
+    render_summary_html(aggregate, summary_html_file, "SBMR")
+    return True
+
+
+def combined_main(argv):
+    """Keep the legacy one-interface CLI while adding an explicit combined mode."""
+    parser = argparse.ArgumentParser(description="Render one SBMR view with distinct IB/OOB results")
+    parser.add_argument("--ib-json")
+    parser.add_argument("--oob-json")
+    parser.add_argument("--ib-report")
+    parser.add_argument("--oob-report")
+    parser.add_argument("--detailed", required=True)
+    parser.add_argument("--summary", required=True)
+    args = parser.parse_args(argv)
+    inputs = [(label, path, report) for label, path, report in (
+        ("SBMR-IB", args.ib_json, args.ib_report), ("SBMR-OOB", args.oob_json, args.oob_report)
+    ) if path]
+    if not inputs:
+        parser.error("at least one of --ib-json or --oob-json is required")
+    if not render_combined_reports(inputs, args.detailed, args.summary):
+        parser.error("no collected SBMR results to render")
+
 def main():
     """Load SBMR JSON and write detailed and summary HTML reports."""
+    if sys.argv[1:2] == ["--combine"]:
+        combined_main(sys.argv[2:])
+        return
     if len(sys.argv) < 4:
         print(
             "Usage: python json_to_html.py <input_json> "
@@ -465,6 +540,7 @@ def main():
         + suite_summary.get("total_skipped", 0)
         + suite_summary.get("total_warnings", 0)
         + suite_summary.get("total_failed_with_waiver", 0)
+        + suite_summary.get("total_ignored", 0)
     )
     chart_data = generate_bar_chart(suite_summary)
 
