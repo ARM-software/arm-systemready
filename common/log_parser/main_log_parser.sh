@@ -471,6 +471,20 @@ if [ "$YOCTO_FLAG_PRESENT" -eq 0 ]; then
             "$LOGS_PATH/sbmr/sbmr_out_of_band_logs/report.html"
     fi
 
+    # Keep legacy per-interface files available; the ACS page uses one SBMR view.
+    SBMR_COMBINED_ARGS=()
+    if [ $SBMR_IB_PROCESSED -eq 1 ]; then
+        SBMR_COMBINED_ARGS+=(--ib-json "$SBMR_IB_JSON" --ib-report "$LOGS_PATH/sbmr/sbmr_in_band_logs/report.html")
+    fi
+    if [ $SBMR_OOB_PROCESSED -eq 1 ]; then
+        SBMR_COMBINED_ARGS+=(--oob-json "$SBMR_OOB_JSON" --oob-report "$LOGS_PATH/sbmr/sbmr_out_of_band_logs/report.html")
+    fi
+    if [ ${#SBMR_COMBINED_ARGS[@]} -gt 0 ]; then
+        python3 "$SCRIPTS_PATH/sbmr/json_to_html.py" --combine \
+            "${SBMR_COMBINED_ARGS[@]}" \
+            --detailed "$HTMLS_DIR/sbmr_detailed.html" --summary "$HTMLS_DIR/sbmr_summary.html" || exit 1
+    fi
+
 fi
 ################################################################################
 # POST-SCRIPT LOG PARSING
@@ -1012,6 +1026,9 @@ if [ -f "$MERGED_JSON" ]; then
 fi
 
 # Finally, call generate_acs_summary.py exactly ONCE at the end
+if [ $SBMR_IB_PROCESSED -eq 1 ] || [ $SBMR_OOB_PROCESSED -eq 1 ]; then
+    GENERATE_ACS_SUMMARY_CMD+=" --sbmr-combined-summary \"$HTMLS_DIR/sbmr_summary.html\""
+fi
 eval "$GENERATE_ACS_SUMMARY_CMD"
 
 print_path=0  # For debug only

@@ -932,6 +932,54 @@ merged.
 
 ## Output Files
 
+### Combined SBMR HTML view
+
+The consolidated summary displays each suite's run-specific requirement and
+compliance in the top-right of its card. These labels use the existing merged
+compliance records, not raw failure counts. A missing applicable suite has a
+`Mandatory (Not Run)` or `Recommended (Not Run)` placeholder, without a chart,
+invented results, empty detailed page, or Details link. Only suites represented
+in the selected run's compliance records are added as missing cards.
+
+For grouped cards (SBMR or Standalone), applicable Mandatory decisions control
+the badge when present; Recommended results do not override them. For example,
+compliant Mandatory SBMR-IB plus missing Mandatory SBMR-OOB displays
+`Mandatory (Not Compliant)`. Hovering over the badge shows the individual
+decisions. The raw and merged JSON and SRS decisions are unchanged. Without
+merged compliance context, the badge displays Unknown.
+
+SR reports present collected SBMR In-band and Out-of-band results in one
+`SBMR` summary card linking to `sbmr_detailed.html`. Each detailed group is labelled
+`SBMR-IB` or `SBMR-OOB`, including when both interfaces use identical suite
+or testcase names. When both interfaces have results, an interface selector
+works together with search and status filters. Print/PDF includes both
+interfaces even when one is filtered or collapsed on screen.
+
+The detailed compliance table includes collected interfaces and applicable
+interfaces recorded as Not Run in the merged results. A missing mandatory
+interface is shown as `Mandatory` / `Not Compliant (Not Run)`. No combined
+compliance record is added to JSON: existing merged decisions remain
+authoritative. Missing interfaces add no test-result rows or counts and do not
+create empty detailed pages. A run selecting only one interface does not add
+the unselected interface to the compliance table.
+
+`sbmr_ib.json`, `sbmr_oob.json`, their merged JSON keys, original suite/case
+identifiers, counts, reasons, and waiver handling remain separate and
+unchanged. Legacy per-interface HTML files remain available for existing
+links. `--suite SBMR`, `--suite SBMR-IB`, and `--suite SBMR-OOB` retain their
+existing selection meanings. The original single-JSON renderer CLI is also
+unchanged; explicit multi-interface rendering is available with:
+
+```bash
+python3 common/log_parser/sbmr/json_to_html.py --combine \
+  --ib-json /path/to/sbmr_ib.json --oob-json /path/to/sbmr_oob.json \
+  --detailed /path/to/sbmr_detailed.html --summary /path/to/sbmr_summary.html
+```
+
+Either JSON option may be omitted. Compliance context is added by the full
+summary-producing flow; raw JSON-to-HTML rendering alone does not infer a
+run's requirement classification.
+
 ### Normal Output
 
 ```text

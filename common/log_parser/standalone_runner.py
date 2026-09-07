@@ -730,6 +730,19 @@ def render_reports(results, html_dir):
         result.detailed_html = detailed
         result.summary_html = summary
 
+    sbmr_results = [result for result in regular_results if result.execution.get("handler") == "sbmr"]
+    if sbmr_results:
+        command = [sys.executable, BASE_DIR / "sbmr" / "json_to_html.py", "--combine",
+                   "--detailed", html_dir / "sbmr_detailed.html",
+                   "--summary", html_dir / "sbmr_summary.html"]
+        for result in sbmr_results:
+            channel = "ib" if result.canonical == "SBMR-IB" else "oob"
+            command.extend([f"--{channel}-json", result.json_files[0]])
+            report = result.inputs.get("report")
+            if report and report.exists:
+                command.extend([f"--{channel}-report", report.path])
+        run_command("[SBMR] Generating combined IB/OOB HTML", command, EXIT_REPORT)
+
     if standalone_results:
         registry = load_registry()
         group = get_suite("STANDALONE", registry)
@@ -849,6 +862,8 @@ def generate_combined_summary(results, roots, args, html_dir, merged_json, acs_i
         "--acs_info_json", acs_info,
         "--use-acs-info-system-info",
     ]
+    if any(result.canonical in {"SBMR-IB", "SBMR-OOB"} for result in results):
+        command.extend(["--sbmr-combined-summary", html_dir / "sbmr_summary.html"])
     if args.acs_config:
         command.extend(["--acs_config_path", args.acs_config])
     if args.system_config:
