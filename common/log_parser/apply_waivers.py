@@ -158,6 +158,30 @@ def _propagate_nested_bsa_waivers(testcase):
             'All failed nested subtests were waived.'
         )
 
+
+def _propagate_standalone_waiver(test_suite_entry):
+    """Mark an explicit standalone result waived when all failures are waived."""
+    test_result = test_suite_entry.get('test_result')
+    if not _is_failed_result(test_result) or _has_waiver_result(test_result):
+        return
+
+    has_unwaived_failure = False
+    has_waived_failure = False
+    for subtest in _iter_nested_subtests(test_suite_entry.get('subtests', [])):
+        subtest_result = subtest.get('sub_test_result')
+        if isinstance(subtest_result, dict):
+            has_unwaived_failure |= subtest_result.get('FAILED', 0) > 0
+            has_waived_failure |= subtest_result.get('FAILED_WITH_WAIVER', 0) > 0
+        elif _is_failed_result(subtest_result):
+            if _has_waiver_result(subtest_result):
+                has_waived_failure = True
+            else:
+                has_unwaived_failure = True
+
+    if has_waived_failure and not has_unwaived_failure:
+        test_suite_entry['test_result'] = _append_waiver_to_result(test_result)
+
+
 def load_waivers(waiver_data, suite_name):
     """Collect waiver entries by scope for the requested suite."""
     suite_level_waivers = []
@@ -608,12 +632,11 @@ def apply_subtest_level_waivers(test_suite_entry, subtest_waivers, suite_name):
                             failed = sub_test_result.get('FAILED', 0)
                             failed_with_waiver = sub_test_result.get('FAILED_WITH_WAIVER', 0)
 
-                            if failed > 0:
-                                sub_test_result['FAILED'] = failed - 1
-                                sub_test_result['FAILED_WITH_WAIVER'] = failed_with_waiver + 1
-                            else:
-                                # Edge case: FAILED is already 0
-                                sub_test_result['FAILED_WITH_WAIVER'] = failed_with_waiver + 1
+                            if failed <= 0:
+                                continue
+
+                            sub_test_result['FAILED'] = failed - 1
+                            sub_test_result['FAILED_WITH_WAIVER'] = failed_with_waiver + 1
 
                             # Add waiver_reason inside sub_test_result
                             reason = waiver.get('Reason', '')
@@ -892,6 +915,8 @@ def apply_waivers(suite_name, json_file, waiver_file='waiver.json', output_json_
         if suite_name.upper() in ('BSA', 'SBSA'):
             for testcase in test_suite_entry.get('testcases', []):
                 _propagate_nested_bsa_waivers(testcase)
+        elif suite_name.upper() == 'STANDALONE':
+            _propagate_standalone_waiver(test_suite_entry)
 
         # Update test suite summary
         # Determine the summary field based on suite name

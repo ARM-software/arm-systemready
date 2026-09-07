@@ -146,7 +146,7 @@ def is_recommended_test_case(suite_entry):
     srs_scope = str(suite_entry.get("SRS scope", "")).strip().lower()
     return srs_scope == "recommended"
 
-def count_fails_in_json(data, skip_recommended=False):
+def count_fails_in_json(data, skip_recommended=False, suite_key=None):
     """
     Inspect JSON data and count how many tests are 'FAILED' vs 'FAILED_WITH_WAIVER'.
     Returns (failed, failed_with_waiver).
@@ -170,6 +170,14 @@ def count_fails_in_json(data, skip_recommended=False):
         return (0, 0)
 
     for suite_entry in test_results:
+        if suite_key == "PCIE_OPTION_ROM_ARCH_AUDIT":
+            overall_result = str(suite_entry.get("test_result", "")).upper()
+            if "FAIL" in overall_result:
+                if "WITH WAIVER" in overall_result:
+                    total_failed_with_waiver += 1
+                else:
+                    total_failed += 1
+            continue
         if skip_recommended and is_recommended_test_case(suite_entry):
             continue
         # If testcases exist, count only testcase-level results to avoid double counting.
@@ -443,6 +451,9 @@ def merge_json_files(json_files, output_file):
         elif "PSCI" in fn:
             section_name = "Suite_Name: PSCI"
             suite_key    = "PSCI"
+        elif "PCIE_OPTION_ROM_ARCH_AUDIT" in fn:
+            section_name = "Suite_Name: PcieOptionRomArchAudit"
+            suite_key    = "PCIE_OPTION_ROM_ARCH_AUDIT"
         elif "PFDI" in fn:
             section_name = "Suite_Name: PFDI"
             suite_key    = "PFDI"
@@ -480,7 +491,7 @@ def merge_json_files(json_files, output_file):
         standalone_aliases = {
             "dt_kselftest", "dt_validate", "ethtool_test",
             "read_write_check_blk_devices", "psci", "capsule update", "network_boot", "smbios", "runtime_dev_map" ,
-            "reserved_memory_map", "dtb_alignment"
+            "reserved_memory_map", "dtb_alignment", "pcie_option_rom_arch_audit"
         }
         if lookup_suite_key in standalone_aliases or lookup_suite_key.startswith("os_"):
             lookup_suite_key = "standalone"
@@ -545,7 +556,8 @@ def merge_json_files(json_files, output_file):
         merged_results[section_name] = data
 
         f, fw = count_fails_in_json(
-            data, skip_recommended=(DT_OR_SR_MODE == "SR" and suite_key == "OS_TEST")
+            data, skip_recommended=(DT_OR_SR_MODE == "SR" and suite_key == "OS_TEST"),
+            suite_key=suite_key,
         )
         if suite_key in suite_fail_data:
             suite_fail_data[suite_key]["Failed"] += f
@@ -826,6 +838,7 @@ def merge_json_files(json_files, output_file):
         "Suite_Name: Runtime device mapping": "Suite_Name: Standalone",
         "Suite_Name: Reserved Memory Map": "Suite_Name: Standalone",
         "Suite_Name: DTB Alignment": "Suite_Name: Standalone",
+        "Suite_Name: PcieOptionRomArchAudit": "Suite_Name: Standalone",
     }
 
     def _entry_to_list(entry):

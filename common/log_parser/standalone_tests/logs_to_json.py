@@ -77,6 +77,14 @@ test_suite_mapping = {
     "Test_suite_description": "Validates that the Devicetree Blob address satisfies the required alignment constraints.",
     "Test_case_description": "Checks that the DTB table address is non-zero and aligned to an 8-byte boundary."
     },
+    "pcie_option_rom_arch_audit": {
+        "Test_suite": "PCIeOptionRomArchAudit",
+        "Test_suite_description": "PCIe Option ROM architecture validation",
+        "Test_case_description": (
+            "Verify that PCIe Option ROM images contain a supported AArch64 UEFI "
+            "image for the platform."
+        )
+    },
 }
 
 def create_subtest(subtest_number, description, status, reason=""):
@@ -1617,6 +1625,150 @@ def parse_runtime_dev_map_conflict(log_data):
     }
 
 
+PCIE_OPTION_ROM_BANNER = re.compile(
+    r'^\s*PcieOptionRomArchAudit:\s*',
+    re.IGNORECASE | re.MULTILINE,
+)
+PCIE_OPTION_ROM_FOUND = re.compile(
+    r'Scanned\s+\d+\s+EFI_PCI_IO\s+handles\s+and\s+found\s+(\d+)\s+'
+    r'PCIe\s+devices\s+with\s+Option\s+ROM\s+images\s*:',
+    re.IGNORECASE,
+)
+PCIE_OPTION_ROM_TOTAL = re.compile(
+    r'^\s*PCIe\s+devices\s+with\s+ROM\s*:\s*(\d+)\s*$',
+    re.IGNORECASE,
+)
+PCIE_OPTION_ROM_NON_COMPLIANT = re.compile(
+    r'^\s*Non-compliant\s+devices\s*:\s*(\d+)\s*$',
+    re.IGNORECASE,
+)
+
+
+def _single_pcie_count(lines, pattern, field_name):
+    """Return one required non-negative PCIe audit count."""
+    matches = [int(match.group(1)) for line in lines if (match := pattern.search(line))]
+    if len(matches) != 1:
+        raise ValueError(
+            f"PcieOptionRomArchAudit record must contain exactly one {field_name}; "
+            f"found {len(matches)}."
+        )
+    return matches[0]
+
+
+def _remove_empty_reason_lists(subtest):
+    result = subtest["sub_test_result"]
+    for key in (
+        "pass_reasons",
+        "fail_reasons",
+        "abort_reasons",
+        "skip_reasons",
+        "warning_reasons",
+    ):
+        if not result.get(key):
+            result.pop(key, None)
+
+
+def parse_pcie_option_rom_arch_audit_log(log_data):
+    """Parse one or more complete PcieOptionRomArchAudit result records."""
+    clean_lines = [re.sub(ansi_escape, "", line).rstrip("\r\n") for line in log_data]
+    record_starts = [
+        index for index, line in enumerate(clean_lines) if PCIE_OPTION_ROM_BANNER.match(line)
+    ]
+    if not record_starts:
+        raise ValueError("PcieOptionRomArchAudit record banner was not found.")
+
+    records = []
+    for index, start in enumerate(record_starts):
+        end = record_starts[index + 1] if index + 1 < len(record_starts) else len(clean_lines)
+        records.append(clean_lines[start:end])
+
+    mapping = test_suite_mapping["pcie_option_rom_arch_audit"]
+    suite_summary = {
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waiver": 0,
+    }
+    test_results = []
+
+    for record in records:
+        devices_with_rom = _single_pcie_count(
+            record,
+            PCIE_OPTION_ROM_FOUND,
+            "'Scanned ... found <count> ... Option ROM images' line",
+        )
+        non_compliant = _single_pcie_count(
+            record,
+            PCIE_OPTION_ROM_NON_COMPLIANT,
+            "'Non-compliant devices' line",
+        )
+
+        total_matches = [
+            int(match.group(1))
+            for line in record
+            if (match := PCIE_OPTION_ROM_TOTAL.match(line))
+        ]
+        if len(total_matches) > 1:
+            raise ValueError(
+                "PcieOptionRomArchAudit record contains duplicate "
+                "'PCIe devices with ROM' totals."
+            )
+        if total_matches and total_matches[0] != devices_with_rom:
+            raise ValueError(
+                "PcieOptionRomArchAudit device counts disagree: "
+                f"scan found {devices_with_rom}, summary reports {total_matches[0]}."
+            )
+        if non_compliant > devices_with_rom:
+            raise ValueError(
+                "PcieOptionRomArchAudit non-compliant device count cannot exceed "
+                f"devices with Option ROM ({non_compliant} > {devices_with_rom})."
+            )
+
+        if devices_with_rom == 0:
+            overall_status = "SKIPPED"
+            reason = (
+                "No PCIe devices with Option ROM images were found; "
+                "architecture compliance check is not applicable."
+            )
+        elif non_compliant == 0:
+            overall_status = "PASSED"
+            reason = (
+                "All PCIe devices containing UEFI driver images include "
+                "an AARCH64 UEFI driver."
+            )
+        else:
+            overall_status = "FAILED"
+            reason = (
+                "One or more PCIe devices contain UEFI driver images but "
+                "do not include an AARCH64 UEFI driver."
+            )
+        compliance_subtest = create_subtest(
+            1,
+            "PCIe Option ROM UEFI driver architecture compliance",
+            overall_status,
+            reason,
+        )
+        entry_summary = {key: 0 for key in suite_summary}
+        update_suite_summary(entry_summary, overall_status)
+        update_suite_summary(suite_summary, overall_status)
+
+        _remove_empty_reason_lists(compliance_subtest)
+
+        test_results.append({
+            "Test_suite": mapping["Test_suite"],
+            "Test_suite_description": mapping["Test_suite_description"],
+            "Test_case": "pcie_option_rom_arch_audit",
+            "Test_case_description": mapping["Test_case_description"],
+            "test_result": overall_status,
+            "subtests": [compliance_subtest],
+            "test_suite_summary": entry_summary,
+        })
+
+    return {"test_results": test_results, "suite_summary": suite_summary}
+
+
 def parse_single_log(log_file_path):
     # Try UTF-8 → fallback to UTF-16 → fallback to binary-safe ignore
     try:
@@ -1634,7 +1786,9 @@ def parse_single_log(log_file_path):
     log_content = ''.join(log_data)
     name = os.path.basename(log_file_path).lower()
 
-    if re.search(r'selftests: dt: test_unprobed_devices.sh', log_content):
+    if PCIE_OPTION_ROM_BANNER.search(log_content):
+        return parse_pcie_option_rom_arch_audit_log(log_data)
+    elif re.search(r'selftests: dt: test_unprobed_devices.sh', log_content):
         return parse_dt_kselftest_log(log_data)
     elif ('dt-validate' in name
             or re.search(r'DeviceTree bindings of Linux kernel version', log_content, re.I)):

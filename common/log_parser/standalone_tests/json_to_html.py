@@ -69,14 +69,15 @@ def detect_columns_used(subtests):
 
 # Function to generate bar chart for test results
 def generate_bar_chart(suite_summary):
-    labels = ['Passed', 'Failed', 'Warnings', 'Failed with Waiver']  # We track "Failed with Waiver" separately
+    labels = ['Passed', 'Failed', 'Skipped', 'Warnings', 'Failed with Waiver']
     sizes = [
         suite_summary.get('total_passed', 0),
         suite_summary.get('total_failed', 0),
+        suite_summary.get('total_skipped', 0),
         suite_summary.get('total_warnings', 0),
         suite_summary.get('total_failed_with_waiver', 0)
     ]
-    colors = ['#d4edda', '#f8d7da', '#fff3cd', '#f39c12']
+    colors = ['#d4edda', '#f8d7da', '#ffe0b2', '#fff3cd', '#f39c12']
 
     plt.figure(figsize=(8, 6))
     bars = plt.bar(labels, sizes, color=colors, edgecolor='black')
@@ -273,6 +274,10 @@ def generate_html(suite_summary, test_results_list, output_html_path,
                     <td class="fail">{{ total_failed }}</td>
                 </tr>
                 <tr>
+                    <td>Skipped</td>
+                    <td class="skipped">{{ total_skipped }}</td>
+                </tr>
+                <tr>
                     <td>Warnings</td>
                     <td class="warning">{{ total_warnings }}</td>
                 </tr>
@@ -311,6 +316,13 @@ def generate_html(suite_summary, test_results_list, output_html_path,
 
         <div class="test-case-header">Test Case: {{ test.Test_case }}</div>
         <div class="test-case-description">Description: {{ test.Test_case_description }}</div>
+        {% set overall_status = get_test_status(test) %}
+        <div class="test-case-description">
+            Overall Result:
+            <span class="{% if overall_status == 'PASSED' %}pass{% elif overall_status == 'FAILED' %}fail{% elif overall_status == 'FAILED_WITH_WAIVER' %}waiver{% elif overall_status == 'WARNINGS' %}warning{% elif overall_status == 'SKIPPED' %}skipped{% endif %}">
+                {{ 'FAILED WITH WAIVER' if overall_status == 'FAILED_WITH_WAIVER' else overall_status }}
+            </span>
+        </div>
 
         {# We ignore dynamic reason columns and use a single "Reason" + "Waiver Reason" #}
         <table>
@@ -364,7 +376,13 @@ def generate_html(suite_summary, test_results_list, output_html_path,
                         {% endif %}
                     {% endfor %}
                     <td>
-                        {{ all_reasons|join("<br>")|safe if all_reasons else "N/A" }}
+                        {% if all_reasons %}
+                            {% for reason in all_reasons %}
+                                {{ reason|e }}{% if not loop.last %}<br>{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            N/A
+                        {% endif %}
                     </td>
                     <td>
                         {{ r.waiver_reason if r.waiver_reason else "N/A" }}
@@ -384,6 +402,7 @@ def generate_html(suite_summary, test_results_list, output_html_path,
     # Compute total tests for summary
     total_tests = (suite_summary.get('total_passed', 0) +
                    suite_summary.get('total_failed', 0) +
+                   suite_summary.get('total_skipped', 0) +
                    suite_summary.get('total_warnings', 0) +
                    suite_summary.get('total_failed_with_waiver', 0))
 
@@ -398,13 +417,15 @@ def generate_html(suite_summary, test_results_list, output_html_path,
         total_tests=total_tests,
         total_passed=suite_summary.get("total_passed", 0),
         total_failed=suite_summary.get("total_failed", 0),
+        total_skipped=suite_summary.get("total_skipped", 0),
         total_warnings=suite_summary.get("total_warnings", 0),
         total_failed_with_waiver=suite_summary.get("total_failed_with_waiver", 0),
         test_results_list=test_results_list,
         is_summary_page=is_summary_page,
         include_drop_down=include_drop_down,
         chart_data=chart_data,
-        enumerate=enumerate
+        enumerate=enumerate,
+        get_test_status=get_test_status
     )
 
     html_content = enhance_html_report(html_content, suite_type="standalone")
@@ -429,6 +450,40 @@ def get_subtest_status(subtest_result):
         return 'UNKNOWN'
 
 
+def get_test_status(test):
+    """Return a testcase status, preferring an explicit overall result."""
+    explicit = str(test.get('test_result', test.get('Test_result', ''))).strip().upper()
+    explicit_aliases = {
+        'PASS': 'PASSED',
+        'PASSED': 'PASSED',
+        'FAIL': 'FAILED',
+        'FAILED': 'FAILED',
+        'SKIP': 'SKIPPED',
+        'SKIPPED': 'SKIPPED',
+        'WARNING': 'WARNINGS',
+        'WARNINGS': 'WARNINGS',
+        'FAILED WITH WAIVER': 'FAILED_WITH_WAIVER',
+        'FAILED_WITH_WAIVER': 'FAILED_WITH_WAIVER',
+        'FAILED (WITH WAIVER)': 'FAILED_WITH_WAIVER',
+    }
+    if explicit in explicit_aliases:
+        return explicit_aliases[explicit]
+
+    statuses = [
+        get_subtest_status(subtest.get('sub_test_result', {}))
+        for subtest in test.get('subtests', [])
+    ]
+    if 'FAILED' in statuses:
+        return 'FAILED'
+    if 'WARNINGS' in statuses:
+        return 'WARNINGS'
+    if 'FAILED_WITH_WAIVER' in statuses:
+        return 'FAILED_WITH_WAIVER'
+    if statuses and all(status == 'SKIPPED' for status in statuses):
+        return 'SKIPPED'
+    return 'PASSED'
+
+
 def main():
     parser = argparse.ArgumentParser(description='Generate HTML report from JSON data.')
     parser.add_argument('input_json_files', nargs='+', help='Input JSON file(s)')
@@ -442,6 +497,7 @@ def main():
     combined_suite_summary = {
         'total_passed': 0,
         'total_failed': 0,
+        'total_skipped': 0,
         'total_warnings':0,
         'total_failed_with_waiver': 0
     }
@@ -463,32 +519,22 @@ def main():
 
             test_results_list.append(test_results)
 
-            # Determine overall pass/fail
+            # Determine each standalone testcase's overall result. New parsers
+            # may provide an explicit result when one designated subtest is
+            # authoritative; older parsers retain subtest-based aggregation.
             for test in test_results:
-                has_failed_without_waiver = False
-                has_failed_with_waiver = False
-                has_warnings = False
-
-                for subtest in test.get('subtests', []):
-                    st_status = get_subtest_status(subtest.get('sub_test_result', {}))
-                    if st_status == 'WARNINGS':
-                        has_warnings = True
-                    elif st_status == 'FAILED':
-                        has_failed_without_waiver = True
-                    elif st_status == 'FAILED_WITH_WAIVER':
-                        has_failed_with_waiver = True
-
-                if has_failed_without_waiver:
-                    combined_suite_summary['total_failed'] += 1
-                elif has_warnings:
-                    combined_suite_summary['total_warnings'] += 1 
-                elif has_failed_with_waiver:
-                    combined_suite_summary['total_failed_with_waiver'] += 1
-                else:
-                    combined_suite_summary['total_passed'] += 1
+                status_key = {
+                    'PASSED': 'total_passed',
+                    'FAILED': 'total_failed',
+                    'SKIPPED': 'total_skipped',
+                    'WARNINGS': 'total_warnings',
+                    'FAILED_WITH_WAIVER': 'total_failed_with_waiver',
+                }[get_test_status(test)]
+                combined_suite_summary[status_key] += 1
 
     total_standalones = (combined_suite_summary['total_passed'] +
                          combined_suite_summary['total_failed'] +
+                         combined_suite_summary['total_skipped'] +
                          combined_suite_summary['total_warnings'] +
                          combined_suite_summary['total_failed_with_waiver'])
     if total_standalones == 0:

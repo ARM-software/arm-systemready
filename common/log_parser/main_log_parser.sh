@@ -514,9 +514,9 @@ fi
 ################################################################################
 # STANDALONE TESTS PARSING (including Capsule)
 ################################################################################
+Standalone_JSONS=()
 if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     LINUX_TOOLS_LOGS_PATH="$LOGS_PATH/linux_tools"
-    Standalone_JSONS=()
 
     # 1) DT_KSELFTEST
     DT_KSELFTEST_LOG="$LINUX_TOOLS_LOGS_PATH/dt_kselftest.log"
@@ -677,19 +677,35 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             echo -e "${RED}ERROR: DTB alignment log parsing to json failed.${NC}"
         fi
     fi
+fi
 
-    # Now generate a single STANDALONE HTML
-    if [ ${#Standalone_JSONS[@]} -gt 0 ]; then
-        Standalone_PROCESSED=1
-        Standalone_DETAILED_HTML="$HTMLS_DIR/standalone_tests_detailed.html"
-        Standalone_SUMMARY_HTML="$HTMLS_DIR/standalone_tests_summary.html"
-
-        python3 "$SCRIPTS_PATH/standalone_tests/json_to_html.py" \
-            "${Standalone_JSONS[@]}" \
-            "$Standalone_DETAILED_HTML" \
-            "$Standalone_SUMMARY_HTML" \
-            --include-drop-down
+# 12) SR-only PCIe Option ROM architecture audit
+if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
+    PCIE_OPTION_ROM_AUDIT_LOG="$LOGS_PATH/uefi_dump/PcieOptionRomArchAudit.log"
+    PCIE_OPTION_ROM_AUDIT_JSON="$JSONS_DIR/pcie_option_rom_arch_audit.json"
+    if check_file "$PCIE_OPTION_ROM_AUDIT_LOG"; then
+        if python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$PCIE_OPTION_ROM_AUDIT_LOG" \
+            "$PCIE_OPTION_ROM_AUDIT_JSON"; then
+            apply_waivers "Standalone" "$PCIE_OPTION_ROM_AUDIT_JSON"
+            Standalone_JSONS+=("$PCIE_OPTION_ROM_AUDIT_JSON")
+        else
+            echo -e "${RED}ERROR: PCIe Option ROM audit log parsing to json failed.${NC}"
+        fi
     fi
+fi
+
+# Now generate a single STANDALONE HTML
+if [ ${#Standalone_JSONS[@]} -gt 0 ]; then
+    Standalone_PROCESSED=1
+    Standalone_DETAILED_HTML="$HTMLS_DIR/standalone_tests_detailed.html"
+    Standalone_SUMMARY_HTML="$HTMLS_DIR/standalone_tests_summary.html"
+
+    python3 "$SCRIPTS_PATH/standalone_tests/json_to_html.py" \
+        "${Standalone_JSONS[@]}" \
+        "$Standalone_DETAILED_HTML" \
+        "$Standalone_SUMMARY_HTML" \
+        --include-drop-down
 fi
 
 ################################################################################
