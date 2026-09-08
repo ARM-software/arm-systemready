@@ -1639,6 +1639,9 @@
         "Suite_Name: Mandatory  : DT_VALIDATE_compliance": {
           "type": "string"
         },
+        "Suite_Name: Mandatory  : DTB_ALIGNMENT_compliance": {
+          "type": "string"
+        },
         "Suite_Name: Mandatory  : ETHTOOL_TEST_compliance": {
           "type": "string"
         },
@@ -1664,6 +1667,9 @@
           "type": "string"
         },
         "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance": {
+          "type": "string"
+        },
+        "Suite_Name: Mandatory  : RESERVED_MEMORY_MAP_compliance": {
           "type": "string"
         },
         "Suite_Name: Recommended  : BSA_compliance": {
@@ -1728,9 +1734,11 @@
             "required": [
               "Suite_Name: Mandatory  : Capsule Update_compliance",
               "Suite_Name: Mandatory  : DT_VALIDATE_compliance",
+              "Suite_Name: Mandatory  : DTB_ALIGNMENT_compliance",
               "Suite_Name: Mandatory  : ETHTOOL_TEST_compliance",
               "Suite_Name: Mandatory  : EBBR-FWTS_compliance",
               "Suite_Name: Mandatory  : READ_WRITE_CHECK_BLK_DEVICES_compliance",
+              "Suite_Name: Mandatory  : RESERVED_MEMORY_MAP_compliance",
               "Suite_Name: Mandatory  : EBBR-SCT_compliance",
               "Suite_Name: Mandatory  : OS_ethtool_test_linux-Fedora-40_compliance",
               "Suite_Name: Mandatory  : OS_ethtool_test_linux-Tumbleweed_compliance",

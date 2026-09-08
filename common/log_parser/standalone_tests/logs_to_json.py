@@ -66,6 +66,17 @@ test_suite_mapping = {
         "Test_suite_description": "Coverage of EBBR requirements",
         "Test_case_description": "Checks runtime device mapping conflict"
     },
+    "reserved_memory_map": {
+    "Test_suite": "Devicetree Reserved Memory Validation",
+    "Test_suite_description": "Validates reserved-memory regions in the Devicetree against expected UEFI memory type and reservation requirements.",
+    "Test_case_description": "Checks static reserved-memory nodes and memory reservation block entries for correct mapping and reservation behavior."
+    },
+
+    "dtb_alignment": {
+    "Test_suite": "Devicetree Blob Alignment Validation",
+    "Test_suite_description": "Validates that the Devicetree Blob address satisfies the required alignment constraints.",
+    "Test_case_description": "Checks that the DTB table address is non-zero and aligned to an 8-byte boundary."
+    },
 }
 
 def create_subtest(subtest_number, description, status, reason=""):
@@ -936,7 +947,276 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
         "test_results": [current_test],
         "suite_summary": suite_summary
     }
+def parse_resv_mem_map(log_data):
+    test_suite_key = "reserved_memory_map"
+    mapping = test_suite_mapping[test_suite_key]
 
+    suite_summary = {
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waiver": 0
+    }
+
+    current_test = {
+        "Test_suite": mapping["Test_suite"],
+        "Test_suite_description": mapping["Test_suite_description"],
+        "Test_case": test_suite_key,
+        "Test_case_description": mapping["Test_case_description"],
+        "subtests": [],
+        "test_suite_summary": suite_summary.copy()
+    }
+
+    subtest_number = 1
+
+    reason_lines_resv = []
+    reason_lines_mrb = []
+    overall_result = None
+    overall_errors = []
+    warning_lines = []
+
+    for line in log_data:
+        line = line.strip()
+
+        if line.startswith("ERROR: Reserved-memory"):
+            reason_lines_resv.append(line)
+
+        if line.startswith("ERROR: Memory Reservation Block"):
+            reason_lines_mrb.append(line)
+
+        if line.startswith("ERROR:"):
+            overall_errors.append(line)
+
+        if line.startswith("DEBUG:"):
+            warning_lines.append(line)
+
+        if line.startswith("RESULTS:"):
+            overall_result = line.split(":", 1)[1].strip()
+
+        if (
+            "Reserved Memory Map Compliance Test:" in line
+            or "Memory Reservation Block Compliance Test:" in line
+        ):
+            match = re.match(
+                r"^INFO:\s+(.+?):\s+(PASSED|FAILED|SKIPPED)",
+                line,
+            )
+
+            if not match:
+                continue
+
+            test_desc = match.group(1)
+            result = match.group(2)
+
+            if test_desc == "Reserved Memory Map Compliance Test":
+                reason = ",".join(reason_lines_resv)
+            else:
+                reason = ",".join(reason_lines_mrb)
+
+            sub = create_subtest(
+                subtest_number,
+                test_desc,
+                result,
+                reason=reason,
+            )
+
+            current_test["subtests"].append(sub)
+
+            update_suite_summary(
+                current_test["test_suite_summary"],
+                result,
+            )
+
+            update_suite_summary(
+                suite_summary,
+                result,
+            )
+
+            subtest_number += 1
+
+    # Preserve the final RESULTS status.
+    #
+    # A component may already have produced a subtest, for example:
+    #   Reserved Memory Map Compliance Test: PASSED
+    #
+    # The MRB check can then terminate with an ERROR followed by:
+    #   RESULTS: FAILED
+    #
+    # Do not discard that terminal failure merely because another
+    # component subtest already exists.
+    if overall_result:
+        existing_failed = (
+            current_test["test_suite_summary"]["total_failed"] > 0
+        )
+
+        if overall_result == "FAILED" and not existing_failed:
+            existing_descs = {
+                sub["sub_Test_Description"]
+                for sub in current_test["subtests"]
+            }
+
+            # If the reserved-memory result exists but the MRB result
+            # was never emitted, attribute the terminal failure to MRB.
+            if (
+                "Reserved Memory Map Compliance Test" in existing_descs
+                and "Memory Reservation Block Compliance Test"
+                    not in existing_descs
+            ):
+                test_desc = "Memory Reservation Block Compliance Test"
+                reason = ",".join(reason_lines_mrb or overall_errors)
+            else:
+                test_desc = "Reserved Memory Map Compliance Test"
+                reason = ",".join(overall_errors)
+
+            sub = create_subtest(
+                subtest_number,
+                test_desc,
+                "FAILED",
+                reason=reason,
+            )
+
+            current_test["subtests"].append(sub)
+
+            update_suite_summary(
+                current_test["test_suite_summary"],
+                "FAILED",
+            )
+
+            update_suite_summary(
+                suite_summary,
+                "FAILED",
+            )
+
+            subtest_number += 1
+
+        # Original early-exit fallback: no component result at all.
+        elif not current_test["subtests"]:
+            if overall_result == "WARNINGS":
+                reason = ",".join(warning_lines)
+            else:
+                reason = ",".join(overall_errors)
+
+            sub = create_subtest(
+                subtest_number,
+                "Reserved Memory Map Compliance Test",
+                overall_result,
+                reason=reason,
+            )
+
+            current_test["subtests"].append(sub)
+
+            update_suite_summary(
+                current_test["test_suite_summary"],
+                overall_result,
+            )
+
+            update_suite_summary(
+                suite_summary,
+                overall_result,
+            )
+    else:
+        reason = "; ".join(
+            overall_errors + ["Incomplete log: final RESULTS line is missing"]
+        )
+        current_test["subtests"].append(create_subtest(
+            subtest_number,
+            "Reserved-memory log completion",
+            "FAILED",
+            reason=reason,
+        ))
+        update_suite_summary(current_test["test_suite_summary"], "FAILED")
+        update_suite_summary(suite_summary, "FAILED")
+
+    # Remove empty reason arrays
+    for subtest in current_test["subtests"]:
+        subres = subtest["sub_test_result"]
+
+        for key in [
+            "pass_reasons",
+            "fail_reasons",
+            "abort_reasons",
+            "skip_reasons",
+            "warning_reasons"
+        ]:
+            if not subres.get(key):
+                subres.pop(key, None)
+
+    return {
+        "test_results": [current_test],
+        "suite_summary": suite_summary
+    }
+def parse_dtb_alignment(log_data):
+    test_suite_key = "dtb_alignment"
+    mapping = test_suite_mapping[test_suite_key]
+    test_desc="Devicetree Blob Alignment Validation" # the address needs to be aligned to 8 bytes, so the test is a single subtest
+
+    suite_summary = {
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waiver": 0
+    }
+
+    current_test = {
+        "Test_suite": mapping["Test_suite"],
+        "Test_suite_description": mapping["Test_suite_description"],
+        "Test_case": test_suite_key,
+        "Test_case_description": mapping["Test_case_description"],
+        "subtests": [],
+        "test_suite_summary": suite_summary.copy()
+    }
+
+    subtest_number = 1
+    fail_reasons = ""
+    result = "FAILED"
+    for line in log_data:
+        line = line.strip()
+        if line.startswith("ERROR:"):
+            fail_reasons += line + "\n"
+        if line.startswith("RESULT:"):
+            result = line.split(":", 1)[1].strip() + "ED"
+    sub = create_subtest(
+           subtest_number,
+           test_desc,
+           result,
+           reason=fail_reasons.strip() if fail_reasons else None
+          )
+
+    current_test["subtests"].append(sub)
+
+    update_suite_summary(
+        current_test["test_suite_summary"],
+        result
+    )
+
+    update_suite_summary(
+        suite_summary,
+        result
+    )
+
+    for subtest in current_test["subtests"]:
+        subres = subtest["sub_test_result"]
+
+        for key in [
+            "pass_reasons",
+            "fail_reasons",
+            "abort_reasons",
+            "skip_reasons",
+            "warning_reasons"
+        ]:
+            if not subres.get(key):
+                subres.pop(key, None)
+
+    return {
+        "test_results": [current_test],
+        "suite_summary": suite_summary
+    }
+
+      
 ###############################################################################
 # PSCI Checker Parse
 ###############################################################################
@@ -1370,6 +1650,10 @@ def parse_single_log(log_file_path):
         return parse_network_boot_log(log_data)
     elif re.search(r'Testing Runtime Device Mapping Conflict Test', log_content):
         return parse_runtime_dev_map_conflict(log_data)
+    elif re.search(r'Testing Devicetree Reserved Memory Map Compliance Test', log_content):
+        return  parse_resv_mem_map(log_data)
+    elif re.search(r'Starting DTB alignment test', log_content):
+        return parse_dtb_alignment(log_data)
     else:
         raise ValueError("Unknown or unsupported standalone log format.")
 

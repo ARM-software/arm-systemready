@@ -431,6 +431,12 @@ def merge_json_files(json_files, output_file):
         elif "NETWORK_BOOT" in fn or "network_boot" in fn.lower():
             section_name = "Suite_Name: Network boot"
             suite_key    = "NETWORK_BOOT"
+        elif "reserved_memory_map" in fn.lower():
+            section_name = "Suite_Name: Reserved Memory Map"
+            suite_key    = "RESERVED_MEMORY_MAP"
+        elif "dtb_alignment" in fn.lower():
+            section_name = "Suite_Name: DTB Alignment"
+            suite_key    = "DTB_ALIGNMENT"
         elif "SMBIOS" in fn:
             section_name = "Suite_Name: SMBIOS"
             suite_key    = "SMBIOS"
@@ -473,7 +479,8 @@ def merge_json_files(json_files, output_file):
         lookup_suite_key = suite_key.lower()
         standalone_aliases = {
             "dt_kselftest", "dt_validate", "ethtool_test",
-            "read_write_check_blk_devices", "psci", "capsule update", "network_boot", "smbios", "runtime_dev_map"
+            "read_write_check_blk_devices", "psci", "capsule update", "network_boot", "smbios", "runtime_dev_map" ,
+            "reserved_memory_map", "dtb_alignment"
         }
         if lookup_suite_key in standalone_aliases or lookup_suite_key.startswith("os_"):
             lookup_suite_key = "standalone"
@@ -816,7 +823,9 @@ def merge_json_files(json_files, output_file):
         "Suite_Name: PSCI": "Suite_Name: Standalone",
         "Suite_Name: SMBIOS": "Suite_Name: Standalone",
         "Suite_Name: Network boot": "Suite_Name: Standalone",
-        "Suite_Name: Runtime device mapping": "Suite_Name: Standalone"
+        "Suite_Name: Runtime device mapping": "Suite_Name: Standalone",
+        "Suite_Name: Reserved Memory Map": "Suite_Name: Standalone",
+        "Suite_Name: DTB Alignment": "Suite_Name: Standalone",
     }
 
     def _entry_to_list(entry):

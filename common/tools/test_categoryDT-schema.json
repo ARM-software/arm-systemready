@@ -32,6 +32,8 @@
 							"Capsule Update",
 							"Capsule update",
 							"ConsoleSupportTest",
+							"Devicetree Blob Alignment Validation",
+							"Devicetree Reserved Memory Validation",
 							"DTValidation",
 							"DevicePathProcotols",
 							"EBBR requirements",
@@ -196,7 +198,9 @@
 		"catID: 51": { "$ref": "#/$defs/catID" },
 		"catID: 52": { "$ref": "#/$defs/catID" },
 		"catID: 53": { "$ref": "#/$defs/catID" },
-		"catID: 54": { "$ref": "#/$defs/catID" }
+		"catID: 54": { "$ref": "#/$defs/catID" },
+		"catID: 55": { "$ref": "#/$defs/catID" },
+		"catID: 56": { "$ref": "#/$defs/catID" }
 	},
 	"required": [
 		"catID: 1",
@@ -252,7 +256,9 @@
 		"catID: 51",
 		"catID: 52",
 		"catID: 53",
-		"catID: 54"
+		"catID: 54",
+		"catID: 55",
+		"catID: 56"
 	],
 	"additionalProperties": false
 }

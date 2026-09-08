@@ -648,6 +648,35 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             echo -e "${RED}ERROR: Runtime device mapping log parsing to json failed.${NC}"
         fi
     fi
+    # 10) RESERVED MEMORY MAP
+    RESERVED_MEM_MAP_LOG="$LINUX_TOOLS_LOGS_PATH/reserved_memory_map_test.log"
+    RESERVED_MEM_MAP_JSON="$JSONS_DIR/reserved_memory_map.json"
+    if check_file "$RESERVED_MEM_MAP_LOG" "M"; then
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$RESERVED_MEM_MAP_LOG" \
+            "$RESERVED_MEM_MAP_JSON"
+        if [ $? -eq 0 ]; then
+            Standalone_JSONS+=("$RESERVED_MEM_MAP_JSON")
+            apply_waivers "Standalone" "$RESERVED_MEM_MAP_JSON"
+        else
+            echo -e "${RED}ERROR: Reserved memory map log parsing to json failed.${NC}"
+        fi
+    fi
+
+    # 11) DTB ALIGNMENT
+    DTB_ALIGNMENT_LOG="$LINUX_TOOLS_LOGS_PATH/dtb_alignment_test.log"
+    DTB_ALIGNMENT_JSON="$JSONS_DIR/dtb_alignment.json"
+    if check_file "$DTB_ALIGNMENT_LOG" "M"; then
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$DTB_ALIGNMENT_LOG" \
+            "$DTB_ALIGNMENT_JSON"
+        if [ $? -eq 0 ]; then
+            Standalone_JSONS+=("$DTB_ALIGNMENT_JSON")
+            apply_waivers "Standalone" "$DTB_ALIGNMENT_JSON"
+        else
+            echo -e "${RED}ERROR: DTB alignment log parsing to json failed.${NC}"
+        fi
+    fi
 
     # Now generate a single STANDALONE HTML
     if [ ${#Standalone_JSONS[@]} -gt 0 ]; then
