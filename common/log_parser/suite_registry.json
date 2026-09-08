@@ -198,7 +198,9 @@
         "PSCI",
         "SMBIOS",
         "NETWORK-BOOT",
-        "RUNTIME-DEV-MAP"
+        "RUNTIME-DEV-MAP",
+        "RESERVED-MEMORY-MAP",
+        "DTB-ALIGNMENT"
       ]
     },
     {
@@ -225,6 +227,34 @@
       "logs_to_json": "standalone_tests/logs_to_json.py",
       "json_to_html": "standalone_tests/json_to_html.py",
       "json_output": "dt_validate.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "RESERVED-MEMORY-MAP",
+      "aliases": ["RESERVED-MEMORY-MAP", "RESERVEDMEMORYMAP", "RESERVED_MEMORY_MAP"],
+      "modes": ["DT"],
+      "requirement_key": "RESERVED_MEMORY_MAP",
+      "requirements": {"DT": "M"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "reserved_memory_map.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "DTB-ALIGNMENT",
+      "aliases": ["DTB-ALIGNMENT", "DTBALIGNMENT", "DTB_ALIGNMENT"],
+      "modes": ["DT"],
+      "requirement_key": "DTB_ALIGNMENT",
+      "requirements": {"DT": "M"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "dtb_alignment.json",
       "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
       "detailed_html": "standalone_tests_detailed.html",
       "summary_html": "standalone_tests_summary.html"
@@ -458,6 +488,18 @@
         "handler": "standalone_single",
         "inputs": [
           {"name": "log", "root": "results", "candidates": ["linux_tools/dt-validate-parser.log"], "required": true}
+        ]
+      },
+      "RESERVED-MEMORY-MAP": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["linux_tools/reserved_memory_map_test.log"], "required": true}
+        ]
+      },
+      "DTB-ALIGNMENT": {
+        "handler": "standalone_single",
+        "inputs": [
+          {"name": "log", "root": "results", "candidates": ["linux_tools/dtb_alignment_test.log"], "required": true}
         ]
       },
       "ETHTOOL-TEST": {

@@ -1004,5 +1004,43 @@
       "FunctionID": 4,
       "Main Readiness Grouping": "runtime readiness"
     }
-  ]
+  ],
+ "catID: 55": [
+    {
+        "Suite": "Standalone",
+        "Description": [
+            "The Devicetree specification defines requirements for reserved memory regions to be represented consistently in the UEFI memory map.",
+            "The Reserved Memory Map Compliance Test validates static /reserved-memory regions against the required UEFI memory types.",
+            "Regions with the no-map property are validated against EfiReservedMemoryType, while other static reserved-memory regions are validated against EfiBootServicesData.",
+            "Memory Reservation Block entries are also validated against EfiReservedMemoryType.",
+            "https://github.com/ARM-software/arm-systemready/blob/main/SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/reserved_memory_map_checker.py"
+        ],
+        "Test Suite": "Devicetree Reserved Memory Validation",
+        "specName": "DT",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+    }
+],
+
+"catID: 56": [
+    {
+        "Suite": "Standalone",
+        "Description": [
+            "The Devicetree specification requires the Devicetree blob to be located at an 8-byte-aligned address.",
+            "The DTB Alignment Test validates the DTB Table address reported by firmware in dmem.log.",
+            "The test verifies that the DTB address is present, non-zero, and aligned to an 8-byte boundary.",
+            "https://github.com/ARM-software/arm-systemready/blob/main/SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/dtb_alignment_test.py"
+        ],
+        "Test Suite": "Devicetree Blob Alignment Validation",
+        "specName": "DT",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+    }
+]
 }
