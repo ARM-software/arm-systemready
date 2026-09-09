@@ -246,6 +246,100 @@ suites:
           sub_Test_Path: "RULE : 1"
 
 
+  - name: sct_logs_to_json_specific
+    files:
+      - common/log_parser/bbr/sct/logs_to_json.py
+
+    cases:
+      - name: cli_sct_json_has_no_empty_subtest_description
+        type: cli
+        command: "./run_case.sh"
+        timeout_sec: 5
+        scripts:
+          run_case.sh: |
+            #!/bin/sh
+            set -eu
+
+            cat > Summary.log <<EOF
+            BBR ACS
+            CheckEvent_Func
+            Test Configuration #0
+            Checks CheckEvent functionality.
+            Test Entry Point GUID: 29481844-C567-4A8D-B92F-D57B32F039B8
+            Returned Status Code: 0
+            /long/path/Test.c:265:Status - Not ReadyBS.CheckEvent - Check event with notify function (no signal). -- PASS
+            4E9AA877-2672-4F8C-BA3C-C02F49A68911
+            /build/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:323:Status - Not RBS.CheckEvent - Check signaled event. -- PASS
+            060234F5-A84A-4DD7-AD5B-64996250F216
+            /build/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:392:Status - Success
+            EFI Conformance Profile Table test -- WARNING
+            62C450FE-0D70-468D-8754-DACAB1F9755E
+            EFI Conformance Profiles Table not found. /build/edk2-test/SctPkg/TestCase/UEFI/EFI/Generic/EfiConformanceProfileTableTestFunction.c:171:Status - Not Found
+            Non-empty EDK reason test -- PASS
+            72C450FE-0D70-468D-8754-DACAB1F9755E
+            /build/edk2-test/SctPkg/TestCase/UEFI/EFI/Generic/OverrideTestFunction.c:200:Status - SCT reason replaced
+            EOF
+
+            cat > Summary.ekl <<EOF
+            |HEAD|||0||01-01-1970|00:00:00|29481844-C567-4A8D-B92F-D57B32F039B8|0x00010000|CheckEvent_Func|Test|Suite|No device path
+            4E9AA877-2672-4F8C-BA3C-C02F49A68911:PASS|BS.CheckEvent - Check event with notify function (no signal).:/build/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:323:Status - Not R
+            060234F5-A84A-4DD7-AD5B-64996250F216:PASS|BS.CheckEvent - Check signaled event.:/other/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Other.c:999:Status - EKL must not replace Summary
+            62C450FE-0D70-468D-8754-DACAB1F9755E:WARNING|EFI Conformance Profile Table test:EFI Conformance Profiles Table not found. /build/edk2-test/SctPkg/TestCase/UEFI/EFI/Generic/EfiConformanceProfileTableTestFunction.c:171:Status - Not Found
+            72C450FE-0D70-468D-8754-DACAB1F9755E:PASS|Non-empty EDK reason test:/build/edk2-test/SctPkg/TestCase/UEFI/EFI/Generic/OverrideTestFunction.c:200:Status - SCT reason replaced
+            |TERM|0000|
+            EOF
+
+            cat > edk2_test_parser.json <<EOF
+            [
+              {"Test Entry Point GUID": "29481844-C567-4A8D-B92F-D57B32F039B8",
+               "sub_Test_GUID": "62C450FE-0D70-468D-8754-DACAB1F9755E", "result": "WARNING",
+               "reason": "", "sub_Test_Description": "EFI Conformance Profile Table test"},
+              {"Test Entry Point GUID": "29481844-C567-4A8D-B92F-D57B32F039B8",
+               "sub_Test_GUID": "72C450FE-0D70-468D-8754-DACAB1F9755E", "result": "PASS",
+               "reason": "EDK override reason", "sub_Test_Description": "Non-empty EDK reason test"}
+            ]
+            EOF
+
+            python3 "$1" --mode SR "$PWD/Summary.log" "$PWD/out.json"
+        args: ["{file}"]
+        expect_exit_code: 0
+        post_checks:
+          - type: file_not_contains
+            path: "{dir}/out.json"
+            text: '"sub_Test_Description": ""'
+          - type: file_not_contains
+            path: "{dir}/out.json"
+            text: '"sub_Test_Path": ""'
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: "BS.CheckEvent - Check event with notify function (no signal)."
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: '"sub_Test_Description": "BS.CheckEvent - Check signaled event."'
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: '"sub_Test_Path": "edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:323"'
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: '"reason": "Status - Not R"'
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: '"reason": "Status - Success"'
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: '"reason": "Status - Not Found"'
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: '"reason": "EDK override reason"'
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: '"sub_Test_Path": "edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:392"'
+          - type: file_not_contains
+            path: "{dir}/out.json"
+            text: "EKL must not replace Summary"
+          - type: file_contains
+            path: "{dir}/out.json"
+            text: '"total_passed": 3'
 # =========================
 # EDK2 LOGS TO JSON
 # =========================
