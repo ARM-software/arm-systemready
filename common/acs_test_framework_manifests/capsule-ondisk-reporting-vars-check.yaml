@@ -16,15 +16,15 @@ suites:
         type: main_guard
         description: "Check that the script contains a standard __main__ guard."
 
-      - name: status_true_returns_passed
+      - name: result_status_true_returns_passed
         type: py_function
-        function: status
+        function: result_status
         args: [true]
         expect_return: "PASSED"
 
-      - name: status_false_returns_warning
+      - name: result_status_false_returns_warning
         type: py_function
-        function: status
+        function: result_status
         args: [false]
         expect_return: "WARNING"
 
