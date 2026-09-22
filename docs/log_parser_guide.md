@@ -1,5 +1,9 @@
 # SystemReady ACS Log Parser Guide
 
+This guide explains how to turn ACS logs into reports, choose parser options,
+and investigate problems. Doctor is an optional manual health check; it is
+not required before parsing logs, committing changes, or opening a pull request.
+
 ## Contents
 
 1. [Purpose](#purpose)
@@ -707,6 +711,183 @@ or generated JSON will pass parsing and schema validation.
 Use the same mode, input, suites, output stages, schema flag, configs, waiver,
 and output path planned for the real run. Then remove only `--doctor`. This
 ensures the preflight checks the dependencies and files for the intended run.
+
+#### Repository health and result correctness
+
+Use `--doctor --health` to run **deeper, isolated correctness checks**. This is
+separate from the fast readiness preflight above. It does not repair parser
+code, apply real platform waivers, or modify supplied reports. Synthetic logs,
+waivers, parser outputs and reproduction commands are kept in a new directory.
+
+From the repository root, using the Python environment containing
+`common/log_parser/requirements.txt` dependencies:
+
+```bash
+bash common/log_parser/main_log_parser.sh --standalone --doctor --health \
+  --doctor-output /path/to/new-doctor-results
+```
+
+Both DT and SR are checked by default. `--mode DT` or `--mode SR` restricts the
+scope. No suite, input log or ACS configuration arguments are required. To also
+validate existing generated report packages (read-only):
+
+```bash
+bash common/log_parser/main_log_parser.sh --standalone --doctor --health \
+  --doctor-output /path/to/new-doctor-results \
+  --doctor-report DT=/path/to/DT/report-package \
+  --doctor-report SR=/path/to/SR/report-package
+```
+
+The output directory must not already exist or be inside a supplied report or
+the parser source directory. Without `--doctor-output`, a new temporary directory
+is created and its location is printed. `--doctor-timeout 60` sets the timeout
+per external command, not a total time limit.
+
+The health checks cover registry and syntax integrity; supported suite/mode
+compliance combinations; mandatory, recommended and extension behavior;
+waivers; incomplete inputs; merged JSON and HTML agreement; and selected/full
+run consistency. Small synthetic fixtures exercise known failure patterns.
+Supplied report checks add schema validation and static report consistency
+checks against real captures. Expected compliance is checked independently of
+the merger's answer: recommended failures/missing results are non-blocking for
+overall SRS, while suite-level failures remain visible. Changes to this policy
+need owner agreement, not silently updated expected values.
+
+Doctor also reuses independent contracts from the PR QA work:
+
+- An explicitly reviewed requirement map detects accidental registry policy
+  changes. New suites and modes need their own expected requirements and native
+  log fixtures; they cannot silently fall outside health coverage.
+- Native fixtures cover 25 executable entries / 32 DT/SR routes, including the
+  SR-only, Recommended PCIe Option ROM suite. Its pass, fail and skip examples
+  have independent expected results; an absent Recommended PCIe result must
+  not block overall compliance. Newly registered routes still require their
+  own expected requirements and sample logs. Exact test
+  IDs, descriptions, statuses, nested paths and record inventories are checked,
+  not only totals. Swapping a passing and failing test must fail even if totals
+  remain unchanged. Raw-schema checks run separately from identity checks.
+- Bad-input checks use a complete control before testing empty, introductory-only,
+  truncated and malformed examples. They include the DT utility, PFDI, SCMI and
+  OS routes and SR OS/PCIe routes. An unusable control is reported as BLOCKED,
+  not accepted as passing coverage. Each finding retains the input, command
+  and observed JSON/HTML decision; these checks do not fix the parser.
+- Conditional-requirement checks keep execution evidence separate from JSON
+  availability. Source-backed SBSA, SBMR IB/OOB and PFDI records are replayed and
+  their exact parsed results checked before their JSON is deliberately omitted
+  from a separate merge. Executed SBSA stays Mandatory; execution of either SBMR
+  interface makes both Mandatory; executed PFDI remains applicable
+  Conditional-Mandatory. Missing results must not erase those obligations or
+  become green. Empty files and banners alone are not execution proof. These
+  controlled direct-merger probes warn about lost execution context; they do
+  not establish a public-flow failure or routine JSON loss. Standalone already
+  checks generated JSON before publishing, and normal-flow conversion failure
+  is not injected by this probe. Report-package-only checks cannot independently
+  establish execution when original logs are unavailable. None of these checks
+  establishes hardware certification.
+- The real `package_standalone.sh` archive and SHA-256 are checked, extracted
+  outside the checkout, and compared against the runtime files. Native probes
+  use that extracted parser with checkout imports disabled. Doctor does not
+  install dependencies or claim a fresh-environment installation test.
+- Supplied artifacts are checked for ambiguous JSON, changed raw-to-merged
+  records, HTML result identity/count mismatches and broken local links. These
+  checks never rewrite a report to make it pass.
+
+For a focused rerun, select groups explicitly:
+
+```bash
+bash common/log_parser/main_log_parser.sh --standalone --doctor --health \
+  --doctor-checks policy,package,native \
+  --doctor-output /path/to/new-native-health-results
+```
+
+Groups are `policy`, `package`, `native`, `merge`, `raw` and `reports`.
+`native` automatically includes `package`. Omit `--doctor-checks` to run all
+default groups. An unavailable prerequisite blocks its affected group, not
+unrelated checks. Missing newer HTML compliance features are reported separately
+while JSON compliance scenarios still run. A focused PASS is not a full health
+PASS; the selected and omitted groups are recorded.
+
+Optional browser and PDF smoke checks use synthetic FWTS pass/fail/waiver
+reports for each selected mode, Chromium at desktop/mobile widths, and the
+public PDF export. Install Chromium and the optional `pypdf` module separately;
+`weasyprint` is already listed in the parser requirements:
+
+```bash
+bash common/log_parser/main_log_parser.sh --standalone --doctor --health \
+  --doctor-visual --doctor-browser /absolute/path/to/chromium \
+  --doctor-output /path/to/new-visual-health-results
+```
+
+`--doctor-browser` can be omitted if `chromium` or `chromium-browser` is on PATH.
+Requested visual checks with missing dependencies are BLOCKED, never silently
+passed. These checks cover UI initialization, visible counts, search/filter
+behavior, horizontal overflow, and PDF identity/compliance/count preservation.
+They do not certify every suite's layout, browser, paper size or pagination.
+Supplied reports are never executed in a browser; only disposable synthetic
+reports are used for these checks.
+
+Open `index.html` for plain-language topics showing **what happened**, **why it
+matters**, **next steps**, and examples from the run. Expand a topic for the
+original check IDs, expected/actual results, and evidence links. Search and
+status/mode/suite filters narrow the evidence; the recorded totals stay unchanged.
+Package-level summaries are separated from the individual findings they repeat.
+`doctor.md` contains readable findings; `doctor.json` contains
+every assertion, including passes, the source revision/hashes and coverage
+warnings. The evidence directory includes synthetic input files and command
+logs. These are diagnostic fixtures, **not real hardware test results**.
+
+Doctor requires missing `Test_suite_info` only when a category file was explicitly
+supplied to the generating run. New standalone outputs record that choice in
+`config/parser_run.json`; explicit categories are copied into the output and
+the parser consumes that snapshot. Doctor verifies its recorded checksum before
+using it as evidence. Bundled defaults do not trigger the missing-info requirement.
+Older reports with no category record receive a warning when this requirement
+cannot be decided, rather than guessing what was supplied. Invalid category
+records fail the provenance check. Existing malformed `Test_suite_info` values
+and all other schema requirements remain checked. This is Doctor's applicability
+rule; it does not change schema files, raw result data, or strict `--schema` /
+`validate.py` validation. Native checks retain the strict validator log separately.
+
+| Doctor status | Meaning |
+|---|---|
+| PASS | This recorded assertion matched its expected result. |
+| FAIL | A reproducible result or repository defect violated the checked contract. |
+| BLOCKED | A dependency, timeout or probe problem prevented verification. |
+| WARN | A policy or coverage limit needs separate review. |
+
+Exit code **0** means the executed scope passed; **1** means at least one
+failure was found; **2** means checks were incomplete with no confirmed failure.
+Invalid wrapper arguments use the standalone CLI's input-error handling.
+Existing bugs therefore make the doctor fail even when the doctor's own unit
+tests pass. Missing dependencies and zero executed checks never count as green.
+
+Doctor is a manually invoked health tool, separate from automatic PR CI. It
+does not depend on staged/unstaged files and is not automatically installed as
+a Git hook or CI gate. Archive its full output directory even when it exits
+nonzero. Run on real DT/SR report packages as well as synthetic fixtures.
+The implementation and its sample data live in `common/log_parser/doctor_checks/`.
+The small `common/log_parser/doctor.py` launcher preserves existing commands and
+imports used by the standalone runner. Packaging includes this folder automatically;
+normal parsing does not load the check groups or start health checks.
+Full browser/print coverage, actual hardware execution and unresolved
+all-skipped/aborted-result policies still require separate validation. A passing
+doctor cannot guarantee the absence of every possible parser defect.
+
+If an import or syntax error prevents the normal wrapper from starting, invoke
+the independent entry point so it can report that repository damage:
+
+```bash
+python3 -B common/log_parser/doctor.py --health \
+  --doctor-output /path/to/new-doctor-results
+```
+
+The doctor's own positive/negative controls can be run independently of known
+production parser bugs:
+
+```bash
+python3 -B -m unittest discover -s common/acs_test_framework_runner \
+  -p 'test_doctor*.py' -v
+```
 
 ### Output Selection
 

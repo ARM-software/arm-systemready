@@ -1,0 +1,1881 @@
+{
+  "_copyright": "Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.",
+  "_license": "SPDX-License-Identifier: Apache-2.0",
+  "_description": "Handwritten sample logs and their expected results for optional Doctor checks. Each scenario gives the mode, suites, input files and expected raw JSON records. Expected results are written independently of parser output so a parser mistake cannot define its own passing answer. These are synthetic examples, not hardware results.",
+  "format_version": 1,
+  "provenance": {
+    "source": "log-parser-pr-qa handwritten native scenarios",
+    "commit": "b6a8a78d1fef3d6e41d2d2aec94006e0a9263c8c",
+    "note": "Synthetic logs and independently specified raw identities; CI overall-compliance expectations are intentionally not imported.",
+    "extensions": [
+      {
+        "scenario": "dt_memory_map_routes",
+        "commit": "decc0aaa9902da57b18d5fd3ec40efa511fb5273",
+        "source": "Handwritten completed-log examples reviewed against reserved_memory_map_checker.py and dtb_alignment_test.py producer messages; expected identities and counts specified independently of parser output."
+      },
+      {
+        "scenarios": ["sr_pcie_pass", "sr_pcie_fail", "sr_pcie_skip"],
+        "commit": "719dab25e12c2d5f36fdc06673d20f0354a851e8",
+        "source": "Handwritten producer-shaped PCIe audit logs; PJ03164-4076 defines SR-only Recommended results using numeric counts: zero ROM devices means SKIPPED, otherwise zero non-compliant devices means PASSED, otherwise FAILED. Printed Result Summary intentionally disagrees to verify that it does not override those counts."
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "sr_all_report_families",
+      "mode": "SR",
+      "suites": [
+        "BSA",
+        "SBSA",
+        "FWTS",
+        "SCT",
+        "BBSR-FWTS",
+        "BBSR-SCT",
+        "BBSR-TPM",
+        "SBMR-IB",
+        "SBMR-OOB",
+        "OS-TESTS"
+      ],
+      "files": {
+        "results/uefi/BsaResults.log": "*** Running PE tests ***\nB_PE_01 : 1 : QA passing rule\nResult: PASSED\nB_PE_02 : 2 : QA failing rule\n=== Start tests for rules referenced by B_PE_02 ===\nB_CHILD_01 : 3 : QA failing child rule\nResult: FAILED\n=== End tests for rules referenced by B_PE_02 ===\nResult: FAILED\n",
+        "results/uefi/SbsaResults.log": "*** Running PE tests ***\nB_PE_01 : 1 : QA passing rule\nResult: PASSED\nB_PE_02 : 2 : QA failing rule\n=== Start tests for rules referenced by B_PE_02 ===\nB_CHILD_01 : 3 : QA failing child rule\nResult: FAILED\n=== End tests for rules referenced by B_PE_02 ===\nResult: FAILED\n",
+        "results/fwts/FWTSResults.log": "Running tests: uefirtmisc\n====================\nuefirtmisc: QA interface checks\nTest 1 of 2: QA passing interface\nPASSED: Test 1, QA passed\nTest 2 of 2: QA failing interface\nFAILED [HIGH] QA failed\n",
+        "results/bbsr/fwts/FWTSResults.log": "Running tests: RuntimeServicesTest\n====================\nRuntimeServicesTest: QA interface checks\nTest 1 of 2: QA passing interface\nPASSED: Test 1, QA passed\nTest 2 of 2: QA failing interface\nFAILED [HIGH] QA failed\n",
+        "results/sct_results/Overall/Summary.log": "BBR ACS 2.1\nResetSystem_Func\nTest Configuration #0\nQA event checks\nTest Entry Point GUID: 29481844-C567-4A8D-B92F-D57B32F039B8\nReturned Status Code: 0\nResetSystem_Func: [FAILURE]\nQA passing event -- PASS\n4E9AA877-2672-4F8C-BA3C-C02F49A68911\n/build/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:10:Status - Success\nQA failing event -- FAIL\n060234F5-A84A-4DD7-AD5B-64996250F216\n/build/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:20:Status - Device Error\n",
+        "results/bbsr/sct_results/Overall/Summary.log": "BBR ACS 2.1\nResetSystem_Func\nTest Configuration #0\nQA event checks\nTest Entry Point GUID: 29481844-C567-4A8D-B92F-D57B32F039B8\nReturned Status Code: 0\nResetSystem_Func: [FAILURE]\nQA passing event -- PASS\n4E9AA877-2672-4F8C-BA3C-C02F49A68911\n/build/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:10:Status - Success\nQA failing event -- FAIL\n060234F5-A84A-4DD7-AD5B-64996250F216\n/build/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:20:Status - Device Error\n",
+        "results/edk2-test-parser/edk2-test-parser.log": "| name | set guid | guid | result | updated by |\n|------|----------|------|--------|------------|\n| QA failing event | 29481844-C567-4A8D-B92F-D57B32F039B8 | 060234F5-A84A-4DD7-AD5B-64996250F216 | FAIL | QA helper reason |\n",
+        "results/edk2-test-parser/edk2-test-parser-bbsr.log": "| name | set guid | guid | result | updated by |\n|------|----------|------|--------|------------|\n| QA failing event | 29481844-C567-4A8D-B92F-D57B32F039B8 | 060234F5-A84A-4DD7-AD5B-64996250F216 | FAIL | QA helper reason |\n",
+        "results/bbsr/tpm2/verify_tpm_measurements.log": "Verify QA digest: PASS\nVerify QA event: FAIL\n  QA digest does not match\n",
+        "results/sbmr/sbmr_in_band_logs/output.xml": "<robot><suite name=\"SBMR\"><suite name=\"Discovery\"><suite name=\"QA checks\">\n<test name=\"QA passing command\"><status status=\"PASS\"/></test>\n<test name=\"QA failing command\"><status status=\"FAIL\">QA command failed</status></test>\n</suite></suite></suite></robot>\n",
+        "results/sbmr/sbmr_out_of_band_logs/output.xml": "<robot><suite name=\"SBMR\"><suite name=\"Discovery\"><suite name=\"QA checks\">\n<test name=\"QA passing command\"><status status=\"PASS\"/></test>\n<test name=\"QA failing command\"><status status=\"FAIL\">QA command failed</status></test>\n</suite></suite></suite></robot>\n",
+        "results/post-script/post-script.log": "INFO QA checks started\nERROR QA required file is missing\nWARNING QA optional file is missing\n",
+        "os-logs/rhel/cat-etc-os-release.txt": "NAME=\"Red Hat Enterprise Linux\"\nVERSION_ID=\"9.3\"\n",
+        "os-logs/sle/cat-etc-os-release.txt": "NAME=\"SLES\"\nVERSION_ID=\"15\"\n"
+      },
+      "auxiliary": [
+        "edk2_test_parser.json",
+        "edk2_test_parser-bbsr.json"
+      ],
+      "raw": {
+        "bsa.json": {
+          "destination": "Suite_Name: BSA",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "Passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "Failed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "Total Rules Run"
+              ],
+              "value": 2
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                0
+              ],
+              "fields": {
+                "Test_case": "B_PE_01 : 1",
+                "Test_case_description": "QA passing rule",
+                "Test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                1
+              ],
+              "fields": {
+                "Test_case": "B_PE_02 : 2",
+                "Test_case_description": "QA failing rule",
+                "Test_result": "FAILED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                1,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "B_CHILD_01 : 3",
+                "sub_Test_Description": "QA failing child rule",
+                "sub_test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "sbsa.json": {
+          "destination": "Suite_Name: SBSA",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "Passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "Failed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "Total Rules Run"
+              ],
+              "value": 2
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                0
+              ],
+              "fields": {
+                "Test_case": "B_PE_01 : 1",
+                "Test_case_description": "QA passing rule",
+                "Test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                1
+              ],
+              "fields": {
+                "Test_case": "B_PE_02 : 2",
+                "Test_case_description": "QA failing rule",
+                "Test_result": "FAILED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                1,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "B_CHILD_01 : 3",
+                "sub_Test_Description": "QA failing child rule",
+                "sub_test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "fwts.json": {
+          "destination": "Suite_Name: SBBR-FWTS",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1 of 2",
+                "sub_Test_Description": "QA passing interface",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2 of 2",
+                "sub_Test_Description": "QA failing interface",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "bbsr_fwts.json": {
+          "destination": "Suite_Name: BBSR-FWTS",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1 of 2",
+                "sub_Test_Description": "QA passing interface",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2 of 2",
+                "sub_Test_Description": "QA failing interface",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "sct.json": {
+          "destination": "Suite_Name: SBBR-SCT",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_GUID": "4E9AA877-2672-4F8C-BA3C-C02F49A68911",
+                "sub_Test_Description": "QA passing event",
+                "sub_test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_GUID": "060234F5-A84A-4DD7-AD5B-64996250F216",
+                "sub_Test_Description": "QA failing event",
+                "sub_test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "bbsr_sct.json": {
+          "destination": "Suite_Name: BBSR-SCT",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_GUID": "4E9AA877-2672-4F8C-BA3C-C02F49A68911",
+                "sub_Test_Description": "QA passing event",
+                "sub_test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_GUID": "060234F5-A84A-4DD7-AD5B-64996250F216",
+                "sub_Test_Description": "QA failing event",
+                "sub_test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "bbsr_tpm.json": {
+          "destination": "Suite_Name: BBSR-TPM",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Verify QA digest",
+                "sub_test_result": "PASS"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "Verify QA event",
+                "sub_test_result": "FAIL"
+              }
+            }
+          ]
+        },
+        "sbmr_ib.json": {
+          "destination": "Suite_Name: SBMR-IB",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "Test_cases",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "QA passing command",
+                "sub_test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "Test_cases",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "QA failing command",
+                "sub_test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "sbmr_oob.json": {
+          "destination": "Suite_Name: SBMR-OOB",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "Test_cases",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "QA passing command",
+                "sub_test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "Test_cases",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "QA failing command",
+                "sub_test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "os_test.json": {
+          "destination": "Suite_Name: OS Tests",
+          "assertions": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "Test_suite"
+              ],
+              "value": "os_test"
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 2
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 0
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0,
+                "sub_test_result",
+                "pass_reasons"
+              ],
+              "value": [
+                "Red Hat Enterprise Linux 9.3"
+              ]
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1,
+                "sub_test_result",
+                "pass_reasons"
+              ],
+              "value": [
+                "SLES 15"
+              ]
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Is rhel logs present or not",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "Is sle logs present or not",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "dt_all_standalone_routes",
+      "mode": "DT",
+      "suites": [
+        "BSA",
+        "FWTS",
+        "SCT",
+        "BBSR-FWTS",
+        "BBSR-SCT",
+        "BBSR-TPM",
+        "PFDI",
+        "SCMI",
+        "POST-SCRIPT",
+        "DT-KSELFTEST",
+        "DT-VALIDATE",
+        "ETHTOOL-TEST",
+        "READ-WRITE-CHECK-BLK-DEVICES",
+        "CAPSULE-UPDATE",
+        "PSCI",
+        "SMBIOS",
+        "NETWORK-BOOT",
+        "RUNTIME-DEV-MAP",
+        "OS-TESTS"
+      ],
+      "files": {
+        "results/uefi/BsaResults.log": "*** Running PE tests ***\nB_PE_01 : 1 : QA passing rule\nResult: PASSED\nB_PE_02 : 2 : QA failing rule\n=== Start tests for rules referenced by B_PE_02 ===\nB_CHILD_01 : 3 : QA failing child rule\nResult: FAILED\n=== End tests for rules referenced by B_PE_02 ===\nResult: FAILED\n",
+        "results/uefi/pfdiresults.log": "*** Running PFDI tests ***\nPFDI_01 : 1 : QA passing rule\nResult: PASSED\nPFDI_02 : 2 : QA failing rule\nResult: FAILED\n",
+        "results/fwts/FWTSResults.log": "Running tests: uefirtmisc\n====================\nuefirtmisc: QA interface checks\nTest 1 of 2: QA passing interface\nPASSED: Test 1, QA passed\nTest 2 of 2: QA failing interface\nFAILED [HIGH] QA failed\n",
+        "results/bbsr/fwts/FWTSResults.log": "Running tests: uefirtauthvar\n====================\nuefirtauthvar: QA interface checks\nTest 1 of 2: QA passing interface\nPASSED: Test 1, QA passed\nTest 2 of 2: QA failing interface\nFAILED [HIGH] QA failed\n",
+        "results/bbsr/sct_results/Overall/Summary.log": "BBR ACS 2.1\nResetSystem_Func\nTest Configuration #0\nQA event checks\nTest Entry Point GUID: 29481844-C567-4A8D-B92F-D57B32F039B8\nReturned Status Code: 0\nResetSystem_Func: [FAILURE]\nQA passing event -- PASS\n4E9AA877-2672-4F8C-BA3C-C02F49A68911\n/build/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:10:Status - Success\nQA failing event -- FAIL\n060234F5-A84A-4DD7-AD5B-64996250F216\n/build/edk2-test/SctPkg/TestCase/UEFI/EFI/BootServices/Test.c:20:Status - Device Error\n",
+        "results/bbsr/tpm2/verify_tpm_measurements.log": "Verify QA digest: PASS\nVerify QA event: FAIL\n  QA digest does not match\n",
+        "results/linux_acs/scmi_acs_app/arm_scmi_test_log.txt": "**** SCMI Compliance Suite ****\n*** Starting BASE tests ***\n1 : QA passing protocol : CONFORMANT\n2 : QA failing protocol : NON CONFORMANT\n",
+        "results/post-script/post-script.log": "INFO QA checks started\nERROR QA required file is missing\nWARNING QA optional file is missing\n",
+        "results/linux_tools/dt_kselftest.log": "selftests: dt: test_unprobed_devices.sh\n# ok 1 node-a\n# not ok 2 node-b\n# ok 3 node-c # SKIP\n",
+        "results/linux_tools/dt-validate-parser.log": "DeviceTree bindings of Linux kernel version: 6.18\nNon-ignored entries\n-------------------\nnode-a dt-validate error QA missing required property\nnode-b dt-validate warning QA optional property\n",
+        "results/linux_tools/ethtool-test.log": "Running Networking Checks\nSUMMARY\nDetected Interfaces: 1 (eth0)\nInterface eth0\nBring up: PASSED\nethtool self tests: FAILED (QA self-test failed)\n",
+        "results/linux_tools/read_write_check_blk_devices.log": "Read block devices tool\nINFO: Block device : /dev/qa\nNo valid partition table found for /dev/qa, treating as raw device.\nPerforming block read on /dev/qa\nBlock read on /dev/qa successful\n****************************************************************\n",
+        "fw/capsule_test_results.log": "Testing ESRT FW version update\nINFO: QA firmware version is unchanged\nRESULTS: Overall Capsule Update Result: FAILED\n",
+        "results/linux_tools/psci/psci_kernel.log": "psci: PSCIv1.1 detected in firmware.\n",
+        "results/sct_results/Overall/Summary.log": "BBR ACS 2.1\nGetTime_Func\nTest Configuration #0\nQA runtime clock check\nTest Entry Point GUID: 00000000-0000-0000-0000-000000000003\nReturned Status Code: 0\nGetTime_Func: [PASS]\nQA clock read -- PASS\n00000000-0000-0000-0000-000000000004\n/build/edk2-test/SctPkg/TestCase/UEFI/EFI/RuntimeServices/Test.c:10:Status - Success\nBBR ACS 2.1\nSmbiosTable\nTest Configuration #0\nQA SMBIOS table check\nSMBIOS table -- PASS\n00000000-0000-0000-0000-000000000001\nQA table found\n",
+        "results/network_boot/network_boot_results.log": "[INFO] network_boot_checks\nImage URL: PASSED (QA image found)\nEFI System Partition (ESP): FAILED (QA partition missing)\nNetwork_Boot_Result: FAILED\n",
+        "results/linux_tools/runtime_device_mapping_conflict_test.log": "Testing Runtime Device Mapping Conflict Test\nDEBUG: QA overlapping mapping\nRESULTS: FAILED\n",
+        "os-logs/linux-Fedora-40/ethtool_test.log": "INFO: No ethernet interfaces detected via ip linux command\n",
+        "os-logs/linux-ubuntu-24/ethtool_test.log": "INFO: No ethernet interfaces detected via ip linux command\n",
+        "os-logs/linux-Tumbleweed/ethtool_test.log": "INFO: No ethernet interfaces detected via ip linux command\n"
+      },
+      "raw": {
+        "bsa.json": {
+          "destination": "Suite_Name: BSA",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "Passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "Failed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "Total Rules Run"
+              ],
+              "value": 2
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                0
+              ],
+              "fields": {
+                "Test_case": "B_PE_01 : 1",
+                "Test_case_description": "QA passing rule",
+                "Test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                1
+              ],
+              "fields": {
+                "Test_case": "B_PE_02 : 2",
+                "Test_case_description": "QA failing rule",
+                "Test_result": "FAILED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                1,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "B_CHILD_01 : 3",
+                "sub_Test_Description": "QA failing child rule",
+                "sub_test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "pfdi.json": {
+          "destination": "Suite_Name: PFDI",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "Passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "Failed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "Total Rules Run"
+              ],
+              "value": 2
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                0
+              ],
+              "fields": {
+                "Test_case": "PFDI_01 : 1",
+                "Test_case_description": "QA passing rule",
+                "Test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                1
+              ],
+              "fields": {
+                "Test_case": "PFDI_02 : 2",
+                "Test_case_description": "QA failing rule",
+                "Test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "fwts.json": {
+          "destination": "Suite_Name: EBBR-FWTS",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1 of 2",
+                "sub_Test_Description": "QA passing interface",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2 of 2",
+                "sub_Test_Description": "QA failing interface",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "bbsr_fwts.json": {
+          "destination": "Suite_Name: BBSR-FWTS",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1 of 2",
+                "sub_Test_Description": "QA passing interface",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2 of 2",
+                "sub_Test_Description": "QA failing interface",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "sct.json": {
+          "destination": "Suite_Name: EBBR-SCT",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_GUID": "00000000-0000-0000-0000-000000000004",
+                "sub_Test_Description": "QA clock read",
+                "sub_test_result": "PASSED"
+              }
+            }
+          ]
+        },
+        "bbsr_sct.json": {
+          "destination": "Suite_Name: BBSR-SCT",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_GUID": "4E9AA877-2672-4F8C-BA3C-C02F49A68911",
+                "sub_Test_Description": "QA passing event",
+                "sub_test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_GUID": "060234F5-A84A-4DD7-AD5B-64996250F216",
+                "sub_Test_Description": "QA failing event",
+                "sub_test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "bbsr_tpm.json": {
+          "destination": "Suite_Name: BBSR-TPM",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Verify QA digest",
+                "sub_test_result": "PASS"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "Verify QA event",
+                "sub_test_result": "FAIL"
+              }
+            }
+          ]
+        },
+        "scmi.json": {
+          "destination": "Suite_Name: SCMI",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                0
+              ],
+              "fields": {
+                "Test_case": "1",
+                "Test_case_description": "QA passing protocol",
+                "Test_result": "PASSED"
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "testcases",
+                1
+              ],
+              "fields": {
+                "Test_case": "2",
+                "Test_case_description": "QA failing protocol",
+                "Test_result": "FAILED"
+              }
+            }
+          ]
+        },
+        "post_script.json": {
+          "destination": "Suite_Name: POST_SCRIPT",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_warnings"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "ERROR QA required file is missing",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "WARNING QA optional file is missing",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 1
+                }
+              }
+            }
+          ]
+        },
+        "dt_kselftest.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_skipped"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "node-a",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "node-b",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                2
+              ],
+              "fields": {
+                "sub_Test_Number": "3",
+                "sub_Test_Description": "node-c",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 0,
+                  "SKIPPED": 1,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "dt_validate.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_warnings"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "node-a",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "node-b",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 1
+                }
+              }
+            }
+          ]
+        },
+        "ethtool_test.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 2
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Detected Interfaces: eth0",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "Bring up interface eth0",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                2
+              ],
+              "fields": {
+                "sub_Test_Number": "3",
+                "sub_Test_Description": "ethtool self-tests on eth0",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "read_write_check_blk_devices.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Read check on Raw device /dev/qa",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "capsule_update.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Testing ESRT FW version update",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "psci.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0,
+                "sub_test_result",
+                "pass_reasons"
+              ],
+              "value": [
+                "PSCI version 1.1 >= 1.0"
+              ]
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "PSCI version checker(1.0 or above)",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "smbios_check.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "00000000-0000-0000-0000-000000000001",
+                "sub_Test_Description": "QA SMBIOS table check",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "network_boot.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_passed"
+              ],
+              "value": 1
+            },
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Image URL",
+                "sub_test_result": {
+                  "PASSED": 1,
+                  "FAILED": 0,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            },
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                1
+              ],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "EFI System Partition (ESP)",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "runtime_dev_map.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Testing Runtime Device Mapping Conflict Test",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "ethtool_test_linux-Fedora-40.json": {
+          "destination": "Suite_Name: OS Tests - ethtool_test_linux-Fedora-40",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "No Ethernet Interfaces Detected",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "ethtool_test_linux-ubuntu-24.json": {
+          "destination": "Suite_Name: OS Tests - ethtool_test_linux-ubuntu-24",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "No Ethernet Interfaces Detected",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        },
+        "ethtool_test_linux-Tumbleweed.json": {
+          "destination": "Suite_Name: OS Tests - ethtool_test_linux-Tumbleweed",
+          "assertions": [
+            {
+              "path": [
+                "suite_summary",
+                "total_failed"
+              ],
+              "value": 1
+            }
+          ],
+          "records": [
+            {
+              "path": [
+                "test_results",
+                0,
+                "subtests",
+                0
+              ],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "No Ethernet Interfaces Detected",
+                "sub_test_result": {
+                  "PASSED": 0,
+                  "FAILED": 1,
+                  "SKIPPED": 0,
+                  "ABORTED": 0,
+                  "WARNINGS": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "sr_pcie_pass",
+      "mode": "SR",
+      "suites": ["PCIE-OPTION-ROM-ARCH-AUDIT"],
+      "files": {
+        "results/uefi_dump/PcieOptionRomArchAudit.log": "PcieOptionRomArchAudit: report all live PCIe devices and classify option ROM contents\nScanned 3 EFI_PCI_IO handles and found 1 PCIe devices with Option ROM images:\nPCIe devices with ROM : 1\nNon-compliant devices : 0\nBBR (UEFI 6.3.3.1 UEFI Drivers) Result Summary: FAIL\n"
+      },
+      "raw": {
+        "pcie_option_rom_arch_audit.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {"path": ["suite_summary", "total_passed"], "value": 1},
+            {"path": ["suite_summary", "total_failed"], "value": 0},
+            {"path": ["suite_summary", "total_skipped"], "value": 0},
+            {"path": ["test_results", 0, "Test_suite"], "value": "PCIeOptionRomArchAudit"},
+            {"path": ["test_results", 0, "Test_case"], "value": "pcie_option_rom_arch_audit"},
+            {"path": ["test_results", 0, "test_result"], "value": "PASSED"}
+          ],
+          "records": [{
+            "path": ["test_results", 0, "subtests", 0],
+            "fields": {
+              "sub_Test_Number": "1",
+              "sub_Test_Description": "PCIe Option ROM UEFI driver architecture compliance",
+              "sub_test_result": {"PASSED": 1, "FAILED": 0, "SKIPPED": 0, "ABORTED": 0, "WARNINGS": 0, "FAILED_WITH_WAIVER": 0}
+            }
+          }]
+        }
+      }
+    },
+    {
+      "name": "sr_pcie_fail",
+      "mode": "SR",
+      "suites": ["PCIE-OPTION-ROM-ARCH-AUDIT"],
+      "files": {
+        "results/uefi_dump/PcieOptionRomArchAudit.log": "PcieOptionRomArchAudit: report all live PCIe devices and classify option ROM contents\nScanned 3 EFI_PCI_IO handles and found 1 PCIe devices with Option ROM images:\nPCIe devices with ROM : 1\nNon-compliant devices : 1\nBBR (UEFI 6.3.3.1 UEFI Drivers) Result Summary: PASS\n"
+      },
+      "raw": {
+        "pcie_option_rom_arch_audit.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {"path": ["suite_summary", "total_passed"], "value": 0},
+            {"path": ["suite_summary", "total_failed"], "value": 1},
+            {"path": ["suite_summary", "total_skipped"], "value": 0},
+            {"path": ["test_results", 0, "Test_suite"], "value": "PCIeOptionRomArchAudit"},
+            {"path": ["test_results", 0, "Test_case"], "value": "pcie_option_rom_arch_audit"},
+            {"path": ["test_results", 0, "test_result"], "value": "FAILED"}
+          ],
+          "records": [{
+            "path": ["test_results", 0, "subtests", 0],
+            "fields": {
+              "sub_Test_Number": "1",
+              "sub_Test_Description": "PCIe Option ROM UEFI driver architecture compliance",
+              "sub_test_result": {"PASSED": 0, "FAILED": 1, "SKIPPED": 0, "ABORTED": 0, "WARNINGS": 0, "FAILED_WITH_WAIVER": 0}
+            }
+          }]
+        }
+      }
+    },
+    {
+      "name": "sr_pcie_skip",
+      "mode": "SR",
+      "suites": ["PCIE-OPTION-ROM-ARCH-AUDIT"],
+      "files": {
+        "results/uefi_dump/PcieOptionRomArchAudit.log": "PcieOptionRomArchAudit: report all live PCIe devices and classify option ROM contents\nScanned 3 EFI_PCI_IO handles and found 0 PCIe devices with Option ROM images:\nPCIe devices with ROM : 0\nNon-compliant devices : 0\nBBR (UEFI 6.3.3.1 UEFI Drivers) Result Summary: PASS\n"
+      },
+      "raw": {
+        "pcie_option_rom_arch_audit.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {"path": ["suite_summary", "total_passed"], "value": 0},
+            {"path": ["suite_summary", "total_failed"], "value": 0},
+            {"path": ["suite_summary", "total_skipped"], "value": 1},
+            {"path": ["test_results", 0, "Test_suite"], "value": "PCIeOptionRomArchAudit"},
+            {"path": ["test_results", 0, "Test_case"], "value": "pcie_option_rom_arch_audit"},
+            {"path": ["test_results", 0, "test_result"], "value": "SKIPPED"}
+          ],
+          "records": [{
+            "path": ["test_results", 0, "subtests", 0],
+            "fields": {
+              "sub_Test_Number": "1",
+              "sub_Test_Description": "PCIe Option ROM UEFI driver architecture compliance",
+              "sub_test_result": {"PASSED": 0, "FAILED": 0, "SKIPPED": 1, "ABORTED": 0, "WARNINGS": 0, "FAILED_WITH_WAIVER": 0}
+            }
+          }]
+        }
+      }
+    },
+    {
+      "name": "dt_memory_map_routes",
+      "mode": "DT",
+      "suites": ["RESERVED-MEMORY-MAP", "DTB-ALIGNMENT"],
+      "files": {
+        "results/linux_tools/reserved_memory_map_test.log": "Testing Devicetree Reserved Memory Map Compliance Test\nINFO: Reserved Memory Map Compliance Test: PASSED\nINFO: Checking Memory Reservation Block entries\nERROR: Memory Reservation Block entry (0x80000000-0x80001000) is not fully covered by Reserved segments in memmap.\nINFO: Memory Reservation Block Compliance Test: FAILED\nRESULTS: FAILED\n",
+        "results/linux_tools/dtb_alignment_test.log": "INFO: Starting DTB alignment test\nINFO: DTB address is 0xFCEAD000\nINFO: Required alignment is 8 bytes\nINFO: DTB address 0xFCEAD000 is 8-byte aligned\nRESULT: PASS\n"
+      },
+      "raw": {
+        "reserved_memory_map.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {"path": ["suite_summary", "total_passed"], "value": 1},
+            {"path": ["suite_summary", "total_failed"], "value": 1},
+            {"path": ["test_results", 0, "Test_suite"], "value": "Devicetree Reserved Memory Validation"},
+            {"path": ["test_results", 0, "Test_case"], "value": "reserved_memory_map"}
+          ],
+          "records": [
+            {
+              "path": ["test_results", 0, "subtests", 0],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Reserved Memory Map Compliance Test",
+                "sub_test_result": {"PASSED": 1, "FAILED": 0, "SKIPPED": 0, "ABORTED": 0, "WARNINGS": 0}
+              }
+            },
+            {
+              "path": ["test_results", 0, "subtests", 1],
+              "fields": {
+                "sub_Test_Number": "2",
+                "sub_Test_Description": "Memory Reservation Block Compliance Test",
+                "sub_test_result": {"PASSED": 0, "FAILED": 1, "SKIPPED": 0, "ABORTED": 0, "WARNINGS": 0}
+              }
+            }
+          ]
+        },
+        "dtb_alignment.json": {
+          "destination": "Suite_Name: Standalone",
+          "assertions": [
+            {"path": ["suite_summary", "total_passed"], "value": 1},
+            {"path": ["suite_summary", "total_failed"], "value": 0},
+            {"path": ["test_results", 0, "Test_suite"], "value": "Devicetree Blob Alignment Validation"},
+            {"path": ["test_results", 0, "Test_case"], "value": "dtb_alignment"}
+          ],
+          "records": [
+            {
+              "path": ["test_results", 0, "subtests", 0],
+              "fields": {
+                "sub_Test_Number": "1",
+                "sub_Test_Description": "Devicetree Blob Alignment Validation",
+                "sub_test_result": {"PASSED": 1, "FAILED": 0, "SKIPPED": 0, "ABORTED": 0, "WARNINGS": 0}
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

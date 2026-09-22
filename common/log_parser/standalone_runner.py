@@ -14,9 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Portable, strict suite-wise SystemReady log parser orchestration."""
+"""Run selected SystemReady log parsers and publish their requested reports.
+
+This entry point checks inputs, calls the existing suite parsers, then applies
+waivers and builds JSON, HTML or PDF output. Doctor is a separate, optional
+path: --doctor checks readiness, and --doctor --health runs deeper checks.
+Normal parsing never waits for a successful Doctor health report.
+"""
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -1023,6 +1030,29 @@ def copy_run_configs(stage, args):
         raise StandaloneError(f"Cannot copy current run configuration: {error}", EXIT_OUTPUT) from error
 
 
+def record_category_provenance(stage, args, test_category):
+    """Record which category file was used so Doctor does not have to guess."""
+    category = {"source": "explicit" if args.test_category else "bundled"}
+    effective = test_category
+    try:
+        config_dir = stage / "config"
+        config_dir.mkdir(exist_ok=True)
+        if args.test_category:
+            # Parse using the saved copy too. Its checksum then proves which
+            # content was used, even if the original file changes later.
+            content = Path(test_category).read_bytes()
+            effective = config_dir / "test_category.json"
+            effective.write_bytes(content)
+            category.update(path="config/test_category.json", sha256=hashlib.sha256(content).hexdigest())
+        # This is run metadata, not a health check or a compliance decision.
+        (config_dir / "parser_run.json").write_text(json.dumps({
+            "format_version": 1, "mode": args.mode, "test_category": category,
+        }, indent=2) + "\n", encoding="utf-8")
+    except OSError as error:
+        raise StandaloneError(f"Cannot record current run category: {error}", EXIT_OUTPUT) from error
+    return effective
+
+
 def publish_output(target, stage, roots, direct_inputs=()):
     try:
         validate_output_target(target, roots, direct_inputs)
@@ -1073,6 +1103,9 @@ def build_parser():
         action="store_true",
         help="Validate registry, dependencies, inputs, and output readiness, then exit",
     )
+    # Add the optional flags to help output without starting any Doctor checks.
+    from doctor import add_arguments
+    add_arguments(parser)
     parser.add_argument("--list-suites", action="store_true", help="List suites and exit")
     parser.add_argument(
         "--version",
@@ -1222,9 +1255,28 @@ def main():
         sys.stdout.reconfigure(line_buffering=True)
     validate_python_version()
     signal.signal(signal.SIGTERM, handle_termination)
-    _, standalone = load_registry_data(DEFAULT_REGISTRY)
     parser = build_parser()
     args = parser.parse_args()
+    if args.health:
+        # Health checks use their own disposable inputs, not a normal parse.
+        # Dispatch before loading the registry so Doctor can report damage to it.
+        if not args.doctor:
+            parser.error("--health requires --doctor")
+        if any((args.suites, args.input_logs, args.output, args.outputs, args.schema,
+                args.acs_config, args.system_config, args.waiver, args.test_category,
+                args.list_suites)):
+            parser.error("Health checks use disposable fixtures; use --doctor-report MODE=PATH "
+                         "for existing reports, not parsing/input options")
+        from doctor import run_health
+        sys.dont_write_bytecode = True
+        try:
+            return run_health(args, BASE_DIR)
+        except (ValueError, OSError) as error:
+            raise StandaloneError("Doctor input/output error: " + str(error), EXIT_INPUT) from error
+    if (args.doctor_output or args.doctor_report or args.doctor_timeout != 60 or
+            args.doctor_checks or args.doctor_visual or args.doctor_browser):
+        parser.error("--doctor-* health options require --doctor --health")
+    _, standalone = load_registry_data(DEFAULT_REGISTRY)
     registry = load_registry()
 
     if args.list_suites:
@@ -1307,6 +1359,7 @@ def main():
     print(f"  Test category  : {test_category}")
 
     if args.doctor:
+        # The quick precheck stops here; it does not parse logs or publish results.
         for canonical in selected:
             resolved = resolve_suite_inputs(
                 canonical,
@@ -1325,6 +1378,8 @@ def main():
         check_output_readiness(Path(args.output))
         print("  Output destination           READY")
         print("Standalone preflight result: PASS")
+        print("Readiness only: log contents and compliance were not evaluated. "
+              "Use --doctor --health for repository correctness checks.")
         return 0
 
     target, stage = prepare_output(Path(args.output), roots, direct_paths)
@@ -1335,6 +1390,8 @@ def main():
         if "html" in outputs:
             html_dir.mkdir(parents=True)
         copy_run_configs(stage, args)
+        # Keep evidence of category selection for a later, optional Doctor run.
+        test_category = record_category_provenance(stage, args, test_category)
 
         results = []
         missing_suites = []

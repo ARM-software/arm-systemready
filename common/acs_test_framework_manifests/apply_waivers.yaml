@@ -591,8 +591,9 @@ suites:
 
 
 
-      - name: bsa_subtest_waiver_applies_by_sub_rule_id
+      - name: bsa_testcase_waiver_reason_applies_to_failed_subtests
         type: cli
+        description: "A whole-test waiver supplies the reason for failed subtests; a child waiver must not replace it."
         text_files:
           bsa.json: |
             {
@@ -631,7 +632,7 @@ suites:
                       "TestCases": [
                         {
                           "Test_case": "RULE_001",
-                          "Reason": "Case waiver placeholder",
+                          "Reason": "BSA whole-test waiver",
                           "SubTests": [
                             {
                               "sub_Rule_ID": "SUB_01",
@@ -651,15 +652,25 @@ suites:
           - "{dir}/waiver.json"
         expect_exit_code: 0
         post_checks:
-          - type: file_contains
+          - type: file_not_contains
             path: "{dir}/bsa.json"
             text: "BSA subtest waiver"
-          - type: file_contains
+          # Check the parent and failed child separately, including both reasons.
+          - type: ordered_contains
             path: "{dir}/bsa.json"
-            text: "WITH WAIVER"
-          - type: file_contains
+            texts:
+              - '"Test_case": "RULE_001"'
+              - '"Test_result": "FAILED (WITH WAIVER)"'
+              - '"sub_Rule_ID": "SUB_01"'
+              - '"sub_test_result": "FAILED (WITH WAIVER)"'
+              - '"waiver_reason": "BSA whole-test waiver"'
+              - '"sub_Rule_ID": "SUB_02"'
+              - '"sub_test_result": "PASSED"'
+              - '"waiver_reason": "BSA whole-test waiver"'
+          # A passing child must stay passed without gaining a waiver reason.
+          - type: regex
             path: "{dir}/bsa.json"
-            text: "\"sub_Rule_ID\": \"SUB_02\""
+            pattern: '"sub_Rule_ID": "SUB_02",\s*"sub_Test_Description": "second subtest",\s*"sub_test_result": "PASSED"\s*\}'
 
       - name: passed_result_is_not_modified_by_waiver
         type: cli
