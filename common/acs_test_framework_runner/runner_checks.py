@@ -1,3 +1,20 @@
+#!/usr/bin/env python3
+# Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
+# SPDX-License-Identifier : Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Utilities and validation helpers for the ACS test framework runner."""
+
 from __future__ import annotations
 
 import ast
@@ -22,6 +39,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 def detect_project_root(script_dir: Path) -> Path:
+    """Return the project root derived from the runner script location."""
     if script_dir.parent.name == "common":
         return script_dir.parent.parent
     return script_dir.parent
@@ -36,11 +54,12 @@ DEFAULT_CLI_TIMEOUT_SEC = 20
 DESTRUCTIVE_TEST_ENV = "RUN_DESTRUCTIVE_HW_TESTS"
 # Runner-managed process launches must not be affected by case-level
 # subprocess.run mocks that target the global subprocess module.
-REAL_SUBPROCESS_RUN = subprocess.run
+REAL_SUBPROCESS_RUN = subprocess.run  # pylint: disable=invalid-name
 
 
 @dataclass
 class TestMeta:
+    """Metadata describing a test case."""
     suite_name: str
     phase: str
     test_type: str
@@ -48,6 +67,7 @@ class TestMeta:
 
 @dataclass
 class TestOutcome:
+    """Result details and status flags for a test case."""
     testcase_name: str
     file_path: str
     passed: bool
@@ -64,14 +84,17 @@ class TestOutcome:
 
     @property
     def error(self) -> bool:
+        """Return whether the outcome represents an error."""
         return self.flags["error"]
 
     @property
     def skipped(self) -> bool:
+        """Return whether the outcome represents a skipped case."""
         return self.flags["skipped"]
 
     @property
     def warning(self) -> bool:
+        """Return whether the outcome represents a warning."""
         return self.flags["warning"]
 
 
@@ -85,6 +108,7 @@ class SkipCase(Exception):
 
 @dataclass
 class CommandRunResult:
+    """Captured result of a command executed by the runner."""
     command_text: str
     stdout: str
     stderr: str
@@ -96,10 +120,12 @@ class CommandRunResult:
 
 @dataclass(frozen=True)
 class RunCaseOptions:
+    """Options controlling execution of a test case."""
     suite_command: str | None = None
 
 
 def create_runner_temp_dir(prefix: str = "runner_env_") -> Path:
+    """Create and return a unique temporary directory for runner work."""
     RUNNER_WORK_DIR.mkdir(parents=True, exist_ok=True)
     for _ in range(100):
         candidate = RUNNER_WORK_DIR / f"{prefix}{uuid4().hex[:8]}"
@@ -112,6 +138,7 @@ def create_runner_temp_dir(prefix: str = "runner_env_") -> Path:
 
 
 def load_yaml_config(yaml_file: Path) -> dict[str, Any]:
+    """Load a YAML configuration file and validate its top-level shape."""
     try:
         with yaml_file.open("r", encoding="utf-8") as handle:
             data = yaml.safe_load(handle) or {}
@@ -125,18 +152,24 @@ def load_yaml_config(yaml_file: Path) -> dict[str, Any]:
 
 
 def ensure_list(value: Any, field_name: str) -> list[Any]:
+    """Validate and return a list-valued configuration field."""
     if not isinstance(value, list):
         raise ConfigError(f"'{field_name}' must be a list")
     return value
 
 
 def ensure_list_of_strings(value: Any, field_name: str) -> list[str]:
+    """Validate and return a list containing only strings."""
     if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
         raise ConfigError(f"'{field_name}' must be a list of strings")
     return value
 
 
-def ensure_string_or_list_of_strings(value: Any, field_name: str) -> list[str]:
+def ensure_string_or_list_of_strings(  # pylint: disable=invalid-name
+    value: Any,
+    field_name: str,
+) -> list[str]:
+    """Normalize a string or list of strings into a list."""
     if value is None:
         return []
     if isinstance(value, str):
@@ -160,6 +193,7 @@ def merge_mappings(
 
 
 def sanitize_name(value: str) -> str:
+    """Replace unsupported name characters with underscores."""
     return "".join(
         char if char.isalnum() or char in {"-", "_", "."} else "_"
         for char in value
@@ -167,6 +201,7 @@ def sanitize_name(value: str) -> str:
 
 
 def is_valid_xml_char(code: int) -> bool:
+    """Return whether a Unicode code point is valid in XML."""
     return (
         code in {0x9, 0xA, 0xD}
         or 0x20 <= code <= 0xD7FF
@@ -176,6 +211,7 @@ def is_valid_xml_char(code: int) -> bool:
 
 
 def sanitize_xml_text(value: Any) -> str:
+    """Convert a value to text and remove XML-invalid characters."""
     if value is None:
         return ""
     if not isinstance(value, str):
@@ -189,6 +225,7 @@ def sanitize_xml_text(value: Any) -> str:
 
 
 def resolve_target_path(file_entry: str) -> Path:
+    """Resolve a target path relative to the project root when needed."""
     raw = Path(file_entry)
     if raw.is_absolute():
         return raw.resolve()
@@ -196,14 +233,17 @@ def resolve_target_path(file_entry: str) -> Path:
 
 
 def read_source(file_path: Path) -> str:
+    """Read and return UTF-8 source text from a file."""
     return file_path.read_text(encoding="utf-8")
 
 
 def parse_ast(file_path: Path) -> ast.AST:
+    """Parse a Python source file and return its abstract syntax tree."""
     return ast.parse(read_source(file_path), filename=str(file_path))
 
 
 def collect_function_names(file_path: Path) -> set[str]:
+    """Collect function names from a Python source file."""
     tree = parse_ast(file_path)
     names: set[str] = set()
 
@@ -215,6 +255,7 @@ def collect_function_names(file_path: Path) -> set[str]:
 
 
 def format_outcome_message(prefix: str, text: str) -> str:
+    """Format an outcome message with optional detail text."""
     text = text.strip()
     return prefix if not text else f"{prefix}: {text}"
 
@@ -227,6 +268,7 @@ def create_outcome(
     meta: TestMeta,
     **kwargs: Any,
 ) -> TestOutcome:
+    """Create a test outcome from common result fields and status flags."""
     return TestOutcome(
         testcase_name=testcase_name,
         file_path=file_path,
@@ -243,10 +285,12 @@ def create_outcome(
 
 
 def build_runner_module_name(file_path: Path) -> str:
+    """Build a unique module name for dynamically loaded runner code."""
     return f"runner_module_{sanitize_name(file_path.stem)}_{uuid4().hex}"
 
 
 def load_module_from_path(file_path: Path) -> Any:
+    """Load and return a Python module from a file path."""
     module_name = build_runner_module_name(file_path)
     spec = importlib.util.spec_from_file_location(
         module_name,
@@ -265,6 +309,7 @@ def load_module_from_path(file_path: Path) -> Any:
 
 
 def normalize_completed_stream(stream: Any) -> str:
+    """Normalize completed-process output into text."""
     if stream is None:
         return ""
     if isinstance(stream, str):
@@ -302,7 +347,11 @@ except ImportError:  # pragma: no cover - exercised by flat-module harness impor
     )
 
 
-def run_post_checks(work_dir: Path, post_checks: Any) -> tuple[bool, list[str]]:
+def run_post_checks(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+    work_dir: Path,
+    post_checks: Any,
+) -> tuple[bool, list[str]]:
+    """Run configured post-checks and return their result and messages."""
     if post_checks is None:
         return True, []
 
@@ -442,6 +491,7 @@ def run_post_checks(work_dir: Path, post_checks: Any) -> tuple[bool, list[str]]:
 
 
 def format_output_block(title: str, text: str) -> str:
+    """Format a titled output block and represent empty output explicitly."""
     cleaned = text.rstrip()
     if not cleaned:
         cleaned = "<empty>"
@@ -452,6 +502,7 @@ def append_log_file_details(
     details_lines: list[str],
     runtime_case: dict[str, Any],
 ) -> None:
+    """Append configured log-file contents to case detail lines."""
     patch_constants = runtime_case.get("patch_constants", {})
     if not isinstance(patch_constants, dict):
         return
@@ -479,6 +530,7 @@ def format_expectation_failure(
     *,
     actual_label: str = "",
 ) -> str:
+    """Format details for a failed expectation check."""
     lines = [
         "PHASE: expectation_check",
         f"CHECK TYPE: {check_type}",
@@ -495,11 +547,12 @@ def format_expectation_failure(
     return "\n".join(lines)
 
 
-def validate_output_expectations(
+def validate_output_expectations(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     case_def: dict[str, Any],
     stdout: str,
     stderr: str,
 ) -> tuple[bool, list[str]]:
+    """Validate configured expectations against captured process output."""
     conditions: list[str] = []
     passed = True
 
