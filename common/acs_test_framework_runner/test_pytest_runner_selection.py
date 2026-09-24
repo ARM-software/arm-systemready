@@ -1,3 +1,20 @@
+#!/usr/bin/env python3
+# Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
+# SPDX-License-Identifier : Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Tests for pytest runner selection and reporting behavior."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -12,6 +29,7 @@ if str(HARNESS_DIR) not in sys.path:
 
 
 def load_harness_module(module_name: str, filename: str):
+    """Load a harness module directly from a file in the harness directory."""
     spec = importlib.util.spec_from_file_location(module_name, HARNESS_DIR / filename)
     assert spec is not None
     assert spec.loader is not None
@@ -30,6 +48,7 @@ runner_reporting = load_harness_module(
 
 
 def test_harness_sources_changed_ignores_pycache() -> None:
+    """Verify that __pycache__ files do not count as harness source changes."""
     changed_paths = {
         pytest_runner.HARNESS_DIR / "__pycache__" / "pytest_runner.cpython-313.pyc",
     }
@@ -38,6 +57,7 @@ def test_harness_sources_changed_ignores_pycache() -> None:
 
 
 def test_select_yaml_runs_runs_all_groups_when_harness_changes(monkeypatch) -> None:
+    """Verify that harness changes select all YAML groups and their targets."""
     yaml_files = [
         pytest_runner.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_one.yaml",
         pytest_runner.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_two.yaml",
@@ -70,6 +90,7 @@ def test_select_yaml_runs_runs_all_groups_when_harness_changes(monkeypatch) -> N
 
 
 def test_select_yaml_runs_preserves_target_only_selection(monkeypatch) -> None:
+    """Verify that direct target changes preserve target-only selection."""
     yaml_files = [pytest_runner.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_one.yaml"]
 
     monkeypatch.setattr(
@@ -103,6 +124,7 @@ def test_select_yaml_runs_preserves_target_only_selection(monkeypatch) -> None:
 
 
 def test_report_changed_yaml_adds_python_targets_for_static_checks(monkeypatch) -> None:
+    """Verify that changed YAML files contribute Python targets to static checks."""
     yaml_path = report.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_one.yaml"
     yaml_target = report.PROJECT_ROOT / "common" / "linux_scripts" / "target.py"
     direct_python_change = report.PROJECT_ROOT / "common" / "linux_scripts" / "direct.py"
@@ -130,6 +152,7 @@ def test_report_changed_yaml_adds_python_targets_for_static_checks(monkeypatch) 
 
 
 def test_report_yaml_target_filter_keeps_only_existing_python_files(monkeypatch) -> None:
+    """Verify that YAML target discovery keeps only existing Python files."""
     yaml_path = report.PROJECT_ROOT / "common" / "acs_test_framework_manifests" / "group_one.yaml"
     py_target = report.PROJECT_ROOT / "common" / "linux_scripts" / "target.py"
     sh_target = report.PROJECT_ROOT / "common" / "linux_scripts" / "target.sh"
@@ -156,6 +179,7 @@ def test_report_yaml_target_filter_keeps_only_existing_python_files(monkeypatch)
 def test_collect_pytest_case_logs_reads_persisted_case_description(
     monkeypatch,
 ) -> None:
+    """Verify that persisted case descriptions are read into collected logs."""
     temp_path = HARNESS_DIR / "_case_log_test_reports"
     shutil.rmtree(temp_path, ignore_errors=True)
     try:
@@ -184,6 +208,7 @@ def test_collect_pytest_case_logs_reads_persisted_case_description(
 def test_collect_pytest_case_logs_skips_missing_case_description(
     monkeypatch,
 ) -> None:
+    """Verify that missing case descriptions are represented as empty text."""
     temp_path = HARNESS_DIR / "_case_log_test_reports"
     shutil.rmtree(temp_path, ignore_errors=True)
     try:
