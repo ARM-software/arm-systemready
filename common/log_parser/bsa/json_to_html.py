@@ -45,6 +45,17 @@ def has_nested_subtests(subtests):
             return True
     return False
 
+def has_reason(records):
+    """Return True when a testcase or any nested subtest has check details."""
+    return any(
+        record.get("reason") or has_reason(record.get("subtests", []))
+        for record in records
+    )
+
+def format_reason(reason):
+    """Display ordered reason lines and accept earlier newline-separated strings."""
+    return "\n".join(reason) if isinstance(reason, list) else reason
+
 def annotate_nested_subtests(test_results):
     """Mark each testcase that needs expand/collapse controls in HTML."""
     for test_suite in test_results:
@@ -261,6 +272,35 @@ def generate_html(
                 text-align: center;
                 font-weight: normal;
             }
+            td.test-reason {
+                white-space: normal;
+                font-weight: normal;
+            }
+            .test-reason .acs-long-reason > .acs-long-reason-text {
+                white-space: pre-wrap;
+                min-width: 0;
+                line-height: 1.7;
+                font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+                font-size: 11px;
+            }
+            .reason-rule-toggle {
+                border: 0;
+                padding: 0;
+                background: transparent;
+                color: #175cd3;
+                cursor: pointer;
+                text-decoration: underline dotted;
+                text-underline-offset: 4px;
+            }
+            .reason-rule-toggle:hover {
+                text-decoration-style: solid;
+            }
+            .reason-rule-toggle:focus-visible,
+            .test-reason summary:focus-visible {
+                outline: 2px solid #175cd3;
+                outline-offset: 3px;
+                border-radius: 4px;
+            }
             /* Keep rule numbers readable while indentation shows nesting. */
             .subtest-number {
                 white-space: nowrap;
@@ -404,10 +444,19 @@ def generate_html(
         </style>
     </head>
     <body>
+        {% macro render_reason(reason, reason_id) %}
+            {% if reason %}
+            <details id="{{ reason_id }}" class="acs-long-value acs-long-reason">
+                <summary>View full reason</summary>
+                <span class="acs-long-reason-text">{{ format_reason(reason) | e }}</span>
+            </details>
+            {% endif %}
+        {% endmacro %}
         {# Render BSA/SBSA subtests recursively so the HTML follows the same
            parent-child order as the JSON and original nested log. #}
-        {% macro render_subtest_rows(subtests, parent_path='') %}
+        {% macro render_subtest_rows(subtests, parent_path='', reason_prefix='reason') %}
             {% for subtest in subtests %}
+            {% set reason_id = reason_prefix ~ '-' ~ loop.index0 %}
             {% set nesting_level = subtest.sub_Test_Level | default(1) | int %}
             {% set subtest_path = subtest.sub_Test_Path | default(subtest.sub_Test_Number) %}
             {% set has_children = subtest.subtests is defined and subtest.subtests %}
@@ -420,7 +469,11 @@ def generate_html(
                     {% else %}
                     <span class="subtest-toggle-placeholder"></span>
                     {% endif %}
+                    {% if subtest.reason %}
+                    <button type="button" class="reason-rule-toggle" aria-expanded="false" aria-controls="{{ reason_id }}" title="Show reason for {{ subtest.sub_Test_Number | e }}">{{ subtest.sub_Test_Number | e }}</button>
+                    {% else %}
                     {{ subtest.sub_Test_Number }}
+                    {% endif %}
                 </td>
                 <td>{{ subtest.sub_Test_Description }}</td>
                 <td class="{% if subtest.sub_test_result == 'PASSED' %}pass{% elif subtest.sub_test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif subtest.sub_test_result == 'FAILED' %}fail{% elif subtest.sub_test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in subtest.sub_test_result %}passed-partial{% elif subtest.sub_test_result == 'SKIPPED' %}skipped{% elif subtest.sub_test_result in ['PAL NOT SUPPORTED', 'NOT TESTED (PAL NOT SUPPORTED)'] %}pal-not-supported{% elif subtest.sub_test_result in ['TEST NOT IMPLEMENTED', 'NOT TESTED (TEST NOT IMPLEMENTED)'] %}not-implemented{% elif 'NOT TESTED' in subtest.sub_test_result %}not-tested{% endif %}">
@@ -433,11 +486,14 @@ def generate_html(
                         N/A
                     {% endif %}
                 </td>
+                {% if show_reason %}
+                <td class="test-reason">{{ render_reason(subtest.reason, reason_id) }}</td>
+                {% endif %}
             </tr>
             {% if has_children %}
                 {# Child rows are printed immediately after their parent with
                    additional indentation from sub_Test_Level. #}
-                {{ render_subtest_rows(subtest.subtests, subtest_path) }}
+                {{ render_subtest_rows(subtest.subtests, subtest_path, reason_id) }}
             {% endif %}
             {% endfor %}
         {% endmacro %}
@@ -522,11 +578,13 @@ def generate_html(
                         <th>Test Case Description</th>
                         <th>Test Result</th>
                         <th>Waiver Reason</th>
+                        {% if show_reason %}<th>Reason</th>{% endif %}
                     </tr>
                 </thead>
                 <tbody>
                     {% for testcase in test.testcases %}
                     {% set subtest_table_id = "subtests-" ~ suite_index ~ "-" ~ loop.index0 %}
+                    {% set reason_id = "reason-" ~ suite_index ~ "-" ~ loop.index0 %}
                     <tr>
                         <td class="testcase-number">
                             {% if testcase.subtests %}
@@ -534,7 +592,11 @@ def generate_html(
                             {% else %}
                             <span class="testcase-toggle-placeholder"></span>
                             {% endif %}
+                            {% if testcase.reason %}
+                            <button type="button" class="reason-rule-toggle" aria-expanded="false" aria-controls="{{ reason_id }}" title="Show reason for {{ testcase.Test_case | e }}">{{ testcase.Test_case | e }}</button>
+                            {% else %}
                             {{ testcase.Test_case }}
+                            {% endif %}
                         </td>
                         <td>{{ testcase.Test_case_description }}</td>
                         <td class="{% if testcase.Test_result == 'PASSED' %}pass{% elif testcase.Test_result == 'FAILED (WITH WAIVER)' %}fail-waiver{% elif testcase.Test_result == 'FAILED' %}fail{% elif testcase.Test_result == 'WARNING' %}warning{% elif 'PASSED(*PARTIAL)' in testcase.Test_result %}passed-partial{% elif testcase.Test_result == 'SKIPPED' %}skipped{% elif testcase.Test_result in ['PAL NOT SUPPORTED', 'NOT TESTED (PAL NOT SUPPORTED)'] %}pal-not-supported{% elif testcase.Test_result in ['TEST NOT IMPLEMENTED', 'NOT TESTED (TEST NOT IMPLEMENTED)'] %}not-implemented{% elif 'NOT TESTED' in testcase.Test_result %}not-tested{% endif %}">
@@ -547,10 +609,13 @@ def generate_html(
                                 N/A
                             {% endif %}
                         </td>
+                        {% if show_reason %}
+                        <td class="test-reason">{{ render_reason(testcase.reason, reason_id) }}</td>
+                        {% endif %}
                     </tr>
                     {% if testcase.subtests %}
                     <tr id="{{ subtest_table_id }}-row" style="background-color: #f9f9f9;">
-                        <td colspan="4">
+                        <td colspan="{{ 5 if show_reason else 4 }}">
                             <div class="subtest-header">
                                 <span class="subtest-title">Subtests:</span>
                                 {% if testcase.has_nested_subtests %}
@@ -573,10 +638,11 @@ def generate_html(
                                         <th>Sub Test Description</th>
                                         <th>Sub Test Result</th>
                                         <th>Waiver Reason</th>
+                                        {% if show_reason %}<th>Reason</th>{% endif %}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{ render_subtest_rows(testcase.subtests) }}
+                                    {{ render_subtest_rows(testcase.subtests, reason_prefix=reason_id) }}
                                 </tbody>
                             </table>
                         </td>
@@ -748,6 +814,49 @@ def generate_html(
                     syncTableControls
                 );
 
+                // Reason disclosures are independent of rule hierarchy controls.
+                var reasonPanels = Array.prototype.slice.call(
+                    document.querySelectorAll('td.test-reason > details')
+                );
+                function syncReasonPanel(panel) {
+                    var button = document.querySelector(
+                        '.reason-rule-toggle[aria-controls="' + panel.id + '"]'
+                    );
+                    panel.querySelector('summary').textContent = (
+                        panel.open ? 'Hide reason' : 'View full reason'
+                    );
+                    if (button) {
+                        button.setAttribute('aria-expanded', String(panel.open));
+                        button.title = (panel.open ? 'Hide reason for ' : 'Show reason for ')
+                            + button.textContent;
+                    }
+                }
+                reasonPanels.forEach(function (panel) {
+                    panel.addEventListener('toggle', function () { syncReasonPanel(panel); });
+                });
+
+                var reasonPrintState = null;
+                window.addEventListener('beforeprint', function () {
+                    if (reasonPrintState !== null) {
+                        return;
+                    }
+                    reasonPrintState = reasonPanels.map(function (panel) { return panel.open; });
+                    reasonPanels.forEach(function (panel) {
+                        panel.open = true;
+                        syncReasonPanel(panel);
+                    });
+                });
+                window.addEventListener('afterprint', function () {
+                    if (reasonPrintState === null) {
+                        return;
+                    }
+                    reasonPanels.forEach(function (panel, index) {
+                        panel.open = reasonPrintState[index];
+                        syncReasonPanel(panel);
+                    });
+                    reasonPrintState = null;
+                });
+
                 document.addEventListener('click', function (event) {
                     // One delegated handler covers every generated subtest row
                     // and the per-testcase Expand all / Collapse all buttons.
@@ -758,7 +867,13 @@ def generate_html(
                         return;
                     }
 
-                    if (hasClass(button, 'testcase-toggle')) {
+                    if (hasClass(button, 'reason-rule-toggle')) {
+                        var panel = document.getElementById(button.getAttribute('aria-controls'));
+                        if (panel) {
+                            panel.open = !panel.open;
+                            syncReasonPanel(panel);
+                        }
+                    } else if (hasClass(button, 'testcase-toggle')) {
                         setTestcaseExpanded(
                             button,
                             button.getAttribute('aria-expanded') !== 'true'
@@ -826,6 +941,8 @@ def generate_html(
         total_not_implemented=suite_summary.get("total_not_implemented", 0),
         total_pal_not_supported=suite_summary.get("total_pal_not_supported", 0),
         test_results=test_results,
+        format_reason=format_reason,
+        show_reason=any(has_reason(test.get("testcases", [])) for test in test_results),
         is_summary_page=is_summary_page,
         test_suite_name=test_suite_name.upper()  # Ensure uppercase for consistency
     )
