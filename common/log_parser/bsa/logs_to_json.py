@@ -26,13 +26,57 @@ from collections import defaultdict
 ANSI_ESCAPE_RE = re.compile(r'\x1b\[[0-9;]*m')
 BRACKET_TIMESTAMP_RE = re.compile(r'^\s*\[.*?\]\s?')
 SIM_TUBE_PREFIX_RE = re.compile(r'^\s*#\s*\d+\s+ns\s+tube:\s+[^:]+:\s?')
+SIM_CONTINUATION_PREFIX_RE = re.compile(r'^\s*#\s?')
 SUITE_HEADER_RE = re.compile(r'\*\*\*\s+Running\s+(.+?)\s+tests\s+\*\*\*')
 REFERENCED_RULES_MARKER_RE = re.compile(
     r'===\s+(Start|End)\s+tests\s+for\s+rules\s+referenced\s+by\s+([A-Za-z0-9_]+)\s+===',
     re.IGNORECASE
 )
-RULE_LINE_RE = re.compile(r'\b([A-Za-z0-9_]+)\s*:\s*(-|\d+)\s*:\s*(.*)$')
+RULE_LINE_RE = re.compile(r'^([A-Za-z0-9_]+)\s*:\s*(-|\d+)\s*:\s*(.*)$')
 RESULT_RE = re.compile(r'\bResult:\s*(.*)$', re.IGNORECASE)
+INTERNAL_TEST_RE = re.compile(r'^Test\s+\d+\s*:\s*.*:\s*\S.*$', re.IGNORECASE)
+DIAGNOSTIC_PREFIX_RE = re.compile(
+    r'^(?:ERROR|WARN(?:ING)?|INFO|DEBUG|TRACE|FATAL|TEST)\s*:',
+    re.IGNORECASE
+)
+REASON_PREFIX_RE = re.compile(r'^(?:ERROR|WARN(?:ING)?|FATAL|TEST)\s*:\s*\S', re.IGNORECASE)
+# INFO, fast-print and direct PAL messages can omit the severity label. Match
+# their outcome explanations, not arbitrary UART payload, debug or progress text.
+PLAIN_REASON_RE = re.compile(
+    r'(?:(?:(?:Failed|Skipped|Passed) at )?checkpoint\s*-\s*(?:0x[\da-f]+|\d+).*'
+    r'|(?:Failed|Skipped|Invalid|Unsupported|Mismatch|Timeout)\b.*'
+    r'|pal_\w+ is not implemented\.?'
+    r'|Please (?:implement|rerun)\b.*'
+    r'|(?:or )?conduct (?:an offline|manual) review\b.*'
+    r'|This test requires\b.*'
+    r'|No .+\b(?:defined|discovered|detected|found|present|available|supported|shared|skipping|reported|implemented)\b.*'
+    r'|No (?:Proximity domains in the system|translation support)\b.*'
+    r'|And no system wake up timer\b.*'
+    r'|ACS could not detect\b.*'
+    r'|PCIe Subsystem not discovered\b.*'
+    r'|(?:RAS|SRAT)\b.*\bnot found\b.*'
+    r'|Pre-requisite rule\b.*\bdid not pass\b.*'
+    r'|SMMU_02 not applicable\s*:\s*Stall model is not supported'
+    r'|Endpoint to (?:Host|Endpoint) DMA test (?:PASSED|FAILED|SKIPPED)'
+    r'|Counter frequency is \d+ (?:MHz|KHz)'
+    r'|FEAT_\w+ (?:not supported\b.*|supported; manual verification required\b.*)'
+    r'|(?:Received )?Failsafe interrupt\b.*'
+    r'|MSC Storage value mismatch\b.*'
+    r'|GET_CXL_COMPONENT_INFO\s*:\s*\S.*'
+    r'|Rule is validated by\b.*'
+    r'|If\b.*\bmanual(?:ly)? (?:validation|review|verify)\b.*'
+    r'|For\b.*\bmanually verify\b.*'
+    r'|The test must be considered fail\b.*'
+    r'|(?:GIC Install Handler Failed|Did not receive UART interrupt)\b.*)',
+    re.IGNORECASE
+)
+FIRMWARE_OUTPUT_RE = re.compile(r'ConvertPages\s*:', re.IGNORECASE)
+# These diagnostics can begin before the legacy 49-character display boundary.
+# Recognize the complete diagnostic instead of treating a truncated word as one.
+HEADER_REASON_RE = re.compile(
+    r'\b(?:No\s+ECAMs\s+discovered\b|GET_CXL_COMPONENT_INFO\s*:|Received\s+Failsafe\s+interrupt\b)',
+    re.IGNORECASE
+)
 MAX_SUBTEST_DESCRIPTION_CHARS = 49
 
 def detect_file_encoding(file_path):
@@ -140,7 +184,8 @@ def normalize_log_line(raw_line):
     # Remove only that wrapper text and leave the ACS rule/result text intact.
     line = ANSI_ESCAPE_RE.sub('', raw_line)
     line = BRACKET_TIMESTAMP_RE.sub('', line)
-    return SIM_TUBE_PREFIX_RE.sub('', line)
+    line = SIM_TUBE_PREFIX_RE.sub('', line)
+    return SIM_CONTINUATION_PREFIX_RE.sub('', line)
 
 def extract_status_text(status_text):
     # Some logs print a Result and the next marker/header on the same line.
@@ -155,6 +200,18 @@ def make_test_number(rule_id, test_index):
 def limit_subtest_description(description):
     """Limit a description to 49 characters."""
     return (description or "").strip()[:MAX_SUBTEST_DESCRIPTION_CHARS].rstrip()
+
+def extract_reason_line(line):
+    """Select a diagnostic record, preserving its printed spacing and content."""
+    firmware = FIRMWARE_OUTPUT_RE.search(line)
+    if firmware:
+        line = line[:firmware.start()].rstrip()
+    # Normalize only for matching; stored reasons retain their internal spacing.
+    normalized = " ".join(line.split())
+    if (REASON_PREFIX_RE.match(normalized) or INTERNAL_TEST_RE.match(normalized) or
+            PLAIN_REASON_RE.fullmatch(normalized)):
+        return line
+    return None
 
 # A frame is one rule that has started but has not reached its Result/END line.
 # Keeping these frames on a stack lets the parser attach each completed child
@@ -193,6 +250,13 @@ def make_rule_frame(suite, rule_id, test_index, description, parent, current_sou
     }
     if parent is None:
         frame["root"] = frame
+    elif len(description.strip()) > MAX_SUBTEST_DESCRIPTION_CHARS:
+        header_match = HEADER_REASON_RE.search(description)
+        header_text = (description[header_match.start():] if header_match else
+                       description.strip()[len(limit_subtest_description(description)):].strip())
+        header_reason = extract_reason_line(header_text)
+        if header_reason:
+            frame["reason_lines"] = [header_reason]
     return frame
 
 def subtest_entry_from_frame(frame, formatted_result):
@@ -205,7 +269,8 @@ def subtest_entry_from_frame(frame, formatted_result):
         ),
         "sub_test_result": formatted_result,
         "sub_Test_Level": frame.get("level", 1),
-        "sub_Test_Path": " / ".join(frame.get("path", []))
+        "sub_Test_Path": " / ".join(frame.get("path", [])),
+        "reason": list(frame.get("reason_lines", []))
     }
     subtests = frame.get("subtests", [])
     if subtests:
@@ -217,7 +282,8 @@ def testcase_from_frame(frame, formatted_result):
         "Test_case": frame.get("number", make_test_number(frame.get("rule_id"), frame.get("index"))),
         "Test_case_description": frame.get("description", ""),
         "Test_result": formatted_result,
-        "_source": frame.get("source", "unknown")
+        "_source": frame.get("source", "unknown"),
+        "reason": list(frame.get("reason_lines", []))
     }
     subtests = frame.get("subtests", [])
     if subtests:
@@ -343,6 +409,14 @@ def main(input_files, output_file):
             if not processing:
                 continue
 
+            reason_line = extract_reason_line(line)
+            # These are diagnostic records even when their text contains rule
+            # or Result-like fields. The producer can emit them for any outcome.
+            if INTERNAL_TEST_RE.match(line) or DIAGNOSTIC_PREFIX_RE.match(line):
+                if rule_stack and reason_line:
+                    rule_stack[-1].setdefault("reason_lines", []).append(reason_line)
+                continue
+
             # ---------------- New log format support ----------------
             # Newer BSA/SBSA logs can nest rule groups:
             #   <PARENT_RULE> : <index> : <description>
@@ -423,6 +497,10 @@ def main(input_files, output_file):
                     continue
 
                 frame = rule_stack.pop()
+                # A diagnostic and its final Result can share a physical line.
+                joined_reason = extract_reason_line(line[:result_match.start()].strip())
+                if joined_reason:
+                    frame.setdefault("reason_lines", []).append(joined_reason)
                 remove_marker_frame(marker_stack, frame)
                 formatted_result, summary_category = classify_status(status_text)
                 complete_rule_frame(
@@ -497,7 +575,10 @@ def main(input_files, output_file):
                 )
                 continue
 
-            # Ignore all other lines (debug, informational, etc.)
+            # Accept known plain diagnostic forms only inside their owning rule.
+            # Result status does not determine whether a reason is retained.
+            if rule_stack and reason_line and not suite_hdr and not referenced_rules_marker:
+                rule_stack[-1].setdefault("reason_lines", []).append(reason_line)
             continue
 
     # Post-process UEFI/Linux duplicates per testcase
@@ -540,6 +621,9 @@ def main(input_files, output_file):
                 if key != "B_PER_08 : -":
                     existing_tc["Test_result"] = linux_tc.get("Test_result")
                     existing_tc["Test_case_summary"] = linux_tc.get("Test_case_summary")
+                    # The reason must describe the same execution as the result,
+                    # including when an older Linux log has no check details.
+                    existing_tc["reason"] = linux_tc.get("reason", [])
 
                 # Override only matching subtests. Linux-only subtests are not
                 # appended because the UEFI tree is the report structure.
