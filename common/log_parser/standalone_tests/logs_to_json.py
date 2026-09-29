@@ -978,7 +978,8 @@ def parse_resv_mem_map(log_data):
     }
 
     subtest_number = 1
-
+    pass_reasons_mrb= []
+    pass_reasons_resv = []
     reason_lines_resv = []
     reason_lines_mrb = []
     overall_result = None
@@ -993,7 +994,20 @@ def parse_resv_mem_map(log_data):
 
         if line.startswith("ERROR: Memory Reservation Block"):
             reason_lines_mrb.append(line)
-
+        if "fully covered" in line:
+            if "Reserved-memory range" in line:
+                pass_reasons_resv.append(line.split("INFO:", 1)[1].strip())
+            if "Memory Reservation Block" in line:
+                pass_reasons_mrb.append(line.split("INFO:", 1)[1].strip())
+        if "SKIPPED" in line:
+            if "Reserved Memory Map Compliance Test" in line:
+                reason_lines_resv.append(line.split("(", 1)[1].rstrip(")"))
+            elif "Memory Reservation Block Compliance Test" in line:
+                if "no MRB entries present" in line:
+                     reason_lines_mrb.append( "In DTB there is no MRB entries present, so the test is skipped")
+                else:
+                     reason_lines_mrb.append(line.split("(", 1)[1].rstrip(")"))
+        
         if line.startswith("ERROR:"):
             overall_errors.append(line)
 
@@ -1017,11 +1031,15 @@ def parse_resv_mem_map(log_data):
 
             test_desc = match.group(1)
             result = match.group(2)
-
             if test_desc == "Reserved Memory Map Compliance Test":
                 reason = ",".join(reason_lines_resv)
             else:
-                reason = ",".join(reason_lines_mrb)
+                reason = ",".join(reason_lines_mrb)           
+            if result == "PASSED":
+                if test_desc == "Reserved Memory Map Compliance Test":
+                    reason = "\n".join(pass_reasons_resv)
+                else:
+                    reason = "\n".join(pass_reasons_mrb)
 
             sub = create_subtest(
                 subtest_number,
@@ -1180,6 +1198,7 @@ def parse_dtb_alignment(log_data):
 
     subtest_number = 1
     fail_reasons = ""
+    pass_reasons = ""
     result = "FAILED"
     for line in log_data:
         line = line.strip()
@@ -1187,11 +1206,13 @@ def parse_dtb_alignment(log_data):
             fail_reasons += line + "\n"
         if line.startswith("RESULT:"):
             result = line.split(":", 1)[1].strip() + "ED"
+    if result == "PASSED":
+        pass_reasons = "DTB alignment is verified to be aligned to 8 bytes"    
     sub = create_subtest(
            subtest_number,
            test_desc,
            result,
-           reason=fail_reasons.strip() if fail_reasons else None
+           reason=fail_reasons.strip() if fail_reasons else pass_reasons.strip()
           )
 
     current_test["subtests"].append(sub)
