@@ -30,7 +30,7 @@ Comprehensive reference for JSON output structures across all test suite parsers
 | **Test Entry Point GUID** | - | - | String | - | String | - | - | - | - |
 | **Test_result** | String | - | String | - | String | - | - | - | - |
 | **Returned Status Code** | - | - | String | - | String | - | - | - | - |
-| **reason** | - | - | String | - | String | - | - | - | String |
+| **reason** | Array of Strings (required; legacy String accepted) | - | String | - | String | - | - | - | String |
 | | | | | | | | | | |
 | **═══ SUBTEST GROUP (subtests[]) ═══** | | | | | | | | | |
 | **subtests[]** | Array | Array | Array | Array | Array | Array | Array | Array | Array |
@@ -40,7 +40,7 @@ Comprehensive reference for JSON output structures across all test suite parsers
 | **sub_Test_Level** | Integer | - | - | - | - | - | - | - | - |
 | **sub_Test_Path** | String | - | - | - | - | - | - | - | - |
 | **sub_test_result** | **String:**<br>• PASSED<br>• FAILED<br>• SKIPPED | **dict:**<br>• PASSED<br>• FAILED<br>• SKIPPED<br>• ABORTED<br>• WARNINGS<br>• FAILED_WITH_WAIVER<br>• pass_reasons (Array)<br>• fail_reasons (Array)<br>• skip_reasons (Array)<br>• abort_reasons (Array)<br>• warning_reasons (Array) | **String:**<br>• PASSED<br>• FAILED<br>• SKIPPED<br>• ABORTED<br>• WARNING | **dict:**<br>• PASSED<br>• FAILED<br>• SKIPPED<br>• ABORTED<br>• WARNINGS<br>• FAILED_WITH_WAIVER<br>• pass_reasons (Array)<br>• fail_reasons (Array)<br>• skip_reasons (Array)<br>• abort_reasons (Array)<br>• warning_reasons (Array) | **String:**<br>• PASSED<br>• FAILED<br>• SKIPPED<br>• ABORTED<br>• WARNING | **String:**<br>• PASSED<br>• FAILED<br>• SKIPPED<br>• ABORTED<br>• WARNING | **dict:**<br>• PASSED<br>• FAILED<br>• SKIPPED<br>• ABORTED<br>• WARNINGS<br>• FAILED_WITH_WAIVER<br>• pass_reasons (Array)<br>• fail_reasons (Array)<br>• skip_reasons (Array)<br>• abort_reasons (Array)<br>• warning_reasons (Array)<br>• waiver_reason (Array) | **dict:**<br>• PASSED<br>• FAILED<br>• SKIPPED<br>• ABORTED<br>• WARNINGS<br>• pass_reasons (Array)<br>• fail_reasons (Array)<br>• skip_reasons (Array)<br>• abort_reasons (Array)<br>• warning_reasons (Array) | **String:**<br>• PASSED<br>• FAILED<br>• SKIPPED<br>• ABORTED<br>• WARNING |
-| **reason** | - | - | String | - | String | String | - | - | String |
+| **reason** | Array of Strings (required; legacy String accepted) | - | String | - | String | String | - | - | String |
 
 **Legend:**
 - `-` Field not present in this suite
@@ -56,6 +56,8 @@ Comprehensive reference for JSON output structures across all test suite parsers
 1. **PFDI** - ONLY suite with top-level Array (not dict with test_results)
 2. **BSA** - Uses unique summary field names (Passed, Failed, Skipped vs total_passed, total_failed, total_skipped)
    - BSA/SBSA `subtests[]` can be nested recursively and use `sub_Test_Path` for exact log-path identity.
+   - For reason capture and display behavior, see the [log parser guide](log_parser_guide.md#complete-standalone-bsa-example).
+   - When UEFI and Linux results are combined, `reason` follows the selected result source. The existing `B_PER_08` exception keeps its UEFI testcase result and reason; matching nested rules still use Linux results and reasons.
    - New BSA/SBSA JSON does not emit `sub_Rule_ID`; waiver files may still use it as a legacy matcher.
 3. **Naming variations:**
    - `suite_summary` (most) vs `Suite_summary` (PFDI - capital S)

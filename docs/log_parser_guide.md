@@ -670,6 +670,20 @@ This command discovers BSA logs, applies BSA waivers, enriches metadata,
 validates raw BSA JSON, generates suite HTML, and creates selected-only merged
 and combined summaries.
 
+BSA, SBSA and PFDI JSON always includes a `reason` array on testcases and
+nested subtests. It stores accepted diagnostics and individual check results
+printed between the rule header and final result, one line per entry in log
+order, for any outcome. Messages belong to their owning rule; `reason` is
+`[]` when no messages qualify. The schema requires this field.
+
+Matching is case-insensitive and tolerates whitespace. Unrecognized text and
+known UART, firmware and debug noise are excluded. Reasons do not change test
+results or summary counts. Legacy string reasons remain supported.
+
+Reasons are collapsed in detailed HTML. Select the rule name or **View full
+reason** to expand them. The Reason column is hidden when all reasons are empty.
+Search includes hidden reasons, and printing shows their full content.
+
 ### Doctor Preflight
 
 `--doctor` checks suite/mode compatibility, the registry, parser files, required

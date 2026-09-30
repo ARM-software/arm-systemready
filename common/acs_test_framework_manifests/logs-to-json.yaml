@@ -244,6 +244,7 @@ suites:
           sub_test_result: "PASSED"
           sub_Test_Level: 1
           sub_Test_Path: "RULE : 1"
+          reason: []
 
 
   - name: sct_logs_to_json_specific

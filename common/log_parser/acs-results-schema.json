@@ -464,7 +464,7 @@
       "additionalProperties": false
     },
     "bsa_subtest": {
-      "$comment": "BSA subtest shape with required IDs and result.",
+      "$comment": "BSA subtest shape with required IDs, result and reason.",
       "type": "object",
       "properties": {
         "sub_Test_Number": {
@@ -481,6 +481,12 @@
         },
         "sub_Test_Path": {
           "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            { "type": "string" },
+            { "$ref": "#/definitions/string_list" }
+          ]
         },
         "sub_Rule_ID": {
           "type": "string"
@@ -505,7 +511,8 @@
       "required": [
         "sub_Test_Number",
         "sub_Test_Description",
-        "sub_test_result"
+        "sub_test_result",
+        "reason"
       ],
       "additionalProperties": false
     },
@@ -627,7 +634,8 @@
         "Test_case",
         "Test_case_description",
         "Test_result",
-        "Test_case_summary"
+        "Test_case_summary",
+        "reason"
       ],
       "properties": {
         "Test_case": {
@@ -638,6 +646,12 @@
         },
         "Test_result": {
           "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            { "type": "string" },
+            { "$ref": "#/definitions/string_list" }
+          ]
         },
         "Test_case_summary": {
           "$ref": "#/definitions/bsa_suite_summary"
