@@ -41,7 +41,6 @@ else
     pci > pci.log
     drivers > drivers.log
     devices > devices.log
-    dh -d -v > dh.log
     dmpstore -all -s dmpstore.bin
     dmpstore -all > dmpstore.log
     memmap > memmap.log
@@ -77,5 +76,6 @@ else
         acpiview -s DSDT -d
         acpiview -s SSDT -d
     endif
+    dh -d -v > dh.log
 endif
 :Done
