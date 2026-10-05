@@ -685,8 +685,8 @@ def _standalone_rows(merged_data, records):
     if not rows:
         return rows
 
-    # Keep a missing Mandatory component visible in the existing Standalone
-    # compliance table without creating an empty result report for it.
+    # Keep missing Mandatory and Recommended components visible in the existing
+    # Standalone compliance table without creating empty result reports for them.
     for canonical in included_order:
         registry_entry = registry_by_name.get(canonical, {})
         requirement_key = registry_entry.get("requirement_key", canonical)
@@ -695,8 +695,8 @@ def _standalone_rows(merged_data, records):
         if identity in seen or not record or not record.get("not_run"):
             continue
         if (
-            record["requirement"] != "Mandatory" or
-            record["compliance"] != "Not Compliant"
+            record["requirement"] not in {"Mandatory", "Recommended"} or
+            record["compliance"] not in {"Not Compliant", "Not Run"}
         ):
             continue
         missing_record = {**record, "component": canonical}
