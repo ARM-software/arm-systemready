@@ -728,19 +728,20 @@ window.addEventListener("load", function () {
       "READ-WRITE-CHECK-BLK-DEVICES | Mandatory | Compliant || " +
       "CAPSULE-UPDATE | Mandatory | Not Compliant (Not Run) || " +
       "PSCI | Recommended | Compliant || SMBIOS | Recommended | Compliant || " +
+      "NETWORK-BOOT | Recommended | Not Compliant (Not Run) || " +
+      "RUNTIME-DEV-MAP | Recommended | Not Compliant (Not Run) || " +
+      "RESERVED-MEMORY-MAP | Mandatory | Not Compliant (Not Run) || " +
       "Future component | Future requirement | " +
       "Partner review pending: <keep this detail>",
-      "Standalone must add only missing Mandatory components to its compliance table");
-    expect(!complianceValues.some(function (value) {
-      return value.indexOf("NETWORK-BOOT") >= 0;
-    }),
-      "A missing Recommended component must remain in the SRS summary only");
+      "Standalone must include missing Mandatory and Recommended components " +
+        "once in registry order while preserving each compliance value");
     expect(complianceRows.every(function (row) {
       return !row.hasAttribute("data-acs-row-status");
     }) && document.documentElement.scrollWidth <=
       document.documentElement.clientWidth + 1,
       "Standalone compliance rows must remain outside filters without overflow");
-    expect(window.getComputedStyle(compliancePanel).borderLeftColor ===
+    expect(complianceRows.length === 11 &&
+      window.getComputedStyle(compliancePanel).borderLeftColor ===
       window.getComputedStyle(compliancePanel).borderTopColor &&
       window.getComputedStyle(complianceRows[0].cells[0]).boxShadow.indexOf(
         "22, 163, 74") >= 0 &&
@@ -749,8 +750,14 @@ window.addEventListener("load", function () {
       window.getComputedStyle(complianceRows[4].cells[0]).boxShadow.indexOf(
         "220, 38, 38") >= 0 &&
       window.getComputedStyle(complianceRows[7].cells[0]).boxShadow.indexOf(
+        "220, 38, 38") >= 0 &&
+      window.getComputedStyle(complianceRows[8].cells[0]).boxShadow.indexOf(
+        "220, 38, 38") >= 0 &&
+      window.getComputedStyle(complianceRows[9].cells[0]).boxShadow.indexOf(
+        "220, 38, 38") >= 0 &&
+      window.getComputedStyle(complianceRows[10].cells[0]).boxShadow.indexOf(
         "100, 116, 139") >= 0,
-      "Standalone must use red rails for failed and mandatory-not-run results, " +
+      "Standalone must use red rails for Not Compliant rows, " +
         "with a neutral future-status fallback");
     var select = document.querySelector(".acs-control select");
     expect(select && select.previousElementSibling.textContent === "Jump to test case" &&
@@ -767,8 +774,12 @@ window.addEventListener("load", function () {
       expect(document.body.getAttribute("data-jump-worked") === "true" && select.value === "",
         "Test-case jump selection must navigate and reset");
     }
-    expect(document.querySelectorAll(".acs-case-overview").length === 2,
-      "Every standalone case must use the shared context card");
+    expect(document.querySelectorAll(".acs-case-overview").length === 2 &&
+      select.options.length === 3 &&
+      document.querySelector(".acs-compact-summary-total").textContent ===
+        "2 suite-reported tests" &&
+      document.querySelector(".acs-status-filter.info").textContent === "All outcomes 2",
+      "Missing compliance entries must not add result cards, jump targets, or test outcomes");
     var firstOverview = document.querySelector(".acs-case-overview");
     expect(firstOverview.querySelector(".acs-case-eyebrow").textContent === "Test case" &&
       firstOverview.querySelector(".acs-case-title").textContent === "ping_test",
@@ -1393,7 +1404,11 @@ def main() -> int:
                     "Suite_Name: Mandatory  : Capsule Update_compliance":
                         "Not Compliant: not run",
                     "Suite_Name: Recommended  : NETWORK_BOOT_compliance":
-                        "Not Run",
+                        "Not Compliant: not run",
+                    "Suite_Name: Recommended  : RUNTIME_DEV_MAP_compliance":
+                        "Not Compliant: not run",
+                    "Suite_Name: Mandatory  : RESERVED_MEMORY_MAP_compliance":
+                        "Not Compliant: not run",
                     "Suite_Name: Recommended  : PSCI_compliance": "Compliant",
                     "Suite_Name: Recommended  : SMBIOS_compliance": "Compliant",
                     "Suite_Name: Future requirement  : Future component_compliance":
@@ -1414,6 +1429,7 @@ def main() -> int:
                     "Test_suite": "Boot sources",
                 },
                 {"Test_case": "psci_check", "Test_suite": "PSCI"},
+                {"Test_case": "SmbiosTable", "Test_suite": "SMBIOS"},
                 {"Test_case": "SmbiosTable", "Test_suite": "SMBIOS"},
                 {"Test_case": "Future component", "Test_suite": "Future suite"},
             ],
@@ -1439,6 +1455,10 @@ def main() -> int:
             "Suite_Name: acs_info": {
                 "ACS Results Summary": {
                     "Suite_Name: Mandatory  : Capsule Update_compliance":
+                        "Not Compliant: not run",
+                    "Suite_Name: Recommended  : RUNTIME_DEV_MAP_compliance":
+                        "Not Compliant: not run",
+                    "Suite_Name: Recommended  : NETWORK_BOOT_compliance":
                         "Not Compliant: not run",
                 }
             }
