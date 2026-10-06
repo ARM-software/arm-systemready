@@ -2489,6 +2489,65 @@ REPORT_JS = r"""
         });
     }
 
+    function groupOutcomeRows(group) {
+        return Array.prototype.filter.call(group.querySelectorAll(
+            "table:not(.summary-table):not(.acs-compliance-table) " +
+            "tbody > tr[data-acs-row-status]"
+        ), function (row) {
+            return row.closest(".acs-result-group") === group && !row.querySelector("table");
+        });
+    }
+
+    function reconcileSctCaseStatuses() {
+        if (document.body.getAttribute("data-acs-suite") !== "sct") {
+            return;
+        }
+        Array.prototype.forEach.call(document.querySelectorAll(".acs-result-group"), function (group) {
+            var rows = groupOutcomeRows(group);
+            var pill = group.querySelector(".acs-case-status .acs-status-pill[data-acs-status]");
+            if (!rows.length || !pill) {
+                return;
+            }
+
+            // SCT's parent result is the raw producer aggregate. Filters and
+            // overrides can change the retained subtests, so summarize the
+            // displayed rows without changing the source JSON.
+            var statuses = rows.map(function (row) {
+                return row.getAttribute("data-acs-row-status");
+            });
+            var status = "";
+            if (statuses.indexOf("fail") >= 0 || statuses.indexOf("fail-waiver") >= 0) {
+                status = "fail";
+            } else if (statuses.indexOf("warning") >= 0) {
+                status = "warning";
+            } else if (statuses.every(function (value) {
+                return value === "pass" || value === "ignored";
+            })) {
+                status = statuses.indexOf("pass") >= 0 ? "pass" : "ignored";
+            }
+            if (!status) {
+                return;
+            }
+
+            var display = statusDisplay(status, "");
+            pill.className = "acs-status-pill " + status;
+            pill.setAttribute("data-acs-status", status);
+            pill.setAttribute("data-acs-status-label", statusLabel(status, display));
+            pill.textContent = display;
+
+            Array.prototype.some.call(group.querySelectorAll(":scope > .heading"), function (heading) {
+                if (!/^Test Result:/i.test(normalizeText(heading.textContent))) {
+                    return false;
+                }
+                var value = heading.querySelector("span");
+                if (value) {
+                    value.textContent = display;
+                }
+                return true;
+            });
+        });
+    }
+
     function decorateGroupStatuses() {
         var priority = [
             "fail", "fail-waiver", "warning", "passed-partial", "pass",
@@ -2604,6 +2663,7 @@ REPORT_JS = r"""
 
     function statusRows() {
         var records = [];
+        var suiteType = document.body.getAttribute("data-acs-suite");
         Array.prototype.forEach.call(document.querySelectorAll(
             "table:not(.summary-table):not(.acs-compliance-table) tbody > tr"
         ), function (row) {
@@ -2633,6 +2693,11 @@ REPORT_JS = r"""
                     statusLabel(group.acsOverviewStatus, pill.textContent);
             }
             if (!pill) {
+                return;
+            }
+            // For SCT, a parent badge summarizes its subtests; it is not an
+            // additional outcome. A parent with no subtests remains countable.
+            if (suiteType === "sct" && groupOutcomeRows(group).length) {
                 return;
             }
             var status = pill.getAttribute("data-acs-status");
@@ -3064,7 +3129,9 @@ REPORT_JS = r"""
 
         var filterScope = document.createElement("div");
         filterScope.className = "acs-filter-scope";
-        filterScope.textContent = "Case and subtest outcomes in this report";
+        filterScope.textContent = document.body.getAttribute("data-acs-suite") === "sct" ?
+            "Subtest outcomes and test cases without subtests in this report" :
+            "Case and subtest outcomes in this report";
         filters.appendChild(filterScope);
 
         var filterHelp = document.createElement("p");
@@ -3788,6 +3855,7 @@ REPORT_JS = r"""
         upgradeSuiteLayouts();
         upgradeTableColumns();
         upgradeStatusCells();
+        reconcileSctCaseStatuses();
         addMobileStatusPreviews();
         decorateGroupStatuses();
         removeDetailedCharts();
