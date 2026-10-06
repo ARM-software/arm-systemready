@@ -197,7 +197,9 @@ window.addEventListener("load", function () {
       "Original summary table must remain as the hidden fallback source");
     expect(compact.querySelector(".acs-reference-note a").textContent.indexOf("Rule result status guide") === 0,
       "Rule-status guide must remain in the compact BSA/SBSA-style summary");
-    expect(document.querySelector(".acs-filter-scope").textContent.indexOf("Case and subtest outcomes") === 0,
+    var expectedFilterScope = document.body.getAttribute("data-acs-suite") === "sct" ?
+      "Subtest outcomes and test cases without subtests" : "Case and subtest outcomes";
+    expect(document.querySelector(".acs-filter-scope").textContent.indexOf(expectedFilterScope) === 0,
       "Filter outcomes must have an explicit scope label");
     expect(!document.querySelector(".acs-count-scope-note"),
       "Detailed summary must not show the confusing count-scope note");
@@ -824,8 +826,9 @@ METADATA_CONTEXT_PAGE = r"""<!doctype html>
 <h1>SCT Test Summary</h1>
 <div class="result-summary"><h2>Result Summary</h2>
   <table class="summary-table"><tbody>
-    <tr><td>Total Tests</td><td>4</td></tr><tr><td>Passed</td><td>2</td></tr>
-    <tr><td>Failed</td><td>2</td></tr>
+    <tr><td>Total Tests</td><td>6</td></tr><tr><td>Passed</td><td>1</td></tr>
+    <tr><td>Failed</td><td>1</td></tr><tr><td>Failed with Waiver</td><td>1</td></tr>
+    <tr><td>Warnings</td><td>1</td></tr><tr><td>Ignored</td><td>2</td></tr>
   </tbody></table>
 </div>
 <div class="detailed-summary">
@@ -833,22 +836,25 @@ METADATA_CONTEXT_PAGE = r"""<!doctype html>
   <div class="heading">Sub Test Suite: <span>EFICompliantTest</span></div>
   <div class="heading">Test Case: <span>PlatformSpecificElements</span></div>
   <div class="heading">Test Case Description: <span>Check platform elements</span></div>
-  <div class="heading">Test Result: <span>PASSED</span></div>
+  <div class="heading">Test Result: <span>FAILED</span></div>
   <div class="test-suite-info"><strong>Test suite info:</strong><ul><li>UEFI context.</li></ul></div>
   <table><thead><tr><th>Description</th><th>Result</th></tr></thead>
-    <tbody><tr><td>Console protocols</td><td>PASSED</td></tr></tbody></table>
+    <tbody>
+      <tr><td>Console protocols</td><td>PASSED</td></tr>
+      <tr><td>Optional console protocol</td><td>IGNORED</td></tr>
+    </tbody></table>
   <div class="heading">Test Suite Name: <span>BootServicesTest</span></div>
   <div class="heading">Sub Test Suite: <span>EventServicesTest</span></div>
   <div class="heading">Test Case: <span>CheckEvent</span></div>
   <div class="heading">Test Case Description: <span>Check event services</span></div>
-  <div class="heading">Test Result: <span>PASSED</span></div>
+  <div class="heading">Test Result: <span>FAILED</span></div>
   <table><thead><tr><th>Description</th><th>Result</th></tr></thead>
-    <tbody><tr><td>Event services</td><td>PASSED</td></tr></tbody></table>
+    <tbody><tr><td>Event services</td><td>IGNORED</td></tr></tbody></table>
   <div class="heading">Test Suite Name: <span>GenericTest</span></div>
   <div class="heading">Sub Test Suite: <span>ProtocolTest</span></div>
   <div class="heading">Test Case: <span>CheckProtocol</span></div>
   <div class="heading">Test Case Description: <span>Check protocol services</span></div>
-  <div class="heading">Test Result: <span>FAILED</span></div>
+  <div class="heading">Test Result: <span>PASSED</span></div>
   <table><thead><tr><th>Description</th><th>Result</th></tr></thead>
     <tbody><tr><td>Protocol services</td><td>FAILED WITH WAIVER</td></tr></tbody></table>
   <div class="heading">Test Suite Name: <span>GenericTest</span></div>
@@ -857,6 +863,13 @@ METADATA_CONTEXT_PAGE = r"""<!doctype html>
   <div class="heading">Test Case Description: <span>Case without subtest rows</span></div>
   <div class="heading">Test Result: <span>FAILED</span></div>
   <table><thead><tr><th>Description</th><th>Result</th></tr></thead><tbody></tbody></table>
+  <div class="heading">Test Suite Name: <span>GenericTest</span></div>
+  <div class="heading">Sub Test Suite: <span>ProfileTest</span></div>
+  <div class="heading">Test Case: <span>WarningCase</span></div>
+  <div class="heading">Test Case Description: <span>Case with a warning subtest</span></div>
+  <div class="heading">Test Result: <span>NOT SUPPORTED</span></div>
+  <table><thead><tr><th>Description</th><th>Result</th></tr></thead>
+    <tbody><tr><td>Profile check</td><td>WARNING</td></tr></tbody></table>
 </div>
 <script>
 window.addEventListener("load", function () {
@@ -865,7 +878,7 @@ window.addEventListener("load", function () {
     function expect(condition, message) { if (!condition) { failures.push(message); } }
     var overviews = document.querySelectorAll(".acs-case-overview");
     var first = overviews[0];
-    expect(overviews.length === 4 && first.querySelector(".acs-case-eyebrow").textContent ===
+    expect(overviews.length === 5 && first.querySelector(".acs-case-eyebrow").textContent ===
       "Test case" && first.querySelector(".acs-case-title").textContent ===
       "PlatformSpecificElements", "SCT must use the shared Test case hierarchy");
     expect((first.textContent.match(/GenericTest/g) || []).length === 1 &&
@@ -882,6 +895,19 @@ window.addEventListener("load", function () {
       "rgb(23, 92, 211)", "SCT context card must use the same shared accent color");
     expect(window.getComputedStyle(first.querySelector(".acs-case-title")).fontSize === "18px",
       "SCT context card must use the same shared title typography");
+    var caseStatuses = Array.prototype.map.call(overviews, function (overview) {
+      return overview.querySelector(".acs-case-status .acs-status-pill").getAttribute(
+        "data-acs-status");
+    });
+    expect(caseStatuses.join(" | ") === "pass | ignored | fail | fail | warning",
+      "SCT case badges must summarize retained subtests and preserve a zero-subtest result");
+    var filterLabels = Array.prototype.map.call(
+      document.querySelectorAll(".acs-status-filter"),
+      function (button) { return button.textContent; }
+    );
+    expect(filterLabels.join(" | ") ===
+      "All outcomes 6 | Passed 1 | Failed 1 | Failed with waiver 1 | Warning 1 | Ignored 2",
+      "SCT filters must count subtests and zero-subtest parents without double counting cases");
     var breakdown = document.querySelector(".acs-failure-summary");
     var rows = Array.prototype.slice.call(breakdown.querySelectorAll(".acs-failure-row"));
     expect(breakdown.getAttribute("data-acs-breakdown-kind") === "test suite" &&
@@ -894,8 +920,8 @@ window.addEventListener("load", function () {
         row.getAttribute("data-acs-failed") + ":" +
         row.getAttribute("data-acs-failed-with-waiver") + ":" +
         row.getAttribute("data-acs-outcomes");
-    }).join(" | ") === "GenericTest:3:1:1:3 | BootServicesTest:1:0:0:1",
-      "Every SCT case must contribute once, using its case result only when no subtest row exists");
+    }).join(" | ") === "GenericTest:4:1:1:5 | BootServicesTest:1:0:0:1",
+      "SCT summaries must count retained subtests and use the parent only when no rows exist");
     document.documentElement.setAttribute("data-browser-smoke", failures.length ? "FAIL" : "PASS");
     var output = document.createElement("pre");
     output.id = "browser-smoke-result";
