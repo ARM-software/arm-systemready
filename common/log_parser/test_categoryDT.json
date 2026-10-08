@@ -1042,5 +1042,24 @@
         "FunctionID": 1,
         "Main Readiness Grouping": "boot readiness"
     }
+],
+"catID: 57": [
+    {
+        "Suite": "Standalone",
+        "Description": [
+            "The EBBR Spin-table Usage Validation test checks OS-visible and captured Devicetree artifacts for spin-table and cpu-release-addr evidence.",
+            "Spin-table evidence causes FAIL for EBBR 2.3.0 or newer.",
+            "Spin-table evidence is reported as WARNING for EBBR below 2.3.0 or when the EBBR version is unknown.",
+            "PSCI and dmesg information are collected for informational purposes only and do not affect the test result.",
+            "https://github.com/ARM-software/arm-systemready/blob/main/SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/spin_table_checker.sh"
+        ],
+        "Test Suite": "EBBR Spin-table Usage Validation",
+        "specName": "EBBR",
+        "rel Import. to main readiness": "Minor",
+        "Waivable": "yes",
+        "SRS scope": "Required",
+        "FunctionID": 1,
+        "Main Readiness Grouping": "boot readiness"
+    }
 ]
 }
