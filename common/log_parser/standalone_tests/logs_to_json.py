@@ -41,6 +41,16 @@ test_suite_mapping = {
         "Test_suite_description": "Checks for boot sources",
         "Test_case_description": "Read/Write Check on Block Devices"
     },
+    "spin_table_check": {
+        "Test_suite": "EBBR Spin-table Usage Validation",
+        "Test_suite_description": (
+            "Validates that spin-table CPU enablement is not exposed in the checked Devicetree artifacts"
+        ),
+        "Test_case_description": (
+            "Checks for spin-table CPU enablement in Devicetree artifacts and "
+            "evaluates the result according to the detected EBBR version."
+        )
+    },
     "capsule_update": {
         "Test_suite": "Capsule Update",
         "Test_suite_description": "Testing firmware capsule update mechanism",
@@ -708,6 +718,125 @@ def parse_read_write_check_blk_devices_log(log_data):
         "test_results": [current_test],
         "suite_summary": suite_summary
     }
+
+
+###############################################################################
+# EBBR Spin-table Usage Validation Parse
+###############################################################################
+def parse_spin_table_check(log_data):
+    test_suite_key = "spin_table_check"
+    mapping = test_suite_mapping[test_suite_key]
+
+    suite_summary = {
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "total_aborted": 0,
+        "total_warnings": 0,
+        "total_failed_with_waiver": 0
+    }
+
+    current_test = {
+        "Test_suite": mapping["Test_suite"],
+        "Test_suite_description": mapping["Test_suite_description"],
+        "Test_case": test_suite_key,
+        "Test_case_description": mapping["Test_case_description"],
+        "subtests": [],
+        "test_suite_summary": suite_summary.copy()
+    }
+
+    result_map = {
+        "PASS": "PASSED",
+        "FAIL": "FAILED",
+        "WARNING": "WARNINGS",
+        "SKIP": "SKIPPED"
+    }
+
+    result = None
+    reasons = []
+    capture_reasons = False
+
+    for raw_line in log_data:
+        line = raw_line.strip()
+
+        if line.startswith("RESULT:"):
+            raw_result = line.split(":", 1)[1].strip().upper()
+            result = result_map.get(raw_result)
+
+            if result is None:
+                raise ValueError(
+                    f"Unsupported spin-table checker result: {raw_result}"
+                )
+
+            capture_reasons = True
+            continue
+
+        if not capture_reasons:
+            continue
+
+        if line.startswith("INFO:"):
+            info = line.split(":", 1)[1].strip()
+
+            # PSCI information is diagnostic only and is not part of
+            # the compliance reason displayed in JSON/HTML.
+            if "PSCI" in info.upper():
+                break
+
+            reasons.append(info)
+            continue
+
+        #Notes lines are diagnostic and must not be displayed as reasons.
+        if line.startswith("NOTE:"):
+            break
+
+    if result is None:
+        raise ValueError("Spin-table checker RESULT line was not found.")
+
+    sub = create_subtest(
+        1,
+        "EBBR Spin-table Usage Validation",
+        result
+    )
+
+    reason_key = {
+        "PASSED": "pass_reasons",
+        "FAILED": "fail_reasons",
+        "WARNINGS": "warning_reasons",
+        "SKIPPED": "skip_reasons"
+    }[result]
+
+    sub["sub_test_result"][reason_key] = reasons
+
+    current_test["test_result"] = result
+    current_test["subtests"].append(sub)
+
+    update_suite_summary(
+        current_test["test_suite_summary"],
+        result
+    )
+
+    update_suite_summary(
+        suite_summary,
+        result
+    )
+
+    # Keep the JSON consistent with the existing standalone parsers:
+    # remove unused reason arrays.
+    for key in (
+        "pass_reasons",
+        "fail_reasons",
+        "abort_reasons",
+        "skip_reasons",
+        "warning_reasons"
+    ):
+        if not sub["sub_test_result"].get(key):
+            sub["sub_test_result"].pop(key, None)
+
+    return {
+        "test_results": [current_test],
+        "suite_summary": suite_summary
+    }
+
 
 # PARSER FOR CAPSULE UPDATE
 def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path, capsule_test_results_log_path):
@@ -1818,6 +1947,8 @@ def parse_single_log(log_file_path):
         return parse_ethtool_test_log(log_data)
     elif re.search(r'Read block devices tool', log_content):
         return parse_read_write_check_blk_devices_log(log_data)
+    elif re.search(r'Spin-table checker started', log_content, re.IGNORECASE):
+        return parse_spin_table_check(log_data)
     elif "SmbiosTable" in log_content:
         smbios_block = extract_smbios_block(log_data)
         return parse_smbios_log(smbios_block)

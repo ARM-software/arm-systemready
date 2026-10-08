@@ -194,6 +194,7 @@
         "DT-VALIDATE",
         "ETHTOOL-TEST",
         "READ-WRITE-CHECK-BLK-DEVICES",
+        "SPIN-TABLE-CHECK",
         "CAPSULE-UPDATE",
         "PSCI",
         "SMBIOS",
@@ -297,6 +298,24 @@
       "logs_to_json": "standalone_tests/logs_to_json.py",
       "json_to_html": "standalone_tests/json_to_html.py",
       "json_output": "read_write_check_blk_devices.json",
+      "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
+      "detailed_html": "standalone_tests_detailed.html",
+      "summary_html": "standalone_tests_summary.html"
+    },
+    {
+      "canonical": "SPIN-TABLE-CHECK",
+      "aliases": [
+        "SPIN-TABLE-CHECK",
+        "SPINTABLECHECK",
+        "SPIN_TABLE_CHECK"
+      ],
+      "modes": ["DT"],
+      "requirement_key": "SPIN_TABLE_CHECK",
+      "requirements": {"DT": "M"},
+      "waiver_suite": "Standalone",
+      "logs_to_json": "standalone_tests/logs_to_json.py",
+      "json_to_html": "standalone_tests/json_to_html.py",
+      "json_output": "spin_table_check.json",
       "schema": "acs-results-schema.json#/definitions/raw_standalone_suite",
       "detailed_html": "standalone_tests_detailed.html",
       "summary_html": "standalone_tests_summary.html"
@@ -526,6 +545,17 @@
         "handler": "standalone_single",
         "inputs": [
           {"name": "log", "root": "results", "candidates": ["linux_tools/read_write_check_blk_devices.log"], "required": true}
+        ]
+      },
+      "SPIN-TABLE-CHECK": {
+        "handler": "standalone_single",
+        "inputs": [
+          {
+            "name": "log",
+            "root": "results",
+            "candidates": ["linux_tools/spin_table_checker.log"],
+            "required": true
+          }
         ]
       },
       "CAPSULE-UPDATE": {

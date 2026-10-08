@@ -562,7 +562,24 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         apply_waivers "Standalone" "$READ_WRITE_CHECK_JSON"
     fi
 
-    # 5) CAPSULE UPDATE => parse as standalone
+    # 5) EBBR SPIN-TABLE CHECK
+    SPIN_TABLE_CHECK_LOG="$LINUX_TOOLS_LOGS_PATH/spin_table_checker.log"
+    SPIN_TABLE_CHECK_JSON="$JSONS_DIR/spin_table_check.json"
+
+    if check_file "$SPIN_TABLE_CHECK_LOG" "M"; then
+        python3 "$SCRIPTS_PATH/standalone_tests/logs_to_json.py" \
+            "$SPIN_TABLE_CHECK_LOG" \
+            "$SPIN_TABLE_CHECK_JSON"
+
+        if [ $? -eq 0 ]; then
+            Standalone_JSONS+=("$SPIN_TABLE_CHECK_JSON")
+            apply_waivers "Standalone" "$SPIN_TABLE_CHECK_JSON"
+        else
+            echo -e "${RED}ERROR: Spin-table check log parsing to json failed.${NC}"
+        fi
+    fi
+
+    # 6) CAPSULE UPDATE => parse as standalone
     CAPSULE_UPDATE_LOG="$(dirname "$LOGS_PATH")/fw/capsule-update.log"
     CAPSULE_ON_DISK_LOG="$(dirname "$LOGS_PATH")/fw/capsule-on-disk.log"
     CAPSULE_TEST_RESULTS_LOG="$(dirname "$LOGS_PATH")/fw/capsule_test_results.log"
@@ -586,7 +603,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         fi
     fi
 
-    # 6) PSCI CHECK
+    # 7) PSCI CHECK
     PSCI_LOG="$LINUX_TOOLS_LOGS_PATH/psci/psci_kernel.log"
     PSCI_JSON="$JSONS_DIR/psci.json"
     if check_file "$PSCI_LOG"; then
@@ -599,7 +616,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         fi
     fi
 
-    # 7) SMBIOS CHECK (strict parser like PSCI)
+    # 8) SMBIOS CHECK (strict parser like PSCI)
     SMBIOS_LOG="$LOGS_PATH/sct_results/Overall/Summary.log"
     SMBIOS_JSON="$JSONS_DIR/smbios_check.json"
 
@@ -619,7 +636,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         echo -e "${YELLOW}WARNING: SMBIOS log not found: $SMBIOS_LOG${NC}"
     fi
 
-    # 8) NETWORK BOOT CHECK
+    # 9) NETWORK BOOT CHECK
     NETWORK_BOOT_LOG="$LOGS_PATH/network_boot/network_boot_results.log"
     NETWORK_BOOT_JSON="$JSONS_DIR/network_boot.json"
     if check_file "$NETWORK_BOOT_LOG" "M"; then
@@ -634,7 +651,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         fi
     fi
 
-    # 9) RUNTIME DEVICE MAPPING CHECK
+    # 10) RUNTIME DEVICE MAPPING CHECK
     RUNTIME_DEV_MAP_LOG="$LINUX_TOOLS_LOGS_PATH/runtime_device_mapping_conflict_test.log"
     RUNTIME_DEV_MAP_JSON="$JSONS_DIR/runtime_dev_map.json"
     if check_file "$RUNTIME_DEV_MAP_LOG" "M"; then
@@ -648,7 +665,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
             echo -e "${RED}ERROR: Runtime device mapping log parsing to json failed.${NC}"
         fi
     fi
-    # 10) RESERVED MEMORY MAP
+    # 11) RESERVED MEMORY MAP
     RESERVED_MEM_MAP_LOG="$LINUX_TOOLS_LOGS_PATH/reserved_memory_map_test.log"
     RESERVED_MEM_MAP_JSON="$JSONS_DIR/reserved_memory_map.json"
     if check_file "$RESERVED_MEM_MAP_LOG" "M"; then
@@ -663,7 +680,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
         fi
     fi
 
-    # 11) DTB ALIGNMENT
+    # 12) DTB ALIGNMENT
     DTB_ALIGNMENT_LOG="$LINUX_TOOLS_LOGS_PATH/dtb_alignment_test.log"
     DTB_ALIGNMENT_JSON="$JSONS_DIR/dtb_alignment.json"
     if check_file "$DTB_ALIGNMENT_LOG" "M"; then
@@ -679,7 +696,7 @@ if [ $YOCTO_FLAG_PRESENT -eq 1 ]; then
     fi
 fi
 
-# 12) SR-only PCIe Option ROM architecture audit
+# 13) SR-only PCIe Option ROM architecture audit
 if [ $YOCTO_FLAG_PRESENT -eq 0 ]; then
     PCIE_OPTION_ROM_AUDIT_LOG="$LOGS_PATH/uefi_dump/PcieOptionRomArchAudit.log"
     PCIE_OPTION_ROM_AUDIT_JSON="$JSONS_DIR/pcie_option_rom_arch_audit.json"

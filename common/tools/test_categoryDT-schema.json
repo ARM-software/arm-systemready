@@ -34,6 +34,7 @@
 							"ConsoleSupportTest",
 							"Devicetree Blob Alignment Validation",
 							"Devicetree Reserved Memory Validation",
+						        "EBBR Spin-table Usage Validation",
 							"DTValidation",
 							"DevicePathProcotols",
 							"EBBR requirements",
@@ -200,7 +201,8 @@
 		"catID: 53": { "$ref": "#/$defs/catID" },
 		"catID: 54": { "$ref": "#/$defs/catID" },
 		"catID: 55": { "$ref": "#/$defs/catID" },
-		"catID: 56": { "$ref": "#/$defs/catID" }
+		"catID: 56": { "$ref": "#/$defs/catID" },
+		"catID: 57": { "$ref": "#/$defs/catID" }
 	},
 	"required": [
 		"catID: 1",
@@ -258,7 +260,8 @@
 		"catID: 53",
 		"catID: 54",
 		"catID: 55",
-		"catID: 56"
+		"catID: 56",
+		"catID: 57"
 	],
 	"additionalProperties": false
 }
