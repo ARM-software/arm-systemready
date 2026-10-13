@@ -62,7 +62,90 @@ hwclock > hwclock.txt 2>&1
 efibootmgr > efibootmgr.txt 2>&1
 efibootmgr -t 20 > efibootmgr-t-20.txt 2>&1
 efibootmgr -t 5 > efibootmgr-t-5.txt 2>&1
+
+# Check boot entry creation and remove the created boot entry
+EFI_VARS_DIR="/sys/firmware/efi/efivars"
+EFI_GLOBAL_GUID="8be4df61-93ca-11d2-aa0d-00e098032b8c"
+get_sys_boot_entries()
+{
+    [ -d "$EFI_VARS_DIR" ] || return 1
+    for var in "$EFI_VARS_DIR"/Boot????-"$EFI_GLOBAL_GUID"; do
+        [ -e "$var" ] || continue
+        name=${var##*/}
+        name=${name%%-*}
+        case "$name" in
+            Boot[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])
+                printf '%s\n' "${name#Boot}"
+                ;;
+        esac
+    done | sort
+}
+get_efibootmgr_entries()
+{
+    output=$(efibootmgr 2>&1)
+    rc=$?
+    [ "$rc" -eq 0 ] || return 1
+    printf '%s\n' "$output" |
+        sed -n 's/^Boot\([0-9A-Fa-f]\{4\}\).*/\1/p' |
+        sort
+}
+# Capture boot entries before creation using both sources
+sys_before=$(get_sys_boot_entries)
+sys_before_rc=$?
+efi_before=$(get_efibootmgr_entries)
+efi_before_rc=$?
+before_match=0
+if [ "$sys_before_rc" -eq 0 ] &&
+   [ "$efi_before_rc" -eq 0 ] &&
+   [ -n "$sys_before" ] &&
+   [ "$sys_before" = "$efi_before" ]; then
+    before_match=1
+fi
+
+# Always run the creation check and capture its output
 efibootmgr -c > efibootmgr-c.txt 2>&1
+create_rc=$?
+printf 'efibootmgr -c return status: %s\n' "$create_rc" >> efibootmgr-c.txt
+# Capture boot entries after creation using both sources
+sys_after=$(get_sys_boot_entries)
+sys_after_rc=$?
+efi_after=$(get_efibootmgr_entries)
+efi_after_rc=$?
+after_match=0
+if [ "$sys_after_rc" -eq 0 ] &&
+   [ "$efi_after_rc" -eq 0 ] &&
+   [ -n "$sys_after" ] &&
+   [ "$sys_after" = "$efi_after" ]; then
+    after_match=1
+fi
+# Only perform cleanup when both before and after snapshots agree
+if [ "$before_match" -eq 1 ] && [ "$after_match" -eq 1 ]; then
+    new_count=0
+    new_entry=""
+    for entry in $sys_after; do
+        if ! printf '%s\n' "$sys_before" | grep -qx "$entry"; then
+            new_count=$((new_count + 1))
+            new_entry="$entry"
+        fi
+    done
+    if [ "$new_count" -eq 1 ]; then
+        printf 'Removing boot entry created by efibootmgr -c: Boot%s\n' \
+            "$new_entry" >> efibootmgr-c.txt
+        efibootmgr -b "$new_entry" -B >> efibootmgr-c.txt 2>&1
+        delete_rc=$?
+        if [ "$delete_rc" -ne 0 ]; then
+            printf 'ERROR: Failed to remove Boot%s\n' "$new_entry" >> efibootmgr-c.txt
+        fi
+
+    elif [ "$new_count" -gt 1 ]; then
+        printf '%s\n' \
+            "WARNING: Multiple new boot entries detected; cleanup skipped" >> efibootmgr-c.txt
+    fi
+
+else
+    printf '%s\n' \
+        "WARNING: Boot entry snapshots do not match; cleanup skipped" >> efibootmgr-c.txt
+fi
 
 ifconfig > ifconfig.txt 2>&1
 ip addr show > ip-addr-show.txt 2>&1
