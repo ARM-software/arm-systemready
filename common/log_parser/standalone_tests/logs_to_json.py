@@ -1123,7 +1123,7 @@ def parse_resv_mem_map(log_data):
 
         if line.startswith("ERROR: Memory Reservation Block"):
             reason_lines_mrb.append(line)
-        if "fully covered" in line:
+        if line.startswith("INFO:") and "fully covered" in line:
             if "Reserved-memory range" in line:
                 pass_reasons_resv.append(line.split("INFO:", 1)[1].strip())
             if "Memory Reservation Block" in line:
