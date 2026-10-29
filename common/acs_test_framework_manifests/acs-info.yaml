@@ -286,7 +286,7 @@ suites:
         text_files:
           acs_config.txt: |
             Band: SystemReady Devicetree Band
-            ACS version: 3.1.2
+            ACS version: 3.1.3
         args:
           - --dmidecode_log
           - "{dir}/missing/dmidecode.txt"
@@ -317,7 +317,7 @@ suites:
             text: "\"Summary Generated On\""
           - type: file_contains
             path: "{dir}/out/acs_info.json"
-            text: "\"ACS version\": \"3.1.2\""
+            text: "\"ACS version\": \"3.1.3\""
 
       - name: cli_unreadable_dmidecode_warns_and_generates_json
         args:

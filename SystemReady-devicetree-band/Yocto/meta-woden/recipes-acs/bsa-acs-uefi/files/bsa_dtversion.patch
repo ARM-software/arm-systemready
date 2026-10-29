@@ -6,7 +6,7 @@ index 6f473d9..7dd50b3 100644
          goto exit_acs;
      }
  
-+    val_print(INFO, "\n\n SystemReady devicetree band ACS v3.1.2", 0);
++    val_print(INFO, "\n\n SystemReady devicetree band ACS v3.1.3", 0);
      val_print(INFO, "\n\n BSA Architecture Compliance Suite");
      val_print(INFO, "\n        Version %d.", BSA_ACS_MAJOR_VER);
      val_print(INFO, "%d.", BSA_ACS_MINOR_VER);

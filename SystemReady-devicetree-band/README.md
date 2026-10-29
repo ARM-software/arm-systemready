@@ -27,9 +27,9 @@ SystemReady-devicetree band compliant platforms implement a minimum set of hardw
 The SystemReady-devicetree band compliance and testing requirements are specified in the [Arm SystemReady Requirements Specification (SRS)](https://developer.arm.com/documentation/den0109/latest)
 
 ## Latest Release details
- - Release version: v3.1.2
+ - Release version: v3.1.3
  - Quality: EAC
- - The latest pre-built release of SystemReady-devicetree band ACS is available for download here: [v26.03_3.1.2](prebuilt_images/v26.03_3.1.2)
+ - The latest pre-built release of SystemReady-devicetree band ACS is available for download here: [v26.10_3.1.3](prebuilt_images/v26.10_3.1.3)
  - The compliance suite is not a substitute for design verification.
  - To review the ACS logs, Arm licensees can contact Arm directly through their partner managers.
 

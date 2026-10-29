@@ -1,3 +1,25 @@
+v26.10_DT_3.1.3
+** Devicetree band**
+* Upgrade DT Yocto/Linux stack and DT bindings, including Linux 7.2.x support and Linux 7.2 BSA driver API compatibility
+* Update DT BSA and PFDI version patches for latest upstream sysarch changes
+* Update FWTS 26.01.00 recipe download source to GitHub FWTS repository
+* Add Devicetree reserved-memory memory-map compliance checker
+* Add DTB 8-byte alignment compliance test
+* Add deprecated spin-table CPU enable-method detection and parsing
+* Add DT kselftest ignore list and additional platform driver coverage
+* Restore SBBR runtime services tests in DT EBBR SCT flow
+* Apply EBBR 2.3 SCT patch and switch to EfiEbbrProfileTableTest
+* Add UefiDump recipe and integrate EBBR profile dumping and validation
+* Add PSCI version reporting in DT system information
+* Collect dmidecode earlier for DT BBSR/SCMI parsing
+* Enforce stricter ESP detection in DT HTTPS/network boot flow
+* Enable Qualcomm platform support updates, including SM8750 basics and QCS615 clock/interconnect/pinctrl drivers
+* Include linux-firmware in Woden image and add X1E80100 firmware support
+* Add dosfstools to Woden image
+* Enable additional GRUB console commands for DT
+* Fix ledge-efi DT build reliability by forcing serial build
+* Refresh DT Yocto ACS recipe metadata against current upstream sources
+
 v26.03_SR_3.1.1
 ** SystemReady band**
 * As SBMR ACS IB is now part of main SR band image, removing separate sbmr build job
