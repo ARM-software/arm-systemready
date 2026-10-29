@@ -1079,15 +1079,11 @@ body[data-acs-suite="sbmr"] .case-header { padding-top: 5px; border-top: 1px sol
     font-weight: 800;
 }
 .acs-filter-help {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+    flex: 1 1 100%;
+    margin: 0;
+    color: var(--acs-muted);
+    font-size: 10px;
+    line-height: 1.4;
 }
 .acs-status-filter {
     gap: 5px;
@@ -1912,6 +1908,9 @@ REPORT_JS = r"""
         var totalDisplay = totalEntry ? totalEntry.value : String(derivedTotal);
 
         container.classList.add("acs-compact-summary");
+        // Share the displayed summary with the filters. A detail row can be
+        // supporting evidence or represent several suite-reported tests.
+        container.acsSummary = {total: totalDisplay, statuses: []};
         var heading = container.querySelector("h2");
         if (heading && heading.parentNode !== container) {
             heading = null;
@@ -1952,6 +1951,12 @@ REPORT_JS = r"""
             label.className = "acs-progress-label";
             label.textContent = status === "passed-partial" ?
                 statusLabel(status, entry.label) : entry.label;
+            container.acsSummary.statuses.push({
+                status: status || "unknown",
+                label: label.textContent,
+                value: entry.value,
+                count: entry.count
+            });
 
             var track = document.createElement("span");
             track.className = "acs-progress-track";
@@ -3015,7 +3020,12 @@ REPORT_JS = r"""
     }
 
     function buildDetailedToolbar() {
+        var reportSummary = document.querySelector(".acs-compact-summary");
+        if (reportSummary && !document.querySelector(".detailed-summary, .detailed-container")) {
+            return;
+        }
         var records = statusRows();
+        var summaryCounts = reportSummary && reportSummary.acsSummary;
         var resultGroups = Array.prototype.slice.call(document.querySelectorAll(".acs-result-group"));
         resultGroups.forEach(function (group) { group.acsFilterRecords = []; });
         records.forEach(function (record) {
@@ -3129,14 +3139,18 @@ REPORT_JS = r"""
 
         var filterScope = document.createElement("div");
         filterScope.className = "acs-filter-scope";
-        filterScope.textContent = document.body.getAttribute("data-acs-suite") === "sct" ?
+        filterScope.textContent = summaryCounts ? "Test results in this report" :
+            document.body.getAttribute("data-acs-suite") === "sct" ?
             "Subtest outcomes and test cases without subtests in this report" :
             "Case and subtest outcomes in this report";
         filters.appendChild(filterScope);
 
         var filterHelp = document.createElement("p");
         filterHelp.className = "acs-filter-help";
-        filterHelp.textContent = "Choose one status to focus the report. Choose it again, or All, to restore every result.";
+        filterHelp.textContent = summaryCounts ?
+            "Counts match the Test-result summary. Filters include matching case and subtest details. " +
+                "'Details only' means the summary count is zero or not provided." :
+            "Choose one status to focus the report. Choose it again, or All, to restore every result.";
         filters.appendChild(filterHelp);
 
         var printScopeNote = document.createElement("p");
@@ -3146,37 +3160,55 @@ REPORT_JS = r"""
 
         var totals = {};
         var labels = {};
+        var countLabels = {};
         var encountered = [];
         var activeStatus = "";
         records.forEach(function (record) {
             if (encountered.indexOf(record.status) < 0) {
                 encountered.push(record.status);
             }
-            totals[record.status] = (totals[record.status] || 0) + 1;
+            if (!summaryCounts) {
+                totals[record.status] = (totals[record.status] || 0) + 1;
+                countLabels[record.status] = String(totals[record.status]);
+            }
             labels[record.status] = labels[record.status] || record.label || statusLabel(record.status, record.status);
         });
+        if (summaryCounts) {
+            summaryCounts.statuses.forEach(function (entry) {
+                labels[entry.status] = entry.label;
+                if (entry.count > 0) {
+                    countLabels[entry.status] = entry.value;
+                    if (encountered.indexOf(entry.status) < 0) {
+                        encountered.push(entry.status);
+                    }
+                }
+            });
+        }
         var allButton = document.createElement("button");
         allButton.type = "button";
         allButton.className = "acs-status-filter info";
         allButton.setAttribute("aria-pressed", "true");
-        allButton.textContent = "All outcomes " + records.length;
+        allButton.textContent = summaryCounts ?
+            "All tests " + summaryCounts.total : "All outcomes " + records.length;
         filters.appendChild(allButton);
         var filterButtons = {};
-        var orderedStatuses = STATUS_ORDER.filter(function (status) { return totals[status]; });
+        var orderedStatuses = STATUS_ORDER.filter(function (status) {
+            return encountered.indexOf(status) >= 0;
+        });
         encountered.forEach(function (status) {
             if (orderedStatuses.indexOf(status) < 0) {
                 orderedStatuses.push(status);
             }
         });
         orderedStatuses.forEach(function (status) {
-            if (!totals[status]) {
-                return;
-            }
             var button = document.createElement("button");
             button.type = "button";
             button.className = "acs-status-filter " + status;
             button.setAttribute("aria-pressed", "false");
-            button.textContent = labels[status] + " " + totals[status];
+            // Distinguish matching details from a zero or absent summary count.
+            button.textContent = labels[status] +
+                (Object.prototype.hasOwnProperty.call(countLabels, status) ?
+                    " " + countLabels[status] : " (details only)");
             button.addEventListener("click", function () {
                 activeStatus = activeStatus === status ? "" : status;
                 applyFilters();
@@ -3287,7 +3319,11 @@ REPORT_JS = r"""
             Object.keys(filterButtons).forEach(function (status) {
                 filterButtons[status].setAttribute("aria-pressed", activeStatus === status ? "true" : "false");
             });
-            count.textContent = "Matching " + visible + " of " + records.length + " outcomes";
+            count.textContent = summaryCounts ?
+                (visible === 0 ? "No matching detailed results" :
+                    activeStatus || query || (channelSelect && channelSelect.value) ?
+                        "Showing matching detailed results" : "Showing all detailed results") :
+                "Matching " + visible + " of " + records.length + " outcomes";
             if ((activeStatus || query) && !expandMatchingGroups && matchingGroupCount > 40) {
                 count.textContent += " · groups kept collapsed for performance";
             }

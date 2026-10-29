@@ -160,12 +160,21 @@ window.addEventListener("load", function () {
     function buttonStartingWith(label) {
       return buttons.find(function (button) { return button.textContent.indexOf(label) === 0; });
     }
-    var all = buttonStartingWith("All outcomes ");
+    var all = buttonStartingWith("All tests ");
     var passed = buttonStartingWith("Passed ");
+    var failed = buttonStartingWith("Failed ");
     var custom = buttonStartingWith("CUSTOM REVIEW ");
-    expect(all && all.textContent === "All outcomes 2", "All filter must count two outcomes");
-    expect(passed && passed.textContent === "Passed 1", "Passed filter must be generated");
+    expect(all && all.textContent === "All tests 10",
+      "All filter must use the suite total, not the two detailed rows");
+    expect(passed && passed.textContent === "Passed 7",
+      "Passed filter must use the suite count, not the single detailed row");
+    expect(failed && failed.textContent === "Failed 2",
+      "A positive summary status must remain available without detailed rows");
     expect(custom && custom.textContent === "CUSTOM REVIEW 1", "Future status filter must be generated");
+    expect(!buttons.some(function (button) { return button.classList.contains("fail-waiver"); }),
+      "Zero summary statuses without matching details must not add filter buttons");
+    expect(document.querySelector(".acs-filter-count").textContent === "Showing all detailed results",
+      "Summary-backed reports must not display a competing row-count total");
     var compact = document.querySelector(".acs-compact-summary");
     var summaryRows = Array.prototype.slice.call(compact.querySelectorAll(".acs-progress-row"));
     var passedSummary = document.querySelector('[data-acs-summary-status="pass"]');
@@ -197,10 +206,14 @@ window.addEventListener("load", function () {
       "Original summary table must remain as the hidden fallback source");
     expect(compact.querySelector(".acs-reference-note a").textContent.indexOf("Rule result status guide") === 0,
       "Rule-status guide must remain in the compact BSA/SBSA-style summary");
-    var expectedFilterScope = document.body.getAttribute("data-acs-suite") === "sct" ?
-      "Subtest outcomes and test cases without subtests" : "Case and subtest outcomes";
-    expect(document.querySelector(".acs-filter-scope").textContent.indexOf(expectedFilterScope) === 0,
-      "Filter outcomes must have an explicit scope label");
+    expect(document.querySelector(".acs-filter-scope").textContent === "Test results in this report",
+      "Filter scope must describe the same test results as the summary");
+    var help = document.querySelector(".acs-filter-help");
+    expect(help.textContent ===
+      "Counts match the Test-result summary. Filters include matching case and subtest details. " +
+      "'Details only' means the summary count is zero or not provided." &&
+      help.getBoundingClientRect().height > 1,
+      "Visible filter help must explain suite counts and detailed filtering");
     expect(!document.querySelector(".acs-count-scope-note"),
       "Detailed summary must not show the confusing count-scope note");
     expect(document.querySelector(".acs-print-scope-note").textContent.indexOf("every result group") >= 0,
@@ -214,14 +227,16 @@ window.addEventListener("load", function () {
       "Detailed report must remove the legacy summary count cards");
     var longReason = document.querySelector("#custom-row .acs-long-reason");
     var shortReason = document.querySelector("#passed-row .acs-long-reason");
-    expect(longReason && !longReason.open, "Verbose SCT/FWTS reason must start collapsed");
-    expect(shortReason && !shortReason.open, "Short SCT/FWTS reason must also start collapsed");
-    expect(document.querySelectorAll(".acs-long-reason").length === 2,
-      "Every SCT/FWTS reason must use a disclosure");
-    expect(longReason && longReason.textContent.indexOf("retains every original character") >= 0,
-      "Collapsed reason must retain its full diagnostic text");
-    expect(longReason && longReason.querySelectorAll(".acs-long-reason-text br").length === 1,
-      "Collapsed reason must retain original line-break elements");
+    if (["sct", "fwts"].indexOf(document.body.getAttribute("data-acs-suite")) >= 0) {
+      expect(longReason && !longReason.open, "Verbose SCT/FWTS reason must start collapsed");
+      expect(shortReason && !shortReason.open, "Short SCT/FWTS reason must also start collapsed");
+      expect(document.querySelectorAll(".acs-long-reason").length === 2,
+        "Every SCT/FWTS reason must use a disclosure");
+      expect(longReason && longReason.textContent.indexOf("retains every original character") >= 0,
+        "Collapsed reason must retain its full diagnostic text");
+      expect(longReason && longReason.querySelectorAll(".acs-long-reason-text br").length === 1,
+        "Collapsed reason must retain original line-break elements");
+    }
     if (longReason) {
       longReason.querySelector("summary").click();
       expect(longReason.open, "Long reason must expand when requested");
@@ -233,8 +248,40 @@ window.addEventListener("load", function () {
       "Nonmatching result must be hidden");
     expect(!document.getElementById("custom-row").classList.contains("acs-filter-hidden"),
       "Matching result must remain visible");
-    all.click();
-    expect(all.getAttribute("aria-pressed") === "true", "All button must restore every outcome");
+    expect(document.querySelector(".acs-filter-count").textContent === "Showing matching detailed results",
+      "An active status must describe matching details without another numeric total");
+    if (failed) {
+      failed.click();
+      expect(document.querySelector(".acs-filter-count").textContent === "No matching detailed results" &&
+        document.querySelector(".acs-empty-state").classList.contains("visible"),
+        "Summary status without detailed rows must expose an honest empty state");
+    }
+    if (all) {
+      all.click();
+      expect(all.getAttribute("aria-pressed") === "true", "All button must restore every outcome");
+    }
+    var search = document.querySelector("input[aria-label='Search report rows']");
+    search.value = "Future outcome";
+    search.dispatchEvent(new Event("input"));
+    expect(document.getElementById("passed-row").classList.contains("acs-filter-hidden") &&
+      !document.getElementById("custom-row").classList.contains("acs-filter-hidden") &&
+      document.querySelector(".acs-filter-count").textContent === "Showing matching detailed results",
+      "Search must continue to filter the detailed rows");
+    search.value = "no such diagnostic";
+    search.dispatchEvent(new Event("input"));
+    expect(document.querySelector(".acs-filter-count").textContent === "No matching detailed results",
+      "An unmatched search must report no matching details");
+    var reset = Array.prototype.find.call(document.querySelectorAll(".acs-button"), function (button) {
+      return button.textContent === "Reset";
+    });
+    reset.click();
+    expect(search.value === "" &&
+      !document.getElementById("passed-row").classList.contains("acs-filter-hidden") &&
+      !document.getElementById("custom-row").classList.contains("acs-filter-hidden") &&
+      document.querySelector(".acs-filter-count").textContent === "Showing all detailed results",
+      "Reset must restore every detail and the unfiltered state");
+    expect(passed.textContent === "Passed 7" && custom.textContent === "CUSTOM REVIEW 1",
+      "Filtering and searching must leave suite-reported counts unchanged");
 
     var group = document.querySelector(".acs-result-group.acs-collapsible");
     expect(!group.classList.contains("acs-collapsed") &&
@@ -270,6 +317,169 @@ window.addEventListener("load", function () {
     expect(document.querySelector(".acs-reference-note a").getAttribute("target") === "_blank",
       "Unrelated external documentation links must retain their new-tab behavior");
 
+    document.documentElement.setAttribute("data-browser-smoke", failures.length ? "FAIL" : "PASS");
+    var output = document.createElement("pre");
+    output.id = "browser-smoke-result";
+    output.textContent = failures.length ? failures.join(" | ") : "PASS";
+    document.body.appendChild(output);
+  }, 100);
+});
+</script>
+</body></html>"""
+
+
+NESTED_COUNTS_PAGE = r"""<!doctype html>
+<html><head><title>Nested status count smoke</title></head><body>
+<h1>Nested status count smoke</h1>
+<div class="result-summary"><h2>Result Summary</h2>
+  <table class="summary-table"><tbody>
+    <tr><td>Total Tests</td><td>1,200</td></tr>
+    <tr><td>Passed</td><td>1,200</td></tr>
+    <tr><td>Warnings</td><td>0</td></tr>
+  </tbody></table>
+</div>
+<div class="detailed-summary">
+  <div class="test-suite-header">Test Suite: Nested evidence</div>
+  <table><thead><tr><th>Description</th><th>Result</th></tr></thead><tbody>
+    <tr id="parent-pass"><td>Passing case</td><td>PASSED</td></tr>
+    <tr id="nested-container"><td colspan="2">
+      <table class="subtest-table"><thead><tr><th>Description</th><th>Result</th></tr></thead><tbody>
+        <tr id="nested-warning"><td>Warning evidence</td><td>WARNING</td></tr>
+        <tr id="nested-skipped"><td>Skipped evidence</td><td>SKIPPED</td></tr>
+      </tbody></table>
+    </td></tr>
+  </tbody></table>
+</div>
+<script>
+window.addEventListener("load", function () {
+  window.setTimeout(function () {
+    var failures = [];
+    function expect(condition, message) { if (!condition) { failures.push(message); } }
+    var summary = document.querySelector(".acs-compact-summary");
+    var sourceSummaryText = summary && summary.querySelector("table.summary-table").textContent;
+    var warningSummary = summary && summary.querySelector('[data-acs-summary-status="warning"]');
+    if (summary) {
+      expect(warningSummary.querySelector(".acs-progress-count").textContent === "0" &&
+        warningSummary.querySelector(".acs-progress-track").getAttribute("aria-valuenow") === "0" &&
+        !summary.querySelector('[data-acs-summary-status="skipped"]'),
+        "Detail-only filters must preserve a zero summary count and leave absent summary statuses absent");
+    }
+    var labels = Array.prototype.map.call(document.querySelectorAll(".acs-status-filter"),
+      function (button) { return button.textContent; });
+    expect(labels.join(" | ") === (summary ?
+      "All tests 1,200 | Passed 1,200 | Warnings (details only) | Skipped (details only)" :
+      "All outcomes 3 | Passed 1 | Warning 1 | Skipped 1"),
+      "Statuses with zero or absent summary counts must identify details only; fallback must count rows");
+    expect(document.querySelector(".acs-filter-scope").textContent === (summary ?
+      "Test results in this report" : "Case and subtest outcomes in this report"),
+      "The count scope must follow summary availability");
+    var counter = document.querySelector(".acs-filter-count");
+    expect(counter.textContent === (summary ? "Showing all detailed results" : "Matching 3 of 3 outcomes"),
+      "Only reports without a summary may show a numeric row counter");
+    var warning = document.querySelector(".acs-status-filter.warning");
+    var skipped = document.querySelector(".acs-status-filter.skipped");
+    warning.click();
+    expect(!document.getElementById("nested-warning").classList.contains("acs-filter-hidden") &&
+      document.getElementById("nested-skipped").classList.contains("acs-filter-hidden") &&
+      !document.getElementById("nested-container").classList.contains("acs-filter-hidden") &&
+      document.getElementById("parent-pass").classList.contains("acs-context-row"),
+      "A details-only warning must remain filterable with its parent context despite a zero summary count");
+    expect(counter.textContent === (summary ? "Showing matching detailed results" : "Matching 1 of 3 outcomes"),
+      "The matching message must follow the selected count scope");
+    skipped.click();
+    expect(!document.getElementById("nested-skipped").classList.contains("acs-filter-hidden") &&
+      document.getElementById("nested-warning").classList.contains("acs-filter-hidden"),
+      "A detail-only status absent from the summary must remain filterable");
+    var search = document.querySelector("input[aria-label='Search report rows']");
+    search.value = "missing diagnostic";
+    search.dispatchEvent(new Event("input"));
+    expect(counter.textContent === (summary ? "No matching detailed results" : "Matching 0 of 3 outcomes") &&
+      document.querySelector(".acs-empty-state").classList.contains("visible"),
+      "An unmatched nested search must retain the correct empty-state wording");
+
+    var printRules = [];
+    Array.prototype.forEach.call(document.styleSheets, function (sheet) {
+      Array.prototype.forEach.call(sheet.cssRules, function (rule) {
+        if (rule.media && rule.media.mediaText === "print") {
+          Array.prototype.forEach.call(rule.cssRules, function (printRule) {
+            printRules.push(printRule.cssText);
+          });
+        }
+      });
+    });
+    var printStyle = document.createElement("style");
+    printStyle.textContent = printRules.join("\n");
+    document.head.appendChild(printStyle);
+    expect(printRules.length > 0 &&
+      ["parent-pass", "nested-container", "nested-warning", "nested-skipped"].every(function (id) {
+        return window.getComputedStyle(document.getElementById(id)).display !== "none";
+      }), "Print styles must include every original row despite active filters");
+    printStyle.remove();
+    var print = Array.prototype.find.call(document.querySelectorAll(".acs-button"), function (button) {
+      return button.textContent === "Print all results / PDF";
+    });
+    var printed = false;
+    window.print = function () { printed = true; };
+    print.click();
+    expect(printed, "The all-results print action must remain functional while filtered");
+    var reset = Array.prototype.find.call(document.querySelectorAll(".acs-button"), function (button) {
+      return button.textContent === "Reset";
+    });
+    reset.click();
+    expect(search.value === "" &&
+      document.querySelector(".acs-status-filter.info").getAttribute("aria-pressed") === "true" &&
+      !document.getElementById("nested-warning").classList.contains("acs-filter-hidden") &&
+      !document.getElementById("nested-skipped").classList.contains("acs-filter-hidden"),
+      "Reset must restore nested results without altering their status filters");
+    expect(labels.join(" | ") === Array.prototype.map.call(
+      document.querySelectorAll(".acs-status-filter"), function (button) {
+        return button.textContent;
+      }).join(" | "), "Search, print, and reset must not change the displayed counts");
+    if (summary) {
+      expect(summary.querySelector("table.summary-table").textContent === sourceSummaryText &&
+        warningSummary.querySelector(".acs-progress-count").textContent === "0" &&
+        !summary.querySelector('[data-acs-summary-status="skipped"]'),
+        "Filtering detail-only statuses must not rewrite summary values or invent a missing status");
+    }
+    document.documentElement.setAttribute("data-browser-smoke", failures.length ? "FAIL" : "PASS");
+    var output = document.createElement("pre");
+    output.id = "browser-smoke-result";
+    output.textContent = failures.length ? failures.join(" | ") : "PASS";
+    document.body.appendChild(output);
+  }, 100);
+});
+</script>
+</body></html>"""
+
+
+EMPTY_DETAILS_PAGE = r"""<!doctype html>
+<html><head><title>Summary without detailed outcomes</title></head><body>
+<h1>Summary without detailed outcomes</h1>
+<div class="result-summary"><h2>Result Summary</h2>
+  <table class="summary-table"><tbody>
+    <tr><td>Total Tests</td><td>2</td></tr>
+    <tr><td>Passed</td><td>0</td></tr>
+    <tr><td>Failed</td><td>2</td></tr>
+  </tbody></table>
+</div>
+<div class="detailed-summary">
+  <table><thead><tr><th>Description</th><th>Result</th></tr></thead><tbody></tbody></table>
+</div>
+<script>
+window.addEventListener("load", function () {
+  window.setTimeout(function () {
+    var failures = [];
+    function expect(condition, message) { if (!condition) { failures.push(message); } }
+    expect(Array.prototype.map.call(document.querySelectorAll(".acs-status-filter"), function (button) {
+      return button.textContent;
+    }).join(" | ") === "All tests 2 | Failed 2",
+      "Summary counts must remain visible when there are no detailed status rows");
+    expect(document.querySelector(".acs-filter-count").textContent === "No matching detailed results" &&
+      document.querySelector(".acs-empty-state").classList.contains("visible"),
+      "An empty detailed report must describe the absence of matching details");
+    document.querySelector(".acs-status-filter.fail").click();
+    expect(document.querySelector(".acs-filter-count").textContent === "No matching detailed results",
+      "Filtering an empty detailed report must remain safe");
     document.documentElement.setAttribute("data-browser-smoke", failures.length ? "FAIL" : "PASS");
     var output = document.createElement("pre");
     output.id = "browser-smoke-result";
@@ -542,9 +752,9 @@ window.addEventListener("load", function () {
       "Moving controls must preserve every report action in order");
     expect(Array.prototype.map.call(document.querySelectorAll(".acs-status-filter"), function (button) {
       return button.textContent;
-    }).join(" | ") === "All outcomes 6 | Passed 1 | Failed 3 | Failed with waiver 1 | Passed (Partial) 1" &&
-      document.querySelector(".acs-filter-count").textContent === "Matching 6 of 6 outcomes",
-      "Moving controls must preserve filter labels, counts, and matching total");
+    }).join(" | ") === "All tests 5 | Passed 1 | Failed 2 | Failed with Waiver 1 | Passed (Partial) 1" &&
+      document.querySelector(".acs-filter-count").textContent === "Showing all detailed results",
+      "Filter counts must match the BSA summary without adding nested failures");
     var collapse = Array.prototype.find.call(document.querySelectorAll(".acs-button"), function (button) {
       return button.textContent === "Collapse all";
     });
@@ -664,8 +874,9 @@ window.addEventListener("load", function () {
       document.querySelector(".acs-failure-summary .acs-compact-summary-total").textContent ===
         "1 test suite · 2 failed",
       "FWTS failure breakdown must agree with its suite-reported summary");
-    expect(document.querySelector(".acs-status-filter.fail").textContent === "Failed 1",
-      "Interactive row filters must continue to describe displayed rows");
+    expect(document.querySelector(".acs-status-filter.info").textContent === "All tests 2" &&
+      document.querySelector(".acs-status-filter.fail").textContent === "Failed 2",
+      "FWTS filters must preserve suite counts when one row represents multiple failures");
     document.documentElement.setAttribute("data-browser-smoke", failures.length ? "FAIL" : "PASS");
     var output = document.createElement("pre");
     output.id = "browser-smoke-result";
@@ -780,7 +991,7 @@ window.addEventListener("load", function () {
       select.options.length === 3 &&
       document.querySelector(".acs-compact-summary-total").textContent ===
         "2 suite-reported tests" &&
-      document.querySelector(".acs-status-filter.info").textContent === "All outcomes 2",
+      document.querySelector(".acs-status-filter.info").textContent === "All tests 2",
       "Missing compliance entries must not add result cards, jump targets, or test outcomes");
     var firstOverview = document.querySelector(".acs-case-overview");
     expect(firstOverview.querySelector(".acs-case-eyebrow").textContent === "Test case" &&
@@ -906,8 +1117,8 @@ window.addEventListener("load", function () {
       function (button) { return button.textContent; }
     );
     expect(filterLabels.join(" | ") ===
-      "All outcomes 6 | Passed 1 | Failed 1 | Failed with waiver 1 | Warning 1 | Ignored 2",
-      "SCT filters must count subtests and zero-subtest parents without double counting cases");
+      "All tests 6 | Passed 1 | Failed 1 | Failed with Waiver 1 | Warnings 1 | Ignored 2",
+      "SCT filter counts and labels must match the summary without double counting cases");
     var breakdown = document.querySelector(".acs-failure-summary");
     var rows = Array.prototype.slice.call(breakdown.querySelectorAll(".acs-failure-row"));
     expect(breakdown.getAttribute("data-acs-breakdown-kind") === "test suite" &&
@@ -953,6 +1164,8 @@ window.addEventListener("load", function () {
       "Card-based suite summaries must use the compact progress view");
     expect(card.querySelector(".acs-compact-summary-total").textContent ===
       "2 suite-reported tests", "Card summary must preserve its source total");
+    expect(!document.querySelector(".acs-toolbar"),
+      "Summary-only suite pages must not show filters for nonexistent detailed results");
     expect(!document.querySelector(".acs-summary-print-button"),
       "The consolidated Print / PDF action must not appear on suite-summary pages");
     document.documentElement.setAttribute("data-browser-smoke", failures.length ? "FAIL" : "PASS");
@@ -1402,8 +1615,6 @@ def main() -> int:
     temp_root = Path(os.getcwd())
     with tempfile.TemporaryDirectory(prefix="report_ui_browser_", dir=temp_root) as temp_name:
         directory = Path(temp_name)
-        sct_detail = enhance_html_report(DETAIL_PAGE, suite_type="sct")
-        fwts_detail = enhance_html_report(DETAIL_PAGE, suite_type="fwts")
         bsa_detail = enhance_html_report(BSA_PAGE, suite_type="bsa")
         post_script_detail = enhance_html_report(POST_SCRIPT_PAGE, suite_type="post-script")
         compressed_counts = enhance_html_report(COMPRESSED_COUNTS_PAGE, suite_type="fwts")
@@ -1525,8 +1736,27 @@ def main() -> int:
             raise RuntimeError(
                 "Dynamic OS compliance values were omitted or not escaped"
             )
-        _run_page(browser, directory, "sct_detail", sct_detail)
-        _run_page(browser, directory, "fwts_detail", fwts_detail)
+        for suite_type in sorted(importlib.import_module("report_ui").VALID_SUITE_TYPES):
+            _run_page(
+                browser, directory, f"{suite_type}_summary_counts",
+                enhance_html_report(DETAIL_PAGE, suite_type=suite_type),
+            )
+        _run_page(
+            browser, directory, "nested_summary_counts",
+            enhance_html_report(NESTED_COUNTS_PAGE, suite_type="bsa"),
+        )
+        no_summary = re.sub(
+            r'<div class="result-summary">.*?</div>', "", NESTED_COUNTS_PAGE,
+            count=1, flags=re.DOTALL,
+        )
+        _run_page(
+            browser, directory, "counts_without_summary",
+            enhance_html_report(no_summary, suite_type="bsa"),
+        )
+        _run_page(
+            browser, directory, "counts_without_details",
+            enhance_html_report(EMPTY_DETAILS_PAGE, suite_type="fwts"),
+        )
         _run_page(browser, directory, "bsa_detail", bsa_detail)
         _run_page(browser, directory, "bsa_detail_tablet", bsa_detail, "1000,900")
         _run_page(browser, directory, "bsa_detail_mobile", bsa_detail, "480,900")
