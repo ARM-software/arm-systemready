@@ -1,16 +1,31 @@
-# DeviceTree Band v3.1.3 — Release Candidates
+# DeviceTree Band v3.1.3 — Main Release & Release Candidates
 
-This README describes where to find the **Release Candidates (RCx)** and how to use the artifacts.
+This README describes where to find the **main release** and **Release Candidates (RCx)**, and how to use the artifacts.
 
 ## Table of Contents
+- [Main Release Image](#main-release-image)
 - [Release Candidate Images](#release-candidate-images)
   - [RC0](#rc0)
 - [Feedback & Issues](#feedback--issues)
 
-## Release Candidate Images
 
-### **RC0** [`./RC0/`](./RC0/)
-Contains image, changes and known issues.
+## Main Release Image
+**DeviceTree Band v3.1.3** pre-built release image is available at [systemready-dt_acs_live_image.wic.xz](https://github.com/ARM-software/arm-systemready/releases/download/v26.10_DT_3.1.3/systemready-dt_acs_live_image.wic.xz)
+
+##### Decompressing the Image for use
+Follow the steps below to decompress the pre-built image:
+
+```bash
+xz -d systemready-dt_acs_live_image.wic.xz
+```
+After decompression, you will get the .wic file, which can be used directly with your target environment.
+
+---
+
+### Release Candidate Images
+
+#### **RC0** [`./RC0/`](./RC0/)
+  Contains image, changes and known issues.
 
 ##### Concat and decompress the Image for use
 
@@ -30,6 +45,6 @@ xz -d systemready-dt_acs_live_image.wic.xz
 ### Feedback & Issues
 
 When reporting, please include:
-- The **version/RC** (e.g., *v3.1.3 RC0*),
-- The **board/machine** and exact artifact name,  
+- The **version/RC** (e.g., *v3.1.3 RC0* or *v3.1.3*),
+- The **board/machine** and exact artifact name,
 - Logs (console output, test logs), and steps to reproduce.
