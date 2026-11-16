@@ -838,6 +838,93 @@ def parse_spin_table_check(log_data):
     }
 
 
+def _parse_negative_capsule_generation(lines):
+    """Describe the final attempt to prepare a trusted pair of negative capsules."""
+    generation_header = re.compile(
+        r"(?:Test:\s*)?Testing\s+generation\s+of\s+negative\s+capsules\s+"
+        r"from\s+signed_capsule\.bin", re.IGNORECASE
+    )
+    test_header = re.compile(r"^(?:Testing\b|Test:\s*)", re.IGNORECASE)
+    attempts = []
+    current = None
+    for raw_line in lines:
+        line = ansi_escape.sub("", raw_line).strip().lstrip("\ufeff")
+        if generation_header.fullmatch(line):
+            current = []
+            attempts.append(current)
+        elif test_header.match(line):
+            current = None
+        elif current is not None and line and not re.fullmatch(
+                r"Test[_\s]Info", line, re.IGNORECASE):
+            current.append(line)
+
+    if not attempts:
+        return None
+
+    # A tool invocation or a published individual file does not commit the pair.
+    # In particular, publication and synchronization failures invalidate both.
+    latest = attempts[-1]
+    success = any(re.fullmatch(
+        r"Successfully generated unauth\.bin and tampered\.bin on-device\.?|"
+        r"Using existing pre-generated negative capsule variants; "
+        r"skipping on-device generation\.?", line, re.IGNORECASE
+    ) for line in latest)
+    unsupported = any(re.match(
+        r"^(?:Insufficient (?:memory|storage) for on-device capsule variant generation|"
+        r"Insufficient storage to generate capsule variants|"
+        r"WARNING: Target system does not have sufficient memory to generate "
+        r"unauth\.bin and tampered\.bin on-device)\b", line, re.IGNORECASE
+    ) for line in latest)
+    failed = any(re.match(
+        r"^(?:signed_capsule\.bin not present\b|"
+        r"capsule-tool\.py not found or not readable\b|"
+        r"Invalid capsule memory threshold configuration\b|Failed to\b|"
+        r"Capsule variant generation or setup failed on-device\b|"
+        r"Capsule update setup has failed\b|ERROR(?:\s|:))", line, re.IGNORECASE
+    ) for line in latest)
+
+    if failed:
+        status = "FAILED"
+        explanation = (
+            "Negative capsule generation or setup failed; a usable pair of "
+            "unauth.bin and tampered.bin was not confirmed."
+        )
+    elif success and unsupported:
+        status = "FAILED"
+        explanation = (
+            "The final generation attempt contains conflicting success and unsupported results."
+        )
+    elif success:
+        status = "PASSED"
+        explanation = (
+            "Negative capsule preparation completed. This result does not assess "
+            "firmware capsule-update behavior."
+        )
+    elif unsupported:
+        status = "SKIPPED"
+        explanation = (
+            "On-device generation is unsupported with the available resources; "
+            "firmware capsule-update support was not assessed by this result. "
+            "Generate unauth.bin and tampered.bin from the same signed_capsule.bin "
+            "offline, then copy them into /mnt/acs_tests/app before running capsule update."
+        )
+    else:
+        status = "FAILED"
+        explanation = (
+            "The final generation attempt is incomplete or interrupted: no completed "
+            "generation or reuse result was recorded for unauth.bin and tampered.bin."
+        )
+
+    reasons = [explanation]
+    if len(attempts) > 1:
+        reasons.append(f"Final generation attempt ({len(attempts)} of {len(attempts)}):")
+    reasons.extend(latest)
+    for number, previous in enumerate(attempts[:-1], 1):
+        reasons.append(f"Previous generation attempt {number} (superseded; not counted):")
+        reasons.extend(previous)
+    return status, reasons
+
+
 # PARSER FOR CAPSULE UPDATE
 def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path, capsule_test_results_log_path):
     test_suite_key = "capsule_update"
@@ -1065,6 +1152,17 @@ def parse_capsule_update_logs(capsule_update_log_path, capsule_on_disk_log_path,
             add_subtest(test_desc, result, reason=test_info_lines)
 
         i += 1
+
+    # Append the preparation result without renumbering existing firmware checks.
+    # Only the detailed results log is authoritative; on-disk logs may contain a
+    # duplicate generation heading written while reporting a setup failure.
+    generation = _parse_negative_capsule_generation(results_lines)
+    if generation is not None:
+        status, reasons = generation
+        add_subtest(
+            "Negative capsule preparation",
+            status, reason=reasons
+        )
 
     # >>> REMOVE EMPTY REASON ARRAYS <<<
     for subtest in current_test["subtests"]:

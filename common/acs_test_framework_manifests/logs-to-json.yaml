@@ -60,6 +60,464 @@ suites:
         type: main_guard
 
 
+  - name: capsule_generation_parser
+    files:
+      - common/log_parser/standalone_tests/logs_to_json.py
+    cases:
+      - name: generation_outcomes_recovery_and_legacy_regression
+        type: cli
+        command: python3
+        args:
+          - "{dir}/capsule_generation_tests.py"
+          - "{file}"
+        expect_exit_code: 0
+        timeout_sec: 30
+        scripts:
+          capsule_generation_tests.py: |
+            # Copyright (c) 2026, Arm Limited or its affiliates. All rights reserved.
+            # SPDX-License-Identifier: Apache-2.0
+            """Regression checks for capsule preparation results and legacy update records.
+
+            Fixtures contain complete captured logs and focused producer fragments, not
+            harness PASS assertions. They test parsing, not firmware acceptance.
+            """
+
+            import importlib.util
+            import json
+            from pathlib import Path
+            import sys
+            import tempfile
+            from textwrap import dedent
+            import unittest
+
+
+            PARSER_PATH = Path(sys.argv.pop(1)).resolve()
+            spec = importlib.util.spec_from_file_location("capsule_generation_parser", PARSER_PATH)
+            assert spec is not None and spec.loader is not None
+            parser = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(parser)
+
+            HEADER = "Testing generation of negative capsules from signed_capsule.bin"
+            DESCRIPTION = "Negative capsule preparation"
+            SUCCESS = "Successfully generated unauth.bin and tampered.bin on-device"
+            REUSE = "Using existing pre-generated negative capsule variants; skipping on-device generation"
+            RECOVERY = "Previous on-device generation was interrupted; discarding untrusted variants"
+            SETUP_FAILED = "Capsule variant generation or setup failed on-device"
+            MISSING_SIGNED_CAPSULE = (
+                "signed_capsule.bin not present, empty, or unreadable; "
+                "skipping on-device capsule variant generation"
+            )
+            OFFLINE = (
+                "Generate unauth.bin and tampered.bin from the same signed_capsule.bin offline, "
+                "then copy them into /mnt/acs_tests/app before running capsule update"
+            )
+            PROGRESS = "Generating unauth.bin from signed_capsule.bin\nGenerating tampered.bin from signed_capsule.bin"
+            RESOURCE_INFO = (
+                "signed_capsule.bin size: 4096 bytes\n"
+                "MemAvailable: 7368296 KiB, SwapFree: 6282192 KiB\n"
+                "Estimated memory required: 262144 KiB\n"
+                "Available storage: 139957920 KiB, required: 8 KiB"
+            )
+            STATUS_KEYS = (
+                "PASSED", "FAILED", "FAILED_WITH_WAIVER", "ABORTED", "SKIPPED", "WARNINGS"
+            )
+
+
+            def generation(*lines: str) -> str:
+                return HEADER + "\n" + "\n".join(lines) + "\n"
+
+
+            def reason_text(subtest: dict) -> str:
+                result = subtest["sub_test_result"]
+                return json.dumps({key: value for key, value in result.items() if "reason" in key})
+
+
+            class CapsuleGenerationParserTests(unittest.TestCase):
+                def parse(self, results: str, update: str = "", on_disk: str = "") -> dict:
+                    with tempfile.TemporaryDirectory(prefix="capsule-parser-") as directory:
+                        root = Path(directory)
+                        update_path = root / "capsule-update.log"
+                        on_disk_path = root / "capsule-on-disk.log"
+                        results_path = root / "capsule_test_results.log"
+                        update_path.write_text(update, encoding="utf-16")
+                        on_disk_path.write_text(on_disk, encoding="utf-16")
+                        results_path.write_text(results, encoding="utf-8")
+                        data = parser.parse_capsule_update_logs(
+                            str(update_path), str(on_disk_path), str(results_path)
+                        )
+                    # Also exercise the machine-readable representation used by consumers.
+                    data = json.loads(json.dumps(data))
+                    self.assertEqual(len(data["test_results"]), 1)
+                    test = data["test_results"][0]
+                    self.assertEqual(test["test_suite_summary"], data["suite_summary"])
+                    for status in STATUS_KEYS:
+                        expected = sum(row["sub_test_result"][status] for row in test["subtests"])
+                        self.assertEqual(data["suite_summary"]["total_" + status.lower()], expected)
+                    for number, row in enumerate(test["subtests"], 1):
+                        self.assertEqual(row["sub_Test_Number"], str(number))
+                        self.assertEqual(sum(row["sub_test_result"][key] for key in STATUS_KEYS), 1)
+                    return data
+
+                def assert_generation(self, data: dict, status: str, *evidence: str) -> dict:
+                    rows = data["test_results"][0]["subtests"]
+                    generated = [row for row in rows if row["sub_Test_Description"] == DESCRIPTION]
+                    self.assertEqual(len(generated), 1, "A capsule pair has one atomic preparation result")
+                    row = generated[0]
+                    self.assertIs(row, rows[-1], "Generation must not renumber existing update records")
+                    self.assertEqual(row["sub_test_result"][status], 1)
+                    for text in evidence:
+                        self.assertIn(text, reason_text(row))
+                    return row
+
+                def test_supplied_generation_scenarios(self) -> None:
+                    """Cover all 15 attachment scenarios using only their producer output."""
+                    missing_tool = "capsule-tool.py not found or not readable at <case-workdir>/capsule-tool.py"
+                    invalid_memory = "Invalid capsule memory threshold configuration"
+                    short_memory = "Insufficient memory for on-device capsule variant generation"
+                    short_storage = "Insufficient storage to generate capsule variants"
+                    failed_unauth = "Failed to generate valid unauth.bin"
+                    failed_tamper = "Failed to generate valid tampered.bin"
+                    failed_publish = "Failed to publish generated tampered.bin"
+                    failed_sync = "Failed to synchronize generated capsule variants"
+                    failed_marker_sync = "Failed to synchronize capsule generation transaction marker"
+                    marker_cleared = "Cleared generation marker after controlled pre-publish failure"
+                    partial_failure = generation("Test_Info", RESOURCE_INFO, PROGRESS, failed_publish, SETUP_FAILED)
+                    cases = [
+                        ("TC01 fresh generation", generation(RESOURCE_INFO, PROGRESS, SUCCESS), "PASSED", SUCCESS),
+                        ("TC02 reuse", generation(REUSE), "PASSED", REUSE),
+                        (
+                            "TC03/TC04 missing or empty signed capsule",
+                            generation("Test_Info", MISSING_SIGNED_CAPSULE), "FAILED", MISSING_SIGNED_CAPSULE,
+                        ),
+                        (
+                            "TC05 missing tool", generation("Test_Info", missing_tool, SETUP_FAILED),
+                            "FAILED", missing_tool,
+                        ),
+                        (
+                            "TC06 invalid memory threshold", generation("Test_Info", invalid_memory, SETUP_FAILED),
+                            "FAILED", invalid_memory,
+                        ),
+                        (
+                            "TC07 insufficient memory",
+                            generation(
+                                "Test_Info", RESOURCE_INFO,
+                                "WARNING: Target system does not have sufficient memory to generate "
+                                "unauth.bin and tampered.bin on-device",
+                                short_memory, OFFLINE,
+                            ),
+                            "SKIPPED", OFFLINE,
+                        ),
+                        (
+                            "TC08 insufficient storage",
+                            generation(
+                                "Test_Info", RESOURCE_INFO, short_storage,
+                                "Insufficient storage for on-device capsule variant generation", OFFLINE,
+                            ),
+                            "SKIPPED", OFFLINE,
+                        ),
+                        (
+                            "TC09 de-authentication failure",
+                            generation(
+                                "Test_Info", "Generating unauth.bin from signed_capsule.bin",
+                                failed_unauth, marker_cleared, SETUP_FAILED,
+                            ),
+                            "FAILED", failed_unauth,
+                        ),
+                        (
+                            "TC10 tamper failure", generation("Test_Info", PROGRESS, failed_tamper, SETUP_FAILED),
+                            "FAILED", failed_tamper,
+                        ),
+                        ("TC11 interrupted recovery", generation(RECOVERY, PROGRESS, SUCCESS), "PASSED", RECOVERY),
+                        ("TC12 partial publication failure", partial_failure, "FAILED", failed_publish),
+                        (
+                            "TC13 partial publication recovery",
+                            partial_failure + "\n" + generation(RECOVERY, PROGRESS, SUCCESS), "PASSED", RECOVERY,
+                        ),
+                        (
+                            "TC14 synchronization failure", generation("Test_Info", PROGRESS, failed_sync, SETUP_FAILED),
+                            "FAILED", failed_sync,
+                        ),
+                        (
+                            "TC15 marker synchronization failure",
+                            generation("Test_Info", failed_marker_sync, marker_cleared, SETUP_FAILED),
+                            "FAILED", failed_marker_sync,
+                        ),
+                    ]
+                    for name, log, status, evidence in cases:
+                        with self.subTest(case=name):
+                            data = self.parse(log)
+                            self.assertEqual(len(data["test_results"][0]["subtests"]), 1)
+                            self.assert_generation(data, status, evidence)
+
+                def test_complete_corstone_capture_preserves_update_records(self) -> None:
+                    # acs_results_template_corstone1000-2.zip, SystemReady be11c88b0f80.
+                    # Complete captured files; UEFI UTF-16 text is decoded and CRLF normalized.
+                    results = dedent("""\
+                        Testing generation of negative capsules from signed_capsule.bin
+                        signed_capsule.bin size: 14405947 bytes
+                        MemAvailable: 1799540 KiB, SwapFree: 0 KiB
+                        Estimated memory required: 262144 KiB
+                        Available storage: 387528 KiB, required: 30951 KiB
+                        Generating unauth.bin from signed_capsule.bin
+                        INFO clear_auth_flags_all: Cleared auth and removed 2202 bytes for payload #0
+                        INFO clear_auth_flags_all: Cleared auth and removed 2202 bytes for payload #1
+                        INFO clear_auth_flags_all: Cleared auth and removed 2202 bytes for payload #2
+                        INFO clear_auth_flags_all: Cleared auth and removed 2202 bytes for payload #3
+                        INFO clear_auth_flags_all: Cleared auth and removed 2202 bytes for payload #4
+                        INFO clear_auth_flags_all: Cleared auth and removed 2202 bytes for payload #5
+                        INFO <module>: Saving to `/mnt/acs_tests/app/.unauth.bin.od0dfV'
+                        INFO write_range: Wrote /mnt/acs_tests/app/.unauth.bin.od0dfV
+                        Valid authenticated capsule in FMP format
+                        Capsule update image type id `6f784cbf-7938-5c23-8d6e-24d2f1410fa9' is unknown
+                        Capsule update image type id `f1d883f9-dfeb-5363-98d8-686ee3b69f4f' is unknown
+                        Capsule update image type id `7fad470e-5ec5-5c03-a2c1-4756b495de61' is unknown
+                        Capsule update image type id `f1933675-5a8c-5b6d-9ef4-846739e89bc8' is unknown
+                        Capsule update image type id `f771aff9-c7e9-5f99-9eda-2369dd694f61' is unknown
+                        Capsule update image type id `b57e432b-a250-5c73-93e3-90205e64baba' is unknown
+                        Generating tampered.bin from signed_capsule.bin
+                        INFO tamper_all: Tamper payload #0: flip bit 1 at image byte 7 (file @ 0x929)
+                        INFO tamper_all: Tamper payload #1: flip bit 5 at image byte 872 (file @ 0x1564)
+                        INFO tamper_all: Tamper payload #2: flip bit 5 at image byte 199445 (file @ 0x5656b)
+                        INFO tamper_all: Tamper payload #3: flip bit 5 at image byte 1045238 (file @ 0x175626)
+                        INFO tamper_all: Tamper payload #4: flip bit 7 at image byte 1983535 (file @ 0x45b039)
+                        INFO tamper_all: Tamper payload #5: flip bit 3 at image byte 10 (file @ 0xdbd135)
+                        INFO <module>: Saving to `/mnt/acs_tests/app/.tampered.bin.ROgKc3'
+                        INFO write_range: Wrote /mnt/acs_tests/app/.tampered.bin.ROgKc3
+                        Valid authenticated capsule in FMP format
+                        Capsule update image type id `6f784cbf-7938-5c23-8d6e-24d2f1410fa9' is unknown
+                        Capsule update image type id `f1d883f9-dfeb-5363-98d8-686ee3b69f4f' is unknown
+                        Capsule update image type id `7fad470e-5ec5-5c03-a2c1-4756b495de61' is unknown
+                        Capsule update image type id `f1933675-5a8c-5b6d-9ef4-846739e89bc8' is unknown
+                        Capsule update image type id `f771aff9-c7e9-5f99-9eda-2369dd694f61' is unknown
+                        Capsule update image type id `b57e432b-a250-5c73-93e3-90205e64baba' is unknown
+                        Successfully generated unauth.bin and tampered.bin on-device
+
+
+                        Testing ESRT FW version update
+                        INFO: Fmp Payload GUID:F1D883F9-DFEB-5363-98D8-686EE3B69F4F, prev version: 0x0, current version: 0x6, last attempted status: 0x0
+                        RESULTS: Fmp Payload  with GUID F1D883F9-DFEB-5363-98D8-686EE3B69F4F was successfully update -- PASSED
+                        INFO: Fmp Payload GUID:7FAD470E-5EC5-5C03-A2C1-4756B495DE61, prev version: 0x0, current version: 0x6, last attempted status: 0x0
+                        RESULTS: Fmp Payload  with GUID 7FAD470E-5EC5-5C03-A2C1-4756B495DE61 was successfully update -- PASSED
+                        INFO: Fmp Payload GUID:F1933675-5A8C-5B6D-9EF4-846739E89BC8, prev version: 0x0, current version: 0x6, last attempted status: 0x0
+                        RESULTS: Fmp Payload  with GUID F1933675-5A8C-5B6D-9EF4-846739E89BC8 was successfully update -- PASSED
+                        INFO: Fmp Payload GUID:F771AFF9-C7E9-5F99-9EDA-2369DD694F61, prev version: 0x0, current version: 0x6, last attempted status: 0x0
+                        RESULTS: Fmp Payload  with GUID F771AFF9-C7E9-5F99-9EDA-2369DD694F61 was successfully update -- PASSED
+                        RESULTS: Overall Capsule Update Result: PASSED
+
+
+                        Testing Capsule On-Disk Update Reporting Variables
+
+
+                        ================================================================================================
+                        Testing Capsule On-Disk Update Reporting Variables
+                        ================================================================================================
+                        INFO: OsIndicationsSupported value: 0x1C
+                        INFO: EBBR profile table path: /mnt/acs_results_template/acs_results/uefi_dump/ebbr_profile_table.log
+                        INFO: EBBR profile table Version: 1
+                        INFO: EBBR profile table NumberOfProfiles: 1
+                        INFO: Extracted 1 GUID(s) from EBBR profile table
+                        INFO: EBBR profile table GUID[0] : CCE33C35-74AC-4087-BCE7-8B29B02EEB27
+                        INFO: EFI Conformance Profile Table indicates platform compliance with EBBR 2.1
+                        INFO: OsIndicationsSupported indicates capsule on-disk support; running RECOMMENDED checks
+                        INFO: CapsuleMax Variable Test: CapsuleMax - Found, Value - Capsule000F
+                        RESULTS: CapsuleMax Variable Test: PASSED
+                        INFO: CapsuleMax Variable Attribute Test: expected attributed value:0x6
+                        RESULTS: CapsuleMax Variable Attribute Test: expected attributed value:0x6, actual attributes Value:0x6, Status - PASSED
+
+                        INFO: CapsuleLast Variable Test: CapsuleLast Variable - Not Found or Not Accessible
+                        RESULTS: CapsuleLast Variable Test: WARNING
+                        INFO: CapsuleLast Variable Attribute Test: expected attributed value:0x7
+                        RESULTS: CapsuleLast Variable Attribute Test: expected attributed value:0x7, actual attributes Value:<N/A>, Status - WARNING
+
+                        RESULTS: CapsuleNNNN Variable Test: No CapsuleNNNN reporting variables found - WARNING
+
+                        RESULTS: Overall Capsule On-Disk Update Reporting Variables Result: WARNING
+                    """)
+                    update = dedent("""\
+                        Testing unauth.bin update
+                        Test_Info
+                        CapsuleApp: creating capsule descriptors at 0xDC830040
+                        CapsuleApp: capsule data starts          at 0xDBA33040 with size 0xDB9D9F
+                        CapsuleApp: capsule block/size              0xDBA33040/0xDB9D9F
+                        CapsuleApp: failed to update capsule - Security Violation
+                        Testing tampered.bin update
+                        Test_Info
+                        CapsuleApp: creating capsule descriptors at 0xDC794040
+                        CapsuleApp: capsule data starts          at 0xDB993040 with size 0xDBD13B
+                        CapsuleApp: capsule block/size              0xDB993040/0xDBD13B
+                        CapsuleApp: failed to update capsule - Security Violation
+                    """)
+                    on_disk = dedent("""\
+                        Testing signed_capsule.bin OD update
+                        Test_Info
+                        CapsuleApp: creating capsule descriptors at 0xDC716040
+                        CapsuleApp: capsule data starts          at 0xDB918040 with size 0xDBD13B
+                        CapsuleApp: capsule block/size              0xDB918040/0xDBD13B
+                        Found EFI system partition on Boot0001: OnDiskFWU
+                        FS2:;HD0b:;BLK4:\x20
+                        Succeed to write signed_capsule.bin
+                    """)
+                    data = self.parse(results, update, on_disk)
+                    rows = data["test_results"][0]["subtests"]
+                    self.assertEqual([row["sub_Test_Description"] for row in rows], [
+                        "Testing unauth.bin update", "Testing tampered.bin update",
+                        "Testing signed_capsule.bin OD update", "Testing ESRT FW version update",
+                        "Testing Capsule On-Disk Update Reporting Variables", DESCRIPTION,
+                    ])
+                    self.assertEqual(data["suite_summary"]["total_passed"], 5)
+                    self.assertEqual(data["suite_summary"]["total_warnings"], 1)
+                    self.assert_generation(data, "PASSED", SUCCESS)
+                    legacy_results = results[results.index("Testing ESRT FW version update"):]
+                    legacy = self.parse(legacy_results, update, on_disk)
+                    self.assertEqual(rows[:-1], legacy["test_results"][0]["subtests"])
+
+                def test_complete_insufficient_memory_helper_capture(self) -> None:
+                    # capsule_update_test_cases.zip, TC07_insufficient_memory.log producer sections.
+                    # Captured host fault injection with a test double; no board/reboot execution.
+                    results = dedent("""\
+                        Testing generation of negative capsules from signed_capsule.bin
+                        Test_Info
+                        signed_capsule.bin size: 4096 bytes
+                        MemAvailable: 7368296 KiB, SwapFree: 6282192 KiB
+                        Estimated memory required: 999999999999 KiB
+                        Available storage: 139957920 KiB, required: 8 KiB
+                        WARNING: Target system does not have sufficient memory to generate unauth.bin and tampered.bin on-device
+                        Generate unauth.bin and tampered.bin from the same signed_capsule.bin offline, then copy them into /mnt/acs_tests/app before running capsule update
+                        Insufficient memory for on-device capsule variant generation
+                        Generate unauth.bin and tampered.bin from the same signed_capsule.bin offline, then copy them into /mnt/acs_tests/app before running capsule update
+                    """)
+                    on_disk = dedent("""\
+                        Testing generation of negative capsules from signed_capsule.bin
+                        Test_Info
+                    """)
+                    data = self.parse(results, on_disk=on_disk)
+                    self.assertEqual(len(data["test_results"][0]["subtests"]), 1)
+                    self.assert_generation(data, "SKIPPED", "Insufficient memory", OFFLINE)
+                    self.assertEqual(data["suite_summary"]["total_skipped"], 1)
+                    self.assertEqual(data["suite_summary"]["total_failed"], 0)
+                    self.assertEqual(data["suite_summary"]["total_passed"], 0)
+
+                def test_resource_footer_does_not_hide_state_failures(self) -> None:
+                    resources = ("Insufficient memory for on-device capsule variant generation",
+                                 "Insufficient storage for on-device capsule variant generation")
+                    footer = "Capsule update is unsupported on this platform"
+                    errors = ("Capsule update setup has failed",
+                              "Failed to clear generation marker after controlled pre-publish failure",
+                              "Failed to persist capsule generation failure state")
+                    for resource in resources:
+                        with self.subTest(resource=resource):
+                            self.assert_generation(
+                                self.parse(generation(resource, OFFLINE, footer)), "SKIPPED", resource, footer
+                            )
+                        for error in errors:
+                            with self.subTest(resource=resource, error=error):
+                                self.assert_generation(
+                                    self.parse(generation(resource, OFFLINE, error)), "FAILED", error
+                                )
+
+                def test_incomplete_attempts_fail_without_claiming_variant_success(self) -> None:
+                    cases = (
+                        generation(), generation("Test_Info"), generation(RESOURCE_INFO),
+                        generation(PROGRESS), generation(RECOVERY),
+                    )
+                    for text in cases:
+                        with self.subTest(log=text):
+                            self.assert_generation(self.parse(text), "FAILED")
+
+                def test_latest_attempt_controls_and_preserves_superseded_evidence(self) -> None:
+                    failed = "Failed to publish generated tampered.bin"
+                    unsupported = generation("Insufficient storage to generate capsule variants", OFFLINE)
+                    cases = [
+                        (generation(failed, SETUP_FAILED) + generation(RECOVERY, SUCCESS), "PASSED", failed),
+                        (generation(SUCCESS) + generation(PROGRESS), "FAILED", SUCCESS),
+                        (generation(SUCCESS) + generation("unrecognized producer outcome"), "FAILED", SUCCESS),
+                        (generation(SUCCESS) + unsupported, "SKIPPED", SUCCESS),
+                        (unsupported + generation(REUSE), "PASSED", OFFLINE),
+                    ]
+                    for log, status, previous in cases:
+                        with self.subTest(status=status, log=log):
+                            row = self.assert_generation(self.parse(log), status, previous)
+                            self.assertIn("superseded", reason_text(row).lower())
+
+                def test_explicit_failure_overrides_success_in_same_attempt(self) -> None:
+                    failures = [
+                        SETUP_FAILED,
+                        "Capsule update setup has failed",
+                        "Failed to generate valid unauth.bin",
+                        "Failed to publish generated tampered.bin",
+                        "Failed to synchronize generated capsule variants",
+                    ]
+                    for failure in failures:
+                        for lines in ((SUCCESS, failure), (failure, SUCCESS)):
+                            with self.subTest(lines=lines):
+                                self.assert_generation(self.parse(generation(*lines)), "FAILED", failure)
+
+                def test_resource_and_success_conflict_is_failed(self) -> None:
+                    unsupported = "Insufficient memory for on-device capsule variant generation"
+                    for terminal in (SUCCESS, REUSE):
+                        for lines in ((unsupported, terminal), (terminal, unsupported)):
+                            with self.subTest(lines=lines):
+                                self.assert_generation(self.parse(generation(*lines)), "FAILED", unsupported, terminal)
+
+                def test_following_headings_bound_generation_evidence(self) -> None:
+                    headings = (
+                        "Testing unrelated operation", "Test: unrelated operation", "Test: Testing unrelated operation"
+                    )
+                    for heading in headings:
+                        with self.subTest(heading=heading):
+                            # A later section cannot complete an incomplete generation attempt.
+                            self.assert_generation(self.parse(generation(PROGRESS) + heading + "\n" + SUCCESS), "FAILED")
+                            # A later section's error cannot invalidate an already completed pair.
+                            self.assert_generation(
+                                self.parse(generation(SUCCESS) + heading + "\n" + SETUP_FAILED), "PASSED"
+                            )
+
+                def test_generation_heading_with_test_prefix(self) -> None:
+                    log = "Test: " + generation(SUCCESS)
+                    self.assert_generation(self.parse(log), "PASSED", SUCCESS)
+
+                def test_no_generation_record_without_generation_heading(self) -> None:
+                    data = self.parse("Testing unrelated operation\n" + SUCCESS + "\n" + SETUP_FAILED)
+                    self.assertEqual(data["test_results"][0]["subtests"], [])
+
+                def test_failure_mirrored_in_on_disk_log_is_not_counted_twice(self) -> None:
+                    data = self.parse(
+                        generation("Test_Info", MISSING_SIGNED_CAPSULE),
+                        on_disk=generation("Test_Info", "signed_capsule.bin not present"),
+                    )
+                    self.assert_generation(data, "FAILED", MISSING_SIGNED_CAPSULE)
+                    self.assertEqual(data["suite_summary"]["total_failed"], 1)
+
+                def test_legacy_update_records_are_unchanged(self) -> None:
+                    update = (
+                        "Testing unauth.bin update\nTest_Info\n"
+                        "CapsuleApp: failed to update capsule - Security Violation\n"
+                        "Testing tampered.bin update\nTest_Info\n"
+                        "tampered.bin not present\n"
+                    )
+                    on_disk = "Testing signed_capsule.bin OD update\nTest_Info\nSucceed to write signed_capsule.bin\n"
+                    results = (
+                        "Testing signed_capsule.bin sanity\nWARNING: partner capsule version is unchanged\n"
+                        "Testing ESRT FW version update\nINFO: Expected firmware version was not installed\n"
+                        "RESULTS: Overall Capsule Update Result: FAILED\n"
+                        "Testing Capsule On-Disk Update Reporting Variables\n\n"
+                        "INFO: CapsuleLast Variable - Not Found\n"
+                        "RESULTS: Overall Capsule On-Disk Update Reporting Variables Result: WARNING\n"
+                    )
+                    baseline = self.parse(results, update, on_disk)
+                    legacy = baseline["test_results"][0]["subtests"]
+                    self.assertEqual(len(legacy), 6)
+                    legacy_statuses = [
+                        next(key for key in STATUS_KEYS if row["sub_test_result"][key]) for row in legacy
+                    ]
+                    self.assertEqual(legacy_statuses, ["PASSED", "FAILED", "PASSED", "PASSED", "FAILED", "WARNINGS"])
+                    with_generation = self.parse(generation(SUCCESS) + results, update, on_disk)
+                    self.assertEqual(with_generation["test_results"][0]["subtests"][:-1], legacy)
+                    self.assert_generation(with_generation, "PASSED", SUCCESS)
+
+
+            unittest.main(verbosity=2)
+
 # =========================
 # SR LOGS TO JSON
 # =========================
