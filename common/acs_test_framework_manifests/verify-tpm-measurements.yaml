@@ -12,6 +12,9 @@ x_verify_tpm_cli: &verify_tpm_cli
       set -eu
       python3 "$1" "$PWD/pcr.yaml" "$PWD/event.yaml"
 
+x_verify_tpm_pcrs: &verify_tpm_pcrs
+  sha256: ["p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7"]
+
 x_valid_tpm_events: &valid_tpm_events
   - EventNum: 1
     PCRIndex: 0
@@ -414,6 +417,53 @@ suites:
           - "Verify EV_TABLE_OF_DEVICES events for measurements of config data to PCR[1] with recommended strings"
           - "Verify presence of “Exit Boot Services Invocation” event with EV_EFI_ACTION type"
           - "PASS"
+
+      # EDK2 CPU-location record must not trigger a naming warning.
+      - name: edk2_cpu_location_record_does_not_warn
+        <<: *verify_tpm_cli
+        scenario:
+          kind: verify_tpm
+          pcrs: *verify_tpm_pcrs
+          table_of_devices:
+            - "010000000000000005a6dd3f6ea7464fad2912f4531b3d081834877d30020000"
+        expect_stdout_or_stderr_regex:
+          - 'Verify EV_TABLE_OF_DEVICES.*recommended strings\s+: PASS'
+        expect_stdout_or_stderr_contains:
+          - "CPU-location record; naming check not applicable"
+
+      # Other invalid names must still generate a warning.
+      - name: unrelated_bad_device_table_name_still_warns
+        <<: *verify_tpm_cli
+        scenario:
+          kind: verify_tpm
+          pcrs: *verify_tpm_pcrs
+          table_of_devices:
+            - "010000000000000005a6dd3f6ea7464fad2912f4531b3d081834877d30020000"
+            - "UNRECOGNIZED_CONFIG"
+        expect_stdout_or_stderr_regex:
+          - 'Verify EV_TABLE_OF_DEVICES.*recommended strings\s+: WARN'
+
+      # A different GUID must not receive the exemption.
+      - name: wrong_guid_device_table_still_warns
+        <<: *verify_tpm_cli
+        scenario:
+          kind: verify_tpm
+          pcrs: *verify_tpm_pcrs
+          table_of_devices:
+            - "010000000000000005a6dd3f6ea7464fad2912f4531b3d091834877d30020000"
+        expect_stdout_or_stderr_regex:
+          - 'Verify EV_TABLE_OF_DEVICES.*recommended strings\s+: WARN'
+
+      # An incomplete structure must not be exempted.
+      - name: truncated_cpu_location_record_still_warns
+        <<: *verify_tpm_cli
+        scenario:
+          kind: verify_tpm
+          pcrs: *verify_tpm_pcrs
+          table_of_devices:
+            - "010000000000000005a6dd3f6ea7464fad2912f4531b3d081834877d300200"
+        expect_stdout_or_stderr_regex:
+          - 'Verify EV_TABLE_OF_DEVICES.*recommended strings\s+: WARN'
 
       # PCR mismatch while event classes are otherwise present.
       - name: cli_pcr_mismatch_reports_fail_but_runs

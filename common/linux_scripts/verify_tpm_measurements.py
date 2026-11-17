@@ -120,6 +120,32 @@ def parse_eventlog_data(event_log_path):
         print(f"ERROR: {e}")
         exit(1)
 
+
+
+def is_edk2_cpu_location_event(event):
+    """Identify the 64-bit EDK2 MP Services CPU-location measurement.
+    Tcg2Dxe.MeasureHandoffTables() logs one EFI_HANDOFF_TABLE_POINTERS
+    entry: UINT64 table count, EFI_MP_SERVICES_PROTOCOL GUID, UINT64 pointer.
+    The event digest covers CPU-location data, not this pointer structure.
+    """
+    if event['event_type'] != "EV_TABLE_OF_DEVICES" or event['pcr_index'] != 1:
+        return False
+
+    event_data = event.get('event_data')
+    if not isinstance(event_data, str):
+        return False
+
+    try:
+        payload = bytes.fromhex(event_data)
+    except ValueError:
+        return False
+
+    return (len(payload) == 32
+            and int.from_bytes(payload[:8], 'little') == 1
+            and payload[8:24] == bytes.fromhex('05a6dd3f6ea7464fad2912f4531b3d08')
+            and int.from_bytes(payload[24:32], 'little') != 0)
+
+
 def check_events(event_list):
     try:
         # Verify the EV_NO_ACTION event for Specification ID version.
@@ -311,25 +337,29 @@ def check_events(event_list):
                     status = "FAIL"
                 else:
                     count = count + 1
+                    # This structured EDK2 record is not a Secure-world/controller
+                    # configuration name; it must not undergo the ASCII naming check.
+                    if is_edk2_cpu_location_event(event):
+                        print_buffer.append(f"Event {event['event_num']:2} is an EDK2 "
+                                            "CPU-location record; naming check not applicable")
+                        continue
                     # check if event data matches recommended string
                     for pattern in sec_wd_aux_patterns:
-                        if re.match(pattern, event['event_data']):
+                        if isinstance(event.get('event_data'), str) and \
+                                re.match(pattern, event['event_data']):
                             match_found = True
                             break
-                    if not match_found :
+                    if not match_found:
                         print_buffer.append(f"Event {event['event_num']:2} data doesn't " + \
                                              "comply with recommended string")
-                        status = "WARN"
+                        if status == "PASS":
+                            status = "WARN"
                     # reset flag for next iteration
                     match_found = False
         if count == 0:
             print_buffer.append("Event of type EV_TABLE_OF_DEVICES measured into PCR[1] not found")
-            TestResult(10, "FAIL")
-        elif status == "WARN":
-            # all events of type EV_TABLE_OF_DEVICES has event string as recommended.
-            TestResult(10, "WARN")
-        else:
-            TestResult(10, "PASS")
+            status = "FAIL"
+        TestResult(10, status)
 
         # If ExitBootServices() is invoked, then an EV_EFI_ACTION event
         # “Exit Boot Services Invocation” must be measured.
