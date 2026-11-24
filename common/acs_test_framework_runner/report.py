@@ -31,7 +31,7 @@ try:  # Support package imports and direct harness module loading.
         load_yaml_config,
         normalize_suites,
         resolve_target_path,
-        sanitize_name,
+        target_work_name,
     )
 except ImportError:  # pragma: no cover - exercised by flat-module harness imports.
     from runner_checks import (
@@ -40,7 +40,7 @@ except ImportError:  # pragma: no cover - exercised by flat-module harness impor
         load_yaml_config,
         normalize_suites,
         resolve_target_path,
-        sanitize_name,
+        target_work_name,
     )
 
 
@@ -310,8 +310,8 @@ def collect_pytest_case_logs(target: str | None = None) -> list[dict[str, str]]:
     resolved_target = resolve_manual_target(target)
 
     if resolved_target is not None:
-        target_stem = sanitize_name(resolved_target.stem)
-        log_paths = sorted(work_root.rglob(f"{target_stem}/combined.log"))
+        target_dir = target_work_name(resolved_target)
+        log_paths = sorted(work_root.rglob(f"{target_dir}/combined.log"))
     else:
         log_paths = sorted(work_root.rglob("combined.log"))
 

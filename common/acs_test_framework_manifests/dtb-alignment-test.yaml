@@ -1,0 +1,197 @@
+suites:
+  - name: dtb_alignment_test
+    files:
+      - SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/dtb_alignment_test.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+        description: "Verify that the DTB alignment checker exists at the expected repository path."
+
+      - name: python_compiles
+        type: py_compile
+        description: "Ensure the DTB alignment checker is syntactically valid Python."
+
+      - name: has_main_guard
+        type: main_guard
+        description: "Check that the script keeps a standard __main__ entry point."
+
+      - name: has_read_text_smart_helper
+        type: function_exists
+        function: read_text_smart
+        description: "Ensure the encoding-tolerant dmem reader remains present."
+
+      - name: cli_missing_dmem_log_fails_with_reason
+        type: cli
+        description: "Verify that the script reports a missing dmem.log and exits with failure."
+        args:
+          - --dmem-log
+          - "{dir}/missing-dmem.log"
+          - --out
+          - "{dir}/dtb_alignment_test.log"
+        expect_exit_code: 1
+        post_checks:
+          - type: file_contains
+            path: "{dir}/dtb_alignment_test.log"
+            text: "ERROR: dmem.log not found"
+          - type: file_contains
+            path: "{dir}/dtb_alignment_test.log"
+            text: "REASON: DTB alignment could not be checked because dmem.log is missing"
+
+
+      - name: cli_missing_dtb_table_entry_fails
+        type: cli
+        description: "Ensure the script fails cleanly when dmem.log does not contain a DTB Table line."
+        args:
+          - --dmem-log
+          - "{dir}/dmem.log"
+          - --out
+          - "{dir}/dtb_alignment_test.log"
+        text_files:
+          dmem.log: |
+            UEFI Table 0000000000001000
+            ACPI Table 0000000000002000
+        expect_exit_code: 1
+        expect_output:
+          - "ERROR: DTB Table entry not found in dmem.log"
+          - "RESULT: FAIL"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/dtb_alignment_test.log"
+            text: "ERROR: DTB Table entry not found in dmem.log"
+
+      - name: cli_null_dtb_address_fails
+        type: cli
+        description: "Validate that a NULL DTB address is rejected."
+        args:
+          - --dmem-log
+          - "{dir}/dmem.log"
+          - --out
+          - "{dir}/dtb_alignment_test.log"
+        text_files:
+          dmem.log: |
+            DTB Table                     0000000000000000
+        expect_exit_code: 1
+        expect_output:
+          - "INFO: DTB address is 0x0"
+          - "ERROR: DTB address is NULL"
+          - "RESULT: FAIL"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/dtb_alignment_test.log"
+            text: "ERROR: DTB address is NULL"
+
+      - name: cli_unaligned_dtb_address_fails
+        type: cli
+        description: "Verify that an address not aligned to 8 bytes is rejected."
+        args:
+          - --dmem-log
+          - "{dir}/dmem.log"
+          - --out
+          - "{dir}/dtb_alignment_test.log"
+        text_files:
+          dmem.log: |
+            DTB Table                     0000000000001004
+        expect_exit_code: 1
+        expect_output:
+          - "INFO: DTB address is 0x1004"
+          - "ERROR: DTB address 0x1004 is not 8-byte aligned"
+          - "RESULT: FAIL"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/dtb_alignment_test.log"
+            text: "ERROR: DTB address 0x1004 is not 8-byte aligned"
+
+      - name: cli_aligned_dtb_address_passes
+        type: cli
+        description: "Verify that a plain hexadecimal aligned DTB address passes."
+        args:
+          - --dmem-log
+          - "{dir}/dmem.log"
+          - --out
+          - "{dir}/dtb_alignment_test.log"
+        text_files:
+          dmem.log: |
+            DTB Table                     0000000000001000
+        expect_exit_code: 0
+        expect_output:
+          - "INFO: DTB address is 0x1000"
+          - "INFO: DTB address 0x1000 is 8-byte aligned"
+          - "RESULT: PASS"
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/dtb_alignment_test.log"
+            texts:
+              - "INFO: Starting DTB alignment test"
+              - "INFO: DTB address is 0x1000"
+              - "INFO: Required alignment is 8 bytes"
+              - "INFO: DTB address 0x1000 is 8-byte aligned"
+              - "RESULT: PASS"
+
+      - name: cli_utf16_dmem_log_is_decoded
+        type: cli
+        description: "Ensure the firmware-style UTF-16 dmem.log path is decoded and validated successfully."
+        args:
+          - --dmem-log
+          - "{dir}/dmem.log"
+          - --out
+          - "{dir}/dtb_alignment_test.log"
+        bin_files:
+          dmem.log:
+            hex: "fffe44005400420020005400610062006c00650020002000200020002000200020002000200020002000200020002000200020002000200020002000200030003000300030003000300030003000300030003000300031003000300030000d000a00"
+        expect_exit_code: 0
+        expect_output:
+          - "INFO: DTB address is 0x1000"
+          - "RESULT: PASS"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/dtb_alignment_test.log"
+            text: "INFO: DTB address 0x1000 is 8-byte aligned"
+
+
+      - name: cli_real_world_aligned_dtb_address_passes
+        type: cli
+        description: "Verify that a representative platform DTB address from logs passes when it is 8-byte aligned."
+        args:
+          - --dmem-log
+          - "{dir}/dmem.log"
+          - --out
+          - "{dir}/dtb_alignment_test.log"
+        text_files:
+          dmem.log: |
+            DTB Table                     00000000FD6A4000
+        expect_exit_code: 0
+        expect_output:
+          - "INFO: DTB address is 0xFD6A4000"
+          - "INFO: DTB address 0xFD6A4000 is 8-byte aligned"
+          - "RESULT: PASS"
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/dtb_alignment_test.log"
+            texts:
+              - "INFO: Starting DTB alignment test"
+              - "INFO: DTB address is 0xFD6A4000"
+              - "INFO: Required alignment is 8 bytes"
+              - "INFO: DTB address 0xFD6A4000 is 8-byte aligned"
+              - "RESULT: PASS"
+
+      - name: cli_real_world_unaligned_dtb_address_fails
+        type: cli
+        description: "Verify that the unaligned DTB address observed in logs is rejected with the expected failure message."
+        args:
+          - --dmem-log
+          - "{dir}/dmem.log"
+          - --out
+          - "{dir}/dtb_alignment_test.log"
+        text_files:
+          dmem.log: |
+            DTB Table                     00000000FCEAD004
+        expect_exit_code: 1
+        expect_output:
+          - "INFO: DTB address is 0xFCEAD004"
+          - "ERROR: DTB address 0xFCEAD004 is not 8-byte aligned"
+          - "RESULT: FAIL"
+        post_checks:
+          - type: file_contains
+            path: "{dir}/dtb_alignment_test.log"
+            text: "ERROR: DTB address 0xFCEAD004 is not 8-byte aligned"

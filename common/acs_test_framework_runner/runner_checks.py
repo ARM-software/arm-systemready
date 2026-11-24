@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import json
+import os
 import re
 import subprocess
 import sys
@@ -36,6 +38,14 @@ except ImportError:  # pragma: no cover - exercised by flat-module harness impor
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def json_value(value: Any) -> Any:
+    """Keep recorded test details safe to write as JSON."""
+    try:
+        return json.loads(json.dumps(value, default=str), parse_constant=str)
+    except (TypeError, ValueError):
+        return repr(value)
 
 
 def detect_project_root(script_dir: Path) -> Path:
@@ -63,6 +73,7 @@ class TestMeta:
     suite_name: str
     phase: str
     test_type: str
+    expectations: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -122,6 +133,8 @@ class CommandRunResult:
 class RunCaseOptions:
     """Options controlling execution of a test case."""
     suite_command: str | None = None
+    reports_dir: Path | None = None
+    change_coverage_plan: dict[Path, dict[str, Any]] | None = None
 
 
 def create_runner_temp_dir(prefix: str = "runner_env_") -> Path:
@@ -200,6 +213,17 @@ def sanitize_name(value: str) -> str:
     )
 
 
+def target_work_name(value: str | Path) -> str:
+    """Keep same-named parser files in distinct report directories."""
+    path = Path(value)
+    if path.is_absolute():
+        try:
+            path = path.resolve().relative_to(PROJECT_ROOT)
+        except ValueError:
+            pass
+    return sanitize_name(path.as_posix())
+
+
 def is_valid_xml_char(code: int) -> bool:
     """Return whether a Unicode code point is valid in XML."""
     return (
@@ -253,6 +277,158 @@ def collect_function_names(file_path: Path) -> set[str]:
 
     return names
 
+_DIFF_HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
+
+
+def parse_unified_diff_zero_context(
+    diff_text: str,
+    project_root: Path = PROJECT_ROOT,
+) -> dict[Path, list[tuple[int, int]]]:
+    changed: dict[Path, list[tuple[int, int]]] = {}
+    current_file: Path | None = None
+
+    for line in diff_text.splitlines():
+        if line.startswith("diff --git "):
+            current_file = None
+            continue
+
+        if line.startswith("+++ b/"):
+            relative = line[len("+++ b/"):].rstrip("\t")
+            current_file = (project_root / relative).resolve()
+            changed.setdefault(current_file, [])
+            continue
+
+        if line == "+++ /dev/null":
+            current_file = None
+            continue
+
+        if current_file is None:
+            continue
+
+        match = _DIFF_HUNK_RE.match(line)
+        if not match:
+            continue
+
+        start = int(match.group(1))
+        count = int(match.group(2) or "1")
+        if count <= 0:
+            continue
+
+        changed[current_file].append((start, start + count - 1))
+
+    return changed
+
+
+def _run_git(project_root: Path, *args: str, **kwargs: Any) -> subprocess.CompletedProcess:
+    """Run Git against the repository used for changed-line selection."""
+    return subprocess.run(
+        ["git", *args],
+        cwd=project_root,
+        capture_output=True,
+        text=True,
+        check=False,
+        **kwargs,
+    )
+
+
+def _resolve_change_baseline(project_root: Path, base_ref: str | None) -> str:
+    """Resolve the baseline tree for the current Gerrit patch or an explicit ref."""
+    requested = base_ref or os.environ.get("ACS_CHANGE_COVERAGE_BASE")
+    if requested:
+        result = _run_git(
+            project_root, "rev-parse", "--verify", "--end-of-options",
+            f"{requested}^{{tree}}",
+        )
+        if result.returncode != 0:
+            raise ConfigError(f"Invalid change coverage baseline: {requested}")
+        return result.stdout.strip()
+
+    parent = _run_git(project_root, "rev-parse", "--verify", "HEAD^")
+    if parent.returncode == 0:
+        return parent.stdout.strip()
+
+    head = _run_git(project_root, "rev-parse", "--verify", "HEAD")
+    if head.returncode == 0:
+        # Do not silently treat a shallow checkout as an initial commit.
+        commit = _run_git(project_root, "cat-file", "-p", "HEAD")
+        if commit.returncode != 0:
+            raise ConfigError("Unable to inspect HEAD for change coverage")
+        headers = commit.stdout.split("\n\n", 1)[0].splitlines()
+        if any(line.startswith("parent ") for line in headers):
+            raise ConfigError(
+                "Change coverage requires the parent of HEAD. Fetch more "
+                "history or set ACS_CHANGE_COVERAGE_BASE to an available ref."
+            )
+
+    # Initial commit or unborn HEAD: compare against Git's empty tree.
+    empty_tree = _run_git(
+        project_root, "hash-object", "-t", "tree", "--stdin", input="",
+    )
+    if empty_tree.returncode != 0:
+        raise ConfigError("Unable to resolve the empty Git tree for change coverage")
+    return empty_tree.stdout.strip()
+
+
+def get_git_changed_line_ranges(
+    project_root: Path,
+    base_ref: str | None = None,
+) -> dict[Path, list[tuple[int, int]]]:
+    """Return net committed, staged and unstaged changes in working-tree coordinates.
+
+    By default, compare against HEAD^ (the latest Gerrit patch's parent).
+    Pass base_ref or set ACS_CHANGE_COVERAGE_BASE to override that baseline.
+    """
+    baseline = _resolve_change_baseline(project_root, base_ref)
+    result = _run_git(
+        project_root,
+        "-c", "core.quotePath=false",
+        "diff", "-U0", "--no-color", "--no-ext-diff", "--no-textconv",
+        "--src-prefix=a/", "--dst-prefix=b/",
+        baseline, "--",
+    )
+    if result.returncode != 0:
+        raise ConfigError(
+            f"Unable to calculate changed lines against {baseline}: "
+            f"{result.stderr.strip()}"
+        )
+    return parse_unified_diff_zero_context(result.stdout, project_root)
+
+
+def collect_python_symbol_ranges(file_path: Path) -> list[dict[str, Any]]:
+    tree = parse_ast(file_path)
+    symbols: list[dict[str, Any]] = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            start = getattr(node, "lineno", None)
+            end = getattr(node, "end_lineno", None)
+            if start is None or end is None:
+                continue
+            symbols.append(
+                {
+                    "name": node.name,
+                    "start": start,
+                    "end": end,
+                }
+            )
+
+    return symbols
+
+
+def changed_lines_to_functions(
+    file_path: Path,
+    ranges: list[tuple[int, int]],
+) -> set[str]:
+    matched: set[str] = set()
+
+    for symbol in collect_python_symbol_ranges(file_path):
+        for start, end in ranges:
+            if end < symbol["start"] or start > symbol["end"]:
+                continue
+            matched.add(symbol["name"])
+            break
+
+    return matched
 
 def format_outcome_message(prefix: str, text: str) -> str:
     """Format an outcome message with optional detail text."""

@@ -465,6 +465,8 @@ Explicit `mocks:` are still supported for one-off cases. Mock targets can use `{
 
 Scenario-generated passthrough rules can be marked as required, so the test fails if the expected mocked path is never actually hit. That prevents silent mock misses.
 
+
+
 ## Current Coverage
 
 The current YAML catalog covers both utility scripts and hardware-facing flows.
@@ -477,6 +479,8 @@ Scenario-backed script coverage:
 | `verify_tpm_measurements` | CLI validation, missing/invalid inputs, PCR/event matching, event-log read and parse failures |
 | `capsule_ondisk_reporting_vars_check` | efivarfs variable parsing, attributes, capsule reporting entries, warn-only documentation of current behavior |
 | `runtime_device_mapping_conflict_checker` | DTS and memmap inputs, conflict detection, parser failures, log-open failures, warn-only known behavior |
+| `reserved_memory_map_checker` | reserved-memory and Memory Reservation Block coverage checks, memmap parsing, DTB parsing, mock-assisted `main()` execution paths, warning/skip/failure/pass result handling |
+| `dtb_alignment_test` | DTB address extraction from `dmem.log`, missing-input handling, missing table detection, NULL and unaligned address failures, aligned address passes, UTF-16 log decoding, and real-world log replay cases |
 | `read_write_check_blk_devices` | raw disks, MBR/GPT layouts, precious partitions, write/readback/restore flows, destructive gating |
 | `acs_info` | platform-info extraction and formatted output paths |
 | `merge_jsons` | merge modes, missing/invalid inputs, ACS info interactions, output generation |
@@ -494,15 +498,8 @@ Generic and utility coverage:
 | `extract_capsule_fw_version` | firmware version extraction cases |
 | `validate_sh` | shell script validation and environment checks |
 
-Hardware-gated coverage:
+In addition to the default wrapper flow, `pytest_runner.py` also supports several direct runner features that are useful when developing, validating, and debugging YAML suites.
 
-- `ethtool_test_hardware`
-- `verify_tpm_measurements_hardware`
-- `capsule_ondisk_reporting_vars_check_hardware`
-- `runtime_device_mapping_conflict_checker_hardware`
-- `read_write_check_blk_devices_hardware`
-
-These hardware suites use `skip_unless_paths_exist` and `skip_unless_commands_succeed` so they are skipped cleanly on machines that do not expose the required platform state.
 
 ## Adding A New Case
 
@@ -519,4 +516,41 @@ Recommended workflow:
 6. Add `post_checks` when the script's output is file-based.
 7. Run `python3 common/yaml_test_harness/report.py <target>` and inspect `common/reports/` if the case fails.
 
+## Framework-level additions 
 
+- **Dashboard generation**
+
+  Provides a static HTML summary for YAML runner results, making it easier to review manifests, targets, case outcomes, and related artifacts in one place.
+
+  ```bash
+  python3 common/acs_test_framework_runner/pytest_runner.py \
+    --selection-mode file \
+    --dashboard \
+    --dashboard-output /tmp/yaml-framework-run/dashboard.html
+  ```
+
+- **Change coverage**
+
+  Adds tracing for Git-changed lines and functions reached by the selected YAML suites, with per-case coverage artifacts written into the runner work directories.
+
+  ```bash
+  python3 common/acs_test_framework_runner/pytest_runner.py \
+    --selection-mode file \
+    --change-coverage
+  ```
+`--change-coverage` and `--change-coverage-function` require `coverage.py` to be installed in the active Python environment.
+
+```bash
+python3 -m pip install coverage
+```
+- **Function reachability mode**
+
+  Allows focused verification that named helper functions are exercised by the selected YAML cases, even when the full file diff is broader than the behavior under review.
+
+  ```bash
+  python3 common/acs_test_framework_runner/pytest_runner.py \
+    --target SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/reserved_memory_map_checker.py \
+    --change-coverage-function parse_memmap \
+    --change-coverage-function extract_reserved_ranges
+  ```
+  
