@@ -1,0 +1,464 @@
+x_reserved_path_mocks: &reserved_path_mocks
+  "{module}.MEMMAP_PATH":
+    factory: builtins.eval
+    args:
+      - "__import__('pathlib').Path(r'{dir}/memmap.log')"
+  "{module}.DTB_PATH":
+    factory: builtins.eval
+    args:
+      - "__import__('pathlib').Path(r'{dir}/input.dtb')"
+  "{module}.OUT_LOG_PATH":
+    factory: builtins.eval
+    args:
+      - "__import__('pathlib').Path(r'{dir}/reserved_memory_map_test.log')"
+
+x_reserved_main_case: &reserved_main_case
+  type: module_main_with_env
+  expect_exit_code: 0
+  mocks:
+    <<: *reserved_path_mocks
+
+suites:
+  - name: reserved_memory_map_checker
+    files:
+      - SystemReady-devicetree-band/Yocto/meta-woden/recipes-acs/install-files/files/reserved_memory_map_checker.py
+
+    cases:
+      - name: file_exists
+        type: file_exists
+        description: "Verify that the reserved-memory checker exists at the expected repository path."
+
+      - name: python_compiles
+        type: py_compile
+        description: "Ensure the checker compiles successfully as valid Python."
+
+      - name: has_main_guard
+        type: main_guard
+        description: "Check that the checker preserves a standard __main__ guard."
+
+      - name: exposes_key_helpers
+        type: function_exists_any
+        functions:
+          - parse_memmap
+          - extract_reserved_ranges
+          - extract_memory_reservation_ranges
+          - mem_map_check
+
+      - name: parse_memmap_extracts_reserved_and_bs_data_segments
+        type: py_function
+        function: parse_memmap
+        description: "Validate that the memmap parser extracts relevant Reserved and BS_Data segments."
+        args:
+          - |
+            Reserved 0x1000-0x1fff 1 0
+            Conventional 0x2000-0x2fff 1 0
+            BS_Data 0x3000-0x3fff 1 0
+        expect_return_contains: "MemSeg(memory_type='Reserved', start=4096, end=8191)"
+
+      - name: to_int_accepts_prefixed_hex
+        type: py_function
+        function: to_int
+        description: "Ensure the hexadecimal parser accepts 0x-prefixed values."
+        args:
+          - "0x1000"
+        expect_return_contains: "4096"
+
+      - name: join_cells_combines_64bit_values
+        type: py_function
+        function: join_cells
+        description: "Verify that 32-bit Devicetree cells are combined into one integer value."
+        args:
+          -
+            - 1
+            - 2
+        expect_return_contains: "4294967298"
+
+      - name: main_missing_memmap_warns
+        <<: *reserved_main_case
+        description: "Verify that the checker reports a missing memmap input as a warning result."
+        post_checks:
+          - type: file_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            text: "Testing Devicetree Reserved Memory Map Compliance Test"
+          - type: file_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            text: "DEBUG: Memmap file not found:"
+          - type: file_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            text: "RESULTS: WARNINGS"
+
+      - name: main_missing_dtb_warns
+        <<: *reserved_main_case
+        description: "Verify that the checker reports a missing DTB input as a warning result."
+        text_files:
+          memmap.log: |
+            Reserved 0x1000-0x1fff 1 0
+        post_checks:
+          - type: file_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            text: "INFO: Using memmap:"
+          - type: file_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            text: "DEBUG: DTB file not found:"
+          - type: file_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            text: "RESULTS: WARNINGS"
+
+      - name: main_no_relevant_segments_and_no_ranges_skips
+        <<: *reserved_main_case
+        description: "Ensure that no relevant memmap segments and no DT ranges produce a skipped result."
+        text_files:
+          memmap.log: |
+            Conventional 0x1000-0x1fff 1 0
+        bin_files:
+          input.dtb:
+            hex: "00"
+        mocks:
+          <<: *reserved_path_mocks
+          "{module}.extract_reserved_ranges":
+            return_value: []
+          "{module}.extract_memory_reservation_ranges":
+            return_value: []
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            texts:
+              - "DEBUG: No Reserved or BS_Data segments could be parsed from the UEFI memory map"
+              - "INFO: No applicable reserved-memory or Memory Reservation Block ranges were found"
+              - "RESULTS: SKIPPED"
+
+      - name: main_no_relevant_segments_with_applicable_ranges_fails
+        <<: *reserved_main_case
+        description: "Verify that missing relevant memmap coverage becomes a failure when DT ranges exist."
+        text_files:
+          memmap.log: |
+            Conventional 0x1000-0x1fff 1 0
+        bin_files:
+          input.dtb:
+            hex: "00"
+        mocks:
+          <<: *reserved_path_mocks
+          "{module}.extract_reserved_ranges":
+            return_value:
+              - 1
+          "{module}.extract_memory_reservation_ranges":
+            return_value: []
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            texts:
+              - "DEBUG: No Reserved or BS_Data segments could be parsed from the UEFI memory map"
+              - "ERROR: Applicable reserved-memory or Memory Reservation Block ranges are present in the DTB, but no matching Reserved or BS_Data descriptors were found in the UEFI memory map"
+              - "RESULTS: FAILED"
+
+      - name: main_reserved_range_covered_by_bs_data_passes
+        <<: *reserved_main_case
+        description: "Verify that a static reserved-memory range covered by BS_Data passes cleanly."
+        text_files:
+          memmap.log: |
+            BS_Data 0x1000-0x1fff 1 0
+        bin_files:
+          input.dtb:
+            hex: "00"
+        mocks:
+          <<: *reserved_path_mocks
+          "{module}.extract_reserved_ranges":
+            factory: builtins.eval
+            args:
+              - |
+                lambda _path: [
+                    __import__("types").SimpleNamespace(
+                        node_name="pool@1000",
+                        start=0x1000,
+                        end=0x1FFF,
+                        size=0x1000,
+                        expected_type="BS_Data",
+                    )
+                ]
+          "{module}.extract_memory_reservation_ranges":
+            return_value: []
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            texts:
+              - "INFO: Checking /reserved-memory ranges"
+              - "INFO: Reserved-memory range pool@1000 (0x1000-0x1fff) is fully covered by BS_Data segments in memmap."
+              - "INFO: Reserved Memory Map Compliance Test: PASSED"
+              - "INFO: Memory Reservation Block Compliance Test: SKIPPED (no MRB entries present)"
+              - "RESULTS: PASSED"
+
+      - name: main_mrb_partial_coverage_fails
+        <<: *reserved_main_case
+        description: "Verify that partially covered Memory Reservation Block entries are reported as failures."
+        text_files:
+          memmap.log: |
+            Reserved 0x1000-0x17ff 1 0
+        bin_files:
+          input.dtb:
+            hex: "00"
+        mocks:
+          <<: *reserved_path_mocks
+          "{module}.extract_reserved_ranges":
+            return_value: []
+          "{module}.extract_memory_reservation_ranges":
+            factory: builtins.eval
+            args:
+              - |
+                lambda _path: [
+                    __import__("types").SimpleNamespace(
+                        node_name="Memory Reservation Block entry 1",
+                        start=0x1000,
+                        end=0x1FFF,
+                        size=0x1000,
+                        expected_type="Reserved",
+                    )
+                ]
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            texts:
+              - "INFO: Checking Memory Reservation Block entries"
+              - "ERROR: Memory Reservation Block entry 1 (0x1000-0x1fff) is not fully covered by Reserved segments in memmap."
+              - "INFO: Memory Reservation Block Compliance Test: FAILED"
+              - "RESULTS: FAILED"
+
+      - name: main_all_checks_pass_single_segment
+        <<: *reserved_main_case
+        description: "Verify that reserved-memory and MRB checks pass when each range is fully covered by a single matching memmap segment."
+        text_files:
+          memmap.log: |
+            Reserved 0x80000000-0x80000fff 1 0
+            BS_Data 0x81000000-0x81001fff 1 0
+            Reserved 0x82000000-0x82000fff 1 0
+        bin_files:
+          input.dtb:
+            hex: "00"
+        mocks:
+          <<: *reserved_path_mocks
+          "{module}.extract_reserved_ranges":
+            factory: builtins.eval
+            args:
+              - |
+                lambda _path: [
+                    __import__("types").SimpleNamespace(
+                        node_name="nomap-carveout@80000000",
+                        start=0x80000000,
+                        end=0x80000FFF,
+                        size=0x1000,
+                        expected_type="Reserved",
+                    ),
+                    __import__("types").SimpleNamespace(
+                        node_name="boot-buffer@81000000",
+                        start=0x81000000,
+                        end=0x81001FFF,
+                        size=0x2000,
+                        expected_type="BS_Data",
+                    ),
+                ]
+          "{module}.extract_memory_reservation_ranges":
+            factory: builtins.eval
+            args:
+              - |
+                lambda _path: [
+                    __import__("types").SimpleNamespace(
+                        node_name="Memory Reservation Block entry 0",
+                        start=0x82000000,
+                        end=0x82000FFF,
+                        size=0x1000,
+                        expected_type="Reserved",
+                    )
+                ]
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            texts:
+              - "INFO: Checking /reserved-memory ranges"
+              - "INFO: Reserved-memory range nomap-carveout@80000000 (0x80000000-0x80000fff) is fully covered by Reserved segments in memmap."
+              - "INFO: Reserved-memory range boot-buffer@81000000 (0x81000000-0x81001fff) is fully covered by BS_Data segments in memmap."
+              - "INFO: Reserved Memory Map Compliance Test: PASSED"
+              - "INFO: Checking Memory Reservation Block entries"
+              - "INFO: Memory Reservation Block entry 0 (0x82000000-0x82000fff) is fully covered by Reserved segments in memmap."
+              - "INFO: Memory Reservation Block Compliance Test: PASSED"
+              - "RESULTS: PASSED"
+
+      - name: main_nomap_reserved_range_not_reserved_fails
+        <<: *reserved_main_case
+        description: "Verify that a nomap reserved-memory range fails when Reserved coverage is missing even if other ranges pass."
+        text_files:
+          memmap.log: |
+            BS_Data 0x81000000-0x81001fff 1 0
+            Reserved 0x82000000-0x82000fff 1 0
+        bin_files:
+          input.dtb:
+            hex: "00"
+        mocks:
+          <<: *reserved_path_mocks
+          "{module}.extract_reserved_ranges":
+            factory: builtins.eval
+            args:
+              - |
+                lambda _path: [
+                    __import__("types").SimpleNamespace(
+                        node_name="nomap-carveout@80000000",
+                        start=0x80000000,
+                        end=0x80000FFF,
+                        size=0x1000,
+                        expected_type="Reserved",
+                    ),
+                    __import__("types").SimpleNamespace(
+                        node_name="boot-buffer@81000000",
+                        start=0x81000000,
+                        end=0x81001FFF,
+                        size=0x2000,
+                        expected_type="BS_Data",
+                    ),
+                ]
+          "{module}.extract_memory_reservation_ranges":
+            factory: builtins.eval
+            args:
+              - |
+                lambda _path: [
+                    __import__("types").SimpleNamespace(
+                        node_name="Memory Reservation Block entry 0",
+                        start=0x82000000,
+                        end=0x82000FFF,
+                        size=0x1000,
+                        expected_type="Reserved",
+                    )
+                ]
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            texts:
+              - "ERROR: Reserved-memory range nomap-carveout@80000000 (0x80000000-0x80000fff) is not fully covered by Reserved segments in memmap."
+              - "INFO: Reserved-memory range boot-buffer@81000000 (0x81000000-0x81001fff) is fully covered by BS_Data segments in memmap."
+              - "INFO: Reserved Memory Map Compliance Test: FAILED"
+              - "INFO: Memory Reservation Block entry 0 (0x82000000-0x82000fff) is fully covered by Reserved segments in memmap."
+              - "INFO: Memory Reservation Block Compliance Test: PASSED"
+              - "RESULTS: FAILED"
+
+      - name: main_reserved_range_covered_by_multiple_segments_passes
+        <<: *reserved_main_case
+        description: "Verify that a reserved-memory range can be fully covered by multiple adjacent memmap segments."
+        text_files:
+          memmap.log: |
+            Reserved 0x80000000-0x800007ff 1 0
+            Reserved 0x80000800-0x80000fff 1 0
+            BS_Data 0x81000000-0x81001fff 1 0
+        bin_files:
+          input.dtb:
+            hex: "00"
+        mocks:
+          <<: *reserved_path_mocks
+          "{module}.extract_reserved_ranges":
+            factory: builtins.eval
+            args:
+              - |
+                lambda _path: [
+                    __import__("types").SimpleNamespace(
+                        node_name="nomap-carveout@80000000",
+                        start=0x80000000,
+                        end=0x80000FFF,
+                        size=0x1000,
+                        expected_type="Reserved",
+                    ),
+                    __import__("types").SimpleNamespace(
+                        node_name="boot-buffer@81000000",
+                        start=0x81000000,
+                        end=0x81001FFF,
+                        size=0x2000,
+                        expected_type="BS_Data",
+                    ),
+                ]
+          "{module}.extract_memory_reservation_ranges":
+            return_value: []
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            texts:
+              - "INFO: Reserved-memory range nomap-carveout@80000000 (0x80000000-0x80000fff) is fully covered by Reserved segments in memmap."
+              - "INFO: Reserved-memory range boot-buffer@81000000 (0x81000000-0x81001fff) is fully covered by BS_Data segments in memmap."
+              - "INFO: Reserved Memory Map Compliance Test: PASSED"
+              - "INFO: Memory Reservation Block Compliance Test: SKIPPED (no MRB entries present)"
+              - "RESULTS: PASSED"
+
+      - name: main_multiple_mrb_entries_pass
+        <<: *reserved_main_case
+        description: "Verify that multiple Memory Reservation Block entries all pass when each is fully covered by Reserved segments."
+        text_files:
+          memmap.log: |
+            Reserved 0x80000000-0x80000fff 1 0
+            BS_Data 0x81000000-0x81001fff 1 0
+            Reserved 0x82000000-0x82000fff 1 0
+            Reserved 0x83000000-0x83001fff 1 0
+            Reserved 0x84000000-0x84000fff 1 0
+            Reserved 0x85000000-0x85002fff 1 0
+        bin_files:
+          input.dtb:
+            hex: "00"
+        mocks:
+          <<: *reserved_path_mocks
+          "{module}.extract_reserved_ranges":
+            factory: builtins.eval
+            args:
+              - |
+                lambda _path: [
+                    __import__("types").SimpleNamespace(
+                        node_name="nomap-carveout@80000000",
+                        start=0x80000000,
+                        end=0x80000FFF,
+                        size=0x1000,
+                        expected_type="Reserved",
+                    ),
+                    __import__("types").SimpleNamespace(
+                        node_name="boot-buffer@81000000",
+                        start=0x81000000,
+                        end=0x81001FFF,
+                        size=0x2000,
+                        expected_type="BS_Data",
+                    ),
+                ]
+          "{module}.extract_memory_reservation_ranges":
+            factory: builtins.eval
+            args:
+              - |
+                lambda _path: [
+                    __import__("types").SimpleNamespace(
+                        node_name="Memory Reservation Block entry 0",
+                        start=0x82000000,
+                        end=0x82000FFF,
+                        size=0x1000,
+                        expected_type="Reserved",
+                    ),
+                    __import__("types").SimpleNamespace(
+                        node_name="Memory Reservation Block entry 1",
+                        start=0x83000000,
+                        end=0x83001FFF,
+                        size=0x2000,
+                        expected_type="Reserved",
+                    ),
+                    __import__("types").SimpleNamespace(
+                        node_name="Memory Reservation Block entry 2",
+                        start=0x84000000,
+                        end=0x84000FFF,
+                        size=0x1000,
+                        expected_type="Reserved",
+                    ),
+                    __import__("types").SimpleNamespace(
+                        node_name="Memory Reservation Block entry 3",
+                        start=0x85000000,
+                        end=0x85002FFF,
+                        size=0x3000,
+                        expected_type="Reserved",
+                    ),
+                ]
+        post_checks:
+          - type: ordered_contains
+            path: "{dir}/reserved_memory_map_test.log"
+            texts:
+              - "INFO: Memory Reservation Block entry 0 (0x82000000-0x82000fff) is fully covered by Reserved segments in memmap."
+              - "INFO: Memory Reservation Block entry 1 (0x83000000-0x83001fff) is fully covered by Reserved segments in memmap."
+              - "INFO: Memory Reservation Block entry 2 (0x84000000-0x84000fff) is fully covered by Reserved segments in memmap."
+              - "INFO: Memory Reservation Block entry 3 (0x85000000-0x85002fff) is fully covered by Reserved segments in memmap."
+              - "INFO: Memory Reservation Block Compliance Test: PASSED"
+              - "RESULTS: PASSED"
